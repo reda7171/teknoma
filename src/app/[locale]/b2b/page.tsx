@@ -204,7 +204,7 @@ export default function B2BPage() {
                                 <input
                                     type="tel"
                                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:border-pixio-yellow text-white placeholder-gray-400"
-                                    placeholder="+212 6XX XXX XXX"
+                                    placeholder="+212 702-220575"
                                 />
                             </div>
                         </div>
@@ -257,15 +257,15 @@ export default function B2BPage() {
                             <div>
                                 <Phone className="w-8 h-8 mx-auto mb-3 text-pixio-yellow" />
                                 <div className="font-bold">Téléphone</div>
-                                <a href="tel:+212600000000" className="text-gray-300 hover:text-pixio-yellow transition-colors">
-                                    +212 6XX XXX XXX
+                                <a href="tel:+212702220575" className="text-gray-300 hover:text-pixio-yellow transition-colors">
+                                    +212 702-220575
                                 </a>
                             </div>
                             <div>
                                 <MapPin className="w-8 h-8 mx-auto mb-3 text-pixio-yellow" />
                                 <div className="font-bold">Adresse</div>
                                 <div className="text-gray-300">
-                                    Casablanca, Maroc
+                                    Rabat, Maroc
                                 </div>
                             </div>
                         </div>

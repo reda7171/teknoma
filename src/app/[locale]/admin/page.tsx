@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle } from 'lucide-react'
+import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getBadgeStats } from '@/lib/actions/analytics'
 import DashboardAnalytics from '@/components/admin/DashboardAnalytics'
 import { isAuthenticated } from '@/lib/actions/auth'
@@ -8,7 +9,7 @@ import { redirect } from 'next/navigation'
 import { getSetting } from '@/lib/actions/site-settings'
 
 async function getStats() {
-    const [booksCount, packsCount, ordersCount, totalRevenue, deliveredCount] = await Promise.all([
+    const [booksCount, packsCount, ordersCount, totalRevenue, deliveredCount, pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount] = await Promise.all([
         prisma.book.count({ where: { active: true } }),
         prisma.pack.count({ where: { active: true } }),
         prisma.order.count({ where: { status: { notIn: ['CANCELLED', 'RETURNED'] } } }), // Commandes valides
@@ -18,6 +19,12 @@ async function getStats() {
         }),
         // Commandes livrées pour le taux de conversion
         prisma.order.count({ where: { status: 'DELIVERED' } }),
+        // Nouveaux KPIs:
+        prisma.order.count({ where: { status: 'PENDING' } }),
+        prisma.user.count(),
+        prisma.book.count({ where: { active: true, stock: 0 } }),
+        prisma.order.count({ where: { status: { in: ['CANCELLED', 'RETURNED'] } } }),
+        prisma.order.count()
     ])
 
     const totalRev = totalRevenue._sum.total || 0
@@ -25,7 +32,8 @@ async function getStats() {
     const panierMoyen = deliveredCount > 0 ? totalRev / deliveredCount : 0
     // Taux conversion = livrées / total des commandes valides (hors annulées/retournées)
     const tauxConversion = ordersCount > 0 ? (deliveredCount / ordersCount) * 100 : 0
-
+    // Taux d'annulation = annulées+retournées / total des commandes
+    const tauxAnnulation = totalOrdersCount > 0 ? (cancelledCount / totalOrdersCount) * 100 : 0
 
     return {
         booksCount,
@@ -34,6 +42,10 @@ async function getStats() {
         totalRevenue: totalRev,
         panierMoyen,
         tauxConversion,
+        pendingOrders,
+        totalUsers,
+        outOfStockBooks,
+        tauxAnnulation
     }
 }
 
@@ -180,7 +192,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             name: 'Packs Actifs',
             value: stats.packsCount,
             icon: Package,
-            color: 'purple',
+            color: 'amber',
         },
         {
             name: 'Commandes',
@@ -189,10 +201,34 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             color: 'green',
         },
         {
+            name: 'En Attente',
+            value: stats.pendingOrders,
+            icon: Clock,
+            color: 'yellow',
+        },
+        {
             name: 'Chiffre d\'affaires',
             value: `${stats.totalRevenue.toFixed(0)} MAD`,
             icon: TrendingUp,
             color: 'orange',
+        },
+        {
+            name: 'Panier Moyen',
+            value: `${stats.panierMoyen.toFixed(0)} MAD`,
+            icon: ShoppingBag,
+            color: 'rose',
+        },
+        {
+            name: 'Utilisateurs',
+            value: stats.totalUsers,
+            icon: Users,
+            color: 'blue',
+        },
+        {
+            name: 'Ruptures Stock',
+            value: stats.outOfStockBooks,
+            icon: AlertTriangle,
+            color: 'red',
         },
         {
             name: 'Taux Conversion',
@@ -201,26 +237,29 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             color: 'teal',
         },
         {
-            name: 'Panier Moyen',
-            value: `${stats.panierMoyen.toFixed(0)} MAD`,
-            icon: ShoppingBag,
-            color: 'rose',
+            name: 'Taux Annulation',
+            value: `${stats.tauxAnnulation.toFixed(1)}%`,
+            icon: XOctagon,
+            color: 'gray',
         },
     ]
 
     const colorClasses = {
         blue: 'bg-blue-100 text-blue-600',
-        purple: 'bg-purple-100 text-purple-600',
+        amber: 'bg-amber-100 text-amber-600',
         green: 'bg-green-100 text-green-600',
         orange: 'bg-orange-100 text-orange-600',
         teal: 'bg-teal-100 text-teal-600',
         rose: 'bg-rose-100 text-rose-600',
+        yellow: 'bg-yellow-100 text-yellow-600',
+        red: 'bg-red-100 text-red-600',
+        gray: 'bg-gray-100 text-gray-600',
     }
 
     const statusColors = {
         PENDING: 'bg-yellow-100 text-yellow-800',
         CONFIRMED: 'bg-blue-100 text-blue-800',
-        SHIPPED: 'bg-purple-100 text-purple-800',
+        SHIPPED: 'bg-cyan-100 text-cyan-800',
         DELIVERED: 'bg-green-100 text-green-800',
         RETURNED: 'bg-orange-100 text-orange-800',
         CANCELLED: 'bg-red-100 text-red-800',
@@ -343,8 +382,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                         <div key={book.id} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
                                             <span className="flex-shrink-0 w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center text-[10px] font-black italic shadow-lg">0{index + 1}</span>
                                             {book.image && (
-                                                <div className="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-100">
-                                                    <img src={book.image} alt={book.title} className="w-full h-full object-cover unoptimized" />
+                                                <div className="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-100 relative">
+                                                    <Image src={book.image} alt={book.title} fill className="object-cover" unoptimized />
                                                 </div>
                                             )}
                                             <div className="flex-grow min-w-0">
@@ -362,7 +401,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             {/* Top Packs */}
                             <div>
                                 <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
-                                    <Package className="w-4 h-4 text-purple-600" />
+                                    <Package className="w-4 h-4 text-amber-600" />
                                     Packs les plus rentables
                                 </h3>
                                 <div className="space-y-4">
@@ -370,14 +409,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                         <div key={pack.id} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
                                             <span className="flex-shrink-0 w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center text-[10px] font-black italic shadow-lg">0{index + 1}</span>
                                             {pack.image && (
-                                                <div className="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-100">
-                                                    <img src={pack.image} alt={pack.name} className="w-full h-full object-cover unoptimized" />
+                                                <div className="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-100 relative">
+                                                    <Image src={pack.image} alt={pack.name} fill className="object-cover" unoptimized />
                                                 </div>
                                             )}
                                             <div className="flex-grow min-w-0">
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{pack.name}</p>
                                                 <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-[10px] font-black text-purple-600">{pack.totalQuantity} VENTES</span>
+                                                    <span className="text-[10px] font-black text-amber-600">{pack.totalQuantity} VENTES</span>
                                                     <span className="text-[10px] font-black text-emerald-500">{pack.totalRevenue.toFixed(0)} MAD</span>
                                                 </div>
                                             </div>

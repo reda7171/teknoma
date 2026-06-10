@@ -131,8 +131,31 @@ export default async function AuthorPage({
                 "@type": "Person",
                 "name": authorName,
                 "description": profile?.bio || `Author ${authorName}`,
-                "image": profile?.image || `${baseUrl}/logo.png`
+                "image": profile?.image || `${baseUrl}/logo.png`,
+                "sameAs": [
+                    `https://ar.wikipedia.org/wiki/${encodeURIComponent(authorName)}`,
+                    `https://fr.wikipedia.org/wiki/${encodeURIComponent(authorName)}`,
+                    `https://en.wikipedia.org/wiki/${encodeURIComponent(authorName)}`
+                ]
             }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": locale === 'ar' ? `كتب ${authorName}` : locale === 'en' ? `Books by ${authorName}` : `Livres de ${authorName}`,
+            "itemListElement": books.map((book, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                    "@type": "Book",
+                    "name": book.title,
+                    "author": {
+                        "@type": "Person",
+                        "name": authorName
+                    },
+                    "url": `${baseUrl}/${locale}/books/${book.id}`
+                }
+            }))
         },
         {
             "@context": "https://schema.org",

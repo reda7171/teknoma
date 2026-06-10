@@ -1,5 +1,6 @@
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
+import Script from 'next/script'
 import { HelpCircle, Truck, CreditCard, RotateCcw, ShieldCheck, ChevronDown } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
@@ -55,8 +56,24 @@ export default async function FAQPage() {
         }
     ];
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqSections.flatMap(section => 
+            section.questions.map(q => ({
+                '@type': 'Question',
+                name: q.q,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: q.a
+                }
+            }))
+        )
+    };
+
     return (
         <div className="min-h-screen bg-white">
+            <Script id="faq-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
             <Header />
 
             {/* Hero Section */}

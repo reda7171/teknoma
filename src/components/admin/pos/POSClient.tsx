@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import { createPOSOrder } from '@/lib/actions/pos';
@@ -51,6 +51,18 @@ export default function POSClient({ books, packs }: POSClientProps) {
   const [allCities, setAllCities] = useState<string[]>([]);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
   const [showCities, setShowCities] = useState(false);
+  const [showCityPopup, setShowCityPopup] = useState(false);
+  const [cityPopupResult, setCityPopupResult] = useState(false);
+
+  const checkCity = () => {
+    if (!customer.city) {
+      showNotification('Veuillez d\'abord saisir une ville', 'error');
+      return;
+    }
+    const exists = allCities.some(c => c.toLowerCase() === customer.city.toLowerCase());
+    setCityPopupResult(exists);
+    setShowCityPopup(true);
+  };
 
   useEffect(() => {
     getWithYouCities().then(setAllCities);
@@ -396,6 +408,13 @@ export default function POSClient({ books, packs }: POSClientProps) {
                             ))}
                         </div>
                     )}
+                    <button 
+                        type="button" 
+                        onClick={checkCity} 
+                        className="text-[9px] text-emerald-500 font-black uppercase tracking-widest mt-2 hover:underline absolute -bottom-5 right-2"
+                    >
+                        Vérifier WithYou
+                    </button>
                 </div>
             </div>
             <input
@@ -460,6 +479,26 @@ export default function POSClient({ books, packs }: POSClientProps) {
           </button>
         </div>
       </div>
+
+      {showCityPopup && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+           <div className="bg-white p-8 rounded-[2rem] shadow-2xl max-w-sm w-full text-center mx-4">
+              <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${cityPopupResult ? 'bg-emerald-100 text-emerald-500' : 'bg-red-100 text-red-500'}`}>
+                 {cityPopupResult ? <Check className="w-8 h-8"/> : <X className="w-8 h-8"/>}
+              </div>
+              <h3 className="text-lg font-black text-black uppercase tracking-widest mb-2">
+                 {cityPopupResult ? 'Ville reconnue' : 'Ville introuvable'}
+              </h3>
+              <p className="text-gray-500 text-[11px] font-medium mb-6 uppercase tracking-wider">
+                 {cityPopupResult ? `La ville "${customer.city}" est prise en charge par la livraison WithYou.` : `Attention, la ville "${customer.city}" ne figure pas dans la base de données WithYou.`}
+              </p>
+              <button onClick={() => setShowCityPopup(false)} className="w-full py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 transition-colors">
+                 Fermer
+              </button>
+           </div>
+        </div>
+      )}
+
     </div>
   );
 }

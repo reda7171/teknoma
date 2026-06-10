@@ -83,5 +83,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('⚠️ Sitemaps: Could not fetch packs during build')
     }
 
-    return [...staticUrls, ...bookUrls, ...postUrls, ...packUrls]
+    // 5. Auteurs dynamiques (récupérés depuis les livres)
+    let authorUrls: any[] = []
+    try {
+        const authors = await prisma.book.findMany({
+            where: { active: true },
+            select: { author: true },
+            distinct: ['author']
+        })
+        authorUrls = locales.flatMap((locale) =>
+            authors.filter(a => a.author).map((a) => ({
+                url: `${baseUrl}/${locale}/authors/${encodeURIComponent(a.author)}`,
+                lastModified: new Date(),
+                changeFrequency: 'weekly' as const,
+                priority: 0.6,
+            }))
+        )
+    } catch (e) {
+        console.warn('⚠️ Sitemaps: Could not fetch authors during build')
+    }
+
+    return [...staticUrls, ...bookUrls, ...postUrls, ...packUrls, ...authorUrls]
 }

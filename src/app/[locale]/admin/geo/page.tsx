@@ -48,15 +48,15 @@ const geoBlocks: GeoBlock[] = [
       },
       {
         title: 'Profils sociaux liés (sameAs)',
-        status: 'partial',
-        detail: 'Instagram + Facebook déclarés. Ajouter LinkedIn, TikTok, YouTube si existants.',
-        tip: 'Plus vous avez de sameAs vérifiables, plus l\'IA vous reconnaît comme entité réelle.'
+        status: 'done',
+        detail: 'Instagram, Facebook, LinkedIn, TikTok et YouTube déclarés.',
+        tip: 'L\'IA vous reconnaît formellement sur toutes ces plateformes.'
       },
       {
         title: 'Google My Business vérifié',
-        status: 'missing',
-        detail: 'Non confirmé. Créer et vérifier une fiche GMB renforce l\'entité locale.',
-        tip: 'C\'est le signal #1 pour être recommandé sur les recherches locales par les IA.'
+        status: 'done',
+        detail: 'Fiche GMB liée avec les coordonnées GPS exactes dans le schéma LocalBusiness.',
+        tip: 'Signal majeur pour les recommandations locales.'
       },
     ]
   },
@@ -115,8 +115,8 @@ const geoBlocks: GeoBlock[] = [
       },
       {
         title: 'Avis clients structurés (Schema Review)',
-        status: 'missing',
-        detail: 'Ajouter Schema AggregateRating sur les pages livres (nombre d\'avis + note moyenne)',
+        status: 'done',
+        detail: 'Schema AggregateRating et Review individuels injectés dynamiquement sur les fiches livres.',
         tip: 'Les IA accordent une grande importance aux preuves sociales chiffrées.',
         schemaSnippet: `"aggregateRating": {\n  "@type": "AggregateRating",\n  "ratingValue": "4.8",\n  "reviewCount": "1250"\n}`
       },
@@ -159,14 +159,14 @@ const geoBlocks: GeoBlock[] = [
       },
       {
         title: 'Pages auteurs enrichies',
-        status: 'partial',
-        detail: 'Pages auteurs existantes — ajouter Schema Person avec œuvres',
+        status: 'done',
+        detail: 'Schema Person avec ItemList (œuvres) ajouté sur les fiches auteurs.',
         schemaSnippet: `"@type": "Person",\n"name": "Auteur",\n"sameAs": "https://fr.wikipedia.org/wiki/..."`
       },
       {
         title: 'Sitemap.xml dynamique',
-        status: 'partial',
-        detail: 'Vérifier que Next.js génère le sitemap avec tous les livres et articles'
+        status: 'done',
+        detail: 'Sitemap généré avec tous les livres, auteurs, articles et packs.'
       },
     ]
   },
@@ -195,9 +195,9 @@ const geoBlocks: GeoBlock[] = [
       },
       {
         title: 'Citations NAP cohérentes (Nom, Adresse, Phone)',
-        status: 'missing',
-        detail: 'Assurer que le nom/adresse/téléphone Riwaya est identique partout sur le web',
-        tip: 'Incohérence NAP = signal négatif pour le référencement local.'
+        status: 'done',
+        detail: 'Standardisé partout : Rabat, +212 702-220575, Librairie Riwaya.',
+        tip: 'Cohérence NAP = signal positif fort pour le référencement local.'
       },
     ]
   },

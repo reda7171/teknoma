@@ -206,14 +206,33 @@ export default async function BookDetailPage({
                 priceCurrency: 'MAD',
                 availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
                 url: `${baseUrl}/${locale}/books/${book.id}`,
+            }
+        }
+    ];
+
+    if (reviewCount > 0) {
+        jsonLd[0].aggregateRating = {
+            '@type': 'AggregateRating',
+            ratingValue: averageRating,
+            reviewCount: reviewCount,
+        };
+        jsonLd[0].review = reviews.map(r => ({
+            '@type': 'Review',
+            reviewRating: {
+                '@type': 'Rating',
+                ratingValue: r.rating,
+                bestRating: '5'
             },
-            aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: averageRating || 5,
-                reviewCount: reviewCount || 1,
+            author: {
+                '@type': 'Person',
+                name: r.userName || 'Anonyme'
             },
-        },
-        {
+            reviewBody: r.comment || '',
+            datePublished: new Date(r.createdAt).toISOString().split('T')[0]
+        }));
+    }
+
+    jsonLd.push({
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
             itemListElement: [
@@ -236,8 +255,7 @@ export default async function BookDetailPage({
                     item: `${baseUrl}/${locale}/books/${book.id}`
                 }
             ]
-        }
-    ]
+        });
 
     const faqQuestions = [
         {

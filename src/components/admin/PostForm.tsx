@@ -11,6 +11,7 @@ import { Book as BookIcon, Search, X } from 'lucide-react'
 import { fetchBooks } from '@/lib/actions/books'
 import { useEffect } from 'react'
 import PostSectionEditor from './post-form/PostSectionEditor'
+import { useUIStore } from '@/store/ui'
 
 interface PostFormProps {
     post?: any
@@ -21,6 +22,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const router = useRouter()
     const { locale } = useParams()
     const lang = typeof locale === 'string' ? locale : 'fr'
+    const { showNotification } = useUIStore()
     const [isPending, setIsPending] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -53,7 +55,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
         const input = title
         
         if (!input && type !== 'TITLE') {
-            alert('Veuillez d\'abord saisir un titre ou des mots-clés.')
+            showNotification("Veuillez d'abord saisir un titre ou des mots-clés.", "error")
             return
         }
 
@@ -123,7 +125,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
         if (!file) return
 
         if (file.size > 5 * 1024 * 1024) {
-            alert("L'image est trop volumineuse (max 5MB)")
+            showNotification("L'image est trop volumineuse (max 5MB)", "error")
             return
         }
 
@@ -135,11 +137,12 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
             const result = await uploadPostImage(formData)
             if (result.success && result.imageUrl) {
                 setCoverImage(result.imageUrl)
+                showNotification("Image uploadée avec succès", "success")
             } else {
-                alert(result.error || "Erreur lors de l'upload")
+                showNotification(result.error || "Erreur lors de l'upload", "error")
             }
         } catch (err) {
-            alert("Erreur lors de l'upload")
+            showNotification("Erreur lors de l'upload", "error")
         } finally {
             setIsPending(false)
         }

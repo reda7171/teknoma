@@ -177,6 +177,8 @@ export default async function LocaleLayout({
   const facebook = await getSetting('contact_facebook');
   const twitter = await getSetting('contact_twitter');
   const linkedin = await getSetting('contact_linkedin');
+  const tiktok = await getSetting('contact_tiktok');
+  const youtube = await getSetting('contact_youtube');
   const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
   const injectedHeadTags = await getSetting('seo_injected_head_tags');
   const fbPixelId = await getSetting('facebook_pixel_id') || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -250,8 +252,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'Riwaya',
+              '@type': 'BookStore',
+              name: 'Librairie Riwaya',
               description: 'Riwaya est la meilleure librairie en ligne au Maroc (a7san librairie en ligne f maghrib). Nous offrons la plus grande sélection de romans, de livres de développement personnel, et d\'affaires avec livraison (COD) partout au Maroc comme Casablanca et Rabat. مكتبة رواية هي أحسن وأفضل مكتبة إلكترونية في المغرب.',
               url: siteUrl,
               logo: `${siteUrl}/globe.svg`,
@@ -259,20 +261,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 facebook || 'https://facebook.com/riwaya',
                 instagram || 'https://instagram.com/riwaya',
                 twitter || 'https://twitter.com/riwaya',
-                linkedin || 'https://linkedin.com/company/riwaya'
+                linkedin || 'https://linkedin.com/company/riwaya',
+                tiktok || 'https://tiktok.com/@riwaya',
+                youtube || 'https://youtube.com/@riwaya'
               ].filter(Boolean),
               contactPoint: {
                 '@type': 'ContactPoint',
-                telephone: whatsappPhone || '+212-600-000000',
+                telephone: whatsappPhone || '+212 702-220575',
                 contactType: 'customer service',
                 areaServed: 'MA',
                 availableLanguage: ['en', 'fr', 'ar']
               },
               address: {
                 '@type': 'PostalAddress',
-                addressLocality: 'Casablanca',
+                streetAddress: 'Rabat',
+                addressLocality: 'Rabat',
+                addressRegion: 'Rabat-Salé-Kénitra',
+                postalCode: '10000',
                 addressCountry: 'MA'
-              }
+              },
+              geo: {
+                '@type': 'GeoCoordinates',
+                latitude: 34.0151156,
+                longitude: -6.8506771
+              },
+              hasMap: 'https://www.google.com/maps/place/Riwaya/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt'
             })
           }}
         />
