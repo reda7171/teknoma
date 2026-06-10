@@ -58,6 +58,8 @@ export async function sendOrderNotification(order: {
     city: string
     total: number
     status: string
+    source?: string
+    comment?: string | null
     items?: { quantity: number; book?: { title: string } | null; pack?: { name: string } | null }[]
 }) {
     const botToken = await getTelegramToken()
@@ -77,10 +79,12 @@ export async function sendOrderNotification(order: {
 
     const text = `🛒 <b>Nouvelle Commande #${shortId}</b>\n\n` +
         `👤 <b>Client:</b> ${order.fullName}\n` +
+        `📱 <b>Source:</b> ${order.source || 'Boutique'}\n` +
         `📞 <b>Téléphone:</b> ${order.phone}\n` +
         `📍 <b>Ville (Saisie):</b> ${order.city}\n` +
         `🌍 <b>Pays/Ville (IP):</b> ${location}\n` +
         `💰 <b>Total:</b> ${order.total.toFixed(2)} MAD\n` +
+        (order.comment ? `📝 <b>Note:</b> ${order.comment}\n` : '') +
         (itemsList ? `\n📦 <b>Articles:</b>\n${itemsList}\n` : '') +
         `🌐 <b>IP:</b> ${ip}\n` +
         `\n🔗 <a href="${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}">Voir la commande</a>`

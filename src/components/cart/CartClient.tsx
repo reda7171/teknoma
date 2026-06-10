@@ -3,6 +3,7 @@
 import { useCartStore } from '@/store/cart'
 import Image from 'next/image'
 import { Link } from '@/i18n/routing'
+import { notifyRemoveFromCart, notifyClearCart } from '@/lib/actions/cart-notify'
 import { ArrowRight, Minus, Plus, Trash2, ShoppingCart, Shield, Truck, AlertCircle, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
@@ -20,6 +21,28 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart } = useCartStore()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('CartPage')
+
+    const handleRemove = async (item: any) => {
+        removeItem(item.id)
+        try {
+            await notifyRemoveFromCart(item.title, item.price, item.type)
+        } catch (error) {
+            console.error('Erreur notification', error)
+        }
+    }
+
+    const handleClearCart = async () => {
+        const value = getTotalPrice()
+        const count = getTotalItems()
+        clearCart()
+        try {
+            if (count > 0) {
+                await notifyClearCart(value, count)
+            }
+        } catch (error) {
+            console.error('Erreur notification', error)
+        }
+    }
 
     useEffect(() => {
         setMounted(true)
@@ -118,6 +141,19 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                                 </span>
                                             )}
                                         </div>
+                                        {item.replacedBooks && Object.keys(item.replacedBooks).length > 0 && (
+                                            <div className="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Livres remplacés :</p>
+                                                <ul className="space-y-2">
+                                                    {Object.values(item.replacedBooks).map((rb) => (
+                                                        <li key={rb.id} className="text-xs text-black font-black flex items-center gap-3">
+                                                            <div className="w-1.5 h-1.5 bg-black rounded-full" />
+                                                            {rb.title}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center justify-between">
@@ -142,7 +178,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                         </div>
 
                                         <button
-                                            onClick={() => removeItem(item.id)}
+                                            onClick={() => handleRemove(item)}
                                             className="flex items-center gap-2 text-gray-300 hover:text-red-500 text-[10px] font-black uppercase tracking-widest px-6 py-3 transition-colors rounded-full hover:bg-red-50"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -155,7 +191,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
                         <div className="flex justify-start pt-10">
                             <button
-                                onClick={clearCart}
+                                onClick={handleClearCart}
                                 className="text-gray-200 hover:text-black text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 px-10 py-5 transition-all rounded-full hover:bg-white"
                             >
                                 <Trash2 className="w-3 h-3" />

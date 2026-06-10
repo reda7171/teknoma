@@ -11,9 +11,9 @@ import { getTranslations } from 'next-intl/server'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { Metadata } from 'next'
 import SetPixelView from '@/components/SetPixelView'
-import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/actions/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
+import PackCustomizerClient from '@/components/packs/PackCustomizerClient'
 
 export async function generateMetadata({
     params,
@@ -264,42 +264,7 @@ export default async function PackDetailPage({
                                     </div>
                                 </div>
 
-                                <div className="mb-12">
-                                    <h3 className="text-[10px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-black mb-8 flex items-center gap-4">
-                                        <Sparkles className="w-4 h-4 text-black" />
-                                        {t('BundleContent')}
-                                    </h3>
-                                    <ul className="space-y-4">
-                                        {pack.books.map((pb) => (
-                                            <li key={pb.book.id} className="flex items-start gap-4">
-                                                <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center shrink-0 mt-0.5">
-                                                    <Check className="w-3.5 h-3.5 text-white" />
-                                                </div>
-                                                <span className="text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400 group-hover:text-black transition-colors">{pb.book.title}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <WhatsAppOrderButton
-                                        title={pack.name}
-                                        price={pack.price}
-                                        phone={whatsappPhone || undefined}
-                                        type="pack"
-                                    />
-                                    <AddToCartButton
-                                        product={{
-                                            id: pack.id,
-                                            title: pack.name,
-                                            price: pack.price,
-                                            image: pack.image || pack.books[0]?.book.image || '',
-                                            type: 'PACK',
-                                            shippingFees: pack.shippingFees
-                                        }}
-                                        className="!py-8 text-xs rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal !rounded-full shadow-2xl hover:shadow-black/20"
-                                    />
-                                </div>
+                                <PackCustomizerClient pack={pack as any} whatsappPhone={whatsappPhone || undefined} />
 
                                 <div className="flex items-center justify-center gap-10 mt-10">
                                     <div className="flex items-center gap-3 text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-300">

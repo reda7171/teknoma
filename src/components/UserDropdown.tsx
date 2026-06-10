@@ -95,7 +95,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute left-0 rtl:right-0 rtl:left-auto mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-black text-black truncate">{user.fullName || t('UserMenu.DefaultUser')}</p>

@@ -11,6 +11,7 @@ export interface CartItem {
     // Optionnel : pour les packs
     booksCount?: number
     shippingFees?: number
+    replacedBooks?: Record<string, { id: string, title: string }>
 }
 
 interface CartStore {

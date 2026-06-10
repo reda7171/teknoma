@@ -43,27 +43,73 @@ export async function generateMetadata({
     const normalizedImage = normalizeImage(book.image)
     const imageUrl = normalizedImage.startsWith('http') ? normalizedImage : normalizedImage.startsWith('data:') ? normalizedImage : `${baseUrl}${normalizedImage}`
 
-    // Générer des mots-clés SEO pertinents
-    const keywords = [
-        book.title,
-        book.author,
-        `${book.title} ${book.author}`,
-        `acheter ${book.title} maroc`,
-        `${book.category} maroc`,
-        `livre ${book.category}`,
-        `${book.author} livres`,
-        'livres maroc',
-        'librairie en ligne maroc',
-        book.language === 'FR' ? 'livre français maroc' : book.language === 'AR' ? 'livre arabe maroc' : 'livre anglais maroc',
-    ].filter(Boolean)
+    let keywords: string[] = []
+    let description = ''
+    let siteTitle = ''
+
+    const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
+
+    if (locale === 'ar') {
+        siteTitle = `${book.title} - ${book.author} | مكتبة رواية`
+        description = `اشتري كتاب "${book.title}" للكاتب ${book.author} من مكتبة رواية. توصيل سريع لجميع مدن المغرب. السعر: ${book.price} درهم. ${book.stock > 0 ? 'متوفر' : 'غير متوفر'}.`
+        keywords = [
+            book.title,
+            book.author,
+            `${book.title} ${book.author}`,
+            `شراء كتاب ${book.title}`,
+            `كتاب ${book.category}`,
+            `كتب ${book.author}`,
+            'مكتبة في الرباط',
+            'مكتبة f rabat',
+            'مكتبة في الدار البيضاء',
+            'مكتبة رواية',
+            'كتب للبيع بالمغرب',
+            'روايات عربية',
+            'توصيل كتب المغرب'
+        ]
+    } else if (locale === 'en') {
+        siteTitle = `${book.title} - ${book.author} | Riwaya Library`
+        description = `Buy "${book.title}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} MAD. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
+        keywords = [
+            book.title,
+            book.author,
+            `${book.title} ${book.author}`,
+            `buy ${book.title} morocco`,
+            `${book.category} books`,
+            `${book.author} books`,
+            'bookstore in rabat',
+            'bookstore in casablanca',
+            'buy books morocco',
+            'online bookstore morocco'
+        ]
+    } else {
+        siteTitle = `${book.title} - ${book.author} | Librairie Riwaya`
+        description = `Achetez "${book.title}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} MAD. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
+        keywords = [
+            book.title,
+            book.author,
+            `${book.title} ${book.author}`,
+            `acheter ${book.title} maroc`,
+            `livre ${book.category}`,
+            `${book.author} livres`,
+            'librairie à rabat',
+            'librairie rabat',
+            'librairie casablanca',
+            'livres maroc',
+            'librairie en ligne maroc',
+            'acheter des livres au maroc'
+        ]
+    }
+    
+    keywords = [...keywords, ...baseKeywords]
 
     return {
-        title: `${book.title} - ${book.author} | Riwaya`,
-        description: `Achetez "${book.title}" de ${book.author} sur Riwaya. ${book.description.slice(0, 120)}... Livraison rapide au Maroc. Prix: ${book.price} MAD. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`,
-        keywords,
+        title: siteTitle,
+        description: description,
+        keywords: keywords,
         openGraph: {
-            title: `${book.title} - ${book.author}`,
-            description: book.description.slice(0, 160) + '...',
+            title: siteTitle,
+            description: description,
             images: [imageUrl],
             type: 'book',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
@@ -71,16 +117,16 @@ export async function generateMetadata({
         },
         twitter: {
             card: 'summary_large_image',
-            title: `${book.title} - ${book.author}`,
-            description: book.description.slice(0, 160) + '...',
+            title: siteTitle,
+            description: description,
             images: [imageUrl],
         },
         alternates: {
-            canonical: `/${locale}/books/${book.id}`,
+            canonical: `${baseUrl}/${locale}/books/${book.id}`,
             languages: {
-                'fr': `/fr/books/${book.id}`,
-                'ar': `/ar/books/${book.id}`,
-                'en': `/en/books/${book.id}`,
+                'fr': `${baseUrl}/fr/books/${book.id}`,
+                'ar': `${baseUrl}/ar/books/${book.id}`,
+                'en': `${baseUrl}/en/books/${book.id}`,
             },
         },
     }
@@ -142,9 +188,14 @@ export default async function BookDetailPage({
             '@context': 'https://schema.org',
             '@type': 'Book',
             name: book.title,
+            inLanguage: locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
             author: {
                 '@type': 'Person',
                 name: book.author,
+            },
+            publisher: {
+                '@type': 'Organization',
+                name: 'Riwaya'
             },
             image: imageUrl,
             description: book.description,
@@ -154,7 +205,7 @@ export default async function BookDetailPage({
                 price: book.price,
                 priceCurrency: 'MAD',
                 availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-                url: `${baseUrl}/books/${book.id}`,
+                url: `${baseUrl}/${locale}/books/${book.id}`,
             },
             aggregateRating: {
                 '@type': 'AggregateRating',
@@ -170,23 +221,53 @@ export default async function BookDetailPage({
                     '@type': 'ListItem',
                     position: 1,
                     name: tNav('Home'),
-                    item: baseUrl
+                    item: `${baseUrl}/${locale}`
                 },
                 {
                     '@type': 'ListItem',
                     position: 2,
                     name: tNav('Books'),
-                    item: `${baseUrl}/books`
+                    item: `${baseUrl}/${locale}/books`
                 },
                 {
                     '@type': 'ListItem',
                     position: 3,
                     name: book.title,
-                    item: `${baseUrl}/books/${book.id}`
+                    item: `${baseUrl}/${locale}/books/${book.id}`
                 }
             ]
         }
     ]
+
+    const faqQuestions = [
+        {
+            question: locale === 'ar' ? `لماذا يجب عليك قراءة كتاب ${book.title}؟` : locale === 'en' ? `Why should you read ${book.title}?` : `Pourquoi devriez-vous lire ${book.title} ?`,
+            answer: locale === 'ar' ? `كتاب ${book.title} للكاتب ${book.author} هو من أفضل الكتب في تصنيف ${book.category}. يقدم رؤية فريدة وقيمة لا غنى عنها للقراء.` : locale === 'en' ? `${book.title} by ${book.author} is one of the best books in the ${book.category} category. It offers unique insights for readers.` : `${book.title} de ${book.author} est l'un des meilleurs livres de la catégorie ${book.category}. Il offre une perspective unique et incontournable.`
+        },
+        {
+            question: locale === 'ar' ? `من هو مؤلف كتاب ${book.title}؟` : locale === 'en' ? `Who is the author of ${book.title}?` : `Qui est l'auteur de ${book.title} ?`,
+            answer: locale === 'ar' ? `مؤلف هذا الكتاب هو ${book.author}، وهو كاتب معروف بأسلوبه المتميز.` : locale === 'en' ? `The author of this book is ${book.author}, known for their distinct style.` : `L'auteur de ce livre est ${book.author}, connu pour son style distinctif.`
+        },
+        {
+            question: locale === 'ar' ? `هل كتاب ${book.title} متوفر للبيع في المغرب؟` : locale === 'en' ? `Is ${book.title} available for sale in Morocco?` : `Le livre ${book.title} est-il disponible au Maroc ?`,
+            answer: locale === 'ar' ? `نعم، كتاب ${book.title} متوفر للبيع في المغرب عبر مكتبة رواية، مع توصيل سريع لجميع المدن مثل الرباط والدار البيضاء.` : locale === 'en' ? `Yes, ${book.title} is available for sale in Morocco through Riwaya Library, with fast delivery to all cities like Rabat and Casablanca.` : `Oui, ${book.title} est disponible au Maroc via la Librairie Riwaya, avec livraison rapide vers toutes les villes comme Rabat et Casablanca.`
+        }
+    ]
+
+    const faqSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqQuestions.map(q => ({
+            '@type': 'Question',
+            name: q.question,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: q.answer
+            }
+        }))
+    }
+    
+    jsonLd.push(faqSchema as any)
 
     return (
         <>
@@ -367,7 +448,7 @@ export default async function BookDetailPage({
                                 {book.stock > 0 ? (
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
-                                        <p className="text-[10px] font-black text-black uppercase tracking-widest">{tBook('ReadyForCollection')}</p>
+                                        <p className="text-sm font-black text-black uppercase tracking-widest">{tBook('ReadyForCollection')}</p>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-3">
@@ -411,7 +492,7 @@ export default async function BookDetailPage({
                             {/* Frequently Bought Together (Upsell/Cross-sell) */}
                             {frequentlyBoughtTogether.length > 0 && (
                                 <div className="mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h3>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h3>
                                     <div className="flex flex-col gap-3 sm:gap-4">
                                         {frequentlyBoughtTogether.map(fbBook => (
                                             <div key={fbBook.id} className="flex items-center gap-3 sm:gap-4 bg-white p-2.5 sm:p-3 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow">
@@ -582,14 +663,14 @@ export default async function BookDetailPage({
                                         <MessageSquare className="w-7 h-7" />
                                     </div>
                                     <h2 className="text-4xl font-black text-black tracking-tighter">{tBook('Voices')}<span className="text-gray-200">.</span></h2>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-loose">
+                                    <p className="text-sm font-black text-gray-400 uppercase tracking-widest leading-loose">
                                         {tBook('SharePerspective')}
                                     </p>
                                 </div>
                                 <ReviewForm bookId={book.id} />
                             </div>
                             <div className="lg:col-span-2 space-y-12">
-                                <h3 className="text-sm font-black text-black uppercase tracking-[0.3em]">
+                                <h3 className="text-lg font-black text-black uppercase tracking-[0.3em]">
                                     {tBook('Reflections', { count: reviews.length })}
                                 </h3>
                                 <ReviewList reviews={reviews} />
@@ -610,6 +691,30 @@ export default async function BookDetailPage({
                                 {filteredSimilarBooks.map((similarBook) => (
                                     <BookCard key={similarBook.id} {...similarBook} />
                                 ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* FAQ Section */}
+                    {faqQuestions.length > 0 && (
+                        <section className="py-32 border-t border-gray-100">
+                            <div className="flex flex-col md:flex-row gap-16">
+                                <div className="md:w-1/3">
+                                    <h2 className="text-4xl font-black text-black tracking-tighter mb-4">
+                                        {locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}<span className="text-blue-500">.</span>
+                                    </h2>
+                                    <p className="text-sm font-bold text-gray-400">
+                                        {locale === 'ar' ? 'كل ما تحتاج معرفته عن هذا الكتاب.' : locale === 'en' ? 'Everything you need to know about this book.' : 'Tout ce que vous devez savoir sur ce livre.'}
+                                    </p>
+                                </div>
+                                <div className="md:w-2/3 space-y-6">
+                                    {faqQuestions.map((faq, index) => (
+                                        <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 hover:shadow-md transition-shadow">
+                                            <h3 className="text-xl font-black text-black mb-4">{faq.question}</h3>
+                                            <p className="text-sm font-medium text-gray-500 leading-relaxed">{faq.answer}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </section>
                     )}

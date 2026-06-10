@@ -1,31 +1,62 @@
 {
-    "name": "Riwaya",
+    "name": "Riwaya — مكتبة أحسن كتب المغرب",
     "short_name": "Riwaya",
-    "description": "Librairie en ligne au Maroc - Achetez et échangez des livres",
-    "start_url": "/",
+    "description": "أحسن مكتبة إلكترونية في المغرب. Meilleure librairie en ligne au Maroc — Livres, Packs, Livraison COD.",
+    "start_url": "/fr/books",
+    "scope": "/",
     "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
     "background_color": "#ffffff",
     "theme_color": "#000000",
     "orientation": "portrait-primary",
+    "lang": "fr-MA",
+    "dir": "auto",
+    "id": "riwaya-ma-pwa",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         },
         {
             "src": "/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
-    "categories": [
-        "books",
-        "shopping",
-        "lifestyle"
+    "screenshots": [
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Riwaya — Catalogue livres"
+        }
     ],
-    "lang": "fr-MA",
-    "dir": "auto"
+    "shortcuts": [
+        {
+            "name": "Catalogue Livres",
+            "short_name": "Livres",
+            "description": "Parcourir tous les livres",
+            "url": "/fr/books",
+            "icons": [{ "src": "/favicon-32x32.png", "sizes": "32x32" }]
+        },
+        {
+            "name": "Packs Promo",
+            "short_name": "Packs",
+            "description": "Voir les packs de livres",
+            "url": "/fr/packs",
+            "icons": [{ "src": "/favicon-32x32.png", "sizes": "32x32" }]
+        }
+    ],
+    "categories": ["books", "shopping", "lifestyle", "education"],
+    "prefer_related_applications": false
 }

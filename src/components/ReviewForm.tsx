@@ -54,10 +54,10 @@ export default function ReviewForm({ bookId }: { bookId: string }) {
 
     return (
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
-            <h3 className="text-xl font-black text-gray-900 tracking-tight">{t('Title')}</h3>
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight">{t('Title')}</h3>
 
             <div className="space-y-4">
-                <label className="text-xs font-black uppercase text-gray-400 block ml-1">{t('GlobalRating')}</label>
+                <label className="text-sm font-black uppercase text-gray-400 block ml-1">{t('GlobalRating')}</label>
                 <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -80,7 +80,7 @@ export default function ReviewForm({ bookId }: { bookId: string }) {
             </div>
 
             <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-gray-400 ml-1">{t('FullName')}</label>
+                <label className="text-sm font-black uppercase text-gray-400 ml-1">{t('FullName')}</label>
                 <input
                     name="fullName"
                     required
@@ -90,7 +90,7 @@ export default function ReviewForm({ bookId }: { bookId: string }) {
             </div>
 
             <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-gray-400 ml-1">{t('YourComment')}</label>
+                <label className="text-sm font-black uppercase text-gray-400 ml-1">{t('YourComment')}</label>
                 <textarea
                     name="comment"
                     required

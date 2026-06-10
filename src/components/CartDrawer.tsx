@@ -7,6 +7,7 @@ import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
+import { notifyRemoveFromCart, notifyClearCart } from '@/lib/actions/cart-notify'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -27,6 +28,28 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
     const totalPrice = getTotalPrice()
     const totalItems = getTotalItems()
+
+    const handleRemove = async (item: any) => {
+        removeItem(item.id)
+        try {
+            await notifyRemoveFromCart(item.title, item.price, item.type)
+        } catch (error) {
+            console.error('Erreur notification', error)
+        }
+    }
+
+    const handleClearCart = async () => {
+        const value = getTotalPrice()
+        const count = getTotalItems()
+        clearCart()
+        try {
+            if (count > 0) {
+                await notifyClearCart(value, count)
+            }
+        } catch (error) {
+            console.error('Erreur notification', error)
+        }
+    }
     
     // Si tous les articles sont numériques, pas de frais de livraison
     // Si un article (ex: pack) a les frais de livraison gratuits, tout le panier est gratuit
@@ -139,7 +162,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                         {item.title}
                                                     </h3>
                                                     <button
-                                                        onClick={() => removeItem(item.id)}
+                                                        onClick={() => handleRemove(item)}
                                                         className="p-1 text-gray-300 hover:text-black transition-colors"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -155,6 +178,19 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                         </span>
                                                     )}
                                                 </div>
+                                                {item.replacedBooks && Object.keys(item.replacedBooks).length > 0 && (
+                                                    <div className="mt-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Livres remplacés :</p>
+                                                        <ul className="space-y-1">
+                                                            {Object.values(item.replacedBooks).map((rb) => (
+                                                                <li key={rb.id} className="text-[10px] text-black font-black flex items-center gap-2">
+                                                                    <div className="w-1 h-1 bg-black rounded-full" />
+                                                                    {rb.title}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Quantity Controls - Style Pixio */}
@@ -183,11 +219,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                 ))}
 
                                 {items.length > 0 && (
-                                    <button
-                                        onClick={clearCart}
-                                        className="w-full py-4 text-[10px] text-gray-400 hover:text-black font-black uppercase tracking-[0.2em] transition-colors"
-                                    >
-                                        {t('ClearSelection')}
+                                <button
+                                    onClick={handleClearCart}
+                                    className="p-2 text-gray-300 hover:text-black transition-colors"
+                                    title="Vider le panier"
+                                >        {t('ClearSelection')}
                                     </button>
                                 )}
                             </div>

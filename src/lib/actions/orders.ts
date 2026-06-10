@@ -19,7 +19,8 @@ const OrderSchema = z.object({
         productId: z.string().uuid(),
         quantity: z.number().int().positive('La quantité doit être supérieure à 0').max(100),
         type: z.enum(['BOOK', 'PACK', 'GIFT', 'DIGITAL', 'ACCESSORY']),
-        price: z.number().min(0, 'Le prix doit être positif ou nul').max(100000)
+        price: z.number().min(0, 'Le prix doit être positif ou nul').max(100000),
+        replacedBooks: z.record(z.object({ id: z.string(), title: z.string() })).optional()
     })).min(1, 'Panier vide').max(50),
     couponCode: z.string().max(50).optional(),
     discount: z.number().optional()
@@ -92,13 +93,23 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
         // OWASP A03: Injection / Validation
         const data = OrderSchema.parse(input)
 
-        // OWASP A03: Sanitize inputs to prevent XSS
+        // Check for replaced books and append to comment
+        let appendedComment = data.comment ? sanitizeInput(data.comment) : ''
+        data.items.forEach(item => {
+            if (item.type === 'PACK' && item.replacedBooks && Object.keys(item.replacedBooks).length > 0) {
+                const replacedText = Object.entries(item.replacedBooks)
+                    .map(([oldId, newBook]) => `Livre remplacé par: ${newBook.title}`)
+                    .join(', ')
+                appendedComment += `\n[Pack personnalisé]: ${replacedText}`
+            }
+        })
+
         const sanitizedData = {
             ...data,
             fullName: sanitizeInput(data.fullName),
             address: sanitizeInput(data.address),
             city: sanitizeInput(data.city),
-            comment: data.comment ? sanitizeInput(data.comment) : undefined,
+            comment: appendedComment.trim() || undefined,
         }
 
         // Calcul du total côté serveur pour sécurité
@@ -212,6 +223,25 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                         where: { id: item.productId },
                         data: { stock: { decrement: item.quantity } }
                     })
+                } else if (item.type === 'PACK') {
+                    // Decrement stock for books inside the pack
+                    const pack = await tx.pack.findUnique({
+                        where: { id: item.productId },
+                        include: { books: true }
+                    })
+                    if (pack) {
+                        for (const packBook of pack.books) {
+                            // If this book was replaced, decrement the replacement book instead
+                            let bookIdToDecrement = packBook.bookId
+                            if (item.replacedBooks && item.replacedBooks[packBook.bookId]) {
+                                bookIdToDecrement = item.replacedBooks[packBook.bookId].id
+                            }
+                            await tx.book.update({
+                                where: { id: bookIdToDecrement },
+                                data: { stock: { decrement: item.quantity } }
+                            })
+                        }
+                    }
                 }
             }
 
@@ -234,7 +264,11 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             const fullOrder = await getOrderById(order.id)
             if (fullOrder) {
                 const { sendOrderNotification } = await import('@/lib/telegram')
-                sendOrderNotification(fullOrder as any).catch(console.error)
+                const { getCommunityUser } = await import('@/lib/actions/community-auth')
+                const user = await getCommunityUser()
+                const source = user ? 'Client Connecté' : 'Client Non Connecté (Invité)'
+                const orderWithSource = { ...fullOrder, source }
+                sendOrderNotification(orderWithSource as any).catch(console.error)
             }
         } catch (e) {
             console.error('Erreur Telegram Notification:', e)

@@ -21,14 +21,71 @@ export async function generateMetadata({
     const { name, locale } = await params
     const authorName = decodeURIComponent(name)
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
+    let keywords: string[] = []
+    let description = ''
+    let siteTitle = ''
+
+    const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
+
+    if (locale === 'ar') {
+        siteTitle = `${authorName} - كتب ومؤلفات | مكتبة رواية`
+        description = `اكتشف جميع كتب ومؤلفات ${authorName} المتوفرة في مكتبة رواية. توصيل سريع لجميع مدن المغرب.`
+        keywords = [
+            authorName,
+            `كتب ${authorName}`,
+            `روايات ${authorName}`,
+            'مكتبة في الرباط',
+            'مكتبة f rabat',
+            'مكتبة في الدار البيضاء',
+            'مكتبة رواية',
+            'كتب للبيع بالمغرب',
+            ...baseKeywords
+        ]
+    } else if (locale === 'en') {
+        siteTitle = `${authorName} - Books and Biography | Riwaya`
+        description = `Discover all books by ${authorName} available on Riwaya. Fast delivery in Morocco.`
+        keywords = [
+            authorName,
+            `books by ${authorName}`,
+            `author ${authorName}`,
+            'bookstore in rabat',
+            'bookstore in casablanca',
+            ...baseKeywords
+        ]
+    } else {
+        siteTitle = `${authorName} - Livres et Biographie | Riwaya`
+        description = `Découvrez tous les livres de ${authorName} disponibles sur Riwaya. Achetez en ligne au Maroc avec livraison rapide.`
+        keywords = [
+            authorName,
+            `livres de ${authorName}`,
+            `auteur ${authorName}`,
+            'librairie à rabat',
+            'librairie casablanca',
+            'livres maroc',
+            ...baseKeywords
+        ]
+    }
+
     return {
-        title: `${authorName} - Livres et Biographie | Riwaya`,
-        description: `Découvrez tous les livres de ${authorName} disponibles sur Riwaya. Achetez en ligne au Maroc avec livraison rapide.`,
+        title: siteTitle,
+        description: description,
+        keywords: keywords,
         openGraph: {
-            title: `${authorName} - Auteur sur Riwaya`,
-            description: `Les meilleurs livres de ${authorName} sélectionnés pour vous.`,
+            title: siteTitle,
+            description: description,
             type: 'profile',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
+            url: `${baseUrl}/${locale}/authors/${encodeURIComponent(name)}`,
+        },
+        alternates: {
+            canonical: `${baseUrl}/${locale}/authors/${encodeURIComponent(name)}`,
+            languages: {
+                'fr': `${baseUrl}/fr/authors/${encodeURIComponent(name)}`,
+                'ar': `${baseUrl}/ar/authors/${encodeURIComponent(name)}`,
+                'en': `${baseUrl}/en/authors/${encodeURIComponent(name)}`,
+            },
         },
     }
 }
@@ -62,8 +119,51 @@ export default async function AuthorPage({
         // notFound()
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
+    const jsonLd = [
+        {
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            "dateCreated": new Date().toISOString(),
+            "dateModified": new Date().toISOString(),
+            "mainEntity": {
+                "@type": "Person",
+                "name": authorName,
+                "description": profile?.bio || `Author ${authorName}`,
+                "image": profile?.image || `${baseUrl}/logo.png`
+            }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": locale === 'ar' ? `من هو ${authorName}؟` : locale === 'en' ? `Who is ${authorName}?` : `Qui est ${authorName} ?`,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": profile?.bio || (locale === 'ar' ? `مؤلف مشهور.` : locale === 'en' ? `A renowned author.` : `Un auteur renommé.`)
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": locale === 'ar' ? `ما هي أفضل كتب ${authorName}؟` : locale === 'en' ? `What are the best books by ${authorName}?` : `Quels sont les meilleurs livres de ${authorName} ?`,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": locale === 'ar' ? `يمكنك العثور على أفضل كتب ${authorName} في مكتبة رواية.` : locale === 'en' ? `You can find the best books by ${authorName} at Riwaya Library.` : `Vous pouvez trouver les meilleurs livres de ${authorName} sur la Librairie Riwaya.`
+                    }
+                }
+            ]
+        }
+    ]
+
     return (
         <div className="min-h-screen bg-pixio-cream flex flex-col">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+            />
             <Header />
 
             <main className="flex-grow">
@@ -148,6 +248,33 @@ export default async function AuthorPage({
                         </div>
                     )}
                 </div>
+
+                {/* FAQ Section */}
+                <section className="bg-white py-20 border-t border-gray-100 mt-20">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-10 text-center">
+                            {locale === 'ar' ? 'الأسئلة الشائعة حول الكاتب' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}
+                        </h2>
+                        <div className="space-y-6">
+                            <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-100">
+                                <h3 className="text-lg font-black text-slate-900 mb-3">
+                                    {locale === 'ar' ? `من هو ${authorName}؟` : locale === 'en' ? `Who is ${authorName}?` : `Qui est ${authorName} ?`}
+                                </h3>
+                                <p className="text-slate-600 leading-relaxed font-medium">
+                                    {profile?.bio || (locale === 'ar' ? `${authorName} هو كاتب ومؤلف تتوفر أعماله في مكتبة رواية.` : locale === 'en' ? `${authorName} is an author whose works are available at Riwaya.` : `${authorName} est un auteur dont les œuvres sont disponibles sur Riwaya.`)}
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-100">
+                                <h3 className="text-lg font-black text-slate-900 mb-3">
+                                    {locale === 'ar' ? `أين يمكنني شراء كتب ${authorName} في المغرب؟` : locale === 'en' ? `Where can I buy books by ${authorName} in Morocco?` : `Où puis-je acheter les livres de ${authorName} au Maroc ?`}
+                                </h3>
+                                <p className="text-slate-600 leading-relaxed font-medium">
+                                    {locale === 'ar' ? `يمكنك شراء جميع كتب ${authorName} من مكتبة رواية مع خدمة التوصيل السريع إلى جميع مدن المغرب بما في ذلك الرباط والدار البيضاء.` : locale === 'en' ? `You can buy all books by ${authorName} from Riwaya Library with fast delivery to all Moroccan cities including Rabat and Casablanca.` : `Vous pouvez acheter tous les livres de ${authorName} sur la Librairie Riwaya avec une livraison rapide vers toutes les villes marocaines, y compris Rabat et Casablanca.`}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
 
             <Footer />

@@ -129,7 +129,7 @@ export default function NotificationDropdown({ initialNotifications, unreadCount
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="fixed left-4 right-4 top-24 w-auto md:absolute md:right-0 md:left-auto md:top-full md:w-96 md:mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="fixed left-4 right-4 top-24 w-auto md:absolute md:left-0 rtl:md:right-0 rtl:md:left-auto md:top-full md:w-96 md:mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     {/* Header */}
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-black text-lg text-black">{t('Title')}</h3>

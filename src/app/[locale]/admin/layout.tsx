@@ -45,7 +45,8 @@ import {
     Database,
     ChevronDown,
     PanelLeftClose,
-    PanelLeftOpen
+    PanelLeftOpen,
+    Globe
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -104,12 +105,36 @@ export default function AdminLayout({
         { name: 'Clients', href: `/${lang}/admin/customers`, icon: Users },
         { name: 'Utilisateurs', href: `/${lang}/admin/users`, icon: Users },
         { name: 'Vendeurs', href: `/${lang}/admin/vendeurs`, icon: Store, featureKey: 'feature_seller' },
-        { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
-        { name: 'Avis', href: `/${lang}/admin/reviews`, icon: MessageSquare },
-        { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
-        { name: 'Coupons', href: `/${lang}/admin/coupons`, icon: Ticket },
-        { name: 'Affiliés', href: `/${lang}/admin/affiliates`, icon: Share2 },
-        { name: 'Analytics', href: `/${lang}/admin/analytics`, icon: BarChart3 },
+        {
+            name: 'Modération',
+            href: `/${lang}/admin/reports`,
+            icon: AlertCircle,
+            children: [
+                { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
+                { name: 'Avis', href: `/${lang}/admin/reviews`, icon: MessageSquare },
+                { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
+            ]
+        },
+        {
+            name: 'Promotions',
+            href: `/${lang}/admin/coupons`,
+            icon: Ticket,
+            children: [
+                { name: 'Coupons', href: `/${lang}/admin/coupons`, icon: Ticket },
+                { name: 'Affiliés', href: `/${lang}/admin/affiliates`, icon: Share2 },
+                { name: 'Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },
+            ]
+        },
+        {
+            name: 'Rapports',
+            href: `/${lang}/admin/analytics`,
+            icon: BarChart3,
+            children: [
+                { name: 'Analytics', href: `/${lang}/admin/analytics`, icon: BarChart3 },
+                { name: 'Finance', href: `/${lang}/admin/finance`, icon: Banknote },
+                { name: 'Traffic', href: `/${lang}/admin/traffic`, icon: TrendingUp },
+            ]
+        },
         { name: 'Marketing', href: `/${lang}/admin/marketing`, icon: Sparkles },
         {
             name: 'Accessoires',
@@ -123,10 +148,17 @@ export default function AdminLayout({
             ]
         },
         { name: 'Menus', href: `/${lang}/admin/menus`, icon: GripVertical },
-        { name: 'Finance', href: `/${lang}/admin/finance`, icon: Banknote },
-        { name: 'Traffic', href: `/${lang}/admin/traffic`, icon: TrendingUp },
+        { name: 'Commande Fournisseur', href: `/${lang}/admin/supplier-order`, icon: ShoppingBag },
         { name: 'Traductions', href: `/${lang}/admin/translations`, icon: Languages },
-        { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
+        {
+            name: 'Référencement',
+            href: `/${lang}/admin/seo`,
+            icon: Search,
+            children: [
+                { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
+                { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
+            ]
+        },
         { 
             name: 'Configuration', 
             href: `/${lang}/admin/config`, 
@@ -144,7 +176,7 @@ export default function AdminLayout({
             ]
         },
         { name: 'Paramètres', href: `/${lang}/admin/settings`, icon: Settings },
-        { name: 'Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },
+
         { name: 'Audit Log', href: `/${lang}/admin/audit`, icon: ShieldCheck },
     ], [lang])
 

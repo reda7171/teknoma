@@ -3,6 +3,15 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { BookOpen, Heart, Users, Target, Sparkles, Award, Truck } from 'lucide-react'
 import Image from 'next/image'
+import { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params;
+    return {
+        title: locale === 'ar' ? 'من نحن | أحسن مكتبة في المغرب' : locale === 'en' ? 'About Us | Best Bookstore in Morocco' : 'À propos | Meilleure librairie au Maroc',
+        description: locale === 'ar' ? 'تعرف على قصة مكتبة رواية، أفضل مكتبة إلكترونية في المغرب. أكثر من 10,000 عميل راضٍ وتوصيل إلى 40 مدينة مغربية.' : locale === 'en' ? 'Discover the story of Riwaya, the best online bookstore in Morocco. Over 10,000 satisfied customers and delivery to 40 Moroccan cities.' : 'Découvrez l\'histoire de Riwaya, la meilleure librairie en ligne au Maroc. Plus de 10 000 clients satisfaits et livraison dans 40 villes marocaines.',
+    }
+}
 
 export default async function AboutPage() {
     const t = await getTranslations('Common')
@@ -10,7 +19,37 @@ export default async function AboutPage() {
     return (
         <div className="min-h-screen bg-pixio-cream overflow-hidden">
             <Header />
-            
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'AboutPage',
+                        mainEntity: {
+                            '@type': 'Organization',
+                            name: 'Riwaya',
+                            description: 'Riwaya est la meilleure librairie en ligne au Maroc, avec plus de 10 000 clients satisfaits et une livraison rapide dans plus de 40 villes.',
+                            numberOfEmployees: {
+                                '@type': 'QuantitativeValue',
+                                value: 15
+                            },
+                            foundingDate: '2023',
+                            areaServed: {
+                                '@type': 'Country',
+                                name: 'Morocco'
+                            },
+                            interactionStatistic: [
+                                {
+                                    '@type': 'InteractionCounter',
+                                    interactionType: 'https://schema.org/BuyAction',
+                                    userInteractionCount: 10000,
+                                    name: 'Clients Satisfaits'
+                                }
+                            ]
+                        }
+                    })
+                }}
+            />
             {/* Hero Section */}
             <section className="relative py-32 md:py-48 px-4 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto text-center relative z-10">

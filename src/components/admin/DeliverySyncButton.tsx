@@ -39,18 +39,16 @@ export default function DeliverySyncButton({
 
 
 
-    if (trackingID) {
+    if (trackingID || deliveryStatus === 'CREATED') {
         return (
             <div className="flex flex-col gap-3">
                 <div className="bg-green-50 border border-green-100 rounded-xl p-4 flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-green-600" />
                     <div>
                         <p className="text-[10px] font-black text-green-700 uppercase tracking-widest leading-none">Expédié via WithYou</p>
-                        <p className="mt-1 text-sm font-black text-green-900 tracking-tighter">ID: {trackingID}</p>
+                        {trackingID && <p className="mt-1 text-sm font-black text-green-900 tracking-tighter">ID: {trackingID}</p>}
                     </div>
                 </div>
-
-
             </div>
         )
     }

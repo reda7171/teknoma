@@ -15,6 +15,7 @@ interface AddToCartButtonProps {
         image: string
         type: 'BOOK' | 'PACK' | 'ACCESSORY'
         shippingFees?: number
+        replacedBooks?: Record<string, { id: string, title: string }>
     }
     variant?: 'primary' | 'secondary'
     className?: string
@@ -48,6 +49,7 @@ export default function AddToCartButton({
                         price: product.price,
                         image: product.image,
                         shippingFees: product.shippingFees,
+                        replacedBooks: product.replacedBooks,
                     })
 
                     // Facebook Pixel Tracking
@@ -70,7 +72,7 @@ export default function AddToCartButton({
             }}
         >
             {showIcon && <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 rtl:flip" />}
-            <span className="uppercase tracking-widest text-[10px] font-black">{t('AddToCart')}</span>
+            <span className="uppercase tracking-widest text-sm font-black">{t('AddToCart')}</span>
         </button>
     )
 }

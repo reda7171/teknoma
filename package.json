@@ -22,6 +22,7 @@
     "build:safe": "node scripts/build-safe.js"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@prisma/client": "^6.2.1",

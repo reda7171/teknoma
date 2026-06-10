@@ -29,10 +29,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   const title = t('Title');
   const description = t('Description');
+  
+  const baseKeywords = [
+    "رواية", "riwaya", "book", "الكاتب", "authors", "كتب", 
+    "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب", 
+    "a7san librairie en ligne f maghrib", "meilleure librairie en ligne au maroc"
+  ];
 
   return {
     title: title,
     description: description,
+    keywords: baseKeywords,
     alternates: {
       canonical: `/${locale}`,
       languages: {
@@ -246,26 +253,34 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'Livrez-vous partout au Maroc ?',
+        name: locale === 'ar' ? 'ما هي أفضل وأحسن مكتبة إلكترونية في المغرب؟' : locale === 'en' ? 'What is the best online bookstore in Morocco?' : 'Quelle est la meilleure librairie en ligne au Maroc ?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Oui, nous livrons nos livres dans toutes les villes et régions du Maroc avec des partenaires logistiques rapides et fiables.',
+          text: locale === 'ar' ? 'تعتبر مكتبة رواية (Riwaya) أحسن وأفضل مكتبة إلكترونية في المغرب. توفر مجموعة ضخمة من الروايات، كتب تطوير الذات، والأعمال مع خدمة الدفع عند الاستلام (COD) والتوصيل السريع لجميع المدن مثل الدار البيضاء والرباط.' : locale === 'en' ? 'Riwaya is considered the best online bookstore in Morocco. It offers a massive collection of novels, self-development, and business books with Cash on Delivery (COD) and fast shipping to all cities like Casablanca and Rabat.' : 'Riwaya est considérée comme la meilleure librairie en ligne au Maroc. Elle propose une vaste collection de romans, livres de développement personnel et business avec paiement à la livraison (COD) et livraison rapide dans toutes les villes comme Casablanca et Rabat.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Quels moyens de paiement acceptez-vous ?',
+        name: locale === 'ar' ? 'هل تقومون بالتوصيل لجميع أنحاء المغرب؟' : locale === 'en' ? 'Do you deliver anywhere in Morocco?' : 'Livrez-vous partout au Maroc ?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Nous privilégions votre sécurité en proposant le paiement à la livraison (Cash on Delivery). Vous ne payez que lorsque vous recevez vos livres en main propre.',
+          text: locale === 'ar' ? 'نعم، نقوم بتوصيل الكتب إلى جميع المدن والمناطق في المغرب مع شركاء لوجستيين سريعين وموثوقين.' : locale === 'en' ? 'Yes, we deliver books to all cities and regions in Morocco with fast and reliable logistics partners.' : 'Oui, nous livrons nos livres dans toutes les villes et régions du Maroc avec des partenaires logistiques rapides et fiables.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Combien dure la livraison ?',
+        name: locale === 'ar' ? 'ما هي طرق الدفع المتاحة؟' : locale === 'en' ? 'What payment methods do you accept?' : 'Quels moyens de paiement acceptez-vous ?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'La livraison prend généralement entre 24h et 48h ouvrables, selon votre adresse exacte au Maroc.',
+          text: locale === 'ar' ? 'نحن نعطي الأولوية لسلامتك من خلال تقديم الدفع عند الاستلام (COD). تدفع فقط عندما تتسلم كتبك بيدك.' : locale === 'en' ? 'We prioritize your safety by offering Cash on Delivery (COD). You only pay when you receive your books in hand.' : 'Nous privilégions votre sécurité en proposant le paiement à la livraison (Cash on Delivery). Vous ne payez que lorsque vous recevez vos livres en main propre.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: locale === 'ar' ? 'كم يستغرق التوصيل؟' : locale === 'en' ? 'How long does delivery take?' : 'Combien dure la livraison ?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: locale === 'ar' ? 'يستغرق التوصيل عادةً بين 24 و 48 ساعة عمل، اعتمادًا على عنوانك الدقيق في المغرب.' : locale === 'en' ? 'Delivery usually takes between 24h and 48h working days, depending on your exact address in Morocco.' : 'La livraison prend généralement entre 24h et 48h ouvrables, selon votre adresse exacte au Maroc.',
         },
       },
     ],

@@ -99,7 +99,8 @@ export async function createPOSOrder(data: {
       const fullOrder = await getOrderById(order.id);
       if (fullOrder) {
         const { sendOrderNotification } = await import('@/lib/telegram');
-        sendOrderNotification(fullOrder as any).catch(console.error);
+        const orderWithSource = { ...fullOrder, source: 'Admin (POS)' };
+        sendOrderNotification(orderWithSource as any).catch(console.error);
       }
     } catch (e) {
       console.error('Erreur Telegram Notification POS:', e);

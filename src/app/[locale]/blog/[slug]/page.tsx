@@ -26,9 +26,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const siteUrl = 'https://riwaya.store'
     const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`
 
+    const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
+    const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    const keywords = [...tags, ...baseKeywords]
+
     return {
         title: `${post.title} | Blog Riwaya`,
         description: post.excerpt || post.title,
+        keywords: keywords,
         openGraph: {
             title: post.title,
             description: post.excerpt || post.title,
@@ -98,21 +103,45 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "BlogPosting",
-                        "headline": post.title,
-                        "image": post.coverImage,
-                        "author": { "@type": "Person", "name": post.author?.fullName || "Riwaya" },
-                        "publisher": {
-                            "@type": "Organization",
-                            "name": "Riwaya",
-                            "logo": { "@type": "ImageObject", "url": "https://riwaya.store/logo.png" }
+                    __html: JSON.stringify([
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "BlogPosting",
+                            "headline": post.title,
+                            "image": post.coverImage,
+                            "author": { "@type": "Person", "name": post.author?.fullName || "Riwaya" },
+                            "publisher": {
+                                "@type": "Organization",
+                                "name": "Riwaya",
+                                "logo": { "@type": "ImageObject", "url": "https://riwaya.store/logo.png" }
+                            },
+                            "datePublished": post.publishedAt,
+                            "dateModified": post.updatedAt,
+                            "description": post.excerpt || post.title
                         },
-                        "datePublished": post.publishedAt,
-                        "dateModified": post.updatedAt,
-                        "description": post.excerpt || post.title
-                    })
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "FAQPage",
+                            "mainEntity": [
+                                {
+                                    "@type": "Question",
+                                    "name": locale === 'ar' ? `عن ماذا يتحدث مقال ${post.title}؟` : locale === 'en' ? `What is the article ${post.title} about?` : `De quoi parle l'article ${post.title} ?`,
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": post.excerpt || post.title
+                                    }
+                                },
+                                {
+                                    "@type": "Question",
+                                    "name": locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who is the author of this article?` : `Qui est l'auteur de cet article ?`,
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": locale === 'ar' ? `تمت كتابة هذا المقال بواسطة ${post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.author?.fullName || 'Riwaya'}.`
+                                    }
+                                }
+                            ]
+                        }
+                    ]).replace(/</g, '\\u003c')
                 }}
             />
 
@@ -646,6 +675,33 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
                 </section>
             )}
+
+            {/* FAQ Section */}
+            <section className="bg-white py-20 border-t border-gray-100">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-10 text-center">
+                        {locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}
+                    </h2>
+                    <div className="space-y-6">
+                        <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-100">
+                            <h3 className="text-lg font-black text-slate-900 mb-3">
+                                {locale === 'ar' ? `عن ماذا يتحدث مقال ${post.title}؟` : locale === 'en' ? `What is the article ${post.title} about?` : `De quoi parle l'article ${post.title} ?`}
+                            </h3>
+                            <p className="text-slate-600 leading-relaxed font-medium">
+                                {post.excerpt || post.title}
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-100">
+                            <h3 className="text-lg font-black text-slate-900 mb-3">
+                                {locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who is the author of this article?` : `Qui est l'auteur de cet article ?`}
+                            </h3>
+                            <p className="text-slate-600 leading-relaxed font-medium">
+                                {locale === 'ar' ? `تمت كتابة هذا المقال بواسطة ${post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.author?.fullName || 'Riwaya'}.`}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <Footer />
         </div>

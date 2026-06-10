@@ -18,6 +18,7 @@ const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
 const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
+const PWAInstallPrompt = dynamic(() => import('@/components/PWAInstallPrompt'))
 
 
 const outfit = Outfit({
@@ -56,6 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const description = seoDescription || t('Description') || "Découvrez Riwaya, la librairie en ligne n°1 au Maroc. Achetez des livres de développement personnel, business, philosophie et romans. Échangez vos livres avec notre communauté. Livraison rapide partout au Maroc, paiement à la livraison.";
 
   const keywordsFr = [
+    "meilleure librairie en ligne au maroc", "meilleure librairie", "a7san librairie en ligne f maghrib", "a7san maktaba",
     "livres maroc", "librairie en ligne maroc", "achat livres maroc", "riwaya",
     "librairie casablanca", "librairie rabat", "librairie marrakech", "librairie tanger",
     "développement personnel maroc", "livres business maroc", "philosophie maroc",
@@ -64,6 +66,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   ];
 
   const keywordsAr = [
+    "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب", "مكتبة رواية",
+    "a7san librairie en ligne f maghrib", "a7san maktaba", "meilleure librairie en ligne au maroc",
     "كتب المغرب", "مكتبة على الانترنت المغرب", "شراء كتب المغرب", "رواية",
     "مكتبة الدار البيضاء", "مكتبة الرباط", "مكتبة مراكش", "مكتبة طنجة",
     "تطوير الذات", "كتب أعمال", "فلسفة", "روايات", "باقات كتب",
@@ -227,6 +231,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               '@type': 'WebSite',
               url: siteUrl,
               name: 'Riwaya',
+              description: 'Riwaya est la meilleure librairie en ligne au Maroc (a7san librairie en ligne f maghrib). Nous offrons la plus grande sélection de romans, de livres de développement personnel, et d\'affaires avec livraison (COD) partout au Maroc comme Casablanca et Rabat. مكتبة رواية هي أحسن وأفضل مكتبة إلكترونية في المغرب.',
               potentialAction: {
                 '@type': 'SearchAction',
                 target: {
@@ -247,6 +252,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Riwaya',
+              description: 'Riwaya est la meilleure librairie en ligne au Maroc (a7san librairie en ligne f maghrib). Nous offrons la plus grande sélection de romans, de livres de développement personnel, et d\'affaires avec livraison (COD) partout au Maroc comme Casablanca et Rabat. مكتبة رواية هي أحسن وأفضل مكتبة إلكترونية في المغرب.',
               url: siteUrl,
               logo: `${siteUrl}/globe.svg`,
               sameAs: [
@@ -274,6 +280,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {children}
           <Toaster />
           <CookieConsent />
+          <PWAInstallPrompt />
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
           {isChatBotEnabled && <ChatBot />}
           <Suspense fallback={null}>
