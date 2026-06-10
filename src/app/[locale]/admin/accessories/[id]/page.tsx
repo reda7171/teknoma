@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Save, Trash2, Package, Image as ImageIcon } from 'lucide-react'
+import { ChevronLeft, Save, Trash2, Package, Image as ImageIcon, Upload, Link2 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function EditAccessoryPage({ 
     params 
@@ -15,13 +16,16 @@ export default function EditAccessoryPage({
 
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload')
+    const [isUploading, setIsUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         price: '',
         costPrice: '',
         stock: '0',
-        image: '',
+        images: [] as string[],
         category: 'BOOKMARK',
         materials: '',
         dimensions: '',
@@ -40,7 +44,7 @@ export default function EditAccessoryPage({
                     price: data.price.toString(),
                     costPrice: data.costPrice.toString(),
                     stock: data.stock.toString(),
-                    image: data.image || '',
+                    images: data.images || (data.image ? [data.image] : []),
                     category: data.category,
                     materials: data.materials || '',
                     dimensions: data.dimensions || '',
@@ -55,6 +59,39 @@ export default function EditAccessoryPage({
                 router.push(`/${locale}/admin/accessories`)
             })
     }, [id, locale, router])
+
+    /* Upload fichiers multiples vers /api/admin/upload */
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+        setIsUploading(true)
+        try {
+            const uploadedUrls: string[] = []
+            for (let i = 0; i < files.length; i++) {
+                const data = new FormData()
+                data.append('file', files[i])
+                const res = await fetch('/api/admin/upload', { method: 'POST', body: data })
+                if (res.ok) {
+                    const json = await res.json()
+                    uploadedUrls.push(json.url)
+                }
+            }
+            if (uploadedUrls.length > 0) {
+                setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }))
+            } else {
+                alert('Erreur upload')
+            }
+        } finally {
+            setIsUploading(false)
+        }
+    }
+
+    const removeImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index)
+        }))
+    }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -240,6 +277,102 @@ export default function EditAccessoryPage({
                             >
                                 {formData.active ? 'Produit Actif' : 'Produit Inactif'}
                             </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                        {/* Image : onglets Upload / URL */}
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Images</label>
+
+                            {/* Onglets */}
+                            <div className="flex rounded-xl overflow-hidden border border-slate-200 mb-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setImageTab('upload')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold transition-all ${
+                                        imageTab === 'upload' ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    <Upload className="w-3.5 h-3.5" /> Uploader
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setImageTab('url')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold transition-all ${
+                                        imageTab === 'url' ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    <Link2 className="w-3.5 h-3.5" /> URL
+                                </button>
+                            </div>
+
+                            {imageTab === 'upload' ? (
+                                <div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={isUploading}
+                                        className="w-full border-2 border-dashed border-slate-200 rounded-xl py-6 flex flex-col items-center gap-2 text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-all disabled:opacity-50"
+                                    >
+                                        <Upload className="w-6 h-6" />
+                                        <span className="text-xs font-bold">
+                                            {isUploading ? 'Upload en cours...' : 'Cliquer pour choisir des fichiers'}
+                                        </span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="relative group flex gap-2">
+                                    <div className="relative flex-1">
+                                        <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            id="url-input"
+                                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            placeholder="https://..."
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const input = document.getElementById('url-input') as HTMLInputElement
+                                            if (input && input.value) {
+                                                setFormData(prev => ({ ...prev, images: [...prev.images, input.value] }))
+                                                input.value = ''
+                                            }
+                                        }}
+                                        className="px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200"
+                                    >
+                                        Ajouter
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Preview */}
+                            {formData.images.length > 0 && (
+                                <div className="mt-4 grid grid-cols-2 gap-3">
+                                    {formData.images.map((img, i) => (
+                                        <div key={i} className="relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 group">
+                                            <Image src={img} alt={`preview ${i}`} fill className="object-cover" unoptimized />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(i)}
+                                                className="absolute top-1 right-1 bg-white/90 p-1.5 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 

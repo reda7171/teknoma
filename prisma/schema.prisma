@@ -905,6 +905,7 @@ model ExtraProduct {
   costPrice   Float    @default(0)
   stock       Int      @default(0)
   image       String?  @db.VarChar(500)
+  images      Json?    @default("[]")
   category    String   @default("ACCESSORY") // BOOKMARK, FURNITURE, USB, etc.
   materials   String?  @db.VarChar(255)
   dimensions  String?  @db.VarChar(255)

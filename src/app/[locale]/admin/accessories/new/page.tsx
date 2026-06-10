@@ -2,7 +2,7 @@
 
 import { useState, use, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronLeft, Save, Image as ImageIcon, Upload, Link2 } from 'lucide-react'
+import { ChevronLeft, Save, Image as ImageIcon, Upload, Link2, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -22,7 +22,7 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
         price: '',
         costPrice: '',
         stock: '0',
-        image: '',
+        images: [] as string[],
         category: defaultCategory,
         materials: '',
         dimensions: '',
@@ -31,24 +31,37 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
         active: true
     })
 
-    /* Upload fichier vers /api/admin/upload */
+    /* Upload fichiers multiples vers /api/admin/upload */
     async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0]
-        if (!file) return
+        const files = e.target.files
+        if (!files || files.length === 0) return
         setIsUploading(true)
         try {
-            const data = new FormData()
-            data.append('file', file)
-            const res = await fetch('/api/admin/upload', { method: 'POST', body: data })
-            if (res.ok) {
-                const json = await res.json()
-                setFormData(prev => ({ ...prev, image: json.url }))
+            const uploadedUrls: string[] = []
+            for (let i = 0; i < files.length; i++) {
+                const data = new FormData()
+                data.append('file', files[i])
+                const res = await fetch('/api/admin/upload', { method: 'POST', body: data })
+                if (res.ok) {
+                    const json = await res.json()
+                    uploadedUrls.push(json.url)
+                }
+            }
+            if (uploadedUrls.length > 0) {
+                setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }))
             } else {
                 alert('Erreur upload')
             }
         } finally {
             setIsUploading(false)
         }
+    }
+
+    const removeImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index)
+        }))
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -258,6 +271,7 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                         ref={fileInputRef}
                                         type="file"
                                         accept="image/*"
+                                        multiple
                                         onChange={handleFileChange}
                                         className="hidden"
                                     />
@@ -269,27 +283,52 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                     >
                                         <Upload className="w-6 h-6" />
                                         <span className="text-xs font-bold">
-                                            {isUploading ? 'Upload en cours...' : 'Cliquer pour choisir un fichier'}
+                                            {isUploading ? 'Upload en cours...' : 'Cliquer pour choisir des fichiers'}
                                         </span>
                                     </button>
                                 </div>
                             ) : (
-                                <div className="relative group">
-                                    <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                    <input
-                                        type="text"
-                                        value={formData.image}
-                                        onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                        placeholder="https://..."
-                                    />
+                                <div className="relative group flex gap-2">
+                                    <div className="relative flex-1">
+                                        <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            id="url-input"
+                                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            placeholder="https://..."
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const input = document.getElementById('url-input') as HTMLInputElement
+                                            if (input && input.value) {
+                                                setFormData(prev => ({ ...prev, images: [...prev.images, input.value] }))
+                                                input.value = ''
+                                            }
+                                        }}
+                                        className="px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200"
+                                    >
+                                        Ajouter
+                                    </button>
                                 </div>
                             )}
 
                             {/* Preview */}
-                            {formData.image && (
-                                <div className="mt-3 relative w-full h-32 rounded-xl overflow-hidden border border-slate-100">
-                                    <Image src={formData.image} alt="preview" fill className="object-cover" unoptimized />
+                            {formData.images.length > 0 && (
+                                <div className="mt-4 grid grid-cols-2 gap-3">
+                                    {formData.images.map((img, i) => (
+                                        <div key={i} className="relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 group">
+                                            <Image src={img} alt={`preview ${i}`} fill className="object-cover" unoptimized />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(i)}
+                                                className="absolute top-1 right-1 bg-white/90 p-1.5 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
