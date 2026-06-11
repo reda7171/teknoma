@@ -18,8 +18,8 @@ interface Exchange {
     status: string
     message: string | null
     createdAt: Date
-    requester?: { fullName: string | null; rating: number; city: string | null }
-    responder?: { fullName: string | null; rating: number; city: string | null }
+    requester?: { fullName: string | null; rating: number; city: string | null; phone?: string | null }
+    responder?: { fullName: string | null; rating: number; city: string | null; phone?: string | null }
     bookRequested: { title: string; author: string; image: string | null }
     bookOffered: { title: string; author: string; image: string | null } | null
     deliveryMethod?: string | null
@@ -169,6 +169,17 @@ export default function ExchangesList({ exchanges, type }: ExchangesListProps) {
                                         <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                                             {type === 'received' ? exchange.requester?.city : exchange.responder?.city}
                                         </span>
+                                        {((type === 'received' && exchange.requester?.phone) || (type === 'sent' && exchange.responder?.phone)) && (
+                                            <>
+                                                <span className="text-gray-300">•</span>
+                                                <a 
+                                                    href={`tel:${type === 'received' ? exchange.requester?.phone : exchange.responder?.phone}`}
+                                                    className="text-[10px] text-blue-500 font-bold hover:underline"
+                                                >
+                                                    {type === 'received' ? exchange.requester?.phone : exchange.responder?.phone}
+                                                </a>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>

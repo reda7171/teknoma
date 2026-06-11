@@ -278,7 +278,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="email"
                             value={settings.contact_email || ''}
                             onChange={(e) => handleChange('contact_email', e.target.value)}
-                            placeholder="contact@riwaya.com"
+                            placeholder="contact@riwaya.store"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>

@@ -151,7 +151,7 @@ export async function getUserExchanges() {
     const received = await (prisma as any).exchange.findMany({
         where: { responderId: user.id },
         include: {
-            requester: { select: { fullName: true, rating: true, city: true } },
+            requester: { select: { fullName: true, rating: true, city: true, phone: true } },
             bookRequested: true,
             bookOffered: true,
             rating: true,
@@ -162,7 +162,7 @@ export async function getUserExchanges() {
     const sent = await (prisma as any).exchange.findMany({
         where: { requesterId: user.id },
         include: {
-            responder: { select: { fullName: true, rating: true, city: true } },
+            responder: { select: { fullName: true, rating: true, city: true, phone: true } },
             bookRequested: true,
             bookOffered: true,
             rating: true,

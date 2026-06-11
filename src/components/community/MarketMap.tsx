@@ -3,6 +3,9 @@
 import React, { useMemo } from 'react'
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api'
 import { MapPin, BookOpen } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
+import { getPrimaryImage } from '@/lib/utils/image'
+import { normalizeImage } from '@/lib/utils'
 
 const MOROCCO_CITIES: Record<string, { lat: number, lng: number }> = {
     "Casablanca": { lat: 33.5731, lng: -7.5898 },
@@ -33,7 +36,11 @@ const center = {
     lng: -7.0926
 };
 
-export default function MarketMap({ books }: { books: any[] }) {
+export default function MarketMap({ books, isBlurred }: { books: any[], isBlurred?: boolean }) {
+    const tc = useTranslations('Community.Market')
+    const locale = useLocale()
+    const isRtl = locale === 'ar'
+
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
@@ -114,10 +121,10 @@ export default function MarketMap({ books }: { books: any[] }) {
                             icon={
                                 typeof window !== 'undefined' && window.google ? {
                                     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                                        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="20" cy="20" r="16" fill="#10b981" fill-opacity="0.3"/>
-                                            <circle cx="20" cy="20" r="12" fill="#10b981"/>
-                                            <text x="20" y="24" font-family="Arial" font-size="12" font-weight="bold" fill="white" text-anchor="middle">${city.count}</text>
+                                        <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" fill="#10b981" />
+                                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" fill="#10b981" />
+                                            <text x="12" y="15" font-family="Arial" font-size="8" font-weight="bold" fill="white" text-anchor="middle">${city.count}</text>
                                         </svg>
                                     `),
                                     scaledSize: new window.google.maps.Size(40, 40),
@@ -128,44 +135,102 @@ export default function MarketMap({ books }: { books: any[] }) {
                     )
                 ))}
 
-                {selectedCity && (
-                    <InfoWindow
-                        position={MOROCCO_CITIES[selectedCity]}
-                        onCloseClick={() => setSelectedCity(null)}
-                    >
-                        <div className="p-2 max-w-[200px]">
-                            <h3 className="font-black text-black uppercase tracking-widest text-xs mb-2 flex items-center gap-2">
-                                <MapPin className="w-3 h-3" />
-                                {selectedCity}
-                            </h3>
-                            <p className="text-gray-600 text-xs mb-3 font-medium">
-                                {cityData.find(c => c.name === selectedCity)?.count} livres disponibles à l'échange dans cette ville.
-                            </p>
-                            <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                Parcourez la liste ci-dessous pour voir les détails.
+                {selectedCity && (() => {
+                    const selectedCityData = cityData.find(c => c.name === selectedCity);
+                    if (!selectedCityData) return null;
+                    return (
+                        <InfoWindow
+                            position={MOROCCO_CITIES[selectedCity]}
+                            onCloseClick={() => setSelectedCity(null)}
+                        >
+                            <div className="p-2 max-w-[220px]">
+                                <h3 className="font-black text-black uppercase tracking-widest text-xs mb-2 flex items-center gap-2">
+                                    <MapPin className="w-3 h-3 text-emerald-600" />
+                                    {selectedCity}
+                                </h3>
+                                <p className="text-gray-600 text-xs mb-3 font-medium">
+                                    {selectedCityData.count} {tc('In')} {selectedCity}.
+                                </p>
+                                
+                                {selectedCityData.books && selectedCityData.books.length > 0 && (
+                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200">
+                                        {selectedCityData.books.slice(0, 10).map((book, idx) => {
+                                            const primaryImage = getPrimaryImage(book.image);
+                                            return primaryImage ? (
+                                                <div key={book.id || idx} className="w-12 h-16 shrink-0 rounded overflow-hidden shadow-sm border border-gray-100 relative bg-gray-50">
+                                                    <img 
+                                                        src={normalizeImage(primaryImage)} 
+                                                        alt={book.title || 'Book cover'}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div key={book.id || idx} className="w-12 h-16 shrink-0 rounded shadow-sm border border-gray-100 bg-gray-100 flex items-center justify-center">
+                                                    <BookOpen className="w-4 h-4 text-gray-300" />
+                                                </div>
+                                            );
+                                        })}
+                                        {selectedCityData.books.length > 10 && (
+                                            <div className="w-12 h-16 shrink-0 rounded shadow-sm border border-gray-100 bg-gray-50 flex flex-col items-center justify-center text-xs font-bold text-gray-500">
+                                                +{selectedCityData.books.length - 10}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    </InfoWindow>
-                )}
+                        </InfoWindow>
+                    );
+                })()}
             </GoogleMap>
             
             <div className="absolute inset-0 pointer-events-none">
                 <div className="max-w-7xl mx-auto h-full relative px-4 sm:px-6 lg:px-8">
-                    <div className="absolute top-6 left-4 sm:left-6 lg:left-8 z-10 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3">
-                        <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white">
+                    <div 
+                        dir={isRtl ? 'rtl' : 'ltr'} 
+                        className={`absolute top-6 z-10 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 ${isRtl ? 'right-4 sm:right-6 lg:right-8' : 'left-4 sm:left-6 lg:left-8'}`}
+                    >
+                        <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shrink-0">
                             <BookOpen className="w-5 h-5" />
                         </div>
                         <div>
                             <div className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                Réseau Riwaya
+                                {tc('MapNetwork')}
                             </div>
                             <div className="text-sm font-black text-black leading-none mt-1">
-                                Échange de livres
+                                {tc('MapExchange')}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {isBlurred && (
+                <div className="absolute inset-0 z-20 backdrop-blur-md bg-black/60 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500" dir={isRtl ? 'rtl' : 'ltr'}>
+                    <div className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col items-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
+                        <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-inner border border-emerald-100/50">
+                            <MapPin className="w-8 h-8" />
+                        </div>
+                        <h2 className="text-xl font-black text-black uppercase tracking-tight mb-3">
+                            {tc('UnlockMap')}
+                        </h2>
+                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-8 leading-relaxed">
+                            {tc('UnlockDesc')}
+                        </p>
+                        
+                        <div className="flex flex-col gap-3 w-full">
+                            <a href="/fr/books" className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 hover:bg-gray-900 transition-all flex items-center justify-center gap-2 hover:-translate-y-1">
+                                <BookOpen className="w-4 h-4 shrink-0" />
+                                {tc('SignUpCTA')}
+                            </a>
+                            <a href="https://wa.me/212600000000" target="_blank" rel="noreferrer" className="w-full py-5 bg-[#25D366] text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-[#25D366]/20 hover:bg-[#20bd5a] transition-all flex items-center justify-center gap-2 hover:-translate-y-1">
+                                <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                                {tc('WhatsAppSupport')}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

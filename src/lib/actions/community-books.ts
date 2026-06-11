@@ -86,7 +86,8 @@ export async function getExchangeBook(id: string) {
         where: { id }
     })
 
-    if (!book || book.ownerId !== user.id) return null
+    if (!book) return null
+    if (book.ownerId !== user.id && user.role !== 'ADMIN') return null
 
     return book
 }
@@ -113,8 +114,11 @@ export async function updateExchangeBook(id: string, formData: FormData): Promis
             where: { id }
         })
 
-        if (!existingBook || existingBook.ownerId !== user.id) {
-            return { success: false, error: "Livre introuvable ou vous n'êtes pas propriétaire" }
+        if (!existingBook) {
+            return { success: false, error: "Livre introuvable" }
+        }
+        if (existingBook.ownerId !== user.id && user.role !== 'ADMIN') {
+            return { success: false, error: "Vous n'êtes pas autorisé à modifier ce livre" }
         }
 
         const updateData: any = {
@@ -159,8 +163,11 @@ export async function deleteExchangeBook(id: string): Promise<BookResult> {
             where: { id }
         })
 
-        if (!existingBook || existingBook.ownerId !== user.id) {
-            return { success: false, error: "Livre introuvable ou vous n'êtes pas propriétaire" }
+        if (!existingBook) {
+            return { success: false, error: "Livre introuvable" }
+        }
+        if (existingBook.ownerId !== user.id && user.role !== 'ADMIN') {
+            return { success: false, error: "Vous n'êtes pas autorisé à supprimer ce livre" }
         }
 
         // Vérifier s'il est utilisé dans des échanges PENDING
@@ -188,5 +195,40 @@ export async function deleteExchangeBook(id: string): Promise<BookResult> {
         return { success: true, bookId: id }
     } catch (error) {
         return { success: false, error: "Erreur lors de la suppression du livre" }
+    }
+}
+
+export async function getSuggestions(query: string, type: 'title' | 'author'): Promise<string[]> {
+    if (!query || query.length < 2) return []
+
+    const isTitle = type === 'title'
+
+    try {
+        const [books, exchangeBooks] = await Promise.all([
+            prisma.book.findMany({
+                where: {
+                    [isTitle ? 'title' : 'author']: { contains: query }
+                },
+                select: { [isTitle ? 'title' : 'author']: true },
+                distinct: [isTitle ? 'title' : 'author'],
+                take: 5
+            }),
+            prisma.exchangeBook.findMany({
+                where: {
+                    [isTitle ? 'title' : 'author']: { contains: query }
+                },
+                select: { [isTitle ? 'title' : 'author']: true },
+                distinct: [isTitle ? 'title' : 'author'],
+                take: 5
+            })
+        ])
+
+        const suggestions = new Set<string>()
+        books.forEach((b: any) => suggestions.add(b[isTitle ? 'title' : 'author']))
+        exchangeBooks.forEach((b: any) => suggestions.add(b[isTitle ? 'title' : 'author']))
+
+        return Array.from(suggestions).slice(0, 5)
+    } catch (e) {
+        return []
     }
 }

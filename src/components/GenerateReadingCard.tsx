@@ -6,6 +6,7 @@ import { Share2, Download, Loader2, Award, BookOpen, Clock, Users } from 'lucide
 import Image from 'next/image'
 import { normalizeImage } from '@/lib/utils'
 import { getUserReadingRank } from '@/lib/actions/reading-rank'
+import { useTranslations } from 'next-intl'
 
 interface GenerateReadingCardProps {
     user: any
@@ -13,6 +14,7 @@ interface GenerateReadingCardProps {
 }
 
 export default function GenerateReadingCard({ user, items }: GenerateReadingCardProps) {
+    const t = useTranslations('Community.Dashboard')
     const [generating, setGenerating] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
     const [rank, setRank] = useState<number | null>(null)
@@ -67,7 +69,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                 className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black hover:bg-emerald-700 transition-all active:scale-95 shadow-lg shadow-emerald-600/20"
             >
                 {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
-                Générer ma carte de lecteur
+                {t('GenerateCard')}
             </button>
 
             {/* Hidden Card for Generation (or visible preview) */}
@@ -174,7 +176,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                     <div className="text-xl font-black text-emerald-600 tracking-tighter">#RiwayaChallenge</div>
                                 </div>
                                 <div className="bg-black text-white px-5 py-2.5 rounded-2xl font-black text-sm">
-                                    riwaya.com
+                                    riwaya.store
                                 </div>
                             </div>
                         </div>

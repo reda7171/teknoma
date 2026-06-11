@@ -21,19 +21,19 @@ export async function GET() {
         // Liste d'auteurs fictifs avec images premium
         const fakeAuthors = [
             {
-                email: 'sarah.l@riwaya.com',
+                email: 'sarah.l@riwaya.store',
                 fullName: 'Sarah Laurent',
                 bio: 'Passionnée de littérature classique et critique littéraire depuis 10 ans.',
                 image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150'
             },
             {
-                email: 'marc.d@riwaya.com',
+                email: 'marc.d@riwaya.store',
                 fullName: 'Marc Dubois',
                 bio: 'Spécialiste du développement personnel et des essais philosophiques.',
                 image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150'
             },
             {
-                email: 'laila.k@riwaya.com',
+                email: 'laila.k@riwaya.store',
                 fullName: 'Laila Kasmi',
                 bio: 'Exploratrice de nouveaux talents littéraires et amoureuse du design de livres.',
                 image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150'

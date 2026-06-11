@@ -1,12 +1,14 @@
 import { getExchangeBookDetails } from '@/lib/actions/community-market'
+import { getCommunityUser } from '@/lib/actions/community-auth'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { normalizeImage } from '@/lib/utils'
-import ImageWithFallback from '@/components/ImageWithFallback'
-import { BookOpen, MapPin, Star, Calendar, RefreshCw, ArrowLeft, ShieldCheck, MessageCircle } from 'lucide-react'
+import { BookOpen, MapPin, Star, Calendar, RefreshCw, ArrowLeft, ShieldCheck, MessageCircle, Edit } from 'lucide-react'
 import { Link } from '@/i18n/routing'
+import { parseImages } from '@/lib/utils/image'
+import BookGalleryClient from '@/components/community/BookGalleryClient'
 
 export default async function CommunityBookDetailPage({
     params
@@ -24,33 +26,47 @@ export default async function CommunityBookDetailPage({
         redirect('/community/market')
     }
 
+    const user = await getCommunityUser()
+    const canEdit = user?.role === 'ADMIN' || user?.id === book.ownerId
+    
+    const parsedImages = parseImages(book.image)
+
     return (
         <div className="min-h-screen bg-pixio-cream flex flex-col">
             <Header />
 
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-                {/* Navigation Back */}
-                <Link
-                    href="/community/market"
-                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-colors mb-12 group"
-                >
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    <span>{te('BackToMarket')}</span>
-                </Link>
+                <div className="flex items-center justify-between mb-12">
+                    {/* Navigation Back */}
+                    <Link
+                        href="/community/market"
+                        className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-colors group"
+                    >
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span>{te('BackToMarket')}</span>
+                    </Link>
+
+                    {/* Edit Button */}
+                    {canEdit && (
+                        <Link
+                            href={`/community/books/${book.id}`}
+                            className="inline-flex items-center gap-2 px-6 py-2 bg-white border-2 border-black text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-colors"
+                        >
+                            <Edit className="w-4 h-4" />
+                            <span>Modifier</span>
+                        </Link>
+                    )}
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
                     {/* Left: Book Cover Premium Look */}
                     <div className="lg:col-span-5 relative">
                         <div className="absolute inset-0 bg-pixio-yellow rounded-[3rem] rotate-3 -z-10 opacity-50 scale-105 blur-sm"></div>
-                        <div className="relative aspect-[3/4] bg-white rounded-[2.5rem] shadow-2xl shadow-black/10 overflow-hidden border-2 border-black group">
-                            {book.image ? (
-                                <ImageWithFallback
-                                    src={book.image}
-                                    alt={book.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                />
+                        <div className="relative">
+                            {parsedImages.length > 0 ? (
+                                <BookGalleryClient images={parsedImages} alt={book.title} />
                             ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center bg-pixio-yellow/20">
+                                <div className="aspect-[3/4] w-full bg-white rounded-[2.5rem] shadow-2xl shadow-black/10 overflow-hidden border-2 border-black flex flex-col items-center justify-center bg-pixio-yellow/20">
                                     <BookOpen className="w-24 h-24 text-pixio-yellow" />
                                 </div>
                             )}

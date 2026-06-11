@@ -5,7 +5,7 @@ const transporter = nodemailer.createTransport({
     port: parseInt(process.env.SMTP_PORT || '465'),
     secure: true,
     auth: {
-        user: process.env.SMTP_USER || 'admin@riwaya.com',
+        user: process.env.SMTP_USER || 'admin@riwaya.store',
         pass: process.env.SMTP_PASS || 'admin123',
     },
 })
@@ -44,14 +44,14 @@ export async function sendOrderConfirmation(order: any) {
             
             <p style="color: #888; font-size: 12px;">
                 Riwaya - Librairie en ligne<br/>
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}">www.riwaya.com</a>
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}">www.riwaya.store</a>
             </p>
         </div>
     `
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya" <admin@riwaya.com>',
+            from: '"Riwaya" <admin@riwaya.store>',
             to: order.email,
             subject: `Confirmation de commande #${order.id.slice(0, 8)}`,
             html,
@@ -100,7 +100,7 @@ export async function sendOrderStatusUpdate(order: any, status: string) {
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya" <admin@riwaya.com>',
+            from: '"Riwaya" <admin@riwaya.store>',
             to: order.email,
             subject: `Mise à jour commande #${order.id.slice(0, 8)}: ${status}`,
             html,

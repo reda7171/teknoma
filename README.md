@@ -10,7 +10,7 @@
 - ✅ Redirection automatique
 
 **Identifiants par défaut** :
-- Email: `admin@riwaya.com`
+- Email: `admin@riwaya.store`
 - Password: `admin123`
 
 ### 🎨 **Back-Office Admin** (`/admin`)
@@ -164,7 +164,7 @@ npm run dev
 
 ### Admin
 ```
-Email: admin@riwaya.com
+Email: admin@riwaya.store
 Password: admin123
 ```
 

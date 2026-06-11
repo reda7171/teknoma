@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
-import { Eye, XCircle, BookOpen, User, ArrowRight } from 'lucide-react'
+import { Eye, XCircle, BookOpen, User, ArrowRight, Image as ImageIcon } from 'lucide-react'
 import { cancelExchange } from '@/lib/actions/admin-exchanges'
 import { useRouter } from 'next/navigation'
+import ExchangeCreativeModal from '@/components/admin/ExchangeCreativeModal'
 
 const STATUS_BADGES: Record<string, { label: string; className: string }> = {
     PENDING: { label: 'En attente', className: 'bg-yellow-100 text-yellow-800' },
@@ -52,6 +53,7 @@ interface Exchange {
 
 export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] }) {
     const [loading, setLoading] = useState<string | null>(null)
+    const [selectedExchangeForCreative, setSelectedExchangeForCreative] = useState<Exchange | null>(null)
     const router = useRouter()
 
     async function handleCancel(id: string) {
@@ -177,6 +179,13 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                             {/* Actions */}
                             <td className="px-10 py-6 text-right">
                                 <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => setSelectedExchangeForCreative(exchange)}
+                                        className="p-3 bg-white border border-gray-100 text-gray-400 hover:text-green-600 hover:border-green-200 rounded-2xl transition-all shadow-sm active:scale-95"
+                                        title="Générer une image pour réseaux sociaux"
+                                    >
+                                        <ImageIcon className="w-4 h-4" />
+                                    </button>
                                     <Link
                                         href={`/admin/exchanges/${exchange.id}`}
                                         className="p-3 bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-200 rounded-2xl transition-all shadow-sm active:scale-95"
@@ -198,6 +207,12 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                     ))}
                 </tbody>
             </table>
+
+            <ExchangeCreativeModal
+                isOpen={!!selectedExchangeForCreative}
+                onClose={() => setSelectedExchangeForCreative(null)}
+                exchange={selectedExchangeForCreative}
+            />
         </div>
     )
 

@@ -523,7 +523,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                         {field('Ville', 'seo_address_city', 'Casablanca')}
                         {field('Pays (code)', 'seo_address_country', 'MA')}
                         {field('Téléphone de contact', 'seo_contact_phone', '+212600000000', 'tel')}
-                        {field('Email de contact', 'seo_contact_email', 'contact@riwaya.com', 'email')}
+                        {field('Email de contact', 'seo_contact_email', 'contact@riwaya.store', 'email')}
                     </div>
                 )}
             </div>

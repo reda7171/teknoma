@@ -7,7 +7,9 @@ import { updateExchangeBook, deleteExchangeBook } from '@/lib/actions/community-
 import { uploadBookImage } from '@/lib/actions/upload'
 import { Link } from '@/i18n/routing'
 import { ArrowLeft, BookOpen, User, Tag, FileText, Loader2, Trash2, ShieldAlert } from 'lucide-react'
-import ImageUpload from '@/components/ImageUpload'
+import MultiImageUpload from '@/components/community/MultiImageUpload'
+import AutocompleteInput from '@/components/community/AutocompleteInput'
+import { parseImages } from '@/lib/utils/image'
 
 export default function EditBookForm({ book }: { book: any }) {
     const t = useTranslations('Community.BookForm')
@@ -16,7 +18,9 @@ export default function EditBookForm({ book }: { book: any }) {
     const [loading, setLoading] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [selectedImage, setSelectedImage] = useState<File | null>(null)
+    const [selectedImages, setSelectedImages] = useState<File[]>([])
+    const currentImages = parseImages(book.image)
+    const [existingImages, setExistingImages] = useState<string[]>(currentImages)
 
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -26,26 +30,32 @@ export default function EditBookForm({ book }: { book: any }) {
         try {
             const formData = new FormData(e.currentTarget)
 
-            // Upload de l'image si sélectionnée
-            let imageUrl = ''
-            if (selectedImage) {
-                const imageFormData = new FormData()
-                imageFormData.append('image', selectedImage)
-                const uploadResult = await uploadBookImage(imageFormData)
+            // Upload des nouvelles images
+            let newImageUrls: string[] = []
+            if (selectedImages.length > 0) {
+                const uploadPromises = selectedImages.map(file => {
+                    const imageFormData = new FormData()
+                    imageFormData.append('image', file)
+                    return uploadBookImage(imageFormData)
+                })
 
-                if (!uploadResult.success) {
-                    setError(uploadResult.error || tcmn('Errors.ImageUploadError'))
+                const results = await Promise.all(uploadPromises)
+                
+                const failed = results.find(r => !r.success)
+                if (failed) {
+                    setError(failed.error || tcmn('Errors.ImageUploadError'))
                     setLoading(false)
                     return
                 }
 
-                imageUrl = uploadResult.imageUrl || ''
+                newImageUrls = results.map(r => r.imageUrl as string)
             }
 
-            if (imageUrl) {
-                formData.set('image', imageUrl)
-            } else if (book.image) {
-                formData.set('image', book.image) // Garder l'ancienne image
+            const allImages = [...existingImages, ...newImageUrls]
+            if (allImages.length > 0) {
+                formData.set('image', JSON.stringify(allImages))
+            } else {
+                formData.set('image', '')
             }
 
             const res = await updateExchangeBook(book.id, formData)
@@ -109,40 +119,43 @@ export default function EditBookForm({ book }: { book: any }) {
                     </div>
 
                     {/* Image Upload */}
-                    <ImageUpload
-                        onImageSelect={setSelectedImage}
-                        onRemove={() => setSelectedImage(null)}
-                        currentImage={book.image}
+                    <MultiImageUpload
+                        onImagesSelect={setSelectedImages}
+                        currentImages={existingImages}
+                        onRemoveCurrent={(idx) => {
+                            const newExisting = [...existingImages]
+                            newExisting.splice(idx, 1)
+                            setExistingImages(newExisting)
+                        }}
+                        maxImages={5}
                     />
 
                     {/* Title */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Title')}</label>
-                        <div className="relative">
-                            <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                            <input
-                                name="title"
-                                defaultValue={book.title}
-                                required
-                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
-                                placeholder="..."
-                            />
-                        </div>
+                        <AutocompleteInput
+                            name="title"
+                            defaultValue={book.title}
+                            suggestionType="title"
+                            required
+                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                            placeholder={`${t('Title')}...`}
+                            icon={<BookOpen className="w-5 h-5 text-gray-300" />}
+                        />
                     </div>
 
                     {/* Author */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Author')}</label>
-                        <div className="relative">
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                            <input
-                                name="author"
-                                defaultValue={book.author}
-                                required
-                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
-                                placeholder="..."
-                            />
-                        </div>
+                        <AutocompleteInput
+                            name="author"
+                            defaultValue={book.author}
+                            suggestionType="author"
+                            required
+                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                            placeholder={`${t('Author')}...`}
+                            icon={<User className="w-5 h-5 text-gray-300" />}
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -189,7 +202,7 @@ export default function EditBookForm({ book }: { book: any }) {
                                 defaultValue={book.description}
                                 rows={4}
                                 className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black resize-none"
-                                placeholder="..."
+                                placeholder={`${t('Description')}...`}
                             />
                         </div>
                     </div>

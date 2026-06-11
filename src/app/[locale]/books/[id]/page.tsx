@@ -144,7 +144,7 @@ export default async function BookDetailPage({
 
     const book = await getBookById(id)
     const user = await getCommunityUser()
-    const isAdmin = user?.role === 'ADMIN' || user?.email === 'admin@riwaya.com'
+    const isAdmin = user?.role === 'ADMIN' || user?.email === 'admin@riwaya.store'
 
     if (!book) {
         notFound()

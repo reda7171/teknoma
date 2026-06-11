@@ -8,14 +8,18 @@ import { getTranslations } from 'next-intl/server'
 
 
 export default async function MarketPage({
+    params,
     searchParams,
 }: {
+    params: Promise<{ locale: string }>
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    const params = await searchParams
-    const search = typeof params.search === 'string' ? params.search : undefined
-    const city = typeof params.city === 'string' ? params.city : undefined
+    const sParams = await searchParams
+    const p = await params
+    const search = typeof sParams.search === 'string' ? sParams.search : undefined
+    const city = typeof sParams.city === 'string' ? sParams.city : undefined
     const t = await getTranslations('Community.Market')
+    const locale = p.locale || 'fr'
 
     const user = await getCommunityUser()
     const orderCount = await getUserOrderCount(user)
@@ -34,11 +38,11 @@ export default async function MarketPage({
             <Header />
 
             <div className="w-full">
-                <MarketMap books={books} />
+                <MarketMap books={books} isBlurred={isBlurred} />
             </div>
 
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32 w-full">
-                <div className="mb-12 text-center md:text-left">
+                <div className="mb-12 text-center md:text-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                     <h1 className="text-4xl lg:text-5xl font-black text-black tracking-tighter mb-4 uppercase">
                         {t('Title')}
                     </h1>

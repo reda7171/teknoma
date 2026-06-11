@@ -384,7 +384,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                     </div>
                                     {config.format === 'post' && (
                                         <div style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center', width: '100%' }}>
-                                             <p style={{ fontSize: '40px', fontWeight: '950', color: config.textColor, opacity: 0.15, letterSpacing: '10px', textTransform: 'uppercase', margin: 0 }}>RIWAYA.COM</p>
+                                             <p style={{ fontSize: '40px', fontWeight: '950', color: config.textColor, opacity: 0.15, letterSpacing: '10px', textTransform: 'uppercase', margin: 0 }}>RIWAYA.STORE</p>
                                         </div>
                                     )}
                                     </div>
@@ -514,7 +514,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
 
                             {/* Footer */}
                             <div style={{ width: '100%', marginTop: 'auto', paddingTop: isPost ? '40px' : '100px', borderTop: isPost ? 'none' : `10px solid ${config.textColor}1a`, textAlign: 'center', flexShrink: 0 }}>
-                                <p style={{ fontSize: isPost ? '60px' : '110px', fontWeight: '950', color: config.textColor, opacity: 0.1, letterSpacing: isPost ? '15px' : '25px', textTransform: 'uppercase', margin: 0 }}>RIWAYA.COM</p>
+                                <p style={{ fontSize: isPost ? '60px' : '110px', fontWeight: '950', color: config.textColor, opacity: 0.1, letterSpacing: isPost ? '15px' : '25px', textTransform: 'uppercase', margin: 0 }}>RIWAYA.STORE</p>
                             </div>
                         </div>
                     </div>

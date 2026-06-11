@@ -26,10 +26,10 @@ export async function generateMetadata({
             title: `${t('Title')} | Riwaya`,
             description: t('Subtitle'),
             type: 'website',
-            url: `https://riwaya.com/${locale}/blog`,
+            url: `https://riwaya.store/${locale}/blog`,
         },
         alternates: {
-            canonical: `https://riwaya.com/${locale}/blog`
+            canonical: `https://riwaya.store/${locale}/blog`
         }
     }
 }
@@ -63,7 +63,7 @@ export default async function BlogPage({
                         "@type": "Blog",
                         "name": `${t('Title')} | Riwaya`,
                         "description": t('Subtitle'),
-                        "url": `https://riwaya.com/${locale}/blog`
+                        "url": `https://riwaya.store/${locale}/blog`
                     })
                 }}
             />

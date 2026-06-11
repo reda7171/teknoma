@@ -10,6 +10,7 @@ import WishlistSection from '@/components/community/WishlistSection'
 import TopReadersList from '@/components/community/TopReadersList'
 import { getTopReaders, getUserExchangeCount } from '@/lib/actions/community'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { getPrimaryImage } from '@/lib/utils/image'
 
 export default async function CommunityDashboard() {
     const user = await getCommunityUser()
@@ -178,7 +179,7 @@ export default async function CommunityDashboard() {
 
                                 <div className="aspect-[2/3] bg-gray-50 rounded-2xl mb-4 overflow-hidden relative shadow-inner">
                                     {book.image ? (
-                                        <img src={book.image} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src={getPrimaryImage(book.image)} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-300">
                                             <BookOpen className="w-8 h-8 opacity-20" />

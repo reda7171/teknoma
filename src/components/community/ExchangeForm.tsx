@@ -8,6 +8,7 @@ import { ArrowLeft, BookOpen, Loader2, Coins, RefreshCw, Sparkles } from 'lucide
 import { Link } from '@/i18n/routing'
 import ReportButton from './ReportButton'
 import { fbPixelEvents, fbCustomEvents } from '@/lib/facebook-pixel'
+import { getPrimaryImage } from '@/lib/utils/image'
 
 interface ExchangeFormProps {
     details: {
@@ -78,7 +79,7 @@ export default function ExchangeForm({ details }: ExchangeFormProps) {
                     <div className="absolute inset-0 bg-pixio-yellow rounded-2xl rotate-6 scale-105 opacity-50 blur-sm group-hover:rotate-12 transition-transform"></div>
                     <div className="relative w-40 h-56 bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border-2 border-white/20">
                         {book.image ? (
-                            <img src={book.image} alt={book.title} className="w-full h-full object-cover" />
+                            <img src={getPrimaryImage(book.image)} alt={book.title} className="w-full h-full object-cover" />
                         ) : (
                             <BookOpen className="w-12 h-12 text-gray-700" />
                         )}

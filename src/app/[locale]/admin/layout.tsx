@@ -101,6 +101,7 @@ export default function AdminLayout({
         { name: 'Auteurs', href: `/${lang}/admin/authors`, icon: Users },
         { name: 'Packs', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
         { name: 'Commandes', href: `/${lang}/admin/orders`, icon: ShoppingCart },
+        { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },
         { name: 'Call Center', href: `/${lang}/admin/call-center`, icon: Headset },
         { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag },
         { name: 'Caisse (POS)', href: `/${lang}/admin/pos`, icon: Monitor },

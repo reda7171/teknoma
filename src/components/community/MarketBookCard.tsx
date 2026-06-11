@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/routing'
 import { BookOpen, MapPin, User, Star, Sparkles } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getPrimaryImage } from '@/lib/utils/image'
 
 // ... interfaces remain same ...
 interface MarketUser {
@@ -67,7 +68,7 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
             {/* Book Image */}
             <CardWrapper href={cardHref as any} className="block aspect-[2/3] bg-gray-50 rounded-2xl mb-4 overflow-hidden relative shadow-inner group-hover:shadow-md transition-shadow">
                 {book.image ? (
-                    <img src={book.image} alt={title} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isBlurred ? 'blur-xl' : ''}`} />
+                    <img src={getPrimaryImage(book.image)} alt={title} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isBlurred ? 'blur-xl' : ''}`} />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <BookOpen className="w-10 h-10 opacity-20" />
