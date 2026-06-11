@@ -67,6 +67,8 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
     const [isPublishing, setIsPublishing] = useState(false)
     const [scheduleAt, setScheduleAt] = useState('')
     const [logoSize, setLogoSize] = useState(24)
+    const [customBgImage, setCustomBgImage] = useState<string | null>(null)
+    const [bgOpacity, setBgOpacity] = useState(100)
 
     if (!isOpen || !exchange) return null
 
@@ -245,12 +247,24 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 <div className="flex-1 bg-gray-50 p-8 flex items-center justify-center overflow-auto">
                     <div 
                         ref={posterRef}
-                        className={`relative w-[400px] h-[500px] ${currentTheme.bg} overflow-hidden font-sans flex flex-col items-center justify-between p-8`}
+                        className={`relative w-[400px] h-[500px] ${customBgImage ? 'bg-black' : currentTheme.bg} overflow-hidden font-sans flex flex-col items-center justify-between p-8`}
                         style={{ aspectRatio: '4/5' }}
                     >
-                        {/* Décoration fond */}
-                        <div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
-                        <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full bg-black/10 blur-3xl"></div>
+                        {customBgImage && (
+                            <img 
+                                src={customBgImage} 
+                                alt="Custom Background" 
+                                className="absolute inset-0 w-full h-full object-cover z-0" 
+                                style={{ opacity: bgOpacity / 100 }}
+                            />
+                        )}
+                        {/* Décoration fond (uniquement si pas d'image perso) */}
+                        {!customBgImage && (
+                            <>
+                                <div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
+                                <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full bg-black/10 blur-3xl"></div>
+                            </>
+                        )}
 
                         {/* En-tête */}
                         <div className="w-full flex justify-between items-center z-10 relative">
@@ -385,6 +399,44 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                                     />
                                 ))}
                             </div>
+
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mt-6 mb-3">Image de Fond Personnalisée</label>
+                            <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const url = URL.createObjectURL(file);
+                                        setCustomBgImage(url);
+                                    }
+                                }}
+                                className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                            {customBgImage && (
+                                <div className="mt-4 space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">
+                                        Opacité de l'image ({bgOpacity}%)
+                                    </label>
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max="100" 
+                                        value={bgOpacity} 
+                                        onChange={(e) => setBgOpacity(Number(e.target.value))}
+                                        className="w-full accent-blue-500"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            setCustomBgImage(null)
+                                            setBgOpacity(100)
+                                        }}
+                                        className="mt-2 text-[10px] font-bold text-red-500 hover:underline block"
+                                    >
+                                        Retirer l'image de fond
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div>
