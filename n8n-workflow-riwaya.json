@@ -210,6 +210,146 @@
         1200,
         300
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-tiktok",
+              "leftValue": "={{ $('Webhook').item.json.body.platform }}",
+              "rightValue": "tiktok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-tiktok",
+      "name": "TikTok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "oAuth2Api",
+        "method": "POST",
+        "url": "https://open.tiktokapis.com/v2/post/publish/video/init/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $('Webhook').item.json.body.caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false,\n    \"video_cover_timestamp_ms\": 1000\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    \"video_url\": \"{{ $('Webhook').item.json.body.video_url || $('Webhook').item.json.body.image }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "tiktok-post",
+      "name": "Post TikTok",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-threads",
+              "leftValue": "={{ $('Webhook').item.json.body.platform }}",
+              "rightValue": "threads",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-threads",
+      "name": "Threads?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "oAuth2Api",
+        "method": "POST",
+        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Webhook').item.json.body.threads_account_id || 'me') + '/threads' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"media_type\": \"{{ $('Webhook').item.json.body.image ? 'IMAGE' : 'TEXT' }}\",\n  {{ $('Webhook').item.json.body.image ? '\\\"image_url\\\": \\\"' + $('Webhook').item.json.body.image + '\\\",' : '' }}\n  \"text\": \"{{ $('Webhook').item.json.body.caption }}\"\n}",
+        "options": {}
+      },
+      "id": "threads-container",
+      "name": "Threads - Créer Container",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "oAuth2Api",
+        "method": "POST",
+        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Webhook').item.json.body.threads_account_id || 'me') + '/threads_publish' }}",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $('Threads - Créer Container').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "threads-publish",
+      "name": "Threads - Publier",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        780
+      ]
     }
   ],
   "connections": {
@@ -223,6 +363,16 @@
           },
           {
             "node": "Instagram?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TikTok?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Threads?",
             "type": "main",
             "index": 0
           }
@@ -276,6 +426,63 @@
       ]
     },
     "IG - Publier": {
+      "main": [
+        [
+          {
+            "node": "Réponse OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok?": {
+      "main": [
+        [
+          {
+            "node": "Post TikTok",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Post TikTok": {
+      "main": [
+        [
+          {
+            "node": "Réponse OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threads?": {
+      "main": [
+        [
+          {
+            "node": "Threads - Créer Container",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Threads - Créer Container": {
+      "main": [
+        [
+          {
+            "node": "Threads - Publier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threads - Publier": {
       "main": [
         [
           {

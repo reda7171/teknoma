@@ -31,6 +31,11 @@ export async function generateMetadata({
     return {
         title: `${product.name} | Riwaya`,
         description: product.description || t('MetaDesc', { name: product.name }),
+        openGraph: {
+            title: `${product.name} | Riwaya`,
+            description: product.description || t('MetaDesc', { name: product.name }),
+            images: [product.image || '/og-image.jpg'],
+        }
     }
 }
 

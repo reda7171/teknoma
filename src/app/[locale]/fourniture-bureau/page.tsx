@@ -10,6 +10,11 @@ import FournitureClient from './FournitureClient'
 export const metadata: Metadata = {
     title: 'Fourniture Bureau | Riwaya',
     description: 'Découvrez notre sélection de fournitures de bureau : stylos, cahiers, organiseurs et tout ce qu\'il faut pour votre espace de travail.',
+    openGraph: {
+        title: 'Fourniture Bureau | Riwaya',
+        description: 'Découvrez notre sélection de fournitures de bureau : stylos, cahiers, organiseurs et tout ce qu\'il faut pour votre espace de travail.',
+        images: ['/og-image.jpg'],
+    }
 }
 
 export default async function FournitureBureauPage() {

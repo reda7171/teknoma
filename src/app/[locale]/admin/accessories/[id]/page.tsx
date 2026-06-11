@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Save, Trash2, Package, Image as ImageIcon, Upload, Link2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -91,6 +91,18 @@ export default function EditAccessoryPage({
             ...prev,
             images: prev.images.filter((_, i) => i !== index)
         }))
+    }
+
+    const moveImage = (index: number, direction: 'left' | 'right') => {
+        setFormData(prev => {
+            const newImages = [...prev.images]
+            if (direction === 'left' && index > 0) {
+                [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]]
+            } else if (direction === 'right' && index < newImages.length - 1) {
+                [newImages[index + 1], newImages[index]] = [newImages[index], newImages[index + 1]]
+            }
+            return { ...prev, images: newImages }
+        })
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -362,6 +374,28 @@ export default function EditAccessoryPage({
                                     {formData.images.map((img, i) => (
                                         <div key={i} className="relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 group">
                                             <Image src={img} alt={`preview ${i}`} fill className="object-cover" unoptimized />
+                                            
+                                            {/* Reorder Controls */}
+                                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/90 px-1 py-0.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-sm">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moveImage(i, 'left')}
+                                                    disabled={i === 0}
+                                                    className="p-1 text-slate-600 hover:text-slate-900 disabled:opacity-30 transition-colors"
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </button>
+                                                <div className="w-[1px] h-3 bg-slate-300"></div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moveImage(i, 'right')}
+                                                    disabled={i === formData.images.length - 1}
+                                                    className="p-1 text-slate-600 hover:text-slate-900 disabled:opacity-30 transition-colors"
+                                                >
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </button>
+                                            </div>
+
                                             <button
                                                 type="button"
                                                 onClick={() => removeImage(i)}

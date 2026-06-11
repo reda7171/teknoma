@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { UserRole } from '@prisma/client'
-import { updateUserRole, toggleUserBan, deleteUser, createUserAdmin, getGlobalLoginHistory, getLoginHistory } from '@/lib/actions/users'
-import { Shield, Ban, Trash2, UserPlus, CheckCircle, X, Search, Clock, Monitor, Globe } from 'lucide-react'
+import { updateUserRole, toggleUserBan, deleteUser, createUserAdmin, getGlobalLoginHistory, getLoginHistory, updateUserAdmin } from '@/lib/actions/users'
+import { Shield, Ban, Trash2, UserPlus, CheckCircle, X, Search, Clock, Monitor, Globe, Edit2, Camera } from 'lucide-react'
+import Image from 'next/image'
+import { uploadUserImage } from '@/lib/actions/upload'
 
 interface User {
     id: string
@@ -13,6 +15,8 @@ interface User {
     isBanned: boolean
     createdAt: Date
     phone: string | null
+    managedLanguages?: string | null
+    image?: string | null
 }
 
 interface LoginRecord {
@@ -32,13 +36,17 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
     const [users, setUsers] = useState<User[]>(initialUsers)
     const [search, setSearch] = useState('')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [editingUserId, setEditingUserId] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [uploadingImage, setUploadingImage] = useState(false)
     
     const [formData, setFormData] = useState({
         email: '',
         fullName: '',
         password: '',
-        role: 'USER'
+        role: 'USER',
+        managedLanguages: '',
+        image: ''
     })
 
     const [activeTab, setActiveTab] = useState<'USERS' | 'ROLES' | 'HISTORY'>('USERS')
@@ -154,16 +162,62 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
         setLoading(false)
     }
 
-    const handleCreateUser = async (e: React.FormEvent) => {
+    const handleSubmitUser = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        const res = await createUserAdmin(formData)
-        if (res.success) {
-            window.location.reload()
+        if (editingUserId) {
+            const res = await updateUserAdmin(editingUserId, formData)
+            if (res.success) {
+                window.location.reload()
+            } else {
+                alert(res.error)
+                setLoading(false)
+            }
         } else {
-            alert(res.error)
-            setLoading(false)
+            const res = await createUserAdmin(formData)
+            if (res.success) {
+                window.location.reload()
+            } else {
+                alert(res.error)
+                setLoading(false)
+            }
         }
+    }
+
+    const openEditModal = (user: User) => {
+        setFormData({
+            email: user.email,
+            fullName: user.fullName || '',
+            password: '', // On ne remplit pas le mot de passe, l'utilisateur peut le laisser vide
+            role: user.role,
+            managedLanguages: user.managedLanguages || '',
+            image: user.image || ''
+        })
+        setEditingUserId(user.id)
+        setIsAddModalOpen(true)
+    }
+
+    const openAddModal = () => {
+        setFormData({ email: '', fullName: '', password: '', role: 'USER', managedLanguages: '', image: '' })
+        setEditingUserId(null)
+        setIsAddModalOpen(true)
+    }
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadingImage(true)
+        const form = new FormData()
+        form.append('image', file)
+
+        const res = await uploadUserImage(form)
+        if (res.success && res.imageUrl) {
+            setFormData({ ...formData, image: res.imageUrl })
+        } else {
+            alert(res.error || 'Erreur lors de l\'upload')
+        }
+        setUploadingImage(false)
     }
 
 
@@ -207,7 +261,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                             />
                         </div>
                         <button
-                            onClick={() => setIsAddModalOpen(true)}
+                            onClick={openAddModal}
                             className="inline-flex items-center px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors"
                         >
                             <UserPlus className="w-4 h-4 mr-2" />
@@ -231,9 +285,20 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                     {filteredUsers.map(user => (
                                         <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-gray-900">{user.fullName || 'Sans nom'}</div>
-                                                <div className="text-gray-500">{user.email}</div>
-                                                {user.phone && <div className="text-xs text-gray-400">{user.phone}</div>}
+                                                <div className="flex items-center gap-3">
+                                                    {user.image ? (
+                                                        <Image src={user.image} alt={user.fullName || user.email} width={40} height={40} className="rounded-full object-cover w-10 h-10 border border-gray-200" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold uppercase border border-gray-200">
+                                                            {(user.fullName || user.email).charAt(0)}
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <div className="font-bold text-gray-900">{user.fullName || 'Sans nom'}</div>
+                                                        <div className="text-sm text-gray-500">{user.email}</div>
+                                                        {user.phone && <div className="text-xs text-gray-400">{user.phone}</div>}
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-gray-500">
                                                 {new Date(user.createdAt).toLocaleDateString('fr-FR')}
@@ -250,7 +315,13 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                                     <option value="MANAGER">Manager</option>
                                                     <option value="ADMIN">Admin</option>
                                                     <option value="TEST">Test</option>
+                                                    <option value="BLOG_MODERATOR">Modérateur blog</option>
                                                 </select>
+                                                {user.role === 'BLOG_MODERATOR' && user.managedLanguages && (
+                                                    <div className="mt-1 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded inline-block border border-blue-100">
+                                                        {user.managedLanguages === 'fr' ? 'FR' : user.managedLanguages === 'ar' ? 'AR' : user.managedLanguages === 'en' ? 'EN' : user.managedLanguages}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${user.isBanned ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
@@ -259,6 +330,13 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openEditModal(user)}
+                                                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                        title="Modifier"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
                                                     <button
                                                         onClick={() => showUserHistory(user)}
                                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -296,7 +374,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6">
                         <div className="w-full md:w-1/3 space-y-2">
                             <h3 className="font-bold text-gray-900 mb-4">Sélectionner un Rôle</h3>
-                            {['MANAGER', 'SELLER', 'INFLUENCER', 'TEST'].map(role => (
+                            {['MANAGER', 'SELLER', 'INFLUENCER', 'TEST', 'BLOG_MODERATOR'].map(role => (
                                 <button
                                     key={role}
                                     onClick={() => setSelectedRole(role)}
@@ -503,12 +581,40 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                         
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center">
-                                <Shield className="w-5 h-5" />
+                                {editingUserId ? <Edit2 className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
                             </div>
-                            <h2 className="text-xl font-bold">Nouvel Utilisateur</h2>
+                            <h2 className="text-xl font-bold">{editingUserId ? 'Modifier l\'Utilisateur' : 'Nouvel Utilisateur'}</h2>
                         </div>
 
-                        <form onSubmit={handleCreateUser} className="space-y-4">
+                        <form onSubmit={handleSubmitUser} className="space-y-4">
+                            <div className="flex justify-center mb-6">
+                                <div className="relative">
+                                    <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden relative group">
+                                        {formData.image ? (
+                                            <Image src={formData.image} alt="Profile" fill className="object-cover" />
+                                        ) : (
+                                            <Shield className="w-8 h-8 text-gray-400" />
+                                        )}
+                                        <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                            <Camera className="w-6 h-6 text-white mb-1" />
+                                            <span className="text-[10px] text-white font-bold">Modifier</span>
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={handleImageUpload}
+                                                disabled={uploadingImage}
+                                            />
+                                        </label>
+                                    </div>
+                                    {uploadingImage && (
+                                        <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
+                                            <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email</label>
                                 <input
@@ -529,10 +635,12 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mot de passe</label>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                    Mot de passe {editingUserId && <span className="text-gray-400 normal-case">(Laisser vide pour ne pas modifier)</span>}
+                                </label>
                                 <input
                                     type="password"
-                                    required
+                                    required={!editingUserId}
                                     value={formData.password}
                                     onChange={e => setFormData({...formData, password: e.target.value})}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
@@ -551,15 +659,32 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                     <option value="MANAGER">Manager</option>
                                     <option value="ADMIN">Admin</option>
                                     <option value="TEST">Test</option>
+                                    <option value="BLOG_MODERATOR">Modérateur blog</option>
                                 </select>
                             </div>
+
+                            {formData.role === 'BLOG_MODERATOR' && (
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Langues gérées</label>
+                                    <select
+                                        value={formData.managedLanguages}
+                                        onChange={e => setFormData({...formData, managedLanguages: e.target.value})}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold text-sm"
+                                    >
+                                        <option value="">Toutes les langues (Par défaut)</option>
+                                        <option value="fr">Français uniquement</option>
+                                        <option value="ar">Arabe uniquement</option>
+                                        <option value="en">Anglais uniquement</option>
+                                    </select>
+                                </div>
+                            )}
                             
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-colors mt-6 disabled:opacity-50"
                             >
-                                {loading ? 'Création...' : 'Créer l\'utilisateur'}
+                                {loading ? 'Enregistrement...' : (editingUserId ? 'Enregistrer les modifications' : 'Créer l\'utilisateur')}
                             </button>
                         </form>
                     </div>

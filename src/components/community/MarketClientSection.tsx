@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import MarketFiltersClient from './MarketFiltersClient'
+import MarketMap from './MarketMap'
 import MarketBookCard from './MarketBookCard'
 import BookGridSkeleton from './BookGridSkeleton'
 import { Frown, Sparkles } from 'lucide-react'

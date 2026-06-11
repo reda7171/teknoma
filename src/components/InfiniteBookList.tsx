@@ -130,13 +130,13 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
 
                                     <div className="flex -space-x-4 md:-space-x-8 relative z-10 items-center justify-center">
                                         {pack.books.slice(0, 4).map((pb: any, i: number) => (
-                                            <div key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
+                                            <Link href={`/books/${pb.book.id}`} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
                                                 <ImageWithFallback 
                                                     src={pb.book.image || ''} 
                                                     alt={pb.book.title} 
                                                     className="w-full h-full object-cover"
                                                 />
-                                            </div>
+                                            </Link>
                                         ))}
                                     </div>
                                 </div>
@@ -205,7 +205,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
 
             {!hasMore && books.length > 0 && (
                 <div className="text-center p-10 text-gray-400 text-xs font-black uppercase tracking-widest">
-                    Fin de la collection
+                    {tCommon('EndOfCollection')}
                 </div>
             )}
         </>

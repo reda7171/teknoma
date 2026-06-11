@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import AddToCartButton from '@/components/AddToCartButton'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import BookReplacementModal from './BookReplacementModal'
+import { Link } from '@/i18n/routing'
 
 interface Book {
     id: string
@@ -75,13 +76,13 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                                     <div className="flex-1">
                                         {replacement ? (
                                             <>
-                                                <span className="text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-black">{replacement.title}</span>
-                                                <div className="text-[10px] text-gray-400 mt-1 line-through">{pb.book.title}</div>
+                                                <Link href={`/books/${replacement.id}`} className="text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-black hover:underline cursor-pointer block w-fit">{replacement.title}</Link>
+                                                <Link href={`/books/${pb.book.id}`} className="text-[10px] text-gray-400 mt-1 line-through hover:text-gray-600 block w-fit">{pb.book.title}</Link>
                                             </>
                                         ) : (
-                                            <span className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal ${isMissing ? 'text-red-500' : 'text-gray-400'}`}>
+                                            <Link href={`/books/${pb.book.id}`} className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal hover:underline cursor-pointer block w-fit ${isMissing ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-black'}`}>
                                                 {pb.book.title}
-                                            </span>
+                                            </Link>
                                         )}
                                         
                                         {isMissing && !replacement && (

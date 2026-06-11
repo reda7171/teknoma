@@ -114,8 +114,8 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         <ul className="space-y-4">
                             <li><Link href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Shipping')}</Link></li>
                             <li><Link href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Returns')}</Link></li>
-                            <li><Link href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">Confidentialité</Link></li>
-                            <li><Link href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">Conditions</Link></li>
+                            <li><Link href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Privacy')}</Link></li>
+                            <li><Link href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Terms')}</Link></li>
                             <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Contact')}</Link></li>
                         </ul>
                     </div>

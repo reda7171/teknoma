@@ -22,6 +22,7 @@ export default async function N8nConfigPage() {
     const facebookAccessToken = await getSetting('facebook_access_token') || ''
     const instagramAccountId = await getSetting('instagram_account_id') || ''
     const instagramToken = await getSetting('instagram_token') || ''
+    const threadsAccountId = await getSetting('threads_account_id') || ''
 
     return (
         <div className="space-y-12">
@@ -54,6 +55,7 @@ export default async function N8nConfigPage() {
                         initialFacebookAccessToken={facebookAccessToken} 
                         initialInstagramAccountId={instagramAccountId}
                         initialInstagramToken={instagramToken}
+                        initialThreadsAccountId={threadsAccountId}
                     />
                 </div>
             </div>

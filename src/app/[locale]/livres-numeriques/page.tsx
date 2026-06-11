@@ -17,6 +17,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     alternates: {
       canonical: `/${locale}/livres-numeriques`,
     },
+    openGraph: {
+      title: `${t('seo.Title')} | Riwaya`,
+      description: t('seo.Description'),
+      images: ['/og-image.jpg'],
+    }
   }
 }
 

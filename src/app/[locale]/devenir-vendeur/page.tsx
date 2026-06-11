@@ -10,6 +10,11 @@ export const metadata: Metadata = {
     title: 'Devenir vendeur | Riwaya',
     description: 'Rejoignez la plus grande librairie en ligne du Maroc. Vendez vos livres simplement et rapidement avec Riwaya.',
     keywords: ['vendre', 'vendeur', 'livres', 'maroc', 'librairie', 'boutique', 'ecommerce'],
+    openGraph: {
+        title: 'Devenir vendeur | Riwaya',
+        description: 'Rejoignez la plus grande librairie en ligne du Maroc. Vendez vos livres simplement et rapidement avec Riwaya.',
+        images: ['/og-image.jpg'],
+    }
 }
 
 export default async function BecomeSellerPage() {

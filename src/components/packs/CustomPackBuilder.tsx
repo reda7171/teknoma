@@ -79,11 +79,13 @@ export default function CustomPackBuilder({ availableBooks }: CustomPackBuilderP
     return (
         <>
             {/* Banner */}
-            <div className="bg-gradient-to-r from-gray-900 to-black p-8 md:p-12 rounded-[2.5rem] shadow-2xl mb-12 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+            <div className="relative bg-gray-900 p-8 md:p-12 rounded-[2.5rem] shadow-2xl mb-12 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden group">
+                <div className="absolute inset-0">
+                    <img src="/images/custom_pack.png" alt="Custom Pack Builder" className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent rtl:bg-gradient-to-l"></div>
+                </div>
                 
-                <div className="relative z-10 text-center md:text-left space-y-4 max-w-xl">
+                <div className="relative z-10 text-center md:text-left rtl:md:text-right space-y-4 max-w-xl">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
                         <SparklesIcon className="w-4 h-4 text-yellow-400" />
                         {t('Exclusive')}

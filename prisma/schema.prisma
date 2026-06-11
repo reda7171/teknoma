@@ -60,6 +60,7 @@ model User {
   updatedAt         DateTime       @updatedAt
   fullName          String?        @db.VarChar(255)
   locale            String         @default("fr") @db.VarChar(5)
+  managedLanguages  String?        @db.VarChar(50)
   city              String?        @db.VarChar(100)
   address           String?        @db.VarChar(500)
   neighborhood      String?        @db.VarChar(100)
@@ -581,6 +582,7 @@ model Post {
   authorId    String
   published   Boolean   @default(false)
   publishedAt DateTime?
+  authorName  String?   @db.VarChar(255)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   author      User      @relation(fields: [authorId], references: [id])
@@ -621,6 +623,7 @@ enum UserRole {
   SELLER
   USER
   TEST
+  BLOG_MODERATOR
 }
 
 enum OrderStatus {

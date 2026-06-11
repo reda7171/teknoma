@@ -19,6 +19,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: `${product.title} | Riwaya`,
     description: product.description,
+    openGraph: {
+      title: `${product.title} | Riwaya`,
+      description: product.description || '',
+      images: [product.image || '/og-image.jpg'],
+    }
   }
 }
 

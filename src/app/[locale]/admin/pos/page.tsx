@@ -13,6 +13,7 @@ export default async function POSPage() {
       price: true,
       image: true,
       stock: true,
+      isbn: true,
     },
     orderBy: { createdAt: 'desc' },
   });

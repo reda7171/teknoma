@@ -169,10 +169,10 @@ export default async function BlogPage({
                                                 </span>
                                             </div>
                                         )}
-                                        {post.author?.fullName && (
+                                        {(post.authorName || post.author?.fullName) && (
                                             <div className="flex items-center gap-1">
                                                 <User className="w-3 h-3" />
-                                                <span>{post.author.fullName}</span>
+                                                <span>{post.authorName || post.author.fullName}</span>
                                             </div>
                                         )}
                                         {post.category && (

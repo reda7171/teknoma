@@ -211,6 +211,7 @@ export async function createPost(data: any) {
                 published: data.published,
                 publishedAt: data.published ? new Date() : null,
                 authorId: adminId,
+                authorName: data.authorName,
                 category: data.category,
                 tags: data.tags || null,
                 language: data.language || 'fr',
@@ -243,6 +244,8 @@ export async function updatePost(id: string, data: any) {
                 coverImage: data.coverImage,
                 published: data.published,
                 publishedAt: data.published && !data.publishedAt ? new Date() : data.publishedAt,
+                authorId: data.authorId || undefined,
+                authorName: data.authorName,
                 category: data.category,
                 tags: data.tags || null,
                 language: data.language || 'fr',
@@ -352,6 +355,27 @@ export async function incrementPostViews(id: string) {
         return { success: true }
     } catch (error) {
         return { success: false }
+    }
+}
+
+/**
+ * Supprime plusieurs articles d'un coup (Bulk Delete)
+ */
+export async function deletePostsBulk(ids: string[]) {
+    try {
+        await verifyAdmin()
+        
+        await prisma.post.deleteMany({
+            where: {
+                id: { in: ids }
+            }
+        })
+        
+        revalidatePath('/', 'layout')
+        return { success: true }
+    } catch (error) {
+        console.error('Error deleting posts bulk:', error)
+        return { success: false, error: 'Une erreur est survenue lors de la suppression' }
     }
 }
 

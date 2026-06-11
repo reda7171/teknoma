@@ -134,6 +134,18 @@ export async function uploadAuthorImage(formData: FormData) {
     }
 }
 
+export async function uploadUserImage(formData: FormData) {
+    try {
+        await verifyAdmin()
+        const file = formData.get('image') as File
+        const imageUrl = await handleSecureUpload(file, 'profiles', 'profile')
+        return { success: true, imageUrl }
+    } catch (error: any) {
+        console.error('[UPLOAD ERROR]', error.message)
+        return { success: false, error: error.message || "Erreur lors de l'upload" }
+    }
+}
+
 /**
  * Suppression sécurisée avec vérification de chemin
  */

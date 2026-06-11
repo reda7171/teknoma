@@ -109,7 +109,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "@type": "BlogPosting",
                             "headline": post.title,
                             "image": post.coverImage,
-                            "author": { "@type": "Person", "name": post.author?.fullName || "Riwaya" },
+                            "author": { "@type": "Person", "name": post.authorName || post.author?.fullName || "Riwaya" },
                             "publisher": {
                                 "@type": "Organization",
                                 "name": "Riwaya",
@@ -136,7 +136,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     "name": locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who is the author of this article?` : `Qui est l'auteur de cet article ?`,
                                     "acceptedAnswer": {
                                         "@type": "Answer",
-                                        "text": locale === 'ar' ? `تمت كتابة هذا المقال بواسطة ${post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.author?.fullName || 'Riwaya'}.`
+                                        "text": locale === 'ar' ? `تمت كتابة هذا المقال بواسطة ${post.authorName || post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.authorName || post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.authorName || post.author?.fullName || 'Riwaya'}.`
                                     }
                                 }
                             ]
@@ -213,12 +213,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                     {/* Méta */}
                     <div className="flex flex-wrap items-center gap-6 text-[11px] rtl:text-[13px] font-bold uppercase tracking-[0.15em] rtl:tracking-normal text-slate-400 border-t border-slate-200 pt-8">
-                        {post.author?.fullName && (
+                        {(post.authorName || post.author?.fullName) && (
                             <span className="flex items-center gap-2 text-slate-700">
-                                {post.author.image ? (
+                                {(!post.authorName && post.author?.image) ? (
                                     <Image
                                         src={post.author.image}
-                                        alt={post.author.fullName}
+                                        alt={post.author.fullName || ''}
                                         width={28}
                                         height={28}
                                         className="rounded-full object-cover ring-2 ring-slate-200"
@@ -228,7 +228,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         <User className="w-3.5 h-3.5 text-slate-500" />
                                     </div>
                                 )}
-                                {post.author.fullName}
+                                {post.authorName || post.author?.fullName}
                             </span>
                         )}
                         {post.publishedAt && (
@@ -360,12 +360,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         </div>
 
                         {/* === Bio Auteur === */}
-                        {post.author && (
+                        {(post.authorName || post.author) && (
                             <div className="mt-16 p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
                                 <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-6">{t('AboutAuthor')}</p>
                                 <div className="flex items-start gap-6">
                                     <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                                        {post.author.image ? (
+                                        {(!post.authorName && post.author?.image) ? (
                                             <Image
                                                 src={post.author.image}
                                                 alt={post.author.fullName || ''}
@@ -378,8 +378,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black mb-1">{post.author.fullName}</h3>
-                                        {post.author.bio && (
+                                        <h3 className="text-lg font-black mb-1">{post.authorName || post.author?.fullName}</h3>
+                                        {(!post.authorName && post.author?.bio) && (
                                             <p className="text-sm text-slate-500 leading-relaxed">{post.author.bio}</p>
                                         )}
                                     </div>

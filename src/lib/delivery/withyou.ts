@@ -130,7 +130,7 @@ class WithYouService {
                 "Safi", "Mohammedia", "Khouribga", "El Jadida", "Beni Mellal", "Nador", "Taza", "Settat", "Berrechid",
                 "Khemisset", "Inezgane", "Ksar El Kebir", "Larache", "Guelmim", "Berkane", "Khenifra", "Sidi Kacem",
                 "Sidi Slimane", "Errachidia", "Taroudant", "Ouarzazate", "Tiznit", "Youssoufia", "Ben Guerir", "Tan-Tan",
-                "Ouazzane", "Guercif", "Dakhla", "Laayoune"
+                "Ouazzane", "Guercif", "Dakhla", "Laayoune", "Oulad Teima", "Sidi Ifni"
             ]
         } catch (error) {
             console.error('[WithYou] Error fetching cities:', error)
@@ -139,7 +139,7 @@ class WithYouService {
                 "Safi", "Mohammedia", "Khouribga", "El Jadida", "Beni Mellal", "Nador", "Taza", "Settat", "Berrechid",
                 "Khemisset", "Inezgane", "Ksar El Kebir", "Larache", "Guelmim", "Berkane", "Khenifra", "Sidi Kacem",
                 "Sidi Slimane", "Errachidia", "Taroudant", "Ouarzazate", "Tiznit", "Youssoufia", "Ben Guerir", "Tan-Tan",
-                "Ouazzane", "Guercif", "Dakhla", "Laayoune"
+                "Ouazzane", "Guercif", "Dakhla", "Laayoune", "Oulad Teima", "Sidi Ifni"
             ]
         }
     }

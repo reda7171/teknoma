@@ -21,6 +21,8 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
     const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
     const { showNotification } = useUIStore()
 
+    const [bulkQueue, setBulkQueue] = useState<OrderType[]>([])
+
     const formatWhatsAppNumber = (phone: string) => {
         let cleaned = phone.replace(/\D/g, '')
         if (cleaned.startsWith('212')) return cleaned
@@ -49,6 +51,24 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
         
         navigator.clipboard.writeText(numbers)
         showNotification(`${selectedOrders.size} numéros copiés !`, 'success')
+    }
+
+    const handleStartBulkWhatsApp = () => {
+        if (selectedOrders.size === 0) return
+        const selected = Array.from(selectedOrders)
+            .map(id => orders.find(o => o.id === id))
+            .filter(Boolean) as OrderType[]
+        setBulkQueue(selected)
+    }
+
+    const sendNextBulkMessage = () => {
+        if (bulkQueue.length === 0) return
+        window.open(getWhatsAppLink(bulkQueue[0]), '_blank')
+        setBulkQueue(prev => prev.slice(1))
+    }
+
+    const cancelBulkMessage = () => {
+        setBulkQueue([])
     }
 
     const toggleSelection = (orderId: string) => {
@@ -101,12 +121,29 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
             {selectedOrders.size > 0 && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in">
                     <span className="font-black text-emerald-800 text-sm">
-                        {selectedOrders.size} commande(s) sélectionnée(s)
+                        {selectedOrders.size} client(s) sélectionné(s)
                     </span>
                     <div className="flex flex-wrap items-center gap-2">
-                        <button onClick={handleCopyBulkNumbers} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all">
-                            Copier Contacts (Bulk)
-                        </button>
+                        {bulkQueue.length > 0 ? (
+                            <div className="flex items-center gap-2 bg-white/50 p-1 rounded-xl">
+                                <span className="text-xs font-bold px-2">{bulkQueue.length} restants</span>
+                                <button onClick={sendNextBulkMessage} className="px-4 py-2 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-[#1DA851] transition-all flex items-center gap-2">
+                                    <PhoneCall className="w-3 h-3" /> Envoyer suivant
+                                </button>
+                                <button onClick={cancelBulkMessage} className="px-4 py-2 bg-red-100 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-200 transition-all">
+                                    Annuler
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <button onClick={handleCopyBulkNumbers} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all">
+                                    Copier Contacts (Bulk)
+                                </button>
+                                <button onClick={handleStartBulkWhatsApp} className="px-4 py-2 bg-[#25D366] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-[#1DA851] transition-all flex items-center gap-2">
+                                    <PhoneCall className="w-3 h-3" /> WhatsApp Bulk
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

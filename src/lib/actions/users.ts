@@ -19,6 +19,8 @@ export async function getUsers() {
                 isBanned: true,
                 createdAt: true,
                 phone: true,
+                managedLanguages: true,
+                image: true,
             }
         })
         return { success: true, data: users }
@@ -80,6 +82,8 @@ export async function createUserAdmin(data: any) {
                 fullName: data.fullName,
                 password: hashedPassword,
                 role: data.role as UserRole,
+                managedLanguages: data.managedLanguages,
+                image: data.image,
             }
         })
         revalidatePath('/admin/users')
@@ -87,6 +91,35 @@ export async function createUserAdmin(data: any) {
     } catch (error: any) {
         if (error.code === 'P2002') return { success: false, error: 'Email déjà utilisé' }
         return { success: false, error: 'Erreur lors de la création' }
+    }
+}
+
+export async function updateUserAdmin(userId: string, data: any) {
+    try {
+        await verifyAdmin()
+        if (!data.email) return { success: false, error: 'Email requis' }
+        
+        const updateData: any = {
+            email: data.email,
+            fullName: data.fullName,
+            role: data.role as UserRole,
+            managedLanguages: data.managedLanguages,
+            image: data.image,
+        }
+
+        if (data.password && data.password.trim() !== '') {
+            updateData.password = await hash(data.password, 10)
+        }
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: updateData
+        })
+        revalidatePath('/admin/users')
+        return { success: true }
+    } catch (error: any) {
+        if (error.code === 'P2002') return { success: false, error: 'Email déjà utilisé par un autre compte' }
+        return { success: false, error: 'Erreur lors de la modification' }
     }
 }
 

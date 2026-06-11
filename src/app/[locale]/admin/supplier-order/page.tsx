@@ -1,6 +1,7 @@
 import { getSupplierOrderRecommendations, getStockStats } from '@/lib/actions/supplier-order'
 import { AlertTriangle, Package, TrendingUp, DollarSign, ShoppingCart, ArrowUp } from 'lucide-react'
 import SupplierOrderExport from '@/components/admin/SupplierOrderExport'
+import CopyTitlesButton from '@/components/admin/CopyTitlesButton'
 
 export const metadata = {
   title: 'Commande Fournisseur | Admin Riwaya',
@@ -112,6 +113,10 @@ export default async function SupplierOrderPage({
             </a>
           ))}
         </div>
+
+        {(filtre === 'URGENT' || filtre === 'WARNING') && (
+          <CopyTitlesButton titles={filtered.map(r => r.title)} />
+        )}
 
         <div className="flex gap-2 items-center ml-auto">
           <span className="text-[10px] font-black uppercase text-gray-400">Période analyse</span>

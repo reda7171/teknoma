@@ -421,7 +421,8 @@
     "DiscoverPack": "Découvrir le pack",
     "SpecialOffer": "Offre Spéciale",
     "OrderViaWhatsApp": "Commander via WhatsApp",
-    "Currency": "MAD"
+    "Currency": "MAD",
+    "EndOfCollection": "Fin de la collection"
   },
   "Packs": {
     "Save": "Économisez",
@@ -1238,5 +1239,11 @@
     "CommentSent": "Commentaire envoyé !",
     "ErrorOccurred": "Une erreur est survenue.",
     "Anonymous": "Anonyme"
+  },
+  "PWAInstallPrompt": {
+    "title": "Installer Riwaya",
+    "description": "Accédez à la librairie rapidement depuis votre écran d'accueil.",
+    "install": "Installer",
+    "later": "Plus tard"
   }
 }

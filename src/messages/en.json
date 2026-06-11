@@ -421,7 +421,8 @@
     "DiscoverPack": "Discover pack",
     "SpecialOffer": "Special Offer",
     "OrderViaWhatsApp": "Order via WhatsApp",
-    "Currency": "MAD"
+    "Currency": "MAD",
+    "EndOfCollection": "End of collection"
   },
   "Packs": {
     "Save": "Save",
@@ -1326,5 +1327,11 @@
     "CommentSent": "Comment submitted!",
     "ErrorOccurred": "An error occurred.",
     "Anonymous": "Anonymous"
+  },
+  "PWAInstallPrompt": {
+    "title": "Install Riwaya",
+    "description": "Access the bookstore quickly from your home screen.",
+    "install": "Install",
+    "later": "Later"
   }
 }

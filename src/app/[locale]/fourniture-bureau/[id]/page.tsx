@@ -29,6 +29,11 @@ export async function generateMetadata({
     return {
         title: `${product.name} | Riwaya`,
         description: product.description || `Découvrez ${product.name} sur Riwaya. Livraison rapide au Maroc.`,
+        openGraph: {
+            title: `${product.name} | Riwaya`,
+            description: product.description || `Découvrez ${product.name} sur Riwaya. Livraison rapide au Maroc.`,
+            images: [product.image || '/og-image.jpg'],
+        }
     }
 }
 

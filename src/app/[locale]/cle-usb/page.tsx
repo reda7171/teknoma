@@ -15,6 +15,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     return {
         title: `${t('Title')} | Riwaya`,
         description: t('Description'),
+        openGraph: {
+            title: `${t('Title')} | Riwaya`,
+            description: t('Description'),
+            images: ['/og-image.jpg'],
+        }
     }
 }
 

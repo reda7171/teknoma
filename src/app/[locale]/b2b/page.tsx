@@ -5,6 +5,11 @@ export const metadata: Metadata = {
     title: 'Partenariats B2B | Riwaya',
     description: 'Collaborez avec Riwaya pour promouvoir vos produits et services auprès de milliers de lecteurs au Maroc.',
     keywords: ['partenariat', 'b2b', 'publicité', 'collaboration', 'marketing', 'livres', 'maroc'],
+    openGraph: {
+        title: 'Partenariats B2B | Riwaya',
+        description: 'Collaborez avec Riwaya pour promouvoir vos produits et services auprès de milliers de lecteurs au Maroc.',
+        images: ['/og-image.jpg'],
+    }
 }
 
 export default function B2BPage() {

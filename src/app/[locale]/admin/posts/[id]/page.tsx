@@ -4,6 +4,19 @@ import { notFound } from 'next/navigation'
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
+    
+    if (id === 'new') {
+        return (
+            <div className="space-y-8 max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div className="text-center md:text-left mb-8">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-3">Nouvel Article</h1>
+                    <p className="text-gray-500 font-medium text-lg">Rédigez un chef-d'œuvre avec l'éditeur premium</p>
+                </div>
+                <PostForm />
+            </div>
+        )
+    }
+
     const post = await getPostById(id)
 
     if (!post) {
@@ -11,7 +24,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
     }
 
     return (
-        <div className="space-y-10 max-w-7xl mx-auto py-8">
+        <div className="space-y-10 max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <div className="text-center md:text-left">
                 <h1 className="text-4xl md:text-5xl font-black text-[#0f0f0f] tracking-tight mb-3">Modifier l'article</h1>
                 <p className="text-gray-500 font-medium text-lg">Mettez à jour le contenu de votre article avec l'éditeur premium</p>

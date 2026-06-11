@@ -374,13 +374,13 @@
     "Join": "انضمام",
     "Rights": "جميع الحقوق محفوظة.",
     "BackToTop": "الرجوع للأعلى",
-    "DevelopedBy": "طُوِّر بواسطة <name>Reda</name>"
+    "DevelopedBy": "تطوير بواسطة <name>Reda</name>"
   },
   "Common": {
     "FreeShippingPromo": "توصيل مجاني في جميع أنحاء المغرب ابتداءً من 300 درهم!",
     "Available": "متوفر",
     "Loading": "جاري التحميل...",
-    "Price": "السعر",
+    "Price": "الثمن",
     "AddToCart": "أضف إلى السلة",
     "AddedToCartSuccess": "تمت الإضافة إلى السلة بنجاح!",
     "AddedToCartError": "خطأ في الإضافة إلى السلة",
@@ -421,14 +421,15 @@
     "DiscoverPack": "استكشاف الباقة",
     "SpecialOffer": "عرض خاص",
     "OrderViaWhatsApp": "اطلب عبر واتساب",
-    "Currency": "درهم"
+    "Currency": "درهم",
+    "EndOfCollection": "نهاية المجموعة"
   },
   "Packs": {
     "Save": "وفر",
     "Exclusive": "باقة حصرية",
     "Includes": "كتب متضمنة",
-    "RegularPrice": "السعر العادي",
-    "PackPrice": "سعر الباقة",
+    "RegularPrice": "الثمن العادي",
+    "PackPrice": "ثمن الباقة",
     "AddSelection": "أضف المختارات",
     "CustomPack": {
       "BannerTitle": "أنشئ باقتك الخاصة",
@@ -1067,7 +1068,7 @@
     "Benefits": {
       "HighSavings": {
         "Title": "توفير كبير",
-        "Desc": "خصم يصل إلى 30% من السعر الفردي"
+        "Desc": "خصم يصل إلى 30% من الثمن الفردي"
       },
       "CuratedMix": {
         "Title": "مزيج مختار",
@@ -1311,5 +1312,11 @@
     "CommentSent": "تم إرسال التعليق!",
     "ErrorOccurred": "حدث خطأ ما.",
     "Anonymous": "مجهول"
+  },
+  "PWAInstallPrompt": {
+    "title": "تثبيت رواية",
+    "description": "قم بالوصول إلى المكتبة بسرعة من شاشتك الرئيسية.",
+    "install": "تثبيت",
+    "later": "لاحقاً"
   }
 }

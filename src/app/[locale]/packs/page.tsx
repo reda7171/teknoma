@@ -13,6 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: `${t('Title')} | Riwaya`,
         description: t('Subtitle'),
+        openGraph: {
+            title: `${t('Title')} | Riwaya`,
+            description: t('Subtitle'),
+            images: ['/images/og-packs.png'],
+        }
     }
 }
 

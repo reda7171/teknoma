@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import { createPOSOrder } from '@/lib/actions/pos';
 import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
+import { printReceipt } from '@/lib/utils/printReceipt';
 import { useEffect } from 'react';
 
 interface Product {
@@ -17,6 +18,7 @@ interface Product {
   price: number;
   image: string | null;
   stock?: number;
+  isbn?: string | null;
 }
 
 interface CartItem extends Product {
@@ -54,30 +56,94 @@ export default function POSClient({ books, packs }: POSClientProps) {
   const [showCityPopup, setShowCityPopup] = useState(false);
   const [cityPopupResult, setCityPopupResult] = useState(false);
 
+  const normalizeString = (str: string) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[\s-]/g, "");
+  };
+
   const checkCity = () => {
     if (!customer.city) {
       showNotification('Veuillez d\'abord saisir une ville', 'error');
       return;
     }
-    const exists = allCities.some(c => c.toLowerCase() === customer.city.toLowerCase());
+    const normalizedInput = normalizeString(customer.city);
+    const exists = allCities.some(c => normalizeString(c) === normalizedInput);
     setCityPopupResult(exists);
     setShowCityPopup(true);
   };
 
+  const [isOffline, setIsOffline] = useState(false);
+  const [offlineOrders, setOfflineOrders] = useState<any[]>([]);
+
   useEffect(() => {
+    // Initial network state
+    setIsOffline(!navigator.onLine);
+    
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Load offline orders
+    const saved = localStorage.getItem('pos_offline_orders');
+    if (saved) {
+      try {
+        setOfflineOrders(JSON.parse(saved));
+      } catch (e) {}
+    }
+
     getWithYouCities().then(setAllCities);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
+
+  const saveOfflineOrder = (orderData: any) => {
+    const newOrder = {
+      ...orderData,
+      id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString()
+    };
+    const updated = [...offlineOrders, newOrder];
+    setOfflineOrders(updated);
+    localStorage.setItem('pos_offline_orders', JSON.stringify(updated));
+    return newOrder.id;
+  };
+
+  const syncOfflineOrders = async () => {
+    if (isOffline || offlineOrders.length === 0) return;
+    setIsSubmitting(true);
+    let successCount = 0;
+    
+    try {
+      for (const order of offlineOrders) {
+        const result = await createPOSOrder(order);
+        if (result.success) successCount++;
+      }
+      
+      setOfflineOrders([]);
+      localStorage.removeItem('pos_offline_orders');
+      showNotification(`${successCount} commande(s) synchronisée(s) avec le serveur`, 'success');
+    } catch (e) {
+      showNotification('Erreur lors de la synchronisation', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (customer.city && customer.city.length > 0) {
+      const normalizedInput = normalizeString(customer.city);
       const filtered = allCities.filter(c => 
-        c.toLowerCase().includes(customer.city.toLowerCase())
+        normalizeString(c).includes(normalizedInput)
       );
       setFilteredCities(filtered.slice(0, 8));
       setShowCities(filtered.length > 0);
     } else {
-      setFilteredCities([]);
-      setShowCities(false);
+      setFilteredCities(allCities.slice(0, 8));
+      // Do not auto-hide here, let onBlur/onFocus handle visibility
     }
   }, [customer.city, allCities]);
 
@@ -95,8 +161,19 @@ export default function POSClient({ books, packs }: POSClientProps) {
     }
   };
 
-  const filteredBooks = books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredBooks = books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || (b.isbn && b.isbn.includes(searchTerm)));
   const filteredPacks = packs.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const handleBarcodeScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim() !== '') {
+      const scannedBook = books.find(b => b.isbn === searchTerm.trim());
+      if (scannedBook) {
+        addToCart(scannedBook, 'BOOK');
+        setSearchTerm('');
+        showNotification(`${scannedBook.title} ajouté au panier`, 'success');
+      }
+    }
+  };
 
   const displayedProducts = [
     ...(activeTab === 'ALL' || activeTab === 'BOOKS' ? filteredBooks.map(b => ({ ...b, type: 'BOOK' as const })) : []),
@@ -147,7 +224,7 @@ export default function POSClient({ books, packs }: POSClientProps) {
 
     setIsSubmitting(true);
     try {
-      const result = await createPOSOrder({
+      const orderPayload = {
         fullName: customer.fullName,
         phone: customer.phone,
         address: customer.address || 'Au magasin',
@@ -162,10 +239,52 @@ export default function POSClient({ books, packs }: POSClientProps) {
         total: finalTotal,
         discount: Number(discount),
         shippingFees: Number(shippingFees)
-      });
+      };
+
+      if (isOffline) {
+        const offlineId = saveOfflineOrder(orderPayload);
+        showNotification(`Sauvegardé hors-ligne: ${offlineId}`, 'success');
+        
+        printReceipt({
+          orderId: offlineId,
+          customerName: customer.fullName,
+          customerPhone: customer.phone,
+          customerCity: customer.city || 'Au magasin',
+          items: cart,
+          subtotal: itemsTotal,
+          shippingFees: Number(shippingFees),
+          discount: Number(discount),
+          total: finalTotal
+        });
+
+        setCart([]);
+        setCustomer({ fullName: '', phone: '', address: '', city: '' });
+        setShippingFees(0);
+        setDiscount(0);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const result = await createPOSOrder(orderPayload);
 
       if (result.success) {
         showNotification(`Commande créée avec succès: ${result.orderId}`, 'success');
+        
+        // Impression du ticket de caisse
+        if (result.orderId) {
+          printReceipt({
+            orderId: result.orderId,
+            customerName: customer.fullName,
+            customerPhone: customer.phone,
+            customerCity: customer.city || 'Au magasin',
+            items: cart,
+            subtotal: itemsTotal,
+            shippingFees: Number(shippingFees),
+            discount: Number(discount),
+            total: finalTotal
+          });
+        }
+
         setCart([]);
         setCustomer({ fullName: '', phone: '', address: '', city: '' });
         setShippingFees(0);
@@ -194,6 +313,22 @@ export default function POSClient({ books, packs }: POSClientProps) {
                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-2">Point de vente physique & Événementiel</p>
               </div>
               <div className="flex items-center gap-3">
+                {isOffline && (
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-2xl border border-red-100 font-black text-[10px] uppercase tracking-widest animate-pulse">
+                    <WifiOff className="w-4 h-4" />
+                    Mode Hors-Ligne
+                  </div>
+                )}
+                {!isOffline && offlineOrders.length > 0 && (
+                  <button 
+                    onClick={syncOfflineOrders}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100 hover:bg-amber-100 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
+                    Sync ({offlineOrders.length})
+                  </button>
+                )}
                 <button 
                   onClick={toggleFullscreen}
                   className="hidden sm:flex w-12 h-12 items-center justify-center text-gray-400 hover:text-black hover:bg-gray-50 rounded-2xl border border-gray-100 transition-all shadow-sm"
@@ -220,9 +355,10 @@ export default function POSClient({ books, packs }: POSClientProps) {
               <Search className="w-4 h-4 text-gray-300 absolute left-5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-black" />
               <input
                 type="text"
-                placeholder="RECHERCHER UN PRODUIT..."
+                placeholder="RECHERCHER OU SCANNER ISBN..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleBarcodeScan}
                 className="w-full pl-14 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-black text-[10px] uppercase tracking-widest shadow-inner"
               />
             </div>
@@ -386,8 +522,12 @@ export default function POSClient({ books, packs }: POSClientProps) {
                         placeholder="VILLE"
                         value={customer.city}
                         autoComplete="off"
-                        onChange={e => setCustomer({...customer, city: e.target.value})}
-                        onFocus={() => customer.city && filteredCities.length > 0 && setShowCities(true)}
+                        onChange={e => {
+                            setCustomer({...customer, city: e.target.value});
+                            setShowCities(true);
+                        }}
+                        onFocus={() => setShowCities(true)}
+                        onBlur={() => setTimeout(() => setShowCities(false), 200)}
                         className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"
                     />
                     {showCities && (

@@ -5,12 +5,13 @@ import { updateSetting } from '@/lib/actions/site-settings'
 import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string }) {
+export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string }) {
     const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl)
     const [instagramWebhookUrl, setInstagramWebhookUrl] = useState(initialInstagramWebhookUrl)
     const [facebookAccessToken, setFacebookAccessToken] = useState(initialFacebookAccessToken)
     const [instagramAccountId, setInstagramAccountId] = useState(initialInstagramAccountId)
     const [instagramToken, setInstagramToken] = useState(initialInstagramToken)
+    const [threadsAccountId, setThreadsAccountId] = useState(initialThreadsAccountId)
     const [loading, setLoading] = useState(false)
     const [isTesting, setIsTesting] = useState(false)
     const [message, setMessage] = useState('')
@@ -27,6 +28,7 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
             await updateSetting('facebook_access_token', facebookAccessToken, 'config', 'Facebook Access Token')
             await updateSetting('instagram_account_id', instagramAccountId, 'config', 'Instagram Account ID')
             await updateSetting('instagram_token', instagramToken, 'config', 'Instagram Token')
+            await updateSetting('threads_account_id', threadsAccountId, 'config', 'Threads Account ID')
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
         } catch (error) {
@@ -124,6 +126,23 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                 />
                 <p className="mt-2 text-xs text-gray-500 font-medium">
                     Jeton d'accès pour interagir avec l'API Instagram.
+                </p>
+            </div>
+
+            <div>
+                <label htmlFor="threadsAccountId" className="block text-sm font-bold text-gray-900 mb-2">
+                    Threads Account ID
+                </label>
+                <input
+                    type="text"
+                    id="threadsAccountId"
+                    value={threadsAccountId}
+                    onChange={(e) => setThreadsAccountId(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    placeholder="Ex: 1234567890"
+                />
+                <p className="mt-2 text-xs text-gray-500 font-medium">
+                    L'ID du compte Threads.
                 </p>
             </div>
 

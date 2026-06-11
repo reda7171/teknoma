@@ -28,6 +28,11 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     return {
         title,
         description: `Explorez notre collection de livres ${categoryName ? `en ${categoryName}` : 'de développement personnel et business'} sur Riwaya. Livraison disponible dans tout le Maroc.`,
+        openGraph: {
+            title,
+            description: `Explorez notre collection de livres ${categoryName ? `en ${categoryName}` : 'de développement personnel et business'} sur Riwaya. Livraison disponible dans tout le Maroc.`,
+            images: ['/og-image.jpg'],
+        }
     }
 }
 

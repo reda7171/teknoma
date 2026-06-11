@@ -9,6 +9,7 @@ import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
 import { Book as BookIcon, Search, X } from 'lucide-react'
 import { fetchBooks } from '@/lib/actions/books'
+import { getUsers } from '@/lib/actions/users'
 import { useEffect } from 'react'
 import PostSectionEditor from './post-form/PostSectionEditor'
 import { useUIStore } from '@/store/ui'
@@ -36,19 +37,28 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [published, setPublished] = useState(post?.published || false)
     const [coverImage, setCoverImage] = useState(post?.coverImage || '')
     const [tags, setTags] = useState(post?.tags || '')
+    const [authorName, setAuthorName] = useState(post?.authorName || '')
     const [language, setLanguage] = useState(post?.language || lang)
+    const [authorId, setAuthorId] = useState(post?.authorId || '')
+    const [adminUsers, setAdminUsers] = useState<any[]>([])
     const [allBooks, setAllBooks] = useState<any[]>([])
     const [bookSearch, setBookSearch] = useState('')
     const [selectedBookIds, setSelectedBookIds] = useState<string[]>(post?.books?.map((b: any) => b.id) || [])
 
     useEffect(() => {
-        const loadBooks = async () => {
-            const result = await fetchBooks({ limit: 1000, includeInactive: true })
-            if (result.success) {
-                setAllBooks(result.data)
+        const loadData = async () => {
+            const [booksResult, usersResult] = await Promise.all([
+                fetchBooks({ limit: 1000, includeInactive: true }),
+                getUsers()
+            ])
+            if (booksResult.success) {
+                setAllBooks(booksResult.data)
+            }
+            if (usersResult.success && usersResult.data) {
+                setAdminUsers(usersResult.data)
             }
         }
-        loadBooks()
+        loadData()
     }, [])
 
     const handleFieldGenerate = async (lang: 'fr' | 'ar', type: 'TITLE' | 'EXCERPT' | 'SLUG') => {
@@ -97,6 +107,8 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                 content,
                 coverImage,
                 published,
+                authorId,
+                authorName,
                 category,
                 tags,
                 language,
@@ -286,6 +298,26 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium"
                                 />
                                 <p className="mt-2 text-[10px] text-gray-400 italic">Séparez les mots-clés par des virgules.</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Auteur (Utilisateur)</label>
+                                <select
+                                    value={authorId}
+                                    onChange={(e) => {
+                                        setAuthorId(e.target.value)
+                                        const selectedUser = adminUsers.find(u => u.id === e.target.value)
+                                        setAuthorName(selectedUser ? selectedUser.fullName : '')
+                                    }}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium appearance-none cursor-pointer"
+                                >
+                                    <option value="" disabled>Sélectionner un utilisateur</option>
+                                    {adminUsers.map(user => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.fullName} ({user.role})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
