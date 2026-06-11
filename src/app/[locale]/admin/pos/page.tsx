@@ -5,29 +5,36 @@ import POSClient from '@/components/admin/pos/POSClient';
 export default async function POSPage() {
   const t = await getTranslations('Admin');
 
-  const books = await prisma.book.findMany({
-    where: { active: true, stock: { gt: 0 } },
-    select: {
-      id: true,
-      title: true,
-      price: true,
-      image: true,
-      stock: true,
-      isbn: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  let books: any[] = [];
+  let packs: any[] = [];
 
-  const packs = await prisma.pack.findMany({
-    where: { active: true },
-    select: {
-      id: true,
-      name: true,
-      price: true,
-      image: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  try {
+    books = await prisma.book.findMany({
+      where: { active: true, stock: { gt: 0 } },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        image: true,
+        stock: true,
+        isbn: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    packs = await prisma.pack.findMany({
+      where: { active: true },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        image: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (error) {
+    console.error("Database unreachable, loading POS in offline mode");
+  }
 
   return (
     <div className="h-[calc(100vh-80px)] w-full overflow-hidden">

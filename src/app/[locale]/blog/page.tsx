@@ -70,14 +70,14 @@ export default async function BlogPage({
             <Header />
 
             {/* Hero Section */}
-            <div className="bg-pixio-beige pt-20 pb-20 relative overflow-hidden">
+            <div className="bg-pixio-beige pt-12 md:pt-20 pb-12 md:pb-20 relative overflow-hidden">
                 <Quote className="absolute -top-10 -right-10 w-64 h-64 text-pixio-cream opacity-50 -rotate-12" />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full text-black text-[10px] font-black uppercase tracking-[0.2em] shadow-sm mb-6 hover:scale-105 transition-transform duration-300">
                         <Sparkles className="w-4 h-4 text-yellow-500 animate-pulse" />
                         <span>{t('Badge')}</span>
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-black text-black mb-6 tracking-tighter hover:scale-[1.02] transition-transform duration-500">
+                    <h1 className="text-5xl md:text-8xl font-black text-black mb-6 tracking-tighter hover:scale-[1.02] transition-transform duration-500">
                         {t('Title')}
                     </h1>
                     <p className="text-lg text-gray-600 uppercase font-bold tracking-widest max-w-2xl mx-auto leading-relaxed">
@@ -90,7 +90,7 @@ export default async function BlogPage({
                     <div className="flex flex-wrap justify-center gap-3">
                         <Link
                             href="/blog"
-                            className={`px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                            className={`px-4 md:px-6 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                         >
                             Tous
                         </Link>
@@ -98,7 +98,7 @@ export default async function BlogPage({
                             <Link
                                 key={cat}
                                 href={`/blog?category=${cat}`}
-                                className={`px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                                className={`px-4 md:px-6 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                             >
                                 {cat}
                             </Link>
@@ -128,15 +128,15 @@ export default async function BlogPage({
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                         {posts.map((post: any, idx: number) => (
                             <Link
                                 href={`/blog/${post.slug}`}
                                 key={post.id}
-                                className={`group relative bg-white rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col ${idx === 0 ? 'md:col-span-2 lg:col-span-3 lg:flex-row lg:h-[500px]' : 'h-full'}`}
+                                className={`group relative bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col ${idx === 0 ? 'md:col-span-2 lg:col-span-3 lg:flex-row lg:h-[500px]' : 'h-full'}`}
                             >
                                 {/* Image */}
-                                <div className={`relative overflow-hidden bg-gray-100 ${idx === 0 ? 'w-full lg:w-1/2 h-64 lg:h-full' : 'aspect-[4/3]'}`}>
+                                <div className={`relative overflow-hidden bg-gray-100 ${idx === 0 ? 'w-full lg:w-1/2 h-48 md:h-64 lg:h-full' : 'aspect-[4/3]'}`}>
                                     {post.coverImage ? (
                                         <Image
                                             src={post.coverImage}
@@ -155,7 +155,7 @@ export default async function BlogPage({
                                 </div>
 
                                 {/* Content */}
-                                <div className={`flex flex-col justify-center p-8 ${idx === 0 ? 'lg:w-1/2 lg:p-12' : ''}`}>
+                                <div className={`flex flex-col justify-center p-6 md:p-8 ${idx === 0 ? 'lg:w-1/2 lg:p-12' : ''}`}>
                                     <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
                                         {post.publishedAt && (
                                             <div className="flex items-center gap-1">
@@ -182,7 +182,7 @@ export default async function BlogPage({
                                         )}
                                     </div>
 
-                                    <h2 className={`font-black text-black leading-tight mb-4 group-hover:text-pixio-pink transition-colors ${idx === 0 ? 'text-3xl md:text-5xl' : 'text-2xl'}`}>
+                                    <h2 className={`font-black text-black leading-tight mb-4 group-hover:text-pixio-pink transition-colors ${idx === 0 ? 'text-2xl md:text-3xl lg:text-5xl' : 'text-xl md:text-2xl'}`}>
                                         {post.title}
                                     </h2>
 
@@ -208,7 +208,7 @@ export default async function BlogPage({
 
                 {/* Pagination */}
                 {pagination.totalPages > 1 && (
-                    <div className="mt-16 md:mt-24 flex flex-wrap items-center justify-center gap-2 md:gap-4">
+                    <div className="mt-12 md:mt-24 flex flex-wrap items-center justify-center gap-2 md:gap-4">
                         {/* Previous Button */}
                         {page > 1 ? (
                             <Link

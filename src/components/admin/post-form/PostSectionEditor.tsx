@@ -17,22 +17,61 @@ interface PostSectionEditorProps {
     postTitle: string
 }
 
-const BOOK_TEMPLATE_SECTIONS: Section[] = [
-    { id: '1', title: 'Introduction', content: '[Présentation rapide du livre et pourquoi il mérite l\'attention]' },
-    { id: '2', title: 'Informations générales', content: '- **Titre :** \n- **Auteur :** \n- **Genre :** \n- **Date de publication :** \n- **Nombre de pages :** \n- **Éditeur :** \n- **Série / tome :** \n- **Langue originale :** ' },
-    { id: '3', title: 'Résumé du livre', content: '[Résumé court sans spoiler]' },
-    { id: '4', title: 'Les personnages', content: '- **Personnage principal :** \n- **Personnages secondaires :** ' },
-    { id: '5', title: 'Les thèmes abordés', content: '- [Thème 1]\n- [Thème 2]' },
-    { id: '6', title: 'Style d\'écriture', content: '[Fluidité, narration, dialogues, etc.]' },
-    { id: '7', title: 'Les points forts', content: '- ' },
-    { id: '8', title: 'Les points faibles', content: '- ' },
-    { id: '9', title: 'Citation(s) marquante(s)', content: '> " "' },
-    { id: '10', title: 'Analyse / interprétation', content: '[Symbolisme, message caché, etc.]' },
-    { id: '11', title: 'Comparaison', content: '[Si vous avez aimé X, vous aimerez Y]' },
-    { id: '12', title: 'Pour quel type de lecteur ?', content: '[Débutants, fans de fantasy, etc.]' },
-    { id: '13', title: 'Note finale / avis personnel', content: '- **Histoire :** /5\n- **Personnages :** /5\n- **Style :** /5\n- **Immersion :** /5\n- **Fin :** /5\n\n**Note globale : ⭐ /5**' },
-    { id: '14', title: 'FAQ', content: '- **Le livre vaut-il le coup ?** \n- **Y a-t-il des spoilers ?** \n- **À partir de quel âge ?** ' }
-]
+const getBookTemplateSections = (lang: 'fr' | 'ar' | 'en'): Section[] => {
+    if (lang === 'ar') {
+        return [
+            { id: '1', title: 'مقدمة', content: '[تقديم سريع للكتاب ولماذا يستحق الاهتمام]' },
+            { id: '2', title: 'معلومات عامة', content: '- **العنوان :** \n- **المؤلف :** \n- **النوع :** \n- **تاريخ النشر :** \n- **عدد الصفحات :** \n- **الناشر :** \n- **سلسلة / جزء :** \n- **اللغة الأصلية :** ' },
+            { id: '3', title: 'ملخص الكتاب', content: '[ملخص قصير بدون حرق للأحداث]' },
+            { id: '4', title: 'الشخصيات', content: '- **الشخصية الرئيسية :** \n- **شخصيات ثانوية :** ' },
+            { id: '5', title: 'المواضيع المتناولة', content: '- [الموضوع 1]\n- [الموضوع 2]' },
+            { id: '6', title: 'أسلوب الكتابة', content: '[السلاسة، السرد، الحوارات، إلخ]' },
+            { id: '7', title: 'نقاط القوة', content: '- ' },
+            { id: '8', title: 'نقاط الضعف', content: '- ' },
+            { id: '9', title: 'اقتباس(ات) بارزة', content: '> " "' },
+            { id: '10', title: 'تحليل / تفسير', content: '[الرمزية، الرسالة الخفية، إلخ]' },
+            { id: '11', title: 'مقارنة', content: '[إذا أحببت X، ستحب Y]' },
+            { id: '12', title: 'لمن هذا الكتاب؟', content: '[المبتدئين، محبي الخيال، إلخ]' },
+            { id: '13', title: 'ملاحظة نهائية / رأي شخصي', content: '- **القصة :** /5\n- **الشخصيات :** /5\n- **الأسلوب :** /5\n- **الانغماس :** /5\n- **النهاية :** /5\n\n**التقييم العام : ⭐ /5**' },
+            { id: '14', title: 'الأسئلة الشائعة', content: '- **هل يستحق الكتاب القراءة؟** \n- **هل توجد حرق للأحداث؟** \n- **ابتداءً من أي عمر؟** ' }
+        ]
+    } else if (lang === 'en') {
+        return [
+            { id: '1', title: 'Introduction', content: '[Brief presentation of the book and why it deserves attention]' },
+            { id: '2', title: 'General Information', content: '- **Title :** \n- **Author :** \n- **Genre :** \n- **Publication Date :** \n- **Number of pages :** \n- **Publisher :** \n- **Series / volume :** \n- **Original Language :** ' },
+            { id: '3', title: 'Book Summary', content: '[Short summary without spoilers]' },
+            { id: '4', title: 'Characters', content: '- **Main character :** \n- **Secondary characters :** ' },
+            { id: '5', title: 'Themes Covered', content: '- [Theme 1]\n- [Theme 2]' },
+            { id: '6', title: 'Writing Style', content: '[Fluidity, narration, dialogues, etc.]' },
+            { id: '7', title: 'Strengths', content: '- ' },
+            { id: '8', title: 'Weaknesses', content: '- ' },
+            { id: '9', title: 'Notable Quote(s)', content: '> " "' },
+            { id: '10', title: 'Analysis / Interpretation', content: '[Symbolism, hidden message, etc.]' },
+            { id: '11', title: 'Comparison', content: '[If you liked X, you will like Y]' },
+            { id: '12', title: 'For what type of reader?', content: '[Beginners, fantasy fans, etc.]' },
+            { id: '13', title: 'Final Note / Personal Opinion', content: '- **Story :** /5\n- **Characters :** /5\n- **Style :** /5\n- **Immersion :** /5\n- **Ending :** /5\n\n**Overall Rating : ⭐ /5**' },
+            { id: '14', title: 'FAQ', content: '- **Is the book worth it?** \n- **Are there any spoilers?** \n- **From what age?** ' }
+        ]
+    }
+    
+    // Default to 'fr'
+    return [
+        { id: '1', title: 'Introduction', content: "[Présentation rapide du livre et pourquoi il mérite l'attention]" },
+        { id: '2', title: 'Informations générales', content: '- **Titre :** \n- **Auteur :** \n- **Genre :** \n- **Date de publication :** \n- **Nombre de pages :** \n- **Éditeur :** \n- **Série / tome :** \n- **Langue originale :** ' },
+        { id: '3', title: 'Résumé du livre', content: '[Résumé court sans spoiler]' },
+        { id: '4', title: 'Les personnages', content: '- **Personnage principal :** \n- **Personnages secondaires :** ' },
+        { id: '5', title: 'Les thèmes abordés', content: '- [Thème 1]\n- [Thème 2]' },
+        { id: '6', title: "Style d'écriture", content: '[Fluidité, narration, dialogues, etc.]' },
+        { id: '7', title: 'Les points forts', content: '- ' },
+        { id: '8', title: 'Les points faibles', content: '- ' },
+        { id: '9', title: 'Citation(s) marquante(s)', content: '> " "' },
+        { id: '10', title: 'Analyse / interprétation', content: '[Symbolisme, message caché, etc.]' },
+        { id: '11', title: 'Comparaison', content: '[Si vous avez aimé X, vous aimerez Y]' },
+        { id: '12', title: 'Pour quel type de lecteur ?', content: '[Débutants, fans de fantasy, etc.]' },
+        { id: '13', title: 'Note finale / avis personnel', content: '- **Histoire :** /5\n- **Personnages :** /5\n- **Style :** /5\n- **Immersion :** /5\n- **Fin :** /5\n\n**Note globale : ⭐ /5**' },
+        { id: '14', title: 'FAQ', content: '- **Le livre vaut-il le coup ?** \n- **Y a-t-il des spoilers ?** \n- **À partir de quel âge ?** ' }
+    ]
+}
 
 export default function PostSectionEditor({ initialContent, onChange, lang, postTitle }: PostSectionEditorProps) {
     const [sections, setSections] = useState<Section[]>([])
@@ -90,7 +129,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
 
     const handleApplyTemplate = () => {
         if (sections.some(s => s.content.trim() !== '') && !confirm('Cela remplacera le contenu actuel. Continuer ?')) return
-        setSections(BOOK_TEMPLATE_SECTIONS.map(s => ({ ...s, id: Date.now() + Math.random().toString() })))
+        setSections(getBookTemplateSections(lang).map(s => ({ ...s, id: Date.now() + Math.random().toString() })))
     }
 
     const handleGenerateContent = async (langToUse: 'fr' | 'ar') => {

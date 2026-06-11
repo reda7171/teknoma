@@ -36,6 +36,8 @@ export default function POSClient({ books, packs }: POSClientProps) {
   const params = useParams();
   const locale = params.locale as string;
   const { showNotification } = useUIStore();
+  const [localBooks, setLocalBooks] = useState<any[]>(books);
+  const [localPacks, setLocalPacks] = useState<any[]>(packs);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS'>('ALL');
@@ -92,13 +94,26 @@ export default function POSClient({ books, packs }: POSClientProps) {
       } catch (e) {}
     }
 
-    getWithYouCities().then(setAllCities);
+    getWithYouCities().then(setAllCities).catch(() => console.error("Impossible de récupérer les villes hors-ligne"));
+
+    // Gestion du catalogue hors-ligne
+    if (books.length > 0 || packs.length > 0) {
+      localStorage.setItem('pos_cached_books', JSON.stringify(books));
+      localStorage.setItem('pos_cached_packs', JSON.stringify(packs));
+      setLocalBooks(books);
+      setLocalPacks(packs);
+    } else {
+      const cachedBooks = localStorage.getItem('pos_cached_books');
+      const cachedPacks = localStorage.getItem('pos_cached_packs');
+      if (cachedBooks) setLocalBooks(JSON.parse(cachedBooks));
+      if (cachedPacks) setLocalPacks(JSON.parse(cachedPacks));
+    }
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [books, packs]);
 
   const saveOfflineOrder = (orderData: any) => {
     const newOrder = {
@@ -161,12 +176,12 @@ export default function POSClient({ books, packs }: POSClientProps) {
     }
   };
 
-  const filteredBooks = books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || (b.isbn && b.isbn.includes(searchTerm)));
-  const filteredPacks = packs.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredBooks = localBooks.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || (b.isbn && b.isbn.includes(searchTerm)));
+  const filteredPacks = localPacks.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleBarcodeScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim() !== '') {
-      const scannedBook = books.find(b => b.isbn === searchTerm.trim());
+      const scannedBook = localBooks.find(b => b.isbn === searchTerm.trim());
       if (scannedBook) {
         addToCart(scannedBook, 'BOOK');
         setSearchTerm('');
@@ -452,7 +467,7 @@ export default function POSClient({ books, packs }: POSClientProps) {
                     <img 
                       src={item.image} 
                       alt={item.title || item.name} 
-                      className="w-full h-full object-cover unoptimized"
+                      className="absolute inset-0 w-full h-full object-cover unoptimized"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

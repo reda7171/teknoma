@@ -331,10 +331,10 @@ export default async function BookDetailPage({
                     </Link>
 
                     {/* Product Detail */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mb-20 md:mb-32">
                         {/* Image */}
                         <div className="lg:sticky lg:top-24 lg:self-start">
-                            <div className="bg-white rounded-[3rem] p-10 shadow-2xl shadow-black/5 border border-gray-100 flex flex-col gap-10">
+                            <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-black/5 border border-gray-100 flex flex-col gap-10">
                                 <div className="relative aspect-[3/4] group">
                                     <div className="absolute top-6 left-6 z-10 rtl:right-6 rtl:left-auto">
                                         <WishlistButton
@@ -418,7 +418,7 @@ export default async function BookDetailPage({
                                     )}
                                 </div>
 
-                                <h1 className="text-5xl md:text-7xl font-black text-black leading-none tracking-tighter">
+                                <h1 className="text-4xl md:text-7xl font-black text-black leading-none tracking-tighter">
                                     {book.title}<span className="text-gray-200">.</span>
                                 </h1>
 
@@ -447,9 +447,9 @@ export default async function BookDetailPage({
 
                             {/* Price Section */}
                             <div className="relative group">
-                                <div className="bg-white border border-gray-100 rounded-[3rem] p-10 shadow-2xl shadow-black/5">
+                                <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-black/5">
                                     <div className="flex items-baseline gap-3 mb-4">
-                                        <span className="text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
+                                        <span className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
                                         <span className="text-xl font-black text-gray-300 uppercase tracking-widest">MAD</span>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -552,7 +552,7 @@ export default async function BookDetailPage({
                                         <Package className="w-4 h-4 text-black" />
                                         <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
                                     </div>
-                                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-loose bg-white p-10 rounded-[2.5rem] border border-gray-50 italic space-y-4">
+                                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
                                         <p>{book.description}</p>
                                         {book.longDescription && (
                                             <p className="text-gray-600 font-medium normal-case tracking-normal mt-4">{book.longDescription}</p>
@@ -561,16 +561,16 @@ export default async function BookDetailPage({
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
-                                        <h2 className="text-[10px] font-black text-black uppercase tracking-[0.3em]">{tBook('Technical')}</h2>
+                                    <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
+                                        <h2 className="text-sm font-black text-black uppercase tracking-[0.3em]">{tBook('Technical')}</h2>
                                         <dl className="space-y-5">
                                             <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                                                <dt className="text-[8px] font-black uppercase tracking-widest text-gray-300">{tBook('Reference')}</dt>
-                                                <dd className="text-[10px] font-black text-black tracking-widest">{book.isbn || 'RIWAYA-GEN'}</dd>
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-300">{tBook('Reference')}</dt>
+                                                <dd className="text-sm font-black text-black tracking-widest">{book.isbn || 'RIWAYA-GEN'}</dd>
                                             </div>
                                             <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                                                <dt className="text-[8px] font-black uppercase tracking-widest text-gray-300">{tBook('Volume')}</dt>
-                                                <dd className="text-[10px] font-black text-black tracking-widest">~{Math.floor(Math.random() * 200) + 150} {tBook('Pages')}</dd>
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-300">{tBook('Volume')}</dt>
+                                                <dd className="text-sm font-black text-black tracking-widest">~{Math.floor(Math.random() * 200) + 150} {tBook('Pages')}</dd>
                                             </div>
                                         </dl>
                                     </div>
@@ -582,7 +582,7 @@ export default async function BookDetailPage({
                             {categoryConfig?.quote && (
                                 <div className="mt-32 relative group">
                                     <div className="absolute inset-0 bg-white rounded-[3rem] rotate-1 group-hover:rotate-0 transition-transform shadow-2xl shadow-black/5" />
-                                    <div className="relative z-10 p-16 md:p-24 text-center">
+                                    <div className="relative z-10 p-8 md:p-24 text-center">
                                         <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-[0.3em] mb-12">
                                             <Sparkles className="w-3 h-3 text-pixio-yellow" />
                                             {tBook('CulturalSelect')}

@@ -219,13 +219,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     <Image
                                         src={post.author.image}
                                         alt={post.author.fullName || ''}
-                                        width={28}
-                                        height={28}
-                                        className="rounded-full object-cover ring-2 ring-slate-200"
+                                        width={48}
+                                        height={48}
+                                        className="rounded-full object-cover ring-2 ring-slate-200 w-12 h-12"
                                     />
                                 ) : (
-                                    <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center">
-                                        <User className="w-3.5 h-3.5 text-slate-500" />
+                                    <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
+                                        <User className="w-6 h-6 text-slate-500" />
                                     </div>
                                 )}
                                 {post.authorName || post.author?.fullName}

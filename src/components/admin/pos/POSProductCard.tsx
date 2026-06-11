@@ -24,7 +24,7 @@ export default function POSProductCard({ product, type, onAdd }: POSProductCardP
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             loading="lazy"
             onError={(e) => { e.currentTarget.src = '/book-placeholder.png' }}
           />
