@@ -97,6 +97,7 @@ export default function AdminLayout({
         { name: 'Dashboard', href: `/${lang}/admin`, icon: LayoutDashboard },
         { name: 'Articles', href: `/${lang}/admin/posts`, icon: FileText },
         { name: 'Livres', href: `/${lang}/admin/books`, icon: BookOpen },
+        { name: 'Titres Demandés', href: `/${lang}/admin/requested-books`, icon: Search },
         { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
         { name: 'Auteurs', href: `/${lang}/admin/authors`, icon: Users },
         { name: 'Packs', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },

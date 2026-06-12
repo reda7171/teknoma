@@ -949,3 +949,17 @@ model AdminAuthRequest {
   @@index([createdAt])
   @@map("admin_auth_requests")
 }
+
+model RequestedBook {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(255)
+  author      String?  @db.VarChar(255)
+  requestCount Int      @default(1)
+  status      String   @default("PENDING") // PENDING, RESTOCKED, IGNORED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([requestCount])
+  @@map("requested_books")
+}
+
