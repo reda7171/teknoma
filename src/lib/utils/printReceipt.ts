@@ -152,9 +152,9 @@ export function printReceipt(data: ReceiptData) {
                 <p><strong>Ville:</strong> ${data.customerCity}</p>
             </div>
 
-            <!-- QR Code (Google Chart API for simplicity on thermal printers) -->
+            <!-- QR Code -->
             <div class="qr-container">
-                <img src="https://chart.googleapis.com/chart?chs=100x100&cht=qr&chl=${encodeURIComponent('https://riwaya.ma/order/' + data.orderId)}&choe=UTF-8" alt="QR Code" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://riwaya.ma/order/' + data.orderId)}" alt="QR Code" />
             </div>
 
             <div class="footer">
