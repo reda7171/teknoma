@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight } from 'lucide-react'
 import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -11,6 +11,7 @@ import BookDescriptionModal from '@/components/admin/BookDescriptionModal'
 import N8nPublishModal from '@/components/admin/N8nPublishModal'
 import BulkPublishModal from '@/components/admin/BulkPublishModal'
 import CaptionPreviewModal from '@/components/admin/CaptionPreviewModal'
+import VideoStudioModal from '@/components/admin/VideoStudioModal'
 import { normalizeImage } from '@/lib/utils'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
@@ -41,8 +42,10 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
     const [descriptionFormat, setDescriptionFormat] = useState<'post' | 'story'>('post')
     const [n8nBook, setN8nBook] = useState<Book | null>(null)
     const [n8nFormat, setN8nFormat] = useState<'post' | 'story'>('post')
+    const [videoStudioBook, setVideoStudioBook] = useState<Book | null>(null)
     const [previewCaptionBook, setPreviewCaptionBook] = useState<Book | null>(null)
     const [quickPublishing, setQuickPublishing] = useState<string | null>(null)
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
     const [orderedBooks, setOrderedBooks] = useState(books)
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
@@ -605,104 +608,152 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                             </button>
                                                                         </>
                                                                     ) : (
-                                                                        <>
-                                                                            <Link
-                                                                                href={`/books/${book.id}`}
-                                                                                target="_blank"
-                                                                                className="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-100 rounded transition-colors"
-                                                                                title="Voir sur le site"
-                                                                            >
-                                                                                <Eye className="w-4 h-4" />
-                                                                            </Link>
+                                                                        <div className="relative">
                                                                             <button
-                                                                                onClick={() => setPreviewCaptionBook(book)}
-                                                                                className="text-yellow-600 hover:text-yellow-900 p-2 hover:bg-yellow-50 rounded transition-colors"
-                                                                                title="Prévisualiser la Caption"
+                                                                                onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === book.id ? null : book.id) }}
+                                                                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
+                                                                                title="Actions"
                                                                             >
-                                                                                <MessageSquare className="w-4 h-4" />
+                                                                                <MoreVertical className="w-4 h-4" />
                                                                             </button>
-                                                                            <button
-                                                                                onClick={() => { setCreativeFormat('post'); setCreativeBook(book); }}
-                                                                                className="text-purple-600 hover:text-purple-900 p-2 hover:bg-purple-50 rounded transition-colors"
-                                                                                title="Générer un Post (FB/Insta)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setCreativeFormat('story'); setCreativeBook(book); }}
-                                                                                className="text-pink-600 hover:text-pink-900 p-2 hover:bg-pink-50 rounded transition-colors"
-                                                                                title="Générer une Story (FB/Insta)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" strokeWidth="2"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setDescriptionFormat('post'); setDescriptionBook(book); }}
-                                                                                className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition-colors"
-                                                                                title="Générer Description (Post)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setDescriptionFormat('story'); setDescriptionBook(book); }}
-                                                                                className="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded transition-colors"
-                                                                                title="Générer Description (Story)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setDescriptionFormat('post'); setDescriptionBook({...book, description: book.longDescription || book.description}); }}
-                                                                                className="text-cyan-600 hover:text-cyan-900 p-2 hover:bg-cyan-50 rounded transition-colors"
-                                                                                title="Générer Description Longue (Post)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setDescriptionFormat('story'); setDescriptionBook({...book, description: book.longDescription || book.description}); }}
-                                                                                className="text-teal-600 hover:text-teal-900 p-2 hover:bg-teal-50 rounded transition-colors"
-                                                                                title="Générer Description Longue (Story)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setN8nFormat('post'); setN8nBook(book); }}
-                                                                                className="text-green-600 hover:text-green-900 p-2 hover:bg-green-50 rounded transition-colors"
-                                                                                title="Publier / Programmer via n8n (FB/Insta)"
-                                                                            >
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => handleQuickPublish(book)}
-                                                                                disabled={quickPublishing === book.id}
-                                                                                className="text-orange-600 hover:text-orange-900 p-2 hover:bg-orange-50 rounded transition-colors disabled:opacity-40"
-                                                                                title="Publier maintenant (FB+Insta) sans options"
-                                                                            >
-                                                                                {quickPublishing === book.id
-                                                                                    ? <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                                                    : <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                                                                                }
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => handleQuickEdit(book)}
-                                                                                className="text-emerald-600 hover:text-emerald-900 p-2 hover:bg-emerald-50 rounded transition-colors"
-                                                                                title="Modification Rapide"
-                                                                            >
-                                                                                <Edit3 className="w-4 h-4" />
-                                                                            </button>
-                                                                            <Link
-                                                                                href={`/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`}
-                                                                                className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition-colors"
-                                                                                title="Modification Complète"
-                                                                            >
-                                                                                <Edit className="w-4 h-4" />
-                                                                            </Link>
-                                                                            <button
-                                                                                onClick={() => handleDelete(book.id, book.title)}
-                                                                                disabled={loading === book.id}
-                                                                                className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                                                                            >
-                                                                                <Trash2 className="w-4 h-4" />
-                                                                            </button>
-                                                                        </>
+
+                                                                            {openDropdown === book.id && (
+                                                                                <>
+                                                                                    {/* Backdrop */}
+                                                                                    <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+                                                                                    {/* Menu */}
+                                                                                    <div className="absolute right-0 top-9 z-50 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-1 animate-[fadeIn_0.1s_ease]">
+
+                                                                                        {/* Voir */}
+                                                                                        <div className="px-3 py-1.5">
+                                                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Voir</p>
+                                                                                        </div>
+                                                                                        <Link
+                                                                                            href={`/books/${book.id}`}
+                                                                                            target="_blank"
+                                                                                            onClick={() => setOpenDropdown(null)}
+                                                                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                                                        >
+                                                                                            <ExternalLink className="w-4 h-4 text-gray-400" /> Voir sur le site
+                                                                                        </Link>
+                                                                                        <button
+                                                                                            onClick={() => { setPreviewCaptionBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                                                        >
+                                                                                            <MessageSquare className="w-4 h-4 text-yellow-500" /> Aperçu Caption
+                                                                                        </button>
+
+                                                                                        <div className="border-t border-gray-100 my-1" />
+
+                                                                                        {/* Créatives */}
+                                                                                        <div className="px-3 py-1.5">
+                                                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Créatives</p>
+                                                                                        </div>
+                                                                                        <button
+                                                                                            onClick={() => { setCreativeFormat('post'); setCreativeBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                                                                                        >
+                                                                                            <Image className="w-4 h-4 text-purple-500" /> Post créatif (FB/IG)
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={() => { setCreativeFormat('story'); setCreativeBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition-colors"
+                                                                                        >
+                                                                                            <Layers className="w-4 h-4 text-pink-500" /> Story créative (FB/IG)
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={() => { setVideoStudioBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                                                                                        >
+                                                                                            <Video className="w-4 h-4 text-indigo-500" /> Studio Shorts / Vidéo
+                                                                                        </button>
+
+                                                                                        <div className="border-t border-gray-100 my-1" />
+
+                                                                                        {/* Descriptions */}
+                                                                                        <div className="px-3 py-1.5">
+                                                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Descriptions IA</p>
+                                                                                        </div>
+                                                                                        <button
+                                                                                            onClick={() => { setDescriptionFormat('post'); setDescriptionBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                                                                        >
+                                                                                            <FileText className="w-4 h-4 text-blue-500" /> Desc. courte Post
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={() => { setDescriptionFormat('story'); setDescriptionBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                                                                        >
+                                                                                            <FileText className="w-4 h-4 text-indigo-500" /> Desc. courte Story
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={() => { setDescriptionFormat('post'); setDescriptionBook({...book, description: book.longDescription || book.description}); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-cyan-50 hover:text-cyan-700 transition-colors"
+                                                                                        >
+                                                                                            <FileText className="w-4 h-4 text-cyan-500" /> Desc. longue Post
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={() => { setDescriptionFormat('story'); setDescriptionBook({...book, description: book.longDescription || book.description}); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition-colors"
+                                                                                        >
+                                                                                            <FileText className="w-4 h-4 text-teal-500" /> Desc. longue Story
+                                                                                        </button>
+
+                                                                                        <div className="border-t border-gray-100 my-1" />
+
+                                                                                        {/* Publication */}
+                                                                                        <div className="px-3 py-1.5">
+                                                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Publication</p>
+                                                                                        </div>
+                                                                                        <button
+                                                                                            onClick={() => { setN8nFormat('post'); setN8nBook(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                                                                                        >
+                                                                                            <Send className="w-4 h-4 text-green-500" /> Publier via n8n
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={() => { handleQuickPublish(book); setOpenDropdown(null) }}
+                                                                                            disabled={quickPublishing === book.id}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors disabled:opacity-40"
+                                                                                        >
+                                                                                            <Zap className="w-4 h-4 text-orange-500" />
+                                                                                            {quickPublishing === book.id ? 'Publication...' : 'Publier maintenant'}
+                                                                                        </button>
+
+                                                                                        <div className="border-t border-gray-100 my-1" />
+
+                                                                                        {/* Édition */}
+                                                                                        <div className="px-3 py-1.5">
+                                                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Édition</p>
+                                                                                        </div>
+                                                                                        <button
+                                                                                            onClick={() => { handleQuickEdit(book); setOpenDropdown(null) }}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                                                                                        >
+                                                                                            <Edit3 className="w-4 h-4 text-emerald-500" /> Modification rapide
+                                                                                        </button>
+                                                                                        <Link
+                                                                                            href={`/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`}
+                                                                                            onClick={() => setOpenDropdown(null)}
+                                                                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                                                                        >
+                                                                                            <Edit className="w-4 h-4 text-blue-500" /> Modification complète
+                                                                                        </Link>
+
+                                                                                        <div className="border-t border-gray-100 my-1" />
+
+                                                                                        {/* Supprimer */}
+                                                                                        <button
+                                                                                            onClick={() => { handleDelete(book.id, book.title); setOpenDropdown(null) }}
+                                                                                            disabled={loading === book.id}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                                                                        >
+                                                                                            <Trash2 className="w-4 h-4" /> Supprimer
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </td>
@@ -811,6 +862,12 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                 isOpen={!!previewCaptionBook}
                 onClose={() => setPreviewCaptionBook(null)}
                 book={previewCaptionBook}
+            />
+
+            <VideoStudioModal
+                isOpen={!!videoStudioBook}
+                onClose={() => setVideoStudioBook(null)}
+                book={videoStudioBook}
             />
         </div>
     )

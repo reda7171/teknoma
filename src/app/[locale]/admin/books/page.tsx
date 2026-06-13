@@ -11,7 +11,6 @@ import SyncJumiaStockButton from '@/components/admin/SyncJumiaStockButton'
 import { Prisma } from '@prisma/client'
 
 import BookFilters from './BookFilters'
-
 export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, filter?: string, limit?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
