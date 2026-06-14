@@ -6,7 +6,8 @@
 import * as htmlToImage from 'html-to-image'
 
 export interface VideoExportOptions {
-    element: HTMLElement
+    element?: HTMLElement
+    imagesDataUrls?: string[]
     duration?: number
     fps?: number
     filename?: string
@@ -14,33 +15,46 @@ export interface VideoExportOptions {
 }
 
 export async function exportToMp4(opts: VideoExportOptions): Promise<void> {
-    const { element, duration = 5, fps = 30, filename = 'short.mp4', onProgress } = opts
+    const { element, imagesDataUrls, duration = 5, fps = 30, filename = 'short.mp4', onProgress } = opts
     const totalMs = duration * 1000
 
     onProgress?.(5)
 
-    // 1. Capture du DOM en PNG haute résolution
-    const dataUrl = await htmlToImage.toPng(element, {
-        quality: 1,
-        pixelRatio: 2,
-        cacheBust: true,
-        skipFonts: false,
-    })
+    let dataUrls: string[] = []
+
+    if (imagesDataUrls && imagesDataUrls.length > 0) {
+        dataUrls = imagesDataUrls
+    } else if (element) {
+        // 1. Capture du DOM en PNG haute résolution
+        const dataUrl = await htmlToImage.toPng(element, {
+            quality: 1,
+            pixelRatio: 2,
+            cacheBust: true,
+            skipFonts: false,
+        })
+        dataUrls.push(dataUrl)
+    } else {
+        throw new Error("No element or imagesDataUrls provided")
+    }
 
     onProgress?.(20)
 
-    // 2. Charger l'image dans un objet Image
-    const img = new Image()
-    await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = reject
-        img.src = dataUrl
-    })
+    // 2. Charger les images dans des objets Image
+    const imgs: HTMLImageElement[] = []
+    for (const url of dataUrls) {
+        const img = new Image()
+        await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve()
+            img.onerror = reject
+            img.src = url
+        })
+        imgs.push(img)
+    }
 
-    // 3. Créer un canvas aux dimensions de l'image
+    // 3. Créer un canvas aux dimensions de la première image
     const canvas = document.createElement('canvas')
-    canvas.width = img.width
-    canvas.height = img.height
+    canvas.width = imgs[0].width
+    canvas.height = imgs[0].height
     const ctx = canvas.getContext('2d')!
 
     onProgress?.(30)
@@ -85,13 +99,19 @@ export async function exportToMp4(opts: VideoExportOptions): Promise<void> {
 
         // 6. Effet Ken Burns : zoom 1 → 1.08 + légère translation
         const startTime = performance.now()
+        const imageDurationMs = totalMs / imgs.length
+
         const animate = () => {
             const elapsed = performance.now() - startTime
             const progress = Math.min(elapsed / totalMs, 1)
 
-            const scale = 1 + progress * 0.08
-            const tx = progress * canvas.width * 0.02
-            const ty = progress * canvas.height * 0.01
+            const currentImgIndex = Math.min(Math.floor(elapsed / imageDurationMs), imgs.length - 1)
+            const imgProgress = (elapsed % imageDurationMs) / imageDurationMs
+            const img = imgs[currentImgIndex]
+
+            const scale = 1 + imgProgress * 0.08
+            const tx = imgProgress * canvas.width * 0.02
+            const ty = imgProgress * canvas.height * 0.01
 
             ctx.clearRect(0, 0, canvas.width, canvas.height)
             ctx.save()
