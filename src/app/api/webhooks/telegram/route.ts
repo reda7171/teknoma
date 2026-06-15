@@ -377,15 +377,34 @@ export async function POST(req: Request) {
                 } else if (period === 'month') {
                     start = new Date(now.getFullYear(), now.getMonth(), 1)
                     label = "Ce Mois"
+                } else if (period === '30days') {
+                    const thirtyDaysAgo = new Date()
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+                    thirtyDaysAgo.setHours(0,0,0,0)
+                    start = thirtyDaysAgo
+                    label = "30 Derniers Jours"
+                } else if (period === '3months') {
+                    const threeMonthsAgo = new Date()
+                    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+                    threeMonthsAgo.setHours(0,0,0,0)
+                    start = threeMonthsAgo
+                    label = "3 Derniers Mois"
+                } else if (period === '1year') {
+                    const oneYearAgo = new Date()
+                    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+                    oneYearAgo.setHours(0,0,0,0)
+                    start = oneYearAgo
+                    label = "1 An"
                 }
 
-                if (period === 'top5') {
+                if (period === 'top5' || period === 'top10') {
+                    const limit = period === 'top10' ? 10 : 5;
                     const topBooks = await prisma.orderItem.groupBy({
                         by: ['bookId'],
                         where: { bookId: { not: null }, order: { status: { not: 'CANCELLED' } } },
                         _count: { bookId: true },
                         orderBy: { _count: { bookId: 'desc' } },
-                        take: 5
+                        take: limit
                     })
 
                     const books = await Promise.all(topBooks.map(async (item) => {
@@ -393,8 +412,9 @@ export async function POST(req: Request) {
                         return `🏆 <b>${book?.title || 'Livre inconnu'}</b> : ${item._count.bookId} ventes`
                     }))
 
-                    const text = `🥇 <b>TOP 5 DES VENTES</b>\n\n${books.join('\n')}`
-                    await answerCallbackQuery(callbackId, '🏆 Top 5 généré', token)
+                    const title = limit === 10 ? "TOP 10 DES VENTES" : "TOP 5 DES VENTES";
+                    const text = `🥇 <b>${title}</b>\n\n${books.join('\n')}`
+                    await answerCallbackQuery(callbackId, `🏆 Top ${limit} généré`, token)
                     await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                 } else {
                     // Récupérer les paramètres pour savoir quoi afficher
@@ -620,7 +640,15 @@ export async function POST(req: Request) {
                         ],
                         [
                             { text: '📅 Ce Mois', callback_data: 'stats:month' },
-                            { text: '🏆 Top 5 Livres', callback_data: 'stats:top5' }
+                            { text: '📅 30 Derniers Jours', callback_data: 'stats:30days' }
+                        ],
+                        [
+                            { text: '📅 3 Mois', callback_data: 'stats:3months' },
+                            { text: '📅 1 An', callback_data: 'stats:1year' }
+                        ],
+                        [
+                            { text: '🏆 Top 5 Livres', callback_data: 'stats:top5' },
+                            { text: '🏆 Top 10 Livres', callback_data: 'stats:top10' }
                         ],
                         [
                             { text: '🛒 Dernières Commandes', callback_data: 'stats:recent_orders' },
