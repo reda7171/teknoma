@@ -106,14 +106,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Headers Cross-Origin Isolation pour FFmpeg.wasm (SharedArrayBuffer)
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-        ],
-      },
+
       // Headers pour le Service Worker
       {
         source: '/sw.js',

@@ -24,6 +24,11 @@ interface Props {
         statsTopViews: boolean
         instagramId: string
         facebookPageId: string
+        templateOrder?: string
+        templateRegister?: string
+        templateReview?: string
+        templateLowStock?: string
+        templateWhatsapp?: string
     }
 }
 
@@ -62,6 +67,13 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             await updateSetting('telegram_stats_top_views', String(settings.statsTopViews), 'config', 'Stats Vues (Bilan)')
             await updateSetting('marketing_instagram_id', settings.instagramId, 'config', 'Instagram Account ID')
             await updateSetting('marketing_facebook_page_id', settings.facebookPageId, 'config', 'Facebook Page ID')
+
+            // Templates
+            if (settings.templateOrder !== undefined) await updateSetting('telegram_template_order', settings.templateOrder, 'config', 'Template Commande')
+            if (settings.templateRegister !== undefined) await updateSetting('telegram_template_register', settings.templateRegister, 'config', 'Template Inscription')
+            if (settings.templateReview !== undefined) await updateSetting('telegram_template_review', settings.templateReview, 'config', 'Template Avis')
+            if (settings.templateLowStock !== undefined) await updateSetting('telegram_template_low_stock', settings.templateLowStock, 'config', 'Template Stock')
+            if (settings.templateWhatsapp !== undefined) await updateSetting('whatsapp_template_order', settings.templateWhatsapp, 'config', 'Template WhatsApp')
 
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
@@ -236,6 +248,71 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                             onChange={(e) => setSettings({ ...settings, facebookPageId: e.target.value })}
                             placeholder="Ex: 102345678901234"
                             className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 rounded-2xl outline-none font-bold text-gray-900 transition-all"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Templates de Messages */}
+            <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-6">
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
+                        <MessageCircle className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-black text-gray-900 tracking-tight">Templates de Messages</h2>
+                        <p className="text-sm text-gray-400 font-bold">Personnalisez le contenu des notifications envoyées</p>
+                    </div>
+                </div>
+
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-[13px] font-black text-gray-900">Notification Nouvelle Commande (Telegram)</label>
+                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}"}</p>
+                        <textarea 
+                            value={settings.templateOrder || ''}
+                            onChange={(e) => setSettings({ ...settings, templateOrder: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[120px] text-sm"
+                        />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <label className="text-[13px] font-black text-gray-900">Confirmation Commande (WhatsApp)</label>
+                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{shortId}}, {{city}}"}</p>
+                        <textarea 
+                            value={settings.templateWhatsapp || ''}
+                            onChange={(e) => setSettings({ ...settings, templateWhatsapp: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-green-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[13px] font-black text-gray-900">Nouvelle Inscription (Telegram)</label>
+                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}"}</p>
+                        <textarea 
+                            value={settings.templateRegister || ''}
+                            onChange={(e) => setSettings({ ...settings, templateRegister: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[13px] font-black text-gray-900">Nouvel Avis Client (Telegram)</label>
+                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{rating}}, {{comment}}"}</p>
+                        <textarea 
+                            value={settings.templateReview || ''}
+                            onChange={(e) => setSettings({ ...settings, templateReview: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[13px] font-black text-gray-900">Alerte Stock Faible (Telegram)</label>
+                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{title}}, {{stock}}"}</p>
+                        <textarea 
+                            value={settings.templateLowStock || ''}
+                            onChange={(e) => setSettings({ ...settings, templateLowStock: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-sm"
                         />
                     </div>
                 </div>

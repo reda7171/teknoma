@@ -36,6 +36,12 @@ export default async function TelegramConfigPage() {
         statsTopViews: await getSetting('telegram_stats_top_views') === 'true',
         instagramId: await getSetting('marketing_instagram_id') || '',
         facebookPageId: await getSetting('marketing_facebook_page_id') || '',
+        // Nouveaux templates de messages
+        templateOrder: await getSetting('telegram_template_order') || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`,
+        templateRegister: await getSetting('telegram_template_register') || `👤 <b>Nouveau Compte Créé</b>\n\n📛 <b>Nom:</b> {{fullName}}\n📧 <b>Email:</b> {{email}}\n{{phone}}📍 <b>Ville:</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n🔑 <b>Rôle:</b> {{role}}\n🌐 <b>IP:</b> {{ip}}\n📅 <b>Date:</b> {{date}}`,
+        templateReview: await getSetting('telegram_template_review') || `⭐ <b>Nouvel Avis Client</b>\n\n👤 <b>Client:</b> {{fullName}}\n⭐ <b>Note:</b> {{rating}}/5\n💬 <b>Message:</b> <i>{{comment}}</i>\n\n📥 <i>Action requise :</i>`,
+        templateLowStock: await getSetting('telegram_template_low_stock') || `⚠️ <b>Alerte Stock Faible</b>\n\n📖 <b>Livre:</b> {{title}}\n📦 <b>Stock restant:</b> <b>{{stock}}</b>\n\n<i>Action rapide disponible :</i>`,
+        templateWhatsapp: await getSetting('whatsapp_template_order') || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`,
     }
 
     const webhookBaseUrl = await getSetting('telegram_webhook_base_url') || ''

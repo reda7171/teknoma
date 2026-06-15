@@ -361,7 +361,7 @@ export async function POST(req: Request) {
             }
             
             // Format: stats:{period}
-            else if (data && data.startsWith('stats:')) {
+            else if (data && data.startsWith('stats:') && !['stats:recent_orders', 'stats:compare_months', 'stats:all_time'].includes(data)) {
                 const [, period] = data.split(':')
                 const now = new Date()
                 let start = new Date(now.setHours(0, 0, 0, 0))

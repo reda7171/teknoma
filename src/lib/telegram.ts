@@ -77,17 +77,20 @@ export async function sendOrderNotification(order: {
         ?.map(i => `  • ${i.book?.title || i.pack?.name || 'Article'} x${i.quantity}`)
         .join('\n') || ''
 
-    const text = `🛒 <b>Nouvelle Commande #${shortId}</b>\n\n` +
-        `👤 <b>Client:</b> ${order.fullName}\n` +
-        `📱 <b>Source:</b> ${order.source || 'Boutique'}\n` +
-        `📞 <b>Téléphone:</b> ${order.phone}\n` +
-        `📍 <b>Ville (Saisie):</b> ${order.city}\n` +
-        `🌍 <b>Pays/Ville (IP):</b> ${location}\n` +
-        `💰 <b>Total:</b> ${order.total.toFixed(2)} MAD\n` +
-        (order.comment ? `📝 <b>Note:</b> ${order.comment}\n` : '') +
-        (itemsList ? `\n📦 <b>Articles:</b>\n${itemsList}\n` : '') +
-        `🌐 <b>IP:</b> ${ip}\n` +
-        `\n🔗 <a href="${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}">Voir la commande</a>`
+    const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_order' } })
+    let text = templateSetting?.value || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`
+
+    text = text.replace(/\{\{shortId\}\}/g, shortId)
+               .replace(/\{\{fullName\}\}/g, order.fullName)
+               .replace(/\{\{source\}\}/g, order.source || 'Boutique')
+               .replace(/\{\{phone\}\}/g, order.phone)
+               .replace(/\{\{city\}\}/g, order.city)
+               .replace(/\{\{location\}\}/g, location)
+               .replace(/\{\{total\}\}/g, order.total.toFixed(2))
+               .replace(/\{\{comment\}\}/g, order.comment ? `📝 <b>Note:</b> ${order.comment}` : '')
+               .replace(/\{\{itemsList\}\}/g, itemsList ? `📦 <b>Articles:</b>\n${itemsList}` : '')
+               .replace(/\{\{ip\}\}/g, ip)
+               .replace(/\{\{orderUrl\}\}/g, `${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}`)
 
     let cleanPhone = order.phone.replace(/[^0-9]/g, '')
     if (cleanPhone.startsWith('0')) {
@@ -96,7 +99,13 @@ export async function sendOrderNotification(order: {
         cleanPhone = '212' + cleanPhone
     }
 
-    const whatsappMsg = encodeURIComponent(`Bonjour ${order.fullName},\n\nVotre commande #${shortId} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à ${order.city}.\n\nMerci de votre confiance ! 📚✨`)
+    const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
+    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
+    whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
+                               .replace(/\{\{shortId\}\}/g, shortId)
+                               .replace(/\{\{city\}\}/g, order.city)
+
+    const whatsappMsg = encodeURIComponent(whatsappText)
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
 
     const keyboard = {
@@ -265,15 +274,17 @@ export async function sendUserRegistrationNotification(user: {
 
     const ip = await getClientIp()
     const location = await getLocationFromIp(ip)
-    const text = `👤 <b>Nouveau Compte Créé</b>\n\n` +
-        `📛 <b>Nom:</b> ${user.fullName}\n` +
-        `📧 <b>Email:</b> ${user.email}\n` +
-        (user.phone ? `📞 <b>Téléphone:</b> ${user.phone}\n` : '') +
-        `📍 <b>Ville:</b> ${user.city}\n` +
-        `🌍 <b>Pays/Ville (IP):</b> ${location}\n` +
-        `🔑 <b>Rôle:</b> ${user.role || 'USER'}\n` +
-        `🌐 <b>IP:</b> ${ip}\n` +
-        `📅 <b>Date:</b> ${new Date().toLocaleString('fr-FR')}`
+    const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_register' } })
+    let text = templateSetting?.value || `👤 <b>Nouveau Compte Créé</b>\n\n📛 <b>Nom:</b> {{fullName}}\n📧 <b>Email:</b> {{email}}\n{{phone}}📍 <b>Ville:</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n🔑 <b>Rôle:</b> {{role}}\n🌐 <b>IP:</b> {{ip}}\n📅 <b>Date:</b> {{date}}`
+
+    text = text.replace(/\{\{fullName\}\}/g, user.fullName)
+               .replace(/\{\{email\}\}/g, user.email)
+               .replace(/\{\{phone\}\}/g, user.phone ? `📞 <b>Téléphone:</b> ${user.phone}\n` : '')
+               .replace(/\{\{city\}\}/g, user.city)
+               .replace(/\{\{location\}\}/g, location)
+               .replace(/\{\{role\}\}/g, user.role || 'USER')
+               .replace(/\{\{ip\}\}/g, ip)
+               .replace(/\{\{date\}\}/g, new Date().toLocaleString('fr-FR'))
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
@@ -332,11 +343,12 @@ export async function sendReviewNotification(review: { id: string, fullName: str
     const shouldNotify = await prisma.siteSettings.findUnique({ where: { key: 'telegram_notify_reviews' } })
     if (shouldNotify?.value === 'false') return
 
-    const text = `⭐ <b>Nouvel Avis Client</b>\n\n` +
-        `👤 <b>Client:</b> ${review.fullName}\n` +
-        `⭐ <b>Note:</b> ${review.rating}/5\n` +
-        `💬 <b>Message:</b> <i>${review.comment}</i>\n\n` +
-        `📥 <i>Action requise :</i>`
+    const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_review' } })
+    let text = templateSetting?.value || `⭐ <b>Nouvel Avis Client</b>\n\n👤 <b>Client:</b> {{fullName}}\n⭐ <b>Note:</b> {{rating}}/5\n💬 <b>Message:</b> <i>{{comment}}</i>\n\n📥 <i>Action requise :</i>`
+
+    text = text.replace(/\{\{fullName\}\}/g, review.fullName)
+               .replace(/\{\{rating\}\}/g, review.rating.toString())
+               .replace(/\{\{comment\}\}/g, review.comment)
 
     const replyMarkup = {
         inline_keyboard: [
@@ -361,10 +373,11 @@ export async function sendLowStockNotification(book: { id: string, title: string
     const shouldNotify = await prisma.siteSettings.findUnique({ where: { key: 'telegram_notify_low_stock' } })
     if (shouldNotify?.value === 'false') return
 
-    const text = `⚠️ <b>Alerte Stock Faible</b>\n\n` +
-        `📖 <b>Livre:</b> ${book.title}\n` +
-        `📦 <b>Stock restant:</b> <b>${book.stock}</b>\n\n` +
-        `<i>Action rapide disponible :</i>`
+    const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_low_stock' } })
+    let text = templateSetting?.value || `⚠️ <b>Alerte Stock Faible</b>\n\n📖 <b>Livre:</b> {{title}}\n📦 <b>Stock restant:</b> <b>{{stock}}</b>\n\n<i>Action rapide disponible :</i>`
+
+    text = text.replace(/\{\{title\}\}/g, book.title)
+               .replace(/\{\{stock\}\}/g, book.stock.toString())
 
     const replyMarkup = {
         inline_keyboard: [

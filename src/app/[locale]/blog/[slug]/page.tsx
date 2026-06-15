@@ -378,9 +378,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black mb-1">{post.authorName || post.author?.fullName}</h3>
-                                        {(!post.authorName && post.author?.bio) && (
+                                        <h3 className="text-lg font-black mb-1">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
+                                        {(!post.authorName && post.author?.bio) ? (
                                             <p className="text-sm text-slate-500 leading-relaxed">{post.author.bio}</p>
+                                        ) : (
+                                            <>
+                                                <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 mb-2">{t('ModeratorRole')}</p>
+                                                <p className="text-sm text-slate-500 leading-relaxed">{t('ModeratorDescription')}</p>
+                                            </>
                                         )}
                                     </div>
                                 </div>

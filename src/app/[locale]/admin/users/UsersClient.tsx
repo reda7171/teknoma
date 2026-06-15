@@ -289,9 +289,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                                     {user.image ? (
                                                         <Image src={user.image} alt={user.fullName || user.email} width={40} height={40} className="rounded-full object-cover w-10 h-10 border border-gray-200" />
                                                     ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold uppercase border border-gray-200">
-                                                            {(user.fullName || user.email).charAt(0)}
-                                                        </div>
+                                                        <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(user.fullName || user.email)}`} alt={user.fullName || user.email} className="rounded-full object-cover w-10 h-10 border border-gray-200" />
                                                     )}
                                                     <div>
                                                         <div className="font-bold text-gray-900">{user.fullName || 'Sans nom'}</div>
@@ -593,7 +591,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                         {formData.image ? (
                                             <Image src={formData.image} alt="Profile" fill className="object-cover" />
                                         ) : (
-                                            <Shield className="w-8 h-8 text-gray-400" />
+                                            <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(formData.fullName || formData.email || 'User')}`} alt="Profile" className="w-full h-full object-cover" />
                                         )}
                                         <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
                                             <Camera className="w-6 h-6 text-white mb-1" />
