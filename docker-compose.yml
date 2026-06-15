@@ -94,7 +94,7 @@ services:
       PMA_USER: ${DB_USER:-riwaya_user}
       PMA_PASSWORD: ${DB_PASSWORD:-riwaya_pass}
     ports:
-      - "127.0.0.1:9901:80"
+      - "9901:80"
     depends_on:
       - db
     networks:
