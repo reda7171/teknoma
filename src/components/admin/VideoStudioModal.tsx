@@ -262,14 +262,30 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const handleGenerate = async () => {
         setLoading(true)
         try {
-            await fetch('/api/n8n/publish', {
+            const res = await fetch('/api/n8n/publish', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ platform, caption, images, is_short: true, texts: { title, author, price, whatsapp, hashtags } })
+                body: JSON.stringify({ 
+                    platform, 
+                    customCaption: `${caption}\n\n${hashtags}`, 
+                    customImageUrl: images[0] || book?.image,
+                    bookId: book?.id,
+                    images, 
+                    is_short: true, 
+                    texts: { title, author, price, whatsapp, hashtags } 
+                })
             })
+            
+            if (!res.ok) {
+                const data = await res.json()
+                throw new Error(data.error || 'Erreur lors de la publication')
+            }
+            
             alert('Envoyé avec succès !')
             onClose()
-        } catch { alert('Erreur lors de la publication') }
+        } catch (e: any) { 
+            alert(e.message || 'Erreur lors de la publication') 
+        }
         finally { setLoading(false) }
     }
 

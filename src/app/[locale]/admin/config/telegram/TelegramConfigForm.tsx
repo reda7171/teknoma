@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateSetting } from '@/lib/actions/site-settings'
-import { Save, Send, Webhook, Trash2, Loader2, Sparkles } from 'lucide-react'
+import { Save, Send, Webhook, Trash2, Loader2, Sparkles, MessageCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Props {

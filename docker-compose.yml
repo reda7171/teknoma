@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-riwaya_pass}
     command: --default-authentication-plugin=mysql_native_password
     ports:
-      - "127.0.0.1:3906:3306"
+      - "3906:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -30,7 +30,7 @@ services:
     container_name: riwaya_redis
     restart: always
     ports:
-      - "127.0.0.1:6379:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -69,7 +69,7 @@ services:
     container_name: riwaya_n8n
     restart: always
     ports:
-      - "127.0.0.1:5678:5678"
+      - "5678:5678"
     environment:
       - N8N_SECURE_COOKIE=false
       - N8N_HOST=${N8N_HOST:-localhost}
