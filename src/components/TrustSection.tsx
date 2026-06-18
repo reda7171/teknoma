@@ -91,7 +91,7 @@ function StatCard({ icon, number, label, bgColor, iconColor, idx }: StatCardProp
                     <AnimatedCounter value={number} />
                 </h3>
                 <div className="w-10 h-1 bg-gray-100 mx-auto rounded-full group-hover:w-16 group-hover:bg-pixio-yellow transition-all duration-500"></div>
-                <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] font-outfit">
+                <p className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase text-gray-400 tracking-[0.3em] font-outfit">
                     {label}
                 </p>
             </div>
@@ -151,12 +151,12 @@ export default function TrustSection({ stats, className, style }: { stats?: { bo
                 <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-32 space-y-8">
                     <div className="inline-flex items-center gap-3 px-8 py-3 bg-black text-white rounded-full hover:scale-105 transition-transform cursor-default">
                         <div className={`w-2 h-2 bg-pixio-yellow rounded-full ${pingClass}`}></div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.5em]">
+                        <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.5em]">
                             {t('Badge')}
                         </span>
                     </div>
 
-                    <h2 className="text-6xl md:text-9xl font-black text-black tracking-[-0.07em] leading-[0.85] uppercase">
+                    <h2 className="text-6xl md:text-9xl rtl:tracking-normal font-black text-black tracking-[-0.07em] leading-[0.85] uppercase">
                         {t('Title')}<span className="text-pixio-yellow">.</span>
                     </h2>
 

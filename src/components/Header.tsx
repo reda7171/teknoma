@@ -309,17 +309,6 @@ export default function Header({ user, notificationDropdown, navigation, feature
                             {/* Mobile Actions First */}
                             <div className="px-4 pb-4 border-b border-gray-100">
                                 <div className="flex items-center justify-around gap-4">
-                                    <button onClick={() => { openCart(); setMobileMenuOpen(false); }} className="relative flex flex-col items-center gap-1">
-                                        <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
-                                            <ShoppingCart className="w-5 h-5 text-gray-900" />
-                                            {displayItems > 0 && (
-                                                <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                                                    {displayItems}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <span className="text-[10px] rtl:text-xs font-bold text-gray-600">{t('Cart')}</span>
-                                    </button>
                                     {notificationDropdown && (
                                         <div className="flex flex-col items-center gap-1">
                                             {notificationDropdown}
@@ -380,6 +369,20 @@ export default function Header({ user, notificationDropdown, navigation, feature
 
             {/* Cart Drawer */}
             <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
+
+            {/* Floating Mobile Cart Button */}
+            <button
+                onClick={openCart}
+                className="md:hidden fixed bottom-6 left-6 z-40 flex items-center justify-center w-14 h-14 bg-black text-white rounded-full shadow-2xl hover:scale-110 transition-transform duration-300"
+                aria-label="Ouvrir le panier"
+            >
+                <ShoppingCart className="w-6 h-6" />
+                {mounted && displayItems > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white ring-2 ring-white animate-in zoom-in duration-300">
+                        {displayItems}
+                    </span>
+                )}
+            </button>
         </header>
     )
 }

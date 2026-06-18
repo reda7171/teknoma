@@ -19,7 +19,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
 
     return (
         <nav className="flex mb-6 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-2 text-xs font-medium text-gray-500">
+            <ol className="flex items-center gap-2 text-xs rtl:text-sm font-medium text-gray-500">
                 <li className="flex items-center">
                     <Link href="/" className="hover:text-black transition-colors flex items-center gap-1">
                         <Home className="w-3 h-3" />
@@ -28,8 +28,8 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                 </li>
                 
                 {items.map((item, index) => (
-                    <li key={index} className="flex items-center space-x-2">
-                        <ChevronRight className="w-3 h-3 text-gray-400 shrink-0" />
+                    <li key={index} className="flex items-center gap-2">
+                        <ChevronRight className="w-3 h-3 text-gray-400 shrink-0 rtl:rotate-180" />
                         {item.href ? (
                             <Link 
                                 href={item.href as any} 

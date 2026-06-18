@@ -137,11 +137,24 @@ export default function CheckoutClient({
     useEffect(() => {
         if (mounted && !isSuccess) {
             const currentSubtotal = getTotalPrice()
-            if (items.length === 0 || (minOrderAmount > 0 && currentSubtotal <= minOrderAmount)) {
+            const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
+            const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
+            const shippingFee = (hasOnlyDigital || hasFreeShippingItem || currentSubtotal >= 500) ? 0 : 30
+            let discountAmount = 0
+            if (coupon) {
+                if (coupon.type === 'PERCENTAGE') {
+                    discountAmount = (currentSubtotal * coupon.discount) / 100
+                } else {
+                    discountAmount = coupon.discount
+                }
+            }
+            const currentFinalTotal = Math.max(0, currentSubtotal - discountAmount + shippingFee)
+
+            if (items.length === 0 || (minOrderAmount > 0 && currentFinalTotal < minOrderAmount)) {
                 router.replace('/cart')
             }
         }
-    }, [mounted, items.length, minOrderAmount, router, isSuccess, getTotalPrice])
+    }, [mounted, items, minOrderAmount, router, isSuccess, getTotalPrice, coupon])
 
     if (!mounted) return null
 
@@ -175,7 +188,7 @@ export default function CheckoutClient({
         setError(null)
         fbPixelEvents.addPaymentInfo()
 
-        if (minOrderAmount > 0 && subtotal <= minOrderAmount) {
+        if (minOrderAmount > 0 && finalTotal < minOrderAmount) {
             setError(`Le montant minimum du panier pour commander est de ${minOrderAmount} MAD.`)
             showNotification(`Le montant minimum du panier pour commander est de ${minOrderAmount} MAD.`, 'error')
             setIsSubmitting(false)
@@ -462,7 +475,7 @@ export default function CheckoutClient({
 
                         {/* Section Coupon */}
                         <div className="pt-10 border-t border-gray-50">
-                            <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-6">{t('PromotionalCode')}</p>
+                            <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-[0.2em] rtl:tracking-normal mb-6">{t('PromotionalCode')}</p>
                             <CouponInput
                                 cartTotal={subtotal}
                                 onApplied={setCoupon}
@@ -472,19 +485,19 @@ export default function CheckoutClient({
 
                         {/* Totaux */}
                         <div className="space-y-5 pt-10 border-t border-gray-50">
-                            <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest text-gray-400">
+                            <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
                                 <span>{t('SelectionSummary')}</span>
                                 <span className="text-black">{subtotal.toFixed(0)} MAD</span>
                             </div>
                             {discountAmount > 0 && (
-                                <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest text-pixio-pink bg-black px-4 py-3 rounded-2xl">
+                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-pixio-pink bg-black px-4 py-3 rounded-2xl">
                                     <span className="flex items-center gap-2">
                                         <Ticket className="w-4 h-4" /> {t('CodeApplied')}
                                     </span>
                                     <span>-{discountAmount.toFixed(0)} MAD</span>
                                 </div>
                             )}
-                            <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest text-gray-400">
+                            <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
                                 <span>{t('DeliveryFee')}</span>
                                 {shippingFee === 0 ? (
                                     <span className="text-black bg-pixio-yellow px-2 py-1 rounded-md">{t('Free')}</span>
@@ -493,10 +506,10 @@ export default function CheckoutClient({
                                 )}
                             </div>
                             <div className="pt-6 border-t border-gray-50">
-                                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">{t('TotalAmount')}</p>
+                                <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-widest rtl:tracking-normal mb-1">{t('TotalAmount')}</p>
                                 <div className="flex items-baseline justify-between">
                                     <p className="text-4xl font-black text-black tracking-tighter leading-none">{finalTotal.toFixed(0)}</p>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">MAD</p>
+                                    <p className="text-[10px] rtl:text-sm font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">MAD</p>
                                 </div>
                             </div>
                         </div>
@@ -528,7 +541,7 @@ export default function CheckoutClient({
 
                         <div className="flex items-center gap-4 p-5 bg-pixio-cream/50 rounded-[1.5rem] border border-gray-50">
                             <Truck className="w-5 h-5 text-black" />
-                            <p className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-loose" dangerouslySetInnerHTML={{ __html: t.raw('FastDelivery') }} />
+                            <p className="text-[9px] rtl:text-xs font-black text-black/40 uppercase tracking-widest rtl:tracking-normal leading-loose rtl:leading-relaxed" dangerouslySetInnerHTML={{ __html: t.raw('FastDelivery') }} />
                         </div>
                     </div>
                 </div>

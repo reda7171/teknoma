@@ -183,8 +183,8 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         <SlidersHorizontal className="w-5 h-5 text-gray-100" />
                     </div>
                     <div>
-                        <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">{t('Filters')}</h2>
-                        <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-1">
+                        <h2 className="text-sm rtl:text-lg rtl:tracking-normal font-black uppercase tracking-widest text-gray-900">{t('Filters')}</h2>
+                        <p className="text-[10px] rtl:text-sm rtl:tracking-normal text-gray-400 font-bold tracking-widest uppercase mt-1">
                             {tCommon('RefineSearch')}
                         </p>
                     </div>
@@ -193,7 +193,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
 
             {/* Author Search */}
             <div>
-                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 ml-1">
+                <label className="flex items-center gap-2 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 mb-4 ml-1">
                     <User className="w-3 h-3" />
                     {t('SearchItems')}
                 </label>
@@ -217,7 +217,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         />
                         <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-black transition-colors">
+                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 group-hover:text-black transition-colors">
                         {tCommon('Available')}
                     </span>
                 </label>
@@ -227,7 +227,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
             <div>
                 <button 
                     onClick={() => toggleSection('langs')}
-                    className="w-full text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between group"
+                    className="w-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between group"
                 >
                     <div className="flex items-center gap-3">
                         <Globe className="w-3 h-3" />
@@ -245,7 +245,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
                             }).toString()}`}
                             scroll={false}
-                            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!params.language
+                            className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${!params.language
                                 ? 'bg-black text-white shadow-lg'
                                 : 'bg-[#F8F9FA] text-gray-400 hover:text-black'
                                 }`}
@@ -264,7 +264,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                     language: lang.code
                                 }).toString()}`}
                                 scroll={false}
-                                className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${params.language === lang.code
+                                className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${params.language === lang.code
                                     ? 'bg-black text-white shadow-lg'
                                     : 'bg-[#F8F9FA] text-gray-400 hover:text-black'
                                     }`}
@@ -281,7 +281,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
             <div>
                 <button 
                     onClick={() => toggleSection('cats')}
-                    className="w-full text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between group"
+                    className="w-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between group"
                 >
                     <div className="flex items-center gap-3">
                         <Filter className="w-3 h-3" />
@@ -299,7 +299,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
                             }).toString()}`}
                             scroll={false}
-                            className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!params.category
+                            className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${!params.category
                                 ? 'bg-black text-white shadow-lg'
                                 : 'bg-[#F8F9FA] text-gray-400 hover:text-black lg:hover:bg-pixio-cream/50'
                                 }`}
@@ -318,7 +318,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                     ...(params.inStock ? { inStock: params.inStock } : {})
                                 }).toString()}`}
                                 scroll={false}
-                                className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${params.category === category
+                                className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${params.category === category
                                     ? 'bg-black text-white shadow-lg'
                                     : 'bg-[#F8F9FA] text-gray-400 hover:text-black lg:hover:bg-pixio-cream/50'
                                     }`}
@@ -330,7 +330,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         {categories.length > 3 && (
                             <button
                                 onClick={() => setIsAllCatsRevealed(!isAllCatsRevealed)}
-                                className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                                className="px-4 py-3 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
                             >
                                 {isAllCatsRevealed ? tCommon('ShowLess') : tCommon('ShowMore')}
                             </button>
@@ -343,10 +343,10 @@ export default function BooksFilters({ params, categories, authors, languages, t
             {(params.category || params.search || params.language || params.inStock) && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
+                        <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
                         <button
                             onClick={resetFilters}
-                            className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+                            className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[9px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest hover:bg-red-100 transition-all"
                         >
                             {t('Reset')}
                         </button>
@@ -381,7 +381,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         {/* Filter Button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
                                 params.category || params.language || params.author || params.inStock 
                                 ? 'bg-black text-white shadow-lg' 
                                 : 'bg-gray-100 text-gray-900'
@@ -400,7 +400,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                     {(params.category || params.language || params.search || params.author || params.inStock) && (
                         <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
                             {params.category && (
-                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
                                     {tCats.has(params.category as any) ? tCats(params.category as any) : params.category}
                                     <Link 
                                         href={`/books?${new URLSearchParams({
@@ -415,7 +415,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                 </div>
                             )}
                             {params.language && (
-                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
                                     {languages.find(l => l.code === params.language)?.label || params.language}
                                     <Link 
                                         href={`/books?${new URLSearchParams({
@@ -430,7 +430,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                 </div>
                             )}
                             {params.author && (
-                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
                                     {params.author}
                                     <Link 
                                         href={`/books?${new URLSearchParams({
@@ -445,7 +445,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                                 </div>
                             )}
                             {(params.inStock === undefined || params.inStock === 'true') && (
-                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
                                     {tCommon('Available')}
                                     <Link 
                                         href={`/books?${new URLSearchParams({
@@ -476,7 +476,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         <div className="flex items-center justify-between p-6 border-b border-gray-100">
                             <div>
                                 <h2 className="text-lg font-black text-gray-900 tracking-tight">{t('Filters')}</h2>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{tCommon('RefineSearch')}</p>
+                                <p className="text-[10px] rtl:text-sm rtl:tracking-normal text-gray-400 font-bold uppercase tracking-widest mt-0.5">{tCommon('RefineSearch')}</p>
                             </div>
                             <button 
                                 onClick={() => setIsMobileMenuOpen(false)}

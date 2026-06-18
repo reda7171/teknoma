@@ -82,7 +82,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             </div>
                             <div>
                                 <h2 className="text-2xl font-black text-black tracking-tight">{t('Title')}</h2>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+                                <p className="text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] text-gray-500">
                                     {t('SelectedItems', { count: totalItems })}
                                 </p>
                             </div>
@@ -219,11 +219,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                 ))}
 
                                 {items.length > 0 && (
-                                <button
-                                    onClick={handleClearCart}
-                                    className="p-2 text-gray-300 hover:text-black transition-colors"
-                                    title="Vider le panier"
-                                >        {t('ClearSelection')}
+                                    <button
+                                        onClick={handleClearCart}
+                                        className="w-full flex items-center justify-center gap-3 p-4 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-white bg-red-50 hover:bg-red-500 transition-all rounded-[1rem] shadow-sm mt-4"
+                                        title="Vider le panier"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        {t('ClearSelection')}
                                     </button>
                                 )}
                             </div>
@@ -235,11 +237,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <div className="p-8 bg-white border-t border-gray-50 space-y-8">
                             {/* Summary */}
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest">
                                     <span className="text-gray-400">{t('Subtotal')}</span>
                                     <span className="text-black">{totalPrice} MAD</span>
                                 </div>
-                                <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
+                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest">
                                     <span className="text-gray-400">{t('Delivery')}</span>
                                     {shippingFee === 0 ? (
                                         <span className="text-pixio-pink bg-black px-2 py-1 rounded-md">{t('Complimentary')}</span>
@@ -274,7 +276,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                                 <button
                                     onClick={onClose}
-                                    className="w-full text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                                    className="w-full text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
                                 >
                                     {t('KeepExploring')}
                                 </button>

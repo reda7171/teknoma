@@ -386,7 +386,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_features':
         return (
-          <section key={key} {...getSectionProps('home_section_features', 'bg-white')} className={`py-24 ${getSectionProps('home_section_features', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_features', 'bg-white')} className={`py-12 ${getSectionProps('home_section_features', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                 {[
@@ -409,7 +409,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_best_sellers':
         return (
-          <section key={key} {...getSectionProps('home_section_best_sellers', 'bg-white')} className={`py-24 ${getSectionProps('home_section_best_sellers', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_best_sellers', 'bg-white')} className={`py-12 ${getSectionProps('home_section_best_sellers', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-6">
                 <div className="space-y-4">
@@ -454,7 +454,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_quote':
         if (!randomQuote) return null
         return (
-          <section key={key} {...getSectionProps('home_section_quote', 'bg-pixio-yellow')} className={`py-24 relative overflow-hidden ${getSectionProps('home_section_quote', 'bg-pixio-yellow').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_quote', 'bg-pixio-yellow')} className={`py-12 relative overflow-hidden ${getSectionProps('home_section_quote', 'bg-pixio-yellow').className || ''}`}>
             <ScrollReveal animation="animate-reveal-up" delay={100} className="relative z-10">
               <Quote className="absolute -top-10 -right-10 w-64 h-64 text-white opacity-50 -rotate-12" />
               <Quote className="absolute -bottom-10 -left-10 w-64 h-64 text-white opacity-50 rotate-12" />
@@ -480,7 +480,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_packs':
         return (
-          <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-24 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-4">
                 <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{t('Collections.Subtitle')}</span>
@@ -509,18 +509,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <ScrollReveal className="space-y-6 text-center lg:text-left max-w-2xl">
                   <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full">
                     <Users className="w-4 h-4 text-pixio-yellow" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em]">{t('BestAuthors.Subtitle')}</span>
+                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.4em]">{t('BestAuthors.Subtitle')}</span>
                   </div>
-                  <h2 className="text-6xl md:text-8xl font-black text-black tracking-tighter leading-[0.8] mb-4">
+                  <h2 className="text-6xl md:text-8xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.8] mb-4">
                     {t('BestAuthors.Title')}<span className="text-pixio-yellow">.</span>
                   </h2>
                   <p className="text-xl text-gray-400 font-medium tracking-tight">{t('BestAuthors.Description')}</p>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right" delay={300}>
                   <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-8 py-4 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
-                    <span className="text-xs font-black uppercase tracking-widest text-black">{t('BestAuthors.BooksPlural')}</span>
-                    <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
-                      <ArrowRight className="w-4 h-4" />
+                    <span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-black">{t('BestAuthors.BooksPlural')}</span>
+                    <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
+                      <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                     </div>
                   </Link>
                 </ScrollReveal>
@@ -528,7 +528,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {bestAuthors.length === 0 ? (
                 <div className="text-center py-32 bg-pixio-cream rounded-[4rem] border-2 border-dashed border-gray-100">
                   <Users className="w-20 h-20 text-gray-200 mx-auto mb-6" />
-                  <p className="text-gray-400 font-black text-xs uppercase tracking-[0.3em]">{t('BestAuthors.NoData')}</p>
+                  <p className="text-gray-400 font-black text-xs rtl:text-sm rtl:tracking-normal uppercase tracking-[0.3em]">{t('BestAuthors.NoData')}</p>
                 </div>
               ) : (
                 <AuthorsCarousel authors={bestAuthors} />
@@ -552,7 +552,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_new_arrivals':
         return (
-          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-24 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-12 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
                 <div className="space-y-4">
@@ -580,7 +580,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_exchange':
         if (!featureExchange) return null
         return (
-          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-24 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-12 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
                 <div className="space-y-4 flex-1">
@@ -653,7 +653,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_digital':
         if (!featureDigitalBooks) return null
         return (
-          <section key={key} {...getSectionProps('home_section_digital', 'bg-black')} className={`py-24 overflow-hidden relative ${getSectionProps('home_section_digital', 'bg-black').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_digital', 'bg-black')} className={`py-12 overflow-hidden relative ${getSectionProps('home_section_digital', 'bg-black').className || ''}`}>
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-400/5 rounded-full blur-[120px]" />
             </div>
@@ -700,11 +700,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
                 <ScrollReveal className="space-y-4 max-w-xl">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-[11px] font-black uppercase text-black tracking-[0.3em]">{t('Journal.Subtitle') || 'Notre Journal'}</span></div>
-                  <h2 className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-[0.9]">{t('Journal.TitlePart1') || 'Derniers Articles'}<br /><span className="text-gray-400 italic">{t('Journal.TitlePart2') || 'à Découvrir'}</span></h2>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-[11px] rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{t('Journal.Subtitle') || 'Notre Journal'}</span></div>
+                  <h2 className="text-5xl md:text-7xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.9]">{t('Journal.TitlePart1') || 'Derniers Articles'}<br /><span className="text-gray-400 italic">{t('Journal.TitlePart2') || 'à Découvrir'}</span></h2>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right">
-                  <Link href="/blog" className="group flex items-center gap-4 bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1"><span className="text-xs font-black uppercase tracking-widest">{t('Journal.ViewAll') || 'Tout Lire'}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
+                  <Link href="/blog" className="group flex items-center gap-4 bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1"><span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest">{t('Journal.ViewAll') || 'Tout Lire'}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" /></Link>
                 </ScrollReveal>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -731,10 +731,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                           </div>
                         </div>
                         <div className="p-8 flex-grow flex flex-col">
-                          <div className="flex items-center gap-2 mb-4"><div className="w-1.5 h-1.5 rounded-full bg-black" /><span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{post.category?.name || 'Inspiration'}</span></div>
+                          <div className="flex items-center gap-2 mb-4"><div className="w-1.5 h-1.5 rounded-full bg-black" /><span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{post.category?.name || 'Inspiration'}</span></div>
                           <h3 className="text-2xl font-black text-black leading-tight mb-4 group-hover:text-gray-600 transition-colors line-clamp-2">{post.title}</h3>
                           <p className="text-gray-500 text-sm font-medium line-clamp-3 mb-8">{post.excerpt}</p>
-                          <div className="mt-auto flex items-center gap-2 text-black font-black text-[10px] uppercase tracking-widest group-hover:gap-4 transition-all"><span>{t('Journal.ReadMore') || 'Lire la suite'}</span><ArrowRight className="w-4 h-4" /></div>
+                          <div className="mt-auto flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{t('Journal.ReadMore') || 'Lire la suite'}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
                         </div>
                       </article>
                     </Link>
@@ -758,7 +758,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {finalOrder.map(key => renderSection(key))}
 
         {/* Newsletter / CTA - Style Pixio Banner */}
-        <section className="py-24 bg-black overflow-hidden relative">
+        <section className="py-12 bg-black overflow-hidden relative">
           <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-beige/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
           <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">

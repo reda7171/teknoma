@@ -1097,9 +1097,9 @@
         "VolumesInCollection": "المجلدات في هذه المجموعة"
     },
     "CartPage": {
-        "Title": "الأرشيف",
+        "Title": "السلة",
         "CollectionCount": "{count} مجموعات",
-        "EmptyTitle": "الأرشيف الخاص بك فارغ",
+        "EmptyTitle": "السلة الخاصة بك فارغة",
         "EmptyDesc": "يبدو أنك لم تختر أي مجلدات بعد. استكشف مختاراتنا لبدء مجموعتك.",
         "BrowseLibrary": "تصفح المكتبة",
         "ViewBundles": "عرض الباقات",
@@ -1108,7 +1108,7 @@
         "VolumesIncluded": "يتضمن {count} مجلدات",
         "DeleteItem": "حذف العنصر",
         "ClearSelection": "مسح كل المختارات",
-        "SummaryTitle": "ملخص الأرشيف",
+        "SummaryTitle": "ملخص السلة",
         "Items": "العناصر",
         "Shipping": "الشحن",
         "FreeShip": "شحن مجاني",

@@ -1047,7 +1047,8 @@
         "Secure": "Secure",
         "FastShip": "Fast Ship",
         "RecommendedForYou": "Recommended for you",
-        "CompleteYourCollection": "Complete your collection"
+        "CompleteYourCollection": "Complete your collection",
+        "MinOrderWarning": "The minimum order amount is {min} MAD. Please add more items to continue."
     },
     "Blog": {
         "Badge": "Journal",

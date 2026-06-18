@@ -56,15 +56,15 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
     const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
     const shippingFee = (hasOnlyDigital || hasFreeShippingItem || totalPrice >= 500) ? 0 : 30
     const finalTotal = totalPrice + shippingFee
-    const isMinAmountReached = totalPrice > minOrderAmount
+    const isMinAmountReached = finalTotal >= minOrderAmount
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-40">
             <div className="flex items-center justify-between mb-16 px-4">
                 <h1 className="text-6xl font-black tracking-tighter flex items-center gap-6">
-                    {t('Title')}<span className="text-gray-200">.</span>
+                    {t('Title')}<span className="text-gray-500">.</span>
                 </h1>
-                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
+                <div className="text-[10px] rtl:text-sm font-black uppercase tracking-[0.4em] text-gray-500">
                     {t('CollectionCount', { count: totalItems })}
                 </div>
             </div>
@@ -72,9 +72,9 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
             {items.length === 0 ? (
                 <div className="bg-white rounded-[3rem] p-32 text-center shadow-2xl shadow-black/5 border border-gray-100">
                     <div className="w-32 h-32 bg-pixio-cream rounded-full flex items-center justify-center mx-auto mb-10 transition-transform hover:scale-110">
-                        <ShoppingCart className="w-12 h-12 text-gray-300" />
+                        <ShoppingCart className="w-12 h-12 text-gray-500" />
                     </div>
-                    <h2 className="text-3xl font-black mb-6 tracking-tighter">{t('EmptyTitle')}<span className="text-gray-200">.</span></h2>
+                    <h2 className="text-3xl font-black mb-6 tracking-tighter">{t('EmptyTitle')}<span className="text-gray-500">.</span></h2>
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-16 max-w-sm mx-auto leading-loose">
                         {t('EmptyDesc')}
                     </p>
@@ -132,11 +132,11 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-4 mb-8">
-                                            <span className="text-[10px] font-black uppercase tracking-widest bg-pixio-cream px-4 py-2 rounded-xl text-black">
+                                            <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest bg-pixio-cream px-4 py-2 rounded-xl text-black">
                                                 {item.price} MAD / {t('ItemUnit')}
                                             </span>
                                             {item.booksCount && (
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-gray-300">
+                                                <span className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">
                                                     {t('VolumesIncluded', { count: item.booksCount })}
                                                 </span>
                                             )}
@@ -179,7 +179,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
                                         <button
                                             onClick={() => handleRemove(item)}
-                                            className="flex items-center gap-2 text-gray-300 hover:text-red-500 text-[10px] font-black uppercase tracking-widest px-6 py-3 transition-colors rounded-full hover:bg-red-50"
+                                            className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-[10px] font-black uppercase tracking-widest px-6 py-3 transition-colors rounded-full hover:bg-red-50"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                             <span className="hidden sm:inline">{t('DeleteItem')}</span>
@@ -192,9 +192,9 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                         <div className="flex justify-start pt-10">
                             <button
                                 onClick={handleClearCart}
-                                className="text-gray-200 hover:text-black text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-4 px-10 py-5 transition-all rounded-full hover:bg-white"
+                                className="text-gray-500 hover:text-red-500 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] flex items-center gap-4 px-8 py-4 transition-all rounded-full border border-gray-100 hover:border-red-100 hover:bg-red-50 bg-white shadow-sm"
                             >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-4 h-4" />
                                 {t('ClearSelection')}
                             </button>
                         </div>
@@ -203,17 +203,17 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                     {/* Summary */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-[3rem] p-12 shadow-2xl shadow-black/5 border border-gray-50 sticky top-32">
-                            <h2 className="text-sm font-black uppercase tracking-[0.3em] mb-10 pb-6 border-b border-gray-50">
+                            <h2 className="text-sm rtl:text-xl font-black uppercase tracking-[0.3em] mb-10 pb-6 border-b border-gray-50">
                                 {t('SummaryTitle')}
                             </h2>
 
                             <div className="space-y-6 mb-12">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('Items')} ({totalItems})</span>
+                                    <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Items')} ({totalItems})</span>
                                     <span className="text-xs font-black uppercase tracking-widest">{totalPrice} MAD</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('Shipping')}</span>
+                                    <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Shipping')}</span>
                                     {shippingFee === 0 ? (
                                         <span className="text-[10px] font-black uppercase tracking-widest text-white bg-black px-4 py-2 rounded-full shadow-lg">
                                             {t('FreeShip')}
@@ -225,7 +225,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
                                 {totalPrice < 500 && (
                                     <div className="bg-pixio-cream/50 p-8 rounded-[2rem] border border-gray-50">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-6 leading-relaxed"
+                                        <p className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500 mb-6 leading-relaxed"
                                             dangerouslySetInnerHTML={{ __html: t.raw('FreeShippingAd').replace('{amount}', (500 - totalPrice).toString()) }} />
                                         <div className="w-full bg-white h-2 rounded-full overflow-hidden shadow-inner">
                                             <div
@@ -242,48 +242,50 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                     <span className="text-xs font-black uppercase tracking-[0.3em]">{t('TotalValue')}</span>
                                     <span className="text-5xl font-black tracking-tighter">{finalTotal} MAD</span>
                                 </div>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-200 text-right">{t('TaxesNote')}</p>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-right">{t('TaxesNote')}</p>
                             </div>
 
                             {minOrderAmount > 0 && !isMinAmountReached && (
                                 <div className="mb-10 p-6 bg-red-50 rounded-3xl border border-red-100 flex items-start gap-4 animate-pulse">
                                     <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-red-600 leading-relaxed">
+                                    <p className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-red-600 leading-relaxed">
                                         {t('MinOrderWarning', { min: minOrderAmount })}
                                     </p>
                                 </div>
                             )}
 
-                            {isMinAmountReached ? (
-                                <Link
-                                    href="/checkout"
-                                    className="w-full h-24 relative flex items-center justify-center bg-black text-white text-[12px] font-black uppercase tracking-[0.4em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20 group active:scale-95 mb-10"
-                                >
-                                    <span className="text-center">{t('BeginCheckout')}</span>
-                                    <ArrowRight className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 group-hover:translate-x-2 transition-transform rtl:left-8 rtl:right-auto rtl:rotate-180 rtl:group-hover:-translate-x-2" />
-                                </Link>
-                            ) : (
-                                <div
-                                    className="w-full h-24 relative flex items-center justify-center bg-gray-100 text-gray-400 text-[12px] font-black uppercase tracking-[0.4em] rounded-full cursor-not-allowed mb-10"
-                                >
-                                    <span className="text-center">{t('BeginCheckout')}</span>
-                                    <ArrowRight className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 rtl:left-8 rtl:right-auto rtl:rotate-180" />
-                                </div>
-                            )}
+                            <div className="hidden md:block">
+                                {isMinAmountReached ? (
+                                    <Link
+                                        href="/checkout"
+                                        className="w-full h-24 relative flex items-center justify-center bg-black text-white text-[12px] font-black uppercase tracking-[0.4em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20 group active:scale-95 mb-10"
+                                    >
+                                        <span className="text-center">{t('BeginCheckout')}</span>
+                                        <ArrowRight className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 group-hover:translate-x-2 transition-transform rtl:left-8 rtl:right-auto rtl:rotate-180 rtl:group-hover:-translate-x-2" />
+                                    </Link>
+                                ) : (
+                                    <div
+                                        className="w-full h-24 relative flex items-center justify-center bg-gray-100 text-gray-500 text-[12px] font-black uppercase tracking-[0.4em] rounded-full cursor-not-allowed mb-10"
+                                    >
+                                        <span className="text-center">{t('BeginCheckout')}</span>
+                                        <ArrowRight className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 rtl:left-8 rtl:right-auto rtl:rotate-180" />
+                                    </div>
+                                )}
+                            </div>
 
                             <Link
                                 href="/books"
-                                className="w-full text-center block text-[10px] font-black uppercase tracking-[0.3em] text-gray-300 hover:text-black transition-colors"
+                                className="w-full text-center block text-[10px] rtl:text-sm font-black uppercase tracking-[0.3em] text-gray-500 hover:text-black transition-colors"
                             >
                                 {t('ContinueShopping')}
                             </Link>
 
-                            <div className="mt-16 flex items-center justify-center gap-8 text-gray-200">
-                                <div className="flex items-center gap-3 text-[8px] font-black uppercase tracking-[0.2em]">
+                            <div className="mt-16 flex items-center justify-center gap-8 text-gray-500">
+                                <div className="flex items-center gap-3 text-[8px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.2em]">
                                     <Shield className="w-4 h-4" />
                                     {t('Secure')}
                                 </div>
-                                <div className="flex items-center gap-3 text-[8px] font-black uppercase tracking-[0.2em]">
+                                <div className="flex items-center gap-3 text-[8px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.2em]">
                                     <Truck className="w-4 h-4" />
                                     {t('FastShip')}
                                 </div>
@@ -300,10 +302,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                         <div className="space-y-4">
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full">
                                 <Sparkles className="w-4 h-4 text-pixio-yellow" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">{t('RecommendedForYou')}</span>
+                                <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em]">{t('RecommendedForYou')}</span>
                             </div>
-                            <h2 className="text-4xl md:text-6xl font-black text-black tracking-tighter">
-                                {t('CompleteYourCollection')}<span className="text-gray-200">.</span>
+                            <h2 className="text-4xl md:text-6xl font-black text-black tracking-tighter rtl:tracking-normal">
+                                {t('CompleteYourCollection')}<span className="text-gray-500">.</span>
                             </h2>
                         </div>
                     </div>
@@ -325,7 +327,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                         <h3 className="text-lg font-black text-black leading-tight mb-2 line-clamp-1">
                                             {book.title}
                                         </h3>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">
                                             {book.author}
                                         </p>
                                         <div className="mt-auto flex items-center justify-between gap-4 pt-6 border-t border-gray-50">
@@ -348,6 +350,39 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                     </div>
                 </div>
             )}
+            {/* Fixed Mobile Checkout Area */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60]">
+                {minOrderAmount > 0 && !isMinAmountReached && (
+                    <div className="bg-red-50 border-t border-red-100 px-4 py-3 flex items-center gap-3 shadow-lg">
+                        <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
+                        <p className="text-[10px] rtl:text-xs font-bold text-red-700 leading-tight">
+                            Le montant minimum de commande est de {minOrderAmount} MAD. Veuillez ajouter plus d'articles pour continuer.
+                        </p>
+                    </div>
+                )}
+                <div className="bg-white border-t border-gray-100 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('TotalValue')}</span>
+                        <span className="text-xl font-black">{finalTotal} MAD</span>
+                    </div>
+                    <div className="flex-1">
+                        {isMinAmountReached ? (
+                            <Link
+                                href="/checkout"
+                                className="w-full h-14 relative flex items-center justify-center bg-black text-white text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:bg-gray-800 transition-all shadow-xl active:scale-95"
+                            >
+                                <span>{t('BeginCheckout')}</span>
+                                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rtl:left-4 rtl:right-auto rtl:rotate-180" />
+                            </Link>
+                        ) : (
+                            <div className="w-full h-14 relative flex items-center justify-center bg-gray-100 text-gray-500 text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full cursor-not-allowed">
+                                <span>{t('BeginCheckout')}</span>
+                                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rtl:left-4 rtl:right-auto rtl:rotate-180" />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

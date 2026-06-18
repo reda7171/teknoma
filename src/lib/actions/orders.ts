@@ -115,17 +115,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
         // Calcul du total côté serveur pour sécurité
         let subtotal = sanitizedData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
-        // Validation du montant minimum du panier
-        const minOrderAmountSetting = await prisma.siteSettings.findUnique({
-            where: { key: 'min_order_amount' }
-        })
-        const minOrderAmount = minOrderAmountSetting ? Number(minOrderAmountSetting.value) : 0
-        if (minOrderAmount > 0 && subtotal <= minOrderAmount) {
-            return { 
-                success: false, 
-                error: `Le montant minimum du panier pour passer commande est de ${minOrderAmount} MAD.` 
-            }
-        }
+        // Validation du montant minimum du panier sera faite après calcul du total
 
         // Appliquer la réduction si elle est fournie par le client (après validation)
         let discount = sanitizedData.discount || 0
@@ -167,6 +157,15 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             // Logique de livraison synchronisée avec le client
             let shippingFees = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
             let total = Math.max(0, subtotal - discount + shippingFees)
+
+            // Validation du montant minimum avec le total final
+            const minOrderAmountSetting = await tx.siteSettings.findUnique({
+                where: { key: 'min_order_amount' }
+            })
+            const minOrderAmount = minOrderAmountSetting ? Number(minOrderAmountSetting.value) : 0
+            if (minOrderAmount > 0 && total < minOrderAmount) {
+                throw new Error(`Le montant minimum du panier pour passer commande est de ${minOrderAmount} MAD.`)
+            }
 
             // Créer la commande
             const newOrder = await (tx.order as any).create({
@@ -279,6 +278,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
     } catch (error: any) {
         if (error instanceof z.ZodError) {
             return { success: false, error: error.issues[0].message }
+        }
+        if (error.message && error.message.includes('montant minimum')) {
+            return { success: false, error: error.message }
         }
         console.error('Erreur createOrder:', error)
         return { success: false, error: "Une erreur est survenue lors de la commande." }

@@ -324,7 +324,7 @@ export default async function BookDetailPage({
                     {/* Back Button */}
                     <Link
                         href="/books"
-                        className="inline-flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 group transition-colors rtl:flex-row-reverse"
+                        className="inline-flex items-center gap-4 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 group transition-colors rtl:flex-row-reverse"
                     >
                         <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:translate-x-1" />
                         <span>{tBook('BackToSelection')}</span>
@@ -377,19 +377,19 @@ export default async function BookDetailPage({
                                         <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                             <Truck className="w-6 h-6 text-black" />
                                         </div>
-                                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">{tBook('FastMove')}</p>
+                                        <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('FastMove')}</p>
                                     </div>
                                     <div className="text-center group cursor-pointer">
                                         <div className="w-14 h-14 bg-pixio-pink rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                             <Shield className="w-6 h-6 text-black" />
                                         </div>
-                                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">{tBook('Secured')}</p>
+                                        <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Secured')}</p>
                                     </div>
                                     <div className="text-center group cursor-pointer">
                                         <div className="w-14 h-14 bg-pixio-yellow rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                             <Package className="w-6 h-6 text-black" />
                                         </div>
-                                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">{tBook('Original')}</p>
+                                        <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Original')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -440,7 +440,7 @@ export default async function BookDetailPage({
                                     </div>
                                     <span className="text-[10px] font-black text-black ml-2 uppercase tracking-widest">{averageRating > 0 ? averageRating.toFixed(1) : '5.0'}</span>
                                 </div>
-                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                <span className="text-[9px] rtl:text-sm rtl:tracking-normal font-black text-gray-400 uppercase tracking-[0.2em]">
                                     {reviews.length > 0 ? tBook('ReaderReviews', { count: reviews.length }) : tBook('BeFirstToReview')}
                                 </span>
                             </div>
@@ -454,7 +454,7 @@ export default async function BookDetailPage({
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 className="w-4 h-4 text-black" />
-                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                        <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-400 uppercase tracking-widest">
                                             {tBook('TaxesIncluded')}
                                         </p>
                                     </div>
@@ -510,7 +510,7 @@ export default async function BookDetailPage({
                             {/* Frequently Bought Together (Upsell/Cross-sell) */}
                             {frequentlyBoughtTogether.length > 0 && (
                                 <div className="mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h3>
+                                    <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h3>
                                     <div className="flex flex-col gap-3 sm:gap-4">
                                         {frequentlyBoughtTogether.map(fbBook => (
                                             <div key={fbBook.id} className="flex items-center gap-3 sm:gap-4 bg-white p-2.5 sm:p-3 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow">
@@ -550,7 +550,7 @@ export default async function BookDetailPage({
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-4">
                                         <Package className="w-4 h-4 text-black" />
-                                        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
+                                        <h2 className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
                                     </div>
                                     <div className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
                                         <p>{book.description}</p>
@@ -701,7 +701,7 @@ export default async function BookDetailPage({
                         <section className="py-32 border-t border-gray-100">
                             <div className="flex items-center justify-between mb-20 px-2">
                                 <h2 className="text-4xl font-black text-black tracking-tighter">{tBook('RecommendedReads')}<span className="text-gray-200">.</span></h2>
-                                <Link href="/books" className="text-[10px] font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all">
+                                <Link href="/books" className="text-[10px] rtl:text-xs rtl:tracking-normal font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all">
                                     {tBook('ExploreAll')}
                                 </Link>
                             </div>
