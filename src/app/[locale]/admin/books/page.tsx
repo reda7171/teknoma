@@ -53,6 +53,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     else if (filterParam === 'stock-desc') orderBy = [{ stock: 'desc' }]
     else if (filterParam === 'title-asc') orderBy = [{ title: 'asc' }]
     else if (filterParam === 'title-desc') orderBy = [{ title: 'desc' }]
+    else if (filterParam === 'orders-asc') orderBy = [{ orderItems: { _count: 'asc' } }]
+    else if (filterParam === 'orders-desc') orderBy = [{ orderItems: { _count: 'desc' } }]
 
     const booksStats = await prisma.book.findMany({
         where,
@@ -69,9 +71,22 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         skip: (currentPage - 1) * ITEMS_PER_PAGE,
         take: ITEMS_PER_PAGE,
         orderBy,
+        include: {
+            _count: {
+                select: {
+                    orderItems: {
+                        where: {
+                            order: {
+                                status: 'CONFIRMED'
+                            }
+                        }
+                    }
+                }
+            }
+        }
     })
 
-    const normalizedBooks = books.map(b => ({ ...b, image: normalizeImage(b.image) }))
+    const normalizedBooks = books.map(b => ({ ...b, image: normalizeImage(b.image), orderCount: b._count?.orderItems || 0 }))
     const totalPages = Math.ceil(totalBooks / ITEMS_PER_PAGE)
 
     return (

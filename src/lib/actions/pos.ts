@@ -11,7 +11,7 @@ export async function createPOSOrder(data: {
   city: string;
   items: {
     id: string;
-    type: 'BOOK' | 'PACK';
+    type: 'BOOK' | 'PACK' | 'ACCESSORY';
     quantity: number;
     price: number;
   }[];
@@ -37,6 +37,12 @@ export async function createPOSOrder(data: {
           select: { costPrice: true }
         });
         costPrice = pack?.costPrice || 0;
+      } else if (item.type === 'ACCESSORY') {
+        const acc = await prisma.extraProduct.findUnique({
+          where: { id: item.id },
+          select: { costPrice: true }
+        });
+        costPrice = acc?.costPrice || 0;
       }
       return { ...item, costPrice };
     }));
@@ -61,6 +67,7 @@ export async function createPOSOrder(data: {
             costPrice: item.costPrice,
             bookId: item.type === 'BOOK' ? item.id : null,
             packId: item.type === 'PACK' ? item.id : null,
+            extraProductId: item.type === 'ACCESSORY' ? item.id : null,
           })),
         },
       },
@@ -89,6 +96,11 @@ export async function createPOSOrder(data: {
             });
           }
         }
+      } else if (item.type === 'ACCESSORY') {
+        await prisma.extraProduct.update({
+          where: { id: item.id },
+          data: { stock: { decrement: item.quantity } },
+        });
       }
     }
 

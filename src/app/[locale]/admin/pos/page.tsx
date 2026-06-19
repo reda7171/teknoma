@@ -7,6 +7,7 @@ export default async function POSPage() {
 
   let books: any[] = [];
   let packs: any[] = [];
+  let accessories: any[] = [];
 
   try {
     books = await prisma.book.findMany({
@@ -18,6 +19,7 @@ export default async function POSPage() {
         image: true,
         stock: true,
         isbn: true,
+        category: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -32,13 +34,26 @@ export default async function POSPage() {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    accessories = await prisma.extraProduct.findMany({
+      where: { active: true },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        image: true,
+        stock: true,
+        category: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   } catch (error) {
     console.error("Database unreachable, loading POS in offline mode");
   }
 
   return (
-    <div className="h-[calc(100vh-80px)] w-full overflow-hidden">
-      <POSClient books={books} packs={packs} />
+    <div className="h-full w-full overflow-hidden">
+      <POSClient books={books} packs={packs} accessories={accessories} />
     </div>
   );
 }

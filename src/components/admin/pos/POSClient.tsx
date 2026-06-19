@@ -1,15 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import { createPOSOrder } from '@/lib/actions/pos';
 import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
 import { printReceipt } from '@/lib/utils/printReceipt';
-import { useEffect } from 'react';
+
+const InlineNumpad = ({ value, onChange, onClose, title }: { value: number | '', onChange: (val: number | '') => void, onClose: () => void, title: string }) => {
+  const [localVal, setLocalVal] = useState(value === 0 ? '' : value.toString());
+
+  const handlePress = (num: string) => {
+    const newVal = localVal + num;
+    setLocalVal(newVal);
+    onChange(Number(newVal) || 0);
+  };
+
+  const handleDelete = () => {
+    const newVal = localVal.slice(0, -1);
+    setLocalVal(newVal);
+    onChange(newVal === '' ? '' : Number(newVal));
+  };
+
+  const handleClear = () => {
+    setLocalVal('');
+    onChange('');
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        onClose();
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleDelete();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      } else if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        handlePress(e.key);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [localVal, onClose, onChange]);
+
+  return (
+    <div className="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">{title}</h3>
+        <button onClick={onClose} className="p-2 bg-white border border-gray-100 text-gray-600 rounded-full hover:bg-gray-50 shadow-sm transition-all active:scale-95">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+          <button key={num} onClick={() => handlePress(num.toString())} className="h-14 bg-white border border-gray-100 rounded-2xl text-xl font-black hover:border-black hover:bg-black hover:text-white active:scale-95 transition-all shadow-sm">
+            {num}
+          </button>
+        ))}
+        <button onClick={handleClear} className="h-14 bg-red-50 border border-red-100 text-red-500 rounded-2xl text-lg font-black hover:bg-red-500 hover:text-white active:scale-95 transition-all shadow-sm">
+          C
+        </button>
+        <button onClick={() => handlePress('0')} className="h-14 bg-white border border-gray-100 rounded-2xl text-xl font-black hover:border-black hover:bg-black hover:text-white active:scale-95 transition-all shadow-sm">
+          0
+        </button>
+        <button onClick={handleDelete} className="h-14 bg-white border border-gray-100 text-gray-600 rounded-2xl flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all shadow-sm">
+          <Delete className="w-6 h-6" />
+        </button>
+      </div>
+      <button onClick={onClose} className="w-full mt-4 py-4 bg-emerald-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all">
+        VALIDER
+      </button>
+    </div>
+  );
+};
 
 interface Product {
   id: string;
@@ -19,38 +90,43 @@ interface Product {
   image: string | null;
   stock?: number;
   isbn?: string | null;
+  category?: string | null;
 }
 
 interface CartItem extends Product {
   cartItemId: string;
   quantity: number;
-  type: 'BOOK' | 'PACK';
+  type: 'BOOK' | 'PACK' | 'ACCESSORY';
 }
 
 interface POSClientProps {
   books: any[];
   packs: any[];
+  accessories?: any[];
 }
 
-export default function POSClient({ books, packs }: POSClientProps) {
+export default function POSClient({ books, packs, accessories = [] }: POSClientProps) {
   const params = useParams();
   const locale = params.locale as string;
   const { showNotification } = useUIStore();
   const [localBooks, setLocalBooks] = useState<any[]>(books);
   const [localPacks, setLocalPacks] = useState<any[]>(packs);
+  const [localAccessories, setLocalAccessories] = useState<any[]>(accessories);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>('ALL');
+  const [activeNumpad, setActiveNumpad] = useState<'shipping' | 'discount' | null>(null);
   const [customer, setCustomer] = useState({
     fullName: '',
     phone: '',
     address: '',
     city: ''
   });
-  const [shippingFees, setShippingFees] = useState(0);
-  const [discount, setDiscount] = useState(0);
+  const [shippingFees, setShippingFees] = useState<number | ''>(0);
+  const [discount, setDiscount] = useState<number | ''>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   
   const [allCities, setAllCities] = useState<string[]>([]);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
@@ -97,23 +173,42 @@ export default function POSClient({ books, packs }: POSClientProps) {
     getWithYouCities().then(setAllCities).catch(() => console.error("Impossible de récupérer les villes hors-ligne"));
 
     // Gestion du catalogue hors-ligne
-    if (books.length > 0 || packs.length > 0) {
+    if (books.length > 0 || packs.length > 0 || accessories.length > 0) {
       localStorage.setItem('pos_cached_books', JSON.stringify(books));
       localStorage.setItem('pos_cached_packs', JSON.stringify(packs));
+      localStorage.setItem('pos_cached_accessories', JSON.stringify(accessories));
       setLocalBooks(books);
       setLocalPacks(packs);
+      setLocalAccessories(accessories);
     } else {
       const cachedBooks = localStorage.getItem('pos_cached_books');
       const cachedPacks = localStorage.getItem('pos_cached_packs');
+      const cachedAccessories = localStorage.getItem('pos_cached_accessories');
       if (cachedBooks) setLocalBooks(JSON.parse(cachedBooks));
       if (cachedPacks) setLocalPacks(JSON.parse(cachedPacks));
+      if (cachedAccessories) setLocalAccessories(JSON.parse(cachedAccessories));
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [books, packs]);
+  }, [books, packs, accessories]);
+
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      const posContainer = document.getElementById('pos-container');
+      if (posContainer && !document.fullscreenElement) {
+        posContainer.requestFullscreen()
+          .then(() => setIsFullscreen(true))
+          .catch(() => {});
+      }
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    return () => document.removeEventListener('click', handleFirstInteraction);
+  }, []);
 
   const saveOfflineOrder = (orderData: any) => {
     const newOrder = {
@@ -163,8 +258,9 @@ export default function POSClient({ books, packs }: POSClientProps) {
   }, [customer.city, allCities]);
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen()
+    const posContainer = document.getElementById('pos-container');
+    if (!document.fullscreenElement && posContainer) {
+      posContainer.requestFullscreen()
         .then(() => setIsFullscreen(true))
         .catch(console.error);
     } else {
@@ -178,6 +274,8 @@ export default function POSClient({ books, packs }: POSClientProps) {
 
   const filteredBooks = localBooks.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || (b.isbn && b.isbn.includes(searchTerm)));
   const filteredPacks = localPacks.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredAccessoriesLibrary = localAccessories.filter(a => a.category === 'LIBRARY' && a.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredAccessoriesKids = localAccessories.filter(a => a.category === 'KIDS' && a.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleBarcodeScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim() !== '') {
@@ -192,10 +290,12 @@ export default function POSClient({ books, packs }: POSClientProps) {
 
   const displayedProducts = [
     ...(activeTab === 'ALL' || activeTab === 'BOOKS' ? filteredBooks.map(b => ({ ...b, type: 'BOOK' as const })) : []),
-    ...(activeTab === 'ALL' || activeTab === 'PACKS' ? filteredPacks.map(p => ({ ...p, type: 'PACK' as const })) : [])
+    ...(activeTab === 'ALL' || activeTab === 'PACKS' ? filteredPacks.map(p => ({ ...p, type: 'PACK' as const })) : []),
+    ...(activeTab === 'ALL' || activeTab === 'ACCESSORIES_LIBRARY' ? filteredAccessoriesLibrary.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : []),
+    ...(activeTab === 'ALL' || activeTab === 'ACCESSORIES_KIDS' ? filteredAccessoriesKids.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : [])
   ];
 
-  const addToCart = (product: any, type: 'BOOK' | 'PACK') => {
+  const addToCart = (product: any, type: 'BOOK' | 'PACK' | 'ACCESSORY') => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id && item.type === type);
       if (existing) {
@@ -219,7 +319,6 @@ export default function POSClient({ books, packs }: POSClientProps) {
     }));
   };
 
-  // Modifier le prix d'un article dans le panier
   const updatePrice = (cartItemId: string, newPrice: number) => {
     setCart(prev => prev.map(item =>
       item.cartItemId === cartItemId ? { ...item, price: newPrice >= 0 ? newPrice : 0 } : item
@@ -277,6 +376,7 @@ export default function POSClient({ books, packs }: POSClientProps) {
         setShippingFees(0);
         setDiscount(0);
         setIsSubmitting(false);
+        setLastOrderId(null);
         return;
       }
 
@@ -285,8 +385,8 @@ export default function POSClient({ books, packs }: POSClientProps) {
       if (result.success) {
         showNotification(`Commande créée avec succès: ${result.orderId}`, 'success');
         
-        // Impression du ticket de caisse
         if (result.orderId) {
+          setLastOrderId(result.orderId);
           printReceipt({
             orderId: result.orderId,
             customerName: customer.fullName,
@@ -317,8 +417,7 @@ export default function POSClient({ books, packs }: POSClientProps) {
   const [showMobileCart, setShowMobileCart] = useState(false);
 
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-4 relative bg-gray-50/50 p-2 lg:p-4 overflow-hidden">
-      {/* Main Content - Products */}
+    <div id="pos-container" className="flex flex-col lg:flex-row h-full gap-4 relative bg-gray-50/50 p-2 lg:p-4 overflow-hidden">
       <div className={`flex-1 flex flex-col min-w-0 bg-white rounded-[3rem] shadow-2xl shadow-black/5 border border-gray-100 overflow-hidden ${showMobileCart ? 'hidden lg:flex' : 'flex'}`}>
         <div className="p-8 md:p-10 border-b border-gray-50 space-y-8 bg-white">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -328,6 +427,16 @@ export default function POSClient({ books, packs }: POSClientProps) {
                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-2">Point de vente physique & Événementiel</p>
               </div>
               <div className="flex items-center gap-3">
+                <Link href={`/${locale}/admin/orders`} className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-2xl border border-gray-100 hover:bg-gray-100 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
+                  <ListOrdered className="w-4 h-4" />
+                  Commandes
+                </Link>
+                {lastOrderId && (
+                  <Link href={`/${locale}/admin/orders/${lastOrderId}`} className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 hover:bg-emerald-100 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm" target="_blank">
+                    <FileText className="w-4 h-4" />
+                    Dernière
+                  </Link>
+                )}
                 {isOffline && (
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-2xl border border-red-100 font-black text-[10px] uppercase tracking-widest animate-pulse">
                     <WifiOff className="w-4 h-4" />
@@ -351,7 +460,6 @@ export default function POSClient({ books, packs }: POSClientProps) {
                 >
                   {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
                 </button>
-                {/* Bouton Panier Mobile Premium */}
                 <button 
                   onClick={() => setShowMobileCart(true)}
                   className="lg:hidden relative w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/20"
@@ -379,12 +487,13 @@ export default function POSClient({ books, packs }: POSClientProps) {
             </div>
           </div>
           
-          {/* Categories Premium */}
           <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
             {[
                 { id: 'ALL', label: 'TOUT LE CATALOGUE' },
                 { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
-                { id: 'PACKS', label: 'PACKS PROMO' }
+                { id: 'PACKS', label: 'PACKS PROMO' },
+                { id: 'ACCESSORIES_LIBRARY', label: 'ACCESSOIRES LECTURE' },
+                { id: 'ACCESSORIES_KIDS', label: 'ACCESSOIRES ENFANTS' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -401,7 +510,6 @@ export default function POSClient({ books, packs }: POSClientProps) {
           </div>
         </div>
 
-        {/* Product Grid Premium */}
         <div className="flex-1 p-8 md:p-10 overflow-y-auto bg-gray-50/30 custom-scrollbar">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {displayedProducts.map((product) => (
@@ -424,7 +532,6 @@ export default function POSClient({ books, packs }: POSClientProps) {
         </div>
       </div>
 
-      {/* Right Sidebar - Cart Premium */}
       <div className={`
         fixed inset-0 z-50 lg:relative lg:inset-auto lg:z-0 lg:w-[450px] flex flex-col bg-white lg:rounded-[3rem] shadow-2xl lg:shadow-xl border border-gray-100 overflow-y-auto custom-scrollbar shrink-0 transition-all duration-500 ease-in-out
         ${showMobileCart ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
@@ -450,8 +557,9 @@ export default function POSClient({ books, packs }: POSClientProps) {
           </span>
         </div>
 
-        {/* Cart Items Premium */}
-        <div className="shrink-0 p-6 space-y-4 bg-white min-h-[300px]">
+        {!activeNumpad && (
+          <>
+            <div className="shrink-0 p-6 space-y-4 bg-white min-h-[300px]">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-gray-200 space-y-6">
               <div className="w-32 h-32 bg-gray-50 rounded-[3rem] flex items-center justify-center shadow-inner">
@@ -477,6 +585,11 @@ export default function POSClient({ books, packs }: POSClientProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-black text-black text-[11px] uppercase tracking-tight line-clamp-1 italic">{item.title || item.name}</h4>
+                  {item.type === 'BOOK' && item.stock !== undefined && (
+                    <p className={`text-xs font-black tracking-widest mt-1 ${item.stock > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                      Stock: {item.stock}
+                    </p>
+                  )}
                   
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-1.5 bg-white border border-gray-100 px-3 py-1.5 rounded-xl shadow-sm">
@@ -510,7 +623,6 @@ export default function POSClient({ books, packs }: POSClientProps) {
           )}
         </div>
 
-        {/* Customer Information Form Premium */}
         <div className="shrink-0 p-8 border-t border-gray-50 bg-gray-50/50 space-y-6">
           <div className="flex items-center gap-3 text-[10px] font-black text-black uppercase tracking-[0.2em]">
             <User className="w-3.5 h-3.5" /> Fiche Client
@@ -581,9 +693,10 @@ export default function POSClient({ books, packs }: POSClientProps) {
             />
           </div>
         </div>
+          </>
+        )}
 
-        {/* Summary & Checkout Premium */}
-        <div className="shrink-0 p-8 md:p-10 bg-white border-t border-gray-50 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
+        <div className="shrink-0 p-8 md:p-10 bg-white border-t border-gray-50 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-b-3xl">
           <div className="space-y-4 mb-8">
             <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
               <span>Sous-total articles</span>
@@ -592,12 +705,12 @@ export default function POSClient({ books, packs }: POSClientProps) {
             <div className="flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
               <span>Frais de livraison</span>
               <div className="flex items-center gap-2">
-                 <input
-                  type="number"
-                  value={shippingFees}
-                  onChange={e => setShippingFees(Number(e.target.value))}
-                  className="w-16 text-right px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black focus:border-black outline-none"
-                />
+                <button
+                  onClick={() => setActiveNumpad('shipping')}
+                  className={`w-16 text-right px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border outline-none ${activeNumpad === 'shipping' ? 'bg-black text-white border-black' : 'bg-gray-50 border-gray-100 text-black focus:border-black'}`}
+                >
+                  {shippingFees === '' ? '0' : shippingFees}
+                </button>
                 <span className="text-black">DH</span>
               </div>
             </div>
@@ -605,12 +718,12 @@ export default function POSClient({ books, packs }: POSClientProps) {
               <span>Remise exceptionnelle</span>
               <div className="flex items-center gap-2 text-red-500">
                 <span className="font-black">-</span>
-                <input
-                  type="number"
-                  value={discount}
-                  onChange={e => setDiscount(Number(e.target.value))}
-                  className="w-16 text-right px-3 py-1.5 bg-red-50/50 border border-red-100 rounded-xl text-[10px] font-black text-red-600 focus:border-red-600 outline-none"
-                />
+                <button
+                  onClick={() => setActiveNumpad('discount')}
+                  className={`w-16 text-right px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border outline-none ${activeNumpad === 'discount' ? 'bg-red-600 text-white border-red-600' : 'bg-red-50/50 border-red-100 text-red-600 focus:border-red-600'}`}
+                >
+                  {discount === '' ? '0' : discount}
+                </button>
                 <span className="font-black">DH</span>
               </div>
             </div>
@@ -625,13 +738,22 @@ export default function POSClient({ books, packs }: POSClientProps) {
             </div>
           </div>
 
-          <button
-            onClick={handleCheckout}
-            disabled={isSubmitting || cart.length === 0}
-            className="w-full py-6 bg-black text-white rounded-3xl font-black text-[12px] uppercase tracking-[0.4em] shadow-2xl shadow-black/30 hover:bg-gray-900 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
-          >
-            {isSubmitting ? 'Traitement en cours...' : 'VALIDER LA VENTE'}
-          </button>
+          {activeNumpad ? (
+            <InlineNumpad 
+              title={activeNumpad === 'shipping' ? "Frais de livraison" : "Remise"}
+              value={activeNumpad === 'shipping' ? shippingFees : discount}
+              onChange={(val) => activeNumpad === 'shipping' ? setShippingFees(val) : setDiscount(val)}
+              onClose={() => setActiveNumpad(null)}
+            />
+          ) : (
+            <button
+              onClick={handleCheckout}
+              disabled={isSubmitting || cart.length === 0}
+              className="w-full py-6 bg-black text-white rounded-3xl font-black text-[12px] uppercase tracking-[0.4em] shadow-2xl shadow-black/30 hover:bg-gray-900 hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
+            >
+              {isSubmitting ? 'Traitement en cours...' : 'VALIDER LA VENTE'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -653,7 +775,6 @@ export default function POSClient({ books, packs }: POSClientProps) {
            </div>
         </div>
       )}
-
     </div>
   );
 }

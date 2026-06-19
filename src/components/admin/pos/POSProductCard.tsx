@@ -1,12 +1,12 @@
 'use client';
 
 import { Plus, Store } from 'lucide-react';
-import { Book, Pack } from '@prisma/client';
+import { Book, Pack, ExtraProduct } from '@prisma/client';
 
 interface POSProductCardProps {
-  product: Book | Pack;
-  type: 'BOOK' | 'PACK';
-  onAdd: (product: Book | Pack, type: 'BOOK' | 'PACK') => void;
+  product: Book | Pack | ExtraProduct | any;
+  type: 'BOOK' | 'PACK' | 'ACCESSORY';
+  onAdd: (product: any, type: 'BOOK' | 'PACK' | 'ACCESSORY') => void;
 }
 
 export default function POSProductCard({ product, type, onAdd }: POSProductCardProps) {

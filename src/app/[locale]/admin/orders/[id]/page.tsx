@@ -7,6 +7,7 @@ import { ArrowLeft, User, Phone, MapPin, Calendar, Clock, Package, ShoppingBag, 
 import OrderStatusUpdater from '@/components/admin/OrderStatusUpdater'
 import DeliverySyncButton from '@/components/admin/DeliverySyncButton'
 import OrderEditModal from '@/components/admin/OrderEditModal'
+import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 
@@ -45,6 +46,7 @@ export default async function OrderDetailsPage({
                     </h1>
                 </div>
                 <div className="flex items-center gap-3">
+                    <DeleteOrderButton orderId={order.id} />
                     <OrderEditModal order={{
                         id: order.id,
                         fullName: order.fullName,
@@ -86,9 +88,13 @@ export default async function OrderDetailsPage({
                                         </div>
                                         <div className="flex-1 space-y-1">
                                             <div className="flex justify-between items-start">
-                                                <h3 className="font-bold text-gray-900 line-clamp-2">
+                                                <Link 
+                                                    href={`/${locale}/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}`}
+                                                    className="font-bold text-gray-900 line-clamp-2 hover:text-blue-600 hover:underline"
+                                                    target="_blank"
+                                                >
                                                     {item.book?.title || item.pack?.name}
-                                                </h3>
+                                                </Link>
                                                 <span className="text-sm font-black text-blue-600">
                                                     {item.price} MAD
                                                 </span>

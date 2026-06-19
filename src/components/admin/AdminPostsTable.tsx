@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Edit, FileText, User, ExternalLink, Trash2 } from 'lucide-react'
 import DeletePostButton from '@/components/admin/DeletePostButton'
 import { deletePostsBulk } from '@/lib/actions/blog'
@@ -110,8 +111,27 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                         />
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className="font-black text-black line-clamp-1 max-w-md uppercase tracking-tight group-hover:text-blue-600 transition-colors">{post.title}</div>
-                                        <div className="text-[10px] text-gray-400 font-bold mt-1 tracking-wider">/{post.slug}</div>
+                                        <div className="flex items-center gap-4">
+                                            {post.coverImage ? (
+                                                <div className="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-100 shadow-sm">
+                                                    <Image
+                                                        src={post.coverImage}
+                                                        alt={post.title}
+                                                        fill
+                                                        className="object-cover"
+                                                        sizes="40px"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                                    <FileText className="w-4 h-4 text-gray-300" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div className="font-black text-black line-clamp-1 max-w-md uppercase tracking-tight group-hover:text-blue-600 transition-colors">{post.title}</div>
+                                                <div className="text-[10px] text-gray-400 font-bold mt-1 tracking-wider">/{post.slug}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-3">

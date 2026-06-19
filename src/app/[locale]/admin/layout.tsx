@@ -416,9 +416,11 @@ export default function AdminLayout({
             )}
 
             {/* Sidebar desktop (fixe) */}
-            <aside className={`hidden md:flex fixed inset-y-0 left-0 bg-white border-r border-slate-200/60 shadow-sm z-50 flex-col transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64 lg:w-72'}`}>
-                {renderSidebarContent(sidebarCollapsed)}
-            </aside>
+            {!pathname?.endsWith('/admin/pos') && (
+                <aside className={`hidden md:flex fixed inset-y-0 left-0 bg-white border-r border-slate-200/60 shadow-sm z-50 flex-col transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64 lg:w-72'}`}>
+                    {renderSidebarContent(sidebarCollapsed)}
+                </aside>
+            )}
 
             {/* Sidebar mobile (drawer) */}
             <aside className={`md:hidden fixed inset-y-0 left-0 w-72 bg-white border-r border-slate-200/60 shadow-xl z-50 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -426,28 +428,30 @@ export default function AdminLayout({
             </aside>
 
             {/* Main Content */}
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? 'md:pl-20' : 'md:pl-64 lg:pl-72'}`}>
+            <div className={`transition-all duration-300 ${pathname?.endsWith('/admin/pos') ? 'pl-0' : sidebarCollapsed ? 'md:pl-20' : 'md:pl-64 lg:pl-72'}`}>
                 {/* Topbar mobile */}
-                <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shadow-sm">
-                    <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
-                    >
-                        <Menu className="w-5 h-5" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
-                            <span className="text-white text-sm font-black italic">R</span>
+                {!pathname?.endsWith('/admin/pos') && (
+                    <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shadow-sm">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
+                                <span className="text-white text-sm font-black italic">R</span>
+                            </div>
+                            <span className="text-base font-black text-slate-900">Riwaya<span className="text-blue-600">.</span></span>
                         </div>
-                        <span className="text-base font-black text-slate-900">Riwaya<span className="text-blue-600">.</span></span>
+                        <div className="flex items-center gap-2">
+                            <LanguageSwitcher />
+                            <OrderNotifications />
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <LanguageSwitcher />
-                        <OrderNotifications />
-                    </div>
-                </div>
+                )}
 
-                <main className="p-4 md:p-8 lg:p-10 w-full min-h-screen">
+                <main className={pathname?.endsWith('/admin/pos') ? "w-full h-screen" : "p-4 md:p-8 lg:p-10 w-full min-h-screen"}>
                     {children}
                 </main>
             </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -28,6 +28,7 @@ interface Book {
     longDescription?: string | null
     active: boolean
     isOriginal: boolean
+    orderCount?: number
 }
 
 export default function BooksTable({ books, pageNumber, totalProviderPages, initialSearch, initialFilter = '', limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, initialSearch: string, initialFilter?: string, limit?: number }) {
@@ -285,6 +286,26 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
         return `${pathname}?${params.toString()}`
     }
 
+    const handleSort = (column: 'price' | 'stock' | 'orders') => {
+        let newFilter = `${column}-desc`;
+        if (initialFilter === `${column}-desc`) {
+            newFilter = `${column}-asc`;
+        }
+        
+        const params = new URLSearchParams()
+        if (initialSearch.trim()) params.set('search', initialSearch.trim())
+        params.set('filter', newFilter)
+        params.set('limit', limit.toString())
+        params.set('page', '1')
+        router.push(`${pathname}?${params.toString()}`)
+    }
+
+    const getSortIcon = (column: 'price' | 'stock' | 'orders') => {
+        if (initialFilter === `${column}-asc`) return <ArrowUp className="w-3 h-3 ml-1" />
+        if (initialFilter === `${column}-desc`) return <ArrowDown className="w-3 h-3 ml-1" />
+        return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />
+    }
+
     const renderPaginationNumbers = () => {
         const pages = [];
         const maxVisiblePages = 5;
@@ -457,11 +478,23 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                         <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Langue
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Prix
+                                        <th 
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                            onClick={() => handleSort('price')}
+                                        >
+                                            <div className="flex items-center">Prix {getSortIcon('price')}</div>
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Stock
+                                        <th 
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                            onClick={() => handleSort('stock')}
+                                        >
+                                            <div className="flex items-center">Stock {getSortIcon('stock')}</div>
+                                        </th>
+                                        <th 
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                            onClick={() => handleSort('orders')}
+                                        >
+                                            <div className="flex items-center">Commandes {getSortIcon('orders')}</div>
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Statut
@@ -553,6 +586,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                         {book.stock} unités
                                                                     </span>
                                                                 )}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                    {book.orderCount || 0} fois
+                                                                </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 {editingId === book.id ? (

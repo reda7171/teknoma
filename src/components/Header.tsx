@@ -272,7 +272,6 @@ export default function Header({ user, notificationDropdown, navigation, feature
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             aria-label="Menu principal"
                             className="md:hidden w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
-                            aria-label="Menu principal"
                         >
                             {mobileMenuOpen ? (
                                 <X className="w-6 h-6 text-black" />
