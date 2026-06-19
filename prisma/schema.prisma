@@ -118,8 +118,12 @@ model LoginHistory {
 model Book {
   id              String        @id @default(uuid())
   title           String        @db.VarChar(255)
+  titleFr         String?       @db.VarChar(255)
+  titleEn         String?       @db.VarChar(255)
   author          String        @db.VarChar(255)
   description     String        @db.Text
+  descriptionFr   String?       @db.Text
+  descriptionEn   String?       @db.Text
   longDescription String?       @db.LongText
   bestQuote       String?       @db.Text
   bestLessons     String?       @db.Text
@@ -153,6 +157,7 @@ model Book {
   // Marketplace fields
   sellerId String?
   seller   User?   @relation("SellerBooks", fields: [sellerId], references: [id])
+  reservations    BookReservation[]
 
   @@index([category])
   @@index([active])
@@ -167,7 +172,11 @@ model Book {
 model Pack {
   id             String      @id @default(uuid())
   name           String      @db.VarChar(255)
+  nameFr         String?     @db.VarChar(255)
+  nameEn         String?     @db.VarChar(255)
   description    String?     @db.Text
+  descriptionFr  String?     @db.Text
+  descriptionEn  String?     @db.Text
   price          Float
   costPrice      Float       @default(0) // Prix de revient du pack entier
   image          String?     @db.VarChar(500)
@@ -961,5 +970,19 @@ model RequestedBook {
 
   @@index([requestCount])
   @@map("requested_books")
+}
+
+model BookReservation {
+  id        String   @id @default(uuid())
+  bookId    String
+  whatsapp  String   @db.VarChar(20)
+  status    String   @default("PENDING") // PENDING, NOTIFIED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+  @@index([whatsapp])
+  @@map("book_reservations")
 }
 

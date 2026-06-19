@@ -164,6 +164,14 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
+  const localeConfig: Record<string, { lang: string, dir: string }> = {
+    ar: { lang: 'ar', dir: 'rtl' },
+    fr: { lang: 'fr', dir: 'ltr' },
+    en: { lang: 'en', dir: 'ltr' },
+  };
+
+  const { lang, dir } = localeConfig[locale] ?? localeConfig.ar;
+
   // Ensure that the incoming `locale` is valid
   if (!routing.locales.includes(locale as any)) {
     notFound();
@@ -188,7 +196,7 @@ export default async function LocaleLayout({
   const adsenseEnabled = await getSetting('adsense_enabled');
 
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+    <html lang={lang} dir={dir} suppressHydrationWarning>
       <head>
         {/* Google Tag Manager */}
         <Script
@@ -254,12 +262,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               '@context': 'https://schema.org',
               '@type': 'BookStore',
               name: 'Librairie Riwaya',
+              image: `${siteUrl}/og-image.jpg`,
+              telephone: whatsappPhone || '+212 702-220575',
+              priceRange: '50 MAD - 500 MAD',
               description: 'Riwaya est la meilleure librairie en ligne au Maroc (a7san librairie en ligne f maghrib). Nous offrons la plus grande sélection de romans, de livres de développement personnel, et d\'affaires avec livraison (COD) partout au Maroc comme Casablanca et Rabat. مكتبة رواية هي أحسن وأفضل مكتبة إلكترونية في المغرب.',
               url: siteUrl,
               logo: `${siteUrl}/globe.svg`,
               sameAs: [
-                facebook || 'https://facebook.com/riwaya',
-                instagram || 'https://instagram.com/riwaya',
+                facebook || 'https://facebook.com/riwaya.book',
+                instagram || 'https://instagram.com/riwaya.book',
                 twitter || 'https://twitter.com/riwaya',
                 linkedin || 'https://linkedin.com/company/riwaya',
                 tiktok || 'https://tiktok.com/@riwaya',

@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/routing'
 import { ShoppingCart, Star, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import WishlistButton from '@/components/WishlistButton'
 import AddToReadingListButton from '@/components/AddToReadingListButton'
@@ -12,6 +12,8 @@ import ImageWithFallback from '@/components/ImageWithFallback'
 interface BookCardProps {
     id: string
     title: string
+    titleFr?: string | null
+    titleEn?: string | null
     author: string
     price: number
     image: string
@@ -23,6 +25,8 @@ interface BookCardProps {
 export default function BookCard({
     id,
     title,
+    titleFr,
+    titleEn,
     author,
     price,
     image,
@@ -31,10 +35,13 @@ export default function BookCard({
     variant = 'default',
 }: BookCardProps) {
     const t = useTranslations('Common');
+    const locale = useLocale();
     const isCompact = variant === 'compact'
     const isFeatured = variant === 'featured'
     const addItem = useCartStore((state) => state.addItem)
     const { openCart, showNotification } = useUIStore()
+
+    const displayTitle = locale === 'fr' && titleFr ? titleFr : locale === 'en' && titleEn ? titleEn : title;
 
     return (
         <div className={`group relative bg-white rounded-3xl overflow-hidden transition-all duration-500 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-2xl h-full flex flex-col ${isFeatured ? 'scale-105 z-10 border-black shadow-xl' : ''}`}>
@@ -43,19 +50,19 @@ export default function BookCard({
                 <div className={`relative bg-white overflow-hidden ${isCompact ? 'aspect-[3/4]' : isFeatured ? 'aspect-[3/4]' : 'aspect-[3/4]'}`}>
                     <ImageWithFallback
                         src={image}
-                        alt={`${title} - Livre par ${author}`}
+                        alt={`${displayTitle} - Livre par ${author}`}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
                     />
 
                     {/* Action Buttons */}
                     <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                         <WishlistButton
-                            item={{ id, title, price, image, type: 'BOOK', slug: `/books/${id}`, author }}
+                            item={{ id, title: displayTitle, price, image, type: 'BOOK', slug: `/books/${id}`, author }}
                             className="bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm"
                         />
                         <AddToReadingListButton
                             bookId={id}
-                            title={title}
+                            title={displayTitle}
                             author={author}
                             cover={image}
                             className="bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm"
@@ -86,7 +93,7 @@ export default function BookCard({
                 <Link href={`/books/${id}`} className="block w-full">
                     <h3 className={`font-black text-gray-900 tracking-tight line-clamp-2 transition-colors group-hover:text-black ${isCompact ? 'text-sm mb-1 uppercase' : isFeatured ? 'text-xl mb-2' : 'text-base mb-1.5'
                         }`}>
-                        {title}
+                        {displayTitle}
                     </h3>
                     <p className={`text-gray-500 font-bold ${isCompact ? 'text-[10px] rtl:text-xs' : 'text-xs rtl:text-sm'}`}>
                         {t('By')} {author}
@@ -113,7 +120,7 @@ export default function BookCard({
                                     addItem({
                                         type: 'BOOK',
                                         id,
-                                        title,
+                                        title: displayTitle,
                                         price,
                                         image,
                                     })

@@ -29,23 +29,27 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   const title = t('Title');
   const description = t('Description');
-  
+
   const baseKeywords = [
-    "رواية", "riwaya", "book", "الكاتب", "authors", "كتب", 
-    "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب", 
+    "رواية", "riwaya", "book", "الكاتب", "authors", "كتب",
+    "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب",
     "a7san librairie en ligne f maghrib", "meilleure librairie en ligne au maroc"
   ];
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
 
   return {
     title: title,
     description: description,
     keywords: baseKeywords,
+
     alternates: {
-      canonical: `/${locale}`,
+      canonical: `${baseUrl}/${locale}`,
       languages: {
-        'fr': '/fr',
-        'ar': '/ar',
-        'en': '/en',
+        'ar': `${baseUrl}/ar`,
+        'fr': `${baseUrl}/fr`,
+        'en': `${baseUrl}/en`,
+        'x-default': `${baseUrl}/ar`,
       },
     },
     openGraph: {
@@ -154,12 +158,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           height: 512,
         },
         sameAs: [
-          'https://instagram.com/itsmereda1',
-          'https://facebook.com/riwaya',
+          'https://instagram.com/riwaya.book',
+          'https://facebook.com/riwaya.book',
           'https://twitter.com/riwaya_ma',
           'https://linkedin.com/company/riwaya',
-          'https://tiktok.com/@riwaya',
-          'https://youtube.com/@riwaya'
+          'https://tiktok.com/@riwaya.book',
+          'https://youtube.com/@riwaya.book'
         ],
         contactPoint: {
           '@type': 'ContactPoint',
@@ -714,10 +718,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       <article className="h-full flex flex-col bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 hover:border-black transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
                         <div className="relative aspect-[16/10] overflow-hidden">
                           {post.coverImage ? (
-                            <ImageWithFallback 
-                              src={post.coverImage} 
-                              alt={post.title} 
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                            <ImageWithFallback
+                              src={post.coverImage}
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
                           ) : (
                             <div className="w-full h-full bg-pixio-cream flex items-center justify-center">

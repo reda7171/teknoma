@@ -16,14 +16,17 @@ import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { sendTelegramMessage } from '@/lib/telegram'
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
-    const params = await searchParams
+export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<SearchParams> }): Promise<Metadata> {
+    const { locale } = await params
+    const resolvedParams = await searchParams
     const tCommon = await getTranslations('Common')
     const tCats = await getTranslations('Categories')
     const tBooksPage = await getTranslations('BooksPage')
 
-    const categoryName = params.category ? (tCats.has(params.category as any) ? String(tCats(params.category as any)) : params.category) : null
+    const categoryName = resolvedParams.category ? (tCats.has(resolvedParams.category as any) ? String(tCats(resolvedParams.category as any)) : resolvedParams.category) : null
     const title = categoryName ? `${categoryName} | Riwaya` : String(tBooksPage('Title')) + ' | Riwaya'
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
 
     return {
         title,
@@ -32,7 +35,16 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
             title,
             description: `Explorez notre collection de livres ${categoryName ? `en ${categoryName}` : 'de développement personnel et business'} sur Riwaya. Livraison disponible dans tout le Maroc.`,
             images: ['/og-image.jpg'],
-        }
+        },
+        alternates: {
+            canonical: `${baseUrl}/${locale}/books`,
+            languages: {
+                'ar': `${baseUrl}/ar/books`,
+                'fr': `${baseUrl}/fr/books`,
+                'en': `${baseUrl}/en/books`,
+                'x-default': `${baseUrl}/ar/books`,
+            },
+        },
     }
 }
 

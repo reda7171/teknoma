@@ -16,7 +16,7 @@ interface VideoStudioModalProps {
     book?: any
 }
 
-type DraggableKey = 'cover' | 'title' | 'author' | 'price' | 'whatsapp' | 'badge' | 'caption_overlay' | 'logo'
+type DraggableKey = 'cover' | 'title' | 'author' | 'price' | 'whatsapp' | 'badge' | 'caption_overlay' | 'logo' | 'socials'
 type LeftPanel = 'images' | 'text' | 'themes' | 'effects' | 'montage' | 'stickers' | 'publish' | null
 
 const DEFAULTS: Record<DraggableKey, { x: number; y: number }> = {
@@ -28,6 +28,7 @@ const DEFAULTS: Record<DraggableKey, { x: number; y: number }> = {
     badge: { x: 0, y: 0 },
     caption_overlay: { x: 0, y: 0 },
     logo: { x: 0, y: 0 },
+    socials: { x: 0, y: 0 },
 }
 
 const THEMES = {
@@ -74,6 +75,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const [caption, setCaption] = useState('')
     const [hashtags, setHashtags] = useState('#riwaya #lecture #livre #maroc')
     const [musicLabel, setMusicLabel] = useState('Son original - Riwaya')
+    const [socialHandle, setSocialHandle] = useState('@riwaya.book')
 
     // Images
     const [images, setImages] = useState<string[]>([])
@@ -90,6 +92,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const [showPrice, setShowPrice] = useState(true)
     const [showOldPrice, setShowOldPrice] = useState(false)
     const [showWhatsapp, setShowWhatsapp] = useState(true)
+    const [showSocials, setShowSocials] = useState(true)
     const [showLogo, setShowLogo] = useState(true)
     const [showCaptionOverlay, setShowCaptionOverlay] = useState(true)
     const [showShadow, setShowShadow] = useState(true)
@@ -490,6 +493,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                                         { label: 'Prix', value: showPrice, set: setShowPrice },
                                         { label: 'Ancien prix', value: showOldPrice, set: setShowOldPrice },
                                         { label: 'WhatsApp', value: showWhatsapp, set: setShowWhatsapp },
+                                        { label: 'Réseaux', value: showSocials, set: setShowSocials },
                                         { label: 'Caption', value: showCaptionOverlay, set: setShowCaptionOverlay },
                                         { label: 'Ombre', value: showShadow, set: setShowShadow },
                                     ].map(({ label, value, set }) => (
@@ -507,6 +511,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                                         { label: 'Prix', value: price, set: setPrice },
                                         { label: 'Ancien prix', value: oldPrice, set: setOldPrice },
                                         { label: 'WhatsApp', value: whatsapp, set: setWhatsapp },
+                                        { label: 'Réseaux', value: socialHandle, set: setSocialHandle },
                                         { label: 'Badge', value: badge, set: setBadge },
                                         { label: 'Musique', value: musicLabel, set: setMusicLabel },
                                     ].map(({ label, value, set }) => (
@@ -761,6 +766,31 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                                         className="text-sm font-bold outline-none"
                                     >{whatsapp}</span>
                                 </div>
+                            )}
+
+                            {/* SOCIALS */}
+                            {showSocials && el('socials', 'bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2',
+                                <>
+                                    <span 
+                                        contentEditable={editing === 'socials'}
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => { setSocialHandle(e.currentTarget.textContent || ''); setEditing(null) }}
+                                        className={`text-white font-bold text-sm tracking-wide outline-none drop-shadow-md ${editing === 'socials' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
+                                    >
+                                        {socialHandle}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white">
+                                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white">
+                                            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current drop-shadow-md" xmlns="http://www.w3.org/2000/svg"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.44 3.29-1.43 4.54-1.03 1.3-2.58 2.16-4.25 2.38-1.74.22-3.56-.05-5.06-1.02-1.48-.96-2.54-2.5-2.85-4.23-.33-1.84.14-3.79 1.25-5.26 1.13-1.48 2.87-2.39 4.74-2.53V13c-.94.04-1.87.35-2.61.94-.74.57-1.18 1.44-1.28 2.37-.11 1.05.21 2.14.9 2.92.68.78 1.75 1.2 2.81 1.14 1.04-.06 2.02-.6 2.53-1.47.38-.66.56-1.42.56-2.18V.02z" /></svg>
+                                        </div>
+                                    </div>
+                                </>
                             )}
 
                             {/* Caption */}

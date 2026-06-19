@@ -175,7 +175,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_instagram || ''}
                             onChange={(e) => handleChange('social_instagram', e.target.value)}
-                            placeholder="https://instagram.com/riwaya"
+                            placeholder="https://instagram.com/riwaya.book"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -188,7 +188,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_facebook || ''}
                             onChange={(e) => handleChange('social_facebook', e.target.value)}
-                            placeholder="https://facebook.com/riwaya"
+                            placeholder="https://facebook.com/riwaya.book"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>

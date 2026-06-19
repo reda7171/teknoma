@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/routing'
 import { Package, ShoppingCart, Sparkles, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import WishlistButton from '@/components/WishlistButton'
 import { normalizeImage } from '@/lib/utils'
@@ -11,6 +11,8 @@ import { normalizeImage } from '@/lib/utils'
 interface PackCardProps {
     id: string
     name: string
+    nameFr?: string | null
+    nameEn?: string | null
     description?: string | null
     price: number
     image: string | null
@@ -29,6 +31,8 @@ interface PackCardProps {
 export default function PackCard({
     id,
     name,
+    nameFr,
+    nameEn,
     price,
     image,
     books,
@@ -36,11 +40,14 @@ export default function PackCard({
 }: PackCardProps) {
     const t = useTranslations('Packs')
     const tCommon = useTranslations('Common')
+    const locale = useLocale()
     const addItem = useCartStore((state) => state.addItem)
     const { openCart, showNotification } = useUIStore()
     const totalOriginalPrice = books.reduce((sum: number, pb: any) => sum + pb.book.price, 0)
     const savings = totalOriginalPrice - price
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
+
+    const displayName = locale === 'fr' && nameFr ? nameFr : locale === 'en' && nameEn ? nameEn : name;
 
     return (
         <div className="group relative bg-[#FDFBF7] rounded-[2rem] overflow-hidden border border-gray-100 hover:border-black shadow-sm hover:shadow-2xl transition-all duration-500">
@@ -64,7 +71,7 @@ export default function PackCard({
                 <WishlistButton
                     item={{
                         id,
-                        title: name,
+                        title: displayName,
                         price,
                         image: image || (books && books.length > 0 ? books[0].book.image : '/images/placeholder.jpg'),
                         type: 'PACK',
@@ -80,7 +87,7 @@ export default function PackCard({
                     {image ? (
                         <img
                             src={normalizeImage(image)}
-                            alt={`Pack ${name} - Riwaya Selection`}
+                            alt={`Pack ${displayName} - Riwaya Selection`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                         />
@@ -91,7 +98,7 @@ export default function PackCard({
                                     <div key={pb.book.id} className={`relative w-20 h-28 rounded-xl overflow-hidden shadow-2xl border-2 border-white ${idx % 2 === 0 ? '-rotate-6' : 'rotate-6'}`}>
                                         <img
                                             src={normalizeImage(pb.book.image)}
-                                            alt={`${pb.book.title} - Inclus dans le pack ${name}`}
+                                            alt={`${pb.book.title} - Inclus dans le pack ${displayName}`}
                                             className="w-full h-full object-cover"
                                             onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                                         />
@@ -109,7 +116,7 @@ export default function PackCard({
                     <div className="flex flex-col items-center text-center mb-6">
                         <span className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-400 mb-2">{t('Exclusive')}</span>
                         <h3 className="text-2xl font-black text-black tracking-tighter mb-2 group-hover:translate-y-1 transition-transform">
-                            {name}
+                            {displayName}
                         </h3>
                         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-100 shadow-sm">
                             <Sparkles className="w-3 h-3 text-yellow-500" />
@@ -141,7 +148,7 @@ export default function PackCard({
                                 addItem({
                                     type: 'PACK',
                                     id,
-                                    title: name,
+                                    title: displayName,
                                     price,
                                     image: image || (books.length > 0 ? books[0].book.image : '/images/placeholder-pack.jpg'),
                                     booksCount: books.length,

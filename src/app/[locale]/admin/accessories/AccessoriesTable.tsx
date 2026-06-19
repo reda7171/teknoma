@@ -113,8 +113,8 @@ export default function AccessoriesTable({
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-black text-slate-900">{item.price} DH</span>
-                                        <span className="text-[10px] text-slate-400 font-medium">Coût: {item.costPrice} DH</span>
+                                        <span className="text-sm font-black text-slate-900">{item.price.toFixed(2)} DH</span>
+                                        <span className="text-[10px] text-slate-400 font-medium">Coût: {item.costPrice.toFixed(2)} DH</span>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">

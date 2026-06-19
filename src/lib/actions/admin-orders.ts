@@ -23,7 +23,9 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
             include: {
                 items: {
                     include: {
-                        book: { select: { id: true, title: true } }
+                        book: { select: { id: true, title: true } },
+                        pack: { include: { books: true } },
+                        extraProduct: { select: { id: true, name: true } }
                     }
                 }
             }
@@ -33,8 +35,10 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 
         const prevStatus = order.status
         const isNowReturned = status === 'RETURNED' || status === 'CANCELLED'
-        // Statuts qui n'avaient pas encore décrémenté (ne pas remettre le stock)
-        const wasNeverShipped = ['PENDING', 'CANCELLED', 'RETURNED'].includes(prevStatus)
+        
+        // Si le statut précédent est déjà CANCELLED ou RETURNED, le stock a déjà été réintégré.
+        // Sinon, le stock avait été décrémenté (lors de la création de la commande), et il faut le réintégrer.
+        const wasAlreadyRestored = ['CANCELLED', 'RETURNED'].includes(prevStatus)
 
         await prisma.$transaction(async (tx) => {
             // Mise à jour statut + historique
@@ -53,15 +57,26 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
             })
 
             // Réintégrer le stock si retour/annulation d'une commande qui avait décrémenté le stock
-            if (isNowReturned && !wasNeverShipped) {
+            if (isNowReturned && !wasAlreadyRestored) {
                 for (const item of order.items) {
                     if (item.type === 'BOOK' && item.bookId) {
                         await tx.book.update({
                             where: { id: item.bookId },
                             data: { stock: { increment: item.quantity } }
                         })
+                    } else if (item.type === 'ACCESSORY' && item.extraProductId) {
+                        await tx.extraProduct.update({
+                            where: { id: item.extraProductId },
+                            data: { stock: { increment: item.quantity } }
+                        })
+                    } else if (item.type === 'PACK' && item.pack) {
+                        for (const packBook of item.pack.books) {
+                            await tx.book.update({
+                                where: { id: packBook.bookId },
+                                data: { stock: { increment: item.quantity } }
+                            })
+                        }
                     }
-                    // Note: les packs ne gèrent pas de stock direct
                 }
             }
 
@@ -74,8 +89,8 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
         revalidatePath('/admin/orders')
         revalidatePath(`/admin/orders/${orderId}`)
 
-        const stockNote = isNowReturned && !wasNeverShipped
-            ? ` | Stock des livres réintégré (${order.items.filter(i => i.type === 'BOOK').length} articles)`
+        const stockNote = isNowReturned && !wasAlreadyRestored
+            ? ` | Stock des produits réintégré (${order.items.length} articles)`
             : ''
 
         await createAuditLog({

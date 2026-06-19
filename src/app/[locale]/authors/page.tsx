@@ -12,12 +12,25 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params
     const t = await getTranslations('AuthorsPage')
     
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
     return {
-        title: t('Title'),
-        description: t('Subheading'),
+        title: `${t('Title')} | Riwaya`,
+        description: t('Description'),
+        openGraph: {
+            title: `${t('Title')} | Riwaya`,
+            description: t('Description'),
+            images: ['/images/authors-og.png'],
+        },
         alternates: {
-            canonical: `/${locale}/authors`
-        }
+            canonical: `${baseUrl}/${locale}/authors`,
+            languages: {
+                'ar': `${baseUrl}/ar/authors`,
+                'fr': `${baseUrl}/fr/authors`,
+                'en': `${baseUrl}/en/authors`,
+                'x-default': `${baseUrl}/ar/authors`,
+            },
+        },
     }
 }
 

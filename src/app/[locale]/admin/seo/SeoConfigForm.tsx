@@ -480,7 +480,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                 <SectionHeader s="social" />
                 {openSection === 'social' && (
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {field('Page Facebook (URL)', 'seo_facebook_page', 'https://facebook.com/riwaya', 'url')}
+                        {field('Page Facebook (URL)', 'seo_facebook_page', 'https://facebook.com/riwaya.book', 'url')}
                         {field('Instagram (@handle)', 'seo_instagram_handle', '@riwaya.ma')}
                         {field('YouTube (URL chaîne)', 'seo_youtube_channel', 'https://youtube.com/@riwaya', 'url')}
                         {field('TikTok (@handle)', 'seo_tiktok_handle', '@riwaya.ma')}

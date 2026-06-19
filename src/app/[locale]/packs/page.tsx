@@ -7,8 +7,11 @@ import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { Link } from '@/i18n/routing'
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
     const t = await getTranslations('PacksPage')
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
 
     return {
         title: `${t('Title')} | Riwaya`,
@@ -17,7 +20,16 @@ export async function generateMetadata(): Promise<Metadata> {
             title: `${t('Title')} | Riwaya`,
             description: t('Subtitle'),
             images: ['/images/og-packs.png'],
-        }
+        },
+        alternates: {
+            canonical: `${baseUrl}/${locale}/packs`,
+            languages: {
+                'ar': `${baseUrl}/ar/packs`,
+                'fr': `${baseUrl}/fr/packs`,
+                'en': `${baseUrl}/en/packs`,
+                'x-default': `${baseUrl}/ar/packs`,
+            },
+        },
     }
 }
 

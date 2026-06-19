@@ -20,13 +20,15 @@ interface AddToCartButtonProps {
     variant?: 'primary' | 'secondary'
     className?: string
     showIcon?: boolean
+    disabled?: boolean
 }
 
 export default function AddToCartButton({
     product,
     variant = 'primary',
     className = '',
-    showIcon = true
+    showIcon = true,
+    disabled = false
 }: AddToCartButtonProps) {
     const addItem = useCartStore((state) => state.addItem)
     const openCart = useUIStore((state) => state.openCart)
@@ -35,11 +37,18 @@ export default function AddToCartButton({
 
     return (
         <button
-            className={`w-full flex items-center justify-center gap-3 font-bold rounded-2xl active:scale-95 transition-all shadow-lg hover:shadow-black/20 ${variant === 'primary'
-                ? 'bg-black text-white hover:bg-gray-800'
-                : 'bg-white text-black border-2 border-black hover:bg-gray-50'
-                } py-5 px-8 ${className}`}
+            disabled={disabled}
+            className={`w-full flex items-center justify-center gap-3 font-bold rounded-2xl transition-all py-5 px-8 ${
+                disabled 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-none' 
+                    : `active:scale-95 shadow-lg hover:shadow-black/20 ${
+                        variant === 'primary'
+                            ? 'bg-black text-white hover:bg-gray-800'
+                            : 'bg-white text-black border-2 border-black hover:bg-gray-50'
+                    }`
+            } ${className}`}
             onClick={() => {
+                if (disabled) return;
                 try {
 
                     addItem({

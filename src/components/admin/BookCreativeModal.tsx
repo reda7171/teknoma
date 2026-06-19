@@ -27,16 +27,17 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [theme, setTheme] = useState<'dark' | 'light' | 'orange' | 'magenta' | 'emerald' | 'gold' | 'purple'>('dark')
 
     // Interactive States
-    const [positions, setPositions] = useState({ 
-        badge: { x: 0, y: 0 }, 
-        logo: { x: 0, y: 0 }, 
-        book: { x: 0, y: 0 }, 
-        title: { x: 0, y: 0 }, 
-        author: { x: 0, y: 0 }, 
-        price: { x: 0, y: 0 }, 
+    const [positions, setPositions] = useState({
+        badge: { x: 0, y: 0 },
+        logo: { x: 0, y: 0 },
+        book: { x: 0, y: 0 },
+        title: { x: 0, y: 0 },
+        author: { x: 0, y: 0 },
+        price: { x: 0, y: 0 },
         delivery: { x: 0, y: 0 },
         bg: { x: 0, y: 0 },
-        whatsapp: { x: 0, y: 0 }
+        whatsapp: { x: 0, y: 0 },
+        socials: { x: 0, y: 0 }
     })
     const [dragging, setDragging] = useState<string | null>(null)
     const [offset, setOffset] = useState({ x: 0, y: 0 })
@@ -52,6 +53,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [showSolde, setShowSolde] = useState(true)
     const [showWhatsapp, setShowWhatsapp] = useState(true)
     const [whatsappScale, setWhatsappScale] = useState(1)
+    const [showSocials, setShowSocials] = useState(true)
+    const [socialsScale, setSocialsScale] = useState(1)
     const [bgImage, setBgImage] = useState<string | null>(null)
     const [bgOpacity, setBgOpacity] = useState(1)
     const [imageOpacity, setImageOpacity] = useState(1)
@@ -63,7 +66,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [showPublishOptions, setShowPublishOptions] = useState(false)
     const [fullBookData, setFullBookData] = useState<any>(null)
     const [caption, setCaption] = useState('')
-    
+
     const [editableTexts, setEditableTexts] = useState({
         badge: book?.category || 'Recommandation',
         title: book?.title || 'Titre',
@@ -72,7 +75,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         oldPrice: (book?.price ? Math.round(book.price * 1.3) : 0).toString(),
         delivery_line1: 'Livraison',
         delivery_line2: 'Gratuite',
-        whatsapp: '+212 600 00 00 00'
+        whatsapp: '+212 702 220 575',
+        socialHandle: '@riwaya.book'
     })
 
     const handleTextChange = (key: string, value: string) => {
@@ -128,7 +132,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     useEffect(() => {
         if (!isOpen) {
             setTheme('dark') // reset
-            setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: 0 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 } })
+            setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: 0 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 }, socials: { x: 0, y: 0 } })
             setImageScale(1)
             setImageRotation(0)
             setLogoScale(3)
@@ -138,6 +142,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             setShowSolde(true)
             setShowWhatsapp(true)
             setWhatsappScale(1)
+            setShowSocials(true)
+            setSocialsScale(1)
         } else if (book) {
             setEditableTexts({
                 badge: book.category || 'Recommandation',
@@ -147,7 +153,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 oldPrice: Math.round(book.price * 1.3).toString(),
                 delivery_line1: 'Livraison',
                 delivery_line2: 'Gratuite',
-                whatsapp: '+212 600 00 00 00'
+                whatsapp: '+212 600 00 00 00',
+                socialHandle: '@riwaya.book'
             })
             // Fetch site settings for WhatsApp phone number
             let whatsappPhone = '+212 600 00 00 00'
@@ -193,7 +200,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const toBase64 = async (url: string): Promise<string> => {
         try {
             if (url.startsWith('data:')) return url;
-            
+
             // Si c'est une URL externe, on passe par notre proxy pour éviter CORS
             let targetUrl = url;
             if (url.startsWith('http') && !url.includes(window.location.host)) {
@@ -247,7 +254,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 cacheBust: true,
                 skipFonts: false,
             })
-            
+
             restoreImages(originals)
 
             let finalDataUrl = dataUrl;
@@ -260,7 +267,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
             const link = document.createElement('a')
             link.href = finalDataUrl
-            link.download = `creative_${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`
+            link.download = `${book.title.replace(/[\/\\?%*:|"<>]/g, '-')}.png`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
@@ -306,7 +313,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 u8arr[n] = bstr.charCodeAt(n)
             }
             const blob = new Blob([u8arr], { type: mime })
-            const file = new File([blob], `creative_${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`, { type: mime })
+            const file = new File([blob], `${book.title.replace(/[\/\\?%*:|"<>]/g, '-')}.png`, { type: mime })
 
             // Try Web Share API first
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -380,7 +387,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 body: formData
             })
             const uploadData = await uploadRes.json()
-            
+
             if (!uploadData.success) {
                 throw new Error(uploadData.error || "Échec de l'upload de la créative")
             }
@@ -427,11 +434,11 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 cacheBust: true,
             })
             restoreImages(originals)
-            
+
             const baseUrl = window.location.origin
             const productUrl = `${baseUrl}/fr/books/${book.id}`
             const text = caption || book.title
-            
+
             const tags = `#riwaya #lecture #livre #maroc #culture ${book.category ? `#${book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
 
             const newWindow = window.open()
@@ -555,23 +562,23 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black backdrop-blur-md">
             <div className="bg-white w-full h-full flex flex-col md:flex-row overflow-hidden shadow-2xl">
-                
+
                 {/* Left side: Preview Area */}
                 <div className="flex-1 bg-gray-100 p-8 flex items-center justify-center overflow-auto">
                     {/* The Poster Container */}
-                    <div 
+                    <div
                         ref={posterRef}
-                        className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[400px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col transition-all duration-300`}
-                        style={{ 
-                            aspectRatio: format === 'story' ? '9/16' : '4/5', 
+                        className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col transition-all duration-300`}
+                        style={{
+                            aspectRatio: format === 'story' ? '9/16' : '1/1',
                             boxShadow: 'none',
                         }}
                     >
                         {/* Custom Background Image Layer */}
                         {bgImage && (
-                            <div 
+                            <div
                                 className={`absolute inset-0 z-0 cursor-move ${dragging === 'bg' ? '' : 'transition-transform'}`}
-                                style={{ 
+                                style={{
                                     backgroundImage: `url(${bgImage})`,
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
@@ -593,14 +600,14 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
                         {/* Top Label & Logo */}
                         <div className="pt-8 px-8 flex justify-between items-start z-10 select-none">
-                            <div 
+                            <div
                                 className={`cursor-move ${dragging === 'badge' ? '' : 'transition-transform active:scale-95'}`}
                                 style={{ transform: `translate(${positions.badge.x}px, ${positions.badge.y}px)`, touchAction: 'none' }}
                                 onMouseDown={(e) => handleMouseDown(e, 'badge')}
                                 onTouchStart={(e) => handleTouchStart(e, 'badge')}
                             >
                                 <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}>
-                                    <p 
+                                    <p
                                         contentEditable
                                         suppressContentEditableWarning
                                         onBlur={(e) => handleTextChange('badge', e.currentTarget.textContent || '')}
@@ -610,18 +617,18 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     </p>
                                 </div>
                             </div>
-                            
+
                             {showLogo && (
-                                <div 
+                                <div
                                     className={`cursor-move ${dragging === 'logo' ? '' : 'transition-transform active:scale-95'} opacity-90`}
                                     style={{ transform: `translate(${positions.logo.x}px, ${positions.logo.y}px)`, touchAction: 'none' }}
                                     onMouseDown={(e) => handleMouseDown(e, 'logo')}
                                     onTouchStart={(e) => handleTouchStart(e, 'logo')}
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img 
-                                        src="/logo.png" 
-                                        alt="Riwaya Logo" 
+                                    <img
+                                        src="/logo.png"
+                                        alt="Riwaya Logo"
                                         crossOrigin="anonymous"
                                         className="h-6 sm:h-8 object-contain filter brightness-0 invert transition-transform"
                                         style={{ transform: `scale(${logoScale})` }}
@@ -631,7 +638,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         </div>
 
                         {showFreeDelivery && (
-                             <div 
+                            <div
                                 className={`flex flex-col items-center select-none absolute top-32 right-8 cursor-move z-20 ${dragging === 'delivery' ? '' : 'transition-transform active:scale-95'}`}
                                 style={{ transform: `translate(${positions.delivery.x}px, ${positions.delivery.y}px)`, touchAction: 'none' }}
                                 onMouseDown={(e) => {
@@ -642,10 +649,10 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     e.stopPropagation();
                                     handleTouchStart(e, 'delivery');
                                 }}
-                             >
+                            >
                                 <span className="text-5xl mb-1 filter drop-shadow-2xl">🚚</span>
                                 <div className="flex flex-col items-center leading-tight">
-                                    <span 
+                                    <span
                                         contentEditable
                                         suppressContentEditableWarning
                                         onBlur={(e) => handleTextChange('delivery_line1', e.currentTarget.textContent || '')}
@@ -653,7 +660,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     >
                                         {editableTexts.delivery_line1}
                                     </span>
-                                    <span 
+                                    <span
                                         contentEditable
                                         suppressContentEditableWarning
                                         onBlur={(e) => handleTextChange('delivery_line2', e.currentTarget.textContent || '')}
@@ -662,30 +669,30 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         {editableTexts.delivery_line2}
                                     </span>
                                 </div>
-                             </div>
+                            </div>
                         )}
 
                         {/* Center Content (Book Cover) */}
                         <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30 pointer-events-none`}>
-                            <div 
+                            <div
                                 className={`relative w-full ${format === 'story' ? 'max-w-[220px]' : 'max-w-[200px]'} mx-auto perspective-1000 cursor-move pointer-events-auto ${dragging === 'book' ? '' : 'transition-transform active:scale-95'}`}
                                 style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)`, touchAction: 'none' }}
                                 onMouseDown={(e) => handleMouseDown(e, 'book')}
                                 onTouchStart={(e) => handleTouchStart(e, 'book')}
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img 
+                                <img
                                     src={(() => {
                                         const img = normalizeImage(book.image);
                                         if (img.startsWith('http') && !img.includes(window.location.host)) {
                                             return `/api/proxy/image?url=${encodeURIComponent(img)}`;
                                         }
                                         return img;
-                                    })() || '/book-placeholder.png'} 
+                                    })() || '/book-placeholder.png'}
                                     alt={book.title}
                                     crossOrigin="anonymous"
                                     className="relative w-full h-auto object-cover rounded shadow-2xl transition-transform"
-                                    style={{ 
+                                    style={{
                                         boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none',
                                         transform: `scale(${imageScale}) rotate(${imageRotation}deg)`,
                                         opacity: imageOpacity
@@ -695,7 +702,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         </div>
 
                         {/* Titre - déplacer par glisser, éditer par double-clic */}
-                        <div 
+                        <div
                             className={`absolute bottom-36 left-1/2 z-10 ${editing === 'title' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'title' ? '' : 'transition-transform active:scale-95'}`}
                             style={{ transform: `translate(calc(-50% + ${positions.title.x}px), ${positions.title.y}px)`, touchAction: 'none' }}
                             onMouseDown={(e) => handleMouseDown(e, 'title')}
@@ -703,7 +710,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             onDoubleClick={() => setEditing('title')}
                             title="Double-clic pour éditer"
                         >
-                            <h2 
+                            <h2
                                 contentEditable={editing === 'title'}
                                 suppressContentEditableWarning
                                 onBlur={(e) => { handleTextChange('title', e.currentTarget.textContent || ''); setEditing(null) }}
@@ -714,7 +721,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         </div>
 
                         {/* Auteur - déplacer par glisser, éditer par double-clic */}
-                        <div 
+                        <div
                             className={`absolute bottom-28 left-1/2 z-10 ${editing === 'author' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'author' ? '' : 'transition-transform active:scale-95'}`}
                             style={{ transform: `translate(calc(-50% + ${positions.author.x}px), ${positions.author.y}px)`, touchAction: 'none' }}
                             onMouseDown={(e) => handleMouseDown(e, 'author')}
@@ -722,7 +729,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             onDoubleClick={() => setEditing('author')}
                             title="Double-clic pour éditer"
                         >
-                            <p 
+                            <p
                                 contentEditable={editing === 'author'}
                                 suppressContentEditableWarning
                                 onBlur={(e) => { handleTextChange('author', e.currentTarget.textContent || ''); setEditing(null) }}
@@ -734,7 +741,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
                         {/* Prix - déplacer par glisser, éditer par double-clic */}
                         {showPrice && (
-                            <div 
+                            <div
                                 className={`absolute bottom-16 left-1/2 z-10 ${editing === 'price' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'price' ? '' : 'transition-transform active:scale-95'}`}
                                 style={{ transform: `translate(calc(-50% + ${positions.price.x}px), ${positions.price.y}px)`, touchAction: 'none' }}
                                 onMouseDown={(e) => handleMouseDown(e, 'price')}
@@ -745,7 +752,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 <div className="flex items-center justify-center gap-3">
                                     {showSolde && (
                                         <div className="text-red-500 font-bold text-2xl line-through drop-shadow-md flex items-baseline gap-1">
-                                            <span 
+                                            <span
                                                 contentEditable={editing === 'price'}
                                                 suppressContentEditableWarning
                                                 onBlur={(e) => { handleTextChange('oldPrice', e.currentTarget.textContent || ''); setEditing(null) }}
@@ -757,7 +764,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         </div>
                                     )}
                                     <div className={`${currentTheme.accent} font-black text-4xl drop-shadow-lg flex items-baseline gap-1`}>
-                                        <span 
+                                        <span
                                             contentEditable={editing === 'price'}
                                             suppressContentEditableWarning
                                             onBlur={(e) => { handleTextChange('price', e.currentTarget.textContent || ''); setEditing(null) }}
@@ -773,9 +780,9 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
                         {/* WhatsApp — drag + double-clic pour éditer */}
                         {showWhatsapp && (
-                            <div 
-                                className={`absolute bottom-4 left-1/2 z-10 ${editing === 'whatsapp' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95`}
-                                style={{ transform: `translate(calc(-50% + ${positions.whatsapp.x}px), ${positions.whatsapp.y}px) scale(${whatsappScale})`, touchAction: 'none' }}
+                            <div
+                                className={`absolute bottom-4 right-4 z-10 ${editing === 'whatsapp' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 origin-bottom-right`}
+                                style={{ transform: `translate(${positions.whatsapp.x}px, ${positions.whatsapp.y}px) scale(${whatsappScale})`, touchAction: 'none' }}
                                 onMouseDown={(e) => handleMouseDown(e, 'whatsapp')}
                                 onTouchStart={(e) => handleTouchStart(e, 'whatsapp')}
                                 onDoubleClick={() => setEditing('whatsapp')}
@@ -785,14 +792,48 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                                     </svg>
-                                    <span 
+                                    <span
                                         contentEditable={editing === 'whatsapp'}
                                         suppressContentEditableWarning
                                         onBlur={(e) => { handleTextChange('whatsapp', e.currentTarget.textContent || ''); setEditing(null) }}
-                                        className="text-sm font-black outline-none"
+                                        className={`font-bold outline-none ${editing === 'whatsapp' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
                                     >
                                         {editableTexts.whatsapp}
                                     </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Social Icons — drag + double-clic pour éditer */}
+                        {showSocials && (
+                            <div
+                                className={`absolute bottom-4 left-4 z-10 ${editing === 'socials' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 flex flex-col items-center gap-3 origin-bottom-left`}
+                                style={{ transform: `translate(${positions.socials.x}px, ${positions.socials.y}px) scale(${socialsScale})`, touchAction: 'none' }}
+                                onMouseDown={(e) => handleMouseDown(e, 'socials')}
+                                onTouchStart={(e) => handleTouchStart(e, 'socials')}
+                                onDoubleClick={() => setEditing('socials')}
+                                title="Double-clic pour éditer"
+                            >
+                                <span
+                                    contentEditable={editing === 'socials'}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => { handleTextChange('socialHandle', e.currentTarget.textContent || ''); setEditing(null) }}
+                                    className={`text-white font-bold text-lg tracking-wide outline-none ${editing === 'socials' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
+                                >
+                                    {editableTexts.socialHandle}
+                                </span>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white">
+                                        <Instagram className="w-6 h-6" />
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                                        <Facebook className="w-6 h-6" fill="currentColor" strokeWidth={0} />
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white border-2 border-white/10">
+                                        <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.44 3.29-1.43 4.54-1.03 1.3-2.58 2.16-4.25 2.38-1.74.22-3.56-.05-5.06-1.02-1.48-.96-2.54-2.5-2.85-4.23-.33-1.84.14-3.79 1.25-5.26 1.13-1.48 2.87-2.39 4.74-2.53V13c-.94.04-1.87.35-2.61.94-.74.57-1.18 1.44-1.28 2.37-.11 1.05.21 2.14.9 2.92.68.78 1.75 1.2 2.81 1.14 1.04-.06 2.02-.6 2.53-1.47.38-.66.56-1.42.56-2.18V.02z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -801,13 +842,13 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
                 {/* Right side: Controls */}
                 <div className="w-full md:w-[380px] bg-white border-l border-gray-200 p-8 flex flex-col relative shrink-0">
-                    <button 
+                    <button
                         onClick={onClose}
                         className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
                     >
                         <X className="w-6 h-6" />
                     </button>
-                    
+
                     <h3 className="text-lg font-bold text-gray-900 mb-6 mt-2 flex items-center">
                         <ImageIcon className="w-5 h-5 mr-2 text-indigo-600" />
                         Créative Publicitaire
@@ -819,49 +860,49 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 Choisir un thème
                             </label>
                             <div className="space-y-2">
-                                <button 
+                                <button
                                     onClick={() => setTheme('dark')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'dark' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gray-900 to-black mr-3 border border-gray-300"></div>
                                     <span className="font-medium text-sm">Mode Sombre</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('light')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'light' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-6 h-6 rounded-md bg-gradient-to-br from-stone-50 to-stone-200 mr-3 border border-gray-300"></div>
                                     <span className="font-medium text-sm">Mode Clair</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('orange')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'orange' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-400 to-red-500 mr-3 border border-gray-300"></div>
                                     <span className="font-medium text-sm">Vibrant (Orange)</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('magenta')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'magenta' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-6 h-6 rounded-md bg-gradient-to-br from-pink-500 to-purple-600 mr-3 border border-gray-300"></div>
                                     <span className="font-medium text-sm">Magenta Pop</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('emerald')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'emerald' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-6 h-6 rounded-md bg-gradient-to-br from-teal-400 to-green-700 mr-3 border border-gray-300"></div>
                                     <span className="font-medium text-sm">Émeraude Nature</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('gold')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'gold' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-6 h-6 rounded-md bg-gradient-to-br from-amber-200 to-orange-500 mr-3 border border-gray-300"></div>
                                     <span className="font-medium text-sm">Gold Premium</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('purple')}
                                     className={`w-full flex items-center px-4 py-3 rounded-xl border ${theme === 'purple' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
@@ -878,10 +919,10 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </label>
                             <div className="space-y-3">
                                 <label className="flex items-center justify-center gap-3 w-full px-4 py-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="hidden" 
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
                                         onChange={(e) => {
                                             const file = e.target.files?.[0]
                                             if (file) {
@@ -903,15 +944,15 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                                 <span>Opacité du fond</span>
                                                 <span>{Math.round(bgOpacity * 100)}%</span>
                                             </label>
-                                            <input 
-                                                type="range" 
-                                                min="0" max="1" step="0.05" 
+                                            <input
+                                                type="range"
+                                                min="0" max="1" step="0.05"
                                                 value={bgOpacity}
                                                 onChange={(e) => setBgOpacity(parseFloat(e.target.value))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                             />
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={() => setBgImage(null)}
                                             className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition"
                                         >
@@ -926,8 +967,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Taille de l'image
                             </label>
-                            <input 
-                                type="range" 
+                            <input
+                                type="range"
                                 min="0.5" max="2" step="0.05"
                                 value={imageScale}
                                 onChange={(e) => setImageScale(parseFloat(e.target.value))}
@@ -939,8 +980,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Rotation de l'image
                             </label>
-                            <input 
-                                type="range" 
+                            <input
+                                type="range"
                                 min="-180" max="180" step="1"
                                 value={imageRotation}
                                 onChange={(e) => setImageRotation(parseInt(e.target.value))}
@@ -953,8 +994,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 <span>Opacité de l'image</span>
                                 <span>{Math.round(imageOpacity * 100)}%</span>
                             </label>
-                            <input 
-                                type="range" 
+                            <input
+                                type="range"
                                 min="0" max="1" step="0.05"
                                 value={imageOpacity}
                                 onChange={(e) => setImageOpacity(parseFloat(e.target.value))}
@@ -966,8 +1007,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Taille du logo
                             </label>
-                            <input 
-                                type="range" 
+                            <input
+                                type="range"
                                 min="0.5" max="3" step="0.1"
                                 value={logoScale}
                                 onChange={(e) => setLogoScale(parseFloat(e.target.value))}
@@ -980,8 +1021,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Taille du WhatsApp
                             </label>
-                            <input 
-                                type="range" 
+                            <input
+                                type="range"
                                 min="0.5" max="2" step="0.1"
                                 value={whatsappScale}
                                 onChange={(e) => setWhatsappScale(parseFloat(e.target.value))}
@@ -990,10 +1031,24 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             />
                         </div>
 
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Taille des Réseaux Sociaux
+                            </label>
+                            <input
+                                type="range"
+                                min="0.5" max="2" step="0.1"
+                                value={socialsScale}
+                                onChange={(e) => setSocialsScale(parseFloat(e.target.value))}
+                                disabled={!showSocials}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 disabled:opacity-50"
+                            />
+                        </div>
+
                         <div className="flex flex-col gap-2">
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showLogo}
                                     onChange={(e) => setShowLogo(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -1002,8 +1057,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </label>
 
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showFreeDelivery}
                                     onChange={(e) => setShowFreeDelivery(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -1012,8 +1067,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </label>
 
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showShadow}
                                     onChange={(e) => setShowShadow(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -1022,8 +1077,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </label>
 
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showPrice}
                                     onChange={(e) => setShowPrice(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -1032,8 +1087,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </label>
 
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showSolde}
                                     onChange={(e) => setShowSolde(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -1042,192 +1097,202 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </label>
 
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showWhatsapp}
                                     onChange={(e) => setShowWhatsapp(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                 />
                                 <span className="text-sm font-medium text-gray-800">Afficher WhatsApp</span>
                             </label>
+
+                            <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                                <input
+                                    type="checkbox"
+                                    checked={showSocials}
+                                    onChange={(e) => setShowSocials(e.target.checked)}
+                                    className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                />
+                                <span className="text-sm font-medium text-gray-800">Afficher Réseaux Sociaux</span>
+                            </label>
                         </div>
 
                         <div className="bg-indigo-50 text-indigo-800 text-xs p-4 rounded-xl space-y-2">
                             <p>💡 <strong>Astuce :</strong> Vous pouvez <strong>glisser-déposer</strong> les éléments et <strong>cliquer sur les textes</strong> pour les modifier !</p>
-                            <p>📏 Format optimisé ({format === 'story' ? '9:16' : '4:5'}) pour {format === 'story' ? 'les stories' : 'les publications'}.</p>
+                            <p>📏 Format optimisé ({format === 'story' ? '9:16' : '1:1 carré'}) pour {format === 'story' ? 'les stories' : 'les publications'}.</p>
                         </div>
                     </div>
 
-                        <div className="pt-6 border-t border-gray-200 flex flex-col gap-3">
-                            <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Publication n8n</h4>
-                                <button 
-                                    onClick={() => setShowPublishOptions(!showPublishOptions)}
-                                    className="text-indigo-600 text-xs font-bold hover:underline"
-                                >
-                                    {showPublishOptions ? 'Masquer options' : 'Options avancées'}
-                                </button>
-                            </div>
-
-                            {showPublishOptions && (
-                                <div className="space-y-4 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                    {/* Platform Selection */}
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Plateforme</label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {[
-                                                { id: 'facebook', label: 'FB', icon: 'FB' },
-                                                { id: 'instagram', label: 'IG', icon: 'IG' },
-                                                { id: 'tiktok', label: 'TK', icon: 'TK' },
-                                                { id: 'all', label: 'All', icon: '🚀' }
-                                            ].map(p => (
-                                                <button
-                                                    key={p.id}
-                                                    onClick={() => setPlatform(p.id as any)}
-                                                    className={`py-2 rounded-lg text-xs font-bold border transition ${platform === p.id ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600'}`}
-                                                >
-                                                    {p.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Description Selection */}
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Description</label>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setUseDescription('short')}
-                                                className={`flex-1 py-2 rounded-lg text-xs font-bold border transition ${useDescription === 'short' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600'}`}
-                                            >
-                                                Courte
-                                            </button>
-                                            <button
-                                                onClick={() => setUseDescription('long')}
-                                                className={`flex-1 py-2 rounded-lg text-xs font-bold border transition ${useDescription === 'long' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600'}`}
-                                            >
-                                                Longue
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Scheduling */}
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Programmer</label>
-                                        <input 
-                                            type="datetime-local"
-                                            value={scheduleAt}
-                                            onChange={(e) => setScheduleAt(e.target.value)}
-                                            className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                                        />
-                                    </div>
-
-                                    {/* Caption Editor */}
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Texte du Post (Caption)</label>
-                                        <textarea 
-                                            value={caption}
-                                            onChange={(e) => setCaption(e.target.value)}
-                                            rows={5}
-                                            className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none font-medium"
-                                            placeholder="Écrivez la légende du post ici..."
-                                        />
-                                        <p className="text-[9px] text-gray-400 mt-1 italic">Ce texte sera utilisé pour la publication et l'aperçu.</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={handleDownload}
-                                    disabled={isGenerating}
-                                    className="flex items-center justify-center px-4 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-70 shadow-lg active:scale-95"
-                                >
-                                    <Download className="w-5 h-5 mr-2" />
-                                    {isGenerating ? '...' : 'Télécharger'}
-                                </button>
-                                <button
-                                    onClick={handlePreview}
-                                    disabled={isGenerating}
-                                    className="flex items-center justify-center px-4 py-3 bg-gray-800 text-white font-medium rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-70 shadow-lg active:scale-95"
-                                >
-                                    <Eye className="w-5 h-5 mr-2" />
-                                    Visualiser
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (!posterRef.current || !book) return
-                                        try {
-                                            setIsGenerating(true)
-                                            const originals = await patchImagesBase64(posterRef.current)
-                                            await new Promise(resolve => setTimeout(resolve, 800))
-                                            const dataUrl = await htmlToImage.toPng(posterRef.current, {
-                                                quality: 1,
-                                                pixelRatio: 2,
-                                                backgroundColor: 'transparent',
-                                                cacheBust: true,
-                                            })
-                                            restoreImages(originals)
-
-                                            const arr = dataUrl.split(',')
-                                            const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
-                                            const bstr = atob(arr[1])
-                                            let n = bstr.length
-                                            const u8arr = new Uint8Array(n)
-                                            while (n--) u8arr[n] = bstr.charCodeAt(n)
-                                            const blob = new Blob([u8arr], { type: mime })
-                                            const filename = `creative_${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.png`
-                                            const file = new File([blob], filename, { type: mime })
-
-                                            const formData = new FormData()
-                                            formData.append('file', file)
-                                            const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
-                                            const uploadData = await uploadRes.json()
-                                            
-                                            if (uploadData.success) {
-                                                const assetRes = await fetch('/api/admin/marketing/assets', {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({
-                                                        name: uploadData.url.split('/').pop(),
-                                                        url: uploadData.url,
-                                                        type: 'CREATIVE',
-                                                        bookId: book.id
-                                                    })
-                                                })
-                                                const assetData = await assetRes.json()
-                                                if (assetData.success) {
-                                                    alert('✅ Image sauvegardée dans le hub marketing')
-                                                } else {
-                                                    throw new Error(assetData.error || 'Erreur lors de l\'enregistrement en base')
-                                                }
-                                            } else {
-                                                throw new Error(uploadData.error || 'Échec de l\'upload')
-                                            }
-                                        } catch (error: any) {
-                                            console.error('Save error:', error)
-                                            alert(`Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`)
-                                        } finally {
-                                            setIsGenerating(false)
-                                        }
-                                    }}
-                                    disabled={isGenerating}
-                                    className="col-span-2 flex items-center justify-center px-4 py-3 bg-emerald-600 text-white font-black text-sm rounded-xl hover:bg-emerald-700 transition-all shadow-lg active:scale-95 disabled:opacity-50"
-                                >
-                                    <Sparkles className="w-5 h-5 mr-2" />
-                                    {isGenerating ? 'Génération...' : 'Sauvegarder dans Marketing'}
-                                </button>
-                            </div>
-                            
+                    <div className="pt-6 border-t border-gray-200 flex flex-col gap-3">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Publication n8n</h4>
                             <button
-                                onClick={handleQuickPublish}
-                                disabled={isGenerating || isPublishing}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white font-bold text-xs rounded-xl hover:bg-orange-600 transition-all active:scale-95 disabled:opacity-50"
+                                onClick={() => setShowPublishOptions(!showPublishOptions)}
+                                className="text-indigo-600 text-xs font-bold hover:underline"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                                {isPublishing ? 'Publication...' : scheduleAt ? `Programmer pour ${new Date(scheduleAt).toLocaleDateString()}` : 'Publier via n8n (Image en cours)'}
+                                {showPublishOptions ? 'Masquer options' : 'Options avancées'}
                             </button>
                         </div>
+
+                        {showPublishOptions && (
+                            <div className="space-y-4 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                {/* Platform Selection */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Plateforme</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            { id: 'facebook', label: 'FB', icon: 'FB' },
+                                            { id: 'instagram', label: 'IG', icon: 'IG' },
+                                            { id: 'tiktok', label: 'TK', icon: 'TK' },
+                                            { id: 'all', label: 'All', icon: '🚀' }
+                                        ].map(p => (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => setPlatform(p.id as any)}
+                                                className={`py-2 rounded-lg text-xs font-bold border transition ${platform === p.id ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600'}`}
+                                            >
+                                                {p.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Description Selection */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Description</label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setUseDescription('short')}
+                                            className={`flex-1 py-2 rounded-lg text-xs font-bold border transition ${useDescription === 'short' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600'}`}
+                                        >
+                                            Courte
+                                        </button>
+                                        <button
+                                            onClick={() => setUseDescription('long')}
+                                            className={`flex-1 py-2 rounded-lg text-xs font-bold border transition ${useDescription === 'long' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-600'}`}
+                                        >
+                                            Longue
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Scheduling */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Programmer</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={scheduleAt}
+                                        onChange={(e) => setScheduleAt(e.target.value)}
+                                        className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    />
+                                </div>
+
+                                {/* Caption Editor */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Texte du Post (Caption)</label>
+                                    <textarea
+                                        value={caption}
+                                        onChange={(e) => setCaption(e.target.value)}
+                                        rows={5}
+                                        className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none font-medium"
+                                        placeholder="Écrivez la légende du post ici..."
+                                    />
+                                    <p className="text-[9px] text-gray-400 mt-1 italic">Ce texte sera utilisé pour la publication et l'aperçu.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={handleDownload}
+                                disabled={isGenerating}
+                                className="flex items-center justify-center px-4 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-70 shadow-lg active:scale-95"
+                            >
+                                <Download className="w-5 h-5 mr-2" />
+                                {isGenerating ? '...' : 'Télécharger'}
+                            </button>
+                            <button
+                                onClick={handlePreview}
+                                disabled={isGenerating}
+                                className="flex items-center justify-center px-4 py-3 bg-gray-800 text-white font-medium rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-70 shadow-lg active:scale-95"
+                            >
+                                <Eye className="w-5 h-5 mr-2" />
+                                Visualiser
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (!posterRef.current || !book) return
+                                    try {
+                                        setIsGenerating(true)
+                                        const originals = await patchImagesBase64(posterRef.current)
+                                        await new Promise(resolve => setTimeout(resolve, 800))
+                                        const dataUrl = await htmlToImage.toPng(posterRef.current, {
+                                            quality: 1,
+                                            pixelRatio: 2,
+                                            backgroundColor: 'transparent',
+                                            cacheBust: true,
+                                        })
+                                        restoreImages(originals)
+
+                                        const arr = dataUrl.split(',')
+                                        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
+                                        const bstr = atob(arr[1])
+                                        let n = bstr.length
+                                        const u8arr = new Uint8Array(n)
+                                        while (n--) u8arr[n] = bstr.charCodeAt(n)
+                                        const blob = new Blob([u8arr], { type: mime })
+                                        const filename = `${book.title.replace(/[\/\\?%*:|"<>]/g, '-')}_${Date.now()}.png`
+                                        const file = new File([blob], filename, { type: mime })
+
+                                        const formData = new FormData()
+                                        formData.append('file', file)
+                                        const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+                                        const uploadData = await uploadRes.json()
+
+                                        if (uploadData.success) {
+                                            const assetRes = await fetch('/api/admin/marketing/assets', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    name: uploadData.url.split('/').pop(),
+                                                    url: uploadData.url,
+                                                    type: 'CREATIVE',
+                                                    bookId: book.id
+                                                })
+                                            })
+                                            const assetData = await assetRes.json()
+                                            if (assetData.success) {
+                                                alert('✅ Image sauvegardée dans le hub marketing')
+                                            } else {
+                                                throw new Error(assetData.error || 'Erreur lors de l\'enregistrement en base')
+                                            }
+                                        } else {
+                                            throw new Error(uploadData.error || 'Échec de l\'upload')
+                                        }
+                                    } catch (error: any) {
+                                        console.error('Save error:', error)
+                                        alert(`Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`)
+                                    } finally {
+                                        setIsGenerating(false)
+                                    }
+                                }}
+                                disabled={isGenerating}
+                                className="col-span-2 flex items-center justify-center px-4 py-3 bg-emerald-600 text-white font-black text-sm rounded-xl hover:bg-emerald-700 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                            >
+                                <Sparkles className="w-5 h-5 mr-2" />
+                                {isGenerating ? 'Génération...' : 'Sauvegarder dans Marketing'}
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={handleQuickPublish}
+                            disabled={isGenerating || isPublishing}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white font-bold text-xs rounded-xl hover:bg-orange-600 transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+                            {isPublishing ? 'Publication...' : scheduleAt ? `Programmer pour ${new Date(scheduleAt).toLocaleDateString()}` : 'Publier via n8n (Image en cours)'}
+                        </button>
+                    </div>
                 </div>
 
             </div>

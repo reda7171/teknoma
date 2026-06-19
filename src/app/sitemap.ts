@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 
 const locales = ['fr', 'ar', 'en']
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://riwaya.store'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://riwaya.store'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 1. Pages statiques

@@ -24,6 +24,8 @@ import { getPostsByBookId } from '@/lib/actions/blog'
 import Image from 'next/image'
 import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import ReserveBookButton from '@/components/ReserveBookButton'
+import { BookJsonLd } from '@/components/BookJsonLd'
 
 export async function generateMetadata({
     params,
@@ -124,9 +126,10 @@ export async function generateMetadata({
         alternates: {
             canonical: `${baseUrl}/${locale}/books/${book.id}`,
             languages: {
-                'fr': `${baseUrl}/fr/books/${book.id}`,
                 'ar': `${baseUrl}/ar/books/${book.id}`,
+                'fr': `${baseUrl}/fr/books/${book.id}`,
                 'en': `${baseUrl}/en/books/${book.id}`,
+                'x-default': `${baseUrl}/ar/books/${book.id}`,
             },
         },
     }
@@ -183,41 +186,19 @@ export default async function BookDetailPage({
     const normalizedImage = normalizeImage(book.image)
     const imageUrl = normalizedImage.startsWith('http') ? normalizedImage : normalizedImage.startsWith('data:') ? normalizedImage : `${baseUrl}${normalizedImage}`
 
-    const jsonLd = [
-        {
-            '@context': 'https://schema.org',
-            '@type': 'Book',
-            name: book.title,
-            inLanguage: locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
-            author: {
-                '@type': 'Person',
-                name: book.author,
-            },
-            publisher: {
-                '@type': 'Organization',
-                name: 'Riwaya'
-            },
-            image: imageUrl,
-            description: book.description,
-            isbn: book.isbn,
-            offers: {
-                '@type': 'Offer',
-                price: book.price,
-                priceCurrency: 'MAD',
-                availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-                url: `${baseUrl}/${locale}/books/${book.id}`,
-            }
-        }
-    ];
+    const displayTitle = locale === 'fr' && book.titleFr ? book.titleFr : locale === 'en' && book.titleEn ? book.titleEn : book.title;
+    const displayDescription = locale === 'fr' && book.descriptionFr ? book.descriptionFr : locale === 'en' && book.descriptionEn ? book.descriptionEn : book.description;
+
+    const jsonLd: any[] = [];
 
     if (reviewCount > 0) {
-        jsonLd[0].aggregateRating = {
-            '@type': 'AggregateRating',
-            ratingValue: averageRating,
-            reviewCount: reviewCount,
-        };
-        jsonLd[0].review = reviews.map(r => ({
+        const reviewSchema = reviews.map(r => ({
+            '@context': 'https://schema.org',
             '@type': 'Review',
+            itemReviewed: {
+                '@type': 'Book',
+                name: displayTitle
+            },
             reviewRating: {
                 '@type': 'Rating',
                 ratingValue: r.rating,
@@ -230,6 +211,7 @@ export default async function BookDetailPage({
             reviewBody: r.comment || '',
             datePublished: new Date(r.createdAt).toISOString().split('T')[0]
         }));
+        jsonLd.push(...reviewSchema);
     }
 
     jsonLd.push({
@@ -251,7 +233,7 @@ export default async function BookDetailPage({
                 {
                     '@type': 'ListItem',
                     position: 3,
-                    name: book.title,
+                    name: displayTitle,
                     item: `${baseUrl}/${locale}/books/${book.id}`
                 }
             ]
@@ -289,10 +271,21 @@ export default async function BookDetailPage({
 
     return (
         <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+            <BookJsonLd 
+                book={book} 
+                locale={locale} 
+                displayTitle={displayTitle}
+                displayDescription={displayDescription}
+                imageUrl={imageUrl}
+                averageRating={averageRating}
+                reviewCount={reviewCount}
             />
+            {jsonLd.length > 0 && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+                />
+            )}
             <div className="min-h-screen bg-pixio-cream">
                 <SetPixelView
                     id={book.id}
@@ -340,7 +333,7 @@ export default async function BookDetailPage({
                                         <WishlistButton
                                             item={{
                                                 id: book.id,
-                                                title: book.title,
+                                                title: displayTitle,
                                                 price: book.price,
                                                 image: book.image,
                                                 type: 'BOOK',
@@ -352,7 +345,7 @@ export default async function BookDetailPage({
                                     </div>
                                     <ImageWithFallback
                                         src={book.image}
-                                        alt={book.title}
+                                        alt={displayTitle}
                                         className="w-full h-full object-cover rounded-[2rem] transition-transform duration-700 group-hover:scale-[1.02]"
                                     />
                                     {book.stock <= 5 && book.stock > 0 && (
@@ -419,7 +412,7 @@ export default async function BookDetailPage({
                                 </div>
 
                                 <h1 className="text-4xl md:text-7xl font-black text-black leading-none tracking-tighter">
-                                    {book.title}<span className="text-gray-200">.</span>
+                                    {displayTitle}<span className="text-gray-200">.</span>
                                 </h1>
 
                                 <p className="text-xl font-black text-gray-300 uppercase tracking-widest">
@@ -475,34 +468,41 @@ export default async function BookDetailPage({
                                     </div>
                                 )}
 
-                                {book.stock > 0 && (
-                                    <div className="space-y-4">
+                                <div className="space-y-4">
+                                    {book.stock > 0 && (
                                         <WhatsAppOrderButton
-                                            title={book.title}
+                                            title={displayTitle}
                                             price={book.price}
                                             phone={whatsappPhone || undefined}
                                             type="book"
                                         />
-                                        <AddToCartButton
-                                            product={{
-                                                id: book.id,
-                                                title: book.title,
-                                                price: book.price,
-                                                image: book.image,
-                                                type: 'BOOK'
-                                            }}
-                                            className="!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
-                                        />
-                                        {(book as any).previewUrl && (
-                                            <a
-                                                href={(book as any).previewUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full flex items-center justify-center py-4 text-xs font-black text-black border-2 border-black rounded-full uppercase tracking-widest hover:bg-gray-50 transition-colors mt-4"
-                                            >
-                                                Lire un extrait
-                                            </a>
-                                        )}
+                                    )}
+                                    <AddToCartButton
+                                        product={{
+                                            id: book.id,
+                                            title: displayTitle,
+                                            price: book.price,
+                                            image: book.image,
+                                            type: 'BOOK'
+                                        }}
+                                        disabled={book.stock <= 0}
+                                        className="!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
+                                    />
+                                    {(book as any).previewUrl && (
+                                        <a
+                                            href={(book as any).previewUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center justify-center py-4 text-xs font-black text-black border-2 border-black rounded-full uppercase tracking-widest hover:bg-gray-50 transition-colors mt-4"
+                                        >
+                                            Lire un extrait
+                                        </a>
+                                    )}
+                                </div>
+
+                                {book.stock <= 0 && (
+                                    <div className="space-y-4 mt-4">
+                                        <ReserveBookButton bookId={book.id} />
                                     </div>
                                 )}
                             </div>
@@ -518,12 +518,12 @@ export default async function BookDetailPage({
                                                     <div className="relative w-12 h-16 sm:w-16 sm:h-20 flex-shrink-0 overflow-hidden rounded-xl">
                                                         <ImageWithFallback
                                                             src={fbBook.image}
-                                                            alt={fbBook.title}
+                                                            alt={locale === 'fr' && fbBook.titleFr ? fbBook.titleFr : locale === 'en' && fbBook.titleEn ? fbBook.titleEn : fbBook.title}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{fbBook.title}</span>
+                                                        <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{locale === 'fr' && fbBook.titleFr ? fbBook.titleFr : locale === 'en' && fbBook.titleEn ? fbBook.titleEn : fbBook.title}</span>
                                                         <p className="text-[9px] font-bold text-gray-400 mt-0.5 sm:mt-1 truncate">{fbBook.author}</p>
                                                         <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} MAD</p>
                                                     </div>
@@ -531,7 +531,7 @@ export default async function BookDetailPage({
                                                 <AddToCartButton
                                                     product={{
                                                         id: fbBook.id,
-                                                        title: fbBook.title,
+                                                        title: locale === 'fr' && fbBook.titleFr ? fbBook.titleFr : locale === 'en' && fbBook.titleEn ? fbBook.titleEn : fbBook.title,
                                                         price: fbBook.price,
                                                         image: fbBook.image,
                                                         type: 'BOOK'
@@ -553,7 +553,7 @@ export default async function BookDetailPage({
                                         <h2 className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
                                     </div>
                                     <div className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
-                                        <p>{book.description}</p>
+                                        <p>{displayDescription}</p>
                                         {book.longDescription && (
                                             <p className="text-gray-600 font-medium normal-case tracking-normal mt-4">{book.longDescription}</p>
                                         )}

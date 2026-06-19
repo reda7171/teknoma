@@ -267,12 +267,12 @@ export default async function PackDetailPage({
                                 <PackCustomizerClient pack={pack as any} whatsappPhone={whatsappPhone || undefined} />
 
                                 <div className="flex items-center justify-center gap-10 mt-10">
-                                    <div className="flex items-center gap-3 text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-300">
-                                        <Truck className="w-4 h-4" />
+                                    <div className="flex items-center gap-3 text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-black">
+                                        <Truck className="w-4 h-4 text-black" />
                                         {t('GlobalShip')}
                                     </div>
-                                    <div className="flex items-center gap-3 text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-300">
-                                        <Shield className="w-4 h-4" />
+                                    <div className="flex items-center gap-3 text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-black">
+                                        <Shield className="w-4 h-4 text-black" />
                                         {t('SecureCOD')}
                                     </div>
                                 </div>

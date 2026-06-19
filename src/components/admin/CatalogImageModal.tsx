@@ -35,7 +35,8 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
         groupByLanguage: false,
         booksPerPage: 24,
         format: 'catalog',
-        contentScale: 1.0
+        scaleX: 1.0,
+        scaleY: 1.0
     })
     const captureRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -53,7 +54,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
 
     if (!isOpen) return null
 
-    const availableBooks = allBooks.filter(b => b.stock > 0)
+    const availableBooks = allBooks
     const filteredBooks = config.selectedCategory === 'all' 
         ? availableBooks 
         : availableBooks.filter(b => b.category === config.selectedCategory)
@@ -337,25 +338,40 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
 
                     <div className="flex-1 bg-gray-200 flex flex-col relative overflow-hidden">
                         {/* Content Scale Control */}
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-xl flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Taille du contenu</span>
-                            <input 
-                                type="range" 
-                                min="0.5" 
-                                max="1.5" 
-                                step="0.05" 
-                                value={config.contentScale} 
-                                onChange={(e) => setConfig({...config, contentScale: parseFloat(e.target.value)})}
-                                className="w-32 accent-purple-600"
-                            />
-                            <span className="text-[10px] font-black text-gray-600 w-8">{Math.round(config.contentScale * 100)}%</span>
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-md px-6 py-3 rounded-3xl shadow-xl flex flex-col items-center gap-2">
+                            <div className="flex items-center gap-4 w-full justify-between">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 w-32">Taille Horizontale</span>
+                                <input 
+                                    type="range" 
+                                    min="0.5" 
+                                    max="1.5" 
+                                    step="0.05" 
+                                    value={config.scaleX} 
+                                    onChange={(e) => setConfig({...config, scaleX: parseFloat(e.target.value)})}
+                                    className="w-32 accent-purple-600"
+                                />
+                                <span className="text-[10px] font-black text-gray-600 w-8">{Math.round(config.scaleX * 100)}%</span>
+                            </div>
+                            <div className="flex items-center gap-4 w-full justify-between">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 w-32">Taille Verticale</span>
+                                <input 
+                                    type="range" 
+                                    min="0.5" 
+                                    max="1.5" 
+                                    step="0.05" 
+                                    value={config.scaleY} 
+                                    onChange={(e) => setConfig({...config, scaleY: parseFloat(e.target.value)})}
+                                    className="w-32 accent-purple-600"
+                                />
+                                <span className="text-[10px] font-black text-gray-600 w-8">{Math.round(config.scaleY * 100)}%</span>
+                            </div>
                         </div>
 
-                        <div className="flex-1 p-8 pt-24 overflow-auto flex justify-center items-start custom-scrollbar">
-                            <div className="origin-top shadow-3xl overflow-hidden bg-white" style={{ transform: `scale(0.22)`, backgroundColor: config.backgroundColor, borderRadius: config.format === 'post' ? '60px' : '0' }}>
+                        <div className="flex-1 p-8 pt-32 pb-32 overflow-auto flex justify-center items-start custom-scrollbar">
+                            <div className="origin-top shadow-3xl overflow-hidden bg-white" style={{ transform: `scale(0.45)`, backgroundColor: config.backgroundColor, borderRadius: config.format === 'post' ? '60px' : '0', marginBottom: '400px' }}>
                              <div className="flex flex-col items-center relative" style={config.format === 'post' ? { width: '1080px', height: '1350px', padding: '60px 40px' } : { width: '1200px', minHeight: '1400px', padding: '96px' }}>
                                 <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.1, ...getPatternStyle(config.pattern, config.backgroundColor) }}></div>
-                                <div style={{ transform: `scale(${config.contentScale})`, transformOrigin: 'top center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'transform 0.2s' }}>
+                                <div style={{ transform: `scale(${config.scaleX}, ${config.scaleY})`, transformOrigin: 'top center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'transform 0.2s' }}>
                                     <div className="relative z-10 w-full flex flex-col items-center">
                                     <h1 dir="auto" className="font-black uppercase text-center mb-6" style={{ color: config.primaryColor, fontSize: config.format === 'post' ? '100px' : '140px', lineHeight: 1.1 }}>{config.title}</h1>
                                     {config.groupByLanguage && chunkedBooks[currentChunkIdx]?.language !== 'all' && (
@@ -436,7 +452,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                         <div style={{ position: 'absolute', inset: 0, zIndex: 0, ...getPatternStyle(config.pattern, config.backgroundColor) }}></div>
 
                         {/* Content Layer */}
-                        <div style={{ transform: `scale(${config.contentScale})`, transformOrigin: 'top center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ transform: `scale(${config.scaleX}, ${config.scaleY})`, transformOrigin: 'top center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 
                                 {/* Header */}
