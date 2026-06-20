@@ -1,8 +1,7 @@
 'use client';
 
-import { usePathname, useRouter } from '@/i18n/routing';
 import { useTransition, useState, useRef, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { Globe, ChevronDown } from 'lucide-react';
 
 import { updateUserLocale } from '@/lib/actions/locale';
@@ -28,7 +27,17 @@ export default function LanguageSwitcher({ upward = false }: { upward?: boolean 
         setIsOpen(false);
         await updateUserLocale(newLocale);
         startTransition(() => {
-            router.replace(pathname, { locale: newLocale });
+            if (pathname) {
+                const pathSegments = pathname.split('/');
+                if (pathSegments.length > 1 && ['fr', 'en', 'ar'].includes(pathSegments[1])) {
+                    pathSegments[1] = newLocale;
+                    router.replace(pathSegments.join('/') + window.location.search);
+                } else {
+                    router.replace(`/${newLocale}${pathname}` + window.location.search);
+                }
+            } else {
+                router.refresh();
+            }
         });
     };
 

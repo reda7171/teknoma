@@ -94,7 +94,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const [showWhatsapp, setShowWhatsapp] = useState(true)
     const [showSocials, setShowSocials] = useState(true)
     const [showLogo, setShowLogo] = useState(true)
-    const [showCaptionOverlay, setShowCaptionOverlay] = useState(true)
+    const [showCaptionOverlay, setShowCaptionOverlay] = useState(false)
     const [showShadow, setShowShadow] = useState(true)
     const [bgBlur, setBgBlur] = useState(20)
     const [bgOpacity, setBgOpacity] = useState(0.4)

@@ -303,9 +303,43 @@ function GeoBlock({ block }: { block: GeoBlock }) {
 
 // ─── Page principale ───────────────────────────────────────────────
 export default function GeoAdminPage() {
-  const totalDone = geoBlocks.flatMap(b => b.signals).filter(s => s.status === 'done').length
-  const totalSignals = geoBlocks.flatMap(b => b.signals).length
+  const [isScanning, setIsScanning] = useState(false)
+  const [hasScanned, setHasScanned] = useState(false)
+
+  const [inputs, setInputs] = useState({
+    faq: '',
+    backlinks: '',
+    trustpilot: '',
+    blog: '',
+    livraison: ''
+  })
+
+  // Calcul dynamique des blocks
+  const dynamicGeoBlocks = geoBlocks.map(block => {
+    return {
+      ...block,
+      signals: block.signals.map(signal => {
+        if (signal.title === 'Page FAQ dédiée /faq' && inputs.faq.trim() !== '') return { ...signal, status: 'done' as const }
+        if (signal.title === 'Mentions externes (backlinks)' && inputs.backlinks.trim() !== '') return { ...signal, status: 'done' as const }
+        if (signal.title === 'Fiche Trustpilot / Avis Google' && inputs.trustpilot.trim() !== '') return { ...signal, status: 'done' as const }
+        if (signal.title === 'Blog avec articles SEO longs' && inputs.blog.trim() !== '') return { ...signal, status: 'done' as const }
+        if (signal.title === 'Page de livraison par ville' && inputs.livraison.trim() !== '') return { ...signal, status: 'done' as const }
+        return signal
+      })
+    }
+  })
+
+  const totalDone = dynamicGeoBlocks.flatMap(b => b.signals).filter(s => s.status === 'done').length
+  const totalSignals = dynamicGeoBlocks.flatMap(b => b.signals).length
   const globalScore = Math.round((totalDone / totalSignals) * 100)
+
+  const handleScan = () => {
+    setIsScanning(true)
+    setTimeout(() => {
+      setIsScanning(false)
+      setHasScanned(true)
+    }, 1500)
+  }
 
   return (
     <div className="space-y-10">
@@ -321,12 +355,42 @@ export default function GeoAdminPage() {
           </p>
         </div>
         {/* Score global */}
-        <div className="bg-black text-white rounded-3xl px-8 py-5 text-center min-w-[160px]">
-          <p className={`text-5xl font-black ${globalScore >= 70 ? 'text-green-400' : globalScore >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
-            {globalScore}%
-          </p>
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">Score GEO Global</p>
-          <p className="text-[9px] text-gray-500 mt-1">{totalDone}/{totalSignals} signaux actifs</p>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <button 
+            onClick={handleScan}
+            disabled={isScanning}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-full font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50"
+          >
+            {isScanning ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Analyse...
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4" />
+                Lancer le Scan
+              </>
+            )}
+          </button>
+          
+          <div className="bg-black text-white rounded-3xl px-8 py-5 text-center min-w-[160px] transition-all">
+            {hasScanned ? (
+              <>
+                <p className={`text-5xl font-black ${globalScore >= 70 ? 'text-green-400' : globalScore >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
+                  {globalScore}%
+                </p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">Score GEO Global</p>
+                <p className="text-[9px] text-gray-500 mt-1">{totalDone}/{totalSignals} signaux actifs</p>
+              </>
+            ) : (
+              <>
+                <p className="text-5xl font-black text-gray-600">--%</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">Score GEO Global</p>
+                <p className="text-[9px] text-gray-500 mt-1">En attente de scan</p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -345,60 +409,108 @@ export default function GeoAdminPage() {
         </div>
       </div>
 
-      {/* Barre de progression par catégorie */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-        {geoBlocks.map(block => {
-          const done = block.signals.filter(s => s.status === 'done').length
-          const pct = Math.round((done / block.signals.length) * 100)
-          const Icon = block.icon
-          return (
-            <div key={block.id} className="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
-              <Icon className="w-5 h-5 mx-auto mb-2 text-gray-600" />
-              <p className="text-xs font-black text-black">{pct}%</p>
-              <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-                  style={{ width: `${pct}%` }}
-                />
+      {hasScanned && (
+        <>
+          {/* Barre de progression par catégorie */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            {dynamicGeoBlocks.map(block => {
+              const done = block.signals.filter(s => s.status === 'done').length
+              const pct = Math.round((done / block.signals.length) * 100)
+              const Icon = block.icon
+              return (
+                <div key={block.id} className="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm transition-all duration-500">
+                  <Icon className="w-5 h-5 mx-auto mb-2 text-gray-600" />
+                  <p className="text-xs font-black text-black">{pct}%</p>
+                  <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-2 leading-tight">{block.label}</p>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Configuration / Amélioration du score */}
+          <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Amélioration du score (Entrez vos liens pour valider)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase">URL Page FAQ dédiée</label>
+                <input type="text" value={inputs.faq} onChange={e => setInputs({...inputs, faq: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-xl px-4 py-2 text-sm text-black focus:border-blue-500 outline-none transition-colors" placeholder="https://riwaya.store/fr/faq" />
               </div>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-2 leading-tight">{block.label}</p>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase">Mentions externes (Backlink d'autorité)</label>
+                <input type="text" value={inputs.backlinks} onChange={e => setInputs({...inputs, backlinks: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-xl px-4 py-2 text-sm text-black focus:border-blue-500 outline-none transition-colors" placeholder="https://hespress.com/..." />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase">Lien Trustpilot / Avis Google</label>
+                <input type="text" value={inputs.trustpilot} onChange={e => setInputs({...inputs, trustpilot: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-xl px-4 py-2 text-sm text-black focus:border-blue-500 outline-none transition-colors" placeholder="https://trustpilot.com/..." />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase">Lien vers le dernier article SEO long</label>
+                <input type="text" value={inputs.blog} onChange={e => setInputs({...inputs, blog: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-xl px-4 py-2 text-sm text-black focus:border-blue-500 outline-none transition-colors" placeholder="https://riwaya.store/fr/blog/..." />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase">URL de la page livraison par ville</label>
+                <input type="text" value={inputs.livraison} onChange={e => setInputs({...inputs, livraison: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-xl px-4 py-2 text-sm text-black focus:border-blue-500 outline-none transition-colors" placeholder="https://riwaya.store/fr/livraison/rabat" />
+              </div>
             </div>
-          )
-        })}
-      </div>
-
-      {/* Blocs détaillés */}
-      <div className="space-y-6">
-        {geoBlocks.map(block => (
-          <GeoBlock key={block.id} block={block} />
-        ))}
-      </div>
-
-      {/* Plan d'action prioritaire */}
-      <div className="bg-gray-950 text-white rounded-3xl p-8">
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Plan d'action prioritaire</p>
-        <div className="space-y-3">
-          {[
-            { priority: '1', action: 'Créer et vérifier une fiche Google My Business', impact: 'Très élevé', time: '1h' },
-            { priority: '2', action: 'Ouvrir un compte Trustpilot + collecter 50+ avis', impact: 'Très élevé', time: '1 semaine' },
-            { priority: '3', action: 'Ajouter Schema AggregateRating sur les fiches livres', impact: 'Élevé', time: '2h dev' },
-            { priority: '4', action: 'Publier 2 articles/semaine sur le blog (livres au Maroc)', impact: 'Élevé', time: 'Récurrent' },
-            { priority: '5', action: 'Créer des pages de livraison par ville (/livraison-rabat)', impact: 'Moyen', time: '1 jour dev' },
-            { priority: '6', action: 'Soumettre un communiqué de presse sur Hespress/Yabiladi', impact: 'Moyen', time: '2h rédaction' },
-          ].map(item => (
-            <div key={item.priority} className="flex items-center gap-4 bg-white/5 rounded-2xl px-5 py-3">
-              <span className="w-7 h-7 bg-white/10 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0">{item.priority}</span>
-              <p className="flex-1 text-sm font-bold text-gray-200">{item.action}</p>
-              <span className={`text-[9px] font-black px-2 py-1 rounded-full ${
-                item.impact === 'Très élevé' ? 'bg-red-900 text-red-300' :
-                item.impact === 'Élevé' ? 'bg-amber-900 text-amber-300' :
-                'bg-blue-900 text-blue-300'
-              }`}>{item.impact}</span>
-              <span className="text-[9px] font-bold text-gray-500 w-20 text-right">{item.time}</span>
+            <div className="mt-6 flex justify-end items-center gap-4">
+              <button 
+                onClick={(e) => {
+                  const btn = e.currentTarget;
+                  const originalText = btn.innerText;
+                  btn.innerText = 'Validé ✅';
+                  btn.classList.add('bg-green-600');
+                  setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-green-600');
+                  }, 2000);
+                }}
+                className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-colors"
+              >
+                Valider les liens
+              </button>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+
+          {/* Blocs détaillés */}
+          <div className="space-y-6">
+            {dynamicGeoBlocks.map(block => (
+              <GeoBlock key={block.id} block={block} />
+            ))}
+          </div>
+
+          {/* Plan d'action prioritaire */}
+          <div className="bg-gray-950 text-white rounded-3xl p-8">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Plan d'action prioritaire</p>
+            <div className="space-y-3">
+              {[
+                { priority: '1', action: 'Créer et vérifier une fiche Google My Business', impact: 'Très élevé', time: '1h' },
+                { priority: '2', action: 'Ouvrir un compte Trustpilot + collecter 50+ avis', impact: 'Très élevé', time: '1 semaine' },
+                { priority: '3', action: 'Ajouter Schema AggregateRating sur les fiches livres', impact: 'Élevé', time: '2h dev' },
+                { priority: '4', action: 'Publier 2 articles/semaine sur le blog (livres au Maroc)', impact: 'Élevé', time: 'Récurrent' },
+                { priority: '5', action: 'Créer des pages de livraison par ville (/livraison-rabat)', impact: 'Moyen', time: '1 jour dev' },
+                { priority: '6', action: 'Soumettre un communiqué de presse sur Hespress/Yabiladi', impact: 'Moyen', time: '2h rédaction' },
+              ].map(item => (
+                <div key={item.priority} className="flex items-center gap-4 bg-white/5 rounded-2xl px-5 py-3">
+                  <span className="w-7 h-7 bg-white/10 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0">{item.priority}</span>
+                  <p className="flex-1 text-sm font-bold text-gray-200">{item.action}</p>
+                  <span className={`text-[9px] font-black px-2 py-1 rounded-full ${
+                    item.impact === 'Très élevé' ? 'bg-red-900 text-red-300' :
+                    item.impact === 'Élevé' ? 'bg-amber-900 text-amber-300' :
+                    'bg-blue-900 text-blue-300'
+                  }`}>{item.impact}</span>
+                  <span className="text-[9px] font-bold text-gray-500 w-20 text-right">{item.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

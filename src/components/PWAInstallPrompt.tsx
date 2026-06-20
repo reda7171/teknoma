@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Download, X, Smartphone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { usePathname } from 'next/navigation'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -11,6 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export default function PWAInstallPrompt() {
   const t = useTranslations('PWAInstallPrompt')
+  const pathname = usePathname()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showBanner, setShowBanner] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
@@ -61,7 +63,7 @@ export default function PWAInstallPrompt() {
     sessionStorage.setItem('pwa-banner-dismissed', '1')
   }
 
-  if (isInstalled || !showBanner || !deferredPrompt) return null
+  if (isInstalled || !showBanner || !deferredPrompt || pathname?.endsWith('/admin')) return null
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-96 z-[9999] animate-in slide-in-from-bottom-4 duration-500">

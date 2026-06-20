@@ -699,11 +699,17 @@ enum ReadingStatus {
   DROPPED
 }
 
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
 model Expense {
   id          String          @id @default(uuid())
   title       String          @db.VarChar(255)
   amount      Float
   category    ExpenseCategory
+  type        TransactionType @default(EXPENSE)
   date        DateTime        @default(now())
   description String?         @db.Text
   unitCost    Float? // Pour le prix de revient moyen d'un livre lors d'un achat en lot
@@ -728,6 +734,8 @@ enum ExpenseCategory {
   OTHER
   GIFTS
   CASHOUT
+  INCOME_CASH
+  INCOME_DELIVERY
 }
 
 model PageView {

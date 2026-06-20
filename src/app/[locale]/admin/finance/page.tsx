@@ -2,7 +2,7 @@ import { isAuthenticated } from '@/lib/actions/auth'
 import { getExpenses, getFinancialStats } from '@/lib/actions/finance'
 import { Plus, Trash2, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import ExpenseForm from '@/components/admin/ExpenseForm'
-import ExpenseRowActions from '@/components/admin/ExpenseRowActions'
+import ExpensesTable from '@/components/admin/ExpensesTable'
 import { redirect } from 'next/navigation'
 
 export default async function FinancePage(props: { params: Promise<{ locale: string }> }) {
@@ -25,12 +25,12 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
 
     // Total des autres dépenses (hors achats de livres, car le coût des livres est déjà déduit via CostOfGoodsSold)
     const operatingExpenses = expenses
-        .filter(e => e.category !== 'BOOKS_PURCHASE')
+        .filter(e => e.type === 'EXPENSE' && e.category !== 'BOOKS_PURCHASE')
         .reduce((sum, e) => sum + e.amount, 0)
 
-    // D'un point de vue Trésorerie : Balance = Revenus encaissés - Toutes les dépenses décaissées
+    // D'un point de vue Trésorerie : Balance = Revenus encaissés + Entrées Cash - Toutes les dépenses décaissées
     // (L'argent réel qui reste en poche ou en banque, en comptant le stock payé d'avance)
-    const cashBalance = stats.totalRevenue - stats.totalExpenses
+    const cashBalance = stats.totalRevenue + stats.totalIncomes - stats.totalExpenses
 
     // D'un point de vue Rentabilité (Bénéfice Net Réel) :
     // Bénéfice = CA - Coût des articles vendus (Livres + frais fixes 2.65/cmd) - Autres charges (Ads globales, Transport, Salaires, etc.)
@@ -125,73 +125,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
             </div>
 
             {/* Expenses List Premium */}
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
-                <div className="px-10 py-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                    <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Historique des Flux de Sortie</h2>
-                    <div className="text-[10px] font-black text-red-600 bg-red-50 px-4 py-1.5 rounded-full uppercase tracking-widest border border-red-100">
-                        {expenses.length} Dépenses
-                    </div>
-                </div>
-                
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-white text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50">
-                            <tr>
-                                <th className="px-10 py-6">Date</th>
-                                <th className="px-10 py-6">Opération</th>
-                                <th className="px-10 py-6">Catégorie</th>
-                                <th className="px-10 py-6 text-right">Montant</th>
-                                <th className="px-10 py-6 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {expenses.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-10 py-24 text-center text-gray-400">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <Wallet className="w-16 h-16 mb-4 opacity-10" />
-                                            <p className="font-black uppercase tracking-widest text-[10px]">Aucune dépense enregistrée</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                expenses.map((expense) => (
-                                    <tr key={expense.id} className="hover:bg-gray-50/50 transition-colors group">
-                                        <td className="px-10 py-6">
-                                            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                {new Date(expense.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-6">
-                                            <div className="flex flex-col">
-                                                <span className="font-black text-black uppercase tracking-tight text-xs">{expense.title}</span>
-                                                {expense.description && (
-                                                    <span className="text-[10px] font-bold text-gray-400 mt-1 italic italic">"{expense.description}"</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-6">
-                                            <span className="px-3 py-1 bg-gray-100 text-gray-500 text-[9px] font-black rounded-full uppercase tracking-widest border border-gray-200">
-                                                {expense.category}
-                                            </span>
-                                        </td>
-                                        <td className="px-10 py-6 text-right">
-                                            <span className="font-black text-red-600 text-sm tracking-tighter">
-                                                -{expense.amount.toFixed(0)} MAD
-                                            </span>
-                                        </td>
-                                        <td className="px-10 py-6 text-right">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <ExpenseRowActions expense={expense} />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <ExpensesTable expenses={expenses} />
         </div>
     )
 }

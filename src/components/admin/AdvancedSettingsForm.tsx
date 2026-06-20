@@ -16,7 +16,8 @@ import {
     MessageCircle,
     Database,
     Download,
-    Package
+    Package,
+    Calculator
 } from 'lucide-react'
 
 interface AdvancedSettingsFormProps {
@@ -87,6 +88,13 @@ const FEATURES = [
         description: 'Active le bouton flottant WhatsApp pour le contact direct.',
         icon: MessageCircle,
         color: 'text-green-500'
+    },
+    {
+        key: 'feature_pos',
+        label: 'Point de Vente (POS)',
+        description: 'Active l\'interface de caisse (Point of Sale) pour les ventes physiques.',
+        icon: Calculator,
+        color: 'text-purple-600'
     },
 ]
 

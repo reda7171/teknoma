@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import { createPOSOrder } from '@/lib/actions/pos';
@@ -115,6 +115,7 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>('ALL');
+  const [gridCols, setGridCols] = useState(8);
   const [activeNumpad, setActiveNumpad] = useState<'shipping' | 'discount' | null>(null);
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -152,6 +153,19 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
   const [isOffline, setIsOffline] = useState(false);
   const [offlineOrders, setOfflineOrders] = useState<any[]>([]);
 
+  const prevOffline = useRef(isOffline);
+
+  useEffect(() => {
+    if (prevOffline.current !== isOffline) {
+      if (isOffline && !prevOffline.current) {
+        showNotification('Connexion perdue. Mode hors-ligne activé.', 'error');
+      } else if (!isOffline && prevOffline.current) {
+        showNotification('Connexion rétablie !', 'success');
+      }
+      prevOffline.current = isOffline;
+    }
+  }, [isOffline, showNotification]);
+
   useEffect(() => {
     // Initial network state
     setIsOffline(!navigator.onLine);
@@ -161,6 +175,23 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
     
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Vérification en continu de la connexion (polling)
+    const checkConnection = async () => {
+      if (!navigator.onLine) {
+        setIsOffline(true);
+        return;
+      }
+      try {
+        const res = await fetch('/favicon.ico', { method: 'HEAD', cache: 'no-store' });
+        setIsOffline(!res.ok);
+      } catch (e) {
+        setIsOffline(true);
+      }
+    };
+
+    const interval = setInterval(checkConnection, 10000);
+
     
     // Load offline orders
     const saved = localStorage.getItem('pos_offline_orders');
@@ -192,6 +223,7 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      clearInterval(interval);
     };
   }, [books, packs, accessories]);
 
@@ -337,49 +369,55 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
     if (!customer.fullName || !customer.phone) return showNotification('Veuillez remplir les informations client (Nom et Téléphone)', 'error');
 
     setIsSubmitting(true);
-    try {
-      const orderPayload = {
-        fullName: customer.fullName,
-        phone: customer.phone,
-        address: customer.address || 'Au magasin',
-        city: customer.city || 'Non spécifiée',
-        items: cart.map(c => ({
-          id: c.id,
-          type: c.type,
-          quantity: c.quantity,
-          price: c.price
-        })),
+    
+    const orderPayload = {
+      fullName: customer.fullName,
+      phone: customer.phone,
+      address: customer.address || 'Au magasin',
+      city: customer.city || 'Non spécifiée',
+      items: cart.map(c => ({
+        id: c.id,
+        type: c.type,
+        quantity: c.quantity,
+        price: c.price
+      })),
+      subtotal: itemsTotal,
+      total: finalTotal,
+      discount: Number(discount),
+      shippingFees: Number(shippingFees)
+    };
+
+    const fallbackOffline = (msg: string) => {
+      showNotification(`${msg}. Passage en sauvegarde locale...`, 'error');
+      const offlineId = saveOfflineOrder(orderPayload);
+      showNotification(`Sauvegardé hors-ligne: ${offlineId}`, 'success');
+      
+      printReceipt({
+        orderId: offlineId,
+        customerName: customer.fullName,
+        customerPhone: customer.phone,
+        customerCity: customer.city || 'Au magasin',
+        items: cart,
         subtotal: itemsTotal,
-        total: finalTotal,
+        shippingFees: Number(shippingFees),
         discount: Number(discount),
-        shippingFees: Number(shippingFees)
-      };
+        total: finalTotal
+      });
 
-      if (isOffline) {
-        const offlineId = saveOfflineOrder(orderPayload);
-        showNotification(`Sauvegardé hors-ligne: ${offlineId}`, 'success');
-        
-        printReceipt({
-          orderId: offlineId,
-          customerName: customer.fullName,
-          customerPhone: customer.phone,
-          customerCity: customer.city || 'Au magasin',
-          items: cart,
-          subtotal: itemsTotal,
-          shippingFees: Number(shippingFees),
-          discount: Number(discount),
-          total: finalTotal
-        });
+      setCart([]);
+      setCustomer({ fullName: '', phone: '', address: '', city: '' });
+      setShippingFees(0);
+      setDiscount(0);
+      setLastOrderId(null);
+    };
 
-        setCart([]);
-        setCustomer({ fullName: '', phone: '', address: '', city: '' });
-        setShippingFees(0);
-        setDiscount(0);
-        setIsSubmitting(false);
-        setLastOrderId(null);
-        return;
-      }
+    if (isOffline) {
+      fallbackOffline('Mode hors-ligne détecté');
+      setIsSubmitting(false);
+      return;
+    }
 
+    try {
       const result = await createPOSOrder(orderPayload);
 
       if (result.success) {
@@ -405,10 +443,10 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
         setShippingFees(0);
         setDiscount(0);
       } else {
-        showNotification(result.error || 'Erreur lors de la création', 'error');
+        fallbackOffline(result.error || 'Erreur serveur');
       }
     } catch (error) {
-      showNotification('Erreur inattendue', 'error');
+      fallbackOffline('Serveur injoignable');
     } finally {
       setIsSubmitting(false);
     }
@@ -418,6 +456,13 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
 
   return (
     <div id="pos-container" className="flex flex-col lg:flex-row h-full gap-4 relative bg-gray-50/50 p-2 lg:p-4 overflow-hidden">
+      {isOffline && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[100] bg-red-600 text-white px-6 py-3 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center gap-3 shadow-2xl shadow-red-600/30">
+          <WifiOff className="w-4 h-4 animate-pulse" />
+          Connexion perdue. Mode hors-ligne activé.
+        </div>
+      )}
+
       <div className={`flex-1 flex flex-col min-w-0 bg-white rounded-[3rem] shadow-2xl shadow-black/5 border border-gray-100 overflow-hidden ${showMobileCart ? 'hidden lg:flex' : 'flex'}`}>
         <div className="p-8 md:p-10 border-b border-gray-50 space-y-8 bg-white">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -487,31 +532,54 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
             </div>
           </div>
           
-          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-            {[
-                { id: 'ALL', label: 'TOUT LE CATALOGUE' },
-                { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
-                { id: 'PACKS', label: 'PACKS PROMO' },
-                { id: 'ACCESSORIES_LIBRARY', label: 'ACCESSOIRES LECTURE' },
-                { id: 'ACCESSORIES_KIDS', label: 'ACCESSOIRES ENFANTS' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
-                  activeTab === tab.id 
-                    ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
-                    : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
-                }`}
+          <div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 no-scrollbar">
+            <div className="flex gap-3">
+              {[
+                  { id: 'ALL', label: 'TOUT LE CATALOGUE' },
+                  { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
+                  { id: 'PACKS', label: 'PACKS PROMO' },
+                  { id: 'ACCESSORIES_LIBRARY', label: 'ACCESSOIRES LECTURE' },
+                  { id: 'ACCESSORIES_KIDS', label: 'ACCESSOIRES ENFANTS' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
+                    activeTab === tab.id 
+                      ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
+                      : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 border border-gray-100 rounded-2xl p-1 bg-white shrink-0 shadow-sm ml-auto">
+              <button 
+                onClick={() => setGridCols(Math.max(2, gridCols - 1))} 
+                className="p-3 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
+                title="Agrandir (Moins de livres)"
               >
-                {tab.label}
+                <ZoomIn className="w-5 h-5" />
               </button>
-            ))}
+              <div className="w-6 text-center text-xs font-black text-gray-300">{gridCols}</div>
+              <button 
+                onClick={() => setGridCols(Math.min(10, gridCols + 1))} 
+                className="p-3 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
+                title="Réduire (Plus de livres)"
+              >
+                <ZoomOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 p-8 md:p-10 overflow-y-auto bg-gray-50/30 custom-scrollbar">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div 
+            className="grid gap-6"
+            style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+          >
             {displayedProducts.map((product) => (
               <POSProductCard
                 key={`${product.type}-${product.id}`}

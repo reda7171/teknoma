@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { createExpense, updateExpense } from '@/lib/actions/finance'
-import { ExpenseCategory } from '@prisma/client'
+import { ExpenseCategory, TransactionType } from '@prisma/client'
 import { Plus, Loader2, Calculator, Edit2 } from 'lucide-react'
 
-const CATEGORIES = [
+const EXPENSE_CATEGORIES = [
     { value: 'TRANSPORT', label: 'Transport' },
     { value: 'ADS', label: 'Publicité (Ads)' },
     { value: 'MARKETING', label: 'Marketing' },
@@ -18,12 +18,26 @@ const CATEGORIES = [
     { value: 'OTHER', label: 'Autre' }
 ]
 
+const INCOME_CATEGORIES = [
+    { value: 'INCOME_CASH', label: 'Cash (Livraison)' },
+    { value: 'INCOME_DELIVERY', label: 'Virement Société de Livraison' },
+    { value: 'OTHER', label: 'Autre Entrée' }
+]
+
 export default function ExpenseForm({ expense }: { expense?: any }) {
     const isEditing = !!expense
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
+    const [type, setType] = useState<TransactionType>(expense?.type || 'EXPENSE')
     const [selectedCategory, setSelectedCategory] = useState<string>(expense?.category || 'TRANSPORT')
     const [isLot, setIsLot] = useState(!!expense?.unitCost)
+
+    // Automatically update default category when type changes
+    useEffect(() => {
+        if (!isEditing) {
+            setSelectedCategory(type === 'INCOME' ? 'INCOME_CASH' : 'TRANSPORT')
+        }
+    }, [type, isEditing])
 
     // Form fields
     const [title, setTitle] = useState(expense?.title || '')
@@ -45,7 +59,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
         let finalAmount = parseFloat(amount as string)
         let finalDescription = description
 
-        if (selectedCategory === 'BOOKS_PURCHASE' && isLot && bookCount && booksCost) {
+        if (type === 'EXPENSE' && selectedCategory === 'BOOKS_PURCHASE' && isLot && bookCount && booksCost) {
             finalAmount = totalLotCost
             const lotDetails = `Lot de ${bookCount} livres. Prix moyen de revient: ${averagePrice.toFixed(2)} MAD/livre. (Livres: ${booksCost || 0} MAD, Transport: ${transportCost || 0} MAD).`
             finalDescription = description ? `${lotDetails} | ${description}` : lotDetails
@@ -55,6 +69,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             title,
             amount: finalAmount,
             category: selectedCategory as ExpenseCategory,
+            type: type,
             description: finalDescription,
             unitCost: (isLot && averagePrice > 0) ? averagePrice : (expense?.unitCost || undefined)
         }
@@ -66,6 +81,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             setTitle('')
             setAmount('')
             setDescription('')
+            setType('EXPENSE')
             setSelectedCategory('TRANSPORT')
             setIsLot(false)
             setBookCount('')
@@ -103,8 +119,27 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
     const formContent = (
         <>
-            <h3 className="font-bold text-lg mb-4 text-gray-800">{isEditing ? 'Modifier la dépense' : 'Ajouter une dépense'}</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-800">{isEditing ? 'Modifier la transaction' : 'Ajouter une transaction'}</h3>
             <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* Choix du type de transaction */}
+                <div className="flex gap-4 p-1 bg-gray-100 rounded-xl w-full max-w-sm">
+                    <button
+                        type="button"
+                        onClick={() => setType('EXPENSE')}
+                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${type === 'EXPENSE' ? 'bg-white shadow text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        Sortie (Dépense)
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setType('INCOME')}
+                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${type === 'INCOME' ? 'bg-white shadow text-emerald-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        Entrée (Revenu)
+                    </button>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1">Titre</label>
@@ -119,14 +154,14 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                             required 
                             className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                         >
-                            {CATEGORIES.map(cat => (
+                            {(type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(cat => (
                                 <option key={cat.value} value={cat.value}>{cat.label}</option>
                             ))}
                         </select>
                     </div>
 
                     {/* Achat Livres - Option Lot */}
-                    {selectedCategory === 'BOOKS_PURCHASE' && (
+                    {type === 'EXPENSE' && selectedCategory === 'BOOKS_PURCHASE' && (
                         <div className="md:col-span-2 bg-blue-50 p-4 border border-blue-100 rounded-xl space-y-4">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input 

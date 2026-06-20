@@ -3,12 +3,13 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { ExpenseCategory } from '@prisma/client'
+import { ExpenseCategory, TransactionType } from '@prisma/client'
 
 export async function createExpense(data: {
     title: string
     amount: number
     category: ExpenseCategory
+    type?: TransactionType
     description?: string
     unitCost?: number
 }) {
@@ -24,7 +25,7 @@ export async function createExpense(data: {
         return { success: true }
     } catch (error) {
         console.error(error)
-        return { success: false, error: 'Erreur lors de la création' }
+        return { success: false, error: 'Erreur lors de la crǸation' }
     }
 }
 
@@ -32,6 +33,7 @@ export async function updateExpense(id: string, data: {
     title: string
     amount: number
     category: ExpenseCategory
+    type?: TransactionType
     description?: string
     unitCost?: number | null
 }) {
@@ -81,7 +83,14 @@ export async function getFinancialStats() {
     await verifyAdmin()
 
     // Total Expenses
-    const totalExpenses = await prisma.expense.aggregate({
+    const expensesAgg = await prisma.expense.aggregate({
+        where: { type: 'EXPENSE' },
+        _sum: { amount: true }
+    })
+
+    // Total Incomes
+    const incomesAgg = await prisma.expense.aggregate({
+        where: { type: 'INCOME' },
         _sum: { amount: true }
     })
 
@@ -112,7 +121,7 @@ export async function getFinancialStats() {
         totalRevenue += order.total
         totalFixedCosts += 2.65 + (order.shippingFees || 0)
         for (const item of order.items) {
-            // Utiliser le costPrice de l'item ou celui du produit s'il est à 0
+            // Utiliser le costPrice de l'item ou celui du produit s'il est  0
             const itemCost = ((item as any).costPrice && (item as any).costPrice > 0)
                 ? (item as any).costPrice
                 : ((item as any).book?.costPrice || (item as any).pack?.costPrice || 0)
@@ -121,9 +130,10 @@ export async function getFinancialStats() {
     }
 
     return {
-        totalExpenses: totalExpenses._sum.amount || 0,
+        totalExpenses: expensesAgg._sum.amount || 0,
+        totalIncomes: incomesAgg._sum.amount || 0,
         totalRevenue: totalRevenue,
-        totalCostOfGoodsSold: totalCostOfGoodsSold + totalFixedCosts, // On inclut dans le coût total de vente
+        totalCostOfGoodsSold: totalCostOfGoodsSold + totalFixedCosts, // On inclut dans le coǯt total de vente
         byCategory: byCategory.map(c => ({
             category: c.category,
             amount: c._sum.amount || 0

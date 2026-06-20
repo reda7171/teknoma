@@ -91,6 +91,7 @@ export default function AdminLayout({
         readingList: featureSettings['feature_reading_list'] !== 'false',
         digital: featureSettings['feature_digital_books'] !== 'false',
         packs: featureSettings['feature_packs'] !== 'false',
+        pos: featureSettings['feature_pos'] !== 'false',
     }), [featureSettings])
 
     const allNavigation = useMemo(() => [
@@ -106,7 +107,7 @@ export default function AdminLayout({
         { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },
         { name: 'Call Center', href: `/${lang}/admin/call-center`, icon: Headset },
         { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag },
-        { name: 'Caisse (POS)', href: `/${lang}/admin/pos`, icon: Monitor },
+        { name: 'Caisse (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },
         { name: 'Clients', href: `/${lang}/admin/customers`, icon: Users },
         { name: 'Utilisateurs', href: `/${lang}/admin/users`, icon: Users },
         { name: 'Vendeurs', href: `/${lang}/admin/vendeurs`, icon: Store, featureKey: 'feature_seller' },
