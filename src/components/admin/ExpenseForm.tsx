@@ -112,7 +112,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm"
             >
                 <Plus className="w-4 h-4" />
-                Nouvelle Dépense
+                Nouvelle Transaction
             </button>
         )
     }
@@ -264,7 +264,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                         className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 font-bold shadow-sm"
                     >
                         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {isEditing ? 'Mettre à jour' : 'Enregistrer la dépense'}
+                        {isEditing ? 'Mettre à jour' : 'Enregistrer la transaction'}
                     </button>
                 </div>
             </form>

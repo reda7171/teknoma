@@ -10,8 +10,10 @@ import { cookies } from 'next/headers'
 import remarkHtml from 'remark-html'
 import remarkGfm from 'remark-gfm'
 import { remark } from 'remark'
-import CommentsSection from '@/components/blog/CommentsSection'
-import ShareArticle from '@/components/blog/ShareArticle'
+import dynamic from 'next/dynamic'
+
+const CommentsSection = dynamic(() => import('@/components/blog/CommentsSection'), { loading: () => <div className="h-32 bg-slate-50 animate-pulse rounded-2xl" /> })
+const ShareArticle = dynamic(() => import('@/components/blog/ShareArticle'))
 import ReadingProgress from '@/components/blog/ReadingProgress'
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
@@ -156,7 +158,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             fill
                             className="object-cover blur-2xl scale-110"
                             priority
-                            unoptimized
                         />
                     </div>
                 )}
@@ -274,7 +275,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     alt=""
                                     fill
                                     className="object-cover opacity-30 blur-[40px] scale-125 saturate-150"
-                                    unoptimized
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-100/50 to-transparent" />
                             </div>
@@ -286,7 +286,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 fill
                                 className="object-contain z-10 drop-shadow-2xl group-hover:scale-105 transition-transform duration-700"
                                 priority
-                                unoptimized
                             />
                             
                             {/* Inner highlight */}
@@ -303,9 +302,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* Colonne article */}
                     <div>
                         {/* AdSense haut */}
-                        {adsenseEnabled && adsensePublisherId && slotTop && (
-                            <AdBanner publisherId={adsensePublisherId} slotId={slotTop} />
-                        )}
+                        <AdBanner
+                            publisherId={adsensePublisherId}
+                            slotId={slotTop}
+                            label="Haut de l'article"
+                        />
 
                         {/* Corps de l'article */}
                         <article
@@ -334,9 +335,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         </article>
 
                         {/* AdSense bas */}
-                        {adsenseEnabled && adsensePublisherId && slotBottom && (
-                            <AdBanner publisherId={adsensePublisherId} slotId={slotBottom} />
-                        )}
+                        <AdBanner
+                            publisherId={adsensePublisherId}
+                            slotId={slotBottom}
+                            label="Bas de l'article"
+                        />
 
                         {/* === Tags & Partage === */}
                         <div className="mt-14 pt-10 border-t-2 border-gray-100">

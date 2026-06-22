@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut, Camera } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
+import BarcodeScanner from './BarcodeScanner';
 import { createPOSOrder } from '@/lib/actions/pos';
 import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
@@ -103,9 +104,31 @@ interface POSClientProps {
   books: any[];
   packs: any[];
   accessories?: any[];
+  showCategories?: boolean;
+  defaultDiscount?: number;
+  maxDiscount?: number;
+  favoriteCategories?: string;
+  showSearch?: boolean;
+  defaultGridCols?: number;
+  defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS';
+  allowOutOfStock?: boolean;
+  requireCustomer?: boolean;
 }
 
-export default function POSClient({ books, packs, accessories = [] }: POSClientProps) {
+export default function POSClient({ 
+  books, 
+  packs, 
+  accessories = [], 
+  showCategories = true, 
+  defaultDiscount = 0, 
+  maxDiscount = 100, 
+  favoriteCategories = '',
+  showSearch = true,
+  defaultGridCols = 8,
+  defaultTab = 'ALL',
+  allowOutOfStock = false,
+  requireCustomer = true
+}: POSClientProps) {
   const params = useParams();
   const locale = params.locale as string;
   const { showNotification } = useUIStore();
@@ -114,8 +137,8 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
   const [localAccessories, setLocalAccessories] = useState<any[]>(accessories);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>('ALL');
-  const [gridCols, setGridCols] = useState(8);
+  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>(defaultTab);
+  const [gridCols, setGridCols] = useState(defaultGridCols);
   const [activeNumpad, setActiveNumpad] = useState<'shipping' | 'discount' | null>(null);
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -124,9 +147,10 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
     city: ''
   });
   const [shippingFees, setShippingFees] = useState<number | ''>(0);
-  const [discount, setDiscount] = useState<number | ''>(0);
+  const [discount, setDiscount] = useState<number | ''>(defaultDiscount || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   
   const [allCities, setAllCities] = useState<string[]>([]);
@@ -320,6 +344,17 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
     }
   };
 
+  const handleBarcodeScanResult = (isbn: string) => {
+    setShowScanner(false);
+    const scannedBook = localBooks.find(b => b.isbn === isbn.trim());
+    if (scannedBook) {
+      addToCart(scannedBook, 'BOOK');
+      showNotification(`${scannedBook.title} ajouté au panier`, 'success');
+    } else {
+      showNotification(`Aucun livre trouvé avec le code-barres ${isbn}`, 'error');
+    }
+  };
+
   const displayedProducts = [
     ...(activeTab === 'ALL' || activeTab === 'BOOKS' ? filteredBooks.map(b => ({ ...b, type: 'BOOK' as const })) : []),
     ...(activeTab === 'ALL' || activeTab === 'PACKS' ? filteredPacks.map(p => ({ ...p, type: 'PACK' as const })) : []),
@@ -328,6 +363,10 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
   ];
 
   const addToCart = (product: any, type: 'BOOK' | 'PACK' | 'ACCESSORY') => {
+    if (!allowOutOfStock && type === 'BOOK' && (product.stock === undefined || product.stock <= 0)) {
+        showNotification('Produit en rupture de stock', 'error');
+        return;
+    }
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id && item.type === type);
       if (existing) {
@@ -366,7 +405,7 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
 
   const handleCheckout = async () => {
     if (cart.length === 0) return showNotification('Le panier est vide', 'error');
-    if (!customer.fullName || !customer.phone) return showNotification('Veuillez remplir les informations client (Nom et Téléphone)', 'error');
+    if (requireCustomer && (!customer.fullName || !customer.phone)) return showNotification('Veuillez remplir les informations client (Nom et Téléphone)', 'error');
 
     setIsSubmitting(true);
     
@@ -463,14 +502,18 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
         </div>
       )}
 
+      {showScanner && (
+        <BarcodeScanner 
+          onResult={handleBarcodeScanResult}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
       <div className={`flex-1 flex flex-col min-w-0 bg-white rounded-[3rem] shadow-2xl shadow-black/5 border border-gray-100 overflow-hidden ${showMobileCart ? 'hidden lg:flex' : 'flex'}`}>
         <div className="p-8 md:p-10 border-b border-gray-50 space-y-8 bg-white">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="flex items-center justify-between gap-6 w-full md:w-auto">
-              <div>
-                <h1 className="text-4xl lg:text-6xl font-black text-black tracking-tighter italic">Caisse<span className="text-emerald-500">.</span></h1>
-                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-2">Point de vente physique & Événementiel</p>
-              </div>
+
               <div className="flex items-center gap-3">
                 <Link href={`/${locale}/admin/orders`} className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-2xl border border-gray-100 hover:bg-gray-100 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
                   <ListOrdered className="w-4 h-4" />
@@ -505,6 +548,23 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
                 >
                   {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
                 </button>
+                <div className="hidden sm:flex items-center gap-1 border border-gray-100 rounded-2xl p-1 bg-white shrink-0 shadow-sm h-12">
+                  <button 
+                    onClick={() => setGridCols(Math.max(2, gridCols - 1))} 
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
+                    title="Agrandir (Moins de livres)"
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                  <div className="w-4 text-center text-xs font-black text-gray-300">{gridCols}</div>
+                  <button 
+                    onClick={() => setGridCols(Math.min(10, gridCols + 1))} 
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
+                    title="Réduire (Plus de livres)"
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                </div>
                 <button 
                   onClick={() => setShowMobileCart(true)}
                   className="lg:hidden relative w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/20"
@@ -519,60 +579,55 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
               </div>
             </div>
             
-            <div className="relative w-full md:w-96 group">
-              <Search className="w-4 h-4 text-gray-300 absolute left-5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-black" />
-              <input
-                type="text"
-                placeholder="RECHERCHER OU SCANNER ISBN..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleBarcodeScan}
-                className="w-full pl-14 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-black text-[10px] uppercase tracking-widest shadow-inner"
-              />
-            </div>
+            {showSearch && (
+              <div className="flex items-center gap-2 w-full md:w-96">
+                <div className="relative flex-1 group">
+                  <Search className="w-4 h-4 text-gray-300 absolute left-5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-black" />
+                  <input
+                    type="text"
+                    placeholder="RECHERCHER OU SCANNER ISBN..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={handleBarcodeScan}
+                    className="w-full pl-14 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-black text-[10px] uppercase tracking-widest shadow-inner"
+                  />
+                </div>
+                <button
+                  onClick={() => setShowScanner(true)}
+                  className="w-14 h-14 bg-black text-white rounded-[1.5rem] flex items-center justify-center hover:bg-gray-800 transition-colors shadow-lg active:scale-95 shrink-0"
+                  title="Scanner avec la caméra"
+                >
+                  <Camera className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
           
-          <div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 no-scrollbar">
-            <div className="flex gap-3">
-              {[
-                  { id: 'ALL', label: 'TOUT LE CATALOGUE' },
-                  { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
-                  { id: 'PACKS', label: 'PACKS PROMO' },
-                  { id: 'ACCESSORIES_LIBRARY', label: 'ACCESSOIRES LECTURE' },
-                  { id: 'ACCESSORIES_KIDS', label: 'ACCESSOIRES ENFANTS' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
-                    activeTab === tab.id 
-                      ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
-                      : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+          {showCategories && (
+            <div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 no-scrollbar">
+              <div className="flex gap-3">
+                {[
+                    { id: 'ALL', label: 'TOUT LE CATALOGUE' },
+                    { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
+                    { id: 'PACKS', label: 'PACKS PROMO' },
+                    { id: 'ACCESSORIES_LIBRARY', label: 'ACCESSOIRES LECTURE' },
+                    { id: 'ACCESSORIES_KIDS', label: 'ACCESSOIRES ENFANTS' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
+                      activeTab === tab.id 
+                        ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
+                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
-
-            <div className="flex items-center gap-2 border border-gray-100 rounded-2xl p-1 bg-white shrink-0 shadow-sm ml-auto">
-              <button 
-                onClick={() => setGridCols(Math.max(2, gridCols - 1))} 
-                className="p-3 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
-                title="Agrandir (Moins de livres)"
-              >
-                <ZoomIn className="w-5 h-5" />
-              </button>
-              <div className="w-6 text-center text-xs font-black text-gray-300">{gridCols}</div>
-              <button 
-                onClick={() => setGridCols(Math.min(10, gridCols + 1))} 
-                className="p-3 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
-                title="Réduire (Plus de livres)"
-              >
-                <ZoomOut className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="flex-1 p-8 md:p-10 overflow-y-auto bg-gray-50/30 custom-scrollbar">
@@ -810,7 +865,18 @@ export default function POSClient({ books, packs, accessories = [] }: POSClientP
             <InlineNumpad 
               title={activeNumpad === 'shipping' ? "Frais de livraison" : "Remise"}
               value={activeNumpad === 'shipping' ? shippingFees : discount}
-              onChange={(val) => activeNumpad === 'shipping' ? setShippingFees(val) : setDiscount(val)}
+              onChange={(val) => {
+                if (activeNumpad === 'shipping') {
+                  setShippingFees(val);
+                } else {
+                  const numVal = Number(val);
+                  if (numVal <= maxDiscount) {
+                    setDiscount(val);
+                  } else {
+                    showNotification(`La remise maximale autorisée est de ${maxDiscount}%`, 'error');
+                  }
+                }
+              }}
               onClose={() => setActiveNumpad(null)}
             />
           ) : (

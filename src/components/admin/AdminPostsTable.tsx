@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Edit, FileText, User, ExternalLink, Trash2 } from 'lucide-react'
+import { Edit, FileText, User, ExternalLink, Trash2, Copy, Check } from 'lucide-react'
 import DeletePostButton from '@/components/admin/DeletePostButton'
 import { deletePostsBulk } from '@/lib/actions/blog'
 import { useRouter } from 'next/navigation'
@@ -17,6 +17,7 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
     const router = useRouter()
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isCopied, setIsCopied] = useState(false)
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
@@ -51,21 +52,39 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
         }
     }
 
+    const handleBulkCopyLinks = () => {
+        const selectedPosts = posts.filter(p => selectedIds.includes(p.id))
+        const links = selectedPosts.map(p => `${window.location.origin}/${locale}/blog/${p.slug}`)
+        navigator.clipboard.writeText(links.join('\\n')).then(() => {
+            setIsCopied(true)
+            setTimeout(() => setIsCopied(false), 2000)
+        })
+    }
+
     return (
         <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
             {selectedIds.length > 0 && (
-                <div className="bg-red-50 px-8 py-4 flex items-center justify-between border-b border-red-100">
-                    <span className="text-sm font-bold text-red-600">
+                <div className="bg-blue-50 px-8 py-4 flex items-center justify-between border-b border-blue-100">
+                    <span className="text-sm font-bold text-blue-600">
                         {selectedIds.length} article(s) sélectionné(s)
                     </span>
-                    <button
-                        onClick={handleBulkDelete}
-                        disabled={isDeleting}
-                        className="bg-red-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50"
-                    >
-                        <Trash2 className="w-3 h-3" />
-                        {isDeleting ? 'Suppression...' : 'Supprimer'}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleBulkCopyLinks}
+                            className="bg-black text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center gap-2"
+                        >
+                            {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                            {isCopied ? 'Copié !' : 'Copier les liens'}
+                        </button>
+                        <button
+                            onClick={handleBulkDelete}
+                            disabled={isDeleting}
+                            className="bg-red-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                            <Trash2 className="w-3 h-3" />
+                            {isDeleting ? 'Suppression...' : 'Supprimer'}
+                        </button>
+                    </div>
                 </div>
             )}
 

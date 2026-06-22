@@ -119,7 +119,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                     <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-black">
                         <Plus className="w-6 h-6" />
                     </div>
-                    <h2 className="text-2xl font-black text-black tracking-tight">Ajouter une dépense</h2>
+                    <h2 className="text-2xl font-black text-black tracking-tight">Ajouter une transaction</h2>
                 </div>
                 <ExpenseForm />
             </div>

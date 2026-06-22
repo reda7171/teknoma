@@ -52,7 +52,8 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
     }
 
     function selectRandomFour() {
-        const shuffled = [...books].sort(() => 0.5 - Math.random())
+        const availableBooks = books.filter(b => b.stock > 0)
+        const shuffled = [...availableBooks].sort(() => 0.5 - Math.random())
         const selected = shuffled.slice(0, 4).map(b => b.id)
         setSelectedBooks(selected)
     }

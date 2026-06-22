@@ -18,7 +18,6 @@ const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
 const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
-const PWAInstallPrompt = dynamic(() => import('@/components/PWAInstallPrompt'))
 
 
 const outfit = Outfit({
@@ -304,7 +303,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {children}
           <Toaster />
           <CookieConsent />
-          <PWAInstallPrompt />
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
           {isChatBotEnabled && <ChatBot />}
           <Suspense fallback={null}>

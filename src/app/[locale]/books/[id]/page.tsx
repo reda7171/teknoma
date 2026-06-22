@@ -26,6 +26,7 @@ import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react
 import Breadcrumbs from '@/components/Breadcrumbs'
 import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
+import AdBanner from '@/components/AdBanner'
 
 export async function generateMetadata({
     params,
@@ -154,7 +155,7 @@ export default async function BookDetailPage({
     }
 
     // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
-    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsensePublisherId, adsenseSidebarSlot] = await Promise.all([
         getBookReviews(id),
         getBookAverageRating(id),
         book.category ? getCategoryConfigByName(book.category) : Promise.resolve(null),
@@ -164,7 +165,9 @@ export default async function BookDetailPage({
         getSetting('announcement_bar_message'),
         getSetting('announcement_bar_bg_color'),
         getSetting('announcement_bar_text_color'),
-        getPostsByBookId(id, locale)
+        getPostsByBookId(id, locale),
+        getSetting('adsense_publisher_id').then(v => v || ''),
+        getSetting('adsense_slot_sidebar').then(v => v || ''),
     ])
 
     const { average: averageRating, count: reviewCount } = ratingData
@@ -306,6 +309,15 @@ export default async function BookDetailPage({
                 <Header />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
+                    {/* Bloc publicitaire AdSense avant le fil d'Ariane */}
+                    <AdBanner
+                        publisherId={adsensePublisherId}
+                        slotId={adsenseSidebarSlot}
+                        label="Publicité — Page Livre"
+                        format="horizontal"
+                        className="!my-3"
+                    />
+
                     {/* Breadcrumb Section */}
                     <Breadcrumbs 
                         items={[
@@ -602,7 +614,16 @@ export default async function BookDetailPage({
 
                     {/* Related Blog Posts - Articles parlant de ce produit */}
                     {relatedPosts && relatedPosts.length > 0 && (
-                        <section className="py-32 border-t border-gray-100">
+                        <section className="py-8 border-t border-gray-100">
+                            {/* Bloc publicitaire AdSense avant les articles liés */}
+                            <AdBanner
+                                publisherId={adsensePublisherId}
+                                slotId={adsenseSidebarSlot}
+                                label="Publicité — Articles liés"
+                                format="horizontal"
+                                className="!my-3 mb-6"
+                            />
+
                             <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8 px-2">
                                 <div className="space-y-4">
                                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full">

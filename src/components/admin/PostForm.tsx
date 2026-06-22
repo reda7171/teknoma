@@ -279,13 +279,24 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         <div className="bg-[#faf9f8] rounded-2xl p-6 border border-gray-100 space-y-6">
                             <div>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Catégorie</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    placeholder="Ex: Développement Personnel"
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium"
-                                />
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium appearance-none cursor-pointer"
+                                >
+                                    <option value="" disabled>Sélectionner une catégorie</option>
+                                    <option value="Développement Personnel">Développement Personnel</option>
+                                    <option value="Business & Entrepreneuriat">Business & Entrepreneuriat</option>
+                                    <option value="Roman & Fiction">Roman & Fiction</option>
+                                    <option value="Histoire & Biographie">Histoire & Biographie</option>
+                                    <option value="Spiritualité & Religion">Spiritualité & Religion</option>
+                                    <option value="Psychologie">Psychologie</option>
+                                    <option value="Santé & Bien-être">Santé & Bien-être</option>
+                                    <option value="Science & Technologie">Science & Technologie</option>
+                                    <option value="Enfants & Jeunesse">Enfants & Jeunesse</option>
+                                    <option value="Actualités & Mises à jour">Actualités & Mises à jour</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
                             </div>
 
                             <div>

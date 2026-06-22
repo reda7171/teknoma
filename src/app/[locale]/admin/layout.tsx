@@ -177,6 +177,7 @@ export default function AdminLayout({
                 { name: 'Configuration n8n', href: `/${lang}/admin/config/n8n`, icon: Repeat },
                 { name: 'Configuration Accueil', href: `/${lang}/admin/config/homepage`, icon: LayoutDashboard },
                 { name: 'Configuration form', href: `/${lang}/admin/config/form`, icon: Settings },
+                { name: 'Configuration POS', href: `/${lang}/admin/config/pos`, icon: Monitor, featureKey: 'feature_pos' },
                 { name: 'Telegram Bot', href: `/${lang}/admin/config/telegram`, icon: MessageCircle },
                 { name: 'Base de données', href: `/${lang}/admin/database`, icon: Database }
             ]
