@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
             longDescription: item?.longDescription || '',
             format,
             platform,
-            scheduleAt: scheduleAt || null,
+            scheduleAt: scheduleAt || '',
             source: 'riwaya-admin',
             facebook_access_token: facebookAccessToken,
             instagram_account_id: instagramAccountId,

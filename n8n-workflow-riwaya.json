@@ -362,11 +362,20 @@
           "conditions": [
             {
               "id": "cond-has-schedule",
-              "leftValue": "={{ $json.body.scheduleAt }}",
+              "leftValue": "={{ .body.scheduleAt }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
                 "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "cond-not-null",
+              "leftValue": "={{ .body.scheduleAt }}",
+              "rightValue": "null",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
               }
             }
           ],
@@ -386,7 +395,7 @@
     {
       "parameters": {
         "resume": "dateTime",
-        "dateTime": "={{ $json.body.scheduleAt }}"
+        "dateTime": "={{ .body.scheduleAt }}"
       },
       "id": "wait-schedule",
       "name": "Wait Schedule",
