@@ -350,6 +350,53 @@
         960,
         780
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-has-schedule",
+              "leftValue": "={{ $json.body.scheduleAt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-schedule",
+      "name": "If Schedule?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resume": "dateTime",
+        "dateTime": "={{ $json.body.scheduleAt }}"
+      },
+      "id": "wait-schedule",
+      "name": "Wait Schedule",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        600,
+        200
+      ],
+      "webhookId": "schedule-webhook"
     }
   ],
   "connections": {
@@ -357,22 +404,7 @@
       "main": [
         [
           {
-            "node": "Facebook?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Instagram?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "TikTok?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Threads?",
+            "node": "If Schedule?",
             "type": "main",
             "index": 0
           }
@@ -487,6 +519,65 @@
         [
           {
             "node": "Réponse OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Schedule?": {
+      "main": [
+        [
+          {
+            "node": "Wait Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Facebook?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Instagram?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TikTok?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Threads?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Schedule": {
+      "main": [
+        [
+          {
+            "node": "Facebook?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Instagram?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TikTok?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Threads?",
             "type": "main",
             "index": 0
           }

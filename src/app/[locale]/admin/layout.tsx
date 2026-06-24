@@ -47,7 +47,8 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     Globe,
-    Headset
+    Headset,
+    Calendar
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -142,6 +143,7 @@ export default function AdminLayout({
             ]
         },
         { name: 'Marketing', href: `/${lang}/admin/marketing`, icon: Sparkles },
+        { name: 'Planning (n8n)', href: `/${lang}/admin/planning`, icon: Calendar },
         {
             name: 'Accessoires',
             href: `/${lang}/admin/accessories`,
