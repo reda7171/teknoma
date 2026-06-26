@@ -507,7 +507,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: currentTheme.bg.includes('gradient') ? undefined : '#000000',
-                cacheBust: true,
+                cacheBust: false,
             })
             restoreImages(originals)
 
@@ -590,7 +590,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
             const dataUrl = await htmlToImage.toPng(posterRef.current, {
                 quality: 1,
                 pixelRatio: 2,
-                cacheBust: true,
+                cacheBust: false,
             })
             restoreImages(originals)
 
@@ -1841,7 +1841,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                                 quality: 1,
                                                 pixelRatio: 2,
                                                 backgroundColor: currentTheme.bg.includes('gradient') ? undefined : '#000000',
-                                                cacheBust: true,
+                                                cacheBust: false,
                                             })
                                             restoreImages(originals)
 

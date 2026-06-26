@@ -155,7 +155,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
                 skipFonts: false,
             })
             restoreImages(originals)
@@ -184,7 +184,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
                 skipFonts: false,
             })
             restoreImages(originals)
@@ -227,7 +227,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
             }).catch(err => {
                 if (err instanceof Event) {
                     throw new Error("Une image n'a pas pu être chargée. La publication a échoué.")
@@ -726,7 +726,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                                 quality: 1,
                                                 pixelRatio: 2,
                                                 backgroundColor: 'transparent',
-                                                cacheBust: true,
+                                                cacheBust: false,
                                             })
                                             restoreImages(originals)
 

@@ -123,7 +123,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
             })
             
             restoreImages(originals)
@@ -154,7 +154,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
             })
             restoreImages(originals)
 

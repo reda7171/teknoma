@@ -208,7 +208,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             }
 
             const res = await fetch(targetUrl);
-            if (!res.ok) throw new Error('Fetch failed');
+            if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText} for ${targetUrl}`);
             const blob = await res.blob();
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -216,8 +216,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 reader.onerror = reject;
                 reader.readAsDataURL(blob);
             });
-        } catch (err) {
-            console.error("Base64 conversion error:", err);
+        } catch (err: any) {
+            console.warn("Base64 conversion fallback used due to error:", err?.message || err);
             // Fallback ultime si même le proxy échoue
             return url;
         }
@@ -251,7 +251,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
                 skipFonts: false,
             })
 
@@ -292,7 +292,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
                 skipFonts: false,
             }).catch(err => {
                 if (err instanceof Event) {
@@ -363,7 +363,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
             })
             restoreImages(originals)
 
@@ -431,7 +431,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
-                cacheBust: true,
+                cacheBust: false,
             })
             restoreImages(originals)
 
@@ -1230,7 +1230,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                             quality: 1,
                                             pixelRatio: 2,
                                             backgroundColor: 'transparent',
-                                            cacheBust: true,
+                                            cacheBust: false,
                                         })
                                         restoreImages(originals)
 

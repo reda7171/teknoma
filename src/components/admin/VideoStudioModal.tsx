@@ -6,7 +6,7 @@ import {
     Image as ImageIcon, Type, Palette, Scissors, Smile, Music,
     Send, Trash2, Plus, MonitorPlay, ZoomIn, ZoomOut, Undo2, Redo2,
     AlignCenter, AlignLeft, AlignRight, Bold, Italic, Layers,
-    SlidersHorizontal, Zap, Hash, Eye, EyeOff, Move, LayoutGrid
+    SlidersHorizontal, Zap, Hash, Eye, EyeOff, Move, LayoutGrid, Sparkles
 } from 'lucide-react'
 import * as htmlToImage from 'html-to-image'
 
@@ -116,6 +116,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const [platform, setPlatform] = useState<'tiktok' | 'instagram' | 'facebook'>('tiktok')
     const [loading, setLoading] = useState(false)
     const [mp4Progress, setMp4Progress] = useState<number | null>(null)
+    const [savingMarketing, setSavingMarketing] = useState<'png' | 'mp4' | null>(null)
 
     // UI State
     const [leftPanel, setLeftPanel] = useState<LeftPanel>('images')
@@ -223,7 +224,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const handleDownload = async () => {
         if (!previewRef.current) return
         try {
-            const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: true })
+            const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: false })
             const a = document.createElement('a'); a.href = dataUrl; a.download = `studio_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'design'}.png`
             document.body.appendChild(a); a.click(); document.body.removeChild(a)
         } catch (e) { console.error(e) }
@@ -240,7 +241,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                 for (let i = 0; i < images.length; i++) {
                     setActiveImageIndex(i)
                     await new Promise(r => setTimeout(r, 800))
-                    const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: true, skipFonts: false })
+                    const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
                     dataUrls.push(dataUrl)
                     setMp4Progress(Math.round(((i + 1) / images.length) * 20))
                 }
@@ -259,6 +260,72 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
             console.error('MP4 export error:', e)
             alert('Erreur lors de la génération vidéo.')
         } finally { setMp4Progress(null) }
+    }
+
+    // Save to Marketing
+    const handleSaveToMarketing = async (type: 'png' | 'mp4') => {
+        if (!previewRef.current) return
+        setSavingMarketing(type)
+        try {
+            let blob: Blob
+            let filename: string
+            if (type === 'png') {
+                const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: false })
+                const res = await fetch(dataUrl)
+                blob = await res.blob()
+                filename = `studio_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'design'}.png`
+            } else {
+                setMp4Progress(0)
+                const dataUrls: string[] = []
+                const originalIndex = activeImageIndex
+                if (images.length > 0) {
+                    for (let i = 0; i < images.length; i++) {
+                        setActiveImageIndex(i)
+                        await new Promise(r => setTimeout(r, 800))
+                        const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
+                        dataUrls.push(dataUrl)
+                        setMp4Progress(Math.round(((i + 1) / images.length) * 20))
+                    }
+                    setActiveImageIndex(originalIndex)
+                }
+                const { exportToMp4 } = await import('@/lib/videoExport')
+                blob = await exportToMp4({
+                    element: previewRef.current,
+                    imagesDataUrls: dataUrls.length > 0 ? dataUrls : undefined,
+                    duration: videoDuration * Math.max(images.length, 1),
+                    fps: 24,
+                    filename: `short_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'video'}.mp4`,
+                    onProgress: (pct) => setMp4Progress(dataUrls.length > 0 ? 20 + Math.round(pct * 0.8) : pct),
+                    returnBlob: true
+                }) as Blob
+                filename = `short_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'video'}.mp4`
+                setMp4Progress(null)
+            }
+
+            const formData = new FormData()
+            const file = new File([blob], filename, { type: type === 'png' ? 'image/png' : 'video/mp4' })
+            formData.append('file', file)
+            formData.append('type', 'marketing')
+            formData.append('marketingType', 'CREATIVE')
+            if (book?.id) formData.append('bookId', book.id)
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+
+            const uploadData = await uploadRes.json()
+            if (!uploadRes.ok) throw new Error(uploadData.error || 'Erreur lors de la sauvegarde')
+
+            alert(`Sauvegardé dans Marketing avec succès !`)
+        } catch (e: any) {
+            console.error('Save to Marketing error:', e)
+            const errorMsg = e instanceof Error ? e.message : (e?.message || e?.name || (typeof e === 'string' ? e : 'Erreur inconnue (voir console)'))
+            alert(`Erreur de sauvegarde: ${errorMsg}`)
+        } finally {
+            setSavingMarketing(null)
+            setMp4Progress(null)
+        }
     }
 
     // Publish
@@ -369,6 +436,17 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                             <span className="text-xs text-white/50">{mp4Progress}%</span>
                         </div>
                     )}
+                    <div className="flex gap-2">
+                        <button onClick={() => handleSaveToMarketing('png')} disabled={savingMarketing !== null} className="flex items-center justify-center px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-700 transition-all shadow-md active:scale-95 disabled:opacity-50">
+                            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                            {savingMarketing === 'png' ? 'Sauvegarde...' : 'Marketing (PNG)'}
+                        </button>
+                        <button onClick={() => handleSaveToMarketing('mp4')} disabled={savingMarketing !== null || images.length === 0} className="flex items-center justify-center px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-700 transition-all shadow-md active:scale-95 disabled:opacity-50">
+                            <Film className="w-3.5 h-3.5 mr-1.5" />
+                            {savingMarketing === 'mp4' ? 'Sauvegarde...' : 'Marketing (MP4)'}
+                        </button>
+                    </div>
+                    <div className="w-px h-5 bg-white/10 mx-1" />
                     <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-lg transition">
                         <Download className="w-3.5 h-3.5" /> PNG
                     </button>
@@ -378,7 +456,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition"
                     >
                         <Film className="w-3.5 h-3.5" />
-                        {mp4Progress !== null ? 'Export…' : 'Exporter MP4'}
+                        {mp4Progress !== null && savingMarketing === null ? 'Export…' : 'Exporter MP4'}
                     </button>
                     <select value={videoDuration} onChange={e => setVideoDuration(Number(e.target.value))}
                         className="px-2 py-1.5 bg-white/5 border border-white/10 text-white/70 text-xs rounded-lg outline-none">

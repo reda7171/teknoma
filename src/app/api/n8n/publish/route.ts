@@ -103,9 +103,10 @@ export async function POST(req: NextRequest) {
         }
 
         // --- PROXY HTTPS POUR META (Instagram/Facebook) ---
-        // Instagram/Facebook exigent HTTPS. On utilise wsrv.nl comme proxy gratuit
-        // Cela règle aussi le problème du format .webp non supporté par IG.
-        if (imageUrl && (platform === 'instagram' || platform === 'facebook' || platform === 'both' || platform === 'all')) {
+        // Instagram/Facebook exigent HTTPS. On utilise wsrv.nl comme proxy gratuit pour les images.
+        const isVideo = imageUrl && (imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm'));
+        
+        if (imageUrl && !isVideo && (platform === 'instagram' || platform === 'facebook' || platform === 'both' || platform === 'all')) {
             imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&q=85`;
             console.log('[N8N PUBLISH] Using Proxy URL for Meta:', imageUrl);
         }
@@ -123,6 +124,7 @@ export async function POST(req: NextRequest) {
             category: itemType === 'BOOK' ? item?.category : 'Promotion',
             language: itemType === 'BOOK' ? item?.language : 'fr',
             image: imageUrl,
+            isVideo: isVideo,
             isPack: itemType === 'PACK',
             booksList: body.books || (itemType === 'PACK' ? (item as any).books?.map((b: any) => b.book?.title || b.title) : []),
             bookUrl: itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : '',
@@ -141,7 +143,8 @@ export async function POST(req: NextRequest) {
             tiktok_access_token: tiktokAccessToken,
             tiktok_creator_id: tiktokCreatorId,
             tiktok_app_id: tiktokAppId,
-            tiktok_client_secret: tiktokClientSecret
+            tiktok_client_secret: tiktokClientSecret,
+            postId: body.postId || ''
         }
 
         // Envoyer au webhook n8n

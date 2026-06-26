@@ -182,7 +182,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 href={`/admin/posts/${post.id}`}
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-900 text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:bg-slate-50 transition-all shadow-sm"
                             >
-                                <Pencil className="w-3 h-3 text-indigo-600" />
+                                <Pencil className="w-3 h-3 text-slate-600" />
                                 {t('Edit')}
                             </Link>
                         )}
@@ -193,7 +193,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <div className="mb-6">
                             <Link
                                 href={`/blog?category=${post.category}`}
-                                className="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal rounded-full hover:bg-indigo-100 transition-colors"
+                                className="inline-block px-4 py-1.5 bg-slate-50 text-slate-600 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal rounded-full hover:bg-slate-100 transition-colors"
                             >
                                 {post.category}
                             </Link>
@@ -234,23 +234,23 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         )}
                         {post.publishedAt && (
                             <span className="flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                                <Calendar className="w-3.5 h-3.5 text-slate-500" />
                                 {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : locale === 'fr' ? 'fr-FR' : 'en-US', {
                                     day: 'numeric', month: 'long', year: 'numeric'
                                 })}
                             </span>
                         )}
                         <span className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                            <Clock className="w-3.5 h-3.5 text-slate-500" />
                             {readingTime} {t('MinRead')}
                         </span>
                         <span className="flex items-center gap-2">
-                            <Eye className="w-3.5 h-3.5 text-indigo-500" />
+                            <Eye className="w-3.5 h-3.5 text-slate-500" />
                             {post.viewCount} {t('Views')}
                         </span>
                         {post._count?.comments > 0 && (
                             <span className="flex items-center gap-2">
-                                <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                                <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
                                 {post._count.comments} {t('Comments')}
                             </span>
                         )}
@@ -316,8 +316,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-h2:text-3xl md:prose-h2:text-4xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:text-[34px]
                                 prose-h3:text-2xl rtl:prose-h3:text-[30px]
                                 prose-p:text-slate-800 prose-p:leading-[2] prose-p:text-[18px] rtl:prose-p:text-[22px] rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
-                                prose-a:text-indigo-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-indigo-600 hover:prose-a:bg-indigo-50 prose-a:transition-colors
-                                prose-blockquote:border-l-4 prose-blockquote:border-indigo-500 prose-blockquote:bg-indigo-50 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:not-italic
+                                prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors
+                                prose-blockquote:border-l-4 prose-blockquote:border-slate-500 prose-blockquote:bg-slate-50 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:not-italic
                                 prose-blockquote:text-slate-800 prose-blockquote:font-bold prose-blockquote:my-8
                                 prose-strong:text-slate-900 prose-strong:font-black
                                 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600
@@ -386,7 +386,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                             <p className="text-sm text-slate-500 leading-relaxed">{post.author.bio}</p>
                                         ) : (
                                             <>
-                                                <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 mb-2">{t('ModeratorRole')}</p>
+                                                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-2">{t('ModeratorRole')}</p>
                                                 <p className="text-sm text-slate-500 leading-relaxed">{t('ModeratorDescription')}</p>
                                             </>
                                         )}
@@ -397,19 +397,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Livres Mentionnés (Mobile/Desktop bas d'article) === */}
                         {post.books && post.books.length > 0 && (
-                            <div className="mt-12 p-8 bg-indigo-50/50 border border-indigo-100 rounded-3xl">
+                            <div className="mt-12 p-8 bg-slate-50/50 border border-slate-100 rounded-3xl">
                                 <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-                                    <BookOpen className="w-5 h-5 text-indigo-600" />
+                                    <BookOpen className="w-5 h-5 text-slate-600" />
                                     {t('InThisArticle')}
                                 </h3>
                                 <div className="grid grid-cols-1 gap-4">
                                     {post.books.map(book => (
-                                        <Link href={`/books/${book.id}`} key={book.id} className="group flex flex-col sm:flex-row gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg transition-all">
+                                        <Link href={`/books/${book.id}`} key={book.id} className="group flex flex-col sm:flex-row gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all">
                                             <div className="relative w-24 h-36 sm:w-32 sm:h-48 bg-slate-50 rounded-lg shadow-sm overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
                                                 {book.image && <Image src={book.image} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
                                             </div>
                                             <div className="flex flex-col flex-1 min-w-0">
-                                                <h4 className="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">{book.title}</h4>
+                                                <h4 className="text-lg font-black text-slate-900 group-hover:text-slate-600 transition-colors leading-tight">{book.title}</h4>
                                                 <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest">{book.author}</p>
 
                                                 {book.description && (
@@ -422,7 +422,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                     <div className="mt-4 space-y-3 bg-slate-50/80 p-4 rounded-xl border border-slate-100">
                                                         {book.bestQuote && (
                                                             <div className="flex gap-3">
-                                                                <Quote className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                                                                <Quote className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
                                                                 <div>
                                                                     <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-0.5">{t('BestQuote')}</p>
                                                                     <p className="text-xs text-slate-700 italic font-medium leading-relaxed">"{book.bestQuote}"</p>
@@ -461,14 +461,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                                                 <div className="mt-auto pt-4 flex items-center justify-between">
                                                     <div>
-                                                        <p className="text-lg font-black text-indigo-600">{book.price} MAD</p>
+                                                        <p className="text-lg font-black text-slate-600">{book.price} MAD</p>
                                                         {book.stock > 0 ? (
                                                             <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{t('InStock')}</span>
                                                         ) : (
                                                             <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">{t('OutOfStock')}</span>
                                                         )}
                                                     </div>
-                                                    <div className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full group-hover:bg-indigo-600 transition-colors">
+                                                    <div className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full group-hover:bg-slate-600 transition-colors">
                                                         {t('Discover')}
                                                     </div>
                                                 </div>
@@ -505,7 +505,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 text-sm">
                                         <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                                            <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                                            <Clock className="w-3.5 h-3.5 text-slate-500" />
                                         </div>
                                         <div>
                                             <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('Reading')}</p>
@@ -514,7 +514,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     </div>
                                     <div className="flex items-center gap-3 text-sm">
                                         <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                                            <Eye className="w-3.5 h-3.5 text-indigo-500" />
+                                            <Eye className="w-3.5 h-3.5 text-slate-500" />
                                         </div>
                                         <div>
                                             <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('Views')}</p>
@@ -524,7 +524,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     {post._count?.comments > 0 && (
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                                                <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                                                <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
                                             </div>
                                             <div>
                                                 <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('Comments')}</p>
@@ -535,7 +535,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     {post.publishedAt && (
                                         <div className="flex items-center gap-3 text-sm">
                                             <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                                                <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                                                <Calendar className="w-3.5 h-3.5 text-slate-500" />
                                             </div>
                                             <div>
                                                 <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('PublishedOn')}</p>
@@ -578,9 +578,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                     {book.image && <Image src={book.image} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-indigo-600 transition-colors leading-tight">{book.title}</h4>
+                                                    <h4 className="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-slate-600 transition-colors leading-tight">{book.title}</h4>
                                                     <p className="text-[10px] text-slate-500 truncate mt-1">{book.author}</p>
-                                                    <p className="text-xs font-black text-indigo-600 mt-1">{book.price} MAD</p>
+                                                    <p className="text-xs font-black text-slate-600 mt-1">{book.price} MAD</p>
                                                 </div>
                                             </Link>
                                         ))}
@@ -591,13 +591,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             {/* CTA Blog */}
                             <Link
                                 href="/blog"
-                                className="group flex items-center justify-between p-5 bg-indigo-50 border border-indigo-100 rounded-3xl hover:bg-indigo-100 transition-colors"
+                                className="group flex items-center justify-between p-5 bg-slate-50 border border-slate-100 rounded-3xl hover:bg-slate-100 transition-colors"
                             >
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal text-indigo-400 mb-1">{t('Explore')}</p>
-                                    <p className="font-black text-indigo-900 text-sm">{t('AllArticles')}</p>
+                                    <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal text-slate-400 mb-1">{t('Explore')}</p>
+                                    <p className="font-black text-slate-900 text-sm">{t('AllArticles')}</p>
                                 </div>
-                                <div className="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                                <div className="w-9 h-9 bg-slate-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                                     <BookOpen className="w-4 h-4 text-white" />
                                 </div>
                             </Link>
@@ -645,7 +645,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         )}
                                         {related.category && (
                                             <div className="absolute top-4 left-4">
-                                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-[0.25em] rounded-full">
+                                                <span className="px-3 py-1 bg-slate-50 text-slate-600 text-[9px] font-black uppercase tracking-[0.25em] rounded-full">
                                                     {related.category}
                                                 </span>
                                             </div>
@@ -660,7 +660,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 </span>
                                             )}
                                         </div>
-                                        <h3 className="font-black text-slate-900 text-lg leading-tight mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                                        <h3 className="font-black text-slate-900 text-lg leading-tight mb-3 group-hover:text-slate-600 transition-colors line-clamp-2">
                                             {related.title}
                                         </h3>
                                         {related.excerpt && (
@@ -672,7 +672,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors">
                                                 {t('ReadArticle')}
                                             </span>
-                                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-indigo-600 transition-colors">
+                                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-600 transition-colors">
                                                 <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white -rotate-45 group-hover:rotate-0 transition-all" />
                                             </div>
                                         </div>

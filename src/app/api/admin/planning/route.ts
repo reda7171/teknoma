@@ -30,6 +30,32 @@ export async function POST(req: NextRequest) {
             }
         })
 
+        // Background-first n8n publish using Promise.all
+        // We use the host to build the absolute URL to hit our own /api/n8n/publish
+        const protocol = req.headers.get('x-forwarded-proto') || 'http';
+        const host = req.headers.get('host') || 'localhost:3000';
+        const baseUrl = `${protocol}://${host}`;
+        const cookie = req.headers.get('cookie') || '';
+
+        // Execute in parallel without awaiting the result so the response is fast
+        Promise.all(platforms.map((platform: string) => 
+            fetch(`${baseUrl}/api/n8n/publish`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Cookie': cookie // Pass the auth cookie
+                },
+                body: JSON.stringify({
+                    customImageUrl: mediaUrl || '',
+                    customCaption: content,
+                    platform: platform,
+                    format: 'post',
+                    scheduleAt: new Date(date).toISOString(),
+                    postId: post.id
+                })
+            }).catch(e => console.error(`[Planning API] Error triggering n8n for ${platform}:`, e))
+        )).catch(console.error);
+
         return NextResponse.json({ success: true, post })
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })

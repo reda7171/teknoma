@@ -14,14 +14,16 @@ const ALLOWED_MIME_TYPES = [
     'image/jpg',
     'image/png',
     'image/webp',
-    'image/gif'
+    'image/gif',
+    'video/mp4',
+    'video/webm'
 ]
 
 // Extensions autorisées
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.jfif']
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.jfif', '.mp4', '.webm']
 
-// Taille max : 5MB
-const MAX_FILE_SIZE = 5 * 1024 * 1024
+// Taille max : 50MB pour supporter les vidéos
+const MAX_FILE_SIZE = 50 * 1024 * 1024
 
 export async function POST(request: NextRequest) {
     try {
@@ -93,8 +95,9 @@ export async function POST(request: NextRequest) {
             'image/webp': ['52494646']
         }
 
+        const isVideo = file.type.startsWith('video/')
         const expectedSignatures = validSignatures[file.type]
-        if (expectedSignatures && !expectedSignatures.some(sig => magicBytes.startsWith(sig))) {
+        if (!isVideo && expectedSignatures && !expectedSignatures.some(sig => magicBytes.startsWith(sig))) {
             console.error('[UPLOAD] Magic bytes mismatch for', file.type, ':', magicBytes)
             return NextResponse.json(
                 { error: 'File content does not match declared type (Magic Bytes Mismatch)' },
@@ -115,31 +118,36 @@ export async function POST(request: NextRequest) {
             targetExtension = '.gif'
         }
 
-        try {
-            let sharpInstance = sharp(buffer)
-            if (targetExtension === '.png') {
-                processedBuffer = await sharpInstance
-                    .png({ compressionLevel: 8 })
-                    .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
-                    .toBuffer()
-            } else if (targetExtension === '.webp') {
-                processedBuffer = await sharpInstance
-                    .webp({ quality: 85 })
-                    .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
-                    .toBuffer()
-            } else if (targetExtension === '.gif') {
-                // Pour les GIF, on ne redimensionne pas pour garder l'animation intacte
-                processedBuffer = await sharpInstance.toBuffer()
-            } else {
-                processedBuffer = await sharpInstance
-                    .jpeg({ quality: 85, mozjpeg: true })
-                    .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
-                    .toBuffer()
-            }
-        } catch (sharpError) {
-            console.error('[UPLOAD] Sharp processing failed:', sharpError)
+        if (isVideo) {
             processedBuffer = buffer
             targetExtension = fileExtension
+        } else {
+            try {
+                let sharpInstance = sharp(buffer)
+                if (targetExtension === '.png') {
+                    processedBuffer = await sharpInstance
+                        .png({ compressionLevel: 8 })
+                        .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
+                        .toBuffer()
+                } else if (targetExtension === '.webp') {
+                    processedBuffer = await sharpInstance
+                        .webp({ quality: 85 })
+                        .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
+                        .toBuffer()
+                } else if (targetExtension === '.gif') {
+                    // Pour les GIF, on ne redimensionne pas pour garder l'animation intacte
+                    processedBuffer = await sharpInstance.toBuffer()
+                } else {
+                    processedBuffer = await sharpInstance
+                        .jpeg({ quality: 85, mozjpeg: true })
+                        .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
+                        .toBuffer()
+                }
+            } catch (sharpError) {
+                console.error('[UPLOAD] Sharp processing failed:', sharpError)
+                processedBuffer = buffer
+                targetExtension = fileExtension
+            }
         }
 
         // OWASP A03: Sanitize filename pour éviter path traversal

@@ -12,9 +12,10 @@ export interface VideoExportOptions {
     fps?: number
     filename?: string
     onProgress?: (pct: number) => void
+    returnBlob?: boolean
 }
 
-export async function exportToMp4(opts: VideoExportOptions): Promise<void> {
+export async function exportToMp4(opts: VideoExportOptions): Promise<Blob | void> {
     const { element, imagesDataUrls, duration = 5, fps = 30, filename = 'short.mp4', onProgress } = opts
     const totalMs = duration * 1000
 
@@ -45,7 +46,7 @@ export async function exportToMp4(opts: VideoExportOptions): Promise<void> {
         const img = new Image()
         await new Promise<void>((resolve, reject) => {
             img.onload = () => resolve()
-            img.onerror = reject
+            img.onerror = () => reject(new Error('Failed to load image for video export'))
             img.src = url
         })
         imgs.push(img)
@@ -81,6 +82,10 @@ export async function exportToMp4(opts: VideoExportOptions): Promise<void> {
             onProgress?.(98)
             const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'
             const blob = new Blob(chunks, { type: mimeType })
+            if (opts.returnBlob) {
+                onProgress?.(100)
+                return resolve(blob)
+            }
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
