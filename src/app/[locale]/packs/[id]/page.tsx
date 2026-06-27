@@ -82,9 +82,9 @@ export async function generateMetadata({
 export default async function PackDetailPage({
     params,
 }: {
-    params: Promise<{ id: string }>
+    params: Promise<{ id: string; locale: string }>
 }) {
-    const { id } = await params
+    const { id, locale } = await params
     const pack = await getPackById(id)
     const t = await getTranslations('PackDetail')
     const tPacks = await getTranslations('Packs')
@@ -162,6 +162,59 @@ export default async function PackDetailPage({
             ]
         }
     ]
+
+    // FAQPage AEO pour le pack — questions multilingues
+    const faqSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+            {
+                '@type': 'Question',
+                name: locale === 'ar'
+                    ? `ما هي الكتب المتضمنة في باقة ${pack.name}؟`
+                    : locale === 'en'
+                        ? `What books are included in the ${pack.name} pack?`
+                        : `Quels livres sont inclus dans le pack ${pack.name} ?`,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: pack.books.map(pb => `${pb.book.title} (${pb.book.author})`).join(', ')
+                }
+            },
+            {
+                '@type': 'Question',
+                name: locale === 'ar'
+                    ? `ما هو سعر باقة ${pack.name}؟`
+                    : locale === 'en'
+                        ? `What is the price of the ${pack.name} pack?`
+                        : `Quel est le prix du pack ${pack.name} ?`,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: locale === 'ar'
+                        ? `سعر باقة ${pack.name} هو ${pack.price} درهم مغربي، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%. الدفع عند الاستلام.`
+                        : locale === 'en'
+                            ? `The ${pack.name} pack costs ${pack.price} MAD instead of ${totalOriginalPrice} MAD for individual purchases. Save ${savingsPercent}%. Payment on delivery.`
+                            : `Le pack ${pack.name} est à ${pack.price} MAD au lieu de ${totalOriginalPrice} MAD à l'achat individuel. Économisez ${savingsPercent}%. Paiement à la livraison.`
+                }
+            },
+            {
+                '@type': 'Question',
+                name: locale === 'ar'
+                    ? `هل يتضمن الطلب التوصيل؟`
+                    : locale === 'en'
+                        ? `Is delivery included when ordering this pack?`
+                        : `La livraison est-elle incluse pour ce pack ?`,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: locale === 'ar'
+                        ? `التوصيل مجاني للطلبات التي تتجاوز 300 درهم. الدفع عند الاستلام في جميع أنحاء المغرب، من 24 إلى 48 ساعة للدار البيضاء وبين يومين وأربعة أيام للمدن الأخرى.`
+                        : locale === 'en'
+                            ? `Delivery is free for orders over 300 MAD. Cash on delivery across Morocco, 24-48h for Casablanca and 2-4 days for other cities.`
+                            : `La livraison est gratuite pour les commandes supérieures à 300 MAD. Paiement à la livraison partout au Maroc, 24-48h pour Casablanca et 2 à 4 jours pour les autres villes.`
+                }
+            }
+        ]
+    }
+    jsonLd.push(faqSchema)
 
     return (
         <>

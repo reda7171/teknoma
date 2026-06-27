@@ -101,7 +101,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             <Header />
 
-            {/* Données Structurées Schema.org */}
+            {/* Données Structurées Schema.org — AEO enrichi */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -111,15 +111,34 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "@type": "BlogPosting",
                             "headline": post.title,
                             "image": post.coverImage,
-                            "author": { "@type": "Person", "name": post.authorName || post.author?.fullName || "Riwaya" },
+                            "url": `https://riwaya.store/${locale}/blog/${post.slug}`,
+                            "author": {
+                                "@type": "Person",
+                                "name": post.authorName || post.author?.fullName || "Riwaya",
+                                "url": `https://riwaya.store/${locale}/blog`
+                            },
                             "publisher": {
                                 "@type": "Organization",
                                 "name": "Riwaya",
-                                "logo": { "@type": "ImageObject", "url": "https://riwaya.store/logo.png" }
+                                "logo": { "@type": "ImageObject", "url": "https://riwaya.store/logo.png", "width": 200, "height": 60 }
                             },
                             "datePublished": post.publishedAt,
                             "dateModified": post.updatedAt,
-                            "description": post.excerpt || post.title
+                            "description": post.excerpt || post.title,
+                            "inLanguage": locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-MA' : 'fr-MA',
+                            "wordCount": post.content ? post.content.trim().split(/\s+/).length : 0,
+                            ...(post.category ? { "articleSection": post.category } : {}),
+                            ...(tags.length > 0 ? { "keywords": tags.join(', ') } : {}),
+                            // Speakable : les sections que les assistants vocaux doivent lire
+                            "speakable": {
+                                "@type": "SpeakableSpecification",
+                                "cssSelector": ["h1", ".article-excerpt", ".article-lead"]
+                            },
+                            "isPartOf": {
+                                "@type": "Blog",
+                                "name": "Blog Riwaya",
+                                "url": `https://riwaya.store/${locale}/blog`
+                            }
                         },
                         {
                             "@context": "https://schema.org",
@@ -127,7 +146,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "mainEntity": [
                                 {
                                     "@type": "Question",
-                                    "name": locale === 'ar' ? `عن ماذا يتحدث مقال ${post.title}؟` : locale === 'en' ? `What is the article ${post.title} about?` : `De quoi parle l'article ${post.title} ?`,
+                                    "name": locale === 'ar' ? `عن ماذا يتحدث مقال "${post.title}"؟` : locale === 'en' ? `What is the article "${post.title}" about?` : `De quoi parle l'article "${post.title}" ?`,
                                     "acceptedAnswer": {
                                         "@type": "Answer",
                                         "text": post.excerpt || post.title
@@ -135,10 +154,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 },
                                 {
                                     "@type": "Question",
-                                    "name": locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who is the author of this article?` : `Qui est l'auteur de cet article ?`,
+                                    "name": locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who wrote this article?` : `Qui a rédigé cet article ?`,
                                     "acceptedAnswer": {
                                         "@type": "Answer",
-                                        "text": locale === 'ar' ? `تمت كتابة هذا المقال بواسطة ${post.authorName || post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.authorName || post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.authorName || post.author?.fullName || 'Riwaya'}.`
+                                        "text": locale === 'ar'
+                                            ? `كتب هذا المقال ${post.authorName || post.author?.fullName || 'فريق رواية'}. يمكنك قراءة المزيد من مقالاتنا على مدونة رواية.`
+                                            : locale === 'en'
+                                                ? `This article was written by ${post.authorName || post.author?.fullName || 'the Riwaya team'}. You can read more articles on the Riwaya blog.`
+                                                : `Cet article a été rédigé par ${post.authorName || post.author?.fullName || "l'équipe Riwaya"}. Vous pouvez lire plus d'articles sur le blog Riwaya.`
+                                    }
+                                },
+                                {
+                                    "@type": "Question",
+                                    "name": locale === 'ar' ? `كم من الوقت يستغرق قراءة هذا المقال؟` : locale === 'en' ? `How long does it take to read this article?` : `Combien de temps faut-il pour lire cet article ?`,
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": locale === 'ar'
+                                            ? `يستغرق قراءة هذا المقال حوالي ${readingTime} دقيقة.`
+                                            : locale === 'en'
+                                                ? `Reading this article takes approximately ${readingTime} minute${readingTime > 1 ? 's' : ''}.`
+                                                : `La lecture de cet article prend environ ${readingTime} minute${readingTime > 1 ? 's' : ''}.`
+                                    }
+                                },
+                                {
+                                    "@type": "Question",
+                                    "name": locale === 'ar' ? `أين يمكنني شراء الكتب الموصى بها في هذا المقال؟` : locale === 'en' ? `Where can I buy books recommended in this article?` : `Où puis-je acheter les livres recommandés dans cet article ?`,
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": locale === 'ar'
+                                            ? `يمكنك العثور على جميع الكتب الموصى بها في مكتبة رواية الإلكترونية على riwaya.store. الدفع عند الاستلام، توصيل سريع في المغرب.`
+                                            : locale === 'en'
+                                                ? `You can find all recommended books at the Riwaya online bookstore on riwaya.store. Cash on delivery, fast shipping in Morocco.`
+                                                : `Vous trouverez tous les livres recommandés sur la librairie en ligne Riwaya sur riwaya.store. Paiement à la livraison, livraison rapide au Maroc.`
                                     }
                                 }
                             ]

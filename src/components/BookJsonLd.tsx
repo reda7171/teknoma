@@ -10,6 +10,8 @@ interface BookJsonLdProps {
     image: string;
     price: number;
     stock: number;
+    category?: string | null;
+    numberOfPages?: number | null;
   };
   locale: string;
   displayTitle: string;
@@ -21,13 +23,15 @@ interface BookJsonLdProps {
 
 export function BookJsonLd({ book, locale, displayTitle, displayDescription, imageUrl, averageRating, reviewCount }: BookJsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store';
+  const bookUrl = `${baseUrl}/${locale}/books/${book.id}`;
 
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
+      // Schema Book — pour les moteurs de réponse AI
       {
         "@type": "Book",
-        "@id": `${baseUrl}/${locale}/books/${book.id}`,
+        "@id": bookUrl,
         "name": displayTitle,
         "author": {
           "@type": "Person",
@@ -37,11 +41,21 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         "inLanguage": locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
         "publisher": {
           "@type": "Organization",
-          "name": "Riwaya"
+          "name": "Riwaya",
+          "url": baseUrl
         },
         "image": imageUrl,
-        "url": `${baseUrl}/${locale}/books/${book.id}`
+        "url": bookUrl,
+        ...(book.category ? { "genre": book.category } : {}),
+        ...(book.numberOfPages ? { "numberOfPages": book.numberOfPages } : {}),
+        "description": displayDescription,
+        // Speakable : les sections que les assistants vocaux doivent lire
+        "speakable": {
+          "@type": "SpeakableSpecification",
+          "cssSelector": ["h1", ".book-description", ".book-price"]
+        }
       },
+      // Schema Product — pour les rich results e-commerce
       {
         "@type": "Product",
         "name": displayTitle,
@@ -51,6 +65,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "Brand",
           "name": "Riwaya"
         },
+        "category": book.category || "Livres",
         "offers": {
           "@type": "Offer",
           "price": book.price,
@@ -58,16 +73,37 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "availability": book.stock > 0
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",
+          "url": bookUrl,
           "seller": {
             "@type": "Organization",
             "name": "Riwaya"
+          },
+          "deliveryLeadTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 4,
+            "unitCode": "DAY"
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 7
           }
+        },
+        // Action d'achat directe — signal fort pour AEO
+        "potentialAction": {
+          "@type": "BuyAction",
+          "target": bookUrl,
+          "price": book.price,
+          "priceCurrency": "MAD"
         },
         ...(reviewCount > 0 ? {
           "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": averageRating,
-            "reviewCount": reviewCount
+            "reviewCount": reviewCount,
+            "bestRating": 5,
+            "worstRating": 1
           }
         } : {})
       }

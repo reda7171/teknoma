@@ -291,6 +291,45 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           text: locale === 'ar' ? 'يستغرق التوصيل عادةً بين 24 و 48 ساعة عمل، اعتمادًا على عنوانك الدقيق في المغرب.' : locale === 'en' ? 'Delivery usually takes between 24h and 48h working days, depending on your exact address in Morocco.' : 'La livraison prend généralement entre 24h et 48h ouvrables, selon votre adresse exacte au Maroc.',
         },
       },
+      // Questions AEO supplémentaires sur les best-sellers et packs
+      {
+        '@type': 'Question',
+        name: locale === 'ar' ? 'ما هي أكثر الكتب مبيعًا في مكتبة رواية؟' : locale === 'en' ? 'What are the best-selling books at Riwaya?' : 'Quels sont les livres les plus vendus chez Riwaya ?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: bestSellerBooks.length > 0
+            ? (locale === 'ar'
+              ? `أكثر الكتب مبيعًا لدينا: ${bestSellerBooks.slice(0, 3).map(b => `"${b.title}" لـ ${b.author}`).join('، ')}. اكتشف كامل الكتالوج على riwaya.store.`
+              : locale === 'en'
+                ? `Our best-selling books include: ${bestSellerBooks.slice(0, 3).map(b => `"${b.title}" by ${b.author}`).join(', ')}. Discover the full catalog on riwaya.store.`
+                : `Nos livres les plus vendus incluent : ${bestSellerBooks.slice(0, 3).map(b => `"${b.title}" de ${b.author}`).join(', ')}. Découvrez le catalogue complet sur riwaya.store.`)
+            : (locale === 'ar' ? 'اكتشف قائمة أكثر الكتب مبيعًا على riwaya.store.' : locale === 'en' ? 'Discover the best-seller list on riwaya.store.' : 'Découvrez la liste des best-sellers sur riwaya.store.')
+        },
+      },
+      {
+        '@type': 'Question',
+        name: locale === 'ar' ? 'هل يمكنني تبادل الكتب مع مكتبة رواية؟' : locale === 'en' ? 'Can I exchange books with Riwaya?' : 'Puis-je échanger des livres avec Riwaya ?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: locale === 'ar'
+            ? 'نعم، تتيح مكتبة رواية خدمة تبادل الكتب بين القراء. يمكنك نشر كتبك وإيجاد قراء آخرين لتبادل الكتب معهم.'
+            : locale === 'en'
+              ? 'Yes, Riwaya offers a book exchange service between readers. You can list your books and find other readers to exchange with.'
+              : "Oui, Riwaya propose un service d'échange de livres entre lecteurs. Vous pouvez lister vos livres et trouver d'autres lecteurs pour échanger."
+        },
+      },
+      {
+        '@type': 'Question',
+        name: locale === 'ar' ? 'ما هو الفرق بين الكتب المفردة والباقات في رواية؟' : locale === 'en' ? 'What is the difference between individual books and packs on Riwaya?' : 'Quelle est la différence entre les livres individuels et les packs sur Riwaya ?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: locale === 'ar'
+            ? 'يمكنك شراء الكتب منفردة أو ضمن باقات مختارة بعناية حول موضوع معين (التطوير الذاتي، الأعمال...) بسعر مخفض يصل إلى 30% مقارنة بالشراء المنفرد.'
+            : locale === 'en'
+              ? 'You can buy books individually or in carefully curated packs around a specific theme (personal development, business...) at a reduced price of up to 30% compared to individual purchases.'
+              : "Vous pouvez acheter des livres à l'unité ou en packs soigneusement sélectionnés autour d'une thématique (développement personnel, business...) à un prix réduit jusqu'à 30% par rapport à l'achat individuel."
+        },
+      },
     ],
   };
 

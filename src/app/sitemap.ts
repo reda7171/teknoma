@@ -7,23 +7,28 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 1. Pages statiques
     const staticPages = [
-        '',
-        '/books',
-        '/packs',
-        '/blog',
-        '/about',
-        '/contact',
-        '/privacy',
-        '/terms',
-        '/tracking'
+        { path: '', priority: 1.0, freq: 'daily' as const },
+        { path: '/books', priority: 0.9, freq: 'daily' as const },
+        { path: '/packs', priority: 0.9, freq: 'daily' as const },
+        { path: '/blog', priority: 0.9, freq: 'daily' as const },
+        { path: '/faq', priority: 0.85, freq: 'weekly' as const },
+        { path: '/about', priority: 0.8, freq: 'monthly' as const },
+        { path: '/contact', priority: 0.7, freq: 'monthly' as const },
+        { path: '/guides', priority: 0.8, freq: 'weekly' as const },
+        { path: '/authors', priority: 0.75, freq: 'weekly' as const },
+        { path: '/privacy', priority: 0.3, freq: 'yearly' as const },
+        { path: '/terms', priority: 0.3, freq: 'yearly' as const },
+        { path: '/tracking', priority: 0.5, freq: 'weekly' as const },
+        { path: '/livraison', priority: 0.6, freq: 'monthly' as const },
+        { path: '/return-policy', priority: 0.4, freq: 'yearly' as const },
     ]
 
     const staticUrls = locales.flatMap((locale) =>
         staticPages.map((page) => ({
-            url: `${baseUrl}/${locale}${page}`,
+            url: `${baseUrl}/${locale}${page.path}`,
             lastModified: new Date(),
-            changeFrequency: 'daily' as const,
-            priority: page === '' ? 1 : 0.8,
+            changeFrequency: page.freq,
+            priority: page.priority,
         }))
     )
 
