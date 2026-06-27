@@ -248,7 +248,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   urlTemplate: `${siteUrl}/fr/books?search={search_term_string}`
                 },
                 'query-input': 'required name=search_term_string'
-              }
+              },
+              hasPart: [
+                { '@type': 'SiteNavigationElement', name: 'Livres', url: `${siteUrl}/${locale}/books` },
+                { '@type': 'SiteNavigationElement', name: 'Packs de Livres', url: `${siteUrl}/${locale}/packs` },
+                { '@type': 'SiteNavigationElement', name: 'Blog', url: `${siteUrl}/${locale}/blog` },
+                { '@type': 'SiteNavigationElement', name: 'Contact', url: `${siteUrl}/${locale}/contact` },
+                { '@type': 'SiteNavigationElement', name: 'FAQ', url: `${siteUrl}/${locale}/faq` }
+              ]
             })
           }}
         />
