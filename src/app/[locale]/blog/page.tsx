@@ -27,6 +27,14 @@ export async function generateMetadata({
             description: t('Subtitle'),
             type: 'website',
             url: `https://riwaya.store/${locale}/blog`,
+            images: [
+                {
+                    url: 'https://riwaya.store/images/og-blog.png',
+                    width: 1200,
+                    height: 630,
+                    alt: 'Blog Riwaya'
+                }
+            ]
         },
         alternates: {
             canonical: `https://riwaya.store/${locale}/blog`
