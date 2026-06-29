@@ -14,6 +14,9 @@ interface Props {
     initialTiktokClientSecret: string
     initialGoogleSearchConsoleId: string
     initialGoogleAnalyticsId: string
+    initialFbMarketingAccessToken: string
+    initialFbAdAccountId: string
+    initialFbPageId: string
 }
 
 export default function TrackingConfigForm({ 
@@ -24,7 +27,10 @@ export default function TrackingConfigForm({
     initialTiktokAppId,
     initialTiktokClientSecret,
     initialGoogleSearchConsoleId,
-    initialGoogleAnalyticsId
+    initialGoogleAnalyticsId,
+    initialFbMarketingAccessToken,
+    initialFbAdAccountId,
+    initialFbPageId
 }: Props) {
     const [fbPixelId, setFbPixelId] = useState(initialFbPixelId)
     const [geminiApiKey, setGeminiApiKey] = useState(initialGeminiApiKey)
@@ -34,6 +40,9 @@ export default function TrackingConfigForm({
     const [tiktokClientSecret, setTiktokClientSecret] = useState(initialTiktokClientSecret)
     const [googleSearchConsoleId, setGoogleSearchConsoleId] = useState(initialGoogleSearchConsoleId)
     const [googleAnalyticsId, setGoogleAnalyticsId] = useState(initialGoogleAnalyticsId)
+    const [fbMarketingAccessToken, setFbMarketingAccessToken] = useState(initialFbMarketingAccessToken)
+    const [fbAdAccountId, setFbAdAccountId] = useState(initialFbAdAccountId)
+    const [fbPageId, setFbPageId] = useState(initialFbPageId)
     
     const [showApiKey, setShowApiKey] = useState(false)
     const [showTiktokToken, setShowTiktokToken] = useState(false)
@@ -56,6 +65,9 @@ export default function TrackingConfigForm({
             await updateSetting('tiktok_client_secret', tiktokClientSecret, 'api', 'TikTok Client Secret')
             await updateSetting('google_search_console_id', googleSearchConsoleId, 'tracking', 'Google Search Console Verification ID')
             await updateSetting('google_analytics_id', googleAnalyticsId, 'tracking', 'Google Analytics Measurement ID')
+            await updateSetting('fb_marketing_access_token', fbMarketingAccessToken, 'api', 'Facebook Marketing API Token')
+            await updateSetting('fb_ad_account_id', fbAdAccountId, 'api', 'Facebook Ad Account ID')
+            await updateSetting('fb_page_id', fbPageId, 'api', 'Facebook Page ID')
 
             setMessage({ type: 'success', text: 'Configuration enregistrée avec succès !' })
             router.refresh()
@@ -92,6 +104,70 @@ export default function TrackingConfigForm({
                         <p className="mt-2 text-[11px] text-gray-400 font-medium ml-1 italic">
                             Identifiant unique utilisé pour le suivi des événements sur Facebook.
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Facebook Marketing API Section */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                        <Facebook className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-black text-gray-900">Facebook Ads API</h2>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Lancement de publicités</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-[13px] font-black text-gray-700 uppercase tracking-wider mb-2 ml-1">
+                            Access Token
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showApiKey ? "text" : "password"}
+                                value={fbMarketingAccessToken}
+                                onChange={(e) => setFbMarketingAccessToken(e.target.value)}
+                                placeholder="EAAG..."
+                                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-sm text-gray-900 pr-12"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowApiKey(!showApiKey)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[13px] font-black text-gray-700 uppercase tracking-wider mb-2 ml-1">
+                                Ad Account ID
+                            </label>
+                            <input
+                                type="text"
+                                value={fbAdAccountId}
+                                onChange={(e) => setFbAdAccountId(e.target.value)}
+                                placeholder="act_123456789"
+                                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-sm text-gray-900"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-black text-gray-700 uppercase tracking-wider mb-2 ml-1">
+                                Page ID
+                            </label>
+                            <input
+                                type="text"
+                                value={fbPageId}
+                                onChange={(e) => setFbPageId(e.target.value)}
+                                placeholder="123456789"
+                                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono text-sm text-gray-900"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

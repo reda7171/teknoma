@@ -18,11 +18,12 @@ import { ChevronLeft, ChevronRight,
     Music,
     Send,
     X,
-    Plus,
     Upload,
-    Loader2
+    Loader2,
+    Megaphone
 } from 'lucide-react'
 import Image from 'next/image'
+import LaunchFacebookAdModal from '@/components/admin/LaunchFacebookAdModal'
 
 interface Asset {
     name: string
@@ -54,6 +55,10 @@ export default function MarketingPage() {
     const [slideIndex, setSlideIndex] = useState(0)
     const [captions, setCaptions] = useState<Record<string, string>>({})
     const [publishProgress, setPublishProgress] = useState<Record<string, 'idle' | 'loading' | 'ok' | 'error'>>({}) 
+
+    // FB Ads Modal
+    const [isFbAdModalOpen, setIsFbAdModalOpen] = useState(false)
+    const [selectedAdAsset, setSelectedAdAsset] = useState<Asset | null>(null)
 
     const fetchAssets = async () => {
         setLoading(true)
@@ -439,9 +444,25 @@ export default function MarketingPage() {
                                     >
                                         <Eye className="w-5 h-5" />
                                     </a>
+                                    {(asset.bookId || asset.packId) && (
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setSelectedAdAsset(asset)
+                                                setIsFbAdModalOpen(true)
+                                            }}
+                                            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
+                                            title="Lancer une publicité FB"
+                                        >
+                                            <Megaphone className="w-5 h-5" />
+                                        </button>
+                                    )}
                                     <button 
-                                        onClick={() => handleDelete(asset.name)}
-                                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDelete(asset.name)
+                                        }}
+                                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 delay-100"
                                         title="Supprimer"
                                     >
                                         <Trash2 className="w-5 h-5" />
@@ -701,7 +722,17 @@ export default function MarketingPage() {
                     </div>
                 )
             })()}
+
+            {/* Modal Lancement FB Ad */}
+            <LaunchFacebookAdModal 
+                isOpen={isFbAdModalOpen}
+                onClose={() => {
+                    setIsFbAdModalOpen(false)
+                    setSelectedAdAsset(null)
+                }}
+                asset={selectedAdAsset}
+            />
+
         </div>
     )
 }
-

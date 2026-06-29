@@ -16,6 +16,9 @@ export default async function TrackingConfigPage() {
     const tiktokClientSecret = await getSetting('tiktok_client_secret') || ''
     const googleSearchConsoleId = await getSetting('google_search_console_id') || ''
     const googleAnalyticsId = await getSetting('google_analytics_id') || ''
+    const fbMarketingAccessToken = await getSetting('fb_marketing_access_token') || ''
+    const fbAdAccountId = await getSetting('fb_ad_account_id') || ''
+    const fbPageId = await getSetting('fb_page_id') || ''
 
     return (
         <div className="space-y-12">
@@ -53,6 +56,9 @@ export default async function TrackingConfigPage() {
                             initialTiktokClientSecret={tiktokClientSecret}
                             initialGoogleSearchConsoleId={googleSearchConsoleId}
                             initialGoogleAnalyticsId={googleAnalyticsId}
+                            initialFbMarketingAccessToken={fbMarketingAccessToken}
+                            initialFbAdAccountId={fbAdAccountId}
+                            initialFbPageId={fbPageId}
                         />
                     </div>
                 </div>
