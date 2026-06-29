@@ -19,6 +19,9 @@ export default async function POSPage() {
   const defaultTab = await getSetting('pos_default_tab') || 'ALL';
   const allowOutOfStock = await getSetting('pos_allow_out_of_stock') === 'true';
   const requireCustomer = await getSetting('pos_require_customer') !== 'false'; // Default to true if not set
+  
+  const activeCompanies = await prisma.shippingCompany.findMany({ where: { isActive: true } });
+  const shippingCompanies = activeCompanies.map(c => ({ id: c.id, name: c.name }));
 
   try {
     books = await prisma.book.findMany({
@@ -77,6 +80,7 @@ export default async function POSPage() {
         defaultTab={defaultTab as any}
         allowOutOfStock={allowOutOfStock}
         requireCustomer={requireCustomer}
+        shippingCompanies={shippingCompanies}
       />
     </div>
   );

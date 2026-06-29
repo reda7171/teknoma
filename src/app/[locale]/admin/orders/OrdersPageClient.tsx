@@ -28,6 +28,7 @@ export default function OrdersPageClient({
     stats
 }: OrdersPageClientProps) {
     const [searchTerm, setSearchTerm] = useState('')
+    const [shippingFilter, setShippingFilter] = useState('')
 
     return (
         <div className="space-y-6">
@@ -67,6 +68,8 @@ export default function OrdersPageClient({
                     currentStatus={currentStatus}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
+                    shippingFilter={shippingFilter}
+                    onShippingFilterChange={setShippingFilter}
                     totalCount={orders.length}
                 />
 
@@ -78,6 +81,7 @@ export default function OrdersPageClient({
                         statusColors={statusColors}
                         statusLabels={statusLabels}
                         searchTerm={searchTerm}
+                        shippingFilter={shippingFilter}
                     />
                 </div>
             </div>

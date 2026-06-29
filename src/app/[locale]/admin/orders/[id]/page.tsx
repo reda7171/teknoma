@@ -260,6 +260,48 @@ export default async function OrderDetailsPage({
                             )}
                         </div>
                     </div>
+
+                    {/* Tracking & UTM */}
+                    {((order as any).utmSource || (order as any).fbclid || (order as any).ttclid) && (
+                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <span className="text-gray-400">📊</span>
+                                Acquisition (Tracking)
+                            </h2>
+                            <div className="space-y-4">
+                                {(order as any).utmSource && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">Source / Medium</p>
+                                        <p className="text-sm font-medium text-gray-900">
+                                            {(order as any).utmSource} / {(order as any).utmMedium || 'none'}
+                                        </p>
+                                    </div>
+                                )}
+                                {(order as any).utmCampaign && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">Campagne</p>
+                                        <p className="text-sm font-medium text-gray-900">{(order as any).utmCampaign}</p>
+                                    </div>
+                                )}
+                                {(order as any).fbclid && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">Meta Click ID (fbclid)</p>
+                                        <p className="text-xs text-gray-900 truncate" title={(order as any).fbclid}>
+                                            {(order as any).fbclid}
+                                        </p>
+                                    </div>
+                                )}
+                                {(order as any).ttclid && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-bold uppercase">TikTok Click ID</p>
+                                        <p className="text-xs text-gray-900 truncate" title={(order as any).ttclid}>
+                                            {(order as any).ttclid}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

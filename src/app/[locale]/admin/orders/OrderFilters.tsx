@@ -11,6 +11,8 @@ interface OrderFiltersProps {
     currentStatus?: string
     searchTerm: string
     onSearchChange: (val: string) => void
+    shippingFilter?: string
+    onShippingFilterChange?: (val: string) => void
     totalCount: number
 }
 
@@ -20,12 +22,14 @@ export default function OrderFilters({
     currentStatus,
     searchTerm,
     onSearchChange,
+    shippingFilter = '',
+    onShippingFilterChange = () => {},
     totalCount
 }: OrderFiltersProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
 
-    const hasActiveFilters = currentStatus || searchTerm
+    const hasActiveFilters = currentStatus || searchTerm || shippingFilter
 
     return (
         <div className="w-full space-y-4">
@@ -48,6 +52,7 @@ export default function OrderFilters({
                         <button
                             onClick={() => {
                                 onSearchChange('')
+                                onShippingFilterChange('')
                                 // Navigation to clear status is handled by links or parent, 
                                 // but for simplicity we keep it as is or could add a reset link
                             }}
@@ -116,6 +121,23 @@ export default function OrderFilters({
                                     <Baby className="w-3.5 h-3.5" /> Enfants
                                 </Link>
                             </div>
+                        </div>
+
+                        {/* Shipping Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Filter className="w-3 h-3" />
+                                Société de livraison
+                            </label>
+                            <select
+                                value={shippingFilter}
+                                onChange={(e) => onShippingFilterChange(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            >
+                                <option value="">Toutes les sociétés</option>
+                                <option value="withyou">WithYou</option>
+                                <option value="olivraison">Olivraison</option>
+                            </select>
                         </div>
 
                         {/* Status Filter */}

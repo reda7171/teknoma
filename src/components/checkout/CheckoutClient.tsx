@@ -224,6 +224,11 @@ export default function CheckoutClient({
                 items: orderItems,
                 couponCode: coupon?.code,
                 discount: discountAmount,
+                utmSource: localStorage.getItem('utm_source') || undefined,
+                utmMedium: localStorage.getItem('utm_medium') || undefined,
+                utmCampaign: localStorage.getItem('utm_campaign') || undefined,
+                fbclid: localStorage.getItem('fbclid') || undefined,
+                ttclid: localStorage.getItem('ttclid') || undefined,
             })
 
             if (result.success) {

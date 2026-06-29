@@ -42,6 +42,9 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
             } else if (key === 'min_order_amount') {
                 category = 'commerce'
                 description = 'Montant minimum du panier'
+            } else if (key === 'n8n_facebook_webhook' || key.startsWith('facebook_')) {
+                category = 'integrations'
+                description = `Intégration ${key}`
             }
 
             return { key, value, category, description }
@@ -337,6 +340,62 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
                             Le client ne pourra pas passer commande si le total est inférieur à ce montant. (0 = pas de minimum)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Intégrations & Tracking */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-8">
+                <h2 className="text-2xl font-black text-black mb-6 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                        <AtSign className="w-5 h-5 text-white" />
+                    </div>
+                    Intégrations & Webhooks
+                </h2>
+                <div className="grid grid-cols-1 gap-6">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Webhook n8n (Facebook Post)
+                        </label>
+                        <input
+                            type="url"
+                            value={settings.n8n_facebook_webhook || ''}
+                            onChange={(e) => handleChange('n8n_facebook_webhook', e.target.value)}
+                            placeholder="https://votre-n8n.com/webhook/123-abc..."
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors font-mono text-sm"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                            L'URL du Webhook n8n qui sera appelé lors du clic sur le bouton "Partager sur Facebook" dans la liste des articles.
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Facebook Pixel ID
+                        </label>
+                        <input
+                            type="text"
+                            value={settings.facebook_pixel_id || ''}
+                            onChange={(e) => handleChange('facebook_pixel_id', e.target.value)}
+                            placeholder="123456789012345"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors font-mono text-sm"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Facebook Conversions API Token
+                        </label>
+                        <input
+                            type="password"
+                            value={settings.facebook_access_token || ''}
+                            onChange={(e) => handleChange('facebook_access_token', e.target.value)}
+                            placeholder="EAA..."
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors font-mono text-sm"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                            Token généré depuis le gestionnaire d'événements Meta pour le suivi serveur.
                         </p>
                     </div>
                 </div>

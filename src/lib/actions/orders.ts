@@ -23,7 +23,12 @@ const OrderSchema = z.object({
         replacedBooks: z.record(z.object({ id: z.string(), title: z.string() })).optional()
     })).min(1, 'Panier vide').max(50),
     couponCode: z.string().max(50).optional(),
-    discount: z.number().optional()
+    discount: z.number().optional(),
+    utmSource: z.string().max(100).optional(),
+    utmMedium: z.string().max(100).optional(),
+    utmCampaign: z.string().max(255).optional(),
+    fbclid: z.string().max(255).optional(),
+    ttclid: z.string().max(255).optional()
 })
 
 export async function getOrders() {
@@ -181,6 +186,11 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                     discount: discount,
                     total: total,
                     couponCode: data.couponCode,
+                    utmSource: data.utmSource,
+                    utmMedium: data.utmMedium,
+                    utmCampaign: data.utmCampaign,
+                    fbclid: data.fbclid,
+                    ttclid: data.ttclid,
                     status: 'PENDING',
                     paymentMethod: sanitizedData.items.every(item => item.type === 'DIGITAL')
                         ? 'DIGITAL_PAYMENT'
@@ -268,9 +278,45 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                 const source = user ? 'Client Connecté' : 'Client Non Connecté (Invité)'
                 const orderWithSource = { ...fullOrder, source }
                 sendOrderNotification(orderWithSource as any).catch(console.error)
+
+                // Envoi CAPI Facebook (Server-Side)
+                const { getSetting } = await import('@/lib/actions/site-settings')
+                const fbPixelId = await getSetting('facebook_pixel_id')
+                const fbAccessToken = await getSetting('facebook_access_token') || process.env.FACEBOOK_ACCESS_TOKEN
+                if (fbPixelId && fbAccessToken) {
+                    const crypto = require('crypto')
+                    const hash = (str: string) => crypto.createHash('sha256').update(str.toLowerCase().trim()).digest('hex')
+                    
+                    const eventData = {
+                        data: [{
+                            event_name: 'Purchase',
+                            event_time: Math.floor(Date.now() / 1000),
+                            action_source: 'website',
+                            user_data: {
+                                em: [hash(fullOrder.email || '')],
+                                ph: [hash(fullOrder.phone.replace(/[^0-9]/g, ''))],
+                                client_ip_address: ip,
+                                client_user_agent: 'Server/Next.js',
+                                fbc: data.fbclid ? `fb.1.${Date.now()}.${data.fbclid}` : undefined
+                            },
+                            custom_data: {
+                                currency: 'MAD',
+                                value: fullOrder.total,
+                                content_ids: fullOrder.items.map((i: any) => i.bookId || i.packId),
+                                content_type: 'product'
+                            }
+                        }]
+                    }
+
+                    fetch(`https://graph.facebook.com/v19.0/${fbPixelId}/events?access_token=${fbAccessToken}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(eventData)
+                    }).catch(console.error)
+                }
             }
         } catch (e) {
-            console.error('Erreur Telegram Notification:', e)
+            console.error('Erreur Telegram Notification / CAPI:', e)
         }
 
         return { success: true, orderId: order.id }

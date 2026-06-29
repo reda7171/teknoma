@@ -113,6 +113,7 @@ interface POSClientProps {
   defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS';
   allowOutOfStock?: boolean;
   requireCustomer?: boolean;
+  shippingCompanies?: { id: string, name: string }[];
 }
 
 export default function POSClient({ 
@@ -127,7 +128,8 @@ export default function POSClient({
   defaultGridCols = 8,
   defaultTab = 'ALL',
   allowOutOfStock = false,
-  requireCustomer = true
+  requireCustomer = true,
+  shippingCompanies = []
 }: POSClientProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -152,6 +154,7 @@ export default function POSClient({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
+  const [selectedShippingCompany, setSelectedShippingCompany] = useState<string>(shippingCompanies[0]?.id || '');
   
   const [allCities, setAllCities] = useState<string[]>([]);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
@@ -423,7 +426,8 @@ export default function POSClient({
       subtotal: itemsTotal,
       total: finalTotal,
       discount: Number(discount),
-      shippingFees: Number(shippingFees)
+      shippingFees: Number(shippingFees),
+      shippingCompany: selectedShippingCompany
     };
 
     const fallbackOffline = (msg: string) => {
@@ -440,7 +444,8 @@ export default function POSClient({
         subtotal: itemsTotal,
         shippingFees: Number(shippingFees),
         discount: Number(discount),
-        total: finalTotal
+        total: finalTotal,
+        shippingCompany: selectedShippingCompany
       });
 
       setCart([]);
@@ -448,6 +453,7 @@ export default function POSClient({
       setShippingFees(0);
       setDiscount(0);
       setLastOrderId(null);
+      setSelectedShippingCompany(shippingCompanies[0]?.id || '');
     };
 
     if (isOffline) {
@@ -473,7 +479,8 @@ export default function POSClient({
             subtotal: itemsTotal,
             shippingFees: Number(shippingFees),
             discount: Number(discount),
-            total: finalTotal
+            total: finalTotal,
+            shippingCompany: selectedShippingCompany
           });
         }
 
@@ -481,6 +488,7 @@ export default function POSClient({
         setCustomer({ fullName: '', phone: '', address: '', city: '' });
         setShippingFees(0);
         setDiscount(0);
+        setSelectedShippingCompany(shippingCompanies[0]?.id || '');
       } else {
         fallbackOffline(result.error || 'Erreur serveur');
       }
@@ -814,6 +822,22 @@ export default function POSClient({
                 onChange={e => setCustomer({...customer, address: e.target.value})}
                 className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"
             />
+            {shippingCompanies.length > 0 && (
+                <div className="relative">
+                    <select
+                        value={selectedShippingCompany}
+                        onChange={(e) => setSelectedShippingCompany(e.target.value)}
+                        className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"
+                    >
+                        <option value="">-- CHOISIR UNE SOCIÉTÉ DE LIVRAISON --</option>
+                        {shippingCompanies.map((company) => (
+                            <option key={company.id} value={company.id}>
+                                {company.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
           </div>
         </div>
           </>

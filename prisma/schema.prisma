@@ -8,6 +8,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ShippingCompany {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(255)
+  logo         String?  @db.VarChar(500)
+  apiKey       String?  @db.VarChar(500)
+  apiUrl       String?  @db.VarChar(500)
+  isActive     Boolean  @default(true)
+  supportPhone String?  @db.VarChar(20)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("shipping_companies")
+}
+
 model CategoryConfig {
   id             String    @id @default(uuid())
   name           String    @unique
@@ -114,7 +128,6 @@ model LoginHistory {
   @@map("login_history")
 }
 
-
 model Book {
   id              String        @id @default(uuid())
   title           String        @db.VarChar(255)
@@ -154,10 +167,17 @@ model Book {
   wishlists       Wishlist[]
   posts           Post[]        @relation("PostBooks")
 
+  // Tracking & Media Buying
+  utmSource   String? @db.VarChar(100)
+  utmMedium   String? @db.VarChar(100)
+  utmCampaign String? @db.VarChar(255)
+  fbclid      String? @db.VarChar(255)
+  ttclid      String? @db.VarChar(255)
+
   // Marketplace fields
-  sellerId String?
-  seller   User?   @relation("SellerBooks", fields: [sellerId], references: [id])
-  reservations    BookReservation[]
+  sellerId     String?
+  seller       User?             @relation("SellerBooks", fields: [sellerId], references: [id])
+  reservations BookReservation[]
 
   @@index([category])
   @@index([active])
@@ -228,6 +248,7 @@ model Order {
   deliverySyncAt DateTime?
   trackingID     String?              @db.VarChar(100)
   deliveryNotes  String?              @db.Text
+  shippingCompany String?             @db.VarChar(100)
   items          OrderItem[]
   statusHistory  OrderStatusHistory[]
 
@@ -587,7 +608,7 @@ model Post {
   title       String
   excerpt     String?   @db.Text
   content     String    @db.LongText
-  coverImage  String?       @db.LongText
+  coverImage  String?   @db.LongText
   authorId    String
   published   Boolean   @default(false)
   publishedAt DateTime?
@@ -917,23 +938,24 @@ model SellerRequest {
   @@index([createdAt])
   @@map("seller_requests")
 }
+
 model ExtraProduct {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
+  id          String      @id @default(uuid())
+  name        String      @db.VarChar(255)
+  description String?     @db.Text
   price       Float
-  costPrice   Float    @default(0)
-  stock       Int      @default(0)
-  image       String?  @db.VarChar(500)
-  images      Json?    @default("[]")
-  category    String   @default("ACCESSORY") // BOOKMARK, FURNITURE, USB, etc.
-  materials   String?  @db.VarChar(255)
-  dimensions  String?  @db.VarChar(255)
-  weight      String?  @db.VarChar(255)
-  warranty    String?  @db.VarChar(255)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  costPrice   Float       @default(0)
+  stock       Int         @default(0)
+  image       String?     @db.VarChar(500)
+  images      Json?       @default("[]")
+  category    String      @default("ACCESSORY") // BOOKMARK, FURNITURE, USB, etc.
+  materials   String?     @db.VarChar(255)
+  dimensions  String?     @db.VarChar(255)
+  weight      String?     @db.VarChar(255)
+  warranty    String?     @db.VarChar(255)
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
 
   @@index([category])
@@ -945,7 +967,7 @@ model MarketingAsset {
   id        String   @id @default(uuid())
   name      String   @unique
   url       String
-  type      String   // CREATIVE, PACK, DESCRIPTION
+  type      String // CREATIVE, PACK, DESCRIPTION
   bookId    String?
   packId    String?
   createdAt DateTime @default(now())
@@ -968,13 +990,13 @@ model AdminAuthRequest {
 }
 
 model RequestedBook {
-  id          String   @id @default(uuid())
-  title       String   @db.VarChar(255)
-  author      String?  @db.VarChar(255)
+  id           String   @id @default(uuid())
+  title        String   @db.VarChar(255)
+  author       String?  @db.VarChar(255)
   requestCount Int      @default(1)
-  status      String   @default("PENDING") // PENDING, RESTOCKED, IGNORED
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status       String   @default("PENDING") // PENDING, RESTOCKED, IGNORED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([requestCount])
   @@map("requested_books")
@@ -993,8 +1015,6 @@ model BookReservation {
   @@index([whatsapp])
   @@map("book_reservations")
 }
-
-
 
 model ScheduledPost {
   id        String   @id @default(uuid())

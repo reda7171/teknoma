@@ -89,7 +89,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     featureDigitalBooks,
     featureExchange,
     recentPosts,
-    homeSettings
+    homeSettings,
+    homepageContent
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -105,12 +106,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     isFeatureEnabled('feature_digital_books'),
     isFeatureEnabled('feature_exchange'),
     getRecentPosts(3, locale),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections'))
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content'))
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
   const newBooks = popularBooks.slice(0, 6)
   const showSection = (key: string) => homeSettings[key] !== 'false'
+
+  // Lire le contenu depuis DB avec fallback sur la valeur i18n
+  const c = (key: string, fallback: string): string => (homepageContent as Record<string, string>)[key] || fallback
 
   const getSectionProps = (key: string, defaultBg: string) => {
     const bg = homeSettings[`bg_${key}`] || defaultBg
@@ -372,22 +377,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <ScrollReveal animation="animate-reveal-up" delay={200} className="space-y-8 text-center lg:text-start">
                     <div className="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0">
                       <Sparkles className="w-4 h-4 text-yellow-500" />
-                      <span>{t('hero.Badge')}</span>
+                      <span>{c('hero_badge', t('hero.Badge'))}</span>
                     </div>
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-black leading-[0.9] tracking-tighter">
-                      {t('hero.TitlePart1')} <br />
-                      <span className="text-gray-400">{t('hero.TitlePart2')}</span>
+                      {c('hero_title_part1', t('hero.TitlePart1'))} <br />
+                      <span className="text-gray-400">{c('hero_title_part2', t('hero.TitlePart2'))}</span>
                     </h1>
                     <p className="text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0">
-                      {t('hero.Description')}
+                      {c('hero_description', t('hero.Description'))}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                       <Link href="/books" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-black text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
-                        <span>{t('hero.ShopLibrary')}</span>
+                        <span>{c('hero_btn_shop', t('hero.ShopLibrary'))}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                       </Link>
                       <Link href="/packs" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black font-black text-xs uppercase tracking-widest rounded-full border-2 border-gray-100 hover:border-black transition-all hover:-translate-y-1">
-                        <span>{t('hero.OurBundles')}</span>
+                        <span>{c('hero_btn_packs', t('hero.OurBundles'))}</span>
                       </Link>
                     </div>
                   </ScrollReveal>
@@ -433,9 +438,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                 {[
-                  { icon: Truck, title: t('Features.ShippingTitle'), desc: t('Features.ShippingDesc'), color: 'bg-pixio-cream' },
-                  { icon: Shield, title: t('Features.PaymentTitle'), desc: t('Features.PaymentDesc'), color: 'bg-pixio-yellow' },
-                  { icon: Package, title: t('Features.PacksTitle'), desc: t('Features.PacksDesc'), color: 'bg-pixio-beige' }
+                  { icon: Truck, title: c('features_1_title', t('Features.ShippingTitle')), desc: c('features_1_desc', t('Features.ShippingDesc')), color: 'bg-pixio-cream' },
+                  { icon: Shield, title: c('features_2_title', t('Features.PaymentTitle')), desc: c('features_2_desc', t('Features.PaymentDesc')), color: 'bg-pixio-yellow' },
+                  { icon: Package, title: c('features_3_title', t('Features.PacksTitle')), desc: c('features_3_desc', t('Features.PacksDesc')), color: 'bg-pixio-beige' }
                 ].map((feature, idx) => (
                   <ScrollReveal key={idx} delay={idx * 150} className="flex flex-col items-center text-center space-y-4">
                     <div className={`w-20 h-20 ${feature.color} rounded-[2rem] flex items-center justify-center group hover:rotate-6 transition-transform shadow-sm hover:shadow-xl`}>
@@ -459,18 +464,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
                     <TrendingUp className="w-4 h-4 text-orange-600" />
                     <span className="text-[11px] font-black uppercase text-orange-600 tracking-[0.3em]">
-                      {t('BestSellers.Subtitle')}
+                      {c('bestsellers_subtitle', t('BestSellers.Subtitle'))}
                     </span>
                   </div>
                   <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
-                    {t('BestSellers.Title')}<span className="text-orange-500">.</span>
+                    {c('bestsellers_title', t('BestSellers.Title'))}<span className="text-orange-500">.</span>
                   </h2>
                   <p className="text-lg text-gray-500 font-medium max-w-2xl mx-auto">
-                    {t('BestSellers.Description')}
+                    {c('bestsellers_description', t('BestSellers.Description'))}
                   </p>
                 </div>
                 <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-8 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
-                  <span className="text-xs font-black uppercase tracking-widest text-black">{t('BestSellers.ViewAll')}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-black">{c('bestsellers_view_all', t('BestSellers.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -479,7 +484,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {bestSellerBooks.length === 0 ? (
                 <ScrollReveal delay={300} className="text-center py-16 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
                   <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{t('BestSellers.Soon')}</p>
+                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{c('bestsellers_soon', t('BestSellers.Soon'))}</p>
                 </ScrollReveal>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -504,7 +509,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="max-w-4xl mx-auto px-4 text-center">
                 <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-12">
                   <Sparkles className="w-4 h-4 text-pixio-yellow" />
-                  {t('Quotes.WisdomOfTheDay')}
+                  {c('quotes_wisdom_label', t('Quotes.WisdomOfTheDay'))}
                 </div>
                 <p className="text-3xl md:text-5xl font-black text-black leading-tight tracking-tighter mb-10 italic">
                   "{randomQuote.quote}"
@@ -513,7 +518,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <div className="w-12 h-1 bg-black rounded-full mb-4"></div>
                   <p className="text-sm font-black uppercase tracking-[0.4em] text-gray-400">— {randomQuote.quoteSource}</p>
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-300 mt-2">
-                    {t('Quotes.FeaturedIn')} <span className="text-black">{randomQuote.name}</span>
+                    {c('quotes_featured_in', t('Quotes.FeaturedIn'))} <span className="text-black">{randomQuote.name}</span>
                   </p>
                 </div>
               </div>
@@ -526,9 +531,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-4">
-                <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{t('Collections.Subtitle')}</span>
+                <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
                 <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
-                  {t('Collections.Title')}<span className="text-pixio-pink">.</span>
+                  {c('collections_title', t('Collections.Title'))}<span className="text-pixio-pink">.</span>
                 </h2>
               </ScrollReveal>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -552,16 +557,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <ScrollReveal className="space-y-6 text-center lg:text-left max-w-2xl">
                   <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full">
                     <Users className="w-4 h-4 text-pixio-yellow" />
-                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.4em]">{t('BestAuthors.Subtitle')}</span>
+                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.4em]">{c('authors_subtitle', t('BestAuthors.Subtitle'))}</span>
                   </div>
                   <h2 className="text-6xl md:text-8xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.8] mb-4">
-                    {t('BestAuthors.Title')}<span className="text-pixio-yellow">.</span>
+                    {c('authors_title', t('BestAuthors.Title'))}<span className="text-pixio-yellow">.</span>
                   </h2>
-                  <p className="text-xl text-gray-400 font-medium tracking-tight">{t('BestAuthors.Description')}</p>
+                  <p className="text-xl text-gray-400 font-medium tracking-tight">{c('authors_description', t('BestAuthors.Description'))}</p>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right" delay={300}>
                   <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-8 py-4 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
-                    <span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-black">{t('BestAuthors.BooksPlural')}</span>
+                    <span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-black">{c('authors_view_books', t('BestAuthors.BooksPlural'))}</span>
                     <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
                       <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                     </div>
@@ -571,7 +576,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {bestAuthors.length === 0 ? (
                 <div className="text-center py-32 bg-pixio-cream rounded-[4rem] border-2 border-dashed border-gray-100">
                   <Users className="w-20 h-20 text-gray-200 mx-auto mb-6" />
-                  <p className="text-gray-400 font-black text-xs rtl:text-sm rtl:tracking-normal uppercase tracking-[0.3em]">{t('BestAuthors.NoData')}</p>
+                  <p className="text-gray-400 font-black text-xs rtl:text-sm rtl:tracking-normal uppercase tracking-[0.3em]">{c('authors_no_data', t('BestAuthors.NoData'))}</p>
                 </div>
               ) : (
                 <AuthorsCarousel authors={bestAuthors} />
@@ -599,11 +604,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
                 <div className="space-y-4">
-                  <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{t('NewArrivals.Subtitle')}</span>
-                  <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">{t('NewArrivals.Title')}</h2>
+                  <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
+                  <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">{c('new_arrivals_title', t('NewArrivals.Title'))}</h2>
                 </div>
                 <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
-                  <span className="text-xs font-black uppercase tracking-widest text-black">{t('NewArrivals.ViewAll')}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-black">{c('new_arrivals_view_all', t('NewArrivals.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -629,15 +634,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="space-y-4 flex-1">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full">
                     <RefreshCw className="w-4 h-4 text-green-600" />
-                    <span className="text-[11px] font-black uppercase text-green-600 tracking-[0.3em]">{t('ExchangeBooks.Subtitle')}</span>
+                    <span className="text-[11px] font-black uppercase text-green-600 tracking-[0.3em]">{c('exchange_subtitle', t('ExchangeBooks.Subtitle'))}</span>
                   </div>
                   <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
-                    {t('ExchangeBooks.Title')}<span className="text-green-500">.</span>
+                    {c('exchange_title', t('ExchangeBooks.Title'))}<span className="text-green-500">.</span>
                   </h2>
-                  <p className="text-lg text-gray-500 font-medium max-w-2xl">{t('ExchangeBooks.Description')}</p>
+                  <p className="text-lg text-gray-500 font-medium max-w-2xl">{c('exchange_description', t('ExchangeBooks.Description'))}</p>
                 </div>
                 <Link href="/community/market" className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-green-100 hover:border-green-600 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-2xl">
-                  <span className="text-xs font-black uppercase tracking-widest text-green-600">{t('ExchangeBooks.ViewAll')}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-green-600">{c('exchange_view_all', t('ExchangeBooks.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -646,9 +651,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {exchangeBooks.length === 0 ? (
                 <ScrollReveal delay={300} className="text-center py-16 bg-white/50 rounded-3xl border-2 border-dashed border-green-200">
                   <RefreshCw className="w-16 h-16 text-green-300 mx-auto mb-4" />
-                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4">{t('ExchangeBooks.NoData')}</p>
+                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4">{c('exchange_no_data', t('ExchangeBooks.NoData'))}</p>
                   <Link href="/community/login" className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg">
-                    <span>{t('ExchangeBooks.JoinCommunity')}</span>
+                    <span>{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </ScrollReveal>
@@ -683,7 +688,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </div>
                   <ScrollReveal delay={500} className="flex justify-center mt-12">
                     <Link href="/community/market" className="group inline-flex items-center gap-4 px-12 py-6 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-2xl hover:scale-105 hover:-translate-y-1">
-                      <span>{t('ExchangeBooks.ViewMore')}</span>
+                      <span>{c('exchange_view_more', t('ExchangeBooks.ViewMore'))}</span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </ScrollReveal>
@@ -703,19 +708,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="flex flex-col lg:flex-row items-center gap-16">
                 <div className="flex-1 space-y-8">
-                  <ScrollReveal animation="animate-reveal-up" delay={100}><div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400/10 border border-amber-400/20 rounded-full"><Zap className="w-3 h-3 text-amber-400" /><span className="text-[11px] font-black uppercase text-amber-400 tracking-[0.3em]">{tDigital('HomeSection.Badge')}</span></div></ScrollReveal>
-                  <ScrollReveal animation="animate-reveal-up" delay={200}><h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">{tDigital('HomeSection.Title')}<span className="text-amber-400">.</span></h2></ScrollReveal>
-                  <ScrollReveal animation="animate-reveal-up" delay={300}><p className="text-lg text-gray-400 font-medium max-w-lg leading-relaxed">{tDigital('HomeSection.Description')}</p></ScrollReveal>
+                  <ScrollReveal animation="animate-reveal-up" delay={100}><div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400/10 border border-amber-400/20 rounded-full"><Zap className="w-3 h-3 text-amber-400" /><span className="text-[11px] font-black uppercase text-amber-400 tracking-[0.3em]">{c('digital_badge', tDigital('HomeSection.Badge'))}</span></div></ScrollReveal>
+                  <ScrollReveal animation="animate-reveal-up" delay={200}><h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">{c('digital_title', tDigital('HomeSection.Title'))}<span className="text-amber-400">.</span></h2></ScrollReveal>
+                  <ScrollReveal animation="animate-reveal-up" delay={300}><p className="text-lg text-gray-400 font-medium max-w-lg leading-relaxed">{c('digital_description', tDigital('HomeSection.Description'))}</p></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={400} className="space-y-4">
                     {[
-                      { icon: Download, label: tDigital('HomeSection.Feature1') },
-                      { icon: FileText, label: tDigital('HomeSection.Feature2') },
-                      { icon: Shield, label: tDigital('HomeSection.Feature3') },
+                      { icon: Download, label: c('digital_feature_1', tDigital('HomeSection.Feature1')) },
+                      { icon: FileText, label: c('digital_feature_2', tDigital('HomeSection.Feature2')) },
+                      { icon: Shield, label: c('digital_feature_3', tDigital('HomeSection.Feature3')) },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-3"><div className="w-8 h-8 bg-amber-400/10 border border-amber-400/20 rounded-xl flex items-center justify-center flex-shrink-0"><item.icon className="w-4 h-4 text-amber-400" /></div><span className="text-sm font-bold text-gray-300">{item.label}</span></div>
                     ))}
                   </ScrollReveal>
-                  <ScrollReveal animation="animate-reveal-up" delay={500}><Link href="/livres-numeriques" className="group inline-flex items-center gap-4 px-10 py-5 bg-amber-400 text-black font-black text-xs uppercase tracking-widest rounded-full hover:bg-amber-300 transition-all shadow-2xl hover:shadow-amber-400/30 hover:-translate-y-1 hover:scale-105"><span>{tDigital('HomeSection.CTA')}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link></ScrollReveal>
+                  <ScrollReveal animation="animate-reveal-up" delay={500}><Link href="/livres-numeriques" className="group inline-flex items-center gap-4 px-10 py-5 bg-amber-400 text-black font-black text-xs uppercase tracking-widest rounded-full hover:bg-amber-300 transition-all shadow-2xl hover:shadow-amber-400/30 hover:-translate-y-1 hover:scale-105"><span>{c('digital_cta', tDigital('HomeSection.CTA'))}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link></ScrollReveal>
                 </div>
                 <ScrollReveal animation="animate-reveal-right" delay={300} className="flex-1 flex justify-center lg:justify-end">
                   <div className="relative w-72 h-80">
@@ -743,11 +748,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
                 <ScrollReveal className="space-y-4 max-w-xl">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-[11px] rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{t('Journal.Subtitle') || 'Notre Journal'}</span></div>
-                  <h2 className="text-5xl md:text-7xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.9]">{t('Journal.TitlePart1') || 'Derniers Articles'}<br /><span className="text-gray-400 italic">{t('Journal.TitlePart2') || 'à Découvrir'}</span></h2>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-[11px] rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{c('journal_subtitle', t('Journal.Subtitle') || 'Notre Journal')}</span></div>
+                  <h2 className="text-5xl md:text-7xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.9]">{c('journal_title_part1', t('Journal.TitlePart1') || 'Derniers Articles')}<br /><span className="text-gray-400 italic">{c('journal_title_part2', t('Journal.TitlePart2') || 'à Découvrir')}</span></h2>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right">
-                  <Link href="/blog" className="group flex items-center gap-4 bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1"><span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest">{t('Journal.ViewAll') || 'Tout Lire'}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" /></Link>
+                  <Link href="/blog" className="group flex items-center gap-4 bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1"><span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest">{c('journal_view_all', t('Journal.ViewAll') || 'Tout Lire')}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" /></Link>
                 </ScrollReveal>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -777,7 +782,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                           <div className="flex items-center gap-2 mb-4"><div className="w-1.5 h-1.5 rounded-full bg-black" /><span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{post.category?.name || 'Inspiration'}</span></div>
                           <h3 className="text-2xl font-black text-black leading-tight mb-4 group-hover:text-gray-600 transition-colors line-clamp-2">{post.title}</h3>
                           <p className="text-gray-500 text-sm font-medium line-clamp-3 mb-8">{post.excerpt}</p>
-                          <div className="mt-auto flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{t('Journal.ReadMore') || 'Lire la suite'}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
+                          <div className="mt-auto flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
                         </div>
                       </article>
                     </Link>
@@ -805,14 +810,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-beige/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
           <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">
-              {t('CTA.TitlePart1')} <br />
-              <span className="text-gray-400 italic">{t('CTA.TitlePart2')}</span>
+              {c('cta_title_part1', t('CTA.TitlePart1'))} <br />
+              <span className="text-gray-400 italic">{c('cta_title_part2', t('CTA.TitlePart2'))}</span>
             </h2>
             <Link
               href="/books"
               className="group inline-flex items-center gap-4 px-12 py-6 bg-white text-black font-black text-xs uppercase tracking-widest rounded-full hover:bg-pixio-cream transition-all shadow-2xl hover:scale-105 hover:-translate-y-1 pulse-yellow-glow"
             >
-              <span>{t('CTA.Button')}</span>
+              <span>{c('cta_button', t('CTA.Button'))}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </ScrollReveal>

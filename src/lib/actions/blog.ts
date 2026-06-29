@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { verifyAdmin, getAdminUser } from '@/lib/actions/auth'
 
 // Public Actions
 
@@ -180,8 +181,6 @@ export async function getAllPosts(page = 1, limit = 20, search?: string, languag
         }
     }
 }
-
-import { verifyAdmin, getAdminUser } from '@/lib/actions/auth'
 
 export async function createPost(data: any) {
     try {
@@ -378,4 +377,65 @@ export async function deletePostsBulk(ids: string[]) {
         return { success: false, error: 'Une erreur est survenue lors de la suppression' }
     }
 }
+
+/**
+ * Partager un article vers Facebook via webhook n8n
+ */
+export async function sharePostToN8n(postId: string) {
+    try {
+        await verifyAdmin()
+        
+        const post = await prisma.post.findUnique({
+            where: { id: postId },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                excerpt: true,
+                coverImage: true,
+                language: true
+            }
+        })
+        
+        if (!post) return { success: false, error: 'Article introuvable' }
+
+        const { getSetting } = await import('@/lib/actions/site-settings')
+        const n8nWebhook = await getSetting('n8n_facebook_webhook')
+        const siteUrl = await getSetting('site_url') || 'https://riwaya.store'
+        
+        if (!n8nWebhook) {
+            return { success: false, error: 'Le webhook n8n n\'est pas configuré dans les paramètres du site (clé: n8n_facebook_webhook)' }
+        }
+
+        const postUrl = `${siteUrl}/${post.language}/blog/${post.slug}`
+        const imageUrl = post.coverImage?.startsWith('http') ? post.coverImage : `${siteUrl}${post.coverImage}`
+
+        const payload = {
+            id: post.id,
+            title: post.title,
+            excerpt: post.excerpt || '',
+            url: postUrl,
+            image: imageUrl,
+            language: post.language
+        }
+
+        const response = await fetch(n8nWebhook, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+
+        if (!response.ok) {
+            return { success: false, error: 'Erreur lors de l\'envoi à n8n' }
+        }
+
+        return { success: true }
+    } catch (error) {
+        console.error('Error sharing post to n8n:', error)
+        return { success: false, error: 'Une erreur est survenue' }
+    }
+}
+
 

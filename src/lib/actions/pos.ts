@@ -19,6 +19,7 @@ export async function createPOSOrder(data: {
   subtotal: number;
   discount: number;
   shippingFees: number;
+  shippingCompany?: string;
 }) {
   try {
 
@@ -57,6 +58,7 @@ export async function createPOSOrder(data: {
         subtotal: data.subtotal,
         discount: data.discount,
         shippingFees: data.shippingFees,
+        shippingCompany: data.shippingCompany,
         status: OrderStatus.CONFIRMED,
         paymentMethod: 'CASH',
         items: {

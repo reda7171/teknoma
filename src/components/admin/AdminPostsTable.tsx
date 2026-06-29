@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Edit, FileText, User, ExternalLink, Trash2, Copy, Check } from 'lucide-react'
 import DeletePostButton from '@/components/admin/DeletePostButton'
+import ShareToN8nButton from '@/components/admin/ShareToN8nButton'
 import { deletePostsBulk } from '@/lib/actions/blog'
 import { useRouter } from 'next/navigation'
 
@@ -194,6 +195,7 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </Link>
+                                            <ShareToN8nButton postId={post.id} />
                                             <DeletePostButton id={post.id} />
                                         </div>
                                     </td>

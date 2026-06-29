@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Search, Trash2, AlertCircle } from 'lucide-react'
-import { bulkDeleteOrders } from '@/lib/actions/admin-orders'
+import { Eye, Search, Trash2, Phone } from 'lucide-react'
+import { bulkDeleteOrders, syncDeliveryStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
 interface OrderItem {
@@ -24,6 +24,10 @@ interface Order {
     total: number
     status: string
     trackingID?: string | null
+    shippingCompany?: string | null
+    shippingCompanyName?: string | null
+    shippingCompanySupportPhone?: string | null
+    deliveryStatus?: string | null
     items: OrderItem[]
 }
 
@@ -33,6 +37,7 @@ interface OrdersTableClientProps {
     statusColors: Record<string, string>
     statusLabels: Record<string, string>
     searchTerm: string
+    shippingFilter?: string
 }
 
 export default function OrdersTableClient({
@@ -40,18 +45,38 @@ export default function OrdersTableClient({
     locale,
     statusColors,
     statusLabels,
-    searchTerm
+    searchTerm,
+    shippingFilter = ''
 }: OrdersTableClientProps) {
     const router = useRouter()
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
+    const [syncingId, setSyncingId] = useState<string | null>(null)
 
-    const filteredOrders = orders.filter(order =>
-        order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.phone.includes(searchTerm) ||
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.city.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const handleSyncDelivery = async (id: string) => {
+        setSyncingId(id)
+        try {
+            const res = await syncDeliveryStatus(id)
+            if (res.success) {
+                router.refresh()
+            } else {
+                alert(res.error || 'Erreur lors de la synchronisation')
+            }
+        } catch (error) {
+            alert('Erreur serveur')
+        } finally {
+            setSyncingId(null)
+        }
+    }
+
+    const filteredOrders = orders.filter(order => {
+        const matchesSearch = order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.phone.includes(searchTerm) ||
+            order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.city.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesShipping = shippingFilter ? order.shippingCompany === shippingFilter : true;
+        return matchesSearch && matchesShipping;
+    })
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
@@ -128,6 +153,7 @@ export default function OrdersTableClient({
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Articles</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Marge Nette</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Livraison</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
                             <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -154,8 +180,8 @@ export default function OrdersTableClient({
                                         <div className="flex items-center gap-2">
                                             <div className="text-sm font-black text-gray-900">#{order.id.slice(0, 8)}</div>
                                             {order.trackingID && (
-                                                <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center" title={`Expédié: ${order.trackingID}`}>
-                                                    <Search className="w-2.5 h-2.5 text-blue-600" />
+                                                <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer" title={`Expédié: ${order.trackingID}\nCliquez pour synchroniser`} onClick={() => handleSyncDelivery(order.id)}>
+                                                    <Search className={`w-2.5 h-2.5 text-blue-600 ${syncingId === order.id ? 'animate-spin' : ''}`} />
                                                 </div>
                                             )}
                                         </div>
@@ -186,6 +212,41 @@ export default function OrdersTableClient({
                                                 </span>
                                             );
                                         })()}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {order.shippingCompany ? (
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    {(order as any).shippingCompanyLogo && (
+                                                        <img
+                                                            src={(order as any).shippingCompanyLogo}
+                                                            alt={order.shippingCompanyName || ''}
+                                                            className="w-6 h-6 object-contain rounded"
+                                                        />
+                                                    )}
+                                                    <span className="text-xs font-bold uppercase text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md inline-block w-fit">
+                                                        {order.shippingCompanyName || order.shippingCompany}
+                                                    </span>
+                                                </div>
+                                                {order.deliveryStatus && (
+                                                    <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-md inline-block w-fit">
+                                                        {order.deliveryStatus}
+                                                    </span>
+                                                )}
+                                                {order.shippingCompanySupportPhone && (
+                                                    <a
+                                                        href={`tel:${order.shippingCompanySupportPhone}`}
+                                                        className="flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md w-fit hover:bg-orange-100 transition-colors"
+                                                        title={`Appeler le support ${order.shippingCompanyName}`}
+                                                    >
+                                                        <Phone className="w-2.5 h-2.5" />
+                                                        {order.shippingCompanySupportPhone}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-gray-400">—</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}>

@@ -18,6 +18,7 @@ const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
 const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
+const UtmTracker = dynamic(() => import('@/components/UtmTracker'))
 
 
 const outfit = Outfit({
@@ -230,10 +231,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSD75KHT"
           height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe></noscript>
         {/* End Google Tag Manager (noscript) */}
-        <Script
+        <UtmTracker />
+        <script
           id="schema-website"
           type="application/ld+json"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
@@ -258,11 +259,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               ]
             })
           }}
-        />
-        <Script
+        ></script>
+        <script
           id="schema-org"
           type="application/ld+json"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
@@ -324,7 +324,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               hasMap: 'https://www.google.com/maps/place/Riwaya/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt'
             })
           }}
-        />
+        ></script>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           <Toaster />

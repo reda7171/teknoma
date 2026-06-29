@@ -10,7 +10,7 @@ import OrdersTableClient from './OrdersTableClient'
 import OrdersPageClient from './OrdersPageClient'
 
 async function getOrders(status?: string) {
-    return prisma.order.findMany({
+    const orders = await prisma.order.findMany({
         where: status ? { status: status as any } : undefined,
         orderBy: { createdAt: 'desc' },
         include: {
@@ -22,6 +22,17 @@ async function getOrders(status?: string) {
             },
         },
     })
+
+    // Charger les sociétés de livraison pour enrichir les commandes
+    const companies = await prisma.shippingCompany.findMany()
+    const companyMap = new Map(companies.map(c => [c.id, c]))
+
+    return orders.map(order => ({
+        ...order,
+        shippingCompanyName: order.shippingCompany ? companyMap.get(order.shippingCompany)?.name || order.shippingCompany : null,
+        shippingCompanySupportPhone: order.shippingCompany ? companyMap.get(order.shippingCompany)?.supportPhone || null : null,
+        shippingCompanyLogo: order.shippingCompany ? companyMap.get(order.shippingCompany)?.logo || null : null,
+    }))
 }
 
 export default async function AdminOrdersPage(props: {

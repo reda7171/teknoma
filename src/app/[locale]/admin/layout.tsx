@@ -175,6 +175,7 @@ export default function AdminLayout({
                 { name: 'API & Tracking', href: `/${lang}/admin/config/api`, icon: Sparkles },
                 { name: 'Google Adsense', href: `/${lang}/admin/config/adsense`, icon: Banknote },
                 { name: 'API Livraison', href: `/${lang}/admin/config/delivery`, icon: Truck },
+                { name: 'Société de livraison', href: `/${lang}/admin/config/shipping-companies`, icon: Truck },
                 { name: 'Configuration Jumia', href: `/${lang}/admin/config/jumia`, icon: ShoppingBag },
                 { name: 'Configuration n8n', href: `/${lang}/admin/config/n8n`, icon: Repeat },
                 { name: 'Configuration Accueil', href: `/${lang}/admin/config/homepage`, icon: LayoutDashboard },

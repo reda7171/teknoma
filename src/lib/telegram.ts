@@ -108,30 +108,42 @@ export async function sendOrderNotification(order: {
     const whatsappMsg = encodeURIComponent(whatsappText)
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
 
-    const keyboard = {
-        inline_keyboard: [
-            [
-                { text: '💬 WhatsApp Confirm', url: whatsappUrl }
-            ],
-            [
-                { text: '✅ Confirmer', callback_data: `os:${order.id}:CONFIRMED` },
-                { text: '🚚 En livraison', callback_data: `os:${order.id}:SHIPPED` }
-            ],
-            [
-                { text: '🚀 Expédier WithYou', callback_data: `sw:${order.id}` }
-            ],
-            [
-                { text: '📦 Livrée', callback_data: `os:${order.id}:DELIVERED` },
-                { text: '🔄 Retournée', callback_data: `os:${order.id}:RETURNED` }
-            ],
-            [
-                { text: '✨ Générer Visuel', callback_data: `gen_creative:${order.id}` }
-            ],
-            [
-                { text: '❌ Annuler', callback_data: `os:${order.id}:CANCELLED` }
-            ]
+    const activeShippingCompanies = await prisma.shippingCompany.findMany({ where: { isActive: true } });
+    const shippingButtons = activeShippingCompanies.map(comp => {
+        // Map the company to its corresponding command
+        // This is a naive mapping based on ID. We can refine it later if needed.
+        const cmd = comp.name.toLowerCase().includes('olivraison') ? 'so' : 'sw';
+        return { text: `🚀 Expédier ${comp.name}`, callback_data: `${cmd}:${order.id}` };
+    });
+
+    const inline_keyboard = [
+        [
+            { text: '💬 WhatsApp Confirm', url: whatsappUrl }
+        ],
+        [
+            { text: '✅ Confirmer', callback_data: `os:${order.id}:CONFIRMED` },
+            { text: '🚚 En livraison', callback_data: `os:${order.id}:SHIPPED` }
         ]
+    ];
+
+    if (shippingButtons.length > 0) {
+        inline_keyboard.push(shippingButtons);
     }
+
+    inline_keyboard.push(
+        [
+            { text: '📦 Livrée', callback_data: `os:${order.id}:DELIVERED` },
+            { text: '🔄 Retournée', callback_data: `os:${order.id}:RETURNED` }
+        ],
+        [
+            { text: '✨ Générer Visuel', callback_data: `gen_creative:${order.id}` }
+        ],
+        [
+            { text: '❌ Annuler', callback_data: `os:${order.id}:CANCELLED` }
+        ]
+    );
+
+    const keyboard = { inline_keyboard };
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 

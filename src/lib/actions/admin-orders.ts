@@ -353,3 +353,69 @@ export async function bulkDeleteOrders(orderIds: string[]) {
         }
     }
 }
+
+/**
+ * Synchroniser le statut de livraison depuis l'API de la société de livraison
+ */
+export async function syncDeliveryStatus(orderId: string) {
+    try {
+        await verifyAdmin()
+
+        const order = await prisma.order.findUnique({
+            where: { id: orderId }
+        })
+
+        if (!order) return { success: false, error: 'Commande introuvable' }
+        if (!order.trackingID) return { success: false, error: 'Aucun numéro de suivi pour cette commande' }
+        if (!order.shippingCompany) return { success: false, error: 'Aucune société de livraison associée' }
+
+        let newStatus = order.deliveryStatus
+
+        const company = await prisma.shippingCompany.findUnique({ where: { id: order.shippingCompany } })
+        if (!company) return { success: false, error: 'Société de livraison non trouvée en base' }
+
+        const compName = company.name.toLowerCase()
+
+        if (compName.includes('withyou')) {
+            const res = await withyouService.getStatus([order.trackingID])
+            if (Array.isArray(res) && res.length > 0) {
+                newStatus = res[0].status || newStatus
+            } else if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+                newStatus = res.data[0].status || newStatus
+            }
+        } else if (compName.includes('olivraison')) {
+            const token = company.apiKey || (await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } }))?.value
+            if (token) {
+                try {
+                    const res = await fetch(`http://partners.olivraison.com/package/${order.trackingID}`, {
+                        headers: { 'authorization': `Bearer ${token}` }
+                    })
+                    if (res.ok) {
+                        const data = await res.json()
+                        newStatus = data.status || newStatus
+                    }
+                } catch (err) {
+                    console.error('Erreur API Olivraison', err)
+                }
+            }
+        }
+
+        if (newStatus !== order.deliveryStatus) {
+            await prisma.order.update({
+                where: { id: orderId },
+                data: {
+                    deliveryStatus: newStatus,
+                    deliverySyncAt: new Date()
+                }
+            })
+            revalidatePath('/admin/orders')
+            revalidatePath(`/admin/orders/${orderId}`)
+            return { success: true, status: newStatus, message: 'Statut mis à jour avec succès' }
+        }
+
+        return { success: true, status: order.deliveryStatus, message: 'Le statut est déjà à jour' }
+    } catch (error: any) {
+        console.error('Erreur lors de la synchronisation de la livraison:', error)
+        return { success: false, error: error.message || 'Erreur lors de la synchronisation' }
+    }
+}
