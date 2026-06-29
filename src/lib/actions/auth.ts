@@ -346,3 +346,8 @@ export async function getAdminUser() {
     }
 }
 
+export async function getAdminRole() {
+    const cookieStore = await cookies()
+    return cookieStore.get('admin-role')?.value || null
+}
+

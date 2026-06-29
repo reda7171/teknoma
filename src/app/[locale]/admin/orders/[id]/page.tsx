@@ -1,4 +1,5 @@
 import { getOrderById } from '@/lib/actions/admin-orders'
+import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { normalizeImage } from '@/lib/utils'
@@ -27,6 +28,13 @@ export default async function OrderDetailsPage({
 
     if (!order) {
         notFound()
+    }
+
+    let shippingCompany = null
+    if (order.shippingCompany) {
+        shippingCompany = await prisma.shippingCompany.findUnique({
+            where: { id: order.shippingCompany }
+        })
     }
 
     return (
@@ -206,6 +214,39 @@ export default async function OrderDetailsPage({
                             <Truck className="w-5 h-5 text-gray-400" />
                             Expédition
                         </h2>
+
+                        {shippingCompany && (
+                            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    {shippingCompany.logo ? (
+                                        <img 
+                                            src={shippingCompany.logo} 
+                                            alt={shippingCompany.name} 
+                                            className="w-10 h-10 object-contain rounded bg-white border border-gray-200 p-1"
+                                        />
+                                    ) : (
+                                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-gray-500 font-bold text-xs">
+                                            {shippingCompany.name.substring(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900">{shippingCompany.name}</p>
+                                        <p className="text-xs text-gray-500">Transporteur</p>
+                                    </div>
+                                </div>
+                                {shippingCompany.supportPhone && (
+                                    <a 
+                                        href={`tel:${shippingCompany.supportPhone}`}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-bold transition-colors"
+                                        title={shippingCompany.supportPhone}
+                                    >
+                                        <Phone className="w-4 h-4" />
+                                        Support
+                                    </a>
+                                )}
+                            </div>
+                        )}
+
                         <DeliverySyncButton
                             orderId={order.id}
                             trackingID={(order as any).trackingID}

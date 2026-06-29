@@ -5,6 +5,7 @@ import OrderFilters from './OrderFilters'
 import OrdersTableClient from './OrdersTableClient'
 import ImportOrdersButton from '@/components/admin/ImportOrdersButton'
 import ExportOrdersButton from '@/components/admin/ExportOrdersButton'
+import BulkSyncDeliveryButton from '@/components/admin/BulkSyncDeliveryButton'
 
 interface OrdersPageClientProps {
     orders: any[]
@@ -35,6 +36,7 @@ export default function OrdersPageClient({
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h1 className="text-3xl font-black text-gray-900 tracking-tight">Gestion des Commandes</h1>
                 <div className="flex items-center gap-3">
+                    <BulkSyncDeliveryButton />
                     <ImportOrdersButton />
                     <ExportOrdersButton orders={orders} />
                 </div>

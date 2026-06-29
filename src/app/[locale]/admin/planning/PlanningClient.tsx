@@ -497,7 +497,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
     }
 
     return (
-        <div className="max-w-6xl mx-auto relative">
+        <div className="w-full h-[calc(100vh-100px)] relative flex flex-col">
             {toast && (
                 <div className={`fixed top-4 right-4 p-4 rounded-xl shadow-lg z-50 text-white font-medium animate-in slide-in-from-top-2 duration-300 ${toast.type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}>
                     {toast.message}
@@ -522,7 +522,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
                 {/* Header Controls */}
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
                     <button onClick={prevDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
@@ -567,7 +567,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                 {/* Grid */}
                 {viewMode === 'day' ? (
                 <DragDropContext onDragEnd={onDragEnd}>
-                    <div className="h-[600px] overflow-y-auto custom-scrollbar p-4 relative">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 relative">
                         {isSameDay(selectedDate, new Date()) && (
                             <div 
                                 ref={scrollRef}
@@ -693,7 +693,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                     </div>
                 </DragDropContext>
                 ) : viewMode === 'week' ? (
-                <div className="h-[600px] overflow-y-auto custom-scrollbar p-4 bg-slate-50">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50">
                     <div className="grid grid-cols-7 gap-4 min-w-[800px]">
                         {weekDays.map(day => {
                             const isToday = isSameDay(day, new Date())
@@ -749,7 +749,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                     </div>
                 </div>
                 ) : (
-                <div className="h-[600px] overflow-y-auto custom-scrollbar p-4 bg-slate-50">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50">
                     <div className="grid grid-cols-7 gap-2 min-w-[800px] mb-2">
                         {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
                             <div key={d} className="text-center text-sm font-bold text-slate-500 uppercase">{d}</div>

@@ -419,3 +419,147 @@ export async function syncDeliveryStatus(orderId: string) {
         return { success: false, error: error.message || 'Erreur lors de la synchronisation' }
     }
 }
+
+export async function bulkSyncDeliveries() {
+    try {
+        await verifyAdmin()
+
+        const activeOrders = await prisma.order.findMany({
+            where: {
+                trackingID: { not: null },
+                status: {
+                    notIn: ['DELIVERED', 'RETURNED', 'CANCELED']
+                },
+                shippingCompany: { not: null }
+            }
+        })
+
+        if (activeOrders.length === 0) {
+            return { success: true, updatedCount: 0 }
+        }
+
+        const companies = await prisma.shippingCompany.findMany({
+            where: {
+                id: { in: Array.from(new Set(activeOrders.map(o => o.shippingCompany!))) }
+            }
+        })
+
+        const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
+        
+        let updatedCount = 0
+        const BATCH_SIZE = 50
+
+        const withYouOrders = activeOrders.filter(o => {
+            const name = companyMap.get(o.shippingCompany!)
+            return name && name.includes('withyou')
+        })
+
+        const olivraisonOrders = activeOrders.filter(o => {
+            const name = companyMap.get(o.shippingCompany!)
+            return name && name.includes('olivraison')
+        })
+
+        // WithYou Bulk
+        if (withYouOrders.length > 0) {
+            for (let i = 0; i < withYouOrders.length; i += BATCH_SIZE) {
+                const batch = withYouOrders.slice(i, i + BATCH_SIZE)
+                const trackingIds = batch.map(o => o.trackingID!).filter(Boolean)
+                
+                try {
+                    const res = await withyouService.getStatus(trackingIds)
+                    let statusArray: any[] = []
+                    
+                    if (Array.isArray(res)) {
+                        statusArray = res
+                    } else if (res?.data && Array.isArray(res.data)) {
+                        statusArray = res.data
+                    }
+                    
+                    for (const item of statusArray) {
+                        const trackingID = item.trackingID || item.trackingId || item.code_tracking
+                        const extStatus = item.status || item.statut
+                        
+                        if (trackingID && extStatus) {
+                            const orderToUpdate = batch.find(o => o.trackingID === trackingID)
+                            if (orderToUpdate && orderToUpdate.deliveryStatus !== extStatus) {
+                                let newInternalStatus = orderToUpdate.status
+                                const statusLower = extStatus.toLowerCase()
+                                
+                                if (statusLower.includes('livr') || statusLower.includes('delivered')) {
+                                    newInternalStatus = 'DELIVERED'
+                                } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
+                                    newInternalStatus = 'RETURNED'
+                                } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
+                                    newInternalStatus = 'CANCELED'
+                                }
+
+                                await prisma.order.update({
+                                    where: { id: orderToUpdate.id },
+                                    data: {
+                                        deliveryStatus: extStatus,
+                                        deliverySyncAt: new Date(),
+                                        status: newInternalStatus
+                                    }
+                                })
+                                updatedCount++
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur sync bulk WithYou:', error)
+                }
+            }
+        }
+
+        // Olivraison
+        if (olivraisonOrders.length > 0) {
+            const defaultKey = await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } })
+            
+            for (const order of olivraisonOrders) {
+                try {
+                    const comp = companies.find(c => c.id === order.shippingCompany)
+                    const token = comp?.apiKey || defaultKey?.value
+                    if (!token) continue
+
+                    const res = await fetch(`http://partners.olivraison.com/package/${order.trackingID}`, {
+                        headers: { 'authorization': `Bearer ${token}` }
+                    })
+                    
+                    if (res.ok) {
+                        const data = await res.json()
+                        const extStatus = data.status
+                        if (extStatus && extStatus !== order.deliveryStatus) {
+                            let newInternalStatus = order.status
+                            const statusLower = extStatus.toLowerCase()
+                            
+                            if (statusLower.includes('livr') || statusLower.includes('delivered')) {
+                                newInternalStatus = 'DELIVERED'
+                            } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
+                                newInternalStatus = 'RETURNED'
+                            } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
+                                newInternalStatus = 'CANCELED'
+                            }
+
+                            await prisma.order.update({
+                                where: { id: order.id },
+                                data: {
+                                    deliveryStatus: extStatus,
+                                    deliverySyncAt: new Date(),
+                                    status: newInternalStatus
+                                }
+                            })
+                            updatedCount++
+                        }
+                    }
+                } catch (err) {
+                    console.error('Erreur API Olivraison', err)
+                }
+            }
+        }
+
+        revalidatePath('/admin/orders')
+        return { success: true, updatedCount }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Erreur inconnue' }
+    }
+}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter, useParams } from 'next/navigation'
 import { useState, useEffect, useMemo } from 'react'
-import { logout, isAuthenticated } from '@/lib/actions/auth'
+import { logout, isAuthenticated, getAdminRole } from '@/lib/actions/auth'
 import { getSettingsByCategory } from '@/lib/actions/site-settings'
 import {
     LayoutDashboard,
@@ -64,6 +64,7 @@ export default function AdminLayout({
     const [featureSettings, setFeatureSettings] = useState<Record<string, string>>({})
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true) // Collapsed by default
+    const [userRole, setUserRole] = useState<string | null>(null)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
         'Configuration': false 
     })
@@ -72,6 +73,8 @@ export default function AdminLayout({
         getSettingsByCategory('features')
             .then(setFeatureSettings)
             .catch(console.error)
+            
+        getAdminRole().then(setUserRole).catch(console.error)
     }, [])
 
     const toggleMenu = (name: string) => {
@@ -96,98 +99,111 @@ export default function AdminLayout({
     }), [featureSettings])
 
     const allNavigation = useMemo(() => [
-        { name: 'Dashboard', href: `/${lang}/admin`, icon: LayoutDashboard },
-        { name: 'Articles', href: `/${lang}/admin/posts`, icon: FileText },
-        { name: 'Livres', href: `/${lang}/admin/books`, icon: BookOpen },
-        { name: 'Titres Demandés', href: `/${lang}/admin/requested-books`, icon: Search },
-        { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
-        { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
-        { name: 'Auteurs', href: `/${lang}/admin/authors`, icon: Users },
-        { name: 'Packs', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
-        { name: 'Commandes', href: `/${lang}/admin/orders`, icon: ShoppingCart },
-        { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },
-        { name: 'Call Center', href: `/${lang}/admin/call-center`, icon: Headset },
-        { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag },
-        { name: 'Caisse (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },
-        { name: 'Clients', href: `/${lang}/admin/customers`, icon: Users },
-        { name: 'Utilisateurs', href: `/${lang}/admin/users`, icon: Users },
-        { name: 'Vendeurs', href: `/${lang}/admin/vendeurs`, icon: Store, featureKey: 'feature_seller' },
         {
-            name: 'Modération',
-            href: `/${lang}/admin/reports`,
-            icon: AlertCircle,
+            name: 'Tableau de Bord',
+            href: `/${lang}/admin`,
+            icon: LayoutDashboard,
             children: [
-                { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
-                { name: 'Avis', href: `/${lang}/admin/reviews`, icon: MessageSquare },
-                { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
+                { name: 'Vue Globale', href: `/${lang}/admin`, icon: LayoutDashboard },
+                { name: 'Planning & Tâches', href: `/${lang}/admin/planning`, icon: Calendar },
             ]
         },
         {
-            name: 'Promotions',
-            href: `/${lang}/admin/coupons`,
-            icon: Ticket,
+            name: 'Catalogue',
+            href: `/${lang}/admin/books`,
+            icon: BookOpen,
             children: [
-                { name: 'Coupons', href: `/${lang}/admin/coupons`, icon: Ticket },
-                { name: 'Affiliés', href: `/${lang}/admin/affiliates`, icon: Share2 },
-                { name: 'Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },
-            ]
-        },
-        {
-            name: 'Rapports',
-            href: `/${lang}/admin/analytics`,
-            icon: BarChart3,
-            children: [
-                { name: 'Analytics', href: `/${lang}/admin/analytics`, icon: BarChart3 },
-                { name: 'Finance', href: `/${lang}/admin/finance`, icon: Banknote },
-                { name: 'Traffic', href: `/${lang}/admin/traffic`, icon: TrendingUp },
-            ]
-        },
-        { name: 'Marketing', href: `/${lang}/admin/marketing`, icon: Sparkles },
-        { name: 'Planning (n8n)', href: `/${lang}/admin/planning`, icon: Calendar },
-        {
-            name: 'Accessoires',
-            href: `/${lang}/admin/accessories`,
-            icon: Bookmark,
-            children: [
+                { name: 'Livres Physiques', href: `/${lang}/admin/books`, icon: BookOpen },
+                { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
+                { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
+                { name: 'Auteurs & Éditeurs', href: `/${lang}/admin/authors`, icon: Users },
                 { name: 'Marque-pages', href: `/${lang}/admin/accessories/bookmarks`, icon: Bookmark },
                 { name: 'Bibliothèques', href: `/${lang}/admin/accessories/library`, icon: Library },
                 { name: 'Clés USB', href: `/${lang}/admin/accessories/usb`, icon: Usb },
                 { name: 'Produits enfants', href: `/${lang}/admin/accessories/kids`, icon: Sparkles },
+                { name: 'Navigation Site', href: `/${lang}/admin/menus`, icon: GripVertical },
             ]
         },
-        { name: 'Menus', href: `/${lang}/admin/menus`, icon: GripVertical },
-        { name: 'Commande Fournisseur', href: `/${lang}/admin/supplier-order`, icon: ShoppingBag },
-        { name: 'Traductions', href: `/${lang}/admin/translations`, icon: Languages },
         {
-            name: 'Référencement',
-            href: `/${lang}/admin/seo`,
-            icon: Search,
+            name: 'Ventes & Opérations',
+            href: `/${lang}/admin/orders`,
+            icon: ShoppingCart,
             children: [
+                { name: 'Commandes Web', href: `/${lang}/admin/orders`, icon: ShoppingCart },
+                { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag },
+                { name: 'Point de Vente (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },
+                { name: 'Centre d\'Appels', href: `/${lang}/admin/call-center`, icon: Headset },
+                { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
+                { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },
+                { name: 'Achats Fournisseurs', href: `/${lang}/admin/supplier-order`, icon: ShoppingBag },
+            ]
+        },
+        {
+            name: 'CRM & Utilisateurs',
+            href: `/${lang}/admin/customers`,
+            icon: Users,
+            children: [
+                { name: 'Clients', href: `/${lang}/admin/customers`, icon: Users },
+                { name: 'Vendeurs / Partenaires', href: `/${lang}/admin/vendeurs`, icon: Store, featureKey: 'feature_seller' },
+                { name: 'Équipe / Staff', href: `/${lang}/admin/users`, icon: ShieldCheck },
+            ]
+        },
+        {
+            name: 'Communauté & Avis',
+            href: `/${lang}/admin/reviews`,
+            icon: MessageSquare,
+            children: [
+                { name: 'Avis Clients', href: `/${lang}/admin/reviews`, icon: MessageSquare },
+                { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
+                { name: 'Demandes de Livres', href: `/${lang}/admin/requested-books`, icon: Search },
+                { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
+                { name: 'Blog & Actualités', href: `/${lang}/admin/posts`, icon: FileText },
+            ]
+        },
+        {
+            name: 'Marketing & Promos',
+            href: `/${lang}/admin/marketing`,
+            icon: Sparkles,
+            children: [
+                { name: 'Campagnes & Offres', href: `/${lang}/admin/marketing`, icon: Sparkles },
+                { name: 'Codes Promo', href: `/${lang}/admin/coupons`, icon: Ticket },
+                { name: 'Affiliation', href: `/${lang}/admin/affiliates`, icon: Share2 },
+                { name: 'Cartes Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },
+            ]
+        },
+        {
+            name: 'Rapports & Analyse',
+            href: `/${lang}/admin/analytics`,
+            icon: BarChart3,
+            children: [
+                { name: 'Statistiques', href: `/${lang}/admin/analytics`, icon: BarChart3 },
+                { name: 'Revenus & Finances', href: `/${lang}/admin/finance`, icon: Banknote },
+                { name: 'Trafic & Acquisition', href: `/${lang}/admin/traffic`, icon: TrendingUp },
+            ]
+        },
+        {
+            name: 'Système & Config',
+            href: `/${lang}/admin/config`,
+            icon: Settings,
+            children: [
+                { name: 'Paramètres Généraux', href: `/${lang}/admin/settings`, icon: Settings },
+                { name: 'Page d\'Accueil', href: `/${lang}/admin/config/homepage`, icon: LayoutDashboard },
+                { name: 'Formulaires', href: `/${lang}/admin/config/form`, icon: Settings },
+                { name: 'API Livraison', href: `/${lang}/admin/config/delivery`, icon: Truck },
+                { name: 'Sociétés de Livraison', href: `/${lang}/admin/config/shipping-companies`, icon: Truck },
+                { name: 'API & Intégrations', href: `/${lang}/admin/config/api`, icon: Sparkles },
+                { name: 'Config Jumia', href: `/${lang}/admin/config/jumia`, icon: ShoppingBag },
+                { name: 'Config n8n', href: `/${lang}/admin/config/n8n`, icon: Repeat },
+                { name: 'Telegram Bot', href: `/${lang}/admin/config/telegram`, icon: MessageCircle },
+                { name: 'Config POS', href: `/${lang}/admin/config/pos`, icon: Monitor, featureKey: 'feature_pos' },
+                { name: 'Google Adsense', href: `/${lang}/admin/config/adsense`, icon: Banknote },
                 { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
                 { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
+                { name: 'Traductions', href: `/${lang}/admin/translations`, icon: Languages },
+                { name: 'Audit Log', href: `/${lang}/admin/audit`, icon: ShieldCheck },
+                { name: 'Base de données', href: `/${lang}/admin/database`, icon: Database },
             ]
-        },
-        { 
-            name: 'Configuration', 
-            href: `/${lang}/admin/config`, 
-            icon: Wrench,
-            children: [
-                { name: 'API & Tracking', href: `/${lang}/admin/config/api`, icon: Sparkles },
-                { name: 'Google Adsense', href: `/${lang}/admin/config/adsense`, icon: Banknote },
-                { name: 'API Livraison', href: `/${lang}/admin/config/delivery`, icon: Truck },
-                { name: 'Société de livraison', href: `/${lang}/admin/config/shipping-companies`, icon: Truck },
-                { name: 'Configuration Jumia', href: `/${lang}/admin/config/jumia`, icon: ShoppingBag },
-                { name: 'Configuration n8n', href: `/${lang}/admin/config/n8n`, icon: Repeat },
-                { name: 'Configuration Accueil', href: `/${lang}/admin/config/homepage`, icon: LayoutDashboard },
-                { name: 'Configuration form', href: `/${lang}/admin/config/form`, icon: Settings },
-                { name: 'Configuration POS', href: `/${lang}/admin/config/pos`, icon: Monitor, featureKey: 'feature_pos' },
-                { name: 'Telegram Bot', href: `/${lang}/admin/config/telegram`, icon: MessageCircle },
-                { name: 'Base de données', href: `/${lang}/admin/database`, icon: Database }
-            ]
-        },
-        { name: 'Paramètres', href: `/${lang}/admin/settings`, icon: Settings },
-
-        { name: 'Audit Log', href: `/${lang}/admin/audit`, icon: ShieldCheck },
+        }
     ], [lang])
 
     const isFeatureEnabled = (key: string) => {
@@ -195,9 +211,31 @@ export default function AdminLayout({
         return !!features[key.replace('feature_', '')]
     }
 
-    const navigation = useMemo(() => allNavigation.filter(item =>
-        !item.featureKey || isFeatureEnabled(item.featureKey)
-    ), [allNavigation, features])
+    const navigation = useMemo(() => {
+        let filteredNav = allNavigation.map(item => ({
+            ...item,
+            // @ts-ignore
+            children: item.children ? item.children.filter(child => !child.featureKey || isFeatureEnabled(child.featureKey)) : []
+        })).filter(item =>
+            // @ts-ignore
+            !item.featureKey || isFeatureEnabled(item.featureKey)
+        )
+
+        if (userRole === 'CONFIRMATOR') {
+            filteredNav = filteredNav.filter(item => item.name === 'Ventes & Opérations' || item.name === 'Tableau de Bord')
+            filteredNav = filteredNav.map(item => {
+                if (item.name === 'Ventes & Opérations') {
+                    return {
+                        ...item,
+                        children: item.children.filter(child => child.name === 'Commandes Web')
+                    }
+                }
+                return item
+            })
+        }
+        
+        return filteredNav
+    }, [allNavigation, features, userRole])
 
     const pathname = usePathname()
     const router = useRouter()
@@ -284,12 +322,15 @@ export default function AdminLayout({
                 {isCollapsed && <div className="h-4"></div>}
                 
                 {navigation.map((item) => {
-                    const isExact = pathname === item.href
-                    const isParent = pathname.startsWith(item.href + '/') && item.href !== `/${lang}/admin`
-                    const isActive = isExact || isParent
-                    const Icon = item.icon
                     // @ts-ignore
                     const hasChildren = item.children && item.children.length > 0
+                    const isExact = pathname === item.href
+                    const isParent = hasChildren 
+                        // @ts-ignore
+                        ? item.children.some(child => pathname === child.href || pathname.startsWith(child.href + '/'))
+                        : pathname.startsWith(item.href + '/') && item.href !== `/${lang}/admin`
+                    const isActive = isExact || isParent
+                    const Icon = item.icon
 
                     return (
                         <div key={item.name} className="space-y-1 relative group/nav">
