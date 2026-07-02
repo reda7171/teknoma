@@ -288,7 +288,37 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
         return response
     } catch (e: any) {
         console.error("Error printing Jumia order labels:", e)
-        await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_LABEL', status: 'ERROR', detail: e.message } }).catch(() => {})
+        await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_LABELS', status: 'ERROR', detail: e.message } }).catch(() => {})
+        throw new Error(e.message)
+    }
+}
+
+export async function printJumiaOrderInvoiceFull(orderId: string) {
+    const jumia = await JumiaAPI.getInstance()
+    if (!jumia) throw new Error("Jumia n'est pas configuré")
+    
+    try {
+        const responseItems = await jumia.getOrderItems(orderId)
+        const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
+        const items = data?.items || data?.data?.items || data || []
+        
+        if (!items || !items.length) {
+            throw new Error("Aucun article trouvé pour cette commande.")
+        }
+        
+        const orderItemIds = items.map((item: any) => item.id || item.orderItemId || item.OrderItemId || item.uuid).filter(Boolean)
+        
+        if (!orderItemIds.length) {
+            throw new Error("Impossible de trouver l'UUID des articles.")
+        }
+        
+        // On the Jumia API side, some use orderId directly or orderItemIds in payload
+        const printResponse = await jumia.printInvoice({ orderId, orderItemIds })
+        await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_INVOICE', status: 'SUCCESS' } }).catch(() => {})
+        return printResponse
+    } catch (e: any) {
+        console.error("Error printing Jumia order invoice:", e)
+        await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_INVOICE', status: 'ERROR', detail: e.message } }).catch(() => {})
         throw new Error(e.message)
     }
 }
@@ -521,6 +551,17 @@ export async function getJumiaCatalogStock(params: any = {}) {
         return await jumia.getCatalogStock(params)
     } catch (e: any) {
         console.error("Error fetching Jumia catalog stock:", e)
+        return { error: e.message }
+    }
+}
+
+export async function getJumiaPayoutStatementsAction(params: any = {}) {
+    try {
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) return { error: "Jumia n'est pas configuré" }
+        return await jumia.getPayoutStatements(params)
+    } catch (e: any) {
+        console.error("Error fetching Jumia payout statements:", e)
         return { error: e.message }
     }
 }

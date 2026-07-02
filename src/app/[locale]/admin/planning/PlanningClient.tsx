@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, X, Image as ImageIcon, Send, Facebook, Instagram, Music, AtSign, CheckCircle, AlertCircle, Loader2, Edit2 } from 'lucide-react'
+import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, X, Image as ImageIcon, Send, Facebook, Instagram, Music, AtSign, CheckCircle, AlertCircle, Loader2, Edit2, RefreshCw, Filter, Smartphone, Star } from 'lucide-react'
 import Image from 'next/image'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
@@ -22,7 +22,15 @@ interface Asset {
     createdAt: string
 }
 
-export default function PlanningClient({ initialPosts }: { initialPosts: ScheduledPost[] }) {
+export interface SuggestedBook {
+    id: string
+    title: string
+    image: string
+    author: string
+    isProgrammed: boolean
+}
+
+export default function PlanningClient({ initialPosts, availableBooks = [] }: { initialPosts: ScheduledPost[], availableBooks?: any[] }) {
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [posts, setPosts] = useState<ScheduledPost[]>(() => {
         return initialPosts.map(p => {
@@ -56,8 +64,16 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
     const [selectedMedia, setSelectedMedia] = useState<Asset | null>(null)
     const [editingPostId, setEditingPostId] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
+    const [platformFilter, setPlatformFilter] = useState('all')
+    const [statusFilter, setStatusFilter] = useState('all')
+    const [dailySuggestions, setDailySuggestions] = useState<SuggestedBook[]>([])
 
     const scrollRef = useRef<HTMLDivElement>(null)
+
+    const seededRandom = (seed: number) => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    }
 
     const showToast = (message: string, type: 'error' | 'success' = 'error') => {
         setToast({ message, type })
@@ -81,6 +97,40 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
         const timer = setInterval(() => setCurrentTime(new Date()), 60000)
         return () => clearInterval(timer)
     }, [])
+
+    const generateSuggestions = (seed?: number) => {
+        if (!availableBooks || availableBooks.length === 0) return;
+        const currentSeed = seed || new Date().getTime();
+        let s = currentSeed;
+        const shuffled = [...availableBooks].sort(() => 0.5 - seededRandom(s++));
+        const picked = shuffled.slice(0, 3);
+        const newSuggestions = picked.map(book => {
+            const isProgrammed = posts.some(post => 
+                (post.mediaUrl && post.mediaUrl.includes(book.image)) || 
+                (post.content && post.content.includes(book.title))
+            );
+            return { ...book, isProgrammed };
+        });
+        setDailySuggestions(newSuggestions);
+    };
+
+    useEffect(() => {
+        const today = new Date();
+        const seedStr = `${today.getFullYear()}${today.getMonth()}${today.getDate()}`;
+        generateSuggestions(parseInt(seedStr, 10));
+    }, [availableBooks]);
+
+    useEffect(() => {
+        if (dailySuggestions.length > 0) {
+            setDailySuggestions(prev => prev.map(book => {
+                const isProgrammed = posts.some(post => 
+                    (post.mediaUrl && post.mediaUrl.includes(book.image)) || 
+                    (post.content && post.content.includes(book.title))
+                );
+                return { ...book, isProgrammed };
+            }));
+        }
+    }, [posts]);
 
     useEffect(() => {
         if (scrollRef.current && isSameDay(selectedDate, new Date())) {
@@ -179,11 +229,6 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
     }
 
     const handleOpenModal = (time: string, postToEdit?: ScheduledPost) => {
-        if (!postToEdit && isPastTime(time)) {
-            showToast('Vous ne pouvez pas programmer dans le passé.', 'error')
-            return
-        }
-        
         if (postToEdit) {
             setEditingPostId(postToEdit.id)
             setSelectedTime(postToEdit.time)
@@ -215,11 +260,6 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
         now.setHours(0, 0, 0, 0)
         const targetDay = new Date(day)
         targetDay.setHours(0, 0, 0, 0)
-        
-        if (targetDay < now) {
-            showToast('Vous ne pouvez pas programmer dans le passé.', 'error')
-            return
-        }
         
         setSelectedDate(day)
         // Check if 12:00 is past for today, if so use current hour + 1
@@ -271,11 +311,6 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
         now.setHours(0, 0, 0, 0)
         const targetDay = new Date(day)
         targetDay.setHours(0, 0, 0, 0)
-        
-        if (targetDay < now) {
-            showToast('Vous ne pouvez pas programmer dans le passé.', 'error')
-            return
-        }
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0]
@@ -316,11 +351,6 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
     const handleImageDrop = (e: React.DragEvent, time: string) => {
         e.preventDefault()
         e.stopPropagation()
-
-        if (isPastTime(time)) {
-            showToast('Vous ne pouvez pas programmer dans le passé.', 'error')
-            return
-        }
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0]
@@ -430,7 +460,12 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
     }
 
     const getPostsForTime = (time: string) => {
-        return posts.filter(post => isSameDay(post.date, selectedDate) && post.time === time)
+        return posts.filter(post => 
+            isSameDay(post.date, selectedDate) && 
+            post.time === time &&
+            (platformFilter === 'all' || post.platforms.includes(platformFilter)) &&
+            (statusFilter === 'all' || post.status === statusFilter)
+        )
     }
 
     const getImageUrl = (url: string) => {
@@ -458,11 +493,6 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
 
         const postToMove = posts.find(p => p.id === postId);
         if (!postToMove) return;
-
-        if (isPastTime(destTime)) {
-            showToast('Vous ne pouvez pas déplacer dans le passé.', 'error');
-            return;
-        }
 
         const originalTime = postToMove.time;
         const originalDate = new Date(postToMove.date);
@@ -515,12 +545,82 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                 </div>
                 <button 
                     onClick={() => handleOpenModal('12:00')}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
+                    className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 hover:shadow-md"
                 >
-                    <Plus className="w-4 h-4" />
-                    <span>Nouveau Post</span>
+                    <Plus className="w-5 h-5" />
+                    Nouveau Post
                 </button>
             </div>
+
+            {/* Quick Filters */}
+            <div className="flex gap-4 mb-4">
+                <div className="flex bg-white rounded-lg p-1 shadow-sm border border-slate-200">
+                    <button onClick={() => setPlatformFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${platformFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Réseaux</button>
+                    <button onClick={() => setPlatformFilter('facebook')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'facebook' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}><Facebook className="w-3 h-3"/> Facebook</button>
+                    <button onClick={() => setPlatformFilter('instagram')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'instagram' ? 'bg-pink-50 text-pink-600' : 'text-slate-500 hover:text-slate-700'}`}><Instagram className="w-3 h-3"/> Instagram</button>
+                </div>
+                <div className="flex bg-white rounded-lg p-1 shadow-sm border border-slate-200">
+                    <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Statuts</button>
+                    <button onClick={() => setStatusFilter('PUBLISHED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'PUBLISHED' ? 'bg-green-50 text-green-600' : 'text-slate-500 hover:text-slate-700'}`}><CheckCircle className="w-3 h-3"/> Publiés</button>
+                    <button onClick={() => setStatusFilter('FAILED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'FAILED' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><AlertCircle className="w-3 h-3"/> Échecs</button>
+                </div>
+            </div>
+
+            {/* Daily Suggestions */}
+            {dailySuggestions.length > 0 && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <Clock className="w-4 h-4" />
+                            </div>
+                            <h2 className="text-sm font-black text-blue-900 uppercase tracking-wider">Suggestions du jour</h2>
+                        </div>
+                        <button 
+                            onClick={() => generateSuggestions(new Date().getTime())}
+                            className="p-1.5 bg-white/50 hover:bg-white text-blue-600 rounded-lg transition-colors border border-blue-200/50 shadow-sm flex items-center gap-1 text-xs font-bold"
+                            title="Rafraîchir les suggestions"
+                        >
+                            <RefreshCw className="w-3.5 h-3.5" /> Rafraîchir
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {dailySuggestions.map(book => (
+                            <div key={book.id} className={`flex items-center gap-3 p-3 rounded-xl border ${book.isProgrammed ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-200 hover:border-blue-400'} transition-colors relative overflow-hidden group shadow-sm`}>
+                                {book.isProgrammed && (
+                                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
+                                        <CheckCircle className="w-3 h-3" />
+                                        Programmé
+                                    </div>
+                                )}
+                                <div className={`w-12 h-16 relative rounded shrink-0 overflow-hidden bg-slate-100 ${book.isProgrammed ? 'opacity-50 grayscale' : ''}`}>
+                                    <Image src={getImageUrl(book.image)} alt={book.title} fill className="object-cover" />
+                                </div>
+                                <div className={`flex-1 min-w-0 ${book.isProgrammed ? 'opacity-60' : ''}`}>
+                                    <p className="font-bold text-slate-900 text-sm truncate">{book.title}</p>
+                                    <p className="text-xs text-slate-500 truncate">{book.author}</p>
+                                    {!book.isProgrammed && (
+                                        <button 
+                                            onClick={() => {
+                                                const timeToSet = '12:00';
+                                                handleOpenModal(timeToSet);
+                                                setTimeout(() => {
+                                                    setNewPostContent(`📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n#livre #lecture #riwaya`);
+                                                    const newMedia = { name: book.title, url: book.image, type: 'image', createdAt: new Date().toISOString() };
+                                                    setSelectedMedia(newMedia as any);
+                                                }, 50);
+                                            }}
+                                            className="mt-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors"
+                                        >
+                                            Programmer
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
                 {/* Header Controls */}
@@ -587,7 +687,12 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
 
                                 return (
                                     <div key={time} className="flex group min-h-[48px]">
-                                        <div className="w-20 shrink-0 text-right pr-4 py-3 border-r border-slate-200">
+                                        <div className="w-20 shrink-0 text-right pr-4 py-3 border-r border-slate-200 relative">
+                                            {['18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45', '20:00'].includes(time) && (
+                                                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-orange-400" title="Heure recommandée pour l'engagement">
+                                                    <Star className="w-3 h-3 fill-orange-400" />
+                                                </div>
+                                            )}
                                             {isHour ? (
                                                 <span className="text-sm font-bold text-slate-700">{time}</span>
                                             ) : (
@@ -609,13 +714,10 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                                                         onClick={() => handleOpenModal(time)}
                                                         className="absolute inset-0 w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 rounded-r-lg z-0"
                                                         aria-label={`Programmer à ${time}`}
-                                                        disabled={isPastTime(time)}
                                                     >
-                                                        {!isPastTime(time) && (
-                                                            <span className="opacity-0 group-hover:opacity-100 flex items-center justify-center text-blue-500 font-bold text-xs gap-1 transition-opacity pointer-events-none h-full">
-                                                                <Plus className="w-3 h-3" /> Programmer
-                                                            </span>
-                                                        )}
+                                                        <span className="opacity-0 group-hover:opacity-100 flex items-center justify-center text-blue-500 font-bold text-xs gap-1 transition-opacity pointer-events-none h-full">
+                                                            <Plus className="w-3 h-3" /> Programmer
+                                                        </span>
                                                     </button>
                                                     
                                                     {/* Scheduled Posts */}
@@ -697,7 +799,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                     <div className="grid grid-cols-7 gap-4 min-w-[800px]">
                         {weekDays.map(day => {
                             const isToday = isSameDay(day, new Date())
-                            const dayPosts = posts.filter(p => isSameDay(p.date, day)).sort((a, b) => a.time.localeCompare(b.time))
+                            const dayPosts = posts.filter(p => isSameDay(p.date, day) && (platformFilter === 'all' || p.platforms.includes(platformFilter)) && (statusFilter === 'all' || p.status === statusFilter)).sort((a, b) => a.time.localeCompare(b.time))
                             
                             return (
                                 <div 
@@ -759,7 +861,7 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                         {monthDays.map(day => {
                             const isToday = isSameDay(day, new Date())
                             const isCurrentMonth = day.getMonth() === selectedDate.getMonth()
-                            const dayPosts = posts.filter(p => isSameDay(p.date, day)).sort((a, b) => a.time.localeCompare(b.time))
+                            const dayPosts = posts.filter(p => isSameDay(p.date, day) && (platformFilter === 'all' || p.platforms.includes(platformFilter)) && (statusFilter === 'all' || p.status === statusFilter)).sort((a, b) => a.time.localeCompare(b.time))
                             
                             return (
                                 <div 
@@ -812,8 +914,8 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200 flex flex-col">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white z-20 shrink-0">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-blue-600" />
                                 {editingPostId ? 'Modifier le post' : `Programmer le ${new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' }).format(selectedDate)}`}
@@ -823,7 +925,9 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                             </button>
                         </div>
                         
-                        <div className="p-4 space-y-4">
+                        <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                        {/* Form Column */}
+                        <div className="p-4 space-y-4 md:w-1/2">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Heure de publication</label>
                                 <select
@@ -954,7 +1058,47 @@ export default function PlanningClient({ initialPosts }: { initialPosts: Schedul
                             </div>
                         </div>
                         
-                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 sticky bottom-0 z-10">
+                        {/* Preview Column */}
+                        <div className="p-4 md:w-1/2 bg-slate-50/50 flex flex-col">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Smartphone className="w-5 h-5 text-slate-500" />
+                                <h4 className="font-bold text-slate-700">Aperçu mobile</h4>
+                            </div>
+                            
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden max-w-[320px] mx-auto w-full">
+                                {/* Header Mock */}
+                                <div className="p-3 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-slate-200" />
+                                    <div>
+                                        <div className="h-3 w-20 bg-slate-200 rounded mb-1" />
+                                        <div className="h-2 w-12 bg-slate-100 rounded" />
+                                    </div>
+                                </div>
+                                {/* Content Mock */}
+                                <div className="px-3 pb-2">
+                                    <p className="text-sm text-slate-800 whitespace-pre-wrap font-sans break-words">{newPostContent || 'Votre texte apparaîtra ici...'}</p>
+                                </div>
+                                {/* Media Mock */}
+                                {selectedMedia && (
+                                    <div className="aspect-square relative bg-black">
+                                        {isVideo(selectedMedia.url) ? (
+                                            <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Image src={getImageUrl(selectedMedia.url)} alt="Preview" fill className="object-cover" />
+                                        )}
+                                    </div>
+                                )}
+                                {/* Footer Mock */}
+                                <div className="p-3 flex items-center gap-4 border-t border-slate-100">
+                                    <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                    <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                    <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        
+                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 sticky bottom-0 z-20 shrink-0">
                             {editingPostId && (
                                 <button 
                                     onClick={(e) => {

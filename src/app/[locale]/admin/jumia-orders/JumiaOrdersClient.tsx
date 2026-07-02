@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send } from 'lucide-react'
-import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull } from './actions'
+import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText } from 'lucide-react'
+import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull } from './actions'
 
 export default function JumiaOrdersClient() {
     const [orders, setOrders] = useState<any[]>([])
@@ -19,6 +19,7 @@ export default function JumiaOrdersClient() {
     const [packingId, setPackingId] = useState<string | null>(null)
     const [confirmPackId, setConfirmPackId] = useState<string | null>(null)
     const [printingId, setPrintingId] = useState<string | null>(null)
+    const [printInvoiceId, setPrintInvoiceId] = useState<string | null>(null)
     const [readyId, setReadyId] = useState<string | null>(null)
     const [confirmReadyId, setConfirmReadyId] = useState<string | null>(null)
     const size = 50
@@ -170,9 +171,129 @@ export default function JumiaOrdersClient() {
                 setErrorMsg("Le format de l'étiquette retourné par Jumia n'est pas pris en charge actuellement.")
             }
         } catch (e: any) {
-            setErrorMsg(`Impossible d'imprimer: ${e.message}`)
+            setErrorMsg(`Impossible d'imprimer l'étiquette: ${e.message}`)
         } finally {
             setPrintingId(null)
+        }
+    }
+
+    const handlePrintInvoice = async (orderId: string) => {
+        setPrintInvoiceId(orderId)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        try {
+            // Jumia V2 API does not have an endpoint for invoice generation. 
+            // We generate the invoice locally using the order details and items.
+            
+            // 1. Find the order in state
+            const order = orders.find((o: any) => (o.id || o.number || o.OrderId || o.OrderNumber) === orderId)
+            if (!order) throw new Error("Commande introuvable.")
+
+            // 2. Fetch order items to detail the invoice
+            let items: any[] = []
+            try {
+                // Fetch items using the existing action that calls Jumia API
+                const { getJumiaOrderItems } = await import('./actions')
+                items = await getJumiaOrderItems(orderId)
+            } catch (err) {
+                console.error("Impossible de récupérer les articles pour la facture", err)
+            }
+
+            // 3. Construct HTML Invoice
+            const invoiceHtml = `
+                <html>
+                <head>
+                    <title>Facture Jumia - ${orderId}</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; max-width: 800px; margin: 0 auto; }
+                        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px; }
+                        .logo { font-size: 24px; font-weight: 900; color: #f97316; }
+                        .invoice-title { font-size: 28px; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; }
+                        .details { display: flex; justify-content: space-between; margin-bottom: 40px; }
+                        .box { background: #f8fafc; padding: 15px; border-radius: 8px; width: 45%; }
+                        h3 { margin-top: 0; font-size: 12px; text-transform: uppercase; color: #64748b; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+                        th { background: #f1f5f9; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+                        .total-row { font-weight: bold; font-size: 18px; }
+                        .footer { text-align: center; color: #94a3b8; font-size: 12px; margin-top: 50px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+                        @media print { body { padding: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="logo">RIWAYA x JUMIA</div>
+                        <div class="invoice-title">Facture</div>
+                    </div>
+                    
+                    <div class="details">
+                        <div class="box">
+                            <h3>Détails de la commande</h3>
+                            <p><strong>N° Commande :</strong> ${order.number || order.OrderId || order.OrderNumber || orderId}</p>
+                            <p><strong>Date :</strong> ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}</p>
+                            <p><strong>Méthode de paiement :</strong> ${order.paymentMethod || order.PaymentMethod || 'JumiaPay / COD'}</p>
+                        </div>
+                        <div class="box">
+                            <h3>Facturé à</h3>
+                            <p><strong>Nom :</strong> ${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}</p>
+                            <p><strong>Téléphone :</strong> ${order.shippingAddress?.phone || order.shippingAddress?.phone2 || 'N/A'}</p>
+                            <p><strong>Adresse :</strong> ${order.shippingAddress?.address1 || ''}, ${order.shippingAddress?.city || ''}</p>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>SKU</th>
+                                <th>Prix unitaire</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items && items.length > 0 ? items.map((item: any) => `
+                                <tr>
+                                    <td>${item.name || item.Name || 'Produit Jumia'}</td>
+                                    <td>${item.sku || item.Sku || item.SellerSku || '-'}</td>
+                                    <td>${parseFloat(item.price || item.ItemPrice || '0').toLocaleString('fr-MA')} MAD</td>
+                                </tr>
+                            `).join('') : `
+                                <tr>
+                                    <td colspan="3" style="text-align: center">Articles inclus dans le total global</td>
+                                </tr>
+                            `}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" style="text-align: right; padding-top: 20px;" class="total-row">Total TTC :</td>
+                                <td style="padding-top: 20px;" class="total-row">${(order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0')} MAD</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="footer">
+                        Merci de votre confiance. Cette facture a été générée automatiquement depuis le système Riwaya.
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `
+
+            // 4. Open in new window and print
+            const printWindow = window.open('', '_blank')
+            if (printWindow) {
+                printWindow.document.write(invoiceHtml)
+                printWindow.document.close()
+                setSuccessMsg(`Facture générée localement pour la commande ${orderId}.`)
+            } else {
+                setErrorMsg("Veuillez autoriser les pop-ups pour afficher la facture.")
+            }
+            
+        } catch (e: any) {
+            setErrorMsg(`Impossible de générer la facture: ${e.message}`)
+        } finally {
+            setPrintInvoiceId(null)
         }
     }
 
@@ -409,17 +530,31 @@ export default function JumiaOrdersClient() {
                                                                 )}
                                                                 
                                                                 {(currentStatus === 'ready_to_ship' || currentStatus === 'shipped' || currentStatus === 'delivered') && (
-                                                                    <button 
-                                                                        onClick={() => handlePrintLabels(order.id || order.number || order.OrderId || order.OrderNumber)}
-                                                                        disabled={printingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
-                                                                        className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-50 text-blue-600 hover:bg-blue-100"
-                                                                    >
-                                                                        {printingId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
-                                                                            <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
-                                                                        ) : (
-                                                                            <><Printer className="w-3 h-3" /> Étiquette</>
-                                                                        )}
-                                                                    </button>
+                                                                    <>
+                                                                        <button 
+                                                                            onClick={() => handlePrintLabels(order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            disabled={printingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                                                        >
+                                                                            {printingId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                            ) : (
+                                                                                <><Printer className="w-3 h-3" /> Étiquette</>
+                                                                            )}
+                                                                        </button>
+
+                                                                        <button 
+                                                                            onClick={() => handlePrintInvoice(order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            disabled={printInvoiceId === (order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                                                        >
+                                                                            {printInvoiceId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                            ) : (
+                                                                                <><FileText className="w-3 h-3" /> Facture</>
+                                                                            )}
+                                                                        </button>
+                                                                    </>
                                                                 )}
                                                             </div>
                                                         )

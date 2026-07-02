@@ -64,10 +64,6 @@ export class JumiaAPI {
             const errText = await response.text()
             console.error(`Erreur API Jumia (${response.status}):`, errText)
             
-            // Notification d'erreur sur Telegram
-            import('@/lib/telegram').then(({ sendTelegramMessage }) => {
-                sendTelegramMessage(`❌ *Erreur API Jumia*\nEndpoint: \`${endpoint}\`\nMéthode: \`${method}\`\nStatut: ${response.status}\nErreur: ${errText}`).catch(console.error)
-            })
 
             throw new Error(`Erreur API Jumia: ${response.statusText} - ${errText}`)
         }
@@ -88,14 +84,6 @@ export class JumiaAPI {
             }
         }
 
-        // Notification de succès sur Telegram pour toutes les requêtes
-        import('@/lib/telegram').then(({ sendTelegramMessage }) => {
-            let msg = `✅ *Appel API Jumia Réussi*\nEndpoint: \`${endpoint}\`\nMéthode: \`${method}\``
-            if (body) {
-                msg += `\nPayload: \`${JSON.stringify(body).substring(0, 300)}...\``
-            }
-            sendTelegramMessage(msg).catch(console.error)
-        })
 
         return data
     }
@@ -149,6 +137,10 @@ export class JumiaAPI {
 
     async printLabels(payload: any) {
         return this.request(`/orders/print-labels?orderId=${payload.orderId}`, 'POST', payload)
+    }
+
+    async printInvoice(payload: any) {
+        return this.request(`/orders/print-invoice?orderId=${payload.orderId}`, 'POST', payload)
     }
 
     async cancelOrders(orderItemIds: string[]) {

@@ -1,30 +1,38 @@
 import { prisma } from '@/lib/prisma'
 import PlanningClient from './PlanningClient'
 
-export const dynamic = 'force-dynamic' // Ensure we get fresh data
+export const dynamic = 'force-dynamic'
 
 export default async function PlanningPage() {
     let initialPosts = []
+    let availableBooks = []
     
     try {
         const posts = await prisma.scheduledPost.findMany({
             orderBy: { date: 'asc' }
         })
         
-        // Convert dates to string for serialization, we'll parse them back in the client
-        // or let the client handle Next.js App Router automatic serialization
         initialPosts = posts.map(p => ({
             id: p.id,
             date: p.date,
             time: p.time,
             content: p.content,
-            platforms: p.platforms, // keep as string, client parses it
+            platforms: p.platforms,
             mediaUrl: p.mediaUrl,
             status: p.status
         }))
+
+        // Fetch active books for suggestions
+        const books = await prisma.book.findMany({
+            where: { active: true },
+            select: { id: true, title: true, image: true, author: true },
+        })
+
+        availableBooks = books;
+
     } catch (error) {
-        console.error('Failed to fetch posts:', error)
+        console.error('Failed to fetch data for planning:', error)
     }
 
-    return <PlanningClient initialPosts={initialPosts as any} />
+    return <PlanningClient initialPosts={initialPosts as any} availableBooks={availableBooks} />
 }
