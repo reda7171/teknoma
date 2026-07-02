@@ -121,7 +121,6 @@ export default function AdminLayout({
                 { name: 'Bibliothèques', href: `/${lang}/admin/accessories/library`, icon: Library },
                 { name: 'Clés USB', href: `/${lang}/admin/accessories/usb`, icon: Usb },
                 { name: 'Produits enfants', href: `/${lang}/admin/accessories/kids`, icon: Sparkles },
-                { name: 'Navigation Site', href: `/${lang}/admin/menus`, icon: GripVertical },
             ]
         },
         {
@@ -187,6 +186,7 @@ export default function AdminLayout({
             icon: Settings,
             children: [
                 { name: 'Paramètres Généraux', href: `/${lang}/admin/settings`, icon: Settings },
+                { name: 'Navigation Site', href: `/${lang}/admin/menus`, icon: GripVertical },
                 { name: 'Page d\'Accueil', href: `/${lang}/admin/config/homepage`, icon: LayoutDashboard },
                 { name: 'Formulaires', href: `/${lang}/admin/config/form`, icon: Settings },
                 { name: 'API Livraison', href: `/${lang}/admin/config/delivery`, icon: Truck },

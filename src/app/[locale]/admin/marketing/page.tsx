@@ -20,7 +20,8 @@ import { ChevronLeft, ChevronRight,
     X,
     Upload,
     Loader2,
-    Megaphone
+    Megaphone,
+    Plus
 } from 'lucide-react'
 import Image from 'next/image'
 import LaunchFacebookAdModal from '@/components/admin/LaunchFacebookAdModal'

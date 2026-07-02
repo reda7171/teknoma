@@ -28,8 +28,8 @@ export default async function AdminCommentsPage({
     }
 
     return (
-        <div className="p-8">
-            <div className="flex items-center gap-4 mb-10">
+        <div className="space-y-8">
+            <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
                     <MessageSquare className="w-6 h-6 text-white" />
                 </div>

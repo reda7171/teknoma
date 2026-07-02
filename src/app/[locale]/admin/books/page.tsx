@@ -46,47 +46,113 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         })
     }
 
-    let orderBy: Prisma.BookOrderByWithRelationInput[] = [{ displayOrder: 'asc' }, { createdAt: 'desc' }]
-    if (filterParam === 'price-asc') orderBy = [{ price: 'asc' }]
-    else if (filterParam === 'price-desc') orderBy = [{ price: 'desc' }]
-    else if (filterParam === 'stock-asc') orderBy = [{ stock: 'asc' }]
-    else if (filterParam === 'stock-desc') orderBy = [{ stock: 'desc' }]
-    else if (filterParam === 'title-asc') orderBy = [{ title: 'asc' }]
-    else if (filterParam === 'title-desc') orderBy = [{ title: 'desc' }]
-    else if (filterParam === 'orders-asc') orderBy = [{ orderItems: { _count: 'asc' } }]
-    else if (filterParam === 'orders-desc') orderBy = [{ orderItems: { _count: 'desc' } }]
+    const productTypeFilter = filterParam.startsWith('type:') ? filterParam.split(':')[1] : 'all'
 
-    const booksStats = await prisma.book.findMany({
-        where,
-        select: { stock: true, active: true, price: true }
-    })
+    let booksStats: any[] = []
+    let allProducts: any[] = []
 
-    const totalBooks = booksStats.length
-    const activeBooks = booksStats.filter(b => b.active).length
-    const totalStock = booksStats.reduce((sum, b) => sum + b.stock, 0)
-    const stockValue = booksStats.reduce((sum, b) => sum + (b.price * b.stock), 0)
+    // 1. Fetch Books
+    if (productTypeFilter === 'all' || productTypeFilter === 'book') {
+        const books = await prisma.book.findMany({
+            where,
+            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
+        })
+        booksStats.push(...books.map(b => ({ stock: b.stock, active: b.active, price: b.price })))
+        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0 })))
+    }
 
-    const books = await prisma.book.findMany({
-        where,
-        skip: (currentPage - 1) * ITEMS_PER_PAGE,
-        take: ITEMS_PER_PAGE,
-        orderBy,
-        include: {
-            _count: {
-                select: {
-                    orderItems: {
-                        where: {
-                            order: {
-                                status: 'CONFIRMED'
-                            }
-                        }
-                    }
-                }
-            }
+    // 2. Fetch Packs
+    if (productTypeFilter === 'all' || productTypeFilter === 'pack') {
+        const packWhere: any = {}
+        if (searchQuery) {
+            packWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } } ]
         }
-    })
+        if (filterParam === 'active') packWhere.active = true
+        if (filterParam === 'inactive') packWhere.active = false
+        
+        const packs = await prisma.pack.findMany({
+            where: packWhere,
+            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
+        })
+        booksStats.push(...packs.map(p => ({ stock: 999, active: p.active, price: p.price })))
+        allProducts.push(...packs.map(p => ({
+            id: p.id,
+            title: p.name,
+            author: 'Pack',
+            price: p.price,
+            stock: 999, // Packs don't have stock
+            image: p.image || '/book-placeholder.png',
+            category: 'PACK',
+            language: 'fr',
+            description: p.description || '',
+            active: p.active,
+            isOriginal: true,
+            productType: 'PACK',
+            orderCount: p._count?.orderItems || 0,
+            createdAt: p.createdAt
+        })))
+    }
 
-    const normalizedBooks = books.map(b => ({ ...b, image: normalizeImage(b.image), orderCount: b._count?.orderItems || 0 }))
+    // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
+    if (productTypeFilter === 'all' || ['kids', 'usb', 'bookmarks'].includes(productTypeFilter)) {
+        const extraWhere: any = {}
+        if (searchQuery) {
+            extraWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } } ]
+        }
+        if (productTypeFilter !== 'all') {
+            extraWhere.category = productTypeFilter.toUpperCase()
+        }
+        if (filterParam === 'active') extraWhere.active = true
+        if (filterParam === 'inactive') extraWhere.active = false
+        
+        const extras = await prisma.extraProduct.findMany({
+            where: extraWhere,
+            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
+        })
+        booksStats.push(...extras.map(e => ({ stock: e.stock, active: e.active, price: e.price })))
+        allProducts.push(...extras.map(e => ({
+            id: e.id,
+            title: e.name,
+            author: 'Accessoire',
+            price: e.price,
+            stock: e.stock,
+            image: e.image || '/book-placeholder.png',
+            category: e.category,
+            language: 'fr',
+            description: e.description || '',
+            active: e.active,
+            isOriginal: true,
+            productType: 'EXTRA',
+            orderCount: e._count?.orderItems || 0,
+            createdAt: e.createdAt
+        })))
+    }
+
+    const totalBooks = allProducts.length
+    const activeBooks = booksStats.filter(b => b.active).length
+    const totalStock = booksStats.reduce((sum, b) => sum + (b.stock === 999 ? 0 : b.stock), 0)
+    const stockValue = booksStats.reduce((sum, b) => sum + (b.price * (b.stock === 999 ? 0 : b.stock)), 0)
+
+    // Manual sorting
+    if (filterParam === 'price-asc') allProducts.sort((a, b) => a.price - b.price)
+    else if (filterParam === 'price-desc') allProducts.sort((a, b) => b.price - a.price)
+    else if (filterParam === 'stock-asc') allProducts.sort((a, b) => a.stock - b.stock)
+    else if (filterParam === 'stock-desc') allProducts.sort((a, b) => b.stock - a.stock)
+    else if (filterParam === 'title-asc') allProducts.sort((a, b) => a.title.localeCompare(b.title))
+    else if (filterParam === 'title-desc') allProducts.sort((a, b) => b.title.localeCompare(a.title))
+    else if (filterParam === 'orders-asc') allProducts.sort((a, b) => a.orderCount - b.orderCount)
+    else if (filterParam === 'orders-desc') allProducts.sort((a, b) => b.orderCount - a.orderCount)
+    else {
+        // Default sort by displayOrder (if book) and createdAt
+        allProducts.sort((a, b) => {
+            if (a.displayOrder !== undefined && b.displayOrder !== undefined && a.displayOrder !== b.displayOrder) {
+                return a.displayOrder - b.displayOrder;
+            }
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        })
+    }
+
+    const normalizedBooks = allProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map(b => ({ ...b, image: normalizeImage(b.image) }))
     const totalPages = Math.ceil(totalBooks / ITEMS_PER_PAGE)
 
     return (

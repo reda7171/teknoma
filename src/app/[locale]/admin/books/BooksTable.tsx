@@ -29,6 +29,7 @@ interface Book {
     active: boolean
     isOriginal: boolean
     orderCount?: number
+    productType?: string
 }
 
 export default function BooksTable({ books, pageNumber, totalProviderPages, initialSearch, initialFilter = '', limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, initialSearch: string, initialFilter?: string, limit?: number }) {
@@ -553,7 +554,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                             </td>
                                                             <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
                                                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                                    {book.category || 'N/A'}
+                                                                    {book.productType === 'PACK' ? 'Pack' : book.productType === 'EXTRA' ? `Accessoire: ${book.category || ''}` : book.category || 'N/A'}
                                                                 </span>
                                                             </td>
                                                             <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
@@ -667,7 +668,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Voir</p>
                                                                                         </div>
                                                                                         <Link
-                                                                                            href={`/books/${book.id}`}
+                                                                                            href={book.productType === 'PACK' ? `/packs/${book.id}` : book.productType === 'EXTRA' ? `/accessories/${book.id}` : `/books/${book.id}`}
                                                                                             target="_blank"
                                                                                             onClick={() => setOpenDropdown(null)}
                                                                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -771,7 +772,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                                             <Edit3 className="w-4 h-4 text-emerald-500" /> Modification rapide
                                                                                         </button>
                                                                                         <Link
-                                                                                            href={`/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`}
+                                                                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`}
                                                                                             onClick={() => setOpenDropdown(null)}
                                                                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                                                                                         >
@@ -815,7 +816,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                         <button onClick={() => handleToggleStatus(book.id, book.active)} className={`p-1.5 rounded-md ${book.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`} title={book.active ? 'Désactiver' : 'Activer'}>
                                             {book.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                                         </button>
-                                        <Link href={`/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
+                                        <Link href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
                                             <Edit className="w-3.5 h-3.5" />
                                         </Link>
                                         <button onClick={() => handleDelete(book.id, book.title)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md">

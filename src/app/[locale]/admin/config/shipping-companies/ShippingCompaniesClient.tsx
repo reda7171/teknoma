@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Plus, Edit2, Trash2, Check, X, Upload, Image as ImageIcon } from 'lucide-react'
+import { Plus, Edit2, Trash2, Check, X, Upload, Image as ImageIcon, Search, Phone } from 'lucide-react'
 import { createShippingCompany, updateShippingCompany, deleteShippingCompany } from '@/lib/actions/shipping-companies'
 
 const EMPTY_FORM = { name: '', logo: '', apiKey: '', apiUrl: '', supportPhone: '', isActive: true }
 
 export default function ShippingCompaniesClient({ initialCompanies }: { initialCompanies: any[] }) {
     const [companies, setCompanies] = useState(initialCompanies)
+    const [searchQuery, setSearchQuery] = useState('')
     const [isEditing, setIsEditing] = useState(false)
     const [currentCompany, setCurrentCompany] = useState<any>(null)
     const [formData, setFormData] = useState(EMPTY_FORM)
@@ -158,49 +159,80 @@ export default function ShippingCompaniesClient({ initialCompanies }: { initialC
         )
     }
 
+    const filteredCompanies = companies.filter(comp => 
+        comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (comp.apiUrl && comp.apiUrl.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (comp.supportPhone && comp.supportPhone.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-2xl font-black uppercase">Liste des sociétés</h2>
-                <button onClick={handleAdd} className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors">
-                    <Plus className="w-4 h-4" /> Ajouter
-                </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:w-80">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Rechercher une société..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-black outline-none transition-all"
+                        />
+                    </div>
+                    <button onClick={handleAdd} className="flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors whitespace-nowrap">
+                        <Plus className="w-4 h-4" /> Ajouter
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {companies.map(comp => (
-                    <div key={comp.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative hover:shadow-md transition-shadow">
-                        <div className="absolute top-4 right-4 flex gap-2">
-                            <button onClick={() => handleEdit(comp)} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"><Edit2 className="w-4 h-4" /></button>
-                            <button onClick={() => handleDelete(comp.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                        </div>
+                {filteredCompanies.length === 0 ? (
+                    <div className="col-span-full py-12 text-center text-gray-400 font-medium bg-white rounded-3xl border border-gray-100 p-8">
+                        Aucune société trouvée.
+                    </div>
+                ) : (
+                    filteredCompanies.map(comp => (
+                        <div key={comp.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative hover:shadow-md transition-shadow">
+                            <div className="absolute top-4 right-4 flex gap-2">
+                                <button onClick={() => handleEdit(comp)} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                                <button onClick={() => handleDelete(comp.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                            </div>
 
-                        {/* Logo + Nom */}
-                        <div className="flex items-center gap-4 mb-4 pr-20">
-                            <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                {comp.logo ? (
-                                    <img src={comp.logo} alt={comp.name} className="w-full h-full object-contain p-1" />
-                                ) : (
-                                    <span className="text-xl font-black text-gray-300">{comp.name[0]}</span>
+                            {/* Logo + Nom */}
+                            <div className="flex items-center gap-4 mb-4 pr-20">
+                                <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    {comp.logo ? (
+                                        <img src={comp.logo} alt={comp.name} className="w-full h-full object-contain p-1" />
+                                    ) : (
+                                        <span className="text-xl font-black text-gray-300">{comp.name[0]}</span>
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black">{comp.name}</h3>
+                                    <p className="text-xs text-gray-400 truncate max-w-[160px]">{comp.apiUrl || 'Pas d\'URL API'}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5 mb-5">
+                                <p className="text-xs text-gray-600"><span className="font-bold">API Key:</span> {comp.apiKey ? '••••••••' : <span className="text-gray-300">Non défini</span>}</p>
+                                <p className="text-xs text-gray-600"><span className="font-bold">Support:</span> {comp.supportPhone || <span className="text-gray-300">Non défini</span>}</p>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button onClick={() => toggleStatus(comp)} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs transition-colors ${comp.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                                    {comp.isActive ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
+                                    {comp.isActive ? 'Active' : 'Désactivée'}
+                                </button>
+                                {comp.supportPhone && (
+                                    <a href={`tel:${comp.supportPhone}`} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors border border-blue-100">
+                                        <Phone className="w-3.5 h-3.5" /> Support
+                                    </a>
                                 )}
                             </div>
-                            <div>
-                                <h3 className="text-lg font-black">{comp.name}</h3>
-                                <p className="text-xs text-gray-400 truncate max-w-[160px]">{comp.apiUrl || 'Pas d\'URL API'}</p>
-                            </div>
                         </div>
-
-                        <div className="space-y-1.5 mb-5">
-                            <p className="text-xs text-gray-600"><span className="font-bold">API Key:</span> {comp.apiKey ? '••••••••' : <span className="text-gray-300">Non défini</span>}</p>
-                            <p className="text-xs text-gray-600"><span className="font-bold">Support:</span> {comp.supportPhone || <span className="text-gray-300">Non défini</span>}</p>
-                        </div>
-
-                        <button onClick={() => toggleStatus(comp)} className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs transition-colors ${comp.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                            {comp.isActive ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-                            {comp.isActive ? 'Active' : 'Désactivée'}
-                        </button>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     )

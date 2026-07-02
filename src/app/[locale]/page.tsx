@@ -357,7 +357,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     'home_section_blog'
   ]
   const sectionsOrder = homeSettings['home_sections_order']
-    ? homeSettings['home_sections_order'].split(',').filter(k => defaultOrder.includes(k))
+    ? homeSettings['home_sections_order'].split(',').filter(k => defaultOrder.includes(k) || k.startsWith('home_section_custom_html_'))
     : defaultOrder
 
   // Ensure missing sections are added at the end
@@ -365,6 +365,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const renderSection = (key: string) => {
     if (!showSection(key)) return null
+
+    if (key.startsWith('home_section_custom_html_')) {
+      const customId = key.replace('home_section_custom_html_', '')
+      const content = homeSettings[`home_custom_html_content_${customId}`]
+      if (!content) return null
+      return (
+        <section
+          key={key}
+          {...getSectionProps(key, 'bg-white')}
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+      )
+    }
 
     switch (key) {
       case 'home_section_hero':

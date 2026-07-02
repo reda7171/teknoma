@@ -20,7 +20,9 @@ import {
     ToggleRight,
     Code,
     ChevronUp,
-    ChevronDown
+    ChevronDown,
+    Plus,
+    Trash2
 } from 'lucide-react'
 
 const PALETTE = [
@@ -51,38 +53,100 @@ const HOME_SECTIONS = [
     { key: 'home_section_exchange', label: 'Échange de Livres', icon: RefreshCw, defaultBg: 'bg-gradient-to-br from-green-50 to-teal-50' },
     { key: 'home_section_digital', label: 'Livres Numériques', icon: FileText, defaultBg: 'bg-black' },
     { key: 'home_section_blog', label: 'Journal / Blog', icon: FileText, defaultBg: 'bg-white' },
-    { key: 'home_section_custom_html', label: 'Section HTML Custom', icon: Code, defaultBg: 'bg-white' },
+    { key: 'home_section_custom_html', label: 'Section HTML Custom (Défaut)', icon: Code, defaultBg: 'bg-white' },
 ]
 
 export default function HomepageSectionsForm({ initialSettings }: HomepageSectionsFormProps) {
     const [sections, setSections] = useState<Record<string, boolean>>(() => {
         const map: Record<string, boolean> = {}
+        
+        // Sections de base
         HOME_SECTIONS.forEach(s => {
             map[s.key] = initialSettings[s.key] !== 'false'
+        })
+
+        // Sections customisées dynamiques
+        Object.keys(initialSettings).forEach(key => {
+            if (key.startsWith('home_section_custom_html_')) {
+                map[key] = initialSettings[key] !== 'false'
+            }
+        })
+
+        return map
+    })
+
+    const [orderedSections, setOrderedSections] = useState<any[]>(() => {
+        // Détecter toutes les sections customisées stockées
+        const customKeys = Object.keys(initialSettings).filter(k => k.startsWith('home_section_custom_html_'))
+        const customSections = customKeys.map(key => {
+            const label = initialSettings[`label_${key}`] || 'Section Custom'
+            return {
+                key,
+                label,
+                icon: Code,
+                defaultBg: 'bg-white',
+                isCustom: true
+            }
+        })
+
+        const allSections = [...HOME_SECTIONS, ...customSections]
+        const orderStr = initialSettings['home_sections_order']
+
+        if (orderStr) {
+            const keys = orderStr.split(',')
+            const existingKeys = allSections.map(s => s.key)
+            const sorted = keys.filter(k => existingKeys.includes(k))
+            const missing = existingKeys.filter(k => !sorted.includes(k))
+            return [...sorted, ...missing].map(k => allSections.find(s => s.key === k)!)
+        }
+        return [...allSections]
+    })
+
+    const [backgrounds, setBackgrounds] = useState<Record<string, string>>(() => {
+        const map: Record<string, string> = {}
+        
+        // Sections de base
+        HOME_SECTIONS.forEach(s => {
+            map[`bg_${s.key}`] = initialSettings[`bg_${s.key}`] || s.defaultBg
+        })
+
+        // Sections customisées dynamiques
+        Object.keys(initialSettings).forEach(key => {
+            if (key.startsWith('home_section_custom_html_')) {
+                map[`bg_${key}`] = initialSettings[`bg_${key}`] || 'bg-white'
+            }
+        })
+
+        return map
+    })
+
+    const [customHtmls, setCustomHtmls] = useState<Record<string, string>>(() => {
+        const map: Record<string, string> = {}
+        // Section custom par défaut
+        map['home_custom_html_content'] = initialSettings['home_custom_html_content'] || ''
+        
+        // Sections customisées dynamiques
+        Object.keys(initialSettings).forEach(key => {
+            if (key.startsWith('home_section_custom_html_')) {
+                const customId = key.replace('home_section_custom_html_', '')
+                map[`home_custom_html_content_${customId}`] = initialSettings[`home_custom_html_content_${customId}`] || ''
+            }
         })
         return map
     })
 
-    const [orderedSections, setOrderedSections] = useState(() => {
-        const orderStr = initialSettings['home_sections_order']
-        if (orderStr) {
-            const keys = orderStr.split(',')
-            // Filter keys to only include those in HOME_SECTIONS and add missing ones
-            const existingKeys = HOME_SECTIONS.map(s => s.key)
-            const sorted = keys.filter(k => existingKeys.includes(k))
-            const missing = existingKeys.filter(k => !sorted.includes(k))
-            return [...sorted, ...missing].map(k => HOME_SECTIONS.find(s => s.key === k)!)
-        }
-        return [...HOME_SECTIONS]
-    })
-    const [backgrounds, setBackgrounds] = useState<Record<string, string>>(() => {
+    const [customLabels, setCustomLabels] = useState<Record<string, string>>(() => {
         const map: Record<string, string> = {}
-        HOME_SECTIONS.forEach(s => {
-            map[`bg_${s.key}`] = initialSettings[`bg_${s.key}`] || s.defaultBg
+        Object.keys(initialSettings).forEach(key => {
+            if (key.startsWith('home_section_custom_html_')) {
+                map[`label_${key}`] = initialSettings[`label_${key}`] || 'Section Custom'
+            }
         })
         return map
     })
-    const [customHtml, setCustomHtml] = useState(initialSettings['home_custom_html_content'] || '')
+
+    const [newCustomLabel, setNewCustomLabel] = useState('')
+    const [showAddForm, setShowAddForm] = useState(false)
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -105,20 +169,54 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
         setOrderedSections(newOrder)
     }
 
+    const handleAddCustomSection = () => {
+        if (!newCustomLabel.trim()) return
+
+        const customId = Date.now().toString()
+        const key = `home_section_custom_html_${customId}`
+        const label = `Section HTML: ${newCustomLabel.trim()}`
+
+        const newSection = {
+            key,
+            label,
+            icon: Code,
+            defaultBg: 'bg-white',
+            isCustom: true
+        }
+
+        setOrderedSections(prev => [...prev, newSection])
+        setSections(prev => ({ ...prev, [key]: true }))
+        setBackgrounds(prev => ({ ...prev, [`bg_${key}`]: 'bg-white' }))
+        setCustomHtmls(prev => ({ ...prev, [`home_custom_html_content_${customId}`]: '' }))
+        setCustomLabels(prev => ({ ...prev, [`label_${key}`]: label }))
+
+        setNewCustomLabel('')
+        setShowAddForm(false)
+    }
+
+    const handleDeleteCustomSection = (key: string) => {
+        setOrderedSections(prev => prev.filter(s => s.key !== key))
+        setSections(prev => {
+            const copy = { ...prev }
+            delete copy[key]
+            return copy
+        })
+    }
+
     const handleSave = async () => {
         setLoading(true)
         setMessage(null)
 
-        const settingsArray = [
-            ...HOME_SECTIONS.map(s => ({
+        const settingsArray: any[] = [
+            ...orderedSections.map(s => ({
                 key: s.key,
                 value: sections[s.key] ? 'true' : 'false',
                 category: 'homepage_sections',
                 description: `Afficher la section ${s.label}`
             })),
-            ...HOME_SECTIONS.map(s => ({
+            ...orderedSections.map(s => ({
                 key: `bg_${s.key}`,
-                value: backgrounds[`bg_${s.key}`],
+                value: backgrounds[`bg_${s.key}`] || s.defaultBg,
                 category: 'homepage_sections',
                 description: `Background pour la section ${s.label}`
             })),
@@ -130,11 +228,30 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
             },
             {
                 key: 'home_custom_html_content',
-                value: customHtml,
+                value: customHtmls['home_custom_html_content'] || '',
                 category: 'homepage_sections',
                 description: 'Contenu HTML personnalisé pour l\'accueil'
             }
         ]
+
+        // Sauvegarder les contenus HTML et labels des sections customisées
+        orderedSections.forEach(s => {
+            if (s.key.startsWith('home_section_custom_html_')) {
+                const customId = s.key.replace('home_section_custom_html_', '')
+                settingsArray.push({
+                    key: `home_custom_html_content_${customId}`,
+                    value: customHtmls[`home_custom_html_content_${customId}`] || '',
+                    category: 'homepage_sections',
+                    description: `Contenu HTML pour la section ${s.label}`
+                })
+                settingsArray.push({
+                    key: `label_${s.key}`,
+                    value: customLabels[`label_${s.key}`] || s.label,
+                    category: 'homepage_sections',
+                    description: `Label pour la section ${s.key}`
+                })
+            }
+        })
 
         const result = await updateMultipleSettings(settingsArray)
 
@@ -157,6 +274,51 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
                     Gestion des Sections (Accueil)
                 </h2>
                 <p className="text-sm text-gray-500 mb-8">Activez ou désactivez les blocs de contenu sur votre page d'accueil.</p>
+
+                {/* Inline form to add custom section */}
+                <div className="mb-8 flex flex-col gap-4">
+                    {!showAddForm ? (
+                        <button
+                            type="button"
+                            onClick={() => setShowAddForm(true)}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-800 transition-all w-fit"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Ajouter une section personnalisée (HTML)
+                        </button>
+                    ) : (
+                        <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col md:flex-row gap-4 items-end">
+                            <div className="flex-1 w-full">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                                    Nom de la section personnalisée
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newCustomLabel}
+                                    onChange={(e) => setNewCustomLabel(e.target.value)}
+                                    placeholder="Ex: Bannière Promotionnelle d'Été"
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-black outline-none transition-all"
+                                />
+                            </div>
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <button
+                                    type="button"
+                                    onClick={handleAddCustomSection}
+                                    className="flex-1 md:flex-none px-6 py-3 bg-green-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-green-700 transition-all"
+                                >
+                                    Confirmer
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowAddForm(false); setNewCustomLabel('') }}
+                                    className="flex-1 md:flex-none px-6 py-3 bg-gray-200 text-black rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-300 transition-all"
+                                >
+                                    Annuler
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="grid grid-cols-1 gap-6">
                     {orderedSections.map((section, index) => {
@@ -207,24 +369,36 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
                                         </div>
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => toggle(section.key)}
-                                        className="flex items-center gap-2 flex-shrink-0 focus:outline-none"
-                                    >
-                                        {isEnabled
-                                            ? <ToggleRight className="w-8 h-8 text-black" />
-                                            : <ToggleLeft className="w-8 h-8 text-gray-300" />
-                                        }
-                                    </button>
+                                    <div className="flex items-center gap-4 flex-shrink-0">
+                                        {section.isCustom && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteCustomSection(section.key)}
+                                                className="p-2 text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
+                                                title="Supprimer cette section"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => toggle(section.key)}
+                                            className="flex items-center gap-2 focus:outline-none"
+                                        >
+                                            {isEnabled
+                                                ? <ToggleRight className="w-8 h-8 text-black" />
+                                                : <ToggleLeft className="w-8 h-8 text-gray-300" />
+                                            }
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {isEnabled && (
                                     <div className="space-y-3 pt-4 border-t border-gray-200/50">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                                             Background (Tailwind ou Hex)
-                                            <div 
-                                                className="w-3 h-3 rounded-full border border-gray-200" 
+                                            <div
+                                                className="w-3 h-3 rounded-full border border-gray-200"
                                                 style={{ backgroundColor: currentBg.startsWith('#') ? currentBg : '' }}
                                             />
                                         </label>
@@ -259,8 +433,27 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
                                             Code HTML / Scripts
                                         </label>
                                         <textarea
-                                            value={customHtml}
-                                            onChange={(e) => setCustomHtml(e.target.value)}
+                                            value={customHtmls['home_custom_html_content']}
+                                            onChange={(e) => setCustomHtmls(prev => ({ ...prev, 'home_custom_html_content': e.target.value }))}
+                                            rows={8}
+                                            placeholder="<div class='custom-banner'>...</div>"
+                                            className="w-full px-4 py-4 bg-gray-900 text-green-400 font-mono text-xs rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                                        />
+                                        <p className="text-[10px] text-gray-400 italic">Attention : Le code sera injecté tel quel dans la page.</p>
+                                    </div>
+                                )}
+
+                                {section.key.startsWith('home_section_custom_html_') && isEnabled && (
+                                    <div className="mt-6 pt-6 border-t border-gray-200/50 space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-indigo-600 flex items-center gap-2">
+                                            Code HTML / Scripts ({section.label})
+                                        </label>
+                                        <textarea
+                                            value={customHtmls[`home_custom_html_content_${section.key.replace('home_section_custom_html_', '')}`] || ''}
+                                            onChange={(e) => {
+                                                const customId = section.key.replace('home_section_custom_html_', '')
+                                                setCustomHtmls(prev => ({ ...prev, [`home_custom_html_content_${customId}`]: e.target.value }))
+                                            }}
                                             rows={8}
                                             placeholder="<div class='custom-banner'>...</div>"
                                             className="w-full px-4 py-4 bg-gray-900 text-green-400 font-mono text-xs rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"

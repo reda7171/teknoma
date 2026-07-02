@@ -135,6 +135,36 @@ export default function BookFilters({
                             </div>
                         </div>
 
+                        {/* Type de produit Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Package className="w-3 h-3" />
+                                Type de produit
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: '', label: 'Tous' },
+                                    { id: 'type:book', label: 'Livres' },
+                                    { id: 'type:pack', label: 'Packs' },
+                                    { id: 'type:kids', label: 'Enfants (Kids)' },
+                                    { id: 'type:usb', label: 'Clés USB' },
+                                    { id: 'type:bookmarks', label: 'Marque-pages' }
+                                ].map((f) => (
+                                    <button
+                                        key={f.id}
+                                        onClick={() => handleApplyFilters(localSearch, f.id)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            (filterParam === f.id || (f.id === '' && !filterParam.startsWith('type:'))) 
+                                            ? 'bg-black text-white' 
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {f.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Stock Filter */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
