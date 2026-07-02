@@ -128,6 +128,76 @@ export async function POST(req: Request) {
                 }
             }
             
+            // Format: jumia_rts:{orderId}
+            else if (data && data.startsWith('jumia_rts:')) {
+                const [, orderId] = data.split(':')
+                const { readyToShipJumiaOrderFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
+
+                try {
+                    await answerCallbackQuery(callbackId, `⏳ Préparation de la commande ${orderId}...`, token)
+                    await readyToShipJumiaOrderFull(orderId)
+                    
+                    if (message?.chat?.id && message?.message_id) {
+                        const { escapeHtml } = await import('@/lib/telegram')
+                        const safeText = escapeHtml(message.text || '')
+                        const updatedText = safeText + '\n\n✅ <b>Statut mis à jour sur Jumia :</b> Prête à expédier (Ready-to-Ship)'
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
+                    }
+                } catch (error: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur Jumia : ${error.message}`, token)
+                }
+            }
+
+            // Format: jumia:pending_orders | jumia:monthly_stats | jumia:returns_check
+            else if (data && data.startsWith('jumia:')) {
+                const action = data.split(':')[1]
+                try {
+                    if (action === 'pending_orders') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+                        const response = await jumia.getOrders(20, undefined, 'PENDING')
+                        const orders = response?.orders || response?.data?.orders || []
+                        if (orders.length === 0) {
+                            await answerCallbackQuery(callbackId, '✅ Aucune commande en attente', token)
+                        } else {
+                            const lines = orders.slice(0, 10).map((o: any) => {
+                                const id = o.number || o.orderId || 'N/A'
+                                const amount = o.totalAmountLocal?.value || '?'
+                                const date = o.createdAt ? new Date(o.createdAt).toLocaleDateString('fr-FR') : ''
+                                return `📦 #${id} | ${amount} MAD | ${date}`
+                            }).join('\n')
+                            const keyboard = orders.slice(0, 5).map((o: any) => {
+                                const id = o.number || o.orderId
+                                return [{ text: `📦 Préparer #${id}`, callback_data: `jumia_rts:${id}` }]
+                            })
+                            await answerCallbackQuery(callbackId, `${orders.length} commande(s) en attente`, token)
+                            await sendTelegramMessage(`🟠 <b>${orders.length} Commande(s) Jumia En Attente</b>\n\n${lines}`, message?.chat?.id.toString(), token, { inline_keyboard: keyboard })
+                        }
+                    } else if (action === 'monthly_stats') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+                        const now = new Date()
+                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+                        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+                        const response = await jumia.getOrders(100, undefined, undefined, monthStart, monthEnd)
+                        const orders = response?.orders || response?.data?.orders || []
+                        const revenue = orders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
+                        const pending = orders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
+                        const delivered = orders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
+                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${orders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Livrées: <b>${delivered}</b>\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        await answerCallbackQuery(callbackId, 'Bilan Jumia chargé', token)
+                        await sendTelegramMessage(text, message?.chat?.id.toString(), token)
+                    } else if (action === 'returns_check') {
+                        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-returns-alert${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
+                        await answerCallbackQuery(callbackId, '🔄 Vérification retours...', token)
+                    }
+                } catch (err: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur: ${err.message}`, token)
+                }
+            }
+            
             // Format: promo_flash:{bookId}
             else if (data && data.startsWith('promo_flash:')) {
                 const [, bookId] = data.split(':')
@@ -437,28 +507,30 @@ export async function POST(req: Request) {
                         }) : Promise.resolve(0)
                     ])
 
-                    let jumiaCount = 0
-                    let jumiaRevenue = 0
+                    let jumiaStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
                     try {
                         const { JumiaAPI } = await import('@/lib/jumia-api')
                         const jumia = await JumiaAPI.getInstance()
                         if (jumia) {
-                            const response = await jumia.getOrders(100, 0)
+                            // Jumia uses ISO format. For createdBefore, we add 1 day so it includes the end date fully.
+                            const endDateForJumia = new Date(end.getTime() + 86400000)
+                            const createdAfter = start.toISOString()
+                            const createdBefore = endDateForJumia.toISOString()
+
+                            const response = await jumia.getOrders(100, undefined, undefined, createdAfter, createdBefore)
                             const jumiaOrders = response?.orders || response?.data?.orders || []
                             
-                            const filtered = jumiaOrders.filter((o: any) => {
-                                const createdAt = o.createdAt || o.CreatedAt
-                                if (!createdAt) return false
-                                const d = new Date(createdAt)
-                                const status = o.status || o.Status || ''
-                                return d >= start && d <= end && status !== 'canceled' && status !== 'CANCELLED'
-                            })
-                            
-                            jumiaCount = filtered.length
-                            jumiaRevenue = filtered.reduce((sum: number, o: any) => {
-                                const price = Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
-                                return sum + price
-                            }, 0)
+                            for (const o of jumiaOrders) {
+                                const status = (o.status || o.Status || '').toLowerCase()
+                                
+                                jumiaStats.count++
+                                jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
+                                
+                                if (status === 'pending') jumiaStats.pending++
+                                else if (status === 'shipped' || status === 'ready-to-ship') jumiaStats.shipped++
+                                else if (status === 'delivered') jumiaStats.delivered++
+                                else if (status === 'canceled' || status === 'failed' || status === 'returned') jumiaStats.canceled++
+                            }
                         }
                     } catch (e) {
                         console.error('Erreur stats Jumia:', e)
@@ -469,8 +541,12 @@ export async function POST(req: Request) {
                                `💰 CA Site : <b>${(revenue._sum.total || 0).toFixed(2)} MAD</b>`
                     
                     text += `\n\n🟠 <b>JUMIA :</b>\n` +
-                            `📦 Commandes : <b>${jumiaCount}</b>\n` +
-                            `💰 CA Jumia : <b>${jumiaRevenue.toFixed(2)} MAD</b>`
+                            `📦 Commandes Total : <b>${jumiaStats.count}</b>\n` +
+                            `💰 CA Total : <b>${jumiaStats.revenue.toFixed(2)} MAD</b>\n` +
+                            `⏳ En attente : ${jumiaStats.pending}\n` +
+                            `🚚 En expédition : ${jumiaStats.shipped}\n` +
+                            `✅ Livrées : ${jumiaStats.delivered}\n` +
+                            `❌ Annulées/Retours : ${jumiaStats.canceled}`
                     
                     if (showVisitors) text += `\n👥 Visiteurs Uniques : <b>${visitors}</b>`
                     if (showRegistrations) text += `\n👤 Inscriptions : <b>${registrations}</b>`
@@ -630,7 +706,32 @@ export async function POST(req: Request) {
             const chatId = body.message.chat.id
             console.log(`[TELEGRAM MESSAGE] Received from ${chatId}: ${text}`)
 
-            if (text.startsWith('/BILAN') || text === 'BILAN' || text.startsWith('/STATS')) {
+            if (text.startsWith('/CMD') || text === 'CMD' || text.startsWith('/HELP') || text === 'HELP') {
+                const helpText = `📘 <b>Riwaya Bot — Commandes disponibles</b>\n\n` +
+                    `<b>📊 Statistiques & Rapports</b>\n` +
+                    `/bilan — Stats site web (aujourd'hui, mois, etc.)\n` +
+                    `/rapport — Rapport quotidien immédiat\n` +
+                    `/stockalerte — Vérifier le stock critique\n\n` +
+                    `<b>🟠 Jumia</b>\n` +
+                    `/jumia — Menu rapide Jumia (pending, bilan, retours)\n\n` +
+                    `<b>📦 Marketing</b>\n` +
+                    `/generer — Envoyer des créatives marketing\n\n` +
+                    `<b>🔍 Recherche</b>\n` +
+                    `/stock [titre] — Vérifier le stock d'un livre\n` +
+                    `/search [nom/téléphone] — Rechercher un client\n\n` +
+                    `<b>⚙️ Automatisations (Cron)</b>\n` +
+                    `Rapport quotidien → <code>/api/cron/daily-report</code>\n` +
+                    `Alerte stock → <code>/api/cron/stock-alert</code>\n` +
+                    `Alerte pending → <code>/api/cron/pending-alert</code>\n` +
+                    `Rapport Jumia hebdo → <code>/api/cron/weekly-jumia-report</code>\n` +
+                    `Alerte retours → <code>/api/cron/jumia-returns-alert</code>\n` +
+                    `Sync commandes Jumia → <code>/api/cron/jumia</code>\n\n` +
+                    `<b>📥 Export</b>\n` +
+                    `CSV commandes Jumia → <code>/api/admin/jumia/export</code>\n\n` +
+                    `<i>💡 Toutes les commandes sont insensibles à la casse</i>`
+                await sendTelegramMessage(helpText, chatId.toString(), token)
+            }
+            else if (text.startsWith('/BILAN') || text === 'BILAN' || text.startsWith('/STATS')) {
                 const replyText = `📊 <b>Centre de Rapports Riwaya</b>\n\nQue souhaitez-vous consulter ?`
                 const replyMarkup = {
                     inline_keyboard: [
@@ -795,6 +896,53 @@ export async function POST(req: Request) {
                         const list = customers.map(c => `👤 <b>${c.fullName}</b>\n📞 ${c.phone}\n📍 ${c.city}, ${c.address}`).join('\n\n')
                         await sendTelegramMessage(`🔍 <b>Résultats Clients</b> :\n\n${list}`, chatId.toString(), token)
                     }
+                }
+            }
+            else if (text.startsWith('/JUMIA')) {
+                // Menu rapide Jumia
+                const replyMarkup = {
+                    inline_keyboard: [
+                        [
+                            { text: '📦 Commandes Jumia Pending', callback_data: 'jumia:pending_orders' }
+                        ],
+                        [
+                            { text: '📊 Bilan Jumia du mois', callback_data: 'jumia:monthly_stats' }
+                        ],
+                        [
+                            { text: '🔄 Alerte Retours/Annulations', callback_data: 'jumia:returns_check' }
+                        ]
+                    ]
+                }
+                await sendTelegramMessage(`🟠 <b>Menu Jumia</b>\n\nChoisissez une action :`, chatId.toString(), token, replyMarkup)
+            }
+            else if (text.startsWith('/RAPPORT') || text === 'RAPPORT') {
+                // Déclencher rapport quotidien maintenant
+                try {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/daily-report${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
+                    const data = await res.json()
+                    if (data.success) {
+                        await sendTelegramMessage(`✅ Rapport envoyé !`, chatId.toString(), token)
+                    } else {
+                        await sendTelegramMessage(`❌ Erreur rapport: ${data.error}`, chatId.toString(), token)
+                    }
+                } catch (e: any) {
+                    await sendTelegramMessage(`❌ Erreur: ${e.message}`, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/STOCKALERTE') || text === 'STOCKALERTE') {
+                // Vérifier stock critique maintenant
+                const threshold = 5
+                const criticalBooks = await prisma.book.findMany({
+                    where: { stock: { lte: threshold }, active: true },
+                    select: { title: true, stock: true },
+                    orderBy: { stock: 'asc' },
+                    take: 15
+                })
+                if (criticalBooks.length === 0) {
+                    await sendTelegramMessage(`✅ <b>Aucun stock critique</b> (seuil: ${threshold})`, chatId.toString(), token)
+                } else {
+                    const lines = criticalBooks.map(b => `📖 ${b.title} → <b>${b.stock}</b>${b.stock === 0 ? ' ⛔' : ''}`).join('\n')
+                    await sendTelegramMessage(`⚠️ <b>${criticalBooks.length} livres stock critique</b>\n\n${lines}`, chatId.toString(), token)
                 }
             }
         }

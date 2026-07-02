@@ -1,0 +1,461 @@
+"use client"
+
+import { useState, useEffect } from 'react'
+import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send } from 'lucide-react'
+import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull } from './actions'
+
+export default function JumiaOrdersClient() {
+    const [orders, setOrders] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
+    const [successMsg, setSuccessMsg] = useState<string | null>(null)
+    const [statusFilter, setStatusFilter] = useState<string>('')
+    const [currentToken, setCurrentToken] = useState<string | null>(null)
+    const [tokenHistory, setTokenHistory] = useState<string[]>([])
+    const [hasNextPage, setHasNextPage] = useState(false)
+    const [stats, setStats] = useState<any>(null)
+    const [cancelingId, setCancelingId] = useState<string | null>(null)
+    const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null)
+    const [packingId, setPackingId] = useState<string | null>(null)
+    const [confirmPackId, setConfirmPackId] = useState<string | null>(null)
+    const [printingId, setPrintingId] = useState<string | null>(null)
+    const [readyId, setReadyId] = useState<string | null>(null)
+    const [confirmReadyId, setConfirmReadyId] = useState<string | null>(null)
+    const size = 50
+
+    const fetchOrders = async (status: string, token: string | undefined, isNext: boolean = false) => {
+        setLoading(true)
+        setErrorMsg(null)
+        try {
+            // L'API Jumia exige un range de 3 mois max pour voir l'historique, sinon elle ne renvoie que la date du jour.
+            const threeMonthsAgo = new Date()
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 2) // Using 2 months to be safe with 3 month range limit
+            const createdAfter = threeMonthsAgo.toISOString().split('T')[0]
+
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            const createdBefore = tomorrow.toISOString().split('T')[0]
+
+            const response = await getJumiaOrders(size, token, status || undefined, createdAfter, createdBefore)
+            
+            setOrders(response.orders)
+            setCurrentToken(response.nextToken)
+            setHasNextPage(!!response.nextToken)
+            
+            if (isNext && token) {
+                setTokenHistory(prev => [...prev, token])
+            } else if (!token) {
+                setTokenHistory([])
+            }
+        } catch (e: any) {
+            setErrorMsg(e.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchOrders(statusFilter, undefined)
+        if (!stats) {
+            getJumiaStats().then(data => {
+                if (data) setStats(data)
+            })
+        }
+    }, [statusFilter])
+
+    const handleNextPage = () => {
+        if (currentToken) {
+            fetchOrders(statusFilter, currentToken, true)
+        }
+    }
+
+    const handlePrevPage = () => {
+        if (tokenHistory.length > 0) {
+            const previousToken = tokenHistory[tokenHistory.length - 2] // The one before the current token
+            // If it's the first page, there is no previous token
+            setTokenHistory(prev => prev.slice(0, -1))
+            fetchOrders(statusFilter, previousToken, false)
+        }
+    }
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setStatusFilter(e.target.value)
+        setTokenHistory([])
+        fetchOrders(e.target.value, undefined)
+    }
+
+    const handleCancelOrder = async (orderId: string) => {
+        if (confirmCancelId !== orderId) {
+            setConfirmCancelId(orderId)
+            setTimeout(() => setConfirmCancelId(null), 3000) // Reset after 3s
+            return
+        }
+        setConfirmCancelId(null)
+        setCancelingId(orderId)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        try {
+            await cancelJumiaOrderFull(orderId)
+            setSuccessMsg(`Commande ${orderId} annulée avec succès.`)
+            fetchOrders(statusFilter, currentToken) // Actualiser la page courante
+        } catch (e: any) {
+            setErrorMsg(`Impossible d'annuler: ${e.message}`)
+        } finally {
+            setCancelingId(null)
+        }
+    }
+
+    const handlePackOrder = async (orderId: string) => {
+        if (confirmPackId !== orderId) {
+            setConfirmPackId(orderId)
+            setTimeout(() => setConfirmPackId(null), 3000)
+            return
+        }
+        
+        setConfirmPackId(null)
+        setPackingId(orderId)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        
+        try {
+            await packJumiaOrderFull(orderId)
+            setSuccessMsg(`Commande ${orderId} marquée comme "Prête à expédier" !`)
+            fetchOrders(statusFilter, currentToken)
+        } catch (e: any) {
+            setErrorMsg(`Impossible de préparer la commande: ${e.message}`)
+        } finally {
+            setPackingId(null)
+        }
+    }
+
+    const handlePrintLabels = async (orderId: string) => {
+        setPrintingId(orderId)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        try {
+            const response = await printJumiaOrderLabelsFull(orderId)
+            
+            // Jumia API may return base64 document or a URL.
+            const base64Data = response.document || response.file || response.data || response.pdf || response
+            const contentType = response.contentType || 'application/pdf'
+            const extension = contentType.includes('zip') ? 'zip' : 'pdf'
+            
+            if (typeof base64Data === 'string' && (base64Data.startsWith('JVBER') || base64Data.startsWith('UEsDB') || base64Data.length > 100)) {
+                // Base64 to Blob
+                const byteCharacters = atob(base64Data)
+                const byteNumbers = new Array(byteCharacters.length)
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i)
+                }
+                const byteArray = new Uint8Array(byteNumbers)
+                const blob = new Blob([byteArray], { type: contentType })
+                const url = window.URL.createObjectURL(blob)
+                
+                const link = document.createElement('a')
+                link.href = url
+                link.setAttribute('download', `etiquette_jumia_${orderId}.${extension}`)
+                document.body.appendChild(link)
+                link.click()
+                link.parentNode?.removeChild(link)
+                window.URL.revokeObjectURL(url)
+                
+                setSuccessMsg(`Étiquettes pour la commande ${orderId} générées et téléchargées.`)
+            } else if (response.url || response.link || (typeof base64Data === 'string' && base64Data.startsWith('http'))) {
+                const targetUrl = response.url || response.link || base64Data
+                window.open(targetUrl, '_blank')
+                setSuccessMsg(`Étiquettes ouvertes dans un nouvel onglet.`)
+            } else {
+                console.error("Format inconnu:", response)
+                setErrorMsg("Le format de l'étiquette retourné par Jumia n'est pas pris en charge actuellement.")
+            }
+        } catch (e: any) {
+            setErrorMsg(`Impossible d'imprimer: ${e.message}`)
+        } finally {
+            setPrintingId(null)
+        }
+    }
+
+    const handleReadyToShipOrder = async (orderId: string) => {
+        if (confirmReadyId !== orderId) {
+            setConfirmReadyId(orderId)
+            setTimeout(() => setConfirmReadyId(null), 3000)
+            return
+        }
+        
+        setConfirmReadyId(null)
+        setReadyId(orderId)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        
+        try {
+            await readyToShipJumiaOrderFull(orderId)
+            setSuccessMsg(`Commande ${orderId} validée "Prête à expédier" (Ready to Ship) avec succès !`)
+            fetchOrders(statusFilter, currentToken)
+        } catch (e: any) {
+            setErrorMsg(`Erreur "Ready to Ship": ${e.message}`)
+        } finally {
+            setReadyId(null)
+        }
+    }
+
+    return (
+        <div className="space-y-6">
+            {stats && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><Package className="w-4 h-4" /></div>
+                            Total (3 mois)
+                        </div>
+                        <p className="text-3xl font-black text-slate-800">{stats.total}</p>
+                    </div>
+                    <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
+                            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><AlertCircle className="w-4 h-4" /></div>
+                            Nouvelles
+                        </div>
+                        <p className="text-3xl font-black text-slate-800">{stats.pending}</p>
+                    </div>
+                    <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
+                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><Truck className="w-4 h-4" /></div>
+                            En transit
+                        </div>
+                        <p className="text-3xl font-black text-slate-800">{stats.shipped}</p>
+                    </div>
+                    <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
+                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl"><TrendingUp className="w-4 h-4" /></div>
+                            CA Estimé
+                        </div>
+                        <p className="text-3xl font-black text-slate-800">{stats.revenue.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
+                            <ShoppingBag className="w-5 h-5" />
+                        </div>
+                        Commandes Jumia
+                    </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                    <select 
+                        value={statusFilter}
+                        onChange={handleStatusChange}
+                        className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                        <option value="">Toutes les commandes</option>
+                        <option value="PENDING">Nouvelles (En attente)</option>
+                        <option value="READY_TO_SHIP">Prêtes à expédier</option>
+                        <option value="SHIPPED">Expédiées (Historique)</option>
+                        <option value="DELIVERED">Livrées (Historique)</option>
+                        <option value="CANCELED">Annulées (Historique)</option>
+                        <option value="RETURNED">Retournées (Historique)</option>
+                        <option value="FAILED">Échouées (Historique)</option>
+                    </select>
+                    <button 
+                        onClick={() => fetchOrders(statusFilter, currentToken || undefined)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-orange-500' : ''}`} />
+                    </button>
+                    <a
+                        href="/api/admin/jumia/export"
+                        download
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-all"
+                        title="Exporter les commandes du mois en CSV"
+                    >
+                        ⬇️ CSV
+                    </a>
+                </div>
+            </div>
+
+            {errorMsg && (
+                <div className="bg-red-50 border border-red-200 p-6 rounded-3xl flex items-center gap-4 text-red-700">
+                    <AlertCircle className="w-8 h-8 shrink-0" />
+                    <div>
+                        <h3 className="font-bold">Erreur</h3>
+                        <p className="text-sm opacity-80">{errorMsg}</p>
+                    </div>
+                </div>
+            )}
+            
+            {successMsg && (
+                <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl flex items-center gap-4 text-emerald-700">
+                    <CheckCircle2 className="w-8 h-8 shrink-0" />
+                    <div>
+                        <h3 className="font-bold">Succès</h3>
+                        <p className="text-sm opacity-80">{successMsg}</p>
+                    </div>
+                </div>
+            )}
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto min-h-[400px]">
+                        {loading && orders.length === 0 ? (
+                            <div className="flex items-center justify-center h-64 text-slate-400">
+                                <RefreshCw className="w-8 h-8 animate-spin text-orange-400" />
+                            </div>
+                        ) : (
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-100 bg-slate-50/50">
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">ID Jumia</th>
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Date</th>
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Client</th>
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Statut</th>
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 text-right">Total</th>
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50 text-sm">
+                                    {orders.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="p-8 text-center text-slate-400 font-medium">
+                                                Aucune commande trouvée.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        orders.map((order: any, index: number) => (
+                                            <tr key={order.id || order.OrderId || index} className="hover:bg-slate-50/50 transition-colors group">
+                                                <td className="p-4 font-bold text-slate-900">{order.number || order.OrderId || order.OrderNumber || 'N/A'}</td>
+                                                <td className="p-4 text-slate-500 font-medium">
+                                                    {order.createdAt ? new Date(order.createdAt).toLocaleString('fr-FR', {
+                                                        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                    }) : (order.CreatedAt ? new Date(order.CreatedAt).toLocaleString('fr-FR') : 'N/A')}
+                                                </td>
+                                                <td className="p-4 font-medium text-slate-700">
+                                                    {order.shippingAddress?.firstName || order.CustomerFirstName} {order.shippingAddress?.lastName || order.CustomerLastName}
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className={`inline-flex px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full ${
+                                                        (order.status || order.Statuses?.[0] || 'pending').toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
+                                                        (order.status || order.Statuses?.[0] || 'pending').toLowerCase() === 'canceled' ? 'bg-red-100 text-red-700' :
+                                                        (order.status || order.Statuses?.[0] || 'pending').toLowerCase() === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-orange-100 text-orange-700'
+                                                    }`}>
+                                                        {order.status || order.Statuses?.[0] || 'PENDING'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 font-bold text-slate-900 text-right">
+                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} MAD
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    {(() => {
+                                                        const currentStatus = (order.status || order.Statuses?.[0] || 'pending').toLowerCase()
+                                                        return (
+                                                            <div className="flex flex-col gap-2 w-full max-w-[140px] mx-auto">
+                                                                {currentStatus === 'pending' && (
+                                                                    <>
+                                                                        <button 
+                                                                            onClick={() => handlePackOrder(order.number || order.OrderId || order.OrderNumber)}
+                                                                            disabled={packingId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
+                                                                                confirmPackId === (order.number || order.OrderId || order.OrderNumber)
+                                                                                ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-md'
+                                                                                : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                                                                            }`}
+                                                                        >
+                                                                            {packingId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                            ) : confirmPackId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                'Confirmer ?'
+                                                                            ) : (
+                                                                                <><Package className="w-3 h-3" /> Préparer</>
+                                                                            )}
+                                                                        </button>
+                                                                        
+                                                                        <button 
+                                                                            onClick={() => handleReadyToShipOrder(order.number || order.OrderId || order.OrderNumber)}
+                                                                            disabled={readyId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
+                                                                                confirmReadyId === (order.number || order.OrderId || order.OrderNumber)
+                                                                                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                                                                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                                                            }`}
+                                                                            title="Une fois préparée (Packed), validez l'expédition"
+                                                                        >
+                                                                            {readyId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                            ) : confirmReadyId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                'Confirmer ?'
+                                                                            ) : (
+                                                                                <><Send className="w-3 h-3" /> Expédier</>
+                                                                            )}
+                                                                        </button>
+                                                                        
+                                                                        <button 
+                                                                            onClick={() => handleCancelOrder(order.number || order.OrderId || order.OrderNumber)}
+                                                                            disabled={cancelingId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
+                                                                                confirmCancelId === (order.number || order.OrderId || order.OrderNumber)
+                                                                                ? 'bg-red-600 text-white hover:bg-red-700 shadow-md'
+                                                                                : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                                            }`}
+                                                                        >
+                                                                            {cancelingId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                            ) : confirmCancelId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                                'Confirmer ?'
+                                                                            ) : (
+                                                                                <><XCircle className="w-3 h-3" /> Annuler</>
+                                                                            )}
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                                
+                                                                {(currentStatus === 'ready_to_ship' || currentStatus === 'shipped' || currentStatus === 'delivered') && (
+                                                                    <button 
+                                                                        onClick={() => handlePrintLabels(order.number || order.OrderId || order.OrderNumber)}
+                                                                        disabled={printingId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                        className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                                                    >
+                                                                        {printingId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                            <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                        ) : (
+                                                                            <><Printer className="w-3 h-3" /> Étiquette</>
+                                                                        )}
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    })()}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                    
+                    {/* Pagination Jumia Token-based */}
+                    <div className="flex items-center justify-between mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <p className="text-xs font-medium text-slate-500">
+                            {orders.length} commandes récupérées
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={handlePrevPage}
+                                disabled={tokenHistory.length === 0 || loading}
+                                className={`p-2 rounded-xl transition-all ${tokenHistory.length === 0 || loading ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white text-slate-700 hover:bg-orange-50 hover:text-orange-600 shadow-sm border border-slate-200'}`}
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Page {tokenHistory.length + 1}</span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={!hasNextPage || loading}
+                                className={`p-2 rounded-xl transition-all ${!hasNextPage || loading ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white text-slate-700 hover:bg-orange-50 hover:text-orange-600 shadow-sm border border-slate-200'}`}
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    )
+}

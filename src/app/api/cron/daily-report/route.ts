@@ -1,79 +1,75 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { sendTelegramMessage } from "@/lib/telegram"
+import { JumiaAPI } from "@/lib/jumia-api"
 
-export async function GET(request: Request) {
+// Rapport quotidien — à appeler via cron chaque matin à 8h
+export async function GET(req: Request) {
     try {
-        // Sécurisation: exiger un token dans l'URL (?token=XYZ) pour authentifier Vercel Cron
-        const { searchParams } = new URL(request.url)
-        const token = searchParams.get('token')
-        const CRON_SECRET = process.env.CRON_SECRET
-
-        if (!CRON_SECRET || token !== CRON_SECRET) {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+        const url = new URL(req.url)
+        const token = url.searchParams.get("token")
+        
+        if (process.env.CRON_SECRET && token !== process.env.CRON_SECRET) {
+            return new NextResponse("Unauthorized", { status: 401 })
         }
 
         const now = new Date()
-        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+        const yesterday = new Date(now)
+        yesterday.setDate(yesterday.getDate() - 1)
+        yesterday.setHours(0, 0, 0, 0)
+        const yesterdayEnd = new Date(yesterday)
+        yesterdayEnd.setHours(23, 59, 59, 999)
 
-        // 1. Commandes des dernières 24h
-        const recentOrders = await prisma.order.findMany({
-            where: {
-                createdAt: {
-                    gte: yesterday
-                }
+        // Stats web (commandes site)
+        const [totalYesterday, revenueYesterday, byStatus] = await Promise.all([
+            prisma.order.count({ where: { createdAt: { gte: yesterday, lte: yesterdayEnd } } }),
+            prisma.order.aggregate({
+                where: { createdAt: { gte: yesterday, lte: yesterdayEnd }, status: { not: 'CANCELLED' } },
+                _sum: { total: true }
+            }),
+            prisma.order.groupBy({
+                by: ['status'],
+                where: { createdAt: { gte: yesterday, lte: yesterdayEnd } },
+                _count: { status: true }
+            })
+        ])
+
+        const statusEmojis: Record<string, string> = {
+            PENDING: '⏳', CONFIRMED: '✅', SHIPPED: '🚚',
+            DELIVERED: '📬', CANCELLED: '❌', RETURNED: '🔄'
+        }
+
+        const statusLines = byStatus
+            .map(s => `${statusEmojis[s.status] || '📦'} ${s.status}: <b>${s._count.status}</b>`)
+            .join('\n')
+
+        // Stats Jumia hier
+        let jumiaSection = ''
+        try {
+            const jumia = await JumiaAPI.getInstance()
+            if (jumia) {
+                const yesterdayStr = yesterday.toISOString().split('T')[0]
+                const todayStr = now.toISOString().split('T')[0]
+                const jResponse = await jumia.getOrders(100, undefined, undefined, yesterdayStr, todayStr)
+                const jOrders = jResponse?.orders || jResponse?.data?.orders || []
+                const jRevenue = jOrders.reduce((sum: number, o: any) => {
+                    return sum + parseFloat(o.totalAmountLocal?.value || o.Price || '0')
+                }, 0)
+                const jPending = jOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
+                jumiaSection = `\n\n🟠 <b>Jumia Hier</b>\n📦 Commandes: <b>${jOrders.length}</b>\n⏳ En attente: <b>${jPending}</b>\n💰 CA: <b>${jRevenue.toFixed(2)} MAD</b>`
             }
-        })
+        } catch {}
 
-        const totalOrders = recentOrders.length
-        const totalRevenue = recentOrders.reduce((sum, order) => sum + order.total, 0)
+        const dateStr = yesterday.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+        const msg = `☀️ <b>Rapport Quotidien Riwaya</b>\n📅 ${dateStr}\n\n` +
+            `🌐 <b>Site Web</b>\n📦 Commandes: <b>${totalYesterday}</b>\n💰 CA: <b>${(revenueYesterday._sum.total || 0).toFixed(2)} MAD</b>` +
+            (statusLines ? `\n\n📊 <b>Détail :</b>\n${statusLines}` : '') +
+            jumiaSection
 
-        // 2. Vérification des stocks (Livres <= 5)
-        const lowStockBooks = await prisma.book.count({
-            where: {
-                stock: {
-                    lte: 5
-                }
-            }
-        })
+        await sendTelegramMessage(msg)
 
-        // 3. Vérification des avis en attente de modération
-        const pendingReviews = await prisma.review.count({
-            where: {
-                isApproved: false
-            }
-        })
-
-        // 4. Clients inscrits récemment
-        const newUsers = await prisma.user.count({
-            where: {
-                createdAt: {
-                    gte: yesterday
-                }
-            }
-        })
-
-        // Construction du message
-        const message = `📊 *Rapport Quotidien du Site (Santé)*\n\n` +
-            `📅 *Date:* ${now.toLocaleDateString('fr-FR')}\n\n` +
-            `🛒 *Commandes (24h):* ${totalOrders}\n` +
-            `💰 *Chiffre d'Affaires:* ${totalRevenue.toFixed(2)} MAD\n` +
-            `👤 *Nouveaux Clients:* ${newUsers}\n\n` +
-            `⚠️ *Alertes & Actions requises:*\n` +
-            `📦 Livres en stock faible ou épuisés : ${lowStockBooks}\n` +
-            `⭐ Avis en attente de modération : ${pendingReviews}\n\n` +
-            `✅ *État de la base de données:* En ligne`;
-
-        // Envoi sur Telegram
-        await sendTelegramMessage(message)
-
-        return NextResponse.json({ success: true, message: 'Rapport envoyé avec succès' })
-    } catch (error: any) {
-        console.error('Erreur CRON Daily Report:', error)
-        
-        // Alerte critique si la base de données est down
-        sendTelegramMessage(`❌ *Erreur Critique*\nImpossible de générer le rapport quotidien. La base de données ou le serveur rencontre un problème.\nErreur: ${error.message}`).catch(console.error)
-        
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+        return NextResponse.json({ success: true })
+    } catch (e: any) {
+        return NextResponse.json({ success: false, error: e.message }, { status: 500 })
     }
 }

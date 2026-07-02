@@ -61,10 +61,43 @@ export class JumiaAPI {
         })
 
         if (!response.ok) {
-            throw new Error(`Erreur API Jumia: ${response.statusText}`)
+            const errText = await response.text()
+            console.error(`Erreur API Jumia (${response.status}):`, errText)
+            
+            // Notification d'erreur sur Telegram
+            import('@/lib/telegram').then(({ sendTelegramMessage }) => {
+                sendTelegramMessage(`❌ *Erreur API Jumia*\nEndpoint: \`${endpoint}\`\nMéthode: \`${method}\`\nStatut: ${response.status}\nErreur: ${errText}`).catch(console.error)
+            })
+
+            throw new Error(`Erreur API Jumia: ${response.statusText} - ${errText}`)
         }
 
-        return response.json()
+        const contentType = response.headers.get('content-type') || ''
+        let data: any
+        
+        if (contentType.includes('application/pdf') || contentType.includes('application/zip') || contentType.includes('application/octet-stream') || contentType.includes('application/x-zip-compressed')) {
+            const arrayBuffer = await response.arrayBuffer()
+            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            data = { document: base64, contentType }
+        } else {
+            const text = await response.text()
+            try {
+                data = JSON.parse(text)
+            } catch (e) {
+                data = { raw: text }
+            }
+        }
+
+        // Notification de succès sur Telegram pour toutes les requêtes
+        import('@/lib/telegram').then(({ sendTelegramMessage }) => {
+            let msg = `✅ *Appel API Jumia Réussi*\nEndpoint: \`${endpoint}\`\nMéthode: \`${method}\``
+            if (body) {
+                msg += `\nPayload: \`${JSON.stringify(body).substring(0, 300)}...\``
+            }
+            sendTelegramMessage(msg).catch(console.error)
+        })
+
+        return data
     }
 
     // --- Endpoints Authentication ---
@@ -81,22 +114,22 @@ export class JumiaAPI {
         })
     }
 
-    // --- Endpoints Boutiques (Shops) ---
-
-    async getShops() {
-        return this.request('/shops')
-    }
-
-    async getShopsOfMasterShop() {
-        return this.request('/shops-of-master-shop')
-    }
-
     // --- Endpoints Commandes (Orders) ---
 
-    async getOrders(limit = 100, offset = 0, status?: string) {
-        let url = `/orders?limit=${limit}&offset=${offset}`
+    async getOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string) {
+        let url = `/orders?size=${size}`
+        if (token) {
+            url += `&token=${token}`
+        }
         if (status) {
+            // L'API Jumia utilise l'Alternative Name (minuscule, tirets)
             url += `&status=${status}`
+        }
+        if (createdAfter) {
+            url += `&createdAfter=${createdAfter}`
+        }
+        if (createdBefore) {
+            url += `&createdBefore=${createdBefore}`
         }
         return this.request(url)
     }
@@ -106,7 +139,7 @@ export class JumiaAPI {
     }
 
     async packOrders(payload: any) {
-        return this.request('/orders/pack', 'POST', payload)
+        return this.request('/v2/orders/pack', 'POST', payload)
     }
 
     async readyToShipOrders(payload: any) {
@@ -114,90 +147,155 @@ export class JumiaAPI {
     }
 
     async printLabels(payload: any) {
-        return this.request('/orders/print-labels', 'POST', payload)
+        return this.request(`/orders/print-labels?orderId=${payload.orderId}`, 'POST', payload)
     }
 
-    async cancelOrders(payload: any) {
-        return this.request('/orders/cancel', 'POST', payload)
+    async cancelOrders(orderItemIds: string[]) {
+        return this.request('/orders/cancel', 'PUT', { orderItemIds })
     }
 
-    async getShipmentProviders() {
-        return this.request('/orders/shipment-providers')
+    async getShipmentProviders(orderItemIds: string[]) {
+        const query = orderItemIds.map(id => `orderItemId=${encodeURIComponent(id)}`).join('&')
+        return this.request(`/orders/shipment-providers?${query}`)
+    }
+
+    async getPayoutStatements(params: {
+        createdAfter?: string;
+        page?: number;
+        size?: number;
+        paid?: boolean;
+        country?: string;
+        currency?: 'LOCAL' | 'USD';
+    } = {}) {
+        const queryParams = new URLSearchParams()
+        if (params.createdAfter) queryParams.append('createdAfter', params.createdAfter)
+        if (params.page) queryParams.append('page', params.page.toString())
+        if (params.size) queryParams.append('size', params.size.toString())
+        if (params.paid !== undefined) queryParams.append('paid', params.paid.toString())
+        if (params.country) queryParams.append('country', params.country)
+        if (params.currency) queryParams.append('currency', params.currency)
+        else queryParams.append('currency', 'LOCAL')
+
+        const queryString = queryParams.toString()
+        return this.request(`/payout-statement${queryString ? `?${queryString}` : ''}`)
+    }
+
+    async createConsignmentOrder(payload: {
+        shopId: string;
+        businessClientCode: string;
+        shippingDate: string;
+        comment?: string;
+        products: any[];
+    }) {
+        return this.request('/consignment-order', 'POST', payload)
+    }
+
+    async updateConsignmentOrder(purchaseOrderNumber: string, payload: {
+        isShipped: boolean;
+        trackingNumber?: string;
+        actualDepartureDate?: string;
+        estimatedArrivalDate?: string;
+        deliveryAgentPhoneNumber?: string;
+        '3plName'?: string;
+    }) {
+        return this.request(`/consignment-order/${purchaseOrderNumber}`, 'PATCH', payload)
+    }
+
+    async getConsignmentStock(businessClientCode: string, sku: string) {
+        return this.request(`/consignment-stock?businessClientCode=${encodeURIComponent(businessClientCode)}&sku=${encodeURIComponent(sku)}`)
+    }
+
+    async getShops() {
+        return this.request('/shops')
+    }
+
+    async getShopsOfMasterShop() {
+        return this.request('/shops-of-master-shop')
+    }
+
+    // --- Endpoints Feeds (Products) ---
+
+    async getFeed(id: string) {
+        return this.request(`/feeds/${id}`)
+    }
+
+    async updateProductsStock(products: any[]) {
+        return this.request('/feeds/products/stock', 'POST', { products })
+    }
+
+    async updateProductsPrice(products: any[]) {
+        return this.request('/feeds/products/price', 'POST', { products })
+    }
+
+    async updateProductsStatus(products: any[]) {
+        return this.request('/feeds/products/status', 'POST', { products })
+    }
+
+    async createProducts(shopId: string, products: any[]) {
+        return this.request('/feeds/products/create', 'POST', { shopId, products })
+    }
+
+    async updateProducts(products: any[], shopId?: string) {
+        const payload: any = { products }
+        if (shopId) payload.shopId = shopId
+        return this.request('/feeds/products/update', 'POST', payload)
     }
 
     // --- Endpoints Produits (Catalog) ---
 
-    async getProducts(limit = 100, offset = 0) {
-        return this.request(`/catalog/products?limit=${limit}&offset=${offset}`)
+    async getBrands(page = 1) {
+        return this.request(`/catalog/brands?page=${page}`)
     }
 
-    async getCategories(limit = 100, offset = 0) {
-        return this.request(`/catalog/categories?limit=${limit}&offset=${offset}`)
+    async getCategories(page = 1, attributeSetName?: string) {
+        const query = new URLSearchParams()
+        if (page) query.append('page', page.toString())
+        if (attributeSetName) query.append('attributeSetName', attributeSetName)
+        const queryString = query.toString()
+        return this.request(`/catalog/categories${queryString ? `?${queryString}` : ''}`)
     }
 
-    async getBrands(limit = 100, offset = 0) {
-        return this.request(`/catalog/brands?limit=${limit}&offset=${offset}`)
+    async getProducts(params: {
+        token?: string;
+        size?: number;
+        sids?: string[];
+        categoryCode?: number;
+        createdAtFrom?: string;
+        createdAtTo?: string;
+        sellerSku?: string;
+        shopId?: string;
+    } = {}) {
+        const query = new URLSearchParams()
+        if (params.token) query.append('token', params.token)
+        if (params.size) query.append('size', params.size.toString())
+        if (params.sids && params.sids.length) params.sids.forEach(sid => query.append('sids', sid))
+        if (params.categoryCode) query.append('categoryCode', params.categoryCode.toString())
+        if (params.createdAtFrom) query.append('createdAtFrom', params.createdAtFrom)
+        if (params.createdAtTo) query.append('createdAtTo', params.createdAtTo)
+        if (params.sellerSku) query.append('sellerSku', params.sellerSku)
+        if (params.shopId) query.append('shopId', params.shopId)
+
+        const queryString = query.toString()
+        return this.request(`/catalog/products${queryString ? `?${queryString}` : ''}`)
     }
 
     async getAttributeSets(id: string) {
-        return this.request(`/catalog/attribute-sets/${id}`)
+        return this.request(`/catalog/attribute-sets/${encodeURIComponent(id)}`)
     }
 
-    async getCatalogStock(limit = 100, offset = 0) {
-        return this.request(`/catalog/stock?limit=${limit}&offset=${offset}`)
-    }
+    async getCatalogStock(params: {
+        token?: string;
+        size?: number;
+        productSids?: string[];
+    } = {}) {
+        const query = new URLSearchParams()
+        if (params.token) query.append('token', params.token)
+        if (params.size) query.append('size', params.size.toString())
+        if (params.productSids && params.productSids.length) params.productSids.forEach(sid => query.append('productSids', sid))
 
-    // --- Endpoints Feeds (Mises à jour asynchrones) ---
-
-    async createProducts(payload: any) {
-        return this.request('/feeds/products/create', 'POST', payload)
-    }
-
-    async updateProducts(payload: any) {
-        return this.request('/feeds/products/update', 'POST', payload)
-    }
-
-    async updateStock(payload: any) {
-        return this.request('/feeds/products/stock', 'POST', payload)
-    }
-
-    async updatePrice(payload: any) {
-        return this.request('/feeds/products/price', 'POST', payload)
-    }
-
-    async updateStatus(payload: any) {
-        return this.request('/feeds/products/status', 'POST', payload)
-    }
-
-    async getFeedStatus(feedId: string) {
-        return this.request(`/feeds/${feedId}`)
+        const queryString = query.toString()
+        return this.request(`/catalog/stock${queryString ? `?${queryString}` : ''}`)
     }
 
     // --- Endpoints Consignation (Consignment) ---
-
-    async getConsignmentOrders(limit = 100, offset = 0) {
-        return this.request(`/consignment-order?limit=${limit}&offset=${offset}`)
-    }
-
-    async getConsignmentOrder(purchaseOrderNumber: string) {
-        return this.request(`/consignment-order/${purchaseOrderNumber}`)
-    }
-
-    async getConsignmentStock(limit = 100, offset = 0) {
-        return this.request(`/consignment-stock?limit=${limit}&offset=${offset}`)
-    }
-
-    // --- Endpoints Finance ---
-
-    async getPayoutStatement(dateFrom?: string, dateTo?: string) {
-        let url = '/payout-statement'
-        const params = new URLSearchParams()
-        if (dateFrom) params.append('CreatedAfter', dateFrom)
-        if (dateTo) params.append('CreatedBefore', dateTo)
-        
-        if (params.toString()) {
-            url += `?${params.toString()}`
-        }
-        return this.request(url)
-    }
 }

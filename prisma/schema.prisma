@@ -189,6 +189,21 @@ model Book {
   @@map("books")
 }
 
+// Historique des actions Jumia
+model JumiaActionLog {
+  id        String   @id @default(uuid())
+  orderId   String   @db.VarChar(100)
+  action    String   @db.VarChar(50)  // PACK, READY_TO_SHIP, CANCEL, PRINT_LABEL, PRICE_UPDATE, STOCK_UPDATE
+  status    String   @default("SUCCESS") @db.VarChar(20) // SUCCESS, ERROR
+  detail    String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("jumia_action_logs")
+}
+
 model Pack {
   id             String      @id @default(uuid())
   name           String      @db.VarChar(255)

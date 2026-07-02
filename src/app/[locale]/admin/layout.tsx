@@ -65,6 +65,7 @@ export default function AdminLayout({
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true) // Collapsed by default
     const [userRole, setUserRole] = useState<string | null>(null)
+    const [pendingJumiaCount, setPendingJumiaCount] = useState(0)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
         'Configuration': false 
     })
@@ -75,6 +76,14 @@ export default function AdminLayout({
             .catch(console.error)
             
         getAdminRole().then(setUserRole).catch(console.error)
+
+        import('@/app/[locale]/admin/jumia-orders/actions').then(({ getPendingJumiaOrdersCount }) => {
+            getPendingJumiaOrdersCount().then(setPendingJumiaCount).catch(console.error)
+            const interval = setInterval(() => {
+                getPendingJumiaOrdersCount().then(setPendingJumiaCount).catch(console.error)
+            }, 60 * 1000) // update every minute
+            return () => clearInterval(interval)
+        })
     }, [])
 
     const toggleMenu = (name: string) => {
@@ -115,6 +124,7 @@ export default function AdminLayout({
             children: [
                 { name: 'Livres Physiques', href: `/${lang}/admin/books`, icon: BookOpen },
                 { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
+                { name: 'Catalogue Jumia', href: `/${lang}/admin/jumia-products`, icon: ShoppingBag },
                 { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
                 { name: 'Auteurs & Éditeurs', href: `/${lang}/admin/authors`, icon: Users },
                 { name: 'Marque-pages', href: `/${lang}/admin/accessories/bookmarks`, icon: Bookmark },
@@ -129,7 +139,8 @@ export default function AdminLayout({
             icon: ShoppingCart,
             children: [
                 { name: 'Commandes Web', href: `/${lang}/admin/orders`, icon: ShoppingCart },
-                { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag },
+                { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag, badge: pendingJumiaCount },
+                { name: 'Consignation (FBJ)', href: `/${lang}/admin/jumia-consignment`, icon: Package },
                 { name: 'Point de Vente (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },
                 { name: 'Centre d\'Appels', href: `/${lang}/admin/call-center`, icon: Headset },
                 { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
@@ -327,7 +338,10 @@ export default function AdminLayout({
                     const isExact = pathname === item.href
                     const isParent = hasChildren 
                         // @ts-ignore
-                        ? item.children.some(child => pathname === child.href || pathname.startsWith(child.href + '/'))
+                        ? item.children.some(child => {
+                            if (child.href === `/${lang}/admin`) return pathname === child.href
+                            return pathname === child.href || pathname.startsWith(child.href + '/')
+                        })
                         : pathname.startsWith(item.href + '/') && item.href !== `/${lang}/admin`
                     const isActive = isExact || isParent
                     const Icon = item.icon
@@ -399,7 +413,14 @@ export default function AdminLayout({
                                                 `}
                                             >
                                                 <ChildIcon className={`w-4 h-4 mr-3 ${isChildActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                                                {child.name}
+                                                <span className="flex-1">{child.name}</span>
+                                                {/* @ts-ignore */}
+                                                {child.badge > 0 && (
+                                                    <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isChildActive ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}`}>
+                                                        {/* @ts-ignore */}
+                                                        {child.badge}
+                                                    </span>
+                                                )}
                                             </Link>
                                         )
                                     })}

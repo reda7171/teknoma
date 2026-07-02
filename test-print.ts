@@ -1,0 +1,1 @@
+﻿import { printJumiaOrderLabelsFull } from './src/app/[locale]/admin/jumia-orders/actions'; async function run() { const res = await printJumiaOrderLabelsFull(process.argv[2]); console.log(JSON.stringify(res, null, 2)) }; run().catch(console.error).finally(()=>process.exit(0))
