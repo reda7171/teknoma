@@ -135,7 +135,8 @@ export class JumiaAPI {
     }
 
     async getOrderItems(orderId: string) {
-        return this.request(`/orders/items?order_id=${orderId}`)
+        // Jumia API attend orderId (camelCase) dans la query string
+        return this.request(`/orders/items?orderId=${orderId}`)
     }
 
     async packOrders(payload: any) {

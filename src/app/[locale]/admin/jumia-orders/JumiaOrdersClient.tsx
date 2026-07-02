@@ -135,8 +135,9 @@ export default function JumiaOrdersClient() {
         try {
             const response = await printJumiaOrderLabelsFull(orderId)
             
-            // Jumia API may return base64 document or a URL.
-            const base64Data = response.document || response.file || response.data || response.pdf || response
+            // Jumia API may return base64 document, a URL, or the V2 format with success.labels
+            const v2Base64 = response?.success?.labels?.[0]?.label
+            const base64Data = v2Base64 || response.document || response.file || response.data || response.pdf || response
             const contentType = response.contentType || 'application/pdf'
             const extension = contentType.includes('zip') ? 'zip' : 'pdf'
             
@@ -351,17 +352,17 @@ export default function JumiaOrdersClient() {
                                                                 {currentStatus === 'pending' && (
                                                                     <>
                                                                         <button 
-                                                                            onClick={() => handlePackOrder(order.number || order.OrderId || order.OrderNumber)}
-                                                                            disabled={packingId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                            onClick={() => handlePackOrder(order.id)}
+                                                                            disabled={packingId === order.id}
                                                                             className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
-                                                                                confirmPackId === (order.number || order.OrderId || order.OrderNumber)
-                                                                                ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-md'
+                                                                                confirmPackId === order.id
+                                                                                ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-md'
                                                                                 : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                                                                             }`}
                                                                         >
-                                                                            {packingId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                            {packingId === order.id ? (
                                                                                 <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
-                                                                            ) : confirmPackId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                            ) : confirmPackId === order.id ? (
                                                                                 'Confirmer ?'
                                                                             ) : (
                                                                                 <><Package className="w-3 h-3" /> Préparer</>
@@ -388,17 +389,17 @@ export default function JumiaOrdersClient() {
                                                                         </button>
                                                                         
                                                                         <button 
-                                                                            onClick={() => handleCancelOrder(order.number || order.OrderId || order.OrderNumber)}
-                                                                            disabled={cancelingId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                            onClick={() => handleCancelOrder(order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            disabled={cancelingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
-                                                                                confirmCancelId === (order.number || order.OrderId || order.OrderNumber)
+                                                                                confirmCancelId === (order.id || order.number || order.OrderId || order.OrderNumber)
                                                                                 ? 'bg-red-600 text-white hover:bg-red-700 shadow-md'
                                                                                 : 'bg-red-50 text-red-600 hover:bg-red-100'
                                                                             }`}
                                                                         >
-                                                                            {cancelingId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                            {cancelingId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
                                                                                 <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
-                                                                            ) : confirmCancelId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                            ) : confirmCancelId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
                                                                                 'Confirmer ?'
                                                                             ) : (
                                                                                 <><XCircle className="w-3 h-3" /> Annuler</>
@@ -409,11 +410,11 @@ export default function JumiaOrdersClient() {
                                                                 
                                                                 {(currentStatus === 'ready_to_ship' || currentStatus === 'shipped' || currentStatus === 'delivered') && (
                                                                     <button 
-                                                                        onClick={() => handlePrintLabels(order.number || order.OrderId || order.OrderNumber)}
-                                                                        disabled={printingId === (order.number || order.OrderId || order.OrderNumber)}
+                                                                        onClick={() => handlePrintLabels(order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                        disabled={printingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                         className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-50 text-blue-600 hover:bg-blue-100"
                                                                     >
-                                                                        {printingId === (order.number || order.OrderId || order.OrderNumber) ? (
+                                                                        {printingId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
                                                                             <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
                                                                         ) : (
                                                                             <><Printer className="w-3 h-3" /> Étiquette</>

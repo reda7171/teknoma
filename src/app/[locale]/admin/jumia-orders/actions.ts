@@ -157,7 +157,8 @@ export async function getJumiaOrderItems(orderId: string) {
     
     try {
         const response = await jumia.getOrderItems(orderId)
-        return response?.items || response?.data?.items || response || []
+        const data = Array.isArray(response) ? response[0] : response
+        return data?.items || data?.data?.items || data || []
     } catch (e: any) {
         console.error("Error fetching Jumia order items:", e)
         throw new Error(e.message)
@@ -169,9 +170,9 @@ export async function cancelJumiaOrderFull(orderId: string) {
     if (!jumia) throw new Error("Jumia n'est pas configuré")
     
     try {
-        // L'API d'annulation requiert les IDs des Order Items. On doit d'abord les récupérer.
         const responseItems = await jumia.getOrderItems(orderId)
-        const items = responseItems?.items || responseItems?.data?.items || responseItems || []
+        const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
+        const items = data?.items || data?.data?.items || data || []
         
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande. Impossible d'annuler.")
@@ -204,7 +205,8 @@ export async function packJumiaOrderFull(orderId: string) {
     try {
         // 1. Fetch Order Items
         const responseItems = await jumia.getOrderItems(orderId)
-        const items = responseItems?.items || responseItems?.data?.items || responseItems || []
+        const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
+        const items = data?.items || data?.data?.items || data || []
         
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
@@ -257,7 +259,8 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
     
     try {
         const responseItems = await jumia.getOrderItems(orderId)
-        const items = responseItems?.items || responseItems?.data?.items || responseItems || []
+        const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
+        const items = data?.items || data?.data?.items || data || []
         
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
@@ -272,8 +275,13 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
         const payload = {
             orderItemIds: orderItemIds,
             orderIds: [orderId],
-            orderId: orderId
+            orderId: orderId,
+            order_id: orderId // Certaines versions de l'API Jumia utilisent underscore
         }
+        
+        console.log('[PRINT LABELS] Order ID:', orderId)
+        console.log('[PRINT LABELS] Items found:', items.length, JSON.stringify(items.slice(0, 2)))
+        console.log('[PRINT LABELS] Payload:', JSON.stringify(payload))
         
         const response = await jumia.printLabels(payload)
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_LABEL', status: 'SUCCESS' } }).catch(() => {})
@@ -291,7 +299,8 @@ export async function readyToShipJumiaOrderFull(orderId: string) {
     
     try {
         const responseItems = await jumia.getOrderItems(orderId)
-        const items = responseItems?.items || responseItems?.data?.items || responseItems || []
+        const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
+        const items = data?.items || data?.data?.items || data || []
         
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
