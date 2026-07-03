@@ -473,6 +473,26 @@ export async function POST(req: Request) {
                 }
             }
             
+            // Format: approve_review:{reviewId}
+            else if (data && data.startsWith('approve_review:')) {
+                const [, reviewId] = data.split(':')
+                await prisma.review.update({ where: { id: reviewId }, data: { isApproved: true } })
+                await answerCallbackQuery(callbackId, '✅ Avis approuvé !', token)
+                if (message?.chat?.id && message?.message_id) {
+                    await editTelegramMessage(message.chat.id, message.message_id, `✅ <b>Avis approuvé avec succès.</b>`, token)
+                }
+            }
+
+            // Format: delete_review:{reviewId}
+            else if (data && data.startsWith('delete_review:')) {
+                const [, reviewId] = data.split(':')
+                await prisma.review.delete({ where: { id: reviewId } })
+                await answerCallbackQuery(callbackId, '🗑️ Avis supprimé !', token)
+                if (message?.chat?.id && message?.message_id) {
+                    await editTelegramMessage(message.chat.id, message.message_id, `🗑️ <b>Avis supprimé.</b>`, token)
+                }
+            }
+            
             // Format: stats:{period}
             else if (data && data.startsWith('stats:') && !['stats:recent_orders', 'stats:compare_months', 'stats:all_time'].includes(data)) {
                 const [, period] = data.split(':')
@@ -766,6 +786,18 @@ export async function POST(req: Request) {
                     `<b>🔍 Recherche</b>\n` +
                     `/stock [titre] — Vérifier le stock d'un livre\n` +
                     `/search [nom/téléphone] — Rechercher un client\n\n` +
+                    `<b>⭐ Gestion Rapide</b>\n` +
+                    `/avis — Modérer les nouveaux avis clients\n` +
+                    `/promo [titre] [prix] — Appliquer un nouveau prix\n` +
+                    `/expedier [ID] — Marquer une commande en expédiée\n` +
+                    `/topclients — Les 5 meilleurs acheteurs\n` +
+                    `/maintenance [on/off] — Bloquer/débloquer l'accès au site\n\n` +
+                    `<b>📝 Blog</b>\n` +
+                    `/blogstats — Voir le Top 5 des articles\n` +
+                    `/blogpublier [mot clé] — Publier un article\n` +
+                    `/blogmasquer [mot clé] — Masquer un article\n` +
+                    `/bloggenerer [sujet] — Générer un article via IA\n` +
+                    `/blogpartager [mot clé] — Partager sur les réseaux sociaux\n\n` +
                     `<b>⚙️ Automatisations (Cron)</b>\n` +
                     `Rapport quotidien → <code>/api/cron/daily-report</code>\n` +
                     `Alerte stock → <code>/api/cron/stock-alert</code>\n` +
@@ -995,6 +1027,227 @@ export async function POST(req: Request) {
                 } else {
                     const lines = criticalBooks.map(b => `📖 ${b.title} → <b>${b.stock}</b>${b.stock === 0 ? ' ⛔' : ''}`).join('\n')
                     await sendTelegramMessage(`⚠️ <b>${criticalBooks.length} livres stock critique</b>\n\n${lines}`, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/AVIS') || text === 'AVIS') {
+                const reviews = await prisma.review.findMany({
+                    where: { isApproved: false },
+                    take: 3,
+                    include: { book: { select: { title: true } } },
+                    orderBy: { createdAt: 'desc' }
+                })
+                if (reviews.length === 0) {
+                    await sendTelegramMessage(`✅ Aucun nouvel avis à valider.`, chatId.toString(), token)
+                } else {
+                    for (const r of reviews) {
+                        const { escapeHtml } = await import('@/lib/telegram')
+                        const msg = `💬 <b>Nouvel Avis en attente</b>\n\n👤 ${escapeHtml(r.fullName)}\n📖 ${escapeHtml(r.book?.title || 'Livre inconnu')}\n⭐ ${r.rating}/5\n📝 <i>${escapeHtml(r.comment)}</i>`
+                        const markup = {
+                            inline_keyboard: [
+                                [
+                                    { text: '✅ Approuver', callback_data: `approve_review:${r.id}` },
+                                    { text: '🗑️ Supprimer', callback_data: `delete_review:${r.id}` }
+                                ]
+                            ]
+                        }
+                        await sendTelegramMessage(msg, chatId.toString(), token, markup)
+                    }
+                }
+            }
+            else if (text.startsWith('/PROMO')) {
+                const parts = rawText.split(' ').slice(1)
+                const price = parseFloat(parts.pop() || '0')
+                const query = parts.join(' ')
+                
+                if (!query || !price) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/promo [titre du livre] [nouveau_prix]</code>`, chatId.toString(), token)
+                } else {
+                    const books = await prisma.book.findMany({ where: { title: { contains: query } }, take: 1 })
+                    if (books.length === 0) {
+                        await sendTelegramMessage(`❌ Aucun livre trouvé pour "${query}"`, chatId.toString(), token)
+                    } else {
+                        const book = books[0]
+                        await prisma.book.update({ where: { id: book.id }, data: { price } })
+                        const { escapeHtml } = await import('@/lib/telegram')
+                        await sendTelegramMessage(`✅ <b>Promo Appliquée !</b>\n\n📖 ${escapeHtml(book.title)}\n💰 Nouveau prix : <b>${price} MAD</b>`, chatId.toString(), token)
+                    }
+                }
+            }
+            else if (text.startsWith('/EXPEDIER')) {
+                const query = rawText.split(' ')[1]
+                if (!query) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/expedier [id_commande]</code>`, chatId.toString(), token)
+                } else {
+                    try {
+                        const order = await prisma.order.update({
+                            where: { id: query },
+                            data: { 
+                                status: 'SHIPPED',
+                                statusHistory: {
+                                    create: {
+                                        status: 'SHIPPED',
+                                        comment: 'Expédiée via Telegram Bot',
+                                        createdBy: 'TELEGRAM'
+                                    }
+                                }
+                            }
+                        })
+                        await sendTelegramMessage(`✅ Commande <b>#${order.id.slice(0,6).toUpperCase()}</b> marquée comme EXPÉDIÉE 🚚`, chatId.toString(), token)
+                    } catch (e) {
+                        await sendTelegramMessage(`❌ Erreur : Commande introuvable.`, chatId.toString(), token)
+                    }
+                }
+            }
+            else if (text.startsWith('/TOPCLIENTS')) {
+                const topUsers = await prisma.order.groupBy({
+                    by: ['phone', 'fullName'],
+                    where: { status: 'DELIVERED' },
+                    _count: { id: true },
+                    _sum: { total: true },
+                    orderBy: { _count: { id: 'desc' } },
+                    take: 5
+                })
+                if (topUsers.length === 0) {
+                    await sendTelegramMessage(`❌ Pas assez de données pour afficher le TOP.`, chatId.toString(), token)
+                } else {
+                    const { escapeHtml } = await import('@/lib/telegram')
+                    const lines = topUsers.map((u, i) => `${i+1}. <b>${escapeHtml(u.fullName)}</b> (${u.phone})\n📦 ${u._count.id} cmd | 💰 ${(u._sum.total || 0).toFixed(0)} MAD`).join('\n\n')
+                    await sendTelegramMessage(`🏆 <b>TOP 5 CLIENTS (Livrées)</b>\n\n${lines}`, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/MAINTENANCE')) {
+                const arg = rawText.split(' ')[1]?.toLowerCase()
+                if (arg === 'on' || arg === 'off') {
+                    const isActive = arg === 'on' ? 'true' : 'false'
+                    await prisma.siteSettings.upsert({
+                        where: { key: 'maintenance_mode' },
+                        update: { value: isActive },
+                        create: { key: 'maintenance_mode', value: isActive }
+                    })
+                    await sendTelegramMessage(`🛠️ Mode Maintenance : <b>${arg.toUpperCase()}</b>`, chatId.toString(), token)
+                } else {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/maintenance [on/off]</code>`, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/BLOGSTATS') || text === 'BLOGSTATS') {
+                const topPosts = await prisma.post.findMany({
+                    where: { published: true },
+                    orderBy: { viewCount: 'desc' },
+                    take: 5,
+                    select: { title: true, viewCount: true }
+                })
+                if (topPosts.length === 0) {
+                    await sendTelegramMessage(`❌ Aucun article publié trouvé.`, chatId.toString(), token)
+                } else {
+                    const { escapeHtml } = await import('@/lib/telegram')
+                    const lines = topPosts.map((p, i) => `${i+1}. <b>${escapeHtml(p.title)}</b>\n👁️ ${p.viewCount} vues`).join('\n\n')
+                    await sendTelegramMessage(`🏆 <b>TOP 5 ARTICLES (Vues)</b>\n\n${lines}`, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/BLOGPUBLIER')) {
+                const query = rawText.split(' ').slice(1).join(' ')
+                if (!query) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/blogpublier [mot clé]</code>`, chatId.toString(), token)
+                } else {
+                    const posts = await prisma.post.findMany({ where: { title: { contains: query } }, take: 1 })
+                    if (posts.length === 0) {
+                        await sendTelegramMessage(`❌ Aucun article trouvé pour "${query}"`, chatId.toString(), token)
+                    } else {
+                        const post = await prisma.post.update({ where: { id: posts[0].id }, data: { published: true, publishedAt: new Date() } })
+                        const { escapeHtml } = await import('@/lib/telegram')
+                        await sendTelegramMessage(`✅ <b>Article publié !</b>\n\n📝 ${escapeHtml(post.title)}`, chatId.toString(), token)
+                    }
+                }
+            }
+            else if (text.startsWith('/BLOGMASQUER')) {
+                const query = rawText.split(' ').slice(1).join(' ')
+                if (!query) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/blogmasquer [mot clé]</code>`, chatId.toString(), token)
+                } else {
+                    const posts = await prisma.post.findMany({ where: { title: { contains: query } }, take: 1 })
+                    if (posts.length === 0) {
+                        await sendTelegramMessage(`❌ Aucun article trouvé pour "${query}"`, chatId.toString(), token)
+                    } else {
+                        const post = await prisma.post.update({ where: { id: posts[0].id }, data: { published: false } })
+                        const { escapeHtml } = await import('@/lib/telegram')
+                        await sendTelegramMessage(`🚫 <b>Article repassé en brouillon !</b>\n\n📝 ${escapeHtml(post.title)}`, chatId.toString(), token)
+                    }
+                }
+            }
+            else if (text.startsWith('/BLOGGENERER')) {
+                const topic = rawText.split(' ').slice(1).join(' ')
+                if (!topic) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/bloggenerer [Sujet de l'article]</code>`, chatId.toString(), token)
+                } else {
+                    await sendTelegramMessage(`⏳ Génération en cours pour le sujet : "${topic}"... Cela peut prendre une minute.`, chatId.toString(), token)
+                    try {
+                        const { generateText } = await import('@/lib/gemini')
+                        const prompt = `Rédige un article de blog complet, optimisé pour le SEO (en français), d'environ 500 mots sur le sujet suivant : ${topic}. Retourne le titre de l'article sur la première ligne, suivi d'un saut de ligne, puis le contenu formaté en HTML propre.`
+                        const generated = await generateText(prompt)
+                        if (!generated) throw new Error('Generation failed')
+                        
+                        const parts = generated.split('\n')
+                        let title = parts[0].replace(/<[^>]*>?/gm, '').trim()
+                        const content = parts.slice(1).join('\n').trim()
+                        
+                        const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
+                        
+                        const post = await prisma.post.create({
+                            data: {
+                                title: title || topic,
+                                slug: (title || topic).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100) + '-' + Date.now().toString().slice(-4),
+                                content: content || '<p>Contenu généré vide</p>',
+                                excerpt: content.replace(/<[^>]*>?/gm, '').slice(0, 150) + '...',
+                                published: false,
+                                authorId: adminUser?.id || '',
+                                authorName: adminUser?.fullName || 'Admin'
+                            }
+                        })
+                        
+                        await sendTelegramMessage(`✅ <b>Article généré avec succès !</b>\n\nTitre : ${title}\nStatut : <b>Brouillon</b>\n\nVous pouvez le lire et l'éditer depuis l'administration.`, chatId.toString(), token)
+                    } catch (e: any) {
+                        await sendTelegramMessage(`❌ Erreur lors de la génération : ${e.message}`, chatId.toString(), token)
+                    }
+                }
+            }
+            else if (text.startsWith('/BLOGPARTAGER')) {
+                const query = rawText.split(' ').slice(1).join(' ')
+                if (!query) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/blogpartager [mot clé]</code>`, chatId.toString(), token)
+                } else {
+                    const posts = await prisma.post.findMany({ where: { title: { contains: query } }, take: 1 })
+                    if (posts.length === 0) {
+                        await sendTelegramMessage(`❌ Aucun article trouvé pour "${query}"`, chatId.toString(), token)
+                    } else {
+                        const post = posts[0]
+                        const n8nWebhookUrl = (await prisma.siteSettings.findUnique({ where: { key: 'n8n_webhook_url' } }))?.value || process.env.N8N_WEBHOOK_URL
+                        if (!n8nWebhookUrl) {
+                            await sendTelegramMessage(`❌ n8n webhook non configuré.`, chatId.toString(), token)
+                        } else {
+                            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                            const postUrl = `${baseUrl}/fr/blog/${post.slug}`
+                            const imageUrl = post.coverImage ? (post.coverImage.startsWith('http') ? post.coverImage : `${baseUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`) : `${baseUrl}/images/default-blog.jpg`
+                            
+                            const payload = {
+                                itemId: post.id,
+                                itemType: 'BLOG',
+                                title: post.title,
+                                caption: `Nouveau sur le blog ! 📚\n\n${post.title}\n\n👉 Lisez l'article complet ici : ${postUrl}`,
+                                image: imageUrl,
+                                isVideo: false,
+                                isPack: false,
+                                format: 'feed',
+                                platform: 'all',
+                                source: 'telegram-bot-action',
+                                facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
+                                instagram_account_id: (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value
+                            }
+                            fetch(n8nWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(console.error)
+                            
+                            const { escapeHtml } = await import('@/lib/telegram')
+                            await sendTelegramMessage(`🚀 Partage de l'article <b>${escapeHtml(post.title)}</b> lancé vers vos réseaux sociaux !`, chatId.toString(), token)
+                        }
+                    }
                 }
             }
         }
