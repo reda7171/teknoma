@@ -2,12 +2,14 @@
 
 import { useState, useRef } from 'react'
 import { Plus, Edit2, Trash2, Check, X, Upload, Image as ImageIcon, Search, Phone } from 'lucide-react'
-import { createShippingCompany, updateShippingCompany, deleteShippingCompany } from '@/lib/actions/shipping-companies'
+import { createShippingCompany, updateShippingCompany, deleteShippingCompany, setDefaultShippingCompany } from '@/lib/actions/shipping-companies'
 
 const EMPTY_FORM = { name: '', logo: '', apiKey: '', apiUrl: '', supportPhone: '', isActive: true }
 
-export default function ShippingCompaniesClient({ initialCompanies }: { initialCompanies: any[] }) {
+export default function ShippingCompaniesClient({ initialCompanies, initialDefaultId }: { initialCompanies: any[], initialDefaultId: string | null }) {
     const [companies, setCompanies] = useState(initialCompanies)
+    const [defaultCompanyId, setDefaultCompanyId] = useState(initialDefaultId)
+    const [isSettingDefault, setIsSettingDefault] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const [isEditing, setIsEditing] = useState(false)
     const [currentCompany, setCurrentCompany] = useState<any>(null)
@@ -81,6 +83,19 @@ export default function ShippingCompaniesClient({ initialCompanies }: { initialC
         const res = await updateShippingCompany(comp.id, { isActive: !comp.isActive })
         if (res.success) setCompanies(companies.map(c => c.id === comp.id ? { ...c, isActive: !comp.isActive } : c))
     }
+
+    const handleSetDefault = async (id: string) => {
+        if (!confirm('Définir cette société comme celle par défaut ?')) return
+        setIsSettingDefault(true)
+        const res = await setDefaultShippingCompany(id)
+        if (res.success) {
+            setDefaultCompanyId(id)
+        } else {
+            alert(res.error)
+        }
+        setIsSettingDefault(false)
+    }
+
 
     if (isEditing) {
         return (
@@ -229,6 +244,20 @@ export default function ShippingCompaniesClient({ initialCompanies }: { initialC
                                         <Phone className="w-3.5 h-3.5" /> Support
                                     </a>
                                 )}
+                            </div>
+                            
+                            <div className="mt-2">
+                                <button 
+                                    onClick={() => handleSetDefault(comp.id)}
+                                    disabled={isSettingDefault || defaultCompanyId === comp.id}
+                                    className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs transition-colors border ${defaultCompanyId === comp.id ? 'bg-yellow-50 text-yellow-700 border-yellow-200 cursor-default' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                                >
+                                    {defaultCompanyId === comp.id ? (
+                                        <><Check className="w-3.5 h-3.5" /> Par défaut</>
+                                    ) : (
+                                        'Définir par défaut'
+                                    )}
+                                </button>
                             </div>
                         </div>
                     ))

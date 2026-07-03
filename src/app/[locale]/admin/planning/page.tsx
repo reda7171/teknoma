@@ -28,7 +28,16 @@ export default async function PlanningPage() {
             select: { id: true, title: true, image: true, author: true },
         })
 
-        availableBooks = books;
+        // Fetch active packs
+        const packs = await prisma.pack.findMany({
+            where: { active: true },
+            select: { id: true, name: true, image: true },
+        })
+
+        availableBooks = [
+            ...books.map(b => ({ ...b, type: 'book' })),
+            ...packs.map(p => ({ id: p.id, title: p.name, image: p.image, author: 'Pack', type: 'pack' }))
+        ];
 
     } catch (error) {
         console.error('Failed to fetch data for planning:', error)

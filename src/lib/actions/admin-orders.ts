@@ -302,6 +302,120 @@ export async function syncOrderToWithYou(orderId: string) {
 }
 
 /**
+ * Envoyer la commande à une société de livraison spécifique (Générique)
+ */
+export async function syncOrderToShippingCompany(orderId: string, companyId: string) {
+    try {
+        await verifyAdmin()
+
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: { items: true }
+        })
+
+        if (!order) throw new Error('Commande introuvable')
+        if (order.trackingID) throw new Error('Cette commande a déjà un tracking ID')
+
+        const company = await prisma.shippingCompany.findUnique({
+            where: { id: companyId }
+        })
+
+        if (!company) throw new Error('Société de livraison introuvable')
+
+        let trackingID = order.id
+
+        const compName = company.name.toLowerCase()
+
+        if (compName.includes('withyou')) {
+            const packageData = {
+                villedest: order.city,
+                nomdest: order.fullName,
+                teldest: order.phone,
+                adressedest: order.address,
+                prixcolis: order.total.toString(),
+                refcolis: order.id,
+                observation: `Commande Riwaya #${order.id.slice(0, 8)}`
+            }
+
+            const response = await withyouService.createPackage(packageData)
+            trackingID = response?.data?.[0]?.trackingID || response?.trackingID || order.id
+        } else if (compName.includes('olivraison')) {
+            const token = company.apiKey || (await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } }))?.value
+            if (!token) throw new Error("Clé API Olivraison manquante")
+
+            const packageData = {
+                price: order.total,
+                comment: order.comment || `Commande Riwaya #${order.id.slice(0, 8)}`,
+                description: `Commande Riwaya #${order.id.slice(0, 8)}`,
+                inventory: true,
+                name: order.fullName,
+                destination: {
+                    name: order.fullName,
+                    phone: order.phone,
+                    city: order.city,
+                    streetAddress: order.address
+                },
+                pickup_address: {
+                    streetAddress: "Adresse Riwaya",
+                    city: "Ville Riwaya",
+                    phone: "0600000000",
+                    company: "Riwaya",
+                    email: "contact@riwaya.store",
+                    website: "https://riwaya.store"
+                }
+            }
+
+            const res = await fetch(`http://partners.olivraison.com/package`, {
+                method: 'POST',
+                headers: { 
+                    'authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(packageData)
+            })
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null)
+                throw new Error(errData?.message || 'Erreur API Olivraison')
+            }
+            
+            const data = await res.json()
+            trackingID = data.trackingID || order.id
+        } else {
+             // throw new Error("Société non supportée pour la création automatique")
+             // Pour les autres, on assigne juste le colis à la société
+        }
+
+        // Mettre à jour la commande locale
+        await prisma.order.update({
+            where: { id: orderId },
+            data: {
+                trackingID: trackingID,
+                deliveryStatus: 'CREATED',
+                deliverySyncAt: new Date(),
+                status: 'CONFIRMED', // Automatiquement passer à confirmé si envoyé à livraison
+                shippingCompany: company.id
+            }
+        })
+
+        revalidatePath('/admin/orders')
+        revalidatePath(`/admin/orders/${orderId}`)
+
+        return {
+            success: true,
+            trackingID: trackingID,
+            message: `Commande envoyée à ${company.name} avec succès`
+        }
+    } catch (error: any) {
+        console.error('Erreur Sync Livraison:', error)
+        return {
+            success: false,
+            error: error.message || 'Erreur lors de la synchronisation avec la livraison'
+        }
+    }
+}
+
+/**
  * Récupérer le sticker de livraison
  */
 export async function getOrderShippingLabel(orderId: string) {

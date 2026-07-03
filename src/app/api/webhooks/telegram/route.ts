@@ -128,14 +128,13 @@ export async function POST(req: Request) {
                 }
             }
             
-            // Format: jumia_rts:{orderId}
             else if (data && data.startsWith('jumia_rts:')) {
                 const [, orderId] = data.split(':')
-                const { readyToShipJumiaOrderFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
+                const { packJumiaOrderFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
 
                 try {
                     await answerCallbackQuery(callbackId, `⏳ Préparation de la commande ${orderId}...`, token)
-                    await readyToShipJumiaOrderFull(orderId)
+                    await packJumiaOrderFull(orderId)
                     
                     if (message?.chat?.id && message?.message_id) {
                         const { escapeHtml } = await import('@/lib/telegram')
@@ -306,17 +305,61 @@ export async function POST(req: Request) {
             else if (data && data.startsWith('pub_creative:')) {
                 const [, itemId, itemType, platform] = data.split(':')
                 try {
-                    const instagramId = (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value
-                    const facebookPageId = (await prisma.siteSettings.findUnique({ where: { key: 'marketing_facebook_page_id' } }))?.value
+                    let item: any = null;
+                    let imageUrl = '';
+                    let title = 'Riwaya';
+
+                    // Si l'ID a la longueur d'un UUID, on suppose que c'est un UUID en DB
+                    if (itemId && itemId.length === 36 && itemId.includes('-')) {
+                        if (itemType === 'BOOK') {
+                            item = await prisma.book.findUnique({ where: { id: itemId } })
+                            if (item) { imageUrl = item.image; title = item.title; }
+                        } else if (itemType === 'PACK') {
+                            item = await prisma.pack.findUnique({ where: { id: itemId } })
+                            if (item) { imageUrl = item.image; title = item.name; }
+                        }
+                    } else if (itemId && itemId !== 'manual') {
+                        // C'est un nom de fichier du dossier uploads
+                        imageUrl = `/uploads/books/${itemId}`
+                        title = itemId
+                    }
+
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                    if (imageUrl && !imageUrl.startsWith('http')) {
+                        imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+                    }
+
+                    // Proxy HTTPS pour Meta
+                    const isVideo = imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm')
+                    if (imageUrl && !isVideo && (platform === 'instagram' || platform === 'facebook' || platform === 'all' || platform === 'both')) {
+                        imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&q=85`
+                    }
 
                     const payload = {
-                        bookId: itemType === 'BOOK' ? itemId : null,
-                        packId: itemType === 'PACK' ? itemId : null,
+                        itemId: item?.id || 'marketing',
+                        itemType,
+                        title: title,
+                        author: item?.author || 'Riwaya',
+                        price: item?.price || 0,
+                        category: item?.category || 'Promotion',
+                        image: imageUrl,
+                        isVideo,
+                        isPack: itemType === 'PACK',
+                        bookUrl: itemType === 'BOOK' && item ? `${baseUrl}/fr/books/${item.id}` : '',
+                        packUrl: itemType === 'PACK' && item ? `${baseUrl}/fr/packs` : '',
+                        itemUrl: item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
+                        caption: item?.description || title,
                         format: 'story',
-                        platform: platform,
-                        instagram_account_id: instagramId,
-                        facebook_page_id: facebookPageId,
-                        source: 'telegram-bot-action'
+                        platform,
+                        source: 'telegram-bot-action',
+                        
+                        // Tokens
+                        facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
+                        instagram_account_id: (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value,
+                        tiktok_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'tiktok_access_token' } }))?.value,
+                        tiktok_creator_id: (await prisma.siteSettings.findUnique({ where: { key: 'tiktok_creator_id' } }))?.value,
+                        tiktok_app_id: (await prisma.siteSettings.findUnique({ where: { key: 'tiktok_app_id' } }))?.value,
+                        tiktok_client_secret: (await prisma.siteSettings.findUnique({ where: { key: 'tiktok_client_secret' } }))?.value
                     }
 
                     const n8nWebhookUrl = (await prisma.siteSettings.findUnique({ where: { key: 'n8n_webhook_url' } }))?.value || process.env.N8N_WEBHOOK_URL
@@ -512,24 +555,28 @@ export async function POST(req: Request) {
                         const { JumiaAPI } = await import('@/lib/jumia-api')
                         const jumia = await JumiaAPI.getInstance()
                         if (jumia) {
-                            // Jumia uses ISO format. For createdBefore, we add 1 day so it includes the end date fully.
-                            const endDateForJumia = new Date(end.getTime() + 86400000)
+                            // Jumia uses ISO format.
                             const createdAfter = start.toISOString()
-                            const createdBefore = endDateForJumia.toISOString()
+                            const createdBefore = end.toISOString()
 
-                            const response = await jumia.getOrders(100, undefined, undefined, createdAfter, createdBefore)
+                            // On demande jusqu'à 500 commandes pour couvrir un mois entier
+                            const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
                             const jumiaOrders = response?.orders || response?.data?.orders || []
                             
                             for (const o of jumiaOrders) {
                                 const status = (o.status || o.Status || '').toLowerCase()
                                 
                                 jumiaStats.count++
-                                jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
+                                
+                                const isCanceled = status === 'canceled' || status === 'failed' || status === 'returned';
+                                if (!isCanceled) {
+                                    jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
+                                }
                                 
                                 if (status === 'pending') jumiaStats.pending++
                                 else if (status === 'shipped' || status === 'ready-to-ship') jumiaStats.shipped++
                                 else if (status === 'delivered') jumiaStats.delivered++
-                                else if (status === 'canceled' || status === 'failed' || status === 'returned') jumiaStats.canceled++
+                                else if (isCanceled) jumiaStats.canceled++
                             }
                         }
                     } catch (e) {
@@ -779,12 +826,15 @@ export async function POST(req: Request) {
                         const files = await fs.readdir(uploadDir)
                         console.log(`[TELEGRAM] Found ${files.length} total files in directory`)
                         
-                        const marketingFiles = files.filter(f => 
+                        const filteredFiles = files.filter(f => 
                             f.toLowerCase().startsWith('creative_') || 
                             f.toLowerCase().startsWith('pack_') || 
                             f.toLowerCase().startsWith('desc_') || 
                             f.toLowerCase().includes('pack')
-                        ).sort().reverse().slice(0, 10)
+                        );
+                        
+                        // Mélanger aléatoirement pour ne pas toujours afficher les mêmes
+                        const marketingFiles = filteredFiles.sort(() => 0.5 - Math.random()).slice(0, 10)
 
                         console.log(`[TELEGRAM] Filtered ${marketingFiles.length} marketing files:`, marketingFiles)
 
@@ -803,10 +853,12 @@ export async function POST(req: Request) {
                     // 2. Tenter la DB si le disque n'a rien donné
                     if (creatives.length === 0) {
                         const dbAssets = await prisma.marketingAsset.findMany({
-                            take: 10,
+                            take: 50, // Prendre les 50 derniers et mélanger
                             orderBy: { createdAt: 'desc' }
                         })
-                        creatives = dbAssets.map(a => ({
+                        const randomAssets = dbAssets.sort(() => 0.5 - Math.random()).slice(0, 10);
+                        
+                        creatives = randomAssets.map(a => ({
                             name: a.name,
                             type: a.type,
                             bookId: a.bookId,
@@ -834,7 +886,7 @@ export async function POST(req: Request) {
                     const buttons = creatives.map(c => {
                         const label = c.name.length > 30 ? c.name.substring(0, 27) + '...' : c.name
                         const typeLabel = c.type === 'PACK' ? '📦' : '✨'
-                        const itemId = (c as any).bookId || (c as any).packId || 'manual'
+                        const itemId = (c as any).bookId || (c as any).packId || c.name
                         return [{ 
                             text: `${typeLabel} ${label}`, 
                             callback_data: `prep_creative:${itemId}:${c.type === 'PACK' ? 'PACK' : 'BOOK'}`.substring(0, 64)

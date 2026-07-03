@@ -90,10 +90,12 @@ export default function AdminLayout({
         if (sidebarCollapsed) {
             setSidebarCollapsed(false)
         }
-        setExpandedMenus(prev => ({
-            ...prev,
-            [name]: !prev[name]
-        }))
+        setExpandedMenus(prev => {
+            if (prev[name]) {
+                return {}
+            }
+            return { [name]: true }
+        })
     }
 
     const features = useMemo(() => ({
@@ -255,8 +257,8 @@ export default function AdminLayout({
         navigation.forEach(item => {
             if (item.children && item.children.some(child => pathname === child.href)) {
                 setExpandedMenus(prev => {
-                    if (prev[item.name]) return prev;
-                    return { ...prev, [item.name]: true };
+                    if (prev[item.name] && Object.keys(prev).length === 1) return prev;
+                    return { [item.name]: true };
                 })
                 // Open sidebar if child is active to show it
                 setSidebarCollapsed(false);

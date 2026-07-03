@@ -28,6 +28,7 @@ export interface SuggestedBook {
     image: string
     author: string
     isProgrammed: boolean
+    type?: 'book' | 'pack'
 }
 
 export default function PlanningClient({ initialPosts, availableBooks = [] }: { initialPosts: ScheduledPost[], availableBooks?: any[] }) {
@@ -459,6 +460,65 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         setIsLoading(false)
     }
 
+    const handleAutoScheduleAll = async () => {
+        setIsLoading(true);
+        const unprogrammed = dailySuggestions.filter(b => !b.isProgrammed);
+        if (unprogrammed.length === 0) {
+            showToast('Toutes les suggestions sont déjà programmées', 'success');
+            setIsLoading(false);
+            return;
+        }
+
+        const possibleTimes = ['10:00', '12:30', '15:00', '18:00', '19:30', '20:00', '21:00'];
+        const shuffledTimes = [...possibleTimes].sort(() => 0.5 - Math.random());
+        
+        let newPostsCount = 0;
+
+        for (let i = 0; i < unprogrammed.length; i++) {
+            const book = unprogrammed[i];
+            const timeSlot = shuffledTimes[i % shuffledTimes.length];
+            const link = `https://riwaya.store/fr/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
+            const content = `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
+
+            const [hours, minutes] = timeSlot.split(':');
+            const scheduleAt = new Date(selectedDate);
+            scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+
+            const payload = {
+                date: scheduleAt.toISOString(),
+                time: timeSlot,
+                content: content,
+                platforms: ['facebook', 'instagram'],
+                mediaUrl: book.image
+            };
+
+            try {
+                const res = await fetch('/api/admin/planning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    let parsedPlatforms = [];
+                    try { parsedPlatforms = JSON.parse(data.post.platforms); } catch { parsedPlatforms = []; }
+                    const updatedPost = { ...data.post, date: new Date(data.post.date), platforms: parsedPlatforms };
+                    setPosts(prev => [...prev, updatedPost]);
+                    newPostsCount++;
+                }
+            } catch (error) {
+                console.error('Erreur autoplanning', error);
+            }
+        }
+
+        if (newPostsCount > 0) {
+            showToast(`${newPostsCount} post(s) programmé(s) avec succès`, 'success');
+        } else {
+            showToast('Erreur lors de la programmation', 'error');
+        }
+        setIsLoading(false);
+    }
+
     const getPostsForTime = (time: string) => {
         return posts.filter(post => 
             isSameDay(post.date, selectedDate) && 
@@ -576,13 +636,23 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                             </div>
                             <h2 className="text-sm font-black text-blue-900 uppercase tracking-wider">Suggestions du jour</h2>
                         </div>
-                        <button 
-                            onClick={() => generateSuggestions(new Date().getTime())}
-                            className="p-1.5 bg-white/50 hover:bg-white text-blue-600 rounded-lg transition-colors border border-blue-200/50 shadow-sm flex items-center gap-1 text-xs font-bold"
-                            title="Rafraîchir les suggestions"
-                        >
-                            <RefreshCw className="w-3.5 h-3.5" /> Rafraîchir
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={handleAutoScheduleAll}
+                                disabled={isLoading}
+                                className="p-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors border border-green-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
+                                title="Programmer aléatoirement"
+                            >
+                                <Plus className="w-3.5 h-3.5" /> Auto-programmer
+                            </button>
+                            <button 
+                                onClick={() => generateSuggestions(new Date().getTime())}
+                                className="p-1.5 bg-white/50 hover:bg-white text-blue-600 rounded-lg transition-colors border border-blue-200/50 shadow-sm flex items-center gap-1 text-xs font-bold"
+                                title="Rafraîchir les suggestions"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" /> Rafraîchir
+                            </button>
+                        </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {dailySuggestions.map(book => (
@@ -594,7 +664,13 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     </div>
                                 )}
                                 <div className={`w-12 h-16 relative rounded shrink-0 overflow-hidden bg-slate-100 ${book.isProgrammed ? 'opacity-50 grayscale' : ''}`}>
-                                    <Image src={getImageUrl(book.image)} alt={book.title} fill className="object-cover" />
+                                    {book.image && getImageUrl(book.image) ? (
+                                        <Image src={getImageUrl(book.image)} alt={book.title} fill className="object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <ImageIcon className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={`flex-1 min-w-0 ${book.isProgrammed ? 'opacity-60' : ''}`}>
                                     <p className="font-bold text-slate-900 text-sm truncate">{book.title}</p>
@@ -605,7 +681,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                 const timeToSet = '12:00';
                                                 handleOpenModal(timeToSet);
                                                 setTimeout(() => {
-                                                    setNewPostContent(`📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n#livre #lecture #riwaya`);
+                                                    const link = `https://riwaya.store/fr/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
+                                                    setNewPostContent(`📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`);
                                                     const newMedia = { name: book.title, url: book.image, type: 'image', createdAt: new Date().toISOString() };
                                                     setSelectedMedia(newMedia as any);
                                                 }, 50);

@@ -1,5 +1,6 @@
 import { verifyAdmin } from '@/lib/actions/auth'
 import { getShippingCompanies } from '@/lib/actions/shipping-companies'
+import { getSetting } from '@/lib/actions/site-settings'
 import { redirect } from 'next/navigation'
 import ShippingCompaniesClient from './ShippingCompaniesClient'
 import { Truck } from 'lucide-react'
@@ -16,6 +17,7 @@ export default async function ShippingCompaniesConfigPage() {
     }
 
     const companies = await getShippingCompanies()
+    const defaultCompanyId = await getSetting('DEFAULT_SHIPPING_COMPANY_ID')
 
     return (
         <div className="space-y-12">
@@ -30,7 +32,7 @@ export default async function ShippingCompaniesConfigPage() {
                 </div>
             </div>
 
-            <ShippingCompaniesClient initialCompanies={companies} />
+            <ShippingCompaniesClient initialCompanies={companies} initialDefaultId={defaultCompanyId} />
         </div>
     )
 }

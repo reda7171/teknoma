@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { revalidatePath } from 'next/cache'
+import { updateSetting } from '@/lib/actions/site-settings'
 
 export async function getShippingCompanies() {
     try {
@@ -51,6 +52,18 @@ export async function deleteShippingCompany(id: string) {
         return { success: true }
     } catch (error: any) {
         console.error('Erreur deleteShippingCompany:', error)
+        return { success: false, error: error.message }
+    }
+}
+
+export async function setDefaultShippingCompany(id: string) {
+    try {
+        await verifyAdmin()
+        await updateSetting('DEFAULT_SHIPPING_COMPANY_ID', id, 'shipping', 'ID de la société de livraison par défaut')
+        revalidatePath('/admin/config/shipping-companies')
+        return { success: true }
+    } catch (error: any) {
+        console.error('Erreur setDefaultShippingCompany:', error)
         return { success: false, error: error.message }
     }
 }

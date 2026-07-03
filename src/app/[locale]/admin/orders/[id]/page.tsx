@@ -1,5 +1,6 @@
 import { getOrderById } from '@/lib/actions/admin-orders'
 import { prisma } from '@/lib/prisma'
+import { getSetting } from '@/lib/actions/site-settings'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { normalizeImage } from '@/lib/utils'
@@ -36,6 +37,13 @@ export default async function OrderDetailsPage({
             where: { id: order.shippingCompany }
         })
     }
+
+    const activeCompanies = await prisma.shippingCompany.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true }
+    })
+    
+    const defaultCompanyId = await getSetting('DEFAULT_SHIPPING_COMPANY_ID')
 
     return (
         <div className="space-y-8">
@@ -251,6 +259,9 @@ export default async function OrderDetailsPage({
                             orderId={order.id}
                             trackingID={(order as any).trackingID}
                             deliveryStatus={(order as any).deliveryStatus}
+                            shippingCompanyId={order.shippingCompany}
+                            companies={activeCompanies}
+                            defaultCompanyId={defaultCompanyId}
                         />
                     </div>
 
