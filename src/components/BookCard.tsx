@@ -18,6 +18,7 @@ interface BookCardProps {
     price: number
     image: string
     category?: string | null
+    language?: string | null
     stock: number
     variant?: 'default' | 'compact' | 'featured'
 }
@@ -31,6 +32,7 @@ export default function BookCard({
     price,
     image,
     category,
+    language,
     stock,
     variant = 'default',
 }: BookCardProps) {
@@ -85,12 +87,25 @@ export default function BookCard({
                             </span>
                         </div>
                     )}
+                    {/* Badge langue AR/FR/EN */}
+                    {language && (
+                        <div className="absolute top-3 left-3 z-20">
+                            <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md shadow-sm ${
+                                language === 'ar' ? 'bg-emerald-600 text-white' :
+                                language === 'fr' ? 'bg-blue-600 text-white' :
+                                language === 'en' ? 'bg-amber-500 text-white' :
+                                'bg-black text-white'
+                            }`}>
+                                {language.toUpperCase()}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </Link>
 
             {/* Content */}
             <div className={`text-center flex flex-col items-center flex-grow bg-white ${isCompact ? 'p-4' : 'px-4 py-6'}`}>
-                <Link href={`/books/${id}`} className="block w-full">
+                <Link href={`/books/${id}`} className="block w-full after:absolute after:inset-0 after:z-0">
                     <h3 className={`font-black text-gray-900 tracking-tight line-clamp-2 transition-colors group-hover:text-black ${isCompact ? 'text-sm mb-1 uppercase' : isFeatured ? 'text-xl mb-2' : 'text-base mb-1.5'
                         }`}>
                         {displayTitle}
@@ -108,7 +123,7 @@ export default function BookCard({
 
                     {stock > 0 && (
                         <button
-                            className={`w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 group/btn ${isCompact
+                            className={`w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 group/btn relative z-10 min-h-[52px] ${isCompact
                                 ? 'py-3'
                                 : isFeatured
                                     ? 'py-4'

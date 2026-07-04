@@ -199,6 +199,7 @@
     },
     "AuthorsPage": {
         "Title": "Nos Auteurs | Riwaya",
+        "Description": "Découvrez tous les auteurs disponibles chez Riwaya. Romans, développement personnel, classiques — explorez les plumes qui ont marqué nos lecteurs.",
         "Heading": "Découvrez nos auteurs",
         "Subheading": "Explorez les esprits brillants derrière vos livres préférés.",
         "SearchPlaceholder": "Rechercher un auteur...",

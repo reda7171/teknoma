@@ -19,6 +19,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('Cart');
 
+    // Swipe to close states
+    const [touchStart, setTouchStart] = useState<number | null>(null)
+    const [touchEnd, setTouchEnd] = useState<number | null>(null)
+
     // Éviter les problèmes d'hydratation avec localStorage
     useEffect(() => {
         setMounted(true)
@@ -58,6 +62,30 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     const shippingFee = (hasOnlyDigital || hasFreeShippingItem || totalPrice >= 500) ? 0 : 30
     const finalTotal = totalPrice + shippingFee
 
+    // Swipe handlers
+    const minSwipeDistance = 50 
+
+    const onTouchStartEvent = (e: React.TouchEvent) => {
+        setTouchEnd(null)
+        setTouchStart(e.targetTouches[0].clientX)
+    }
+
+    const onTouchMoveEvent = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX)
+
+    const onTouchEndEvent = () => {
+        if (!touchStart || !touchEnd) return
+        const distance = touchStart - touchEnd
+        const isLeftSwipe = distance > minSwipeDistance
+        const isRightSwipe = distance < -minSwipeDistance
+        
+        const isRTL = document.documentElement.dir === 'rtl'
+        if (isRTL && isLeftSwipe) {
+            onClose()
+        } else if (!isRTL && isRightSwipe) {
+            onClose()
+        }
+    }
+
     return (
         <>
             {/* Overlay */}
@@ -70,12 +98,15 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
             {/* Drawer */}
             <div
+                onTouchStart={onTouchStartEvent}
+                onTouchMove={onTouchMoveEvent}
+                onTouchEnd={onTouchEndEvent}
                 className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-50 transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                     }`}
             >
                 <div className="flex flex-col h-full">
                     {/* Header - Style Pixio */}
-                    <div className="flex items-center justify-between p-8 border-b border-gray-50">
+                    <div className="flex items-center justify-between p-4 sm:p-8 border-b border-gray-50">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
                                 <ShoppingCart className="w-6 h-6 text-white" />
@@ -100,7 +131,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="flex-1 overflow-y-auto custom-scrollbar bg-pixio-cream/30">
                         {items.length === 0 ? (
                             // Empty State - Style Pixio
-                            <div className="flex flex-col items-center justify-center h-full p-12 text-center space-y-8">
+                            <div className="flex flex-col items-center justify-center h-full p-6 sm:p-12 text-center space-y-8">
                                 <div className="relative">
                                     <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl relative z-10">
                                         <ShoppingCart className="w-12 h-12 text-gray-200" />
@@ -125,14 +156,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             </div>
                         ) : (
                             // Cart Items - Styled Cards
-                            <div className="p-8 space-y-6">
+                            <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
                                 {items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="flex gap-6 p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:border-black group/item"
+                                        className="flex gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:border-black group/item"
                                     >
                                         {/* Image */}
-                                        <div className="relative w-24 h-32 flex-shrink-0 bg-pixio-cream rounded-2xl overflow-hidden border border-gray-50 group-hover:scale-105 transition-transform">
+                                        <div className="relative w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0 bg-pixio-cream rounded-2xl overflow-hidden border border-gray-50 group-hover:scale-105 transition-transform">
                                             {item.image && typeof item.image === 'string' && item.image.trim().length > 5 ? (
                                                 <img
                                                     src={normalizeImage(item.image)}
@@ -234,7 +265,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                     {/* Footer - Style Pixio Summary */}
                     {items.length > 0 && (
-                        <div className="p-8 bg-white border-t border-gray-50 space-y-8">
+                        <div className="p-4 sm:p-8 bg-white border-t border-gray-50 space-y-6 sm:space-y-8 pb-safe">
                             {/* Summary */}
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest">
@@ -268,7 +299,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                 <Link
                                     href="/checkout"
                                     onClick={onClose}
-                                    className="flex items-center justify-center gap-3 w-full py-6 bg-black text-white font-black text-xs uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20"
+                                    className="flex items-center justify-center gap-3 w-full py-4 sm:py-6 min-h-[56px] bg-black text-white font-black text-xs uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20"
                                 >
                                     <span>{t('ProceedToCheckout')}</span>
                                     <ArrowRight className="w-4 h-4 rtl:rotate-180" />

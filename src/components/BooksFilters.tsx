@@ -175,6 +175,13 @@ export default function BooksFilters({ params, categories, authors, languages, t
         setIsMobileMenuOpen(false)
     }
 
+    // Couleurs par code de langue pour les badges
+    const langBadgeStyle: Record<string, string> = {
+        ar: 'bg-emerald-600 text-white',
+        fr: 'bg-blue-600 text-white',
+        en: 'bg-amber-500 text-white',
+    }
+
     const FilterContent = ({ isMobile = false }) => (
         <div className={`space-y-3 ${isMobile ? 'pb-20' : ''}`}>
             {!isMobile && (
@@ -190,6 +197,69 @@ export default function BooksFilters({ params, categories, authors, languages, t
                     </div>
                 </div>
             )}
+
+            {/* LANGUE EN PREMIER — filtre prioritaire */}
+            <div>
+                <button 
+                    onClick={() => toggleSection('langs')}
+                    className="w-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center justify-between group"
+                >
+                    <div className="flex items-center gap-3">
+                        <Globe className="w-3 h-3" />
+                        {t('Languages')}
+                    </div>
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openSections.langs ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.langs && (
+                    <div className="flex flex-wrap gap-2 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Link
+                            href={`/books?${new URLSearchParams({
+                                ...(params.category ? { category: params.category } : {}),
+                                ...(params.search ? { search: params.search } : {}),
+                                ...(params.author ? { author: params.author } : {}),
+                                ...(params.inStock ? { inStock: params.inStock } : {}),
+                            }).toString()}`}
+                            scroll={false}
+                            className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
+                                !params.language
+                                ? 'bg-black text-white shadow-lg'
+                                : 'bg-[#F8F9FA] text-gray-400 hover:text-black'
+                            }`}
+                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                        >
+                            {t('AllLanguages')}
+                        </Link>
+                        {languages.map((lang) => (
+                            <Link
+                                key={lang.code}
+                                href={`/books?${new URLSearchParams({
+                                    ...(params.category ? { category: params.category } : {}),
+                                    ...(params.search ? { search: params.search } : {}),
+                                    ...(params.author ? { author: params.author } : {}),
+                                    ...(params.inStock ? { inStock: params.inStock } : {}),
+                                    language: lang.code
+                                }).toString()}`}
+                                scroll={false}
+                                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
+                                    params.language === lang.code
+                                        ? (langBadgeStyle[lang.code] || 'bg-black text-white') + ' shadow-lg'
+                                        : 'bg-[#F8F9FA] text-gray-400 hover:text-black'
+                                }`}
+                                onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                            >
+                                <span className={`inline-block text-[8px] font-black px-1.5 py-0.5 rounded ${
+                                    params.language === lang.code
+                                        ? 'bg-white/20'
+                                        : langBadgeStyle[lang.code] || 'bg-black text-white'
+                                }`}>
+                                    {lang.code.toUpperCase()}
+                                </span>
+                                {lang.label}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             {/* Author Search */}
             <div>
@@ -223,61 +293,8 @@ export default function BooksFilters({ params, categories, authors, languages, t
                 </label>
             </div>
 
-            {/* Languages */}
-            <div>
-                <button 
-                    onClick={() => toggleSection('langs')}
-                    className="w-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between group"
-                >
-                    <div className="flex items-center gap-3">
-                        <Globe className="w-3 h-3" />
-                        {t('Languages')}
-                    </div>
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openSections.langs ? 'rotate-180' : ''}`} />
-                </button>
-                {openSections.langs && (
-                    <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <Link
-                            href={`/books?${new URLSearchParams({
-                                ...(params.category ? { category: params.category } : {}),
-                                ...(params.search ? { search: params.search } : {}),
-                                ...(params.author ? { author: params.author } : {}),
-                                ...(params.inStock ? { inStock: params.inStock } : {}),
-                            }).toString()}`}
-                            scroll={false}
-                            className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${!params.language
-                                ? 'bg-black text-white shadow-lg'
-                                : 'bg-[#F8F9FA] text-gray-400 hover:text-black'
-                                }`}
-                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
-                        >
-                            {t('AllLanguages')}
-                        </Link>
-                        {languages.map((lang) => (
-                            <Link
-                                key={lang.code}
-                                href={`/books?${new URLSearchParams({
-                                    ...(params.category ? { category: params.category } : {}),
-                                    ...(params.search ? { search: params.search } : {}),
-                                    ...(params.author ? { author: params.author } : {}),
-                                    ...(params.inStock ? { inStock: params.inStock } : {}),
-                                    language: lang.code
-                                }).toString()}`}
-                                scroll={false}
-                                className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${params.language === lang.code
-                                    ? 'bg-black text-white shadow-lg'
-                                    : 'bg-[#F8F9FA] text-gray-400 hover:text-black'
-                                    }`}
-                                onClick={() => isMobile && setIsMobileMenuOpen(false)}
-                            >
-                                {lang.label}
-                            </Link>
-                        ))}
-                    </div>
-                )}
-            </div>
-
             {/* Categories */}
+
             <div>
                 <button 
                     onClick={() => toggleSection('cats')}

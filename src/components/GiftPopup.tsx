@@ -13,12 +13,32 @@ export default function GiftPopup() {
     useEffect(() => {
         setMounted(true)
         const hasSeenPopup = localStorage.getItem('gift_popup_seen')
-        
-        if (!hasSeenPopup) {
-            const timer = setTimeout(() => {
+        if (hasSeenPopup) return
+
+        let shown = false
+
+        // Déclencheur 1 : après 30 secondes
+        const timer = setTimeout(() => {
+            if (!shown) {
+                shown = true
                 setIsOpen(true)
-            }, 3000) // Apparition après 3 secondes
-            return () => clearTimeout(timer)
+            }
+        }, 30000)
+
+        // Déclencheur 2 : après 50% de scroll
+        const handleScroll = () => {
+            const scrolled = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)
+            if (scrolled >= 0.5 && !shown) {
+                shown = true
+                setIsOpen(true)
+            }
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true })
+
+        return () => {
+            clearTimeout(timer)
+            window.removeEventListener('scroll', handleScroll)
         }
     }, [])
 

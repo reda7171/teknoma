@@ -10,6 +10,7 @@ import LanguageSwitcher from './LanguageSwitcher'
 import { useTranslations } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import UserDropdown from './UserDropdown'
+import MobileBottomNav from './MobileBottomNav'
 import { getWishlist } from '@/lib/actions/community-wishlist'
 import { getReadingList } from '@/lib/actions/reading-list'
 import { useWishlistStore } from '@/store/wishlist'
@@ -43,6 +44,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
     const pathname = usePathname()
     const t = useTranslations('Navigation')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
     const { isCartOpen, openCart, closeCart } = useUIStore()
     const totalItems = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0))
     const [mounted, setMounted] = useState(false)
@@ -267,16 +269,16 @@ export default function Header({ user, notificationDropdown, navigation, feature
                             {mounted && <UserDropdown user={user} features={features} />}
                         </div>
 
-                        {/* Mobile Menu Button */}
+                        {/* Mobile Menu Button -> Replaced by Search Icon on mobile */}
                         <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            aria-label="Menu principal"
+                            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                            aria-label="Recherche mobile"
                             className="md:hidden w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
                         >
-                            {mobileMenuOpen ? (
+                            {mobileSearchOpen ? (
                                 <X className="w-6 h-6 text-black" />
                             ) : (
-                                <Menu className="w-6 h-6 text-black" />
+                                <Search className="w-6 h-6 text-black" />
                             )}
                         </button>
                     </div>
@@ -291,7 +293,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
               !pathname.includes('/community/profile/edit') && 
               !pathname.includes('/cart') && 
               !pathname.includes('/checkout')) && (
-                <div className="hidden md:block py-3 bg-[#FDFBF7]" suppressHydrationWarning>
+                <div className={`${mobileSearchOpen ? 'block' : 'hidden'} md:block py-3 bg-[#FDFBF7] shadow-sm md:shadow-none`} suppressHydrationWarning>
                     <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                         <div className="max-w-3xl mx-auto">
                             <PredictiveSearch />
@@ -300,88 +302,89 @@ export default function Header({ user, notificationDropdown, navigation, feature
                 </div>
             )}
 
-            <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
-                {/* Mobile Menu */}
-                {mobileMenuOpen && (
-                    <div className="md:hidden py-4 border-t border-gray-200 bg-white" suppressHydrationWarning>
-                        <nav className="flex flex-col space-y-3" suppressHydrationWarning>
-                            {/* Mobile Actions First */}
-                            <div className="px-4 pb-4 border-b border-gray-100">
-                                <div className="flex items-center justify-around gap-4">
-                                    {notificationDropdown && (
-                                        <div className="flex flex-col items-center gap-1">
-                                            {notificationDropdown}
-                                        </div>
-                                    )}
+            {/* Full-screen Mobile Menu Drawer */}
+            <div 
+                className={`md:hidden fixed inset-0 bg-white z-[60] transform transition-transform duration-300 ease-in-out ${
+                    mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
+                }`}
+                suppressHydrationWarning
+            >
+                <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                    <span className="text-lg font-black tracking-tighter">riwaya<span className="text-[#10b981]">.</span></span>
+                    <button 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
+                    >
+                        <X className="w-6 h-6 text-black" />
+                    </button>
+                </div>
+                <div className="overflow-y-auto h-[calc(100vh-73px)] pb-24">
+                    <nav className="flex flex-col space-y-3 p-4" suppressHydrationWarning>
+                        {/* Mobile Actions First */}
+                        <div className="pb-4 mb-2 border-b border-gray-100">
+                            <div className="flex items-center justify-around gap-4">
+                                {notificationDropdown && (
                                     <div className="flex flex-col items-center gap-1">
-                                        <UserDropdown user={user} features={features} />
+                                        {notificationDropdown}
                                     </div>
+                                )}
+                                <div className="flex flex-col items-center gap-1">
+                                    <UserDropdown user={user} features={features} />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Navigation Links */}
-                            {finalNavItems.map((item: any) => {
-                                const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.isJournal
-                                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
-                                
-                                const isKids = item.href.includes('/mon-enfant')
-                                const isDigital = item.href.includes('/livres-numeriques')
-                                const isJournal = item.isJournal
+                        {/* Navigation Links */}
+                        {finalNavItems.map((item: any) => {
+                            const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.isJournal
+                            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+                            
+                            const isKids = item.href.includes('/mon-enfant')
+                            const isDigital = item.href.includes('/livres-numeriques')
+                            const isJournal = item.isJournal
 
-                                const vibrantBg = isKids ? 'bg-pink-50' : isDigital ? 'bg-amber-50' : isJournal ? 'bg-[#FDFBF7]' : 'bg-blue-50'
-                                const vibrantText = isKids ? 'text-pink-600' : isDigital ? 'text-amber-600' : isJournal ? 'text-black' : 'text-blue-600'
-                                const vibrantActiveBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : 'bg-blue-500'
-                                const vibrantActiveText = isJournal ? 'text-white' : 'text-white'
-                                
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className={`px-5 py-4 rounded-[1.5rem] transition-colors font-bold text-sm ${
-                                            isSpecial 
-                                                ? isActive 
-                                                    ? `${vibrantActiveBg} ${vibrantActiveText} shadow-md` 
-                                                    : `${vibrantBg} ${vibrantText} border-2 border-transparent hover:border-gray-200`
-                                                : isActive
-                                                    ? 'text-black bg-gray-50'
-                                                    : 'text-gray-900 hover:bg-gray-50'
-                                        }`}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <span className={`${isSpecial ? 'uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black' : ''}`}>
-                                                {item.label}
-                                                {isJournal && <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />}
-                                            </span>
-                                            {isSpecial && <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : vibrantActiveBg}`} />}
-                                        </div>
-                                    </Link>
-                                )
-                            })}
-                            <div className="px-4 py-2">
-                                <LanguageSwitcher />
-                            </div>
-                        </nav>
-                    </div>
-                )}
+                            const vibrantBg = isKids ? 'bg-pink-50' : isDigital ? 'bg-amber-50' : isJournal ? 'bg-[#FDFBF7]' : 'bg-blue-50'
+                            const vibrantText = isKids ? 'text-pink-600' : isDigital ? 'text-amber-600' : isJournal ? 'text-black' : 'text-blue-600'
+                            const vibrantActiveBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : 'bg-blue-500'
+                            const vibrantActiveText = isJournal ? 'text-white' : 'text-white'
+                            
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`px-5 py-4 rounded-[1.5rem] transition-colors font-bold text-sm min-h-[52px] flex items-center ${
+                                        isSpecial 
+                                            ? isActive 
+                                                ? `${vibrantActiveBg} ${vibrantActiveText} shadow-md` 
+                                                : `${vibrantBg} ${vibrantText} border-2 border-transparent hover:border-gray-200`
+                                            : isActive
+                                                ? 'text-black bg-gray-50'
+                                                : 'text-gray-900 hover:bg-gray-50'
+                                    }`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <div className="flex justify-between items-center w-full">
+                                        <span className={`${isSpecial ? 'uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black' : ''}`}>
+                                            {item.label}
+                                            {isJournal && <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />}
+                                        </span>
+                                        {isSpecial && <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : vibrantActiveBg}`} />}
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                        <div className="py-4">
+                            <LanguageSwitcher />
+                        </div>
+                    </nav>
+                </div>
             </div>
 
             {/* Cart Drawer */}
             <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
 
-            {/* Floating Mobile Cart Button */}
-            <button
-                onClick={openCart}
-                className="md:hidden fixed bottom-6 left-6 z-40 flex items-center justify-center w-14 h-14 bg-black text-white rounded-full shadow-2xl hover:scale-110 transition-transform duration-300"
-                aria-label="Ouvrir le panier"
-            >
-                <ShoppingCart className="w-6 h-6" />
-                {mounted && displayItems > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-[10px] font-black text-white ring-2 ring-white animate-in zoom-in duration-300">
-                        {displayItems}
-                    </span>
-                )}
-            </button>
+            {/* Mobile Bottom Navigation */}
+            <MobileBottomNav onMenuClick={() => setMobileMenuOpen(true)} />
         </header>
     )
 }

@@ -20,7 +20,12 @@ import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
-    const { slug, locale } = await params
+    const { slug: rawSlug, locale } = await params
+    // Normaliser le slug : supprimer les accents pour matcher la DB (slugs ASCII)
+    const slug = rawSlug
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
     const post = await getPostBySlug(slug, locale)
 
     if (!post) return {}
@@ -62,7 +67,12 @@ function estimateReadingTime(content: string): number {
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
-    const { slug, locale } = await params
+    const { slug: rawSlug, locale } = await params
+    // Normaliser le slug : supprimer les accents pour matcher la DB (slugs ASCII)
+    const slug = rawSlug
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
     const post = await getPostBySlug(slug, locale)
     const t = await getTranslations('BlogArticle')
 

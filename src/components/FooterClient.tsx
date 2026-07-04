@@ -45,7 +45,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                 </button>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-24 md:pb-12 relative">
                 {/* Vertical Social Sidebar */}
                 <div className="absolute ltr:right-4 sm:ltr:-right-16 rtl:left-4 sm:rtl:-left-16 top-32 z-10 hidden xl:flex">
                     <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-full py-6 px-3 flex flex-col gap-6 shadow-2xl">
@@ -58,7 +58,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-16 mb-12 md:mb-20">
                     <div className="space-y-6">
                         <Link href="/" className="flex items-center gap-2 group">
                             {siteLogo ? (
@@ -83,7 +83,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </p>
                     </div>
                     <div>
-                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-8">{t('Navigation')}</h3>
+                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Navigation')}</h3>
                         <ul className="space-y-4" suppressHydrationWarning>
                             <li suppressHydrationWarning>
                                 <Link href="/books" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
@@ -110,7 +110,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </ul>
                     </div>
                     <div>
-                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-8">{t('Support')}</h3>
+                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Support')}</h3>
                         <ul className="space-y-4">
                             <li><Link href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Shipping')}</Link></li>
                             <li><Link href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Returns')}</Link></li>
@@ -120,7 +120,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </ul>
                     </div>
                     <div>
-                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-8">{t('Journal')}</h3>
+                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Journal')}</h3>
                         <ul className="space-y-4 mb-8">
                             <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{tNav('Journal')}</Link></li>
                         </ul>

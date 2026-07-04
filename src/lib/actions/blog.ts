@@ -68,7 +68,13 @@ export async function getPostCategories(language: string = 'fr') {
  * Récupère un article par son slug
  */
 export async function getPostBySlug(slug: string, language?: string) {
-    const where: any = { slug, published: true }
+    // Normaliser : supprimer les accents (ex: î → i) pour robustesse URL → DB
+    const normalizedSlug = slug
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+
+    const where: any = { slug: normalizedSlug, published: true }
     if (language) {
         where.language = language
     }
