@@ -613,13 +613,13 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             </div>
 
             {/* Quick Filters */}
-            <div className="flex gap-4 mb-4">
-                <div className="flex bg-white rounded-lg p-1 shadow-sm border border-slate-200">
+            <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
+                <div className="flex flex-wrap bg-white rounded-lg p-1 shadow-sm border border-slate-200">
                     <button onClick={() => setPlatformFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${platformFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Réseaux</button>
                     <button onClick={() => setPlatformFilter('facebook')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'facebook' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}><Facebook className="w-3 h-3"/> Facebook</button>
                     <button onClick={() => setPlatformFilter('instagram')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'instagram' ? 'bg-pink-50 text-pink-600' : 'text-slate-500 hover:text-slate-700'}`}><Instagram className="w-3 h-3"/> Instagram</button>
                 </div>
-                <div className="flex bg-white rounded-lg p-1 shadow-sm border border-slate-200">
+                <div className="flex flex-wrap bg-white rounded-lg p-1 shadow-sm border border-slate-200">
                     <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Statuts</button>
                     <button onClick={() => setStatusFilter('PUBLISHED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'PUBLISHED' ? 'bg-green-50 text-green-600' : 'text-slate-500 hover:text-slate-700'}`}><CheckCircle className="w-3 h-3"/> Publiés</button>
                     <button onClick={() => setStatusFilter('FAILED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'FAILED' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><AlertCircle className="w-3 h-3"/> Échecs</button>
@@ -629,14 +629,14 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             {/* Daily Suggestions */}
             {dailySuggestions.length > 0 && (
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 mb-6">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                                 <Clock className="w-4 h-4" />
                             </div>
                             <h2 className="text-sm font-black text-blue-900 uppercase tracking-wider">Suggestions du jour</h2>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <button 
                                 onClick={handleAutoScheduleAll}
                                 disabled={isLoading}
@@ -701,21 +701,21 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
                 {/* Header Controls */}
-                <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+                <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
                     <button onClick={prevDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                     
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                             <Calendar className="w-5 h-5" />
                         </div>
-                        <h2 className="text-lg font-bold text-slate-800 capitalize">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-800 capitalize">
                             {formatDate(selectedDate)}
                         </h2>
                     </div>
 
-                    <div className="flex bg-slate-100 p-1 rounded-lg">
+                    <div className="flex flex-wrap justify-center bg-slate-100 p-1 rounded-lg">
                         <button 
                             onClick={() => setViewMode('day')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'day' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -764,16 +764,16 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
                                 return (
                                     <div key={time} className="flex group min-h-[48px]">
-                                        <div className="w-20 shrink-0 text-right pr-4 py-3 border-r border-slate-200 relative">
+                                        <div className="w-16 sm:w-20 shrink-0 text-right pr-2 sm:pr-4 py-3 border-r border-slate-200 relative">
                                             {['18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45', '20:00'].includes(time) && (
-                                                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-orange-400" title="Heure recommandée pour l'engagement">
+                                                <div className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 text-orange-400" title="Heure recommandée pour l'engagement">
                                                     <Star className="w-3 h-3 fill-orange-400" />
                                                 </div>
                                             )}
                                             {isHour ? (
-                                                <span className="text-sm font-bold text-slate-700">{time}</span>
+                                                <span className="text-xs sm:text-sm font-bold text-slate-700">{time}</span>
                                             ) : (
-                                                <span className="text-xs font-medium text-slate-400">{time}</span>
+                                                <span className="text-[10px] sm:text-xs font-medium text-slate-400">{time}</span>
                                             )}
                                         </div>
                                         <Droppable droppableId={time}>
@@ -872,7 +872,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     </div>
                 </DragDropContext>
                 ) : viewMode === 'week' ? (
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50">
+                <div className="flex-1 overflow-auto custom-scrollbar p-4 bg-slate-50">
                     <div className="grid grid-cols-7 gap-4 min-w-[800px]">
                         {weekDays.map(day => {
                             const isToday = isSameDay(day, new Date())
@@ -928,7 +928,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     </div>
                 </div>
                 ) : (
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50">
+                <div className="flex-1 overflow-auto custom-scrollbar p-4 bg-slate-50">
                     <div className="grid grid-cols-7 gap-2 min-w-[800px] mb-2">
                         {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
                             <div key={d} className="text-center text-sm font-bold text-slate-500 uppercase">{d}</div>

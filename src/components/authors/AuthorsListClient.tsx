@@ -63,13 +63,13 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                 <div className="mb-16">
                     <div className="relative max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4">
                         <div className="relative flex-grow w-full">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                            <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />
                             <input 
                                 type="text"
                                 placeholder={t('SearchPlaceholder')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-16 pr-8 py-6 bg-white border-none rounded-full shadow-2xl shadow-black/5 text-lg font-medium outline-none focus:ring-2 focus:ring-black transition-all"
+                                className="w-full pl-12 md:pl-16 pr-6 md:pr-8 py-4 md:py-6 bg-white border-none rounded-full shadow-xl md:shadow-2xl shadow-black/5 text-base md:text-lg font-medium outline-none focus:ring-2 focus:ring-black transition-all"
                             />
                         </div>
                         {/* Toggle Disponible */}
@@ -89,7 +89,7 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
 
                 {/* Alphabet Index (Quick Scroll) */}
                 {!search && (
-                    <div className="flex flex-wrap justify-center gap-2 mb-16">
+                    <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-12 md:mb-16">
                         {alphabet.map(letter => (
                             <button
                                 key={letter}
@@ -97,7 +97,7 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                                     const el = document.getElementById(`letter-${letter}`)
                                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
                                 }}
-                                className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-black transition-all
+                                className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl text-xs md:text-sm font-black transition-all
                                     ${groupedAuthors.find(([l]) => l === letter) 
                                         ? 'bg-white text-black hover:bg-black hover:text-white shadow-sm' 
                                         : 'text-gray-300 cursor-not-allowed'}`}
@@ -124,11 +124,11 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {list.map((author, idx) => (
                                         <ScrollReveal key={author.name} delay={idx * 50} animation="animate-reveal-up">
-                                            <Link 
+                                                <Link 
                                                 href={`/authors/${encodeURIComponent(author.name)}`}
-                                                className="group flex items-center gap-6 p-6 bg-white rounded-3xl border border-transparent hover:border-black transition-all duration-300 hover:shadow-xl"
+                                                className="group flex items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-3xl border border-transparent hover:border-black transition-all duration-300 shadow-sm sm:shadow-none hover:shadow-xl"
                                             >
-                                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100 shadow-sm group-hover:scale-105 transition-transform">
+                                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100 shadow-sm group-hover:scale-105 transition-transform">
                                                     {(author.image || author.sampleBookImage) ? (
                                                         <img 
                                                             src={author.image || author.sampleBookImage!} 
@@ -137,20 +137,20 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
-                                                            <User className="w-6 h-6 text-gray-300" />
+                                                            <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-300" />
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="flex-grow min-w-0">
-                                                    <h3 className="text-lg font-black text-black truncate group-hover:text-pixio-pink transition-colors">
+                                                    <h3 className="text-base sm:text-lg font-black text-black truncate group-hover:text-pixio-pink transition-colors">
                                                         {author.name}
                                                     </h3>
                                                     <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
                                                         {t('BooksCount', { count: author.bookCount })}
                                                     </p>
                                                 </div>
-                                                <div className="w-10 h-10 rounded-full bg-pixio-cream flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100">
-                                                    <ChevronRight className="w-5 h-5" />
+                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 sm:bg-pixio-cream flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all transform sm:-translate-x-2 opacity-100 sm:opacity-0 group-hover:translate-x-0 group-hover:opacity-100">
+                                                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white" />
                                                 </div>
                                             </Link>
                                         </ScrollReveal>

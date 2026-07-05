@@ -279,7 +279,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             {/* Header section style Riwaya */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
-                    <h1 className="text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
+                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
                         Tableau<span className="text-blue-600">.</span>
                     </h1>
                     <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
@@ -314,7 +314,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 {statCards.map((stat, i) => {
                     const Icon = stat.icon
                     return (
-                        <div key={stat.name} className="group bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-xl shadow-black/5 hover:-translate-y-1 transition-all relative overflow-hidden">
+                        <div key={stat.name} className="group bg-white rounded-3xl sm:rounded-[2.5rem] border border-gray-100 p-6 sm:p-8 shadow-xl shadow-black/5 hover:-translate-y-1 transition-all relative overflow-hidden">
                             <div className="flex flex-col relative z-10">
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{stat.name}</p>
                                 <p className="text-3xl font-black text-black tracking-tighter mb-4">{stat.value}</p>
@@ -332,26 +332,26 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             </div>
 
             {/* Charts Section */}
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-10">
+            <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-4 sm:p-6 lg:p-10">
                 <DashboardAnalytics />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
                 {/* Marketing Widget Premium */}
-                <div className="lg:col-span-3 bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
-                    <div className="px-10 py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                <div className="lg:col-span-3 bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
+                    <div className="px-6 py-6 md:px-10 md:py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                         <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
                             <TrendingUp className="w-4 h-4 text-blue-600" />
                             Performance Marketing
                         </h2>
                     </div>
-                    <div className="p-10">
+                    <div className="p-6 md:p-10">
                         {badgeStats.length === 0 ? (
                             <div className="text-center text-gray-300 py-6 italic font-bold uppercase text-[10px]">Aucune donnée</div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                                 {badgeStats.map((stat: any) => (
-                                    <div key={stat.name} className="flex flex-col items-center justify-center p-8 bg-gray-50/50 rounded-[2rem] hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-gray-100 group">
+                                    <div key={stat.name} className="flex flex-col items-center justify-center p-6 md:p-8 bg-gray-50/50 rounded-2xl md:rounded-[2rem] hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-gray-100 group">
                                         <span className="text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">{stat.value}</span>
                                         <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-2">{stat.name}</span>
                                     </div>
@@ -362,15 +362,15 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 </div>
 
                 {/* Top Performers Premium */}
-                <div className="lg:col-span-3 bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
-                    <div className="px-10 py-8 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+                <div className="lg:col-span-3 bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
+                    <div className="px-6 py-6 md:px-10 md:py-8 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
                         <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
                             <TrendingUp className="w-4 h-4 text-emerald-600" />
                             Classement des ventes
                         </h2>
                     </div>
-                    <div className="p-10">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="p-6 md:p-10">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
                             {/* Top Books */}
                             <div>
                                 <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
@@ -429,8 +429,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 </div>
 
                 {/* Recent Orders Premium */}
-                <div className="lg:col-span-2 bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
-                    <div className="px-10 py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                <div className="lg:col-span-2 bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
+                    <div className="px-6 py-6 md:px-10 md:py-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                         <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Dernières Transactions</h2>
                         <Link href="/admin/orders" className="text-[9px] font-black text-white bg-black px-4 py-2 rounded-xl hover:bg-gray-800 transition-all uppercase tracking-widest">Voir tout</Link>
                     </div>
@@ -439,14 +439,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             <tbody className="divide-y divide-gray-50">
                                 {recentOrders.map((order) => (
                                     <tr key={order.id} className="hover:bg-gray-50 transition-colors group">
-                                        <td className="px-10 py-6 whitespace-nowrap">
+                                        <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap">
                                             <div className="text-xs font-black text-black uppercase tracking-tight italic">{order.fullName}</div>
                                             <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{order.city}</div>
                                         </td>
-                                        <td className="px-10 py-6 whitespace-nowrap text-sm font-black text-blue-600 tracking-tighter">
+                                        <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap text-sm font-black text-blue-600 tracking-tighter">
                                             {order.total.toLocaleString()} MAD
                                         </td>
-                                        <td className="px-10 py-6 whitespace-nowrap text-right">
+                                        <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap text-right">
                                             <span className={`px-4 py-1 inline-flex text-[9px] font-black rounded-full uppercase tracking-widest shadow-sm ${statusColors[order.status as keyof typeof statusColors]}`}>
                                                 {statusLabels[order.status as keyof typeof statusLabels]}
                                             </span>
@@ -459,8 +459,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 </div>
 
                 {/* Low Stock Alerts Premium */}
-                <div className="lg:col-span-1 bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
-                    <div className="px-10 py-8 border-b border-gray-50 flex justify-between items-center bg-red-50/30">
+                <div className="lg:col-span-1 bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
+                    <div className="px-6 py-6 md:px-10 md:py-8 border-b border-gray-50 flex justify-between items-center bg-red-50/30">
                         <h2 className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] flex items-center gap-2">
                             <Package className="w-4 h-4" />
                             Alerte Rupture
@@ -490,7 +490,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             ))
                         )}
                     </div>
-                    <div className="p-8 bg-gray-50/50 border-t border-gray-50">
+                    <div className="p-6 md:p-8 bg-gray-50/50 border-t border-gray-50">
                         <Link href="/admin/books" className="block w-full text-center py-4 bg-white border border-gray-100 rounded-2xl text-[9px] font-black text-gray-400 hover:text-black hover:border-black transition-all uppercase tracking-[0.2em]">Rapprovisionner</Link>
                     </div>
                 </div>

@@ -30,6 +30,7 @@ interface Book {
     isOriginal: boolean
     orderCount?: number
     productType?: string
+    sellerSku?: string | null
 }
 
 export default function BooksTable({ books, pageNumber, totalProviderPages, initialSearch, initialFilter = '', limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, initialSearch: string, initialFilter?: string, limit?: number }) {
@@ -358,8 +359,8 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                     {toast.msg}
                 </div>
             )}
-            <div className="p-4 bg-white border-b border-gray-200 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
+            <div className="p-4 bg-white border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
                         Total: <span className="text-gray-900 font-black">{books.length}</span> livres affichés
                     </p>
@@ -548,7 +549,10 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
                                                                             </span>
                                                                         </div>
-                                                                        <div className="text-sm text-gray-500">{book.author}</div>
+                                                                        <div className="text-sm text-gray-500">
+                                                                            {book.author}
+                                                                            {book.sellerSku && <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono bg-gray-100 text-gray-600 rounded">SKU: {book.sellerSku}</span>}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -828,7 +832,10 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                     </div>
                                     <div className="flex-1 flex flex-col">
                                         <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight">{book.title}</h3>
-                                        <p className="text-xs text-gray-500 mt-1 truncate">{book.author}</p>
+                                        <p className="text-xs text-gray-500 mt-1 truncate">
+                                            {book.author}
+                                            {book.sellerSku && <span className="ml-2 font-mono text-[9px] px-1 bg-gray-100 rounded">SKU: {book.sellerSku}</span>}
+                                        </p>
                                         <div className="mt-auto pt-3 flex items-center justify-between">
                                             <span className="font-black text-sm text-gray-900">{book.price} <span className="text-[10px] text-gray-500">MAD</span></span>
                                             <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${book.stock > 10 ? 'bg-green-100 text-green-700' : book.stock > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>

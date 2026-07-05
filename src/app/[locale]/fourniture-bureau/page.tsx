@@ -33,28 +33,28 @@ export default async function FournitureBureauPage() {
                 <div className="absolute -top-20 -right-20 w-72 h-72 bg-amber-50 rounded-full blur-3xl opacity-70 pointer-events-none" />
                 <div className="absolute -bottom-16 -left-16 w-60 h-60 bg-sky-50 rounded-full blur-3xl opacity-70 pointer-events-none" />
 
-                <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-10">
+                <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center text-center md:text-left gap-10 relative z-10">
                     <div className="flex-1">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-100 text-amber-700 rounded-full text-sm font-bold mb-5">
-                            <Briefcase className="w-4 h-4" />
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs sm:text-sm font-bold mb-4 sm:mb-5">
+                            <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             Espace de travail
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight mb-4">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 leading-tight mb-4">
                             Fourniture <span className="text-amber-500">Bureau</span>
                         </h1>
-                        <p className="text-slate-500 text-lg leading-relaxed max-w-lg mb-8">
+                        <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-lg mx-auto md:mx-0 mb-6 sm:mb-8">
                             Stylos, cahiers, organiseurs, classeurs — tout ce dont vous avez besoin pour un bureau productif et bien rangé.
                         </p>
-                        <div className="flex gap-6 text-sm font-bold text-slate-500">
-                            <span className="flex items-center gap-1"><Package className="w-4 h-4 text-amber-500" /> {products.length} produits</span>
-                            <span className="flex items-center gap-1"><Star className="w-4 h-4 text-amber-400" /> Livraison rapide</span>
+                        <div className="flex justify-center md:justify-start gap-4 sm:gap-6 text-xs sm:text-sm font-bold text-slate-500">
+                            <span className="flex items-center gap-1"><Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" /> {products.length} produits</span>
+                            <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" /> Livraison rapide</span>
                         </div>
                     </div>
-                    <div className="flex-1 flex justify-center">
-                        <div className="w-64 h-64 md:w-80 md:h-80 relative">
-                            <div className="absolute inset-0 bg-amber-50 rounded-3xl rotate-6" />
-                            <div className="absolute inset-0 bg-white rounded-3xl shadow-xl flex items-center justify-center">
-                                <Briefcase className="w-28 h-28 text-amber-200" strokeWidth={1} />
+                    <div className="flex-1 flex justify-center w-full">
+                        <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 relative">
+                            <div className="absolute inset-0 bg-amber-50 rounded-[2rem] sm:rounded-3xl rotate-6" />
+                            <div className="absolute inset-0 bg-white rounded-[2rem] sm:rounded-3xl shadow-xl flex items-center justify-center">
+                                <Briefcase className="w-20 h-20 sm:w-28 sm:h-28 text-amber-200" strokeWidth={1} />
                             </div>
                         </div>
                     </div>

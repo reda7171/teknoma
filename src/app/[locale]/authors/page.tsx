@@ -61,13 +61,13 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                             </ScrollReveal>
                             
                             <ScrollReveal animation="animate-reveal-up" delay={200}>
-                                <h1 className="text-5xl md:text-8xl font-black text-black leading-tight tracking-tighter">
+                                <h1 className="text-4xl md:text-5xl lg:text-8xl font-black text-black leading-tight tracking-tighter break-words">
                                     {t('Heading')}<span className="text-pixio-pink">.</span>
                                 </h1>
                             </ScrollReveal>
 
                             <ScrollReveal animation="animate-reveal-up" delay={400}>
-                                <p className="text-xl text-gray-500 font-medium max-w-2xl tracking-tight">
+                                <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl tracking-tight px-4 sm:px-0">
                                     {t('Subheading')}
                                 </p>
                             </ScrollReveal>
@@ -87,10 +87,10 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                 <div className="h-px flex-grow bg-gray-100"></div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
                                 {featuredAuthors.map((author, idx) => (
                                     <ScrollReveal key={author.name} delay={idx * 100} animation="animate-reveal-up">
-                                        <div className="group relative bg-white p-8 rounded-[3rem] border border-gray-50 hover:border-black transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                                        <div className="group relative bg-white p-6 md:p-8 rounded-3xl md:rounded-[3rem] border border-gray-50 hover:border-black transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
                                             <div className="flex flex-col items-center text-center">
                                                 <Link 
                                                     href={`/authors/${encodeURIComponent(author.name)}`}

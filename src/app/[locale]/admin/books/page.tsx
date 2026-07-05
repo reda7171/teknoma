@@ -58,7 +58,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
         })
         booksStats.push(...books.map(b => ({ stock: b.stock, active: b.active, price: b.price })))
-        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0 })))
+        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku })))
     }
 
     // 2. Fetch Packs
@@ -89,6 +89,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             isOriginal: true,
             productType: 'PACK',
             orderCount: p._count?.orderItems || 0,
+            sellerSku: p.sellerSku,
             createdAt: p.createdAt
         })))
     }
@@ -124,6 +125,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             isOriginal: true,
             productType: 'EXTRA',
             orderCount: e._count?.orderItems || 0,
+            sellerSku: e.sellerSku,
             createdAt: e.createdAt
         })))
     }

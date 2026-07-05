@@ -259,13 +259,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     )}
 
                     {/* Titre principal */}
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1] tracking-tighter mb-8 max-w-4xl">
+                    <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.2] md:leading-[1] tracking-tighter mb-6 md:mb-8 max-w-4xl break-words">
                         {post.title}
                     </h1>
 
                     {/* Extrait */}
                     {post.excerpt && (
-                        <p className="text-lg md:text-xl text-slate-500 leading-relaxed mb-10 max-w-3xl font-medium">
+                        <p className="text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed mb-8 md:mb-10 max-w-3xl font-medium">
                             {post.excerpt}
                         </p>
                     )}
@@ -318,14 +318,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* === IMAGE COVER grande === */}
             {post.coverImage && (
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-20">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 md:mt-16 mb-12 md:mb-20">
                     <div className="relative group">
                         {/* Decorative background blocks for editorial look */}
-                        <div className="absolute inset-0 bg-black rounded-[3rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl" />
-                        <div className="absolute inset-0 bg-gray-200 rounded-[3rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20" />
+                        <div className="absolute inset-0 bg-black rounded-3xl md:rounded-[3rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl" />
+                        <div className="absolute inset-0 bg-gray-200 rounded-3xl md:rounded-[3rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20" />
                         
                         {/* Main Container */}
-                        <div className="relative aspect-[4/3] md:aspect-[21/9] w-full overflow-hidden rounded-[3rem] border-[8px] border-white bg-slate-50 shadow-2xl shadow-black/10 group-hover:-translate-y-2 transition-transform duration-700">
+                        <div className="relative aspect-[4/3] md:aspect-[21/9] w-full overflow-hidden rounded-3xl md:rounded-[3rem] border-4 md:border-[8px] border-white bg-slate-50 shadow-2xl shadow-black/10 group-hover:-translate-y-2 transition-transform duration-700">
                             {/* Blurred Ambient Background */}
                             <div className="absolute inset-0 z-0">
                                 <Image
@@ -369,20 +369,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {/* Corps de l'article */}
                         <article
                             id="article-content"
-                            className="prose prose-lg max-w-none rtl:text-[22px] rtl:font-bold rtl:leading-[2.5]
+                            className="prose prose-base md:prose-lg max-w-none rtl:text-[18px] md:rtl:text-[22px] rtl:font-bold rtl:leading-[2] md:rtl:leading-[2.5]
                                 prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900
-                                prose-h2:text-3xl md:prose-h2:text-4xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:text-[34px]
-                                prose-h3:text-2xl rtl:prose-h3:text-[30px]
-                                prose-p:text-slate-800 prose-p:leading-[2] prose-p:text-[18px] rtl:prose-p:text-[22px] rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
-                                prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors
+                                prose-h2:text-2xl md:prose-h2:text-3xl lg:prose-h2:text-4xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:text-[24px] md:rtl:prose-h2:text-[34px]
+                                prose-h3:text-xl md:prose-h3:text-2xl rtl:prose-h3:text-[20px] md:rtl:prose-h3:text-[30px]
+                                prose-p:text-slate-800 prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:text-[16px] md:prose-p:text-[18px] rtl:prose-p:text-[18px] md:rtl:prose-p:text-[22px] rtl:prose-p:leading-[2] md:rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
+                                prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors break-words
                                 prose-blockquote:border-l-4 prose-blockquote:border-slate-500 prose-blockquote:bg-slate-50 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:not-italic
-                                prose-blockquote:text-slate-800 prose-blockquote:font-bold prose-blockquote:my-8
+                                prose-blockquote:text-slate-800 prose-blockquote:font-bold prose-blockquote:my-8 prose-blockquote:text-sm md:prose-blockquote:text-base
                                 prose-strong:text-slate-900 prose-strong:font-black
-                                prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600
-                                prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8
-                                prose-img:rounded-2xl prose-img:shadow-lg prose-img:mx-auto prose-img:my-10
-                                prose-ul:space-y-2 prose-ol:space-y-2 prose-ul:mb-8 prose-ol:mb-8
-                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold rtl:prose-li:text-[21px] rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold"
+                                prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600 prose-code:break-all
+                                prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8 prose-pre:overflow-x-auto
+                                prose-img:rounded-xl md:prose-img:rounded-2xl prose-img:shadow-lg prose-img:mx-auto prose-img:my-8 md:prose-img:my-10 prose-img:w-full prose-img:object-cover
+                                prose-ul:space-y-2 prose-ol:space-y-2 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
+                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold"
                         >
                             <style>{`
                                 #article-content p { margin-bottom: 2rem !important; margin-top: 1rem !important; }
@@ -400,18 +400,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         />
 
                         {/* === Tags & Partage === */}
-                        <div className="mt-14 pt-10 border-t-2 border-gray-100">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t-2 border-gray-100">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                 {tags.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
                                         {tags.map(tag => (
                                             <Link
                                                 key={tag}
                                                 href={`/blog?search=${encodeURIComponent(tag)}`}
-                                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-600 text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-slate-900 hover:text-white transition-all"
+                                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-600 text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-slate-900 hover:text-white transition-all break-words"
                                             >
-                                                <Tag className="w-3 h-3" />
-                                                {tag}
+                                                <Tag className="w-3 h-3 flex-shrink-0" />
+                                                <span className="truncate max-w-[150px] sm:max-w-xs">{tag}</span>
                                             </Link>
                                         ))}
                                     </div>
@@ -422,10 +422,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Bio Auteur === */}
                         {(post.authorName || post.author) && (
-                            <div className="mt-16 p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
-                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-6">{t('AboutAuthor')}</p>
-                                <div className="flex items-start gap-6">
-                                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            <div className="mt-12 md:mt-16 p-6 md:p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
+                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-4 md:mb-6">{t('AboutAuthor')}</p>
+                                <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
+                                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
                                         {(!post.authorName && post.author?.image) ? (
                                             <Image
                                                 src={post.author.image}
@@ -435,17 +435,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 className="object-cover w-full h-full"
                                             />
                                         ) : (
-                                            <User className="w-7 h-7 text-slate-400" />
+                                            <User className="w-6 h-6 md:w-7 md:h-7 text-slate-400" />
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black mb-1">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
+                                        <h3 className="text-base md:text-lg font-black mb-1">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
                                         {(!post.authorName && post.author?.bio) ? (
                                             <p className="text-sm text-slate-500 leading-relaxed">{post.author.bio}</p>
                                         ) : (
                                             <>
-                                                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-2">{t('ModeratorRole')}</p>
-                                                <p className="text-sm text-slate-500 leading-relaxed">{t('ModeratorDescription')}</p>
+                                                <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-2">{t('ModeratorRole')}</p>
+                                                <p className="text-xs md:text-sm text-slate-500 leading-relaxed">{t('ModeratorDescription')}</p>
                                             </>
                                         )}
                                     </div>
@@ -455,9 +455,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Livres Mentionnés (Mobile/Desktop bas d'article) === */}
                         {post.books && post.books.length > 0 && (
-                            <div className="mt-12 p-8 bg-slate-50/50 border border-slate-100 rounded-3xl">
-                                <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-                                    <BookOpen className="w-5 h-5 text-slate-600" />
+                            <div className="mt-10 md:mt-12 p-5 md:p-8 bg-slate-50/50 border border-slate-100 rounded-3xl">
+                                <h3 className="text-base md:text-lg font-black text-slate-900 mb-4 md:mb-6 flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-slate-600" />
                                     {t('InThisArticle')}
                                 </h3>
                                 <div className="grid grid-cols-1 gap-4">
@@ -465,13 +465,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         const displayTitle = getLocalizedTitle(book, locale);
                                         const bookUrl = generateBookUrl(book, locale);
                                         return (
-                                        <Link href={bookUrl} key={book.id} className="group flex flex-col sm:flex-row gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all">
+                                        <Link href={bookUrl} key={book.id} className="group flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all">
                                             <div className="relative w-24 h-36 sm:w-32 sm:h-48 bg-slate-50 rounded-lg shadow-sm overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
                                                 {book.image && <Image src={book.image} alt={displayTitle} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
                                             </div>
-                                            <div className="flex flex-col flex-1 min-w-0">
-                                                <h4 className="text-lg font-black text-slate-900 group-hover:text-slate-600 transition-colors leading-tight">{displayTitle}</h4>
-                                                <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest">{book.author}</p>
+                                            <div className="flex flex-col flex-1 min-w-0 text-center sm:text-start">
+                                                <h4 className="text-base md:text-lg font-black text-slate-900 group-hover:text-slate-600 transition-colors leading-tight truncate-multiline break-words">{displayTitle}</h4>
+                                                <p className="text-xs md:text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest truncate">{book.author}</p>
 
                                                 {book.description && (
                                                     <p className="text-sm text-slate-600 mt-3 line-clamp-3 leading-relaxed">
@@ -520,16 +520,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                     </div>
                                                 )}
 
-                                                <div className="mt-auto pt-4 flex items-center justify-between">
+                                                <div className="mt-auto pt-4 flex items-center justify-between sm:justify-start gap-4">
                                                     <div>
-                                                        <p className="text-lg font-black text-slate-600">{book.price} MAD</p>
+                                                        <p className="text-base md:text-lg font-black text-slate-600">{book.price} MAD</p>
                                                         {book.stock > 0 ? (
-                                                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{t('InStock')}</span>
+                                                            <span className="text-[9px] md:text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{t('InStock')}</span>
                                                         ) : (
-                                                            <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">{t('OutOfStock')}</span>
+                                                            <span className="text-[9px] md:text-[10px] font-bold text-rose-500 uppercase tracking-widest">{t('OutOfStock')}</span>
                                                         )}
                                                     </div>
-                                                    <div className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full group-hover:bg-slate-600 transition-colors">
+                                                    <div className="px-4 py-2 bg-slate-900 text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full group-hover:bg-slate-600 transition-colors whitespace-nowrap sm:ml-auto">
                                                         {t('Discover')}
                                                     </div>
                                                 </div>

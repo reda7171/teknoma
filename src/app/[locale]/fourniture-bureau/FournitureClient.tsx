@@ -85,21 +85,21 @@ export default function FournitureClient({ products }: { products: Product[] }) 
             </div>
 
             {/* Grille produits */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                 {filtered.map(product => (
                     <div
                         key={product.id}
-                        className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
+                        className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group"
                     >
                         <Link href={`/fourniture-bureau/${product.id}`} className="flex flex-col flex-grow">
                             {/* Image */}
-                            <div className="relative h-44 bg-slate-50 w-full">
+                            <div className="relative h-36 sm:h-44 bg-slate-50 w-full overflow-hidden">
                                 {product.image ? (
                                     <Image
                                         src={product.image}
                                         alt={product.name}
                                         fill
-                                        className="object-cover"
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                                         unoptimized
                                     />
                                 ) : (
@@ -121,20 +121,20 @@ export default function FournitureClient({ products }: { products: Product[] }) 
                             </div>
 
                             {/* Infos */}
-                            <div className="p-4 flex flex-col flex-grow">
+                            <div className="p-3 sm:p-4 flex flex-col flex-grow">
                                 <h3 className="font-bold text-slate-900 text-sm leading-tight mb-1 line-clamp-2">{product.name}</h3>
                                 {product.description && (
-                                    <p className="text-xs text-slate-400 line-clamp-2 mb-3">{product.description}</p>
+                                    <p className="text-xs text-slate-400 line-clamp-2 mb-2 sm:mb-3">{product.description}</p>
                                 )}
                             </div>
                         </Link>
                         
-                        <div className="p-4 pt-0 mt-auto flex items-center justify-between">
-                            <span className="text-lg font-black text-slate-900">{product.price.toFixed(2)} DH</span>
+                        <div className="p-3 sm:p-4 pt-0 mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                            <span className="text-base sm:text-lg font-black text-slate-900">{product.price.toFixed(2)} DH</span>
                             <button
                                 onClick={() => handleAdd(product)}
                                 disabled={product.stock === 0}
-                                className={`p-2 rounded-xl transition-all text-sm font-bold flex items-center gap-1.5 ${
+                                className={`w-full sm:w-auto p-2 sm:px-3 sm:py-2 rounded-xl transition-all text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 ${
                                     added === product.id
                                         ? 'bg-green-500 text-white scale-95'
                                         : product.stock === 0
@@ -142,8 +142,8 @@ export default function FournitureClient({ products }: { products: Product[] }) 
                                         : 'bg-amber-500 text-white hover:bg-amber-600 active:scale-95'
                                 }`}
                             >
-                                <ShoppingCart className="w-4 h-4" />
-                                {added === product.id ? 'Ajouté !' : ''}
+                                <ShoppingCart className="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="truncate">{added === product.id ? 'Ajouté !' : 'Ajouter'}</span>
                             </button>
                         </div>
                     </div>
