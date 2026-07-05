@@ -168,7 +168,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
-    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsensePublisherId, adsenseSidebarSlot] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot] = await Promise.all([
         getBookReviews(bookId),
         getBookAverageRating(bookId),
         book.category ? getCategoryConfigByName(book.category) : Promise.resolve(null),
@@ -179,6 +179,7 @@ export default async function BookDetailPage({
         getSetting('announcement_bar_bg_color'),
         getSetting('announcement_bar_text_color'),
         getPostsByBookId(id, locale),
+        getSetting('adsense_enabled').then(v => v === 'true'),
         getSetting('adsense_publisher_id').then(v => v || ''),
         getSetting('adsense_slot_sidebar').then(v => v || ''),
     ])
@@ -320,13 +321,15 @@ export default async function BookDetailPage({
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
                     {/* Bloc publicitaire AdSense avant le fil d'Ariane */}
-                    <AdBanner
-                        publisherId={adsensePublisherId}
-                        slotId={adsenseSidebarSlot}
-                        label="Publicité — Page Livre"
-                        format="horizontal"
-                        className="!my-3"
-                    />
+                    {adsenseEnabled && (
+                        <AdBanner
+                            publisherId={adsensePublisherId}
+                            slotId={adsenseSidebarSlot}
+                            label="Publicité — Page Livre"
+                            format="horizontal"
+                            className="!my-3"
+                        />
+                    )}
 
                     {/* Breadcrumb Section */}
                     <Breadcrumbs 
@@ -590,13 +593,13 @@ export default async function BookDetailPage({
                                     <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
                                         <h2 className="text-sm font-black text-black uppercase tracking-[0.3em]">{tBook('Technical')}</h2>
                                         <dl className="space-y-5">
-                                            <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
                                                 <dt className="text-xs font-black uppercase tracking-widest text-gray-300">{tBook('Reference')}</dt>
-                                                <dd className="text-sm font-black text-black tracking-widest">{book.isbn || 'RIWAYA-GEN'}</dd>
+                                                <dd className="text-sm font-black text-black tracking-widest break-all sm:text-right">{book.isbn || 'RIWAYA-GEN'}</dd>
                                             </div>
-                                            <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
                                                 <dt className="text-xs font-black uppercase tracking-widest text-gray-300">{tBook('Volume')}</dt>
-                                                <dd className="text-sm font-black text-black tracking-widest">~{Math.floor(Math.random() * 200) + 150} {tBook('Pages')}</dd>
+                                                <dd className="text-sm font-black text-black tracking-widest sm:text-right">~{Math.floor(Math.random() * 200) + 150} {tBook('Pages')}</dd>
                                             </div>
                                         </dl>
                                     </div>
@@ -630,15 +633,17 @@ export default async function BookDetailPage({
                     {relatedPosts && relatedPosts.length > 0 && (
                         <section className="py-8 border-t border-gray-100">
                             {/* Bloc publicitaire AdSense avant les articles liés */}
-                            <AdBanner
-                                publisherId={adsensePublisherId}
-                                slotId={adsenseSidebarSlot}
-                                label="Publicité — Articles liés"
-                                format="horizontal"
-                                className="!my-3 mb-6"
-                            />
+                            {adsenseEnabled && (
+                                <AdBanner
+                                    publisherId={adsensePublisherId}
+                                    slotId={adsenseSidebarSlot}
+                                    label="Publicité — Articles liés"
+                                    format="horizontal"
+                                    className="!my-3 mb-6"
+                                />
+                            )}
 
-                            <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8 px-2">
+                            <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-16 gap-6 md:gap-8 px-2">
                                 <div className="space-y-4">
                                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full">
                                         <FileText className="w-4 h-4" />
@@ -708,8 +713,8 @@ export default async function BookDetailPage({
                     )}
 
                     {/* Reviews Section */}
-                    <section className="py-32 border-t border-gray-100">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-24">
+                    <section className="py-20 md:py-32 border-t border-gray-100">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24">
                             <div className="lg:col-span-1 space-y-10">
                                 <div className="space-y-4">
                                     <div className="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center mb-8">

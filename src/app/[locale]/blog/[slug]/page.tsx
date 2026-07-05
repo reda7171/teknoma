@@ -360,11 +360,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* Colonne article */}
                     <div>
                         {/* AdSense haut */}
-                        <AdBanner
-                            publisherId={adsensePublisherId}
-                            slotId={slotTop}
-                            label="Haut de l'article"
-                        />
+                        {adsenseEnabled === 'true' && (
+                            <AdBanner
+                                publisherId={adsensePublisherId}
+                                slotId={slotTop}
+                                label="Haut de l'article"
+                            />
+                        )}
 
                         {/* Corps de l'article */}
                         <article
@@ -393,11 +395,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         </article>
 
                         {/* AdSense bas */}
-                        <AdBanner
-                            publisherId={adsensePublisherId}
-                            slotId={slotBottom}
-                            label="Bas de l'article"
-                        />
+                        {adsenseEnabled === 'true' && (
+                            <AdBanner
+                                publisherId={adsensePublisherId}
+                                slotId={slotBottom}
+                                label="Bas de l'article"
+                            />
+                        )}
 
                         {/* === Tags & Partage === */}
                         <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t-2 border-gray-100">
