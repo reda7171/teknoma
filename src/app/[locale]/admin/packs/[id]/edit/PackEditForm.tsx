@@ -95,6 +95,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
             bookIds: selectedBooks,
+            sellerSku: formData.get('sellerSku') as string || undefined,
         }
 
         const result = await updatePack(pack.id, input)
@@ -214,6 +215,21 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                         Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} MAD</span>
                                     </p>
                                 )}
+                            </div>
+
+                            {/* Seller SKU */}
+                            <div>
+                                <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Seller SKU (Jumia)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="sellerSku"
+                                    name="sellerSku"
+                                    defaultValue={(pack as any).sellerSku || ''}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    placeholder="SKU vendeur pour synchronisation"
+                                />
                             </div>
 
                             {/* Image */}

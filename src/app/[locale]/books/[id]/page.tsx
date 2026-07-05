@@ -28,13 +28,16 @@ import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
 import AdBanner from '@/components/AdBanner'
 
+import { getLocalizedTitle, getLocalizedDescription, generateBookUrl } from '@/lib/i18n-utils'
+
 export async function generateMetadata({
     params,
 }: {
     params: Promise<{ id: string; locale: string }>
 }): Promise<Metadata> {
     const { id, locale } = await params
-    const book = await getBookById(id)
+    const bookId = id.slice(0, 36);
+    const book = await getBookById(bookId)
 
     if (!book) {
         return {
@@ -46,6 +49,9 @@ export async function generateMetadata({
     const normalizedImage = normalizeImage(book.image)
     const imageUrl = normalizedImage.startsWith('http') ? normalizedImage : normalizedImage.startsWith('data:') ? normalizedImage : `${baseUrl}${normalizedImage}`
 
+    const localizedTitle = getLocalizedTitle(book, locale)
+    const localizedDescriptionText = getLocalizedDescription(book, locale)
+
     let keywords: string[] = []
     let description = ''
     let siteTitle = ''
@@ -53,13 +59,13 @@ export async function generateMetadata({
     const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
 
     if (locale === 'ar') {
-        siteTitle = `${book.title} - ${book.author} | مكتبة رواية`
-        description = `اشتري كتاب "${book.title}" للكاتب ${book.author} من مكتبة رواية. توصيل سريع لجميع مدن المغرب. السعر: ${book.price} درهم. ${book.stock > 0 ? 'متوفر' : 'غير متوفر'}.`
+        siteTitle = `${localizedTitle} - ${book.author} | مكتبة رواية`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `اشتري كتاب "${localizedTitle}" للكاتب ${book.author} من مكتبة رواية. توصيل سريع لجميع مدن المغرب. السعر: ${book.price} درهم. ${book.stock > 0 ? 'متوفر' : 'غير متوفر'}.`
         keywords = [
-            book.title,
+            localizedTitle,
             book.author,
-            `${book.title} ${book.author}`,
-            `شراء كتاب ${book.title}`,
+            `${localizedTitle} ${book.author}`,
+            `شراء كتاب ${localizedTitle}`,
             `كتاب ${book.category}`,
             `كتب ${book.author}`,
             'مكتبة في الرباط',
@@ -71,13 +77,13 @@ export async function generateMetadata({
             'توصيل كتب المغرب'
         ]
     } else if (locale === 'en') {
-        siteTitle = `${book.title} - ${book.author} | Riwaya Library`
-        description = `Buy "${book.title}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} MAD. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
+        siteTitle = `${localizedTitle} - ${book.author} | Riwaya Library`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Buy "${localizedTitle}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} MAD. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
         keywords = [
-            book.title,
+            localizedTitle,
             book.author,
-            `${book.title} ${book.author}`,
-            `buy ${book.title} morocco`,
+            `${localizedTitle} ${book.author}`,
+            `buy ${localizedTitle} morocco`,
             `${book.category} books`,
             `${book.author} books`,
             'bookstore in rabat',
@@ -86,13 +92,13 @@ export async function generateMetadata({
             'online bookstore morocco'
         ]
     } else {
-        siteTitle = `${book.title} - ${book.author} | Librairie Riwaya`
-        description = `Achetez "${book.title}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} MAD. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
+        siteTitle = `${localizedTitle} - ${book.author} | Librairie Riwaya`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Achetez "${localizedTitle}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} MAD. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
         keywords = [
-            book.title,
+            localizedTitle,
             book.author,
-            `${book.title} ${book.author}`,
-            `acheter ${book.title} maroc`,
+            `${localizedTitle} ${book.author}`,
+            `acheter ${localizedTitle} maroc`,
             `livre ${book.category}`,
             `${book.author} livres`,
             'librairie à rabat',
@@ -125,12 +131,12 @@ export async function generateMetadata({
             images: [imageUrl],
         },
         alternates: {
-            canonical: `${baseUrl}/${locale}/books/${book.id}`,
+            canonical: `${baseUrl}${generateBookUrl(book, locale)}`,
             languages: {
-                'ar': `${baseUrl}/ar/books/${book.id}`,
-                'fr': `${baseUrl}/fr/books/${book.id}`,
-                'en': `${baseUrl}/en/books/${book.id}`,
-                'x-default': `${baseUrl}/ar/books/${book.id}`,
+                'ar': `${baseUrl}${generateBookUrl(book, 'ar')}`,
+                'fr': `${baseUrl}${generateBookUrl(book, 'fr')}`,
+                'en': `${baseUrl}${generateBookUrl(book, 'en')}`,
+                'x-default': `${baseUrl}${generateBookUrl(book, 'ar')}`,
             },
         },
     }
@@ -142,11 +148,13 @@ export default async function BookDetailPage({
     params: Promise<{ id: string; locale: string }>
 }) {
     const { id, locale } = await params
+    const bookId = id.slice(0, 36);
+    
     const tBook = await getTranslations('BookDetail');
     const tCommon = await getTranslations('Common');
     const tNav = await getTranslations('Navigation');
 
-    const book = await getBookById(id)
+    const book = await getBookById(bookId)
     const user = await getCommunityUser()
     const isAdmin = user?.role === 'ADMIN' || user?.email === 'admin@riwaya.store'
 
@@ -154,10 +162,15 @@ export default async function BookDetailPage({
         notFound()
     }
 
+    // Extraction des titres et descriptions dynamiques selon la langue
+    const displayTitle = getLocalizedTitle(book, locale);
+    const displayDescription = getLocalizedDescription(book, locale);
+    const displayLongDescription = getLocalizedLongDescription(book, locale);
+
     // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
     const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsensePublisherId, adsenseSidebarSlot] = await Promise.all([
-        getBookReviews(id),
-        getBookAverageRating(id),
+        getBookReviews(bookId),
+        getBookAverageRating(bookId),
         book.category ? getCategoryConfigByName(book.category) : Promise.resolve(null),
         getPopularBooks(6),
         getSetting('contact_whatsapp'),
@@ -188,9 +201,6 @@ export default async function BookDetailPage({
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const normalizedImage = normalizeImage(book.image)
     const imageUrl = normalizedImage.startsWith('http') ? normalizedImage : normalizedImage.startsWith('data:') ? normalizedImage : `${baseUrl}${normalizedImage}`
-
-    const displayTitle = locale === 'fr' && book.titleFr ? book.titleFr : locale === 'en' && book.titleEn ? book.titleEn : book.title;
-    const displayDescription = locale === 'fr' && book.descriptionFr ? book.descriptionFr : locale === 'en' && book.descriptionEn ? book.descriptionEn : book.description;
 
     const jsonLd: any[] = [];
 
@@ -524,18 +534,21 @@ export default async function BookDetailPage({
                                 <div className="mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
                                     <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h3>
                                     <div className="flex flex-col gap-3 sm:gap-4">
-                                        {frequentlyBoughtTogether.map(fbBook => (
+                                        {frequentlyBoughtTogether.map(fbBook => {
+                                            const fbDisplayTitle = getLocalizedTitle(fbBook, locale);
+                                            const fbBookUrl = generateBookUrl(fbBook, locale);
+                                            return (
                                             <div key={fbBook.id} className="flex items-center gap-3 sm:gap-4 bg-white p-2.5 sm:p-3 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow">
-                                                <Link href={`/books/${fbBook.id}`} target="_blank" rel="noopener noreferrer" className="flex gap-3 sm:gap-4 items-center flex-1 min-w-0 group">
+                                                <Link href={fbBookUrl} target="_blank" rel="noopener noreferrer" className="flex gap-3 sm:gap-4 items-center flex-1 min-w-0 group">
                                                     <div className="relative w-12 h-16 sm:w-16 sm:h-20 flex-shrink-0 overflow-hidden rounded-xl">
                                                         <ImageWithFallback
                                                             src={fbBook.image}
-                                                            alt={locale === 'fr' && fbBook.titleFr ? fbBook.titleFr : locale === 'en' && fbBook.titleEn ? fbBook.titleEn : fbBook.title}
+                                                            alt={fbDisplayTitle}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{locale === 'fr' && fbBook.titleFr ? fbBook.titleFr : locale === 'en' && fbBook.titleEn ? fbBook.titleEn : fbBook.title}</span>
+                                                        <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{fbDisplayTitle}</span>
                                                         <p className="text-[9px] font-bold text-gray-400 mt-0.5 sm:mt-1 truncate">{fbBook.author}</p>
                                                         <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} MAD</p>
                                                     </div>
@@ -543,7 +556,7 @@ export default async function BookDetailPage({
                                                 <AddToCartButton
                                                     product={{
                                                         id: fbBook.id,
-                                                        title: locale === 'fr' && fbBook.titleFr ? fbBook.titleFr : locale === 'en' && fbBook.titleEn ? fbBook.titleEn : fbBook.title,
+                                                        title: fbDisplayTitle,
                                                         price: fbBook.price,
                                                         image: fbBook.image,
                                                         type: 'BOOK'
@@ -552,7 +565,8 @@ export default async function BookDetailPage({
                                                     className="!px-3 sm:!px-4 !py-2.5 sm:!py-3 text-[8px] sm:text-[9px] uppercase tracking-widest font-black !rounded-xl !w-auto flex-shrink-0 shadow-sm"
                                                 />
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

@@ -28,7 +28,8 @@ const OrderSchema = z.object({
     utmMedium: z.string().max(100).optional(),
     utmCampaign: z.string().max(255).optional(),
     fbclid: z.string().max(255).optional(),
-    ttclid: z.string().max(255).optional()
+    ttclid: z.string().max(255).optional(),
+    paymentMethod: z.enum(['COD', 'STRIPE', 'PAYPAL', 'CMI']).optional()
 })
 
 export async function getOrders() {
@@ -191,10 +192,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                     utmCampaign: data.utmCampaign,
                     fbclid: data.fbclid,
                     ttclid: data.ttclid,
-                    status: 'PENDING',
+                    status: ['STRIPE', 'PAYPAL', 'CMI'].includes(sanitizedData.paymentMethod || '') ? 'PENDING_PAYMENT' : 'PENDING',
                     paymentMethod: sanitizedData.items.every(item => item.type === 'DIGITAL')
                         ? 'DIGITAL_PAYMENT'
-                        : 'COD', // Cash On Delivery
+                        : (sanitizedData.paymentMethod || 'COD'), // Use selected payment method or fallback to COD
                     items: {
                         create: itemsWithCost.map(item => ({
                             type: item.type,

@@ -141,6 +141,15 @@ export default function POSClient({
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>(defaultTab);
   const [gridCols, setGridCols] = useState(defaultGridCols);
+  
+  useEffect(() => {
+    if (window.innerWidth < 640) {
+      setGridCols(2);
+    } else if (window.innerWidth < 1024) {
+      setGridCols(Math.min(4, defaultGridCols));
+    }
+  }, [defaultGridCols]);
+
   const [activeNumpad, setActiveNumpad] = useState<'shipping' | 'discount' | null>(null);
   const [customer, setCustomer] = useState({
     fullName: '',
@@ -517,12 +526,12 @@ export default function POSClient({
         />
       )}
 
-      <div className={`flex-1 flex flex-col min-w-0 bg-white rounded-[3rem] shadow-2xl shadow-black/5 border border-gray-100 overflow-hidden ${showMobileCart ? 'hidden lg:flex' : 'flex'}`}>
-        <div className="p-8 md:p-10 border-b border-gray-50 space-y-8 bg-white">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className={`flex-1 flex flex-col min-w-0 bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl shadow-black/5 border border-gray-100 overflow-hidden ${showMobileCart ? 'hidden lg:flex' : 'flex'}`}>
+        <div className="p-4 md:p-10 border-b border-gray-50 space-y-4 md:space-y-8 bg-white">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-8">
             <div className="flex items-center justify-between gap-6 w-full md:w-auto">
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <Link href={`/${locale}/admin/orders`} className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-2xl border border-gray-100 hover:bg-gray-100 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
                   <ListOrdered className="w-4 h-4" />
                   Commandes
@@ -575,11 +584,11 @@ export default function POSClient({
                 </div>
                 <button 
                   onClick={() => setShowMobileCart(true)}
-                  className="lg:hidden relative w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/20"
+                  className="lg:hidden relative w-12 h-12 md:w-14 md:h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/20"
                 >
-                  <ShoppingBag className="w-6 h-6" />
+                  <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" />
                   {cart.length > 0 && (
-                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg animate-bounce">
+                    <span className="absolute -top-2 -right-2 w-5 h-5 md:w-6 md:h-6 bg-emerald-500 text-white text-[9px] md:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg animate-bounce">
                       {cart.length}
                     </span>
                   )}
@@ -590,19 +599,19 @@ export default function POSClient({
             {showSearch && (
               <div className="flex items-center gap-2 w-full md:w-96">
                 <div className="relative flex-1 group">
-                  <Search className="w-4 h-4 text-gray-300 absolute left-5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-black" />
+                  <Search className="w-4 h-4 text-gray-300 absolute left-4 md:left-5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-black" />
                   <input
                     type="text"
                     placeholder="RECHERCHER OU SCANNER ISBN..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={handleBarcodeScan}
-                    className="w-full pl-14 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-black text-[10px] uppercase tracking-widest shadow-inner"
+                    className="w-full pl-12 pr-6 md:pl-14 md:pr-8 py-4 md:py-5 bg-gray-50 border border-gray-100 rounded-[1.25rem] md:rounded-[1.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-black text-[9px] md:text-[10px] uppercase tracking-widest shadow-inner"
                   />
                 </div>
                 <button
                   onClick={() => setShowScanner(true)}
-                  className="w-14 h-14 bg-black text-white rounded-[1.5rem] flex items-center justify-center hover:bg-gray-800 transition-colors shadow-lg active:scale-95 shrink-0"
+                  className="w-12 h-12 md:w-14 md:h-14 bg-black text-white rounded-[1.25rem] md:rounded-[1.5rem] flex items-center justify-center hover:bg-gray-800 transition-colors shadow-lg active:scale-95 shrink-0"
                   title="Scanner avec la caméra"
                 >
                   <Camera className="w-5 h-5" />
@@ -613,7 +622,7 @@ export default function POSClient({
           
           {showCategories && (
             <div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 no-scrollbar">
-              <div className="flex gap-3">
+              <div className="flex gap-2 md:gap-3">
                 {[
                     { id: 'ALL', label: 'TOUT LE CATALOGUE' },
                     { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
@@ -624,7 +633,7 @@ export default function POSClient({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
+                    className={`px-4 py-3 md:px-8 md:py-4 rounded-[1rem] md:rounded-2xl font-black text-[8px] md:text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
                       activeTab === tab.id 
                         ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
                         : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
@@ -638,9 +647,9 @@ export default function POSClient({
           )}
         </div>
 
-        <div className="flex-1 p-8 md:p-10 overflow-y-auto bg-gray-50/30 custom-scrollbar">
+        <div className="flex-1 p-4 md:p-10 overflow-y-auto bg-gray-50/30 custom-scrollbar">
           <div 
-            className="grid gap-6"
+            className="grid gap-3 sm:gap-6 responsive-pos-grid"
             style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
           >
             {displayedProducts.map((product) => (

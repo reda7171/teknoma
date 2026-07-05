@@ -158,6 +158,7 @@ model Book {
   imageTitle      String?       @db.VarChar(500) // Title SEO pour l'image
   displayOrder    Int           @default(0)
   isOriginal      Boolean       @default(true)
+  sellerSku       String?       @db.VarChar(100)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   orderItems      OrderItem[]
@@ -218,6 +219,7 @@ model Pack {
   isFreeDelivery Boolean     @default(false)
   shippingFees   Float       @default(0)
   active         Boolean     @default(true)
+  sellerSku      String?     @db.VarChar(100)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   orderItems     OrderItem[]
@@ -970,6 +972,7 @@ model ExtraProduct {
   weight      String?     @db.VarChar(255)
   warranty    String?     @db.VarChar(255)
   active      Boolean     @default(true)
+  sellerSku   String?     @db.VarChar(100)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]

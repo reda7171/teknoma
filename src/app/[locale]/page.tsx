@@ -815,7 +815,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <>
       <GiftPopup />
       <HeaderWithUser />
-      <main className="min-h-screen bg-white">
+      <style dangerouslySetInnerHTML={{ __html: `
+        body::-webkit-scrollbar { display: none !important; }
+        body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+      `}} />
+      <main className="min-h-screen bg-white overflow-x-hidden">
         {finalOrder.map(key => renderSection(key))}
 
         {/* Newsletter / CTA - Style Pixio Banner */}

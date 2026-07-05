@@ -8,9 +8,10 @@ import Image from 'next/image'
 import { Link, useRouter } from '@/i18n/routing'
 
 import { trackBadgeClick } from '@/lib/actions/analytics'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { normalizeImage } from '@/lib/utils'
+import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 
 const Countdown = ({ expiresAt }: { expiresAt: string | Date }) => {
     const [timeLeft, setTimeLeft] = useState('')
@@ -52,6 +53,7 @@ export default function PredictiveSearch() {
     const searchRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
     const t = useTranslations('PredictiveSearch');
+    const locale = useLocale();
 
     // Charger l'historique et les catégories au montage
     useEffect(() => {
@@ -230,10 +232,13 @@ export default function PredictiveSearch() {
                             <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
                                 {results.length > 0 ? (
                                     <div className="p-4 space-y-3">
-                                        {results.map((book) => (
+                                        {results.map((book) => {
+                                            const displayTitle = getLocalizedTitle(book, locale);
+                                            const bookUrl = generateBookUrl(book, locale);
+                                            return (
                                             <Link
                                                 key={book.id}
-                                                href={`/books/${book.id}`}
+                                                href={bookUrl}
                                                 onClick={() => {
                                                     saveToHistory(query)
                                                     setIsOpen(false)
@@ -243,7 +248,7 @@ export default function PredictiveSearch() {
                                                 <div className="relative w-14 h-20 rounded-xl overflow-hidden bg-gray-50 shrink-0 border border-gray-50 shadow-sm transition-all group-hover/item:scale-105">
                                                     <Image
                                                         src={normalizeImage(book.image)}
-                                                        alt={book.title}
+                                                        alt={displayTitle}
                                                         fill
                                                         className="object-cover"
                                                         unoptimized
@@ -251,7 +256,7 @@ export default function PredictiveSearch() {
                                                 </div>
                                                 <div className="flex-1 min-w-0 space-y-1">
                                                     <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">{book.category || 'Collection'}</p>
-                                                    <h4 className="font-black text-gray-900 text-sm truncate group-hover/item:text-black transition-colors leading-none">{book.title}</h4>
+                                                    <h4 className="font-black text-gray-900 text-sm truncate group-hover/item:text-black transition-colors leading-none">{displayTitle}</h4>
                                                     <p className="text-[10px] font-bold text-gray-500 italic">{t('By', { author: book.author })}</p>
                                                     <div className="flex items-center justify-between mt-2">
                                                         <span className="text-sm font-black text-gray-900">{book.price} MAD</span>
@@ -261,7 +266,8 @@ export default function PredictiveSearch() {
                                                     </div>
                                                 </div>
                                             </Link>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 ) : !isLoading && (
                                     <div className="p-16 text-center space-y-4 bg-pixio-cream/30">

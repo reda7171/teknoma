@@ -41,9 +41,9 @@ export default async function MarketPage({
                 <MarketMap books={books} isBlurred={isBlurred} />
             </div>
 
-            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32 w-full">
-                <div className="mb-12 text-center md:text-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                    <h1 className="text-4xl lg:text-5xl font-black text-black tracking-tighter mb-4 uppercase">
+            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-32 w-full">
+                <div className="mb-8 sm:mb-12 text-center md:text-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-black tracking-tighter mb-3 sm:mb-4 uppercase">
                         {t('Title')}
                     </h1>
                     <p className="text-gray-500 font-medium max-w-2xl mx-auto md:mx-0">

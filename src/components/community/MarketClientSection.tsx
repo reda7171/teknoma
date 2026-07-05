@@ -37,17 +37,17 @@ export default function MarketClientSection({ initialBooks, smartMatches, search
                 <div className={`transition-opacity duration-300 ${isPending ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
                     {/* Smart Matches Section (Hidden if searching/filtering) */}
                     {smartMatches.length > 0 && !search && !city && (
-                        <div className="mb-16">
-                            <div className="flex items-center gap-3 mb-8">
+                        <div className="mb-12 sm:mb-16">
+                            <div className="flex items-center gap-3 mb-6 sm:mb-8">
                                 <div className="w-10 h-10 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-3">
                                     <Sparkles className="w-5 h-5 text-pixio-yellow" />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black text-black tracking-tight uppercase">{t('MatchesForYou')}</h2>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('BasedOnWishlist')}</p>
+                                    <h2 className="text-xl sm:text-2xl font-black text-black tracking-tight uppercase">{t('MatchesForYou')}</h2>
+                                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400">{t('BasedOnWishlist')}</p>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
                                 {smartMatches.map((book: any) => (
                                     <MarketBookCard key={book.id} book={book} isSmartMatch isBlurred={isBlurred} />
                                 ))}
@@ -56,9 +56,9 @@ export default function MarketClientSection({ initialBooks, smartMatches, search
                     )}
 
                     {/* Main Grid Title */}
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-2 h-8 bg-black rounded-full" />
-                        <h2 className="text-2xl font-black text-black tracking-tight uppercase">{t('AllBooks')}</h2>
+                    <div className="flex items-center gap-3 mb-6 sm:mb-8">
+                        <div className="w-2 h-6 sm:h-8 bg-black rounded-full" />
+                        <h2 className="text-xl sm:text-2xl font-black text-black tracking-tight uppercase">{t('AllBooks')}</h2>
                     </div>
 
                     {/* Main Grid */}

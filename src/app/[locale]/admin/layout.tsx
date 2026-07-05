@@ -202,6 +202,7 @@ export default function AdminLayout({
                 { name: 'Navigation Site', href: `/${lang}/admin/menus`, icon: GripVertical },
                 { name: 'Page d\'Accueil', href: `/${lang}/admin/config/homepage`, icon: LayoutDashboard },
                 { name: 'Formulaires', href: `/${lang}/admin/config/form`, icon: Settings },
+                { name: 'Modes de Paiement', href: `/${lang}/admin/config/payment-methods`, icon: Banknote },
                 { name: 'API Livraison', href: `/${lang}/admin/config/delivery`, icon: Truck },
                 { name: 'Sociétés de Livraison', href: `/${lang}/admin/config/shipping-companies`, icon: Truck },
                 { name: 'API & Intégrations', href: `/${lang}/admin/config/api`, icon: Sparkles },

@@ -15,6 +15,7 @@ const PackSchema = z.object({
     isFreeDelivery: z.boolean().default(false),
     shippingFees: z.number().min(0).default(0),
     bookIds: z.array(z.string().uuid()).min(1, 'Le pack doit contenir au moins un livre'),
+    sellerSku: z.string().optional(),
 })
 
 export type PackInput = z.infer<typeof PackSchema>
@@ -51,6 +52,7 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                 image: validatedData.image,
                 isFreeDelivery: validatedData.isFreeDelivery,
                 shippingFees: validatedData.shippingFees,
+                sellerSku: validatedData.sellerSku,
                 active: true,
                 books: {
                     create: validatedData.bookIds.map((bookId) => ({
@@ -158,6 +160,7 @@ export async function updatePack(
                     image: validatedData.image,
                     isFreeDelivery: validatedData.isFreeDelivery,
                     shippingFees: validatedData.shippingFees,
+                    sellerSku: validatedData.sellerSku,
                     books: {
                         create: validatedData.bookIds.map((bookId) => ({
                             bookId,

@@ -37,28 +37,28 @@ export default function CookieConsent() {
     if (!isVisible) return null
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6 flex justify-center pointer-events-none">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] p-3 sm:p-6 flex justify-center pointer-events-none">
             <div className="w-full max-w-4xl pointer-events-auto">
-                <div className="relative overflow-hidden bg-white/95 backdrop-blur-2xl border border-white/40 shadow-[0_20px_80px_-20px_rgba(0,0,0,0.1)] rounded-[3rem] p-2">
+                <div className="relative overflow-hidden bg-white/95 backdrop-blur-2xl border border-white/40 shadow-[0_20px_80px_-20px_rgba(0,0,0,0.1)] rounded-3xl sm:rounded-[3rem] p-1 sm:p-2">
                 {/* Subtle Gradient Glow */}
                 <div className="absolute -top-24 -right-24 w-48 h-48 bg-black/5 rounded-full blur-3xl"></div>
                 
-                <div className="relative bg-white/90 rounded-[2.2rem] p-8">
+                <div className="relative bg-white/90 rounded-[1.5rem] sm:rounded-[2.2rem] p-5 sm:p-8">
                     <button 
                         onClick={() => setIsVisible(false)}
                         aria-label="Fermer le bandeau des cookies"
-                        className="absolute top-6 right-6 text-gray-300 hover:text-black transition-all hover:rotate-90 duration-300"
+                        className="absolute top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-black transition-all hover:rotate-90 duration-300"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
 
-                    <div className="flex flex-col gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
-                                <Cookie className="w-7 h-7 text-white" />
+                    <div className="flex flex-col gap-4 sm:gap-6">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-black rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
+                                <Cookie className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-base font-black uppercase tracking-[0.2em] text-black">
+                                <h3 className="text-sm sm:text-base font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-black">
                                     {t('Title')}
                                 </h3>
                                 <div className="flex items-center gap-2 mt-1">
@@ -68,8 +68,8 @@ export default function CookieConsent() {
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <p className="text-[13px] font-medium text-gray-600 leading-relaxed">
+                        <div className="space-y-3 sm:space-y-4">
+                            <p className="text-xs sm:text-[13px] font-medium text-gray-600 leading-relaxed">
                                 {t.rich('Description', {
                                     link: (chunks) => (
                                         <Link href="/privacy" className="text-black font-bold underline underline-offset-4 decoration-1 hover:decoration-2 transition-all">
@@ -79,22 +79,22 @@ export default function CookieConsent() {
                                 })}
                             </p>
                             
-                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                                 <button 
                                     onClick={handleAccept}
-                                    className="flex-1 px-8 py-4 bg-black text-white text-[11px] font-black uppercase tracking-[0.15em] rounded-2xl hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-black/5"
+                                    className="flex-1 px-4 py-3 sm:px-8 sm:py-4 bg-black text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] rounded-xl sm:rounded-2xl hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-black/5"
                                 >
                                     {t('Accept')}
                                 </button>
                                 <button 
                                     onClick={handleDecline}
-                                    className="flex-1 px-8 py-4 border border-gray-200 text-black text-[11px] font-black uppercase tracking-[0.15em] rounded-2xl hover:bg-gray-50 transition-all active:scale-95"
+                                    className="flex-1 px-4 py-3 sm:px-8 sm:py-4 border border-gray-200 text-black text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all active:scale-95"
                                 >
                                     {t('LearnMore')}
                                 </button>
                             </div>
                             
-                            <div className="flex justify-center">
+                            <div className="flex justify-center mt-2 sm:mt-0">
                                 <button className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-2">
                                     <Settings2 className="w-3 h-3" />
                                     Preference Settings

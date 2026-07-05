@@ -78,27 +78,27 @@ export default async function BlogPage({
             <Header />
 
             {/* Hero Section */}
-            <div className="bg-pixio-beige pt-12 md:pt-20 pb-12 md:pb-20 relative overflow-hidden">
-                <Quote className="absolute -top-10 -right-10 w-64 h-64 text-pixio-cream opacity-50 -rotate-12" />
+            <div className="bg-pixio-beige pt-10 sm:pt-12 md:pt-20 pb-10 sm:pb-12 md:pb-20 relative overflow-hidden">
+                <Quote className="absolute -top-10 -right-10 w-48 h-48 sm:w-64 sm:h-64 text-pixio-cream opacity-50 -rotate-12" />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full text-black text-[10px] font-black uppercase tracking-[0.2em] shadow-sm mb-6 hover:scale-105 transition-transform duration-300">
-                        <Sparkles className="w-4 h-4 text-yellow-500 animate-pulse" />
+                    <div className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-md rounded-full text-black text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shadow-sm mb-4 sm:mb-6 hover:scale-105 transition-transform duration-300">
+                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 animate-pulse" />
                         <span>{t('Badge')}</span>
                     </div>
-                    <h1 className="text-5xl md:text-8xl font-black text-black mb-6 tracking-tighter hover:scale-[1.02] transition-transform duration-500">
+                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-black text-black mb-4 sm:mb-6 tracking-tighter hover:scale-[1.02] transition-transform duration-500">
                         {t('Title')}
                     </h1>
-                    <p className="text-lg text-gray-600 uppercase font-bold tracking-widest max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-sm sm:text-lg text-gray-600 uppercase font-bold tracking-widest max-w-2xl mx-auto leading-relaxed">
                         {t('Subtitle')}
                     </p>
                 </div>
 
                 {/* Categories Bar */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 relative z-10">
-                    <div className="flex flex-wrap justify-center gap-3">
+                <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 mt-8 sm:mt-12 relative z-10">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <Link
                             href="/blog"
-                            className={`px-4 md:px-6 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                         >
                             Tous
                         </Link>
@@ -106,7 +106,7 @@ export default async function BlogPage({
                             <Link
                                 key={cat}
                                 href={`/blog?category=${cat}`}
-                                className={`px-4 md:px-6 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                             >
                                 {cat}
                             </Link>
@@ -119,19 +119,19 @@ export default async function BlogPage({
                 publisherId={adsenseId || ""} 
                 slot={adsenseSidebarSlot || "blog_top_horizontal"} 
                 isEnabled={adsenseEnabled === 'true'} 
-                className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10"
+                className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10"
             />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20">
                 {posts.length === 0 ? (
-                    <div className="text-center py-32 bg-white/50 backdrop-blur-sm rounded-[3rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                            <BookOpen className="w-10 h-10 text-gray-300" />
+                    <div className="text-center py-20 sm:py-32 bg-white/50 backdrop-blur-sm rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300" />
                         </div>
-                        <p className="text-gray-900 font-black uppercase tracking-widest text-lg">
+                        <p className="text-gray-900 font-black uppercase tracking-widest text-base sm:text-lg">
                             {t('NoPosts')}
                         </p>
-                        <p className="text-sm text-gray-500 mt-2 font-medium max-w-sm mx-auto">
+                        <p className="text-xs sm:text-sm text-gray-500 mt-2 font-medium max-w-sm mx-auto px-4">
                             {t('ComingSoon')}
                         </p>
                     </div>
@@ -141,7 +141,7 @@ export default async function BlogPage({
                             <Link
                                 href={`/blog/${post.slug}`}
                                 key={post.id}
-                                className={`group relative bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col ${idx === 0 ? 'md:col-span-2 lg:col-span-3 lg:flex-row lg:h-[500px]' : 'h-full'}`}
+                                className={`group relative bg-white rounded-3xl md:rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col ${idx === 0 ? 'md:col-span-2 lg:col-span-3 lg:flex-row lg:h-[500px]' : 'h-full'}`}
                             >
                                 {/* Image */}
                                 <div className={`relative overflow-hidden bg-gray-100 ${idx === 0 ? 'w-full lg:w-1/2 h-48 md:h-64 lg:h-full' : 'aspect-[4/3]'}`}>

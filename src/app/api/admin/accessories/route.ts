@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
                 dimensions: data.dimensions,
                 weight: data.weight,
                 warranty: data.warranty,
+                sellerSku: data.sellerSku,
                 active: data.active !== undefined ? data.active : true
             }
         })

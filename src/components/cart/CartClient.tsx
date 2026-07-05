@@ -59,12 +59,12 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
     const isMinAmountReached = finalTotal >= minOrderAmount
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-40">
-            <div className="flex items-center justify-between mb-16 px-4">
-                <h1 className="text-6xl font-black tracking-tighter flex items-center gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 pb-20 sm:pb-40">
+            <div className="flex items-center justify-between mb-8 sm:mb-16 px-2 sm:px-4">
+                <h1 className="text-4xl sm:text-6xl font-black tracking-tighter flex items-center gap-4 sm:gap-6">
                     {t('Title')}<span className="text-gray-500">.</span>
                 </h1>
-                <div className="text-[10px] rtl:text-sm font-black uppercase tracking-[0.4em] text-gray-500">
+                <div className="text-[9px] sm:text-[10px] rtl:text-sm font-black uppercase tracking-widest sm:tracking-[0.4em] text-gray-500">
                     {t('CollectionCount', { count: totalItems })}
                 </div>
             </div>
@@ -100,7 +100,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                         {items.map((item) => (
                             <div
                                 key={item.id}
-                                className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-black/5 transition-all flex flex-col sm:flex-row gap-10 group"
+                                className="bg-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-black/5 transition-all flex flex-col sm:flex-row gap-6 sm:gap-10 group"
                             >
                                 {/* Image */}
                                 <div className="relative w-full sm:w-32 h-44 flex-shrink-0 bg-pixio-cream rounded-[2rem] overflow-hidden border border-gray-50 transition-transform group-hover:scale-105">
@@ -123,11 +123,11 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                 {/* Content */}
                                 <div className="flex-1 flex flex-col justify-between py-2">
                                     <div>
-                                        <div className="flex justify-between items-start gap-6 mb-4">
-                                            <h3 className="text-xl font-black tracking-tighter uppercase leading-tight group-hover:text-gray-600 transition-colors">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-6 mb-4">
+                                            <h3 className="text-lg sm:text-xl font-black tracking-tighter uppercase leading-tight group-hover:text-gray-600 transition-colors">
                                                 {item.title}
                                             </h3>
-                                            <p className="text-xl font-black tracking-tighter whitespace-nowrap">
+                                            <p className="text-lg sm:text-xl font-black tracking-tighter whitespace-nowrap">
                                                 {item.price * item.quantity} MAD
                                             </p>
                                         </div>
@@ -156,8 +156,8 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                         )}
                                     </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4 bg-pixio-cream p-2 rounded-2xl">
+                                    <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 mt-4 sm:mt-0">
+                                        <div className="flex items-center gap-4 bg-pixio-cream p-2 rounded-2xl w-full sm:w-auto justify-between sm:justify-start">
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                                 className="w-10 h-10 flex items-center justify-center bg-white rounded-xl hover:bg-black hover:text-white transition-all shadow-sm active:scale-95"
@@ -179,10 +179,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
                                         <button
                                             onClick={() => handleRemove(item)}
-                                            className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-[10px] font-black uppercase tracking-widest px-6 py-3 transition-colors rounded-full hover:bg-red-50"
+                                            className="flex items-center justify-center gap-2 text-gray-500 hover:text-red-500 text-[10px] font-black uppercase tracking-widest px-6 py-3 transition-colors rounded-full hover:bg-red-50 bg-gray-50 sm:bg-transparent w-full sm:w-auto"
                                         >
                                             <Trash2 className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('DeleteItem')}</span>
+                                            <span className="inline">{t('DeleteItem')}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -202,8 +202,8 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
                     {/* Summary */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-[3rem] p-12 shadow-2xl shadow-black/5 border border-gray-50 sticky top-32">
-                            <h2 className="text-sm rtl:text-xl font-black uppercase tracking-[0.3em] mb-10 pb-6 border-b border-gray-50">
+                        <div className="bg-white rounded-3xl sm:rounded-[3rem] p-6 sm:p-12 shadow-2xl shadow-black/5 border border-gray-50 sticky top-32">
+                            <h2 className="text-sm rtl:text-xl font-black uppercase tracking-[0.3em] mb-6 sm:mb-10 pb-6 border-b border-gray-50">
                                 {t('SummaryTitle')}
                             </h2>
 
@@ -237,12 +237,12 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                 )}
                             </div>
 
-                            <div className="border-t border-gray-50 pt-8 mb-12">
-                                <div className="flex justify-between items-baseline mb-2">
+                            <div className="border-t border-gray-50 pt-6 sm:pt-8 mb-8 sm:mb-12">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-2 gap-2">
                                     <span className="text-xs font-black uppercase tracking-[0.3em]">{t('TotalValue')}</span>
-                                    <span className="text-5xl font-black tracking-tighter">{finalTotal} MAD</span>
+                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{finalTotal} MAD</span>
                                 </div>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-right">{t('TaxesNote')}</p>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-left sm:text-right">{t('TaxesNote')}</p>
                             </div>
 
                             {minOrderAmount > 0 && !isMinAmountReached && (

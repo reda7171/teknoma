@@ -31,12 +31,15 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     
     // Nouveaux states pour les champs gérés avec Gemini
     const [description, setDescription] = useState<string>('')
+    const [descriptionFr, setDescriptionFr] = useState<string>('')
     const [longDescription, setLongDescription] = useState<string>('')
+    const [longDescriptionFr, setLongDescriptionFr] = useState<string>('')
     const [isGeneratingShort, setIsGeneratingShort] = useState(false)
     const [isGeneratingLong, setIsGeneratingLong] = useState(false)
     const [authors, setAuthors] = useState<string[]>([])
     const [isNewAuthor, setIsNewAuthor] = useState(false)
     const [selectedAuthor, setSelectedAuthor] = useState<string>('')
+    const [currentLang, setCurrentLang] = useState<'ar' | 'fr'>('ar')
 
     useEffect(() => {
         getPurchaseLots().then(data => setLots(data)).catch(console.error)
@@ -60,7 +63,9 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setBook(result.data)
                 setSelectedCost((result.data as any).costPrice?.toString() || '0')
             setDescription(result.data.description || '')
+            setDescriptionFr(result.data.descriptionFr || '')
             setLongDescription(result.data.longDescription || '')
+            setLongDescriptionFr(result.data.longDescriptionFr || '')
             setSelectedAuthor(result.data.author || '')
         } else {
             setError(result.error || 'Livre introuvable')
@@ -108,10 +113,13 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         }
 
         const input: BookInput = {
-            title: formData.get('title') as string,
+            title: formData.get('title_ar') as string,
+            titleFr: formData.get('title_fr') as string || undefined,
             author: formData.get('author') as string,
-            description: formData.get('description') as string,
-            longDescription: formData.get('longDescription') as string || undefined,
+            description: description,
+            descriptionFr: descriptionFr || undefined,
+            longDescription: longDescription || undefined,
+            longDescriptionFr: longDescriptionFr || undefined,
             isbn: formData.get('isbn') as string || undefined,
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
@@ -124,6 +132,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             isBestSeller: formData.get('isBestSeller') === 'true',
             previewUrl: formData.get('previewUrl') as string || undefined,
             isOriginal: formData.get('isOriginal') !== 'false',
+            sellerSku: formData.get('sellerSku') as string || undefined,
         }
 
         const result = await updateBook(id, input)
@@ -234,20 +243,52 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
             {/* Form */}
             <form key={book.id} onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex justify-end mb-4 gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="lang_toggle" 
+                            checked={currentLang === 'ar'} 
+                            onChange={() => setCurrentLang('ar')} 
+                            className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className={`text-sm font-medium ${currentLang === 'ar' ? 'text-orange-500' : 'text-gray-500'}`}>Arabic</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="lang_toggle" 
+                            checked={currentLang === 'fr'} 
+                            onChange={() => setCurrentLang('fr')} 
+                            className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className={`text-sm font-medium ${currentLang === 'fr' ? 'text-orange-500' : 'text-gray-500'}`}>French</span>
+                    </label>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Titre */}
                     <div className="md:col-span-2">
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Titre <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
-                            id="title"
-                            name="title"
-                            required
+                            name="title_ar"
+                            required={currentLang === 'ar'}
                             defaultValue={book.title}
+                            style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Ex: Atomic Habits"
+                            placeholder="Titre en arabe"
+                        />
+                        <input
+                            type="text"
+                            name="title_fr"
+                            required={currentLang === 'fr'}
+                            defaultValue={book.titleFr || ''}
+                            style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Titre en français"
                         />
                     </div>
 
@@ -317,6 +358,21 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             defaultValue={book.isbn || ''}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Ex: 9780735211292"
+                        />
+                    </div>
+
+                    {/* Seller SKU */}
+                    <div>
+                        <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700 mb-2">
+                            Seller SKU (Jumia)
+                        </label>
+                        <input
+                            type="text"
+                            id="sellerSku"
+                            name="sellerSku"
+                            defaultValue={book.sellerSku || ''}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="SKU vendeur pour synchronisation"
                         />
                     </div>
 
@@ -435,21 +491,25 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     </div>
 
                     {/* Langue du Livre */}
-                    <div>
-                        <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
+                    <fieldset>
+                        <legend className="block text-sm font-medium text-gray-700 mb-2">
                             Langue du Livre
-                        </label>
-                        <select
-                            id="language"
-                            name="language"
-                            defaultValue={book.language || 'fr'}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="fr">Français</option>
-                            <option value="ar">Arabe</option>
-                            <option value="en">Anglais</option>
-                        </select>
-                    </div>
+                        </legend>
+                        <div className="flex flex-wrap gap-4">
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="language" value="fr" defaultChecked={!book.language || book.language === 'fr'} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Français</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="language" value="ar" defaultChecked={book.language === 'ar'} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Arabe</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="language" value="en" defaultChecked={book.language === 'en'} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Anglais</span>
+                            </label>
+                        </div>
+                    </fieldset>
 
                     {/* Visibilité (Actif/Inactif) */}
                     <div>
@@ -527,7 +587,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     {/* Description courte */}
                     <div className="md:col-span-2">
                         <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Description courte <span className="text-red-500">*</span>
                             </label>
                             <button type="button" onClick={generateShortDescription} disabled={isGeneratingShort} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
@@ -535,21 +595,31 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             </button>
                         </div>
                         <textarea
-                            id="description"
-                            name="description"
-                            required
+                            name="description_ar"
+                            required={currentLang === 'ar'}
                             rows={4}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description courte du livre..."
+                            placeholder="Description courte du livre en arabe..."
+                        />
+                        <textarea
+                            name="description_fr"
+                            required={currentLang === 'fr'}
+                            rows={4}
+                            value={descriptionFr}
+                            onChange={(e) => setDescriptionFr(e.target.value)}
+                            style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Description courte du livre en français..."
                         />
                     </div>
 
                     {/* Description longue */}
                     <div className="md:col-span-2">
                         <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="longDescription" className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Description longue
                                 <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du livre)</span>
                             </label>
@@ -558,13 +628,22 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             </button>
                         </div>
                         <textarea
-                            id="longDescription"
-                            name="longDescription"
+                            name="longDescription_ar"
                             rows={8}
                             value={longDescription}
                             onChange={(e) => setLongDescription(e.target.value)}
+                            style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre..."
+                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en arabe..."
+                        />
+                        <textarea
+                            name="longDescription_fr"
+                            rows={8}
+                            value={longDescriptionFr}
+                            onChange={(e) => setLongDescriptionFr(e.target.value)}
+                            style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en français..."
                         />
                     </div>
 

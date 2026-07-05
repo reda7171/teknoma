@@ -8,6 +8,7 @@ import { useUIStore } from '@/store/ui'
 import WishlistButton from '@/components/WishlistButton'
 import AddToReadingListButton from '@/components/AddToReadingListButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import { generateBookUrl } from '@/lib/i18n-utils'
 
 interface BookCardProps {
     id: string
@@ -44,11 +45,13 @@ export default function BookCard({
     const { openCart, showNotification } = useUIStore()
 
     const displayTitle = locale === 'fr' && titleFr ? titleFr : locale === 'en' && titleEn ? titleEn : title;
+    // Générer l'URL avec le slug dynamique
+    const bookUrl = generateBookUrl({ id, title, titleFr, titleEn }, locale);
 
     return (
         <div className={`group relative bg-white rounded-3xl overflow-hidden transition-all duration-500 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-2xl h-full flex flex-col ${isFeatured ? 'scale-105 z-10 border-black shadow-xl' : ''}`}>
             {/* Image Container */}
-            <Link href={`/books/${id}`} className="block relative">
+            <Link href={bookUrl} className="block relative">
                 <div className={`relative bg-white overflow-hidden ${isCompact ? 'aspect-[3/4]' : isFeatured ? 'aspect-[3/4]' : 'aspect-[3/4]'}`}>
                     <ImageWithFallback
                         src={image}
@@ -59,7 +62,7 @@ export default function BookCard({
                     {/* Action Buttons */}
                     <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                         <WishlistButton
-                            item={{ id, title: displayTitle, price, image, type: 'BOOK', slug: `/books/${id}`, author }}
+                            item={{ id, title: displayTitle, price, image, type: 'BOOK', slug: bookUrl, author }}
                             className="bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm"
                         />
                         <AddToReadingListButton
@@ -105,7 +108,7 @@ export default function BookCard({
 
             {/* Content */}
             <div className={`text-center flex flex-col items-center flex-grow bg-white ${isCompact ? 'p-4' : 'px-4 py-6'}`}>
-                <Link href={`/books/${id}`} className="block w-full after:absolute after:inset-0 after:z-0">
+                <Link href={bookUrl} className="block w-full after:absolute after:inset-0 after:z-0">
                     <h3 className={`font-black text-gray-900 tracking-tight line-clamp-2 transition-colors group-hover:text-black ${isCompact ? 'text-sm mb-1 uppercase' : isFeatured ? 'text-xl mb-2' : 'text-base mb-1.5'
                         }`}>
                         {displayTitle}

@@ -23,14 +23,17 @@ interface CheckoutForm {
     address: string
     city: string
     comment?: string
+    paymentMethod: 'COD' | 'STRIPE' | 'PAYPAL' | 'CMI'
 }
 
 export default function CheckoutClient({ 
     user,
-    minOrderAmount = 0
+    minOrderAmount = 0,
+    paymentSettings
 }: { 
     user?: { fullName?: string | null; email: string; image?: string | null } | null;
     minOrderAmount?: number;
+    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean }
 }) {
     const router = useRouter()
     const { items, getTotalPrice, clearCart } = useCartStore()
@@ -46,8 +49,11 @@ export default function CheckoutClient({
     const defaultValues: Partial<CheckoutForm> = user ? {
         email: user.email,
         firstName: user.fullName?.split(' ')[0] || '',
-        lastName: user.fullName?.split(' ').slice(1).join(' ') || ''
-    } : {}
+        lastName: user.fullName?.split(' ').slice(1).join(' ') || '',
+        paymentMethod: paymentSettings?.codEnabled !== false ? 'COD' : 'STRIPE'
+    } : {
+        paymentMethod: paymentSettings?.codEnabled !== false ? 'COD' : 'STRIPE'
+    }
 
     const { register, handleSubmit, getValues, setValue, watch, formState: { errors } } = useForm<CheckoutForm>({
         defaultValues
@@ -229,6 +235,7 @@ export default function CheckoutClient({
                 utmCampaign: localStorage.getItem('utm_campaign') || undefined,
                 fbclid: localStorage.getItem('fbclid') || undefined,
                 ttclid: localStorage.getItem('ttclid') || undefined,
+                paymentMethod: data.paymentMethod,
             })
 
             if (result.success) {
@@ -253,7 +260,47 @@ export default function CheckoutClient({
                 }
 
                 setIsSuccess(true)
+                if (data.paymentMethod === 'STRIPE' || data.paymentMethod === 'PAYPAL' || data.paymentMethod === 'CMI') {
+                    const endpointMap = {
+                        'STRIPE': '/api/checkout/stripe',
+                        'PAYPAL': '/api/checkout/paypal',
+                        'CMI': '/api/checkout/cmi'
+                    }
+                    try {
+                        const res = await fetch(endpointMap[data.paymentMethod], {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: result.orderId })
+                        })
+                        const paymentData = await res.json()
+                        if (res.ok && paymentData.url) {
+                            window.location.href = paymentData.url
+                            return // Prevent clearCart yet, user will be redirected
+                        } else if (res.ok && paymentData.formHtml) {
+                            // CMI Returns HTML form to be submitted
+                            const div = document.createElement('div')
+                            div.innerHTML = paymentData.formHtml
+                            document.body.appendChild(div)
+                            const form = div.querySelector('form')
+                            if (form) {
+                                form.submit()
+                                return
+                            }
+                            throw new Error('Erreur de génération du formulaire CMI')
+                        } else {
+                            throw new Error(paymentData.error || `Erreur ${data.paymentMethod}`)
+                        }
+                    } catch (err) {
+                        console.error(`Erreur redirection ${data.paymentMethod}:`, err)
+                        showNotification('Erreur lors de la redirection vers le paiement sécurisé.', 'error')
+                        setIsSubmitting(false)
+                        return
+                    }
+                }
+
                 clearCart()
+                setCoupon(null)
+                setIsSuccess(true)
                 if (user) {
                     showNotification('Commande reussi...', 'success')
                     router.push('/orders')
@@ -396,12 +443,75 @@ export default function CheckoutClient({
                                 {t('PaymentMethod')}
                             </h2>
 
-                            <div className="relative">
-                                <div className="p-8 bg-pixio-cream/30 border-2 border-black rounded-[2rem] flex items-center gap-8 shadow-2xl shadow-black/5">
+                            {paymentSettings?.stripeEnabled && (
+                                <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'STRIPE' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
+                                    <input 
+                                        type="radio" 
+                                        value="STRIPE" 
+                                        {...register('paymentMethod')}
+                                        className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
+                                    />
+                                    <div className="ml-3 flex flex-col">
+                                        <span className="font-bold text-pixio-dark">Carte Bancaire (Stripe)</span>
+                                        <span className="text-sm text-pixio-gray">Payez maintenant avec votre carte de manière sécurisée</span>
+                                    </div>
+                                    <svg className="w-8 h-8 ml-auto opacity-50" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M20 40C31.0457 40 40 31.0457 40 20C40 8.95431 31.0457 0 20 0C8.95431 0 0 8.95431 0 20C0 31.0457 8.95431 40 20 40Z" fill="#6772E5"/>
+                                        <path fillRule="evenodd" clipRule="evenodd" d="M19.3491 14.8879C19.3491 13.9171 20.3016 13.2952 21.4394 13.2952C23.3618 13.2952 25.1091 14.072 26.3533 14.8879L28.1887 11.2355C26.4795 9.87556 24.1166 9.09875 21.4394 9.09875C17.0784 9.09875 13.9312 11.6631 13.9312 15.8981C13.9312 21.6486 21.7891 21.2601 21.7891 24.3685C21.7891 25.4564 20.6901 26.1947 19.3491 26.1947C16.9423 26.1947 14.8849 25.029 13.3308 23.941L11.5342 27.671C13.5546 29.2251 16.3012 30.2354 19.3491 30.2354C23.9018 30.2354 27.2469 27.671 27.2469 23.3971C27.2469 17.4135 19.3491 17.9575 19.3491 14.8879Z" fill="white"/>
+                                    </svg>
+                                </label>
+                            )}
+
+                            {paymentSettings?.paypalEnabled && (
+                                <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'PAYPAL' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
+                                    <input 
+                                        type="radio" 
+                                        value="PAYPAL" 
+                                        {...register('paymentMethod')}
+                                        className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
+                                    />
+                                    <div className="ml-3 flex flex-col">
+                                        <span className="font-bold text-pixio-dark">PayPal</span>
+                                        <span className="text-sm text-pixio-gray">Payez de manière sécurisée via votre compte PayPal</span>
+                                    </div>
+                                    <svg className="w-8 h-8 ml-auto opacity-50" viewBox="0 0 124 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M46.2 10.6C45.3 5.4 41 2.8 35.1 2.8H26.5C25.4 2.8 24.5 3.5 24.3 4.5L20.1 31C19.9 31.8 20.6 32.5 21.4 32.5H26.3C27.4 32.5 28.3 31.7 28.5 30.7L29.6 23.7C29.8 22.7 30.7 22 31.8 22H33.8C39.4 22 43.6 19.4 44.8 14.2C45 13 45.1 11.8 45.1 10.6H46.2ZM39.5 14.2C38.6 17.6 35.6 17.6 32.2 17.6H31.1L32 11.5H33C35.9 11.5 38.3 11.5 39.5 14.2Z" fill="#253B80"/>
+                                        <path d="M68.3 10.9L65.4 16.4L63.3 11.4C62.9 10.5 62 9.9 61 9.9H55.4C54.4 9.9 53.9 11 54.4 11.9L60.5 24.1L55.5 31.6C54.9 32.4 55.5 33.6 56.5 33.6H62C62.8 33.6 63.5 33.2 63.9 32.5L74.4 11.6C74.9 10.7 74.3 9.6 73.3 9.6H69.9C69.3 9.6 68.7 10.1 68.3 10.9Z" fill="#253B80"/>
+                                        <path d="M22 10.6C21.1 5.4 16.8 2.8 10.9 2.8H2.3C1.2 2.8 0.3 3.5 0.1 4.5L0 5.4L2.9 5.4H11.5C14.4 5.4 16.8 5.4 17.7 8.1C18.6 11.5 15.6 11.5 12.2 11.5H11.1L9.1 24.1L10.3 24.1H12.3C17.9 24.1 22.1 21.5 23.3 16.3C23.5 15.1 23.6 13.9 23.6 12.7L22 10.6Z" fill="#179BD7"/>
+                                    </svg>
+                                </label>
+                            )}
+
+                            {paymentSettings?.cmiEnabled && (
+                                <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'CMI' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
+                                    <input 
+                                        type="radio" 
+                                        value="CMI" 
+                                        {...register('paymentMethod')}
+                                        className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
+                                    />
+                                    <div className="ml-3 flex flex-col">
+                                        <span className="font-bold text-pixio-dark">Carte Bancaire Marocaine (CMI)</span>
+                                        <span className="text-sm text-pixio-gray">Payez de manière sécurisée via le Centre Monétique Interbancaire</span>
+                                    </div>
+                                    <div className="ml-auto opacity-50 font-black text-gray-500 text-lg">
+                                        CMI
+                                    </div>
+                                </label>
+                            )}
+
+                            {paymentSettings?.codEnabled && (
+                                <label className={`relative flex items-center p-8 border-2 rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'COD' ? 'border-black bg-pixio-cream/50' : 'border-transparent bg-pixio-cream/30 hover:border-black/50'}`}>
+                                    <input 
+                                        type="radio" 
+                                        value="COD" 
+                                        {...register('paymentMethod')}
+                                        className="sr-only"
+                                    />
                                     <div className="w-16 h-16 bg-white border border-gray-100 text-black rounded-2xl flex items-center justify-center shrink-0">
                                         <Wallet className="w-8 h-8" />
                                     </div>
-                                    <div>
+                                    <div className="ml-8">
                                         <p className="font-black text-black text-xl tracking-tight">
                                             {hasOnlyDigital ? 'Paiement à distance (Virement/CashPlus)' : t('CashOnDelivery')}
                                         </p>
@@ -410,12 +520,12 @@ export default function CheckoutClient({
                                         </p>
                                     </div>
                                     <div className="ml-auto rtl:mr-auto rtl:ml-0">
-                                        <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                                            <CheckCircle className="w-5 h-5 text-white" />
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'COD' ? 'bg-black text-white' : 'bg-gray-200 text-gray-400'}`}>
+                                            <CheckCircle className="w-5 h-5" />
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </label>
+                            )}
                         </div>
                     </form>
                 </div>

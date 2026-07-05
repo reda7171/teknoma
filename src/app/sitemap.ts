@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
+import { generateBookUrl } from '@/lib/i18n-utils'
 
 const locales = ['fr', 'ar', 'en']
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://riwaya.store'
@@ -36,11 +37,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let bookUrls: any[] = []
     try {
         const books = await prisma.book.findMany({
-            select: { id: true, updatedAt: true }
+            select: { id: true, title: true, titleFr: true, titleEn: true, updatedAt: true }
         })
         bookUrls = locales.flatMap((locale) =>
             books.map((book) => ({
-                url: `${baseUrl}/${locale}/books/${book.id}`,
+                url: `${baseUrl}${generateBookUrl(book, locale)}`,
                 lastModified: book.updatedAt,
                 changeFrequency: 'weekly' as const,
                 priority: 0.7,

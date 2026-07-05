@@ -18,6 +18,7 @@ import ReadingProgress from '@/components/blog/ReadingProgress'
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
+import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
@@ -460,13 +461,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     {t('InThisArticle')}
                                 </h3>
                                 <div className="grid grid-cols-1 gap-4">
-                                    {post.books.map(book => (
-                                        <Link href={`/books/${book.id}`} key={book.id} className="group flex flex-col sm:flex-row gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all">
+                                    {post.books.map(book => {
+                                        const displayTitle = getLocalizedTitle(book, locale);
+                                        const bookUrl = generateBookUrl(book, locale);
+                                        return (
+                                        <Link href={bookUrl} key={book.id} className="group flex flex-col sm:flex-row gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all">
                                             <div className="relative w-24 h-36 sm:w-32 sm:h-48 bg-slate-50 rounded-lg shadow-sm overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
-                                                {book.image && <Image src={book.image} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
+                                                {book.image && <Image src={book.image} alt={displayTitle} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
                                             </div>
                                             <div className="flex flex-col flex-1 min-w-0">
-                                                <h4 className="text-lg font-black text-slate-900 group-hover:text-slate-600 transition-colors leading-tight">{book.title}</h4>
+                                                <h4 className="text-lg font-black text-slate-900 group-hover:text-slate-600 transition-colors leading-tight">{displayTitle}</h4>
                                                 <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest">{book.author}</p>
 
                                                 {book.description && (
@@ -531,7 +535,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 </div>
                                             </div>
                                         </Link>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -629,18 +634,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         {t('InThisArticle')}
                                     </p>
                                     <div className="space-y-4">
-                                        {post.books.map(book => (
-                                            <Link href={`/books/${book.id}`} key={book.id} className="group flex gap-4 items-start">
+                                        {post.books.map(book => {
+                                            const displayTitle = getLocalizedTitle(book, locale);
+                                            const bookUrl = generateBookUrl(book, locale);
+                                            return (
+                                            <Link href={bookUrl} key={book.id} className="group flex gap-4 items-start">
                                                 <div className="relative w-12 h-16 bg-slate-100 rounded shadow-sm overflow-hidden flex-shrink-0">
-                                                    {book.image && <Image src={book.image} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
+                                                    {book.image && <Image src={book.image} alt={displayTitle} fill className="object-cover group-hover:scale-105 transition-transform" unoptimized />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-slate-600 transition-colors leading-tight">{book.title}</h4>
+                                                    <h4 className="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-slate-600 transition-colors leading-tight">{displayTitle}</h4>
                                                     <p className="text-[10px] text-slate-500 truncate mt-1">{book.author}</p>
                                                     <p className="text-xs font-black text-slate-600 mt-1">{book.price} MAD</p>
                                                 </div>
                                             </Link>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

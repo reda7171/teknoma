@@ -33,6 +33,7 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
                 image: pack.image || '',
                 isFreeDelivery: pack.isFreeDelivery,
                 shippingFees: pack.shippingFees,
+                sellerSku: pack.sellerSku || '',
                 selectedBookIds
             }}
             books={books}

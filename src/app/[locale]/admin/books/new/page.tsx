@@ -18,6 +18,7 @@ export default function BookForm() {
     const [selectedAuthor, setSelectedAuthor] = useState<string>('')
     const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false)
     const authorInputRef = useRef<HTMLDivElement>(null)
+    const [currentLang, setCurrentLang] = useState<'ar' | 'fr'>('ar')
 
     useEffect(() => {
         getPurchaseLots().then(data => {
@@ -76,9 +77,11 @@ export default function BookForm() {
         }
 
         const input: BookInput = {
-            title: formData.get('title') as string,
+            title: formData.get('title_ar') as string,
+            titleFr: formData.get('title_fr') as string || undefined,
             author: formData.get('author') as string,
-            description: formData.get('description') as string,
+            description: formData.get('description_ar') as string,
+            descriptionFr: formData.get('description_fr') as string || undefined,
             isbn: formData.get('isbn') as string || undefined,
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
@@ -88,6 +91,7 @@ export default function BookForm() {
             language: formData.get('language') as string || 'fr',
             previewUrl: formData.get('previewUrl') as string || undefined,
             isOriginal: formData.get('isOriginal') !== 'false', // Par défaut true
+            sellerSku: formData.get('sellerSku') as string || undefined,
         }
 
         const result = await createBook(input)
@@ -127,19 +131,50 @@ export default function BookForm() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex justify-end mb-4 gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="lang_toggle" 
+                            checked={currentLang === 'ar'} 
+                            onChange={() => setCurrentLang('ar')} 
+                            className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className={`text-sm font-medium ${currentLang === 'ar' ? 'text-orange-500' : 'text-gray-500'}`}>Arabic</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="lang_toggle" 
+                            checked={currentLang === 'fr'} 
+                            onChange={() => setCurrentLang('fr')} 
+                            className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className={`text-sm font-medium ${currentLang === 'fr' ? 'text-orange-500' : 'text-gray-500'}`}>French</span>
+                    </label>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Titre */}
                     <div className="md:col-span-2">
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Titre <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
-                            id="title"
-                            name="title"
-                            required
+                            name="title_ar"
+                            required={currentLang === 'ar'}
+                            style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Ex: Atomic Habits"
+                            placeholder="Titre en arabe"
+                        />
+                        <input
+                            type="text"
+                            name="title_fr"
+                            required={currentLang === 'fr'}
+                            style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Titre en français"
                         />
                     </div>
 
@@ -208,6 +243,20 @@ export default function BookForm() {
                             name="isbn"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Ex: 9780735211292"
+                        />
+                    </div>
+
+                    {/* Seller SKU */}
+                    <div>
+                        <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700 mb-2">
+                            Seller SKU (Jumia)
+                        </label>
+                        <input
+                            type="text"
+                            id="sellerSku"
+                            name="sellerSku"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="SKU vendeur pour synchronisation"
                         />
                     </div>
 
@@ -323,20 +372,25 @@ export default function BookForm() {
                     </div>
 
                     {/* Langue du Livre */}
-                    <div>
-                        <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
+                    <fieldset>
+                        <legend className="block text-sm font-medium text-gray-700 mb-2">
                             Langue du Livre
-                        </label>
-                        <select
-                            id="language"
-                            name="language"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="fr">Français</option>
-                            <option value="ar">Arabe</option>
-                            <option value="en">Anglais</option>
-                        </select>
-                    </div>
+                        </legend>
+                        <div className="flex flex-wrap gap-4">
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="language" value="fr" defaultChecked className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Français</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="language" value="ar" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Arabe</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="language" value="en" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Anglais</span>
+                            </label>
+                        </div>
+                    </fieldset>
 
                     {/* Livre Original */}
                     <div>
@@ -363,16 +417,24 @@ export default function BookForm() {
 
                     {/* Description */}
                     <div className="md:col-span-2">
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                             Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
-                            id="description"
-                            name="description"
-                            required
+                            name="description_ar"
+                            required={currentLang === 'ar'}
                             rows={4}
+                            style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée du livre..."
+                            placeholder="Description détaillée du livre en arabe..."
+                        />
+                        <textarea
+                            name="description_fr"
+                            required={currentLang === 'fr'}
+                            rows={4}
+                            style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Description détaillée du livre en français..."
                         />
                     </div>
 

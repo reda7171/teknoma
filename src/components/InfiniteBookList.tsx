@@ -9,7 +9,8 @@ import { Book } from '@prisma/client'
 import { Link } from '@/i18n/routing'
 import { Package, ArrowRight, Sparkles } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
+import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 
 interface InfiniteBookListProps {
     initialBooks: Book[]
@@ -28,6 +29,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
     const [hasMore, setHasMore] = useState(true)
     const [loading, setLoading] = useState(false)
     const tCommon = useTranslations('Common')
+    const locale = useLocale()
     const observerTarget = useRef<HTMLDivElement>(null)
 
     // Pack aléatoire sélectionné uniquement côté client pour éviter l'hydratation mismatch
@@ -129,15 +131,19 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                     </div>
 
                                     <div className="flex -space-x-4 md:-space-x-8 relative z-10 items-center justify-center">
-                                        {pack.books.slice(0, 4).map((pb: any, i: number) => (
-                                            <Link href={`/books/${pb.book.id}`} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
+                                        {pack.books.slice(0, 4).map((pb: any, i: number) => {
+                                            const displayTitle = getLocalizedTitle(pb.book, locale);
+                                            const bookUrl = generateBookUrl(pb.book, locale);
+                                            return (
+                                            <Link href={bookUrl} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
                                                 <ImageWithFallback 
                                                     src={pb.book.image || ''} 
-                                                    alt={pb.book.title} 
+                                                    alt={displayTitle} 
                                                     className="w-full h-full object-cover"
                                                 />
                                             </Link>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );

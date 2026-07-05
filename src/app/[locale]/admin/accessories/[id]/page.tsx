@@ -31,6 +31,7 @@ export default function EditAccessoryPage({
         dimensions: '',
         weight: '',
         warranty: '',
+        sellerSku: '',
         active: true
     })
 
@@ -50,6 +51,7 @@ export default function EditAccessoryPage({
                     dimensions: data.dimensions || '',
                     weight: data.weight || '',
                     warranty: data.warranty || '',
+                    sellerSku: data.sellerSku || '',
                     active: data.active
                 })
                 setIsLoading(false)
@@ -273,6 +275,17 @@ export default function EditAccessoryPage({
                                 value={formData.stock}
                                 onChange={e => setFormData({ ...formData, stock: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Seller SKU (Jumia)</label>
+                            <input
+                                type="text"
+                                value={(formData as any).sellerSku || ''}
+                                onChange={e => setFormData({ ...formData, sellerSku: e.target.value })}
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all font-bold"
+                                placeholder="SKU vendeur pour synchronisation"
                             />
                         </div>
 

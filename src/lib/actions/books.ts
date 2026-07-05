@@ -11,8 +11,12 @@ import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/boo
 
 const BookSchema = z.object({
     title: z.string().min(1, 'Le titre est requis'),
+    titleFr: z.string().optional(),
+    titleEn: z.string().optional(),
     author: z.string().min(1, 'L\'auteur est requis'),
     description: z.string().min(10, 'La description doit contenir au moins 10 caractères'),
+    descriptionFr: z.string().optional(),
+    descriptionEn: z.string().optional(),
     longDescription: z.string().optional(),
     isbn: z.string().optional(),
     price: z.number().min(0),
@@ -26,6 +30,7 @@ const BookSchema = z.object({
     isBestSeller: z.boolean().optional(),
     previewUrl: z.string().optional(),
     isOriginal: z.boolean().optional().default(true),
+    sellerSku: z.string().optional(),
 })
 
 export type BookInput = z.infer<typeof BookSchema>
