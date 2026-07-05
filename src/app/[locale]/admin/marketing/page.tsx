@@ -261,11 +261,11 @@ export default function MarketingPage() {
                     <p className="text-slate-500 mt-2 font-medium">Retrouvez toutes les images générées pour vos campagnes publicitaires.</p>
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap w-full md:w-auto">
                     {/* Mode sélection */}
                     <button
                         onClick={() => { setSelectionMode(s => !s); setSelectedAssets([]) }}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm border transition-all active:scale-95 ${
+                        className={`flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-5 py-3 rounded-xl font-bold text-sm border transition-all active:scale-95 ${
                             selectionMode ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                     >
@@ -273,13 +273,22 @@ export default function MarketingPage() {
                         {selectionMode ? `Sélection (${selectedAssets.length})` : 'Sélectionner'}
                     </button>
 
+                    <button 
+                        onClick={() => setIsUploadModalOpen(true)}
+                        className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span className="hidden sm:inline">Nouvelle Créative</span>
+                        <span className="sm:hidden">Ajouter</span>
+                    </button>
+
                     {/* Publier la sélection */}
                     {selectionMode && selectedAssets.length > 0 && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap mt-2 md:mt-0">
                             <select
                                 value={bulkPlatform}
                                 onChange={e => setBulkPlatform(e.target.value as any)}
-                                className="px-3 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 bg-white outline-none"
+                                className="px-3 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 bg-white outline-none flex-1 md:flex-none"
                             >
                                 <option value="all">Toutes plateformes</option>
                                 <option value="facebook">Facebook</option>
@@ -287,21 +296,15 @@ export default function MarketingPage() {
                             </select>
                             <button
                                 onClick={openBulkPreview}
-                                className="flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all active:scale-95"
+                                className="flex items-center justify-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all active:scale-95 flex-1 md:flex-none whitespace-nowrap"
                             >
                                 <Eye className="w-4 h-4" />
-                                Prévisualiser {selectedAssets.length} créative{selectedAssets.length > 1 ? 's' : ''}
+                                <span className="hidden sm:inline">Prévisualiser {selectedAssets.length} créative{selectedAssets.length > 1 ? 's' : ''}</span>
+                                <span className="sm:hidden">Aperçu ({selectedAssets.length})</span>
                             </button>
                         </div>
                     )}
 
-                    <button 
-                        onClick={() => setIsUploadModalOpen(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Nouvelle Créative
-                    </button>
                     <button 
                         onClick={fetchAssets}
                         className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm active:scale-95"
