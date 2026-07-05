@@ -28,7 +28,7 @@ import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
 import AdBanner from '@/components/AdBanner'
 
-import { getLocalizedTitle, getLocalizedDescription, generateBookUrl } from '@/lib/i18n-utils'
+import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 
 export async function generateMetadata({
     params,

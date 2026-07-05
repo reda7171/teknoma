@@ -64,13 +64,9 @@ export default function middleware(request: NextRequest) {
     }
 
     // 2. Ajouter les headers de sécurité (OWASP)
-    // CSP - Générer un nonce pour script-src afin d'éviter 'unsafe-inline'
-    const isDev = process.env.NODE_ENV === 'development'
-    const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
-    
     const cspHeader = [
         "default-src 'self'",
-        `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com`,
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: https: blob:",
         "font-src 'self' data: https://fonts.gstatic.com",
@@ -84,8 +80,7 @@ export default function middleware(request: NextRequest) {
         "form-action 'self'",
     ].join('; ')
 
-    // Passer le nonce et le CSP à Next.js via la requête
-    request.headers.set('x-nonce', nonce)
+    // Passer le CSP à Next.js via la requête
     request.headers.set('x-middleware-request-content-security-policy', cspHeader)
 
     // 1. D'abord exécuter le middleware next-intl pour gérer la locale
