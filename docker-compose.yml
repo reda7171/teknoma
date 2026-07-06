@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      network: riwaya_network
+      network: host
     image: riwaya-app:latest
     container_name: riwaya_app
     restart: always
