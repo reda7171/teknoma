@@ -9,7 +9,8 @@ export const maxDuration = 60 // Allow longer execution time if fetching many pa
 export async function GET(req: Request) {
     try {
         const url = new URL(req.url)
-        if (url.searchParams.get('token') !== process.env.CRON_SECRET) {
+        const expectedToken = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
+        if (url.searchParams.get('token') !== expectedToken) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 

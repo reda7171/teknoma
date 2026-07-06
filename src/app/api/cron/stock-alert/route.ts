@@ -8,7 +8,8 @@ export async function GET(req: Request) {
         const url = new URL(req.url)
         const token = url.searchParams.get("token")
         
-        if (process.env.CRON_SECRET && token !== process.env.CRON_SECRET) {
+        const expectedToken = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
+        if (expectedToken && token !== expectedToken) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
