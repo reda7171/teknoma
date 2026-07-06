@@ -588,8 +588,23 @@ export async function POST(req: Request) {
                             if (item) { imageUrl = item.image; title = item.name; }
                         }
                     } else if (itemId && itemId !== 'manual') {
-                        imageUrl = `/uploads/books/${itemId}`
-                        title = itemId
+                        const fs = require('fs').promises
+                        const path = require('path')
+                        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'books')
+                        try {
+                            const files = await fs.readdir(uploadDir)
+                            const matchedFile = files.find((f: string) => f.startsWith(itemId))
+                            if (matchedFile) {
+                                imageUrl = `/uploads/books/${matchedFile}`
+                                title = matchedFile
+                            } else {
+                                imageUrl = `/uploads/books/${itemId}`
+                                title = itemId
+                            }
+                        } catch (err) {
+                            imageUrl = `/uploads/books/${itemId}`
+                            title = itemId
+                        }
                     }
 
                     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
@@ -705,8 +720,23 @@ export async function POST(req: Request) {
                             if (item) { imageUrl = item.image; title = item.name; }
                         }
                     } else if (itemId && itemId !== 'manual') {
-                        imageUrl = `/uploads/books/${itemId}`
-                        title = itemId
+                        const fs = require('fs').promises
+                        const path = require('path')
+                        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'books')
+                        try {
+                            const files = await fs.readdir(uploadDir)
+                            const matchedFile = files.find((f: string) => f.startsWith(itemId))
+                            if (matchedFile) {
+                                imageUrl = `/uploads/books/${matchedFile}`
+                                title = matchedFile
+                            } else {
+                                imageUrl = `/uploads/books/${itemId}`
+                                title = itemId
+                            }
+                        } catch (err) {
+                            imageUrl = `/uploads/books/${itemId}`
+                            title = itemId
+                        }
                     }
 
                     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
@@ -1278,11 +1308,13 @@ export async function POST(req: Request) {
                     const buttons = creatives.map(c => {
                         const label = c.name.length > 30 ? c.name.substring(0, 27) + '...' : c.name
                         const typeLabel = c.type === 'PACK' ? '📦' : '✨'
-                        const itemId = (c as any).bookId || (c as any).packId || c.name
+                        // Use only the first 30 chars of the name or ID to avoid exceeding 64 bytes
+                        const rawId = (c as any).bookId || (c as any).packId || c.name
+                        const itemId = String(rawId).substring(0, 30)
                         const shortType = c.type === 'PACK' ? 'P' : 'B'
                         return [{ 
                             text: `${typeLabel} ${label}`, 
-                            callback_data: `prep_c:${itemId}:${shortType}`.substring(0, 64)
+                            callback_data: `prep_c:${itemId}:${shortType}`
                         }]
                     })
 
