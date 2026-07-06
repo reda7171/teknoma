@@ -405,3 +405,31 @@ export async function sendLowStockNotification(book: { id: string, title: string
 
     return sendTelegramMessage(text, undefined, undefined, replyMarkup)
 }
+
+/**
+ * Envoyer un document Telegram (PDF, etc.)
+ */
+export async function sendTelegramDocument(documentBuffer: Buffer, filename: string, caption: string, chatId?: string, botToken?: string) {
+    const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
+    const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
+    
+    if (!token || !id) return null
+
+    const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
+    
+    const promises = chatIds.map(cid => {
+        const formData = new FormData()
+        formData.append('chat_id', cid)
+        formData.append('caption', caption)
+        formData.append('parse_mode', 'HTML')
+        formData.append('document', new Blob([documentBuffer], { type: 'application/pdf' }), filename)
+
+        return fetch(`${TELEGRAM_API}${token}/sendDocument`, {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json())
+    })
+
+    const results = await Promise.all(promises)
+    return results[0]
+}

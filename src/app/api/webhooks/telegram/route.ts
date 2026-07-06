@@ -147,6 +147,16 @@ export async function POST(req: Request) {
                 }
             }
 
+            else if (data && data.startsWith('upd_stock:')) {
+                const bookId = data.split(':')[1]
+                const book = await prisma.book.findUnique({ where: { id: bookId } })
+                if (!book) {
+                    await answerCallbackQuery(callbackId, 'Livre introuvable.', token)
+                } else {
+                    await answerCallbackQuery(callbackId, 'Instructions envoyées.', token)
+                    await sendTelegramMessage(`🔄 Pour mettre à jour le stock de <b>${book.title}</b> :\n\nCopiez et envoyez la commande suivante avec la nouvelle quantité :\n<code>/setstock ${book.id} [quantité]</code>`, message?.chat?.id.toString(), token)
+                }
+            }
             // Format: jumia:pending_orders | jumia:monthly_stats | jumia:returns_check
             else if (data && data.startsWith('jumia:')) {
                 const action = data.split(':')[1]
@@ -180,14 +190,207 @@ export async function POST(req: Request) {
                         const now = new Date()
                         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
                         const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-                        const response = await jumia.getOrders(100, undefined, undefined, monthStart, monthEnd)
-                        const orders = response?.orders || response?.data?.orders || []
-                        const revenue = orders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
-                        const pending = orders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
-                        const delivered = orders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
-                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${orders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Livrées: <b>${delivered}</b>\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        
+                        let allOrders: any[] = []
+                        let hasMore = true
+                        let nextToken: string | undefined = undefined
+                        while (hasMore) {
+                            const response = await jumia.getOrders(100, nextToken, undefined, monthStart, monthEnd)
+                            const orders = response?.orders || response?.data?.orders || []
+                            allOrders = allOrders.concat(orders)
+                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
+                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
+                        }
+                        
+                        const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
+                        const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
+                        const delivered = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
+                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Livrées: <b>${delivered}</b>\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
+                    } else if (action === 'yearly_stats') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+                        const now = new Date()
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+                        
+                        let allOrders: any[] = []
+                        let hasMore = true
+                        let nextToken: string | undefined = undefined
+                        while (hasMore) {
+                            const response = await jumia.getOrders(100, nextToken, undefined, yearStart, yearEnd)
+                            const orders = response?.orders || response?.data?.orders || []
+                            allOrders = allOrders.concat(orders)
+                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
+                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
+                        }
+
+                        const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
+                        const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
+                        const delivered = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
+                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Livrées: <b>${delivered}</b>\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        await answerCallbackQuery(callbackId, 'Bilan Jumia annuel chargé', token)
+                        await sendTelegramMessage(text, message?.chat?.id.toString(), token)
+                    } else if (action === 'yearly_chart') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+                        const now = new Date()
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+                        
+                        await answerCallbackQuery(callbackId, 'Génération du graphique...', token)
+
+                        let allOrders: any[] = []
+                        let hasMore = true
+                        let nextToken: string | undefined = undefined
+                        while (hasMore) {
+                            const response = await jumia.getOrders(100, nextToken, undefined, yearStart, yearEnd)
+                            const orders = response?.orders || response?.data?.orders || []
+                            allOrders = allOrders.concat(orders)
+                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
+                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
+                        }
+
+                        const monthlyRevenue = Array(12).fill(0)
+                        const monthlyTotalOrders = Array(12).fill(0)
+                        const monthlyCanceledOrders = Array(12).fill(0)
+                        
+                        allOrders.forEach(o => {
+                            if (o.createdAt && o.status) {
+                                const month = new Date(o.createdAt).getMonth()
+                                monthlyTotalOrders[month]++
+                                
+                                if (o.status.toUpperCase() === 'CANCELED') {
+                                    monthlyCanceledOrders[month]++
+                                } else if (o.status.toUpperCase() !== 'RETURNED') {
+                                    const amount = parseFloat(o.totalAmountLocal?.value || '0')
+                                    monthlyRevenue[month] += amount
+                                }
+                            }
+                        })
+
+                        const cancellationRate = monthlyTotalOrders.map((total, i) => total > 0 ? Math.round((monthlyCanceledOrders[i] / total) * 100) : 0)
+
+                        const chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                                datasets: [
+                                    {
+                                        type: 'line',
+                                        label: 'Taux Annulation (%)',
+                                        data: cancellationRate,
+                                        borderColor: 'rgba(255, 99, 132, 1)',
+                                        borderWidth: 2,
+                                        fill: false,
+                                        yAxisID: 'y1'
+                                    },
+                                    {
+                                        type: 'bar',
+                                        label: 'CA Net (MAD)',
+                                        data: monthlyRevenue.map(v => Math.round(v)),
+                                        backgroundColor: 'rgba(255, 153, 0, 0.8)',
+                                        borderRadius: 4,
+                                        yAxisID: 'y'
+                                    }
+                                ]
+                            },
+                            options: {
+                                plugins: {
+                                    title: { display: true, text: `Évolution CA Jumia & Annulations - ${now.getFullYear()}` }
+                                },
+                                scales: {
+                                    y: { type: 'linear', display: true, position: 'left' },
+                                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, min: 0, max: 100 }
+                                }
+                            }
+                        }
+                        
+                        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`
+                        
+                        const { sendTelegramPhoto } = await import('@/lib/telegram')
+                        await sendTelegramPhoto(chartUrl, `📈 <b>Évolution du CA Jumia et Annulations (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
+                    } else if (action === 'jumia_vs_store_chart') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+                        const now = new Date()
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+                        
+                        await answerCallbackQuery(callbackId, 'Génération comparatif en cours...', token)
+
+                        let allOrders: any[] = []
+                        let hasMore = true
+                        let nextToken: string | undefined = undefined
+                        while (hasMore) {
+                            const response = await jumia.getOrders(100, nextToken, undefined, yearStart, yearEnd)
+                            const orders = response?.orders || response?.data?.orders || []
+                            allOrders = allOrders.concat(orders)
+                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
+                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
+                        }
+
+                        const monthlyJumiaRevenue = Array(12).fill(0)
+                        allOrders.forEach(o => {
+                            if (o.createdAt && o.status && (o.status.toUpperCase() !== 'CANCELED' && o.status.toUpperCase() !== 'RETURNED')) {
+                                const month = new Date(o.createdAt).getMonth()
+                                const amount = parseFloat(o.totalAmountLocal?.value || '0')
+                                monthlyJumiaRevenue[month] += amount
+                            }
+                        })
+
+                        const storeOrders = await prisma.order.findMany({
+                            where: {
+                                createdAt: {
+                                    gte: new Date(yearStart),
+                                    lte: new Date(yearEnd + 'T23:59:59Z')
+                                }
+                            },
+                            select: { total: true, createdAt: true, status: true }
+                        })
+
+                        const monthlyStoreRevenue = Array(12).fill(0)
+                        storeOrders.forEach(o => {
+                            if (o.status !== 'CANCELLED' && o.status !== 'RETURNED') {
+                                const month = o.createdAt.getMonth()
+                                monthlyStoreRevenue[month] += o.total
+                            }
+                        })
+
+                        const chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                                datasets: [
+                                    {
+                                        label: 'Boutique (MAD)',
+                                        data: monthlyStoreRevenue.map(v => Math.round(v)),
+                                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                        borderRadius: 4
+                                    },
+                                    {
+                                        label: 'Jumia (MAD)',
+                                        data: monthlyJumiaRevenue.map(v => Math.round(v)),
+                                        backgroundColor: 'rgba(255, 153, 0, 0.8)',
+                                        borderRadius: 4
+                                    }
+                                ]
+                            },
+                            options: {
+                                plugins: {
+                                    title: { display: true, text: `Comparatif Jumia vs Boutique - ${now.getFullYear()}` }
+                                }
+                            }
+                        }
+                        
+                        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`
+                        
+                        const { sendTelegramPhoto } = await import('@/lib/telegram')
+                        await sendTelegramPhoto(chartUrl, `📊 <b>Comparatif Jumia vs Boutique (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
                     } else if (action === 'returns_check') {
                         const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-returns-alert${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
                         await answerCallbackQuery(callbackId, '🔄 Vérification retours...', token)
@@ -221,6 +424,69 @@ export async function POST(req: Request) {
                     }
                 } catch (error: any) {
                     await answerCallbackQuery(callbackId, `❌ Erreur : ${error.message}`, token)
+                }
+            }
+
+            // Format: jumia_rts:{orderNumber}
+            else if (data && data.startsWith('jumia_rts:')) {
+                const [, orderNumber] = data.split(':')
+                try {
+                    const { JumiaAPI } = await import('@/lib/jumia-api')
+                    const jumia = await JumiaAPI.getInstance()
+                    if (!jumia) throw new Error('Jumia non configuré')
+                    
+                    const itemsResponse = await jumia.getOrderItems(orderNumber)
+                    const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
+                    const orderItemIds = items.map((i: any) => i.orderItemId)
+
+                    if (orderItemIds.length === 0) throw new Error('Aucun article trouvé')
+
+                    await jumia.packOrders({ orderItemIds, deliveryType: 'dropship' })
+                    
+                    const providersResponse = await jumia.getShipmentProviders(orderItemIds)
+                    const providers = providersResponse?.shipmentProviders || providersResponse?.data?.shipmentProviders || []
+                    const defaultProvider = providers.length > 0 ? providers[0].name : ''
+
+                    await jumia.readyToShipOrders({
+                        orderItemIds,
+                        deliveryType: 'dropship',
+                        shipmentProvider: defaultProvider,
+                        trackingNumber: ''
+                    })
+
+                    await answerCallbackQuery(callbackId, `✅ Commande ${orderNumber} passée en Ready to Ship`, token)
+                    if (message?.chat?.id && message?.message_id) {
+                        const updatedText = `✅ <b>Commande Jumia prête à expédier (RTS)</b>\n\n🆔 Commande: <b>${orderNumber}</b>`
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
+                    }
+                } catch (error: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur RTS : ${error.message}`, token)
+                }
+            }
+
+            // Format: jumia_cancel:{orderNumber}
+            else if (data && data.startsWith('jumia_cancel:')) {
+                const [, orderNumber] = data.split(':')
+                try {
+                    const { JumiaAPI } = await import('@/lib/jumia-api')
+                    const jumia = await JumiaAPI.getInstance()
+                    if (!jumia) throw new Error('Jumia non configuré')
+                    
+                    const itemsResponse = await jumia.getOrderItems(orderNumber)
+                    const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
+                    const orderItemIds = items.map((i: any) => i.orderItemId)
+
+                    if (orderItemIds.length === 0) throw new Error('Aucun article trouvé')
+
+                    await jumia.cancelOrders(orderItemIds)
+                    
+                    await answerCallbackQuery(callbackId, `❌ Commande ${orderNumber} annulée`, token)
+                    if (message?.chat?.id && message?.message_id) {
+                        const updatedText = `❌ <b>Commande Jumia annulée</b>\n\n🆔 Commande: <b>${orderNumber}</b>`
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
+                    }
+                } catch (error: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur Annulation : ${error.message}`, token)
                 }
             }
 
@@ -301,15 +567,18 @@ export async function POST(req: Request) {
                 }
             }
 
-            // Format: pub_creative:{id}:{type}:{platform}
-            else if (data && data.startsWith('pub_creative:')) {
-                const [, itemId, itemType, platform] = data.split(':')
+            // Format: pub_c:{id}:{type}:{platform}
+            else if (data && data.startsWith('pub_c:')) {
+                const [, itemId, shortType, shortPlatform] = data.split(':')
+                const itemType = shortType === 'P' ? 'PACK' : 'BOOK'
+                const platformMap: any = { ig: 'instagram', fb: 'facebook', tt: 'tiktok', tg: 'telegram' }
+                const platform = platformMap[shortPlatform] || 'instagram'
+
                 try {
                     let item: any = null;
                     let imageUrl = '';
                     let title = 'Riwaya';
 
-                    // Si l'ID a la longueur d'un UUID, on suppose que c'est un UUID en DB
                     if (itemId && itemId.length === 36 && itemId.includes('-')) {
                         if (itemType === 'BOOK') {
                             item = await prisma.book.findUnique({ where: { id: itemId } })
@@ -319,7 +588,6 @@ export async function POST(req: Request) {
                             if (item) { imageUrl = item.image; title = item.name; }
                         }
                     } else if (itemId && itemId !== 'manual') {
-                        // C'est un nom de fichier du dossier uploads
                         imageUrl = `/uploads/books/${itemId}`
                         title = itemId
                     }
@@ -329,11 +597,15 @@ export async function POST(req: Request) {
                         imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
                     }
 
-                    // Proxy HTTPS pour Meta
                     const isVideo = imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm')
                     if (imageUrl && !isVideo && (platform === 'instagram' || platform === 'facebook' || platform === 'all' || platform === 'both')) {
                         imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&q=85`
                     }
+
+                    const customCaptionSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_custom_caption' } })
+                    const customCaption = customCaptionSetting?.value
+                    
+                    const finalCaption = (customCaption && customCaption.length > 0) ? customCaption : (item?.description || title)
 
                     const payload = {
                         itemId: item?.id || 'marketing',
@@ -348,12 +620,11 @@ export async function POST(req: Request) {
                         bookUrl: itemType === 'BOOK' && item ? `${baseUrl}/fr/books/${item.id}` : '',
                         packUrl: itemType === 'PACK' && item ? `${baseUrl}/fr/packs` : '',
                         itemUrl: item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
-                        caption: item?.description || title,
+                        caption: finalCaption,
                         format: 'story',
                         platform,
                         source: 'telegram-bot-action',
                         
-                        // Tokens
                         facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
                         instagram_account_id: (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value,
                         tiktok_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'tiktok_access_token' } }))?.value,
@@ -373,6 +644,10 @@ export async function POST(req: Request) {
                         body: JSON.stringify(payload)
                     }).catch(console.error)
 
+                    if (customCaption) {
+                        await prisma.siteSettings.update({ where: { key: 'telegram_custom_caption' }, data: { value: '' } })
+                    }
+
                     if (message?.chat?.id && message?.message_id) {
                         await editTelegramMessage(message.chat.id, message.message_id, `⏳ <b>Génération en cours...</b>\n\nVotre visuel pour <b>${platform.toUpperCase()}</b> est en cours de création via n8n.`, token)
                     }
@@ -381,23 +656,92 @@ export async function POST(req: Request) {
                 }
             }
 
-            // Format: prep_creative:{itemId}:{itemType}
-            else if (data && data.startsWith('prep_creative:')) {
-                const [, itemId, itemType] = data.split(':')
-                const replyMarkup = {
-                    inline_keyboard: [
-                        [
-                            { text: '📸 Instagram', callback_data: `pub_creative:${itemId}:${itemType}:instagram` },
-                            { text: '📘 Facebook', callback_data: `pub_creative:${itemId}:${itemType}:facebook` }
-                        ],
-                        [
-                            { text: '🎵 TikTok', callback_data: `pub_creative:${itemId}:${itemType}:tiktok` },
-                            { text: '✈️ Telegram', callback_data: `pub_creative:${itemId}:${itemType}:telegram` }
+            // Format: prep_c:{itemId}:{itemType}
+            else if (data && data.startsWith('prep_c:')) {
+                const [, itemId, shortType] = data.split(':')
+                try {
+                    const replyMarkup = {
+                        inline_keyboard: [
+                            [
+                                { text: '👁️ Voir l\'image', callback_data: `view_c:${itemId}:${shortType}` }
+                            ],
+                            [
+                                { text: '📸 Instagram', callback_data: `pub_c:${itemId}:${shortType}:ig` },
+                                { text: '📘 Facebook', callback_data: `pub_c:${itemId}:${shortType}:fb` }
+                            ],
+                            [
+                                { text: '🎵 TikTok', callback_data: `pub_c:${itemId}:${shortType}:tt` },
+                                { text: '✈️ Telegram', callback_data: `pub_c:${itemId}:${shortType}:tg` }
+                            ],
+                            [
+                                { text: '✏️ Légende Personnalisée', callback_data: `caption_info` }
+                            ]
                         ]
-                    ]
+                    }
+                    if (message?.chat?.id && message?.message_id) {
+                        await answerCallbackQuery(callbackId, `📱 Options du visuel`, token)
+                        await editTelegramMessage(message.chat.id, message.message_id, `📱 <b>Options du Visuel</b>\n\nQue souhaitez-vous faire ?`, token, replyMarkup)
+                    }
+                } catch (error: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur: ${error.message}`, token)
                 }
-                if (message?.chat?.id && message?.message_id) {
-                    await editTelegramMessage(message.chat.id, message.message_id, `📱 <b>Destination du Visuel</b>\n\nSur quelle plateforme souhaitez-vous publier ?`, token, replyMarkup)
+            }
+            
+            // Format: view_c:{itemId}:{shortType}
+            else if (data && data.startsWith('view_c:')) {
+                const [, itemId, shortType] = data.split(':')
+                const itemType = shortType === 'P' ? 'PACK' : 'BOOK'
+                try {
+                    let item: any = null;
+                    let imageUrl = '';
+                    let title = 'Riwaya';
+
+                    if (itemId && itemId.length === 36 && itemId.includes('-')) {
+                        if (itemType === 'BOOK') {
+                            item = await prisma.book.findUnique({ where: { id: itemId } })
+                            if (item) { imageUrl = item.image; title = item.title; }
+                        } else if (itemType === 'PACK') {
+                            item = await prisma.pack.findUnique({ where: { id: itemId } })
+                            if (item) { imageUrl = item.image; title = item.name; }
+                        }
+                    } else if (itemId && itemId !== 'manual') {
+                        imageUrl = `/uploads/books/${itemId}`
+                        title = itemId
+                    }
+
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                    if (imageUrl && !imageUrl.startsWith('http')) {
+                        imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+                    }
+
+                    await answerCallbackQuery(callbackId, `Envoi de l'image...`, token)
+                    
+                    const replyMarkup = {
+                        inline_keyboard: [
+                            [
+                                { text: '📸 Instagram', callback_data: `pub_c:${itemId}:${shortType}:ig` },
+                                { text: '📘 Facebook', callback_data: `pub_c:${itemId}:${shortType}:fb` }
+                            ],
+                            [
+                                { text: '🎵 TikTok', callback_data: `pub_c:${itemId}:${shortType}:tt` },
+                                { text: '✈️ Telegram', callback_data: `pub_c:${itemId}:${shortType}:tg` }
+                            ]
+                        ]
+                    }
+
+                    const { sendTelegramPhoto } = await import('@/lib/telegram')
+                    await sendTelegramPhoto(imageUrl, `👁️ Aperçu : <b>${title}</b>`, message?.chat?.id.toString(), token, replyMarkup)
+
+                } catch (error: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur : ${error.message}`, token)
+                }
+            }
+            
+            // Format: caption_info
+            else if (data === 'caption_info') {
+                await answerCallbackQuery(callbackId, `Comment ajouter une légende`, token)
+                if (message?.chat?.id) {
+                    await sendTelegramMessage(`✏️ <b>Pour personnaliser la légende :</b>\n\nEnvoyez simplement un message dans ce chat commençant par <code>#legende</code>.\n\nExemple :\n<code>#legende 🔥 Ne ratez pas notre promotion ! Lien en bio.</code>\n\nUne fois enregistrée, la légende sera utilisée pour votre prochaine publication.`, message.chat.id.toString(), token)
                 }
             }
             
@@ -780,9 +1124,10 @@ export async function POST(req: Request) {
                     `/rapport — Rapport quotidien immédiat\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
                     `<b>🟠 Jumia</b>\n` +
-                    `/jumia — Menu rapide Jumia (pending, bilan, retours)\n\n` +
-                    `<b>📦 Marketing</b>\n` +
-                    `/generer — Envoyer des créatives marketing\n\n` +
+                    `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n\n` +
+                    `<b>📦 Marketing & Réseaux Sociaux</b>\n` +
+                    `/generer — Liste des créatives, prévisualisation et publication (IG, FB, TT, TG)\n` +
+                    `#legende [votre texte] — Définir une légende personnalisée pour la prochaine publication Facebook/Instagram\n\n` +
                     `<b>🔍 Recherche</b>\n` +
                     `/stock [titre] — Vérifier le stock d'un livre\n` +
                     `/search [nom/téléphone] — Rechercher un client\n\n` +
@@ -799,6 +1144,8 @@ export async function POST(req: Request) {
                     `/bloggenerer [sujet] — Générer un article via IA\n` +
                     `/blogpartager [mot clé] — Partager sur les réseaux sociaux\n\n` +
                     `<b>⚙️ Automatisations (Cron)</b>\n` +
+                    `Rapport Jumia Annuel (Graphique + PDF) → <code>/api/cron/telegram-yearly-chart</code>\n` +
+                    `Notifications commandes Jumia (Photo + Boutons) → <code>/api/cron/jumia-new-orders</code>\n` +
                     `Rapport quotidien → <code>/api/cron/daily-report</code>\n` +
                     `Alerte stock → <code>/api/cron/stock-alert</code>\n` +
                     `Alerte pending → <code>/api/cron/pending-alert</code>\n` +
@@ -840,6 +1187,19 @@ export async function POST(req: Request) {
                     ]
                 }
                 await sendTelegramMessage(replyText, chatId.toString(), token, replyMarkup)
+            }
+            else if (text && text.toLowerCase().startsWith('#legende')) {
+                const customCaption = text.substring(8).trim();
+                if (customCaption.length === 0) {
+                    await sendTelegramMessage(`⚠️ La légende est vide. Veuillez taper votre texte après #legende.`, chatId.toString(), token)
+                } else {
+                    await prisma.siteSettings.upsert({
+                        where: { key: 'telegram_custom_caption' },
+                        update: { value: customCaption },
+                        create: { key: 'telegram_custom_caption', value: customCaption }
+                    })
+                    await sendTelegramMessage(`✅ <b>Légende personnalisée enregistrée :</b>\n\n<i>${customCaption}</i>\n\nVous pouvez maintenant cliquer sur le bouton d'un réseau social (Instagram, Facebook...) pour publier avec cette légende.`, chatId.toString(), token)
+                }
             }
             else if (text.startsWith('/GENERER') || text === 'GENERER' || text.startsWith('/MARKETING')) {
                 console.log(`[TELEGRAM] Command /GENERER received from chat ${chatId}`)
@@ -919,9 +1279,10 @@ export async function POST(req: Request) {
                         const label = c.name.length > 30 ? c.name.substring(0, 27) + '...' : c.name
                         const typeLabel = c.type === 'PACK' ? '📦' : '✨'
                         const itemId = (c as any).bookId || (c as any).packId || c.name
+                        const shortType = c.type === 'PACK' ? 'P' : 'B'
                         return [{ 
                             text: `${typeLabel} ${label}`, 
-                            callback_data: `prep_creative:${itemId}:${c.type === 'PACK' ? 'PACK' : 'BOOK'}`.substring(0, 64)
+                            callback_data: `prep_c:${itemId}:${shortType}`.substring(0, 64)
                         }]
                     })
 
@@ -958,6 +1319,45 @@ export async function POST(req: Request) {
                     }
                 }
             }
+            else if (text.startsWith('/STOCKALERT')) {
+                const books = await prisma.book.findMany({
+                    where: { stock: { lt: 3 } },
+                    orderBy: { stock: 'asc' },
+                    select: { id: true, title: true, stock: true }
+                })
+                if (books.length === 0) {
+                    await sendTelegramMessage(`✅ Aucun produit avec un stock < 3.`, chatId.toString(), token)
+                } else {
+                    const list = books.map(b => `🚨 <b>${b.title}</b> : ${b.stock}`).join('\n')
+                    const keyboard = books.slice(0, 5).map((b) => {
+                        return [{ text: `🔄 Maj: ${b.title.substring(0, 25)}`, callback_data: `upd_stock:${b.id}` }]
+                    })
+                    const textMessage = `📊 <b>Alerte Stock Critique (< 3)</b> :\n\n${list}`
+                    await sendTelegramMessage(textMessage, chatId.toString(), token, { inline_keyboard: keyboard })
+                }
+            }
+            else if (text.startsWith('/SETSTOCK')) {
+                const parts = rawText.split(' ')
+                if (parts.length < 3) {
+                    await sendTelegramMessage(`💡 Utilisation : <code>/setstock [id_livre] [quantité]</code>`, chatId.toString(), token)
+                } else {
+                    const bookId = parts[1]
+                    const qty = parseInt(parts[2], 10)
+                    if (isNaN(qty)) {
+                        await sendTelegramMessage(`❌ La quantité doit être un nombre valide.`, chatId.toString(), token)
+                    } else {
+                        try {
+                            const updated = await prisma.book.update({
+                                where: { id: bookId },
+                                data: { stock: qty }
+                            })
+                            await sendTelegramMessage(`✅ Stock mis à jour :\n📖 <b>${updated.title}</b>\n📦 Nouveau stock: <b>${updated.stock}</b>`, chatId.toString(), token)
+                        } catch (err) {
+                            await sendTelegramMessage(`❌ Erreur ou livre introuvable.`, chatId.toString(), token)
+                        }
+                    }
+                }
+            }
             else if (text.startsWith('/SEARCH')) {
                 const query = rawText.split(' ').slice(1).join(' ')
                 if (!query) {
@@ -991,6 +1391,15 @@ export async function POST(req: Request) {
                         ],
                         [
                             { text: '📊 Bilan Jumia du mois', callback_data: 'jumia:monthly_stats' }
+                        ],
+                        [
+                            { text: "📅 Bilan Jumia d'année", callback_data: 'jumia:yearly_stats' }
+                        ],
+                        [
+                            { text: '📈 Graphique Annuel (CA)', callback_data: 'jumia:yearly_chart' }
+                        ],
+                        [
+                            { text: '📊 Jumia vs Boutique', callback_data: 'jumia:jumia_vs_store_chart' }
                         ],
                         [
                             { text: '🔄 Alerte Retours/Annulations', callback_data: 'jumia:returns_check' }

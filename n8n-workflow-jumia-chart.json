@@ -1,0 +1,120 @@
+{
+  "name": "Riwaya - Rapport Jumia Mensuel",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 20 28 * *"
+            }
+          ]
+        }
+      },
+      "id": "e4f5g6",
+      "name": "Schedule Trigger (Rapport)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://riwaya.store/api/cron/telegram-yearly-chart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "VOTRE_VRAI_CRON_SECRET_ICI"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3",
+      "name": "HTTP Rapport Mensuel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger_new_orders",
+      "name": "Schedule Trigger (Toutes les 15m)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://riwaya.store/api/cron/jumia-new-orders",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "VOTRE_VRAI_CRON_SECRET_ICI"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http_new_orders",
+      "name": "HTTP Nouvelles Commandes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (Rapport)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Rapport Mensuel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger (Toutes les 15m)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Nouvelles Commandes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
