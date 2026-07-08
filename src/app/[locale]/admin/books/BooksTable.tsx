@@ -33,7 +33,15 @@ interface Book {
     sellerSku?: string | null
 }
 
-export default function BooksTable({ books, pageNumber, totalProviderPages, initialSearch, initialFilter = '', limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, initialSearch: string, initialFilter?: string, limit?: number }) {
+interface ActiveFilters {
+    search: string;
+    status: string;
+    type: string;
+    lang: string;
+    sort: string;
+}
+
+export default function BooksTable({ books, pageNumber, totalProviderPages, activeFilters, limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, activeFilters: ActiveFilters, limit?: number }) {
     const [loading, setLoading] = useState<string | null>(null)
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [bulkLoading, setBulkLoading] = useState(false)
@@ -188,8 +196,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
     const handleExportExcel = async () => {
         try {
             const params = new URLSearchParams()
-            if (initialSearch) params.set('search', initialSearch)
-            if (initialFilter) params.set('filter', initialFilter)
+            if (activeFilters.search) params.set('search', activeFilters.search)
+            if (activeFilters.status) params.set('status', activeFilters.status)
+            if (activeFilters.type) params.set('type', activeFilters.type)
+            if (activeFilters.lang) params.set('lang', activeFilters.lang)
+            if (activeFilters.sort) params.set('sort', activeFilters.sort)
 
             const res = await fetch(`/api/admin/books/export-excel?${params.toString()}`)
             if (!res.ok) throw new Error('Export échoué')
@@ -281,30 +292,36 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
 
     const buildUrl = (page: number, newLimit?: number) => {
         const params = new URLSearchParams()
-        if (initialSearch.trim()) params.set('search', initialSearch.trim())
-        if (initialFilter) params.set('filter', initialFilter)
+        if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
+        if (activeFilters.status) params.set('status', activeFilters.status)
+        if (activeFilters.type) params.set('type', activeFilters.type)
+        if (activeFilters.lang) params.set('lang', activeFilters.lang)
+        if (activeFilters.sort) params.set('sort', activeFilters.sort)
         if (newLimit || limit !== 20) params.set('limit', (newLimit || limit).toString())
         params.set('page', page.toString())
         return `${pathname}?${params.toString()}`
     }
 
     const handleSort = (column: 'price' | 'stock' | 'orders') => {
-        let newFilter = `${column}-desc`;
-        if (initialFilter === `${column}-desc`) {
-            newFilter = `${column}-asc`;
+        let newSort = `${column}-desc`;
+        if (activeFilters.sort === `${column}-desc`) {
+            newSort = `${column}-asc`;
         }
         
         const params = new URLSearchParams()
-        if (initialSearch.trim()) params.set('search', initialSearch.trim())
-        params.set('filter', newFilter)
+        if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
+        if (activeFilters.status) params.set('status', activeFilters.status)
+        if (activeFilters.type) params.set('type', activeFilters.type)
+        if (activeFilters.lang) params.set('lang', activeFilters.lang)
+        params.set('sort', newSort)
         params.set('limit', limit.toString())
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
     }
 
     const getSortIcon = (column: 'price' | 'stock' | 'orders') => {
-        if (initialFilter === `${column}-asc`) return <ArrowUp className="w-3 h-3 ml-1" />
-        if (initialFilter === `${column}-desc`) return <ArrowDown className="w-3 h-3 ml-1" />
+        if (activeFilters.sort === `${column}-asc`) return <ArrowUp className="w-3 h-3 ml-1" />
+        if (activeFilters.sort === `${column}-desc`) return <ArrowDown className="w-3 h-3 ml-1" />
         return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />
     }
 
@@ -391,7 +408,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
 
             {books.length === 0 ? (
                 <div className="text-center py-12">
-                    <p className="text-gray-500">Aucun livre trouvé {initialSearch && `pour "${initialSearch}"`}</p>
+                    <p className="text-gray-500">Aucun livre trouvé {activeFilters.search && `pour "${activeFilters.search}"`}</p>
                 </div>
             ) : (
                 <>
@@ -543,8 +560,13 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                         />
                                                                     </div>
                                                                     <div className="ml-4">
-                                                                        <div className="text-sm font-medium text-gray-900">
-                                                                            {book.title}
+                                                                        <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
+                                                                            <Link 
+                                                                                href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
+                                                                                className="hover:text-blue-600 hover:underline transition-colors"
+                                                                            >
+                                                                                {book.title}
+                                                                            </Link>
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
                                                                             </span>
@@ -776,7 +798,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                                                                             <Edit3 className="w-4 h-4 text-emerald-500" /> Modification rapide
                                                                                         </button>
                                                                                         <Link
-                                                                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`}
+                                                                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
                                                                                             onClick={() => setOpenDropdown(null)}
                                                                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                                                                                         >
@@ -820,7 +842,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                         <button onClick={() => handleToggleStatus(book.id, book.active)} className={`p-1.5 rounded-md ${book.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`} title={book.active ? 'Désactiver' : 'Activer'}>
                                             {book.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                                         </button>
-                                        <Link href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(initialSearch ? {search: initialSearch} : {}), ...(initialFilter ? {filter: initialFilter} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
+                                        <Link href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
                                             <Edit className="w-3.5 h-3.5" />
                                         </Link>
                                         <button onClick={() => handleDelete(book.id, book.title)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md">
@@ -831,7 +853,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, init
                                         <img src={normalizeImage(book.image)} alt={book.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} />
                                     </div>
                                     <div className="flex-1 flex flex-col">
-                                        <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight">{book.title}</h3>
+                                        <Link 
+                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
+                                        >
+                                            <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight hover:text-blue-600 hover:underline transition-colors">{book.title}</h3>
+                                        </Link>
                                         <p className="text-xs text-gray-500 mt-1 truncate">
                                             {book.author}
                                             {book.sellerSku && <span className="ml-2 font-mono text-[9px] px-1 bg-gray-100 rounded">SKU: {book.sellerSku}</span>}

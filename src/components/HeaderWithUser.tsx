@@ -28,6 +28,7 @@ export default async function HeaderWithUser() {
         readingList: featureSettings['feature_reading_list'] !== 'false',
         digital: featureSettings['feature_digital_books'] !== 'false',
         packs: featureSettings['feature_packs'] !== 'false',
+        deposerListe: featureSettings['feature_deposer_liste'] !== 'false',
     }
 
     return (

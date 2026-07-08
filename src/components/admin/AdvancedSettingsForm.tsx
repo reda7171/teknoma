@@ -17,7 +17,8 @@ import {
     Database,
     Download,
     Package,
-    Calculator
+    Calculator,
+    FileText
 } from 'lucide-react'
 
 interface AdvancedSettingsFormProps {
@@ -95,6 +96,13 @@ const FEATURES = [
         description: 'Active l\'interface de caisse (Point of Sale) pour les ventes physiques.',
         icon: Calculator,
         color: 'text-purple-600'
+    },
+    {
+        key: 'feature_deposer_liste',
+        label: 'Déposer ma liste',
+        description: 'Active le module "Déposer ma liste scolaire" et son lien dans la barre de navigation.',
+        icon: FileText,
+        color: 'text-green-500'
     },
 ]
 

@@ -4,19 +4,25 @@ import { useState, useEffect } from 'react'
 import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Globe } from 'lucide-react'
 import { Link, useRouter, usePathname } from '@/i18n/routing'
 
+interface ActiveFilters {
+    search: string;
+    status: string;
+    type: string;
+    lang: string;
+    sort: string;
+}
+
 interface BookFiltersProps {
-    searchQuery: string
-    filterParam: string
+    activeFilters: ActiveFilters;
     totalCount: number
 }
 
 export default function BookFilters({
-    searchQuery,
-    filterParam,
+    activeFilters,
     totalCount
 }: BookFiltersProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const [localSearch, setLocalSearch] = useState(searchQuery)
+    const [localSearch, setLocalSearch] = useState(activeFilters.search)
     const router = useRouter()
     const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
@@ -29,18 +35,24 @@ export default function BookFilters({
         if (!mounted) return
 
         const timer = setTimeout(() => {
-            if (localSearch !== searchQuery) {
-                handleApplyFilters(localSearch, filterParam)
+            if (localSearch !== activeFilters.search) {
+                handleApplyFilters({ search: localSearch })
             }
         }, 500)
 
         return () => clearTimeout(timer)
     }, [localSearch, mounted])
 
-    const handleApplyFilters = (newSearch: string, newFilter: string) => {
+    const handleApplyFilters = (updates: Partial<ActiveFilters>) => {
+        const newFilters = { ...activeFilters, ...updates }
         const params = new URLSearchParams()
-        if (newSearch.trim()) params.set('search', newSearch.trim())
-        if (newFilter) params.set('filter', newFilter)
+        
+        if (newFilters.search?.trim()) params.set('search', newFilters.search.trim())
+        if (newFilters.status) params.set('status', newFilters.status)
+        if (newFilters.type) params.set('type', newFilters.type)
+        if (newFilters.lang) params.set('lang', newFilters.lang)
+        if (newFilters.sort) params.set('sort', newFilters.sort)
+        
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
     }
@@ -50,7 +62,7 @@ export default function BookFilters({
         router.push(pathname)
     }
 
-    const hasActiveFilters = searchQuery || filterParam
+    const hasActiveFilters = Object.values(activeFilters).some(v => v !== '')
 
     return (
         <div className="w-full space-y-4">
@@ -96,7 +108,7 @@ export default function BookFilters({
                                 <Search className="w-3 h-3" />
                                 Recherche
                             </label>
-                            <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(localSearch, filterParam); }} className="relative">
+                            <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters({ search: localSearch }); }} className="relative">
                                 <input
                                     type="text"
                                     placeholder="Titre, auteur, catégorie..."
@@ -122,9 +134,9 @@ export default function BookFilters({
                                 ].map((f) => (
                                     <button
                                         key={f.id}
-                                        onClick={() => handleApplyFilters(localSearch, f.id)}
+                                        onClick={() => handleApplyFilters({ status: f.id })}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            filterParam === f.id 
+                                            activeFilters.status === f.id && !['in-stock', 'out-of-stock'].includes(activeFilters.status)
                                             ? 'bg-black text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
@@ -144,17 +156,17 @@ export default function BookFilters({
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     { id: '', label: 'Tous' },
-                                    { id: 'type:book', label: 'Livres' },
-                                    { id: 'type:pack', label: 'Packs' },
-                                    { id: 'type:kids', label: 'Enfants (Kids)' },
-                                    { id: 'type:usb', label: 'Clés USB' },
-                                    { id: 'type:bookmarks', label: 'Marque-pages' }
+                                    { id: 'book', label: 'Livres' },
+                                    { id: 'pack', label: 'Packs' },
+                                    { id: 'kids', label: 'Enfants (Kids)' },
+                                    { id: 'usb', label: 'Clés USB' },
+                                    { id: 'bookmarks', label: 'Marque-pages' }
                                 ].map((f) => (
                                     <button
                                         key={f.id}
-                                        onClick={() => handleApplyFilters(localSearch, f.id)}
+                                        onClick={() => handleApplyFilters({ type: f.id })}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            (filterParam === f.id || (f.id === '' && !filterParam.startsWith('type:'))) 
+                                            activeFilters.type === f.id
                                             ? 'bg-black text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
@@ -178,9 +190,9 @@ export default function BookFilters({
                                 ].map((f) => (
                                     <button
                                         key={f.id}
-                                        onClick={() => handleApplyFilters(localSearch, f.id)}
+                                        onClick={() => handleApplyFilters({ status: activeFilters.status === f.id ? '' : f.id })}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            filterParam === f.id 
+                                            activeFilters.status === f.id 
                                             ? 'bg-black text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
@@ -199,15 +211,15 @@ export default function BookFilters({
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[
-                                    { id: 'lang:fr', label: 'Français' },
-                                    { id: 'lang:ar', label: 'العربية' },
-                                    { id: 'lang:en', label: 'English' }
+                                    { id: 'fr', label: 'Français' },
+                                    { id: 'ar', label: 'العربية' },
+                                    { id: 'en', label: 'English' }
                                 ].map((f) => (
                                     <button
                                         key={f.id}
-                                        onClick={() => handleApplyFilters(localSearch, f.id)}
+                                        onClick={() => handleApplyFilters({ lang: activeFilters.lang === f.id ? '' : f.id })}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            filterParam === f.id 
+                                            activeFilters.lang === f.id 
                                             ? 'bg-black text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
@@ -235,9 +247,9 @@ export default function BookFilters({
                                 ].map((f) => (
                                     <button
                                         key={f.id}
-                                        onClick={() => handleApplyFilters(localSearch, f.id)}
+                                        onClick={() => handleApplyFilters({ sort: f.id })}
                                         className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                                            filterParam === f.id 
+                                            activeFilters.sort === f.id 
                                             ? 'bg-blue-600 text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}

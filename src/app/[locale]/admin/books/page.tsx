@@ -11,12 +11,15 @@ import SyncJumiaStockButton from '@/components/admin/SyncJumiaStockButton'
 import { Prisma } from '@prisma/client'
 
 import BookFilters from './BookFilters'
-export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, filter?: string, limit?: string }> }) {
+export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
     const searchQuery = params.search || ''
-    const filterParam = params.filter || ''
+    const statusParam = params.status || ''
+    const typeParam = params.type || ''
+    const langParam = params.lang || ''
+    const sortParam = params.sort || ''
 
     const where: Prisma.BookWhereInput = {
         ...(searchQuery && {
@@ -26,27 +29,27 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 { category: { contains: searchQuery } }
             ]
         }),
-        ...(filterParam === 'no-image' && {
+        ...(statusParam === 'no-image' && {
             image: { in: ['', '/book-placeholder.png'] }
         }),
-        ...(filterParam === 'out-of-stock' && {
+        ...(statusParam === 'out-of-stock' && {
             stock: { equals: 0 }
         }),
-        ...(filterParam === 'in-stock' && {
+        ...(statusParam === 'in-stock' && {
             stock: { gt: 0 }
         }),
-        ...(filterParam === 'active' && {
+        ...(statusParam === 'active' && {
             active: true
         }),
-        ...(filterParam === 'inactive' && {
+        ...(statusParam === 'inactive' && {
             active: false
         }),
-        ...(filterParam.startsWith('lang:') && {
-            language: filterParam.split(':')[1]
+        ...(langParam && {
+            language: langParam
         })
     }
 
-    const productTypeFilter = filterParam.startsWith('type:') ? filterParam.split(':')[1] : 'all'
+    const productTypeFilter = typeParam || 'all'
 
     let booksStats: any[] = []
     let allProducts: any[] = []
@@ -67,8 +70,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (searchQuery) {
             packWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } } ]
         }
-        if (filterParam === 'active') packWhere.active = true
-        if (filterParam === 'inactive') packWhere.active = false
+        if (statusParam === 'active') packWhere.active = true
+        if (statusParam === 'inactive') packWhere.active = false
         
         const packs = await prisma.pack.findMany({
             where: packWhere,
@@ -103,8 +106,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (productTypeFilter !== 'all') {
             extraWhere.category = productTypeFilter.toUpperCase()
         }
-        if (filterParam === 'active') extraWhere.active = true
-        if (filterParam === 'inactive') extraWhere.active = false
+        if (statusParam === 'active') extraWhere.active = true
+        if (statusParam === 'inactive') extraWhere.active = false
         
         const extras = await prisma.extraProduct.findMany({
             where: extraWhere,
@@ -136,14 +139,14 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const stockValue = booksStats.reduce((sum, b) => sum + (b.price * (b.stock === 999 ? 0 : b.stock)), 0)
 
     // Manual sorting
-    if (filterParam === 'price-asc') allProducts.sort((a, b) => a.price - b.price)
-    else if (filterParam === 'price-desc') allProducts.sort((a, b) => b.price - a.price)
-    else if (filterParam === 'stock-asc') allProducts.sort((a, b) => a.stock - b.stock)
-    else if (filterParam === 'stock-desc') allProducts.sort((a, b) => b.stock - a.stock)
-    else if (filterParam === 'title-asc') allProducts.sort((a, b) => a.title.localeCompare(b.title))
-    else if (filterParam === 'title-desc') allProducts.sort((a, b) => b.title.localeCompare(a.title))
-    else if (filterParam === 'orders-asc') allProducts.sort((a, b) => a.orderCount - b.orderCount)
-    else if (filterParam === 'orders-desc') allProducts.sort((a, b) => b.orderCount - a.orderCount)
+    if (sortParam === 'price-asc') allProducts.sort((a, b) => a.price - b.price)
+    else if (sortParam === 'price-desc') allProducts.sort((a, b) => b.price - a.price)
+    else if (sortParam === 'stock-asc') allProducts.sort((a, b) => a.stock - b.stock)
+    else if (sortParam === 'stock-desc') allProducts.sort((a, b) => b.stock - a.stock)
+    else if (sortParam === 'title-asc') allProducts.sort((a, b) => a.title.localeCompare(b.title))
+    else if (sortParam === 'title-desc') allProducts.sort((a, b) => b.title.localeCompare(a.title))
+    else if (sortParam === 'orders-asc') allProducts.sort((a, b) => a.orderCount - b.orderCount)
+    else if (sortParam === 'orders-desc') allProducts.sort((a, b) => b.orderCount - a.orderCount)
     else {
         // Default sort by displayOrder (if book) and createdAt
         allProducts.sort((a, b) => {
@@ -156,6 +159,14 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
     const normalizedBooks = allProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map(b => ({ ...b, image: normalizeImage(b.image) }))
     const totalPages = Math.ceil(totalBooks / ITEMS_PER_PAGE)
+
+    const activeFilters = {
+        search: searchQuery,
+        status: statusParam,
+        type: typeParam,
+        lang: langParam,
+        sort: sortParam
+    }
 
     return (
         <div className="space-y-8">
@@ -214,8 +225,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             <div className="flex flex-col gap-8">
                 {/* Search & Filters */}
                 <BookFilters 
-                    searchQuery={searchQuery}
-                    filterParam={filterParam}
+                    activeFilters={activeFilters}
                     totalCount={totalBooks}
                 />
 
@@ -226,8 +236,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                             books={normalizedBooks} 
                             pageNumber={currentPage} 
                             totalProviderPages={totalPages} 
-                            initialSearch={searchQuery} 
-                            initialFilter={filterParam} 
+                            activeFilters={activeFilters}
                             limit={ITEMS_PER_PAGE} 
                         />
                     </div>

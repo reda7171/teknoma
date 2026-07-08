@@ -346,6 +346,7 @@
         "Cart": "Cart",
         "Login": "Login",
         "Admin": "Admin",
+        "DeposerListe": "Drop off my list",
         "Search": "Search books...",
         "Journal": "Journal",
         "UserMenu": {
@@ -1344,5 +1345,8 @@
         "description": "Access the bookstore quickly from your home screen.",
         "install": "Install",
         "later": "Later"
+    },
+    "help": {
+        "feedback_success": "Message sent successfully!"
     }
 }

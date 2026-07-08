@@ -29,15 +29,33 @@
           "conditions": [
             {
               "id": "cond-fb",
-              "leftValue": "={{ $json.body.platform }}",
-              "rightValue": "instagram",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "facebook",
               "operator": {
                 "type": "string",
-                "operation": "notEquals"
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-fb-both",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "both",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-fb-all",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "all",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -103,15 +121,33 @@
           "conditions": [
             {
               "id": "cond-ig",
-              "leftValue": "={{ $('Webhook').item.json.body.platform }}",
-              "rightValue": "facebook",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "instagram",
               "operator": {
                 "type": "string",
-                "operation": "notEquals"
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-ig-both",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "both",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-ig-all",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "all",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -221,16 +257,25 @@
           },
           "conditions": [
             {
-              "id": "cond-tiktok",
-              "leftValue": "={{ $('Webhook').item.json.body.platform }}",
+              "id": "cond-tk",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
               "rightValue": "tiktok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-tk-all",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "all",
               "operator": {
                 "type": "string",
                 "operation": "equals"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -282,16 +327,25 @@
           },
           "conditions": [
             {
-              "id": "cond-threads",
-              "leftValue": "={{ $('Webhook').item.json.body.platform }}",
+              "id": "cond-th",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
               "rightValue": "threads",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-th-all",
+              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "rightValue": "all",
               "operator": {
                 "type": "string",
                 "operation": "equals"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -398,6 +452,36 @@
         200
       ],
       "webhookId": "schedule-webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Programmé avec succès dans n8n', bookId: .item.json.body.bookId }) }}",
+        "options": {}
+      },
+      "id": "response-scheduled",
+      "name": "Réponse Programmé",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: \"Programm� avec succ�s dans n8n\", bookId: $(\"Webhook\").item.json.body.bookId }) }}",
+        "options": {}
+      },
+      "id": "response-scheduled",
+      "name": "R�ponse Programm�",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ]
     }
   ],
   "connections": {
@@ -530,7 +614,7 @@
       "main": [
         [
           {
-            "node": "Wait Schedule",
+            "node": "R�ponse Programm�",
             "type": "main",
             "index": 0
           }
@@ -579,6 +663,28 @@
           },
           {
             "node": "Threads?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Réponse Programmé": {
+      "main": [
+        [
+          {
+            "node": "Wait Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "R�ponse Programm�": {
+      "main": [
+        [
+          {
+            "node": "Wait Schedule",
             "type": "main",
             "index": 0
           }

@@ -36,6 +36,7 @@ interface HeaderProps {
         readingList?: boolean
         digital?: boolean
         packs?: boolean
+        deposerListe?: boolean
     }
     siteLogo?: string | null
 }
@@ -133,6 +134,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
 
     const displayItems = mounted ? totalItems : 0
     const defaultNavItems = [
+        ...(features.deposerListe === true ? [{ href: '/deposer-liste', label: t('DeposerListe') }] : []),
         { href: '/books', label: t('Books') },
         { href: '/authors', label: t('Authors') },
         { href: '/blog', label: t('Journal'), isJournal: true },
@@ -158,15 +160,20 @@ export default function Header({ user, notificationDropdown, navigation, feature
                 if ((url.includes('community') || url.includes('echange') || label.includes('echange')) && features.exchange !== true) return false
                 if ((url.includes('vendeur') || label.includes('vendeur')) && features.seller !== true) return false
                 if ((url.includes('reading') || url.includes('lecture') || label.includes('lecture')) && features.readingList !== true) return false
+                if ((url.includes('deposer') || label.includes('deposer')) && features.deposerListe !== true) return false
                 
                 return true
             })
             .map(item => ({ href: item.url, label: t(item.label as any), isJournal: item.url.includes('/blog') }))
         : defaultNavItems
 
-    const finalNavItems = navigation && navigation.length > 0 && !navItems.some(i => i.href.includes('authors'))
+    let finalNavItems = navigation && navigation.length > 0 && !navItems.some(i => i.href.includes('authors'))
         ? [...navItems, { href: '/authors', label: t('Authors'), isJournal: false }]
         : navItems
+
+    if (features.deposerListe === true && !finalNavItems.some((i: any) => i.href.includes('deposer-liste'))) {
+        finalNavItems = [{ href: '/deposer-liste', label: t('DeposerListe'), isJournal: false }, ...finalNavItems]
+    }
 
     return (
         <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -197,16 +204,17 @@ export default function Header({ user, notificationDropdown, navigation, feature
                         {/* Navigation Items - Only render client side after mounting */}
                         {mounted && finalNavItems.map((item: any) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
-                            const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.href.includes('/livres-numeriques') || item.isJournal
+                            const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.href.includes('/livres-numeriques') || item.isJournal || item.href.includes('/deposer-liste')
 
                             if (isSpecial) {
                                 const isKids = item.href.includes('/mon-enfant')
                                 const isDigital = item.href.includes('/livres-numeriques')
                                 const isJournal = item.isJournal
+                                const isDeposer = item.href.includes('/deposer-liste')
                                 
-                                const vibrantBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : 'bg-blue-500'
-                                const vibrantText = isKids ? 'text-pink-500' : isDigital ? 'text-amber-500' : isJournal ? 'text-black' : 'text-blue-500'
-                                const vibrantBorder = isKids ? 'border-pink-500/20 hover:border-pink-500' : isDigital ? 'border-amber-400/20 hover:border-amber-400' : isJournal ? 'border-gray-200 hover:border-black' : 'border-blue-500/20 hover:border-blue-500'
+                                const vibrantBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : isDeposer ? 'bg-green-500' : 'bg-blue-500'
+                                const vibrantText = isKids ? 'text-pink-500' : isDigital ? 'text-amber-500' : isJournal ? 'text-black' : isDeposer ? 'text-green-500' : 'text-blue-500'
+                                const vibrantBorder = isKids ? 'border-pink-500/20 hover:border-pink-500' : isDigital ? 'border-amber-400/20 hover:border-amber-400' : isJournal ? 'border-gray-200 hover:border-black' : isDeposer ? 'border-green-500/20 hover:border-green-500' : 'border-blue-500/20 hover:border-blue-500'
                                 
                                 const finalBg = isJournal ? 'bg-[#FDFBF7]' : vibrantBg
                                 const finalText = isJournal ? 'text-black' : vibrantText
@@ -336,16 +344,17 @@ export default function Header({ user, notificationDropdown, navigation, feature
 
                         {/* Navigation Links */}
                         {finalNavItems.map((item: any) => {
-                            const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.isJournal
+                            const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.isJournal || item.href.includes('/deposer-liste')
                             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                             
                             const isKids = item.href.includes('/mon-enfant')
                             const isDigital = item.href.includes('/livres-numeriques')
                             const isJournal = item.isJournal
+                            const isDeposer = item.href.includes('/deposer-liste')
 
-                            const vibrantBg = isKids ? 'bg-pink-50' : isDigital ? 'bg-amber-50' : isJournal ? 'bg-[#FDFBF7]' : 'bg-blue-50'
-                            const vibrantText = isKids ? 'text-pink-600' : isDigital ? 'text-amber-600' : isJournal ? 'text-black' : 'text-blue-600'
-                            const vibrantActiveBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : 'bg-blue-500'
+                            const vibrantBg = isKids ? 'bg-pink-50' : isDigital ? 'bg-amber-50' : isJournal ? 'bg-[#FDFBF7]' : isDeposer ? 'bg-green-50' : 'bg-blue-50'
+                            const vibrantText = isKids ? 'text-pink-600' : isDigital ? 'text-amber-600' : isJournal ? 'text-black' : isDeposer ? 'text-green-600' : 'text-blue-600'
+                            const vibrantActiveBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : isDeposer ? 'bg-green-500' : 'bg-blue-500'
                             const vibrantActiveText = isJournal ? 'text-white' : 'text-white'
                             
                             return (

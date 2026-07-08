@@ -346,6 +346,7 @@
         "Cart": "Panier",
         "Login": "Connexion",
         "Admin": "Admin",
+        "DeposerListe": "Déposer ma liste",
         "Search": "Rechercher des livres...",
         "Journal": "Journal",
         "UserMenu": {
@@ -1255,5 +1256,8 @@
         "description": "Accédez à la librairie rapidement depuis votre écran d'accueil.",
         "install": "Installer",
         "later": "Plus tard"
+    },
+    "help": {
+        "feedback_success": "Message envoyé avec succès !"
     }
 }

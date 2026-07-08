@@ -107,6 +107,7 @@ export default function AdminLayout({
         digital: featureSettings['feature_digital_books'] !== 'false',
         packs: featureSettings['feature_packs'] !== 'false',
         pos: featureSettings['feature_pos'] !== 'false',
+        deposer_liste: featureSettings['feature_deposer_liste'] !== 'false',
     }), [featureSettings])
 
     const allNavigation = useMemo(() => [
@@ -146,6 +147,7 @@ export default function AdminLayout({
                 { name: 'Point de Vente (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },
                 { name: 'Centre d\'Appels', href: `/${lang}/admin/call-center`, icon: Headset },
                 { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
+                { name: 'Listes Scolaires', href: `/${lang}/admin/school-lists`, icon: FileText, featureKey: 'feature_deposer_liste' },
                 { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },
                 { name: 'Achats Fournisseurs', href: `/${lang}/admin/supplier-order`, icon: ShoppingBag },
             ]
