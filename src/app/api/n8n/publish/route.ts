@@ -15,9 +15,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // OWASP A04: Rate Limiting
+        // OWASP A04: Rate Limiting (augmenté à 100 pour autoriser l'auto-programmation par lots)
         const ip = await getIpIdentifier()
-        const limiter = await rateLimit(`n8n_publish_${ip}`, { limit: 20, windowMs: 60000 })
+        const limiter = await rateLimit(`n8n_publish_${ip}`, { limit: 100, windowMs: 60000 })
         if (!limiter.success) {
             return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
         }
@@ -159,7 +159,8 @@ export async function POST(req: NextRequest) {
             n8nRes = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                // Envelopper le payload dans un tableau 'batch' pour correspondre au nouveau workflow
+                body: JSON.stringify({ batch: [payload] }),
                 signal: controller.signal
             })
         } catch (fetchError: any) {
