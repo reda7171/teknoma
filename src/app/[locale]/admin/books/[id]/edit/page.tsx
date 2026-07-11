@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
+import { publishBooksToJumia } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
@@ -23,6 +24,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
     const [id, setId] = useState<string>(bookId)
     const [loading, setLoading] = useState(false)
+    const [isPushingJumia, setIsPushingJumia] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [book, setBook] = useState<any>(null)
@@ -143,6 +145,25 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         } else {
             setError(result.error)
             setLoading(false)
+        }
+    }
+
+    async function handlePushToJumia() {
+        if (!bookId) return
+        if (!confirm('Voulez-vous vraiment publier ce livre sur Jumia ?')) return
+        
+        setIsPushingJumia(true)
+        try {
+            const res = await publishBooksToJumia([bookId])
+            if (res.success) {
+                alert(res.message || 'Livre publié avec succès sur Jumia')
+            } else {
+                alert(res.message || 'Erreur lors de la publication')
+            }
+        } catch (err: any) {
+            alert(err.message || 'Erreur lors de la publication')
+        } finally {
+            setIsPushingJumia(false)
         }
     }
 
@@ -665,6 +686,16 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
                 {/* Actions */}
                 <div className="mt-6 flex items-center justify-end gap-4">
+                    <button
+                        type="button"
+                        onClick={handlePushToJumia}
+                        disabled={isPushingJumia || loading}
+                        className="inline-flex items-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                    >
+                        {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                        Push to Jumia
+                    </button>
+                    
                     <Link
                         href={returnUrl}
                         className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
@@ -673,7 +704,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     </Link>
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || isPushingJumia}
                         className="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Save className="w-5 h-5 mr-2" />

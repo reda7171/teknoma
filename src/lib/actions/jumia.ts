@@ -52,23 +52,88 @@ export async function publishBooksToJumia(bookIds: string[]) {
             return { success: false, message: "Aucun livre trouvé pour publication." }
         }
 
-        // Construction du payload Jumia pour création de produits
-        // L'API Jumia attend généralement un format spécifique, ceci est une simulation
+        const shops = await jumia.getShops()
+        const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
+
         const productsPayload = books.map(book => ({
-            SellerSku: book.isbn || book.id,
-            Name: book.title,
-            Brand: "Generic",
-            PrimaryCategory: 1, // Catégorie générique ou à mapper
-            Description: book.description || book.title,
-            Price: book.price,
-            Quantity: book.stock,
-            MainImage: book.image
+            name: {
+                value: book.title.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
+                translations: [{ language: "FR", value: book.title.substring(0, 60) }]
+            },
+            description: {
+                value: (book.description || book.title).padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
+                translations: [{ language: "FR", value: book.description || book.title }]
+            },
+            parentSku: book.id,
+            sellerSku: book.isbn || book.id,
+            gtinBarcode: book.isbn || undefined,
+            variation: "1",
+            brand: {
+                code: 1126253, // Generic code based on the provided sample
+                name: "Generic"
+            },
+            category: {
+                // IMPORTANT: Nous utilisons 1000052 (Foreign Language Study) temporairement
+                // car "Bestselling Books" nécessite un code numérique exact que Jumia API ne permet pas de chercher.
+                // Veuillez remplacer 1000052 par le vrai code de "Bestselling Books" quand vous l'aurez.
+                code: 1000052, 
+                name: "Bestselling Books"
+            },
+            images: book.image ? [{
+                url: book.image.startsWith('/') ? `https://riwaya.store${book.image}` : book.image,
+                primary: true
+            }] : [],
+            price: {
+                currency: "MAD",
+                value: book.price,
+                salePrice: book.salePrice ? {
+                    value: book.salePrice,
+                    startAt: new Date().toISOString().split('T')[0],
+                    endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
+                } : undefined
+            },
+            stock: book.stock,
+            attributes: [
+                {
+                    name: "isbn",
+                    value: book.isbn || "N/A"
+                },
+                {
+                    name: "short_description",
+                    value: `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li><li>Qualité garantie par Riwaya</li></ul>`
+                },
+                {
+                    name: "model",
+                    value: "Standard"
+                },
+                {
+                    name: "product_weight",
+                    value: "0.5"
+                }
+            ]
         }))
 
-        // await jumia.request('/feeds/products/create', 'POST', { Products: productsPayload })
+        // Appeler la nouvelle méthode createProducts
+        const response = await jumia.createProducts(shopId, productsPayload)
         
-        return { success: true, message: `${books.length} livre(s) envoyés pour publication sur Jumia.` }
+        if (response?.feedId) {
+            // Wait briefly to see if it processes immediately (often does for errors)
+            await new Promise(r => setTimeout(r, 2500))
+            const feedRes = await jumia.getFeed(response.feedId)
+            
+            if (feedRes?.status === 'FAILED') {
+                const itemError = feedRes.feedItems?.[0]?.errorMessage || 'Erreurs de validation'
+                const globalErrors = feedRes.feedItems?.[0]?.errors?.globalMessages?.join(', ') || ''
+                return { 
+                    success: false, 
+                    message: `Jumia a rejeté le produit: ${itemError} ${globalErrors}`.trim()
+                }
+            }
+        }
+
+        return { success: true, message: `${books.length} livre(s) envoyés pour publication sur Jumia. (ID: ${response?.feedId})`, response }
     } catch (error: any) {
+        console.error("Erreur publishBooksToJumia:", error)
         return { success: false, message: `Erreur de publication: ${error.message}` }
     }
 }

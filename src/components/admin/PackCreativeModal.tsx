@@ -27,9 +27,10 @@ interface PackCreativeModalProps {
         whatsappNumber?: string
     } | null
     format?: 'post' | 'story'
+    onImageGenerated?: (url: string) => void
 }
 
-export default function PackCreativeModal({ isOpen, onClose, pack, format = 'post' }: PackCreativeModalProps) {
+export default function PackCreativeModal({ isOpen, onClose, pack, format = 'post', onImageGenerated }: PackCreativeModalProps) {
     const posterRef = useRef<HTMLDivElement>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [theme, setTheme] = useState<'dark' | 'light' | 'orange' | 'magenta' | 'emerald' | 'gold' | 'purple'>('dark')
@@ -415,18 +416,35 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     if (!isOpen || !pack) return null
 
     // Convertit une URL image en base64 via canvas pour contourner CORS
-    const toBase64 = async (url: string): Promise<string> => {
+    const toBase64 = async (img: HTMLImageElement): Promise<string> => {
         try {
+            const url = img.src;
             if (url.startsWith('data:')) return url;
             
-            // Si c'est une URL externe, on passe par notre proxy pour éviter CORS
+            // Essai via canvas d'abord (car l'image est déjà chargée dans le DOM)
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth || img.width || 500;
+                canvas.height = img.naturalHeight || img.height || 500;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                    const dataUrl = canvas.toDataURL('image/png');
+                    if (dataUrl && dataUrl !== 'data:,') return dataUrl;
+                }
+            } catch(e) {
+                // Canvas "tainted", on passe au fetch
+            }
+
             let targetUrl = url;
-            if (url.startsWith('http') && !url.includes(window.location.host)) {
-                targetUrl = `/api/proxy/image?url=${encodeURIComponent(url)}`;
+            const isLocal = targetUrl.startsWith('/') || targetUrl.includes(window.location.host);
+            if (!isLocal) {
+                const absoluteUrl = targetUrl.startsWith('//') ? window.location.protocol + targetUrl : targetUrl;
+                targetUrl = `/api/proxy/image?url=${encodeURIComponent(absoluteUrl)}`;
             }
 
             const res = await fetch(targetUrl);
-            if (!res.ok) throw new Error('Fetch failed');
+            if (!res.ok) throw new Error('Fetch failed: ' + res.status);
             const blob = await res.blob();
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -435,8 +453,8 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 reader.readAsDataURL(blob);
             });
         } catch (err) {
-            console.error("Base64 conversion error:", err);
-            return url;
+            console.warn("Base64 conversion error, keeping original URL:", err);
+            return img.src;
         }
     }
 
@@ -447,7 +465,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
         await Promise.all(Array.from(imgs).map(async (img) => {
             const original = img.src
             originals.push({ el: img, src: original })
-            const b64 = await toBase64(original)
+            const b64 = await toBase64(img)
             img.src = b64
         }))
         return originals
@@ -764,11 +782,21 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
 
     // Dispositions de livres prédéfinies
     const LAYOUTS = [
-        { name: '\u00c9ventail', icon: '\uD83C\uDFB4' },
-        { name: 'Rangée', icon: '\u2261' },
-        { name: 'Grille', icon: '\u22ef' },
-        { name: 'Cascade', icon: '\u2198' },
-        { name: 'Pile', icon: '\u25A3' },
+        { name: 'Éventail', icon: '🎴' },
+        { name: 'Rangée', icon: '≡' },
+        { name: 'Grille', icon: '⋯' },
+        { name: 'Cascade', icon: '↘' },
+        { name: 'Pile', icon: '▢' },
+        { name: 'Cercle', icon: '⭘' },
+        { name: 'Pyramide', icon: '△' },
+        { name: 'Zigzag', icon: '⮀' },
+        { name: 'Arc', icon: '⌒' },
+        { name: 'Chevron', icon: '∨' },
+        { name: 'Étoile', icon: '⚝' },
+        { name: 'Spirale', icon: '🌀' },
+        { name: 'Diagonale', icon: '⤡' },
+        { name: 'Chaos', icon: '💥' },
+        { name: 'Colonne', icon: '⫶' },
     ]
 
     const applyLayout = (layoutIdx: number) => {
@@ -812,6 +840,78 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 x = (Math.random() - 0.5) * 20
                 y = (Math.random() - 0.5) * 20
                 rot = (Math.random() - 0.5) * 30
+            } else if (layoutIdx === 5) {
+                // Cercle
+                const radius = Math.min(150, 400 / Math.max(1, n - 1));
+                const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+                x = Math.cos(angle) * radius;
+                y = Math.sin(angle) * radius;
+                rot = (angle * 180 / Math.PI) + 90;
+            } else if (layoutIdx === 6) {
+                // Pyramide
+                let r = 0;
+                let count = 0;
+                while (count + r + 1 <= i) {
+                    r++;
+                    count += r + 1;
+                }
+                const col = i - count;
+                const cols = r + 1;
+                x = (col - (cols - 1) / 2) * 110;
+                y = r * 130 - 80;
+                rot = 0;
+            } else if (layoutIdx === 7) {
+                // Zigzag
+                const spacingX = Math.min(90, 260 / n);
+                x = (i - (n - 1) / 2) * spacingX;
+                y = (i % 2 === 0 ? -1 : 1) * 40;
+                rot = (i % 2 === 0 ? 5 : -5);
+            } else if (layoutIdx === 8) {
+                // Arc
+                const angleRange = Math.PI / 1.5; 
+                const angle = n > 1 ? (i / (n - 1) - 0.5) * angleRange : 0;
+                const radius = 200;
+                x = Math.sin(angle) * radius;
+                y = -Math.cos(angle) * radius + 150; 
+                rot = angle * 180 / Math.PI;
+            } else if (layoutIdx === 9) {
+                // Chevron
+                const spacingX = Math.min(80, 240 / n);
+                x = (i - (n - 1) / 2) * spacingX;
+                y = -Math.abs(i - (n - 1) / 2) * 70 + 60;
+                rot = (i > (n - 1) / 2) ? 10 : (i < (n - 1) / 2) ? -10 : 0;
+            } else if (layoutIdx === 10) {
+                // Étoile
+                const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+                const radius = (i % 2 === 0) ? 160 : 70; // Alternance
+                x = Math.cos(angle) * radius;
+                y = Math.sin(angle) * radius;
+                rot = (angle * 180 / Math.PI) + 90;
+            } else if (layoutIdx === 11) {
+                // Spirale
+                const angle = i * Math.PI * 0.7; // Angle spirale
+                const radius = i * 25 + 20; // Rayon augmentant
+                x = Math.cos(angle) * radius;
+                y = Math.sin(angle) * radius;
+                rot = (angle * 180 / Math.PI) + 90;
+            } else if (layoutIdx === 12) {
+                // Diagonale
+                const spacingX = Math.min(60, 200 / n);
+                const spacingY = Math.min(60, 200 / n);
+                x = (i - (n - 1) / 2) * spacingX;
+                y = (i - (n - 1) / 2) * spacingY;
+                rot = 0;
+            } else if (layoutIdx === 13) {
+                // Chaos
+                x = (Math.random() - 0.5) * 300;
+                y = (Math.random() - 0.5) * 250;
+                rot = (Math.random() - 0.5) * 180;
+            } else if (layoutIdx === 14) {
+                // Colonne
+                const spacing = Math.min(100, 300 / n);
+                x = 0;
+                y = (i - (n - 1) / 2) * spacing;
+                rot = (i % 2 === 0 ? 3 : -3);
             }
 
             newPositions[key] = { x, y }
@@ -1493,7 +1593,29 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                             </div>
                         </div>
 
+                        {/* Dispositions */}
                         <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 block ml-1">
+                                Disposition des Livres
+                            </label>
+                            <div className="grid grid-cols-5 gap-2">
+                                {LAYOUTS.map((layout, idx) => (
+                                    <button
+                                        key={layout.name}
+                                        onClick={() => applyLayout(idx)}
+                                        className={`flex flex-col items-center p-2 rounded-xl border-2 transition-all group ${currentLayout === idx ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                        title={layout.name}
+                                    >
+                                        <span className="text-xl mb-1 leading-none">{layout.icon}</span>
+                                        <span className={`text-[8px] font-bold uppercase tracking-wider text-center break-words w-full ${currentLayout === idx ? 'text-indigo-700' : 'text-gray-500'}`}>
+                                            {layout.name}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Taille des images
                             </label>
@@ -1894,6 +2016,60 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                     <Sparkles className="w-4 h-4" />
                                     {isGenerating ? 'Génération...' : 'Sauvegarder dans Marketing'}
                                 </button>
+                                {onImageGenerated && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!posterRef.current || !pack) return
+                                            let originals: { el: HTMLImageElement, src: string }[] = []
+                                            try {
+                                                setIsGenerating(true)
+                                                originals = await patchImagesBase64(posterRef.current)
+                                                await new Promise(resolve => setTimeout(resolve, 800))
+                                                const dataUrl = await htmlToImage.toPng(posterRef.current, {
+                                                    quality: 1,
+                                                    pixelRatio: 2,
+                                                    backgroundColor: currentTheme.bg.includes('gradient') ? undefined : '#000000',
+                                                    cacheBust: false,
+                                                })
+                                                restoreImages(originals)
+
+                                                const arr = dataUrl.split(',')
+                                                const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
+                                                const bstr = atob(arr[1])
+                                                let n = bstr.length
+                                                const u8arr = new Uint8Array(n)
+                                                while (n--) u8arr[n] = bstr.charCodeAt(n)
+                                                const blob = new Blob([u8arr], { type: mime })
+                                                const filename = `pack_cover_${pack.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.png`
+                                                const file = new File([blob], filename, { type: mime })
+
+                                                const formData = new FormData()
+                                                formData.append('file', file)
+                                                const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+                                                const uploadData = await uploadRes.json()
+
+                                                if (uploadData.success) {
+                                                    onImageGenerated(uploadData.url)
+                                                    alert('✅ Image définie comme couverture du pack !')
+                                                    onClose()
+                                                } else {
+                                                    throw new Error(uploadData.error || 'Échec de l\'upload')
+                                                }
+                                            } catch (error: any) {
+                                                if (originals.length) restoreImages(originals)
+                                                console.error('Save error:', error)
+                                                alert(`Erreur: ${error.message || 'Erreur inconnue'}`)
+                                            } finally {
+                                                setIsGenerating(false)
+                                            }
+                                        }}
+                                        disabled={isGenerating || isPublishing}
+                                        className="col-span-2 flex items-center justify-center gap-3 px-6 py-4 bg-orange-500 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-orange-600 transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                                    >
+                                        <ImageIcon className="w-4 h-4" />
+                                        {isGenerating ? 'Génération...' : 'Définir comme Image du Pack'}
+                                    </button>
+                                )}
                             </div>
                         </div>
 

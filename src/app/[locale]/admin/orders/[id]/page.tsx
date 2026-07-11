@@ -10,6 +10,7 @@ import OrderStatusUpdater from '@/components/admin/OrderStatusUpdater'
 import DeliverySyncButton from '@/components/admin/DeliverySyncButton'
 import OrderEditModal from '@/components/admin/OrderEditModal'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
+import OrderItemsEditor from '@/components/admin/OrderItemsEditor'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 
@@ -79,104 +80,13 @@ export default async function OrderDetailsPage({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main: Items */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-                            <ShoppingBag className="w-5 h-5 text-gray-400" />
-                            <h2 className="text-lg font-bold text-gray-900">Articles commandés</h2>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                            {order.items.map((item) => {
-                                const product = item.book || item.pack
-                                return (
-                                    <div key={item.id} className="p-6 flex gap-4">
-                                        <div className="relative w-20 h-28 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100">
-                                            {item.book?.image ? (
-                                                <ImageWithFallback
-                                                    src={item.book.image}
-                                                    alt="Produit"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <Package className="w-8 h-8 text-gray-300" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 space-y-1">
-                                            <div className="flex justify-between items-start">
-                                                <Link 
-                                                    href={`/${locale}/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}`}
-                                                    className="font-bold text-gray-900 line-clamp-2 hover:text-blue-600 hover:underline"
-                                                    target="_blank"
-                                                >
-                                                    {item.book?.title || item.pack?.name}
-                                                </Link>
-                                                <span className="text-sm font-black text-blue-600">
-                                                    {item.price} MAD
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-500">
-                                                {item.type === 'PACK' ? 'Pack Exclusive' : `Par ${item.book?.author}`}
-                                            </p>
-                                            <div className="pt-2 flex items-center justify-between">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-gray-100 text-gray-600">
-                                                    Qté: {item.quantity}
-                                                </span>
-                                                <span className="text-sm font-bold text-gray-900">
-                                                    Total: {item.price * item.quantity} MAD
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        <div className="bg-gray-50 p-6 border-t border-gray-100 flex flex-col gap-3">
-                            <div className="flex justify-between items-center text-sm text-gray-500 font-bold">
-                                <span>Total des articles (Prix de revient)</span>
-                                <span>
-                                    {order.items.reduce((sum, item) => {
-                                        // On utilise le prix de revient enregistré dans la commande, 
-                                        // sinon on retombe sur celui du livre actuel, sinon 0
-                                        const itemCost = (item.costPrice && item.costPrice > 0) 
-                                            ? item.costPrice 
-                                            : (item.book?.costPrice || item.pack?.costPrice || 0)
-                                        return sum + (itemCost * item.quantity)
-                                    }, 0).toFixed(2)} MAD
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm text-gray-500 font-bold">
-                                <span>Frais de livraison</span>
-                                <span>{(order.shippingFees || 0).toFixed(2)} MAD</span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm text-gray-500 font-bold">
-                                <span>Frais fixes (Étiquette, Sachet, Ads)</span>
-                                <span>2.65 MAD</span>
-                            </div>
-                            <div className="pt-3 border-t border-gray-200 flex justify-between items-center">
-                                <span className="text-lg font-bold text-gray-900">Chiffre d'Affaire</span>
-                                <span className="text-2xl font-black text-gray-900">
-                                    {order.total} MAD
-                                </span>
-                            </div>
-                            <div className="pt-3 border-t border-gray-200 flex justify-between items-center bg-green-50 -mx-6 px-6 py-4 mt-2">
-                                <span className="text-lg font-bold text-green-800">Marge Nette (Estimée)</span>
-                                <span className="text-2xl font-black text-green-600">
-                                    {(
-                                        order.total -
-                                        order.items.reduce((sum, item) => {
-                                            const itemCost = (item.costPrice && item.costPrice > 0) 
-                                                ? item.costPrice 
-                                                : (item.book?.costPrice || item.pack?.costPrice || 0)
-                                            return sum + (itemCost * item.quantity)
-                                        }, 0) -
-                                        2.65 -
-                                        (order.shippingFees || 0)
-                                    ).toFixed(2)} MAD
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    <OrderItemsEditor 
+                        orderId={order.id}
+                        initialItems={order.items}
+                        locale={locale}
+                        shippingFees={order.shippingFees}
+                        discount={order.discount}
+                    />
 
                     {/* Commentaire */}
                     {order.comment && (

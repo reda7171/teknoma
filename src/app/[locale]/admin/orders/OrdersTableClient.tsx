@@ -187,11 +187,11 @@ export default function OrdersTableClient({
                                         </div>
                                         <div className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString('fr-FR')}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-semibold text-gray-900">{order.fullName}</div>
-                                        <div className="text-xs text-gray-500">{order.phone}</div>
+                                    <td className="px-6 py-4 max-w-[150px] truncate" title={order.fullName || ''}>
+                                        <div className="text-sm font-semibold text-gray-900 truncate">{order.fullName}</div>
+                                        <div className="text-xs text-gray-500 truncate">{order.phone}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    <td className="px-6 py-4 max-w-[150px] truncate text-sm text-gray-600" title={order.city || ''}>
                                         {order.city}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">

@@ -237,7 +237,21 @@ export default function POSClient({
       } catch (e) {}
     }
 
-    getWithYouCities().then(setAllCities).catch(() => console.error("Impossible de récupérer les villes hors-ligne"));
+    const cachedCities = localStorage.getItem('pos_cached_cities');
+    if (cachedCities) {
+        try { setAllCities(JSON.parse(cachedCities)); } catch(e) {}
+    }
+    
+    if (navigator.onLine) {
+        getWithYouCities()
+            .then(cities => {
+                if (cities && cities.length > 0) {
+                    setAllCities(cities);
+                    localStorage.setItem('pos_cached_cities', JSON.stringify(cities));
+                }
+            })
+            .catch(() => console.warn("Impossible de récupérer les villes en ligne"));
+    }
 
     // Gestion du catalogue hors-ligne
     if (books.length > 0 || packs.length > 0 || accessories.length > 0) {

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
             where: {
                 trackingID: { not: null },
                 status: {
-                    notIn: ['DELIVERED', 'RETURNED', 'CANCELED']
+                    notIn: ['DELIVERED', 'RETURNED', 'CANCELLED']
                 },
                 shippingCompany: { not: null }
             }
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
                                 } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
                                     newInternalStatus = 'RETURNED'
                                 } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
-                                    newInternalStatus = 'CANCELED'
+                                    newInternalStatus = 'CANCELLED'
                                 }
 
                                 await prisma.order.update({
@@ -130,7 +130,7 @@ export async function GET(request: Request) {
                             } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
                                 newInternalStatus = 'RETURNED'
                             } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
-                                newInternalStatus = 'CANCELED'
+                                newInternalStatus = 'CANCELLED'
                             }
 
                             await prisma.order.update({

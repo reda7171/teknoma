@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
+import { publishBooksToJumia } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
 
@@ -37,6 +38,7 @@ interface PackEditFormProps {
 export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [isPushingJumia, setIsPushingJumia] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
     const [selectedBooks, setSelectedBooks] = useState<string[]>(pack.selectedBookIds)
@@ -45,6 +47,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [searchQuery, setSearchQuery] = useState('')
     const [name, setName] = useState(pack.name)
     const [description, setDescription] = useState(pack.description)
+    const [packImage, setPackImage] = useState(pack.image)
     const [onlyAvailable, setOnlyAvailable] = useState(true)
 
     function toggleBook(bookId: string) {
@@ -106,6 +109,23 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
         } else {
             setError(result.error)
             setLoading(false)
+        }
+    }
+
+    async function handlePushToJumia() {
+        if (!confirm('Voulez-vous vraiment publier ce pack sur Jumia ?')) return
+        setIsPushingJumia(true)
+        try {
+            const res = await publishBooksToJumia([pack.id])
+            if (res.success) {
+                alert(res.message || 'Pack publié avec succès sur Jumia')
+            } else {
+                alert('Erreur: ' + res.message)
+            }
+        } catch (err) {
+            alert('Erreur technique lors de la publication')
+        } finally {
+            setIsPushingJumia(false)
         }
     }
 
@@ -238,7 +258,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     Image du pack
                                 </label>
                                 <ImageInput 
-                                    defaultValue={pack.image} 
+                                    defaultValue={packImage} 
                                     bookTitle={pack.name} 
                                 />
                             </div>
@@ -421,11 +441,20 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                         <div className="space-y-3">
                             <button
                                 type="submit"
-                                disabled={loading || selectedBooks.length === 0}
+                                disabled={loading || selectedBooks.length === 0 || isPushingJumia}
                                 className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Save className="w-5 h-5 mr-2" />
                                 {loading ? 'Enregistrement...' : 'Enregistrer'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handlePushToJumia}
+                                disabled={isPushingJumia || loading}
+                                className="w-full inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                            >
+                                {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                                Push to Jumia
                             </button>
                             <button
                                 type="button"
@@ -455,7 +484,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             <PackCreativeModal
                 isOpen={creativeFormat !== null}
                 onClose={() => setCreativeFormat(null)}
-                format={creativeFormat || 'post'}
+                format={creativeFormat!}
+                onImageGenerated={(url) => setPackImage(url)}
                 pack={{
                     id: pack.id,
                     name: name,

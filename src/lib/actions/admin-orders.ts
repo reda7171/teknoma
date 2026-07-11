@@ -542,7 +542,7 @@ export async function bulkSyncDeliveries() {
             where: {
                 trackingID: { not: null },
                 status: {
-                    notIn: ['DELIVERED', 'RETURNED', 'CANCELED']
+                    notIn: ['DELIVERED', 'RETURNED', 'CANCELLED']
                 },
                 shippingCompany: { not: null }
             }
@@ -604,7 +604,7 @@ export async function bulkSyncDeliveries() {
                                 } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
                                     newInternalStatus = 'RETURNED'
                                 } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
-                                    newInternalStatus = 'CANCELED'
+                                    newInternalStatus = 'CANCELLED'
                                 }
 
                                 await prisma.order.update({
@@ -651,7 +651,7 @@ export async function bulkSyncDeliveries() {
                             } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
                                 newInternalStatus = 'RETURNED'
                             } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
-                                newInternalStatus = 'CANCELED'
+                                newInternalStatus = 'CANCELLED'
                             }
 
                             await prisma.order.update({
@@ -675,5 +675,221 @@ export async function bulkSyncDeliveries() {
         return { success: true, updatedCount }
     } catch (error: any) {
         return { success: false, error: error.message || 'Erreur inconnue' }
+    }
+}
+
+
+
+/**
+ * Mettre à jour les articles d'une commande (Edition dynamique)
+ */
+export async function updateOrderItems(orderId: string, items: {
+    id?: string;
+    type: 'BOOK' | 'PACK';
+    productId: string;
+    quantity: number;
+    price: number;
+}[]) {
+    try {
+        await verifyAdmin()
+
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: { items: true }
+        })
+
+        if (!order) {
+            throw new Error('Commande introuvable')
+        }
+
+        // Si la commande n'a pas un statut qui a décrémenté le stock, on n'impacte pas le stock
+        // Habituellement, toute commande non annulée a décrémenté le stock à la création.
+        // Si elle est "RETURNED" ou "CANCELED" ou "CANCELLED", le stock a déjà été réintégré.
+        const isCanceledOrReturned = order.status === 'CANCELLED' || order.status === 'CANCELLED' || order.status === 'RETURNED'
+        const impactsStock = !isCanceledOrReturned
+
+        let newSubtotal = 0
+
+        // Transaction pour assurer la cohérence
+        await prisma.$transaction(async (tx) => {
+            // 1. Pour chaque ancien item, on regarde s'il est supprimé ou modifié
+            for (const oldItem of order.items) {
+                const newItem = items.find(i => i.id === oldItem.id)
+                
+                if (!newItem) {
+                    // Item supprimé
+                    if (impactsStock) {
+                        if (oldItem.type === 'BOOK' && oldItem.bookId) {
+                            await tx.book.update({
+                                where: { id: oldItem.bookId },
+                                data: { stock: { increment: oldItem.quantity } }
+                            })
+                        } else if (oldItem.type === 'PACK' && oldItem.packId) {
+                            const packBooks = await tx.packBook.findMany({ where: { packId: oldItem.packId } })
+                            for (const pb of packBooks) {
+                                await tx.book.update({
+                                    where: { id: pb.bookId },
+                                    data: { stock: { increment: oldItem.quantity } }
+                                })
+                            }
+                        }
+                    }
+                    await tx.orderItem.delete({ where: { id: oldItem.id } })
+                } else {
+                    // Item modifié (changement de quantité)
+                    const diff = newItem.quantity - oldItem.quantity
+                    if (diff !== 0 && impactsStock) {
+                        if (oldItem.type === 'BOOK' && oldItem.bookId) {
+                            await tx.book.update({
+                                where: { id: oldItem.bookId },
+                                data: { stock: { decrement: diff } }
+                            })
+                        } else if (oldItem.type === 'PACK' && oldItem.packId) {
+                            const packBooks = await tx.packBook.findMany({ where: { packId: oldItem.packId } })
+                            for (const pb of packBooks) {
+                                await tx.book.update({
+                                    where: { id: pb.bookId },
+                                    data: { stock: { decrement: diff } }
+                                })
+                            }
+                        }
+                    }
+                    
+                    // Calculer le prix
+                    newSubtotal += newItem.price * newItem.quantity
+                    
+                    await tx.orderItem.update({
+                        where: { id: oldItem.id },
+                        data: {
+                            quantity: newItem.quantity,
+                            price: newItem.price,
+                        }
+                    })
+                }
+            }
+
+            // 2. Pour chaque nouvel item, on l'ajoute
+            for (const newItem of items.filter(i => !i.id)) {
+                let costPrice = 0
+                if (newItem.type === 'BOOK') {
+                    const book = await tx.book.findUnique({ where: { id: newItem.productId }})
+                    if (book) {
+                        costPrice = book.costPrice
+                        if (impactsStock) {
+                            await tx.book.update({
+                                where: { id: newItem.productId },
+                                data: { stock: { decrement: newItem.quantity } }
+                            })
+                        }
+                    }
+                } else if (newItem.type === 'PACK') {
+                    const pack = await tx.pack.findUnique({ where: { id: newItem.productId }})
+                    if (pack) {
+                        costPrice = pack.costPrice
+                        if (impactsStock) {
+                            const packBooks = await tx.packBook.findMany({ where: { packId: newItem.productId } })
+                            for (const pb of packBooks) {
+                                await tx.book.update({
+                                    where: { id: pb.bookId },
+                                    data: { stock: { decrement: newItem.quantity } }
+                                })
+                            }
+                        }
+                    }
+                }
+
+                newSubtotal += newItem.price * newItem.quantity
+
+                await tx.orderItem.create({
+                    data: {
+                        orderId: order.id,
+                        type: newItem.type as any,
+                        quantity: newItem.quantity,
+                        price: newItem.price,
+                        costPrice: costPrice,
+                        bookId: newItem.type === 'BOOK' ? newItem.productId : null,
+                        packId: newItem.type === 'PACK' ? newItem.productId : null
+                    }
+                })
+            }
+
+            // 3. Mettre à jour la commande
+            const newTotal = newSubtotal + order.shippingFees - order.discount
+            await tx.order.update({
+                where: { id: order.id },
+                data: {
+                    subtotal: newSubtotal,
+                    total: newTotal,
+                    updatedAt: new Date()
+                }
+            })
+
+            // 4. Historique
+            await tx.orderStatusHistory.create({
+                data: {
+                    orderId: order.id,
+                    status: order.status,
+                    comment: "Modification des articles et quantités de la commande",
+                    createdBy: "ADMIN"
+                }
+            })
+            
+            // Log global
+            await tx.auditLog.create({
+                data: {
+                    action: 'UPDATE_ITEMS',
+                    entity: 'ORDER',
+                    entityId: order.id,
+                    details: `Mise à jour des articles. Nouveau total: ${newTotal}`,
+                    userId: 'SYSTEM'
+                }
+            })
+        })
+
+        revalidatePath('/admin/orders')
+        revalidatePath(`/admin/orders/${orderId}`)
+
+        return {
+            success: true,
+            message: "Les articles de la commande ont été mis à jour"
+        }
+    } catch (error: any) {
+        console.error('Erreur lors de la modification des articles:', error)
+        return {
+            success: false,
+            error: error.message || 'Impossible de mettre à jour les articles'
+        }
+    }
+}
+
+/**
+ * Rechercher des livres ou packs pour les ajouter à une commande
+ */
+export async function searchProductsForOrder(query: string) {
+    try {
+        await verifyAdmin()
+        if (!query || query.length < 2) return []
+
+        const books = await prisma.book.findMany({
+            where: { title: { contains: query } },
+            take: 10,
+            select: { id: true, title: true, price: true, image: true, stock: true }
+        })
+
+        const packs = await prisma.pack.findMany({
+            where: { name: { contains: query } },
+            take: 5,
+            select: { id: true, name: true, price: true, image: true }
+        })
+
+        const results = [
+            ...books.map(b => ({ type: 'BOOK' as const, id: b.id, title: b.title, price: b.price, image: b.image, stock: b.stock })),
+            ...packs.map(p => ({ type: 'PACK' as const, id: p.id, title: p.name, price: p.price, image: p.image, stock: 999 })) // on simule un stock infini pour les packs pour l'instant
+        ]
+
+        return results
+    } catch (error) {
+        console.error('Erreur recherche produits:', error)
+        return []
     }
 }

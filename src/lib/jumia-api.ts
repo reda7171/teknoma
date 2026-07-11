@@ -57,7 +57,8 @@ export class JumiaAPI {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.accessToken}`
             },
-            body: body ? JSON.stringify(body) : undefined
+            body: body ? JSON.stringify(body) : undefined,
+            cache: 'no-store'
         })
 
         if (!response.ok) {

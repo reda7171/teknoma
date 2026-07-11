@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { uploadSchoolList } from '@/lib/actions/school-list-upload'
 import { Upload, FileText, CheckCircle2, Loader2, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function DeposerListeForm() {
     const [file, setFile] = useState<File | null>(null)
@@ -12,6 +13,7 @@ export default function DeposerListeForm() {
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const t = useTranslations('DeposerListe')
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -23,7 +25,7 @@ export default function DeposerListeForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!file || !name || !phone) {
-            setError("Veuillez remplir tous les champs et ajouter un fichier.")
+            setError(t('fillAllError'))
             return
         }
 
@@ -40,7 +42,7 @@ export default function DeposerListeForm() {
         if (result.success) {
             setSuccess(true)
         } else {
-            setError(result.error || "Une erreur est survenue.")
+            setError(result.error || t('genericError'))
         }
         setLoading(false)
     }
@@ -51,15 +53,15 @@ export default function DeposerListeForm() {
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle2 className="w-10 h-10 text-green-600" />
                 </div>
-                <h3 className="text-2xl font-black text-green-800 mb-4">Liste reçue avec succès !</h3>
+                <h3 className="text-2xl font-black text-green-800 mb-4">{t('successTitle')}</h3>
                 <p className="text-green-700 font-medium">
-                    Nous avons bien reçu votre liste. Notre équipe s'occupe de tout et vous contactera très prochainement sur le numéro fourni.
+                    {t('successMsg')}
                 </p>
                 <button 
                     onClick={() => { setSuccess(false); setFile(null); setName(''); setPhone(''); }}
                     className="mt-8 px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors inline-block"
                 >
-                    Envoyer une autre liste
+                    {t('sendAnother')}
                 </button>
             </div>
         )
@@ -67,7 +69,7 @@ export default function DeposerListeForm() {
 
     return (
         <form onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-gray-100 relative text-left">
-            <h3 className="text-2xl font-black text-black mb-8 text-center">Envoyez-nous votre liste</h3>
+            <h3 className="text-2xl font-black text-black mb-8 text-center">{t('formTitle')}</h3>
 
             {error && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 font-bold text-sm text-center">
@@ -77,31 +79,31 @@ export default function DeposerListeForm() {
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Nom complet *</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{t('fullName')}</label>
                     <input 
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Ex: Mohamed Amine"
+                        placeholder={t('fullNamePlaceholder')}
                         className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] transition-all"
                         required
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Numéro de téléphone *</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{t('phone')}</label>
                     <input 
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Ex: 06 12 34 56 78"
+                        placeholder={t('phonePlaceholder')}
                         className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] transition-all"
                         required
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Fichier de la liste (PDF, DOCX, TXT) *</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">{t('fileLabel')}</label>
                     
                     {!file ? (
                         <div 
@@ -110,9 +112,9 @@ export default function DeposerListeForm() {
                         >
                             <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#10b981] mb-2" />
                             <p className="text-sm font-bold text-gray-500 group-hover:text-[#10b981]">
-                                Cliquez ou glissez votre fichier ici
+                                {t('dragDrop')}
                             </p>
-                            <p className="text-xs text-gray-400 mt-1">PDF, DOCX ou TXT (Max 10MB)</p>
+                            <p className="text-xs text-gray-400 mt-1">{t('fileLimits')}</p>
                         </div>
                     ) : (
                         <div className="w-full p-4 border border-green-200 bg-green-50 rounded-xl flex items-center justify-between">
@@ -151,7 +153,7 @@ export default function DeposerListeForm() {
                 className="w-full mt-8 px-6 py-4 bg-[#10b981] text-white font-black uppercase tracking-widest rounded-xl hover:bg-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/30"
             >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
-                {loading ? "Envoi en cours..." : "Envoyer ma liste"}
+                {loading ? t('sending') : t('send')}
             </button>
         </form>
     )

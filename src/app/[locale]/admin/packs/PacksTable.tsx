@@ -30,6 +30,8 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
     const [n8nFormat, setN8nFormat] = useState<'post' | 'story'>('post')
     const [quickPublishing, setQuickPublishing] = useState<string | null>(null)
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+    const [search, setSearch] = useState('')
+    const [statusFilter, setStatusFilter] = useState('ALL')
 
     async function handleDelete(id: string, name: string) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${name}" ?`)) {
@@ -86,16 +88,36 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
         }
     }
 
-    if (packs.length === 0) {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-500">Aucun pack trouvé</p>
-            </div>
-        )
-    }
+    const filteredPacks = packs.filter(pack => {
+        const matchesSearch = pack.name.toLowerCase().includes(search.toLowerCase())
+        if (statusFilter === 'ACTIVE') return pack.active && matchesSearch
+        if (statusFilter === 'INACTIVE') return !pack.active && matchesSearch
+        return matchesSearch
+    })
 
     return (
-        <div className="overflow-x-auto relative">
+        <div className="overflow-x-auto relative flex flex-col">
+            <div className="p-4 bg-white border-b border-gray-200 flex flex-wrap gap-4 items-center justify-between">
+                <div className="flex gap-4 flex-1">
+                    <input 
+                        type="text" 
+                        placeholder="Rechercher un pack par nom..." 
+                        className="border border-gray-300 rounded-lg px-4 py-2 text-sm w-full max-w-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <select 
+                        className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="ALL">Tous les statuts</option>
+                        <option value="ACTIVE">Actifs uniquement</option>
+                        <option value="INACTIVE">Inactifs uniquement</option>
+                    </select>
+                </div>
+            </div>
+
             {/* Toast notification */}
             {toast && (
                 <div className={`fixed top-6 right-6 z-[9999] px-5 py-3 rounded-xl shadow-2xl text-sm font-bold transition-all animate-in slide-in-from-top-2 ${toast.ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
@@ -123,7 +145,14 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {packs.map((pack) => (
+                    {filteredPacks.length === 0 && (
+                        <tr>
+                            <td colSpan={5} className="text-center py-12 text-gray-500">
+                                {packs.length === 0 ? "Aucun pack trouvé" : "Aucun pack ne correspond à vos filtres"}
+                            </td>
+                        </tr>
+                    )}
+                    {filteredPacks.map((pack) => (
                         <tr key={pack.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4">
                                 <div className="flex items-center">

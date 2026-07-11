@@ -3,6 +3,7 @@ import Footer from '@/components/Footer'
 import { CheckCircle2, Sparkles } from 'lucide-react'
 import { Metadata } from 'next'
 import DeposerListeForm from '@/components/DeposerListeForm'
+import { getTranslations } from 'next-intl/server'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
@@ -13,24 +14,30 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function DeposerListePage() {
+    const t = await getTranslations('DeposerListe')
+    
     return (
         <div className="min-h-screen bg-[#FDFBF7] overflow-hidden">
             <Header />
             
-            <section className="relative py-32 px-4 border-b border-gray-100 min-h-[calc(100vh-80px)] flex flex-col justify-center">
+            <section 
+                className="relative py-32 px-4 border-b border-gray-100 min-h-[calc(100vh-80px)] flex flex-col justify-center bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/back-to-school-bg.png')" }}
+            >
+                {/* Overlay pour la lisibilité */}
+                <div className="absolute inset-0 bg-[#FDFBF7]/85 backdrop-blur-sm z-0"></div>
+
                 <div className="max-w-4xl mx-auto text-center relative z-10 w-full">
                     <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <Sparkles className="w-3 h-3 text-[#10b981]" />
-                        Rentrée Scolaire
+                        {t('tag')}
                     </div>
                     
-                    <h1 className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-tight mb-8">
-                        Déposez votre liste scolaire : <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-teal-500">on s'occupe de tout !</span>
-                    </h1>
+                    <h1 className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-tight mb-8" dangerouslySetInnerHTML={{ __html: t.raw('pageTitle') }}></h1>
                     
                     <div className="flex items-center justify-center gap-3 text-lg md:text-2xl font-bold text-gray-600 mb-16">
                         <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
-                        <p>Liste complète garantie, sans prise de tête 👌</p>
+                        <p>{t('subtitle')}</p>
                     </div>
 
                     <div className="max-w-2xl mx-auto z-20 relative">
@@ -38,9 +45,7 @@ export default async function DeposerListePage() {
                     </div>
                     
                     <div className="mt-16 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-                        <p className="text-xl md:text-2xl font-black text-black leading-tight">
-                            Notre équipe s'occupera de tout préparer,<br className="hidden md:block"/> fini les tracas de la rentrée scolaire !
-                        </p>
+                        <p className="text-xl md:text-2xl font-black text-black leading-tight" dangerouslySetInnerHTML={{ __html: t.raw('teamMsg') }}></p>
                     </div>
                 </div>
 

@@ -12,6 +12,7 @@ import Toaster from '@/components/Toaster';
 import Script from 'next/script';
 
 const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'))
+const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannelButton'))
 const ChatBot = dynamic(() => import('@/components/ChatBot'))
 const PixelTracker = dynamic(() => import('@/components/PixelTracker'))
 const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
@@ -330,6 +331,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <Toaster />
           <CookieConsent />
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
+          <WhatsAppChannelButton />
           {isChatBotEnabled && <ChatBot />}
           <Suspense fallback={null}>
             <PixelTracker />

@@ -29,7 +29,7 @@
           "conditions": [
             {
               "id": "cond-fb",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "facebook",
               "operator": {
                 "type": "string",
@@ -38,7 +38,7 @@
             },
             {
               "id": "cond-fb-both",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "both",
               "operator": {
                 "type": "string",
@@ -47,7 +47,7 @@
             },
             {
               "id": "cond-fb-all",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "all",
               "operator": {
                 "type": "string",
@@ -77,7 +77,7 @@
           "parameters": [
             {
               "name": "access_token",
-              "value": "={{ $('Webhook').item.json.body.facebook_access_token }}"
+              "value": "={{ $('Webhook').body.facebook_access_token }}"
             }
           ]
         },
@@ -87,11 +87,11 @@
           "parameters": [
             {
               "name": "url",
-              "value": "={{ $('Webhook').item.json.body.image }}"
+              "value": "={{ $('Webhook').body.image }}"
             },
             {
               "name": "message",
-              "value": "={{ $('Webhook').item.json.body.caption }}"
+              "value": "={{ $('Webhook').body.caption }}"
             },
             {
               "name": "published",
@@ -121,7 +121,7 @@
           "conditions": [
             {
               "id": "cond-ig",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "instagram",
               "operator": {
                 "type": "string",
@@ -130,7 +130,7 @@
             },
             {
               "id": "cond-ig-both",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "both",
               "operator": {
                 "type": "string",
@@ -139,7 +139,7 @@
             },
             {
               "id": "cond-ig-all",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "all",
               "operator": {
                 "type": "string",
@@ -163,13 +163,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ 'https://graph.facebook.com/v19.0/' + ($('Webhook').item.json.body.instagram_account_id || '869754449565702') + '/media' }}",
+        "url": "={{ 'https://graph.facebook.com/v19.0/' + ($('Webhook').body.instagram_account_id || '869754449565702') + '/media' }}",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "access_token",
-              "value": "={{ $('Webhook').item.json.body.facebook_access_token }}"
+              "value": "={{ $('Webhook').body.facebook_access_token }}"
             }
           ]
         },
@@ -179,11 +179,11 @@
           "parameters": [
             {
               "name": "image_url",
-              "value": "={{ $('Webhook').item.json.body.image }}"
+              "value": "={{ $('Webhook').body.image }}"
             },
             {
               "name": "caption",
-              "value": "={{ $('Webhook').item.json.body.caption }}"
+              "value": "={{ $('Webhook').body.caption }}"
             }
           ]
         },
@@ -201,13 +201,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ 'https://graph.facebook.com/v19.0/' + ($('Webhook').item.json.body.instagram_account_id || '869754449565702') + '/media_publish' }}",
+        "url": "={{ 'https://graph.facebook.com/v19.0/' + ($('Webhook').body.instagram_account_id || '869754449565702') + '/media_publish' }}",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "access_token",
-              "value": "={{ $('Webhook').item.json.body.facebook_access_token }}"
+              "value": "={{ $('Webhook').body.facebook_access_token }}"
             }
           ]
         },
@@ -235,7 +235,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ success: true, message: 'Publié avec succès', bookId: $('Webhook').item.json.body.bookId }) }}",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Publié avec succès', bookId: $('Webhook').body.bookId }) }}",
         "options": {}
       },
       "id": "response-node",
@@ -258,7 +258,7 @@
           "conditions": [
             {
               "id": "cond-tk",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "tiktok",
               "operator": {
                 "type": "string",
@@ -267,7 +267,7 @@
             },
             {
               "id": "cond-tk-all",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "all",
               "operator": {
                 "type": "string",
@@ -305,7 +305,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $('Webhook').item.json.body.caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false,\n    \"video_cover_timestamp_ms\": 1000\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    \"video_url\": \"{{ $('Webhook').item.json.body.video_url || $('Webhook').item.json.body.image }}\"\n  }\n}",
+        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $('Webhook').body.caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false,\n    \"video_cover_timestamp_ms\": 1000\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    \"video_url\": \"{{ $('Webhook').body.video_url || $('Webhook').body.image }}\"\n  }\n}",
         "options": {}
       },
       "id": "tiktok-post",
@@ -328,7 +328,7 @@
           "conditions": [
             {
               "id": "cond-th",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "threads",
               "operator": {
                 "type": "string",
@@ -337,7 +337,7 @@
             },
             {
               "id": "cond-th-all",
-              "leftValue": "={{ $(\"Webhook\").item.json.body.platform }}",
+              "leftValue": "={{ $(\"Webhook\").body.platform }}",
               "rightValue": "all",
               "operator": {
                 "type": "string",
@@ -363,10 +363,10 @@
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "oAuth2Api",
         "method": "POST",
-        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Webhook').item.json.body.threads_account_id || 'me') + '/threads' }}",
+        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Webhook').body.threads_account_id || 'me') + '/threads' }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"media_type\": \"{{ $('Webhook').item.json.body.image ? 'IMAGE' : 'TEXT' }}\",\n  {{ $('Webhook').item.json.body.image ? '\\\"image_url\\\": \\\"' + $('Webhook').item.json.body.image + '\\\",' : '' }}\n  \"text\": \"{{ $('Webhook').item.json.body.caption }}\"\n}",
+        "jsonBody": "={\n  \"media_type\": \"{{ $('Webhook').body.image ? 'IMAGE' : 'TEXT' }}\",\n  {{ $('Webhook').body.image ? '\\\"image_url\\\": \\\"' + $('Webhook').body.image + '\\\",' : '' }}\n  \"text\": \"{{ $('Webhook').body.caption }}\"\n}",
         "options": {}
       },
       "id": "threads-container",
@@ -383,7 +383,7 @@
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "oAuth2Api",
         "method": "POST",
-        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Webhook').item.json.body.threads_account_id || 'me') + '/threads_publish' }}",
+        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Webhook').body.threads_account_id || 'me') + '/threads_publish' }}",
         "sendBody": true,
         "contentType": "form-urlencoded",
         "bodyParameters": {
@@ -456,7 +456,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ success: true, message: 'Programmé avec succès dans n8n', bookId: .item.json.body.bookId }) }}",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Programmé avec succès dans n8n', bookId: .body.bookId }) }}",
         "options": {}
       },
       "id": "response-scheduled",
@@ -471,7 +471,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ success: true, message: \"Programm� avec succ�s dans n8n\", bookId: $(\"Webhook\").item.json.body.bookId }) }}",
+        "responseBody": "={{ JSON.stringify({ success: true, message: \"Programm� avec succ�s dans n8n\", bookId: $(\"Webhook\").body.bookId }) }}",
         "options": {}
       },
       "id": "response-scheduled",
@@ -482,6 +482,21 @@
         500,
         200
       ]
+    },
+    {
+      "parameters": {
+        "operation": "splitOutItems",
+        "fieldToSplitOut": "batch",
+        "options": {}
+      },
+      "id": "split-batch-node",
+      "name": "Split Batch",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        320,
+        300
+      ]
     }
   ],
   "connections": {
@@ -489,7 +504,7 @@
       "main": [
         [
           {
-            "node": "If Schedule?",
+            "node": "Split Batch",
             "type": "main",
             "index": 0
           }
@@ -685,6 +700,17 @@
         [
           {
             "node": "Wait Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Batch": {
+      "main": [
+        [
+          {
+            "node": "If Schedule?",
             "type": "main",
             "index": 0
           }

@@ -2,9 +2,10 @@
 
 import { useState, useEffect, use, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { publishBooksToJumia } from '@/lib/actions/jumia'
 
 export default function EditAccessoryPage({ 
     params 
@@ -18,6 +19,7 @@ export default function EditAccessoryPage({
     const [isSaving, setIsSaving] = useState(false)
     const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload')
     const [isUploading, setIsUploading] = useState(false)
+    const [isPushingJumia, setIsPushingJumia] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [formData, setFormData] = useState({
         name: '',
@@ -105,6 +107,23 @@ export default function EditAccessoryPage({
             }
             return { ...prev, images: newImages }
         })
+    }
+
+    async function handlePushToJumia() {
+        if (!confirm('Voulez-vous vraiment publier cet accessoire sur Jumia ?')) return
+        setIsPushingJumia(true)
+        try {
+            const res = await publishBooksToJumia([id])
+            if (res.success) {
+                alert(res.message || 'Accessoire publié avec succès sur Jumia')
+            } else {
+                alert('Erreur: ' + res.message)
+            }
+        } catch (err) {
+            alert('Erreur technique lors de la publication')
+        } finally {
+            setIsPushingJumia(false)
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -423,13 +442,24 @@ export default function EditAccessoryPage({
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={isSaving}
-                        className="w-full flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 disabled:opacity-50"
-                    >
-                        {isSaving ? 'Enregistrement...' : <><Save className="w-5 h-5 mr-3" /> Mettre à jour</>}
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={handlePushToJumia}
+                            disabled={isPushingJumia || isSaving}
+                            className="w-1/3 flex items-center justify-center px-8 py-4 bg-orange-500 text-white font-black text-sm rounded-2xl hover:bg-orange-600 transition-all shadow-xl shadow-orange-100 disabled:opacity-50"
+                        >
+                            {isPushingJumia ? <Loader2 className="w-5 h-5 mr-3 animate-spin" /> : null}
+                            Push to Jumia
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSaving || isPushingJumia}
+                            className="flex-1 flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-black text-sm rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 disabled:opacity-50"
+                        >
+                            {isSaving ? 'Enregistrement...' : <><Save className="w-5 h-5 mr-3" /> Mettre à jour</>}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

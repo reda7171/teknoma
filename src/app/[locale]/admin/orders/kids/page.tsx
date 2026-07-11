@@ -133,10 +133,10 @@ export default async function KidsOrdersPage(props: {
                                         <p className="text-sm font-black text-gray-900">#{order.id.slice(0, 8)}</p>
                                         <p className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
                                     </td>
-                                    <td className="px-5 py-4 whitespace-nowrap">
-                                        <p className="text-sm font-semibold text-gray-900">{order.fullName}</p>
-                                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                                            <Phone className="w-3 h-3" /> {order.phone}
+                                    <td className="px-5 py-4 max-w-[150px] truncate" title={order.fullName || ''}>
+                                        <p className="text-sm font-semibold text-gray-900 truncate">{order.fullName}</p>
+                                        <p className="text-xs text-gray-500 flex items-center gap-1 truncate">
+                                            <Phone className="w-3 h-3 shrink-0" /> <span className="truncate">{order.phone}</span>
                                         </p>
                                     </td>
                                     <td className="px-5 py-4 whitespace-nowrap">
@@ -144,9 +144,9 @@ export default async function KidsOrdersPage(props: {
                                             {order.items.length} article{order.items.length > 1 ? 's' : ''}
                                         </span>
                                     </td>
-                                    <td className="px-5 py-4 whitespace-nowrap">
-                                        <span className="flex items-center gap-1 text-sm text-gray-600">
-                                            <MapPin className="w-3 h-3" /> {order.city}
+                                    <td className="px-5 py-4 max-w-[150px] truncate" title={order.city || ''}>
+                                        <span className="flex items-center gap-1 text-sm text-gray-600 truncate">
+                                            <MapPin className="w-3 h-3 shrink-0" /> <span className="truncate">{order.city}</span>
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 whitespace-nowrap text-sm font-black text-pink-700">

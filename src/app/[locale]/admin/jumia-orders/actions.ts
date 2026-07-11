@@ -533,6 +533,26 @@ export async function getJumiaProducts(params: any = {}) {
     }
 }
 
+export async function getAllJumiaProducts() {
+    let allProducts: any[] = []
+    let nextToken: string | undefined = undefined
+
+    try {
+        do {
+            const res = await getJumiaProducts({ token: nextToken, size: 50 })
+            if (res.error) break;
+            if (res.products && res.products.length > 0) {
+                allProducts = allProducts.concat(res.products)
+            }
+            nextToken = res.nextToken
+        } while (nextToken)
+        
+        return { products: allProducts }
+    } catch (e: any) {
+        return { error: e.message, products: allProducts }
+    }
+}
+
 export async function getJumiaAttributeSets(id: string) {
     try {
         const jumia = await JumiaAPI.getInstance()

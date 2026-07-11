@@ -1,7 +1,9 @@
 import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
 import JumiaProductsClient from "./JumiaProductsClient"
-import { getJumiaProducts } from "../jumia-orders/actions"
+import { getAllJumiaProducts } from "../jumia-orders/actions"
+
+export const dynamic = 'force-dynamic'
 
 export default async function JumiaProductsPage({
     params: { locale }
@@ -10,8 +12,8 @@ export default async function JumiaProductsPage({
 }) {
     const t = await getTranslations('Admin')
     
-    // On charge la première page des produits Jumia (sans filtre particulier pour démarrer)
-    const initialProducts = await getJumiaProducts({ size: 10 })
+    // On charge tous les produits Jumia
+    const initialProducts = await getAllJumiaProducts()
 
     return (
         <div className="flex-1 space-y-4 p-8 pt-6">
@@ -21,7 +23,7 @@ export default async function JumiaProductsPage({
             <Suspense fallback={<div>Chargement du catalogue...</div>}>
                 <JumiaProductsClient 
                     initialData={initialProducts?.products || []} 
-                    nextToken={initialProducts?.nextToken} 
+                    nextToken={null} 
                 />
             </Suspense>
         </div>

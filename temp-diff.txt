@@ -1,0 +1,440 @@
+﻿diff --git a/src/lib/actions/admin-orders.ts b/src/lib/actions/admin-orders.ts
+index 4006199..ba2f828 100644
+--- a/src/lib/actions/admin-orders.ts
++++ b/src/lib/actions/admin-orders.ts
+@@ -625,6 +625,217 @@ export async function bulkSyncDeliveries() {
+             }
+         }
+ 
++        // Olivraison
++        if (olivraisonOrders.length > 0) {
++            const defaultKey = await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } })
++            
++            for (const order of olivraisonOrders) {
++                try {
++                    const comp = companies.find(c => c.id === order.shippingCompany)
++                    const token = comp?.apiKey || defaultKey?.value
++                    if (!token) continue
++
++                    const res = await fetch(`http://partners.olivraison.com/package/${order.trackingID}`, {
++                        headers: { 'authorization': `Bearer ${token}` }
++                    })
++                    
++export async function bulkDeleteOrders(orderIds: string[]) {
++    try {
++        await verifyAdmin()
++
++        await prisma.orderItem.deleteMany({
++            where: { orderId: { in: orderIds } }
++        })
++
++        await prisma.orderStatusHistory.deleteMany({
++            where: { orderId: { in: orderIds } }
++        })
++
++        await prisma.order.deleteMany({
++            where: { id: { in: orderIds } }
++        })
++
++        revalidatePath('/admin/orders')
++
++        await createAuditLog({
++            action: 'BULK_DELETE',
++            entity: 'ORDER',
++            entityId: 'MULTIPLE',
++            details: `Suppression group├®e de ${orderIds.length} commandes`
++        })
++
++        sendTelegramMessage(`­ƒùæ´©Å *Suppression Massive*\n\n${orderIds.length} commandes ont ├®t├® supprim├®es par l'administrateur.\n­ƒòÆ ${new Date().toLocaleString('fr-FR')}`).catch(console.error)
++
++        return {
++            success: true,
++            message: `${orderIds.length} commandes supprim├®es avec succ├¿s`
++        }
++    } catch (error) {
++        console.error('Erreur lors de la suppression group├®e des commandes:', error)
++        return {
++            success: false,
++            error: 'Une erreur est survenue lors de la suppression'
++        }
++    }
++}
++
++/**
++ * Synchroniser le statut de livraison depuis l'API de la soci├®t├® de livraison
++ */
++export async function syncDeliveryStatus(orderId: string) {
++    try {
++        await verifyAdmin()
++
++        const order = await prisma.order.findUnique({
++            where: { id: orderId }
++        })
++
++        if (!order) return { success: false, error: 'Commande introuvable' }
++        if (!order.trackingID) return { success: false, error: 'Aucun num├®ro de suivi pour cette commande' }
++        if (!order.shippingCompany) return { success: false, error: 'Aucune soci├®t├® de livraison associ├®e' }
++
++        let newStatus = order.deliveryStatus
++
++        const company = await prisma.shippingCompany.findUnique({ where: { id: order.shippingCompany } })
++        if (!company) return { success: false, error: 'Soci├®t├® de livraison non trouv├®e en base' }
++
++        const compName = company.name.toLowerCase()
++
++        if (compName.includes('withyou')) {
++            const res = await withyouService.getStatus([order.trackingID])
++            if (Array.isArray(res) && res.length > 0) {
++                newStatus = res[0].status || newStatus
++            } else if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
++                newStatus = res.data[0].status || newStatus
++            }
++        } else if (compName.includes('olivraison')) {
++            const token = company.apiKey || (await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } }))?.value
++            if (token) {
++                try {
++                    const res = await fetch(`http://partners.olivraison.com/package/${order.trackingID}`, {
++                        headers: { 'authorization': `Bearer ${token}` }
++                    })
++                    if (res.ok) {
++                        const data = await res.json()
++                        newStatus = data.status || newStatus
++                    }
++                } catch (err) {
++                    console.error('Erreur API Olivraison', err)
++                }
++            }
++        }
++
++        if (newStatus !== order.deliveryStatus) {
++            await prisma.order.update({
++                where: { id: orderId },
++                data: {
++                    deliveryStatus: newStatus,
++                    deliverySyncAt: new Date()
++                }
++            })
++            revalidatePath('/admin/orders')
++            revalidatePath(`/admin/orders/${orderId}`)
++            return { success: true, status: newStatus, message: 'Statut mis ├á jour avec succ├¿s' }
++        }
++
++        return { success: true, status: order.deliveryStatus, message: 'Le statut est d├®j├á ├á jour' }
++    } catch (error: any) {
++        console.error('Erreur lors de la synchronisation de la livraison:', error)
++        return { success: false, error: error.message || 'Erreur lors de la synchronisation' }
++    }
++}
++
++export async function bulkSyncDeliveries() {
++    try {
++        await verifyAdmin()
++
++        const activeOrders = await prisma.order.findMany({
++            where: {
++                trackingID: { not: null },
++                status: {
++                    notIn: ['DELIVERED', 'RETURNED', 'CANCELED']
++                },
++                shippingCompany: { not: null }
++            }
++        })
++
++        if (activeOrders.length === 0) {
++            return { success: true, updatedCount: 0 }
++        }
++
++        const companies = await prisma.shippingCompany.findMany({
++            where: {
++                id: { in: Array.from(new Set(activeOrders.map(o => o.shippingCompany!))) }
++            }
++        })
++
++        const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
++        
++        let updatedCount = 0
++        const BATCH_SIZE = 50
++
++        const withYouOrders = activeOrders.filter(o => {
++            const name = companyMap.get(o.shippingCompany!)
++            return name && name.includes('withyou')
++        })
++
++        const olivraisonOrders = activeOrders.filter(o => {
++            const name = companyMap.get(o.shippingCompany!)
++            return name && name.includes('olivraison')
++        })
++
++        // WithYou Bulk
++        if (withYouOrders.length > 0) {
++            for (let i = 0; i < withYouOrders.length; i += BATCH_SIZE) {
++                const batch = withYouOrders.slice(i, i + BATCH_SIZE)
++                const trackingIds = batch.map(o => o.trackingID!).filter(Boolean)
++                
++                try {
++                    const res = await withyouService.getStatus(trackingIds)
++                    let statusArray: any[] = []
++                    
++                    if (Array.isArray(res)) {
++                        statusArray = res
++                    } else if (res?.data && Array.isArray(res.data)) {
++                        statusArray = res.data
++                    }
++                    
++                    for (const item of statusArray) {
++                        const trackingID = item.trackingID || item.trackingId || item.code_tracking
++                        const extStatus = item.status || item.statut
++                        
++                        if (trackingID && extStatus) {
++                            const orderToUpdate = batch.find(o => o.trackingID === trackingID)
++                            if (orderToUpdate && orderToUpdate.deliveryStatus !== extStatus) {
++                                let newInternalStatus = orderToUpdate.status
++                                const statusLower = extStatus.toLowerCase()
++                                
++                                if (statusLower.includes('livr') || statusLower.includes('delivered')) {
++                                    newInternalStatus = 'DELIVERED'
++                                } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
++                                    newInternalStatus = 'RETURNED'
++                                } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
++                                    newInternalStatus = 'CANCELED'
++                                }
++
++                                await prisma.order.update({
++                                    where: { id: orderToUpdate.id },
++                                    data: {
++                                        deliveryStatus: extStatus,
++                                        deliverySyncAt: new Date(),
++                                        status: newInternalStatus
++                                    }
++                                })
++                                updatedCount++
++                            }
++                        }
++                    }
++                } catch (error) {
++                    console.error('Erreur sync bulk WithYou:', error)
++                }
++            }
++        }
++
+         // Olivraison
+         if (olivraisonOrders.length > 0) {
+             const defaultKey = await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } })
+@@ -677,3 +888,217 @@ export async function bulkSyncDeliveries() {
+         return { success: false, error: error.message || 'Erreur inconnue' }
+     }
+ }
++
++/**
++ * Mettre ├á jour les articles d'une commande (Edition dynamique)
++ */
++export async function updateOrderItems(orderId: string, items: {
++    id?: string;
++    type: 'BOOK' | 'PACK';
++    productId: string;
++    quantity: number;
++    price: number;
++}[]) {
++    try {
++        await verifyAdmin()
++
++        const order = await prisma.order.findUnique({
++            where: { id: orderId },
++            include: { items: true }
++        })
++
++        if (!order) {
++            throw new Error('Commande introuvable')
++        }
++
++        // Si la commande n'a pas un statut qui a d├®cr├®ment├® le stock, on n'impacte pas le stock
++        // Habituellement, toute commande non annul├®e a d├®cr├®ment├® le stock ├á la cr├®ation.
++        // Si elle est "RETURNED" ou "CANCELED" ou "CANCELLED", le stock a d├®j├á ├®t├® r├®int├®gr├®.
++        const isCanceledOrReturned = order.status === 'CANCELED' || order.status === 'CANCELLED' || order.status === 'RETURNED'
++        const impactsStock = !isCanceledOrReturned
++
++        let newSubtotal = 0
++
++        // Transaction pour assurer la coh├®rence
++        await prisma.$transaction(async (tx) => {
++            // 1. Pour chaque ancien item, on regarde s'il est supprim├® ou modifi├®
++            for (const oldItem of order.items) {
++                const newItem = items.find(i => i.id === oldItem.id)
++                
++                if (!newItem) {
++                    // Item supprim├®
++                    if (impactsStock) {
++                        if (oldItem.type === 'BOOK' && oldItem.bookId) {
++                            await tx.book.update({
++                                where: { id: oldItem.bookId },
++                                data: { stock: { increment: oldItem.quantity } }
++                            })
++                        } else if (oldItem.type === 'PACK' && oldItem.packId) {
++                            const packBooks = await tx.packBook.findMany({ where: { packId: oldItem.packId } })
++                            for (const pb of packBooks) {
++                                await tx.book.update({
++                                    where: { id: pb.bookId },
++                                    data: { stock: { increment: oldItem.quantity } }
++                                })
++                            }
++                        }
++                    }
++                    await tx.orderItem.delete({ where: { id: oldItem.id } })
++                } else {
++                    // Item modifi├® (changement de quantit├®)
++                    const diff = newItem.quantity - oldItem.quantity
++                    if (diff !== 0 && impactsStock) {
++                        if (oldItem.type === 'BOOK' && oldItem.bookId) {
++                            await tx.book.update({
++                                where: { id: oldItem.bookId },
++                                data: { stock: { decrement: diff } }
++                            })
++                        } else if (oldItem.type === 'PACK' && oldItem.packId) {
++                            const packBooks = await tx.packBook.findMany({ where: { packId: oldItem.packId } })
++                            for (const pb of packBooks) {
++                                await tx.book.update({
++                                    where: { id: pb.bookId },
++                                    data: { stock: { decrement: diff } }
++                                })
++                            }
++                        }
++                    }
++                    
++                    // Calculer le prix
++                    newSubtotal += newItem.price * newItem.quantity
++                    
++                    await tx.orderItem.update({
++                        where: { id: oldItem.id },
++                        data: {
++                            quantity: newItem.quantity,
++                            price: newItem.price,
++                        }
++                    })
++                }
++            }
++
++            // 2. Pour chaque nouvel item, on l'ajoute
++            for (const newItem of items.filter(i => !i.id)) {
++                let costPrice = 0
++                if (newItem.type === 'BOOK') {
++                    const book = await tx.book.findUnique({ where: { id: newItem.productId }})
++                    if (book) {
++                        costPrice = book.costPrice
++                        if (impactsStock) {
++                            await tx.book.update({
++                                where: { id: newItem.productId },
++                                data: { stock: { decrement: newItem.quantity } }
++                            })
++                        }
++                    }
++                } else if (newItem.type === 'PACK') {
++                    const pack = await tx.pack.findUnique({ where: { id: newItem.productId }})
++                    if (pack) {
++                        costPrice = pack.costPrice
++                        if (impactsStock) {
++                            const packBooks = await tx.packBook.findMany({ where: { packId: newItem.productId } })
++                            for (const pb of packBooks) {
++                                await tx.book.update({
++                                    where: { id: pb.bookId },
++                                    data: { stock: { decrement: newItem.quantity } }
++                                })
++                            }
++                        }
++                    }
++                }
++
++                newSubtotal += newItem.price * newItem.quantity
++
++                await tx.orderItem.create({
++                    data: {
++                        orderId: order.id,
++                        type: newItem.type as any,
++                        quantity: newItem.quantity,
++                        price: newItem.price,
++                        costPrice: costPrice,
++                        bookId: newItem.type === 'BOOK' ? newItem.productId : null,
++                        packId: newItem.type === 'PACK' ? newItem.productId : null
++                    }
++                })
++            }
++
++            // 3. Mettre ├á jour la commande
++            const newTotal = newSubtotal + order.shippingFees - order.discount
++            await tx.order.update({
++                where: { id: order.id },
++                data: {
++                    subtotal: newSubtotal,
++                    total: newTotal,
++                    updatedAt: new Date()
++                }
++            })
++
++            // 4. Historique
++            await tx.orderStatusHistory.create({
++                data: {
++                    orderId: order.id,
++                    status: order.status,
++                    comment: "Modification des articles et quantit├®s de la commande",
++                    createdBy: "ADMIN"
++                }
++            })
++            
++            // Log global
++            await tx.auditLog.create({
++                data: {
++                    action: 'UPDATE_ITEMS',
++                    entity: 'ORDER',
++                    entityId: order.id,
++                    details: `Mise ├á jour des articles. Nouveau total: ${newTotal}`,
++                    userId: 'SYSTEM'
++                }
++            })
++        })
++
++        revalidatePath('/admin/orders')
++        revalidatePath(`/admin/orders/${orderId}`)
++
++        return {
++            success: true,
++            message: "Les articles de la commande ont ├®t├® mis ├á jour"
++        }
++    } catch (error: any) {
++        console.error('Erreur lors de la modification des articles:', error)
++        return {
++            success: false,
++            error: error.message || 'Impossible de mettre ├á jour les articles'
++        }
++    }
++}
++
++/**
++ * Rechercher des livres ou packs pour les ajouter ├á une commande
++ */
++export async function searchProductsForOrder(query: string) {
++    try {
++        await verifyAdmin()
++        if (!query || query.length < 2) return []
++
++        const books = await prisma.book.findMany({
++            where: { title: { contains: query } },
++            take: 10,
++            select: { id: true, title: true, price: true, image: true, stock: true }
++        })
++
++        const packs = await prisma.pack.findMany({
++            where: { name: { contains: query } },
++            take: 5,
++            select: { id: true, name: true, price: true, image: true }
++        })
++
++        const results = [
++            ...books.map(b => ({ type: 'BOOK' as const, id: b.id, title: b.title, price: b.price, image: b.image, stock: b.stock })),
++            ...packs.map(p => ({ type: 'PACK' as const, id: p.id, title: p.name, price: p.price, image: p.image, stock: 999 })) // on simule un stock infini pour les packs pour l'instant
++        ]
++
++        return results
++    } catch (error) {
++        console.error('Erreur recherche produits:', error)
++        return []
++    }
++}

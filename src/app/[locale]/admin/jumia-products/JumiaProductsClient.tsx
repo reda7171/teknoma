@@ -15,6 +15,12 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
     const [loading, setLoading] = useState(false)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
     const [syncing, setSyncing] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [statusFilter, setStatusFilter] = useState("ALL")
+    const [visibilityFilter, setVisibilityFilter] = useState("ALL")
+    const [categoryFilter, setCategoryFilter] = useState("ALL")
+
+    const categories = Array.from(new Set(products.map((p: any) => p.category?.name || p.primaryCategory?.name).filter(Boolean))) as string[]
 
     const handleSyncStock = async () => {
         if (!confirm("Voulez-vous synchroniser le stock de Riwaya vers Jumia pour tous les produits (basé sur le nom du produit) ?")) return;
@@ -107,8 +113,45 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center bg-white p-4 rounded-md border">
-                <input type="text" placeholder="Rechercher par SKU..." className="border rounded-md px-3 py-2 text-sm w-full max-w-sm" />
+            <div className="flex justify-between items-center bg-white p-4 rounded-md border gap-4 flex-wrap">
+                <div className="flex gap-2 flex-1 flex-wrap min-w-[300px]">
+                    <input 
+                        type="text" 
+                        placeholder="Rechercher par nom, SKU vendeur ou SKU Jumia..." 
+                        className="border rounded-md px-3 py-2 text-sm w-full max-w-sm" 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <select 
+                        className="border rounded-md px-3 py-2 text-sm"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="ALL">Tous les statuts QC</option>
+                        <option value="APPROVED">Approuvé (APPROVED)</option>
+                        <option value="REJECTED">Rejeté (REJECTED)</option>
+                        <option value="PENDING">En attente (PENDING)</option>
+                    </select>
+                    <select 
+                        className="border rounded-md px-3 py-2 text-sm"
+                        value={visibilityFilter}
+                        onChange={(e) => setVisibilityFilter(e.target.value)}
+                    >
+                        <option value="ALL">Toute visibilité</option>
+                        <option value="VISIBLE">Visible</option>
+                        <option value="HIDDEN">Masqué</option>
+                    </select>
+                    <select 
+                        className="border rounded-md px-3 py-2 text-sm max-w-[200px]"
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                    >
+                        <option value="ALL">Toutes les catégories</option>
+                        {categories.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </select>
+                </div>
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={handleSyncStock} 
@@ -144,7 +187,26 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                                 </td>
                             </tr>
                         )}
-                        {products.map((p: any) => {
+                        {products.filter((p: any) => {
+                            const businessClient = p.variations?.[0]?.businessClients?.[0]
+                            const qcStatus = (businessClient?.qc?.status || p.status || 'N/A').toUpperCase()
+                            const isVisible = businessClient?.visible === true
+                            const cat = p.category?.name || p.primaryCategory?.name
+
+                            if (statusFilter !== "ALL" && qcStatus !== statusFilter) return false
+                            
+                            if (visibilityFilter === "VISIBLE" && !isVisible) return false
+                            if (visibilityFilter === "HIDDEN" && isVisible) return false
+
+                            if (categoryFilter !== "ALL" && cat !== categoryFilter) return false
+
+                            if (!searchQuery) return true
+                            const q = searchQuery.toLowerCase()
+                            const name = (p.name || "").toLowerCase()
+                            const sellerSku = (p.sellerSku || p.variations?.[0]?.sellerSku || "").toLowerCase()
+                            const jumiaSku = (p.variations?.[0]?.sku || "").toLowerCase()
+                            return name.includes(q) || sellerSku.includes(q) || jumiaSku.includes(q)
+                        }).sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).map((p: any) => {
                             const businessClient = p.variations?.[0]?.businessClients?.[0]
                             return (
                                 <tr key={p.id} className="hover:bg-slate-50">
@@ -214,13 +276,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                 </table>
             </div>
             
-            {nextToken && (
-                <div className="flex justify-center mt-4">
-                    <button onClick={fetchMore} disabled={loading} className="px-4 py-2 border rounded-md bg-slate-100 hover:bg-slate-200 text-sm">
-                        {loading ? "Chargement..." : "Afficher plus"}
-                    </button>
-                </div>
-            )}
+            {/* Pagination removed - All loaded at once */}
         </div>
     )
 }
