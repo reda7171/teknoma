@@ -188,8 +188,8 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-                        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0] + 'T00:00:00Z'
+                        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0] + 'T23:59:59Z'
                         
                         let allOrders: any[] = []
                         let hasMore = true
@@ -213,8 +213,8 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
-                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0] + 'T00:00:00Z'
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0] + 'T23:59:59Z'
                         
                         let allOrders: any[] = []
                         let hasMore = true
@@ -238,8 +238,8 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
-                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0] + 'T00:00:00Z'
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0] + 'T23:59:59Z'
                         
                         await answerCallbackQuery(callbackId, 'Génération du graphique...', token)
 
@@ -309,7 +309,7 @@ export async function POST(req: Request) {
                             }
                         }
                         
-                        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`
+                        const chartUrl = `https://quickchart.io/chart?v=3&c=${encodeURIComponent(JSON.stringify(chartConfig))}`
                         
                         const { sendTelegramPhoto } = await import('@/lib/telegram')
                         await sendTelegramPhoto(chartUrl, `📈 <b>Évolution du CA Jumia et Annulations (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
@@ -318,8 +318,8 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
-                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0] + 'T00:00:00Z'
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0] + 'T23:59:59Z'
                         
                         await answerCallbackQuery(callbackId, 'Génération comparatif en cours...', token)
 
@@ -387,7 +387,7 @@ export async function POST(req: Request) {
                             }
                         }
                         
-                        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`
+                        const chartUrl = `https://quickchart.io/chart?v=3&c=${encodeURIComponent(JSON.stringify(chartConfig))}`
                         
                         const { sendTelegramPhoto } = await import('@/lib/telegram')
                         await sendTelegramPhoto(chartUrl, `📊 <b>Comparatif Jumia vs Boutique (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
