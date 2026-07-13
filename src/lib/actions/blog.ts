@@ -353,10 +353,19 @@ export async function getRelatedPosts(postId: string, category: string | null, l
  */
 export async function incrementPostViews(id: string) {
     try {
-        await prisma.post.update({
+        const post = await prisma.post.update({
             where: { id },
-            data: { viewCount: { increment: 1 } }
+            data: { viewCount: { increment: 1 } },
+            select: { title: true, viewCount: true }
         })
+
+        try {
+            const { sendTelegramMessage } = await import('@/lib/telegram')
+            await sendTelegramMessage(`📖 <b>Nouvelle lecture d'article !</b>\n\n📌 <b>Titre:</b> ${post.title}\n👁️ <b>Vues totales:</b> ${post.viewCount}`)
+        } catch (e) {
+            console.error("Erreur envoi telegram view:", e)
+        }
+
         return { success: true }
     } catch (error) {
         return { success: false }

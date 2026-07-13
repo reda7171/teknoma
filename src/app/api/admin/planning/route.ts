@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
         const baseUrl = `${protocol}://${host}`;
         const cookie = req.headers.get('cookie') || '';
 
-        // Execute in parallel without awaiting the result so the response is fast
-        Promise.all(platforms.map((platform: string) => 
+        // Execute and AWAIT the result so Next.js Serverless doesn't terminate the promise
+        await Promise.all(platforms.map((platform: string) => 
             fetch(`${baseUrl}/api/n8n/publish`, {
                 method: 'POST',
                 headers: { 

@@ -31,8 +31,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     if (!post) return {}
 
-    const siteUrl = 'https://riwaya.store'
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`
+    const imageUrl = post.coverImage ? `${siteUrl}/api/blog/${post.id}/image` : null
 
     const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
     const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
@@ -49,13 +50,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             type: 'article',
             publishedTime: post.publishedAt?.toISOString(),
             authors: post.author?.fullName ? [post.author.fullName] : ['Riwaya'],
-            images: post.coverImage ? [{ url: post.coverImage, width: 1200, height: 630, alt: post.title }] : [],
+            images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: post.title }] : [],
         },
         twitter: {
             card: 'summary_large_image',
             title: post.title,
             description: post.excerpt || post.title,
-            images: post.coverImage ? [post.coverImage] : [],
+            images: imageUrl ? [imageUrl] : [],
         },
         alternates: { canonical: canonicalUrl },
     }

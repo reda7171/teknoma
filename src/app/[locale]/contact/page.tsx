@@ -63,6 +63,25 @@ export default async function ContactPage() {
                                 <p className="text-sm font-black text-black">Lun - Sam : 09h - 19h</p>
                             </div>
                         </div>
+
+                        {/* WhatsApp Channel Invite */}
+                        <div className="mt-12 bg-green-50 border border-green-100 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-6 group hover:bg-green-100 transition-colors">
+                            <div className="w-16 h-16 bg-[#25D366] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform flex-shrink-0">
+                                <MessageCircle className="w-8 h-8" />
+                            </div>
+                            <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-xl font-black text-green-950 mb-2">Rejoignez notre chaîne WhatsApp</h3>
+                                <p className="text-green-800 font-medium text-sm mb-4">Ne manquez aucune de nos offres exclusives, nouveautés et promotions.</p>
+                                <a 
+                                    href="https://chat.whatsapp.com/BEKvpmcSTP73Y6zKvFR4oI?s=sw&p=a&ilr=1" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center px-6 py-3 bg-[#25D366] text-white rounded-full text-xs font-bold uppercase tracking-wider hover:bg-green-600 transition-colors shadow-md"
+                                >
+                                    S'abonner
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Contact Form */}

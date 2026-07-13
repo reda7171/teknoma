@@ -68,6 +68,8 @@ export async function generateMetadata({
         ]
     }
 
+    const imageUrl = `${baseUrl}/api/authors/${encodeURIComponent(name)}/image`
+
     return {
         title: siteTitle,
         description: description,
@@ -78,6 +80,20 @@ export async function generateMetadata({
             type: 'profile',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
             url: `${baseUrl}/${locale}/authors/${encodeURIComponent(name)}`,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: authorName
+                }
+            ]
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: siteTitle,
+            description: description,
+            images: [imageUrl]
         },
         alternates: {
             canonical: `${baseUrl}/${locale}/authors/${encodeURIComponent(name)}`,

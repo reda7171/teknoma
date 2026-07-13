@@ -46,8 +46,7 @@ export async function generateMetadata({
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-    const normalizedImage = normalizeImage(book.image)
-    const imageUrl = normalizedImage.startsWith('http') ? normalizedImage : normalizedImage.startsWith('data:') ? normalizedImage : `${baseUrl}${normalizedImage}`
+    const imageUrl = `${baseUrl}/api/books/${book.id}/image`
 
     const localizedTitle = getLocalizedTitle(book, locale)
     const localizedDescriptionText = getLocalizedDescription(book, locale)
@@ -349,11 +348,11 @@ export default async function BookDetailPage({
                     </Link>
 
                     {/* Product Detail */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mb-20 md:mb-32">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 mb-10 md:mb-32">
                         {/* Image */}
                         <div className="lg:sticky lg:top-24 lg:self-start">
-                            <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-black/5 border border-gray-100 flex flex-col gap-10">
-                                <div className="relative aspect-[3/4] group">
+                            <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-4 sm:p-6 md:p-10 shadow-2xl shadow-black/5 border border-gray-100 flex flex-col gap-8 md:gap-10">
+                                <div className="relative aspect-[3/4] group max-w-sm mx-auto w-full">
                                     <div className="absolute top-6 left-6 z-10 rtl:right-6 rtl:left-auto">
                                         <WishlistButton
                                             item={{
@@ -390,7 +389,7 @@ export default async function BookDetailPage({
                                 </div>
 
                                 {/* Trust Badges */}
-                                <div className="grid grid-cols-3 gap-6 pt-10 border-t border-gray-50">
+                                <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-8 md:pt-10 border-t border-gray-50">
                                     <div className="text-center group cursor-pointer">
                                         <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                             <Truck className="w-6 h-6 text-black" />
@@ -414,9 +413,9 @@ export default async function BookDetailPage({
                         </div>
 
                         {/* Info */}
-                        <div className="flex flex-col gap-12">
-                            <div className="space-y-6">
-                                <div className="flex flex-wrap items-center gap-4 mb-4">
+                        <div className="flex flex-col gap-8 md:gap-12">
+                            <div className="space-y-4 md:space-y-6">
+                                <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-2 md:mb-4">
                                     {book.category && (
                                         <Link
                                             href={`/books?category=${encodeURIComponent(book.category)}`}
@@ -436,7 +435,7 @@ export default async function BookDetailPage({
                                     )}
                                 </div>
 
-                                <h1 className="text-4xl md:text-7xl font-black text-black leading-none tracking-tighter">
+                                <h1 className="text-3xl sm:text-4xl md:text-7xl font-black text-black leading-tight md:leading-none tracking-tight md:tracking-tighter">
                                     {displayTitle}<span className="text-gray-200">.</span>
                                 </h1>
 
@@ -446,8 +445,8 @@ export default async function BookDetailPage({
                             </div>
 
                             {/* Rating Summary */}
-                            <div className="flex items-center gap-6">
-                                <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-50">
+                            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                                <div className="flex items-center gap-2 bg-white px-4 md:px-5 py-2 md:py-3 rounded-2xl shadow-sm border border-gray-50">
                                     <div className="flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
                                             <Star
@@ -465,9 +464,9 @@ export default async function BookDetailPage({
 
                             {/* Price Section */}
                             <div className="relative group">
-                                <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl shadow-black/5">
-                                    <div className="flex items-baseline gap-3 mb-4">
-                                        <span className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
+                                <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-black/5">
+                                    <div className="flex items-baseline gap-3 mb-3 md:mb-4">
+                                        <span className="text-4xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
                                         <span className="text-xl font-black text-gray-300 uppercase tracking-widest">MAD</span>
                                     </div>
                                     <div className="flex items-center gap-3">

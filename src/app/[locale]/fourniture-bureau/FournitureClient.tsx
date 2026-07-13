@@ -96,7 +96,13 @@ export default function FournitureClient({ products }: { products: Product[] }) 
                             <div className="relative h-36 sm:h-44 bg-slate-50 w-full overflow-hidden">
                                 {product.image ? (
                                     <Image
-                                        src={product.image}
+                                        src={
+                                            product.image.startsWith('http') || product.image.startsWith('/') || product.image.startsWith('data:') 
+                                                ? product.image 
+                                                : product.image.startsWith('/9j/') ? `data:image/jpeg;base64,${product.image}` 
+                                                : product.image.startsWith('iVBOR') ? `data:image/png;base64,${product.image}` 
+                                                : `data:image/jpeg;base64,${product.image}`
+                                        }
                                         alt={product.name}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-500"

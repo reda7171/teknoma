@@ -108,7 +108,12 @@ export async function sendOrderNotification(order: {
     const whatsappMsg = encodeURIComponent(whatsappText)
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
 
-    const activeShippingCompanies = await prisma.shippingCompany.findMany({ where: { isActive: true } });
+    const orderData = await prisma.order.findUnique({
+        where: { id: order.id },
+        select: { shippingCompany: true }
+    });
+
+    const activeShippingCompanies = orderData?.shippingCompany ? [orderData.shippingCompany] : [];
     const shippingButtons = activeShippingCompanies.map(comp => {
         // Map the company to its corresponding command
         // This is a naive mapping based on ID. We can refine it later if needed.

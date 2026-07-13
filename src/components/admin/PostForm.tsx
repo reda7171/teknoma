@@ -488,7 +488,6 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                             <div className="max-h-60 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-100">
                                 {allBooks
                                     .filter(b => b.title.toLowerCase().includes(bookSearch.toLowerCase()) && !selectedBookIds.includes(b.id))
-                                    .slice(0, 50)
                                     .map(book => (
                                         <button
                                             key={book.id}
