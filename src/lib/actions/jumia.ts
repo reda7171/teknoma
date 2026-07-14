@@ -98,7 +98,7 @@ export async function publishBooksToJumia(bookIds: string[]) {
                     name: "Generic"
                 },
                 category: {
-                    code: 1000001, 
+                    code: 1000203, 
                     name: "Bestselling Books"
                 },
                 images: book.image ? [{
