@@ -96,10 +96,10 @@ export async function POST(req: Request) {
                         break
                     case 'SellerSKU':
                     case 'ParentSKU':
-                        val = book.id.substring(0, 8).toUpperCase()
+                        val = book.sellerSku || book.isbn || book.id.substring(0, 8).toUpperCase()
                         break
                     case 'Brand':
-                        val = '1015941 - Books'
+                        val = 'Generic'
                         break
                     case 'PrimaryCategory':
                         val = '1000203 - Books, Movies and Music / Bestselling Books'
@@ -115,34 +115,34 @@ export async function POST(req: Request) {
                         val = book.stock
                         break
                     case 'author':
-                        val = book.author
+                        val = book.author || ''
                         break
                     case 'language':
-                        val = book.language === 'ar' ? 'Arabic' : book.language === 'en' ? 'English' : 'French'
+                        val = book.language === 'ar' ? 'Arabic' : book.language === 'en' ? 'English' : book.language === 'fr' ? 'French' : ''
                         break
                     case 'book_type':
-                        val = 'Paperback'
+                        val = ''
                         break
                     case 'variation':
-                        val = '...'
+                        val = ''
                         break
                     case 'age_range':
-                        val = '18 Years +'
+                        val = ''
                         break
                     case 'production_country':
-                        val = 'Morocco'
+                        val = ''
                         break
                     case 'main_material':
-                        val = 'Paper'
+                        val = ''
                         break
                     case 'product_weight':
-                        val = '0.5'
+                        val = ''
                         break
                     case 'package_content':
-                        val = '1 Book'
+                        val = ''
                         break
                     case 'warranty_type':
-                        val = 'Replacement by Vendor'
+                        val = ''
                         break
                     case 'MainImage':
                         val = book.image
