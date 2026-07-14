@@ -278,11 +278,17 @@ export class JumiaAPI {
     }
 
     async getCatalogStock(params: {
+        sku?: string;
+        sellerSku?: string;
+        shopId?: string;
         token?: string;
         size?: number;
         productSids?: string[];
     } = {}) {
         const query = new URLSearchParams()
+        if (params.sku) query.append('sku', params.sku)
+        if (params.sellerSku) query.append('sellerSku', params.sellerSku)
+        if (params.shopId) query.append('shopId', params.shopId)
         if (params.token) query.append('token', params.token)
         if (params.size) query.append('size', params.size.toString())
         if (params.productSids && params.productSids.length) params.productSids.forEach(sid => query.append('productSids', sid))

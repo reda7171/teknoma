@@ -61,7 +61,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } } }
         })
         booksStats.push(...books.map(b => ({ stock: b.stock, active: b.active, price: b.price })))
-        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, hasArticle: (b._count?.posts || 0) > 0 })))
+        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, jumiaStock: b.jumiaStock, hasArticle: (b._count?.posts || 0) > 0 })))
     }
 
     // 2. Fetch Packs
@@ -93,6 +93,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             productType: 'PACK',
             orderCount: p._count?.orderItems || 0,
             sellerSku: p.sellerSku,
+            jumiaStock: p.jumiaStock,
             createdAt: p.createdAt
         })))
     }
@@ -129,6 +130,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             productType: 'EXTRA',
             orderCount: e._count?.orderItems || 0,
             sellerSku: e.sellerSku,
+            jumiaStock: null,
             createdAt: e.createdAt
         })))
     }

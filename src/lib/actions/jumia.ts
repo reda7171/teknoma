@@ -170,20 +170,16 @@ export async function checkJumiaAvailability() {
 
         let hasNextPage = true
         let token: string | undefined
-        const syncedSkus = new Set<string>()
+        const syncedSkus = new Map<string, number>()
 
-        // 1. Fetch all products from Jumia
+        // 1. Fetch all stock from Jumia
         while (hasNextPage) {
-            const data = await jumia.getProducts({ size: 100, token })
+            const data = await jumia.getCatalogStock({ size: 100, token })
             if (!data || !data.products) break
             
             for (const item of data.products) {
-                if (item.variations) {
-                    for (const varObj of item.variations) {
-                        if (varObj.sellerSku) {
-                            syncedSkus.add(varObj.sellerSku)
-                        }
-                    }
+                if (item.sellerSku && item.globalStock !== undefined) {
+                    syncedSkus.set(item.sellerSku, item.globalStock)
                 }
             }
 
@@ -199,41 +195,36 @@ export async function checkJumiaAvailability() {
         }
 
         // 2. Update all Books in database
-        // Reset all to false first
+        // Reset all to false/null first
         await prisma.book.updateMany({
-            data: { isSyncedWithJumia: false }
+            data: { isSyncedWithJumia: false, jumiaStock: null }
         })
 
         // Then update the ones that exist on Jumia
         let updatedCount = 0
-        const skuArray = Array.from(syncedSkus)
+        const skuArray = Array.from(syncedSkus.entries())
         
-        // We do it in chunks to avoid query too large
-        const chunkSize = 100
-        for (let i = 0; i < skuArray.length; i += chunkSize) {
-            const chunk = skuArray.slice(i, i + chunkSize)
-            // match either sellerSku or id
+        for (const [sku, stock] of skuArray) {
             const result = await prisma.book.updateMany({
                 where: {
                     OR: [
-                        { sellerSku: { in: chunk } },
-                        { id: { in: chunk } } // Some fallbacks to book.id
+                        { sellerSku: sku },
+                        { id: sku } // Some fallbacks to book.id
                     ]
                 },
-                data: { isSyncedWithJumia: true }
+                data: { isSyncedWithJumia: true, jumiaStock: stock }
             })
             updatedCount += result.count
         }
 
         // Also do the same for Packs just in case
         await prisma.pack.updateMany({
-            data: { isSyncedWithJumia: false }
+            data: { isSyncedWithJumia: false, jumiaStock: null }
         })
-        for (let i = 0; i < skuArray.length; i += chunkSize) {
-            const chunk = skuArray.slice(i, i + chunkSize)
+        for (const [sku, stock] of skuArray) {
             await prisma.pack.updateMany({
-                where: { sellerSku: { in: chunk } },
-                data: { isSyncedWithJumia: true }
+                where: { sellerSku: sku },
+                data: { isSyncedWithJumia: true, jumiaStock: stock }
             })
         }
 

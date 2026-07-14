@@ -32,6 +32,7 @@ interface Book {
     productType?: string
     sellerSku?: string | null
     isSyncedWithJumia?: boolean
+    jumiaStock?: number | null
     hasArticle?: boolean
 }
 
@@ -524,6 +525,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                             Jumia
                                         </th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Qté Synch
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Lié à un article
                                         </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -667,6 +671,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <span className={book.isSyncedWithJumia ? 'text-green-600' : 'text-gray-400'}>
                                                                     {book.isSyncedWithJumia ? <Check className="w-4 h-4 mx-auto" /> : '-'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                <span className={book.jumiaStock != null && book.stock === book.jumiaStock ? 'text-green-600' : 'text-red-600'}>
+                                                                    {book.jumiaStock != null && book.stock === book.jumiaStock ? 'Oui' : 'Non'}
                                                                 </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
