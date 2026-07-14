@@ -319,7 +319,7 @@ export default async function BookDetailPage({
 
                 <Header />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-40">
                     {/* Bloc publicitaire AdSense avant le fil d'Ariane */}
                     {adsenseEnabled && (
                         <AdBanner
@@ -546,7 +546,7 @@ export default async function BookDetailPage({
                                     </div>
                                 )}
 
-                                <div className="space-y-4">
+                                <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col gap-3 pb-safe md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none md:space-y-4 md:gap-0">
                                     {book.stock > 0 && (
                                         <WhatsAppOrderButton
                                             title={displayTitle}
@@ -564,14 +564,14 @@ export default async function BookDetailPage({
                                             type: 'BOOK'
                                         }}
                                         disabled={book.stock <= 0}
-                                        className="!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
+                                        className="!py-4 md:!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
                                     />
                                     {(book as any).previewUrl && (
                                         <a
                                             href={(book as any).previewUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-full flex items-center justify-center py-4 text-xs font-black text-black border-2 border-black rounded-full uppercase tracking-widest hover:bg-gray-50 transition-colors mt-4"
+                                            className="w-full flex items-center justify-center py-3 md:py-4 text-[10px] md:text-xs font-black text-black border-2 border-black rounded-full uppercase tracking-widest hover:bg-gray-50 transition-colors mt-2 md:mt-4"
                                         >
                                             Lire un extrait
                                         </a>
@@ -748,7 +748,7 @@ export default async function BookDetailPage({
                             </div>
                         </section>
                     )}
-                </div>
+                </main>
                 <Footer />
             </div>
         </>

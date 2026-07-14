@@ -16,12 +16,13 @@ import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, Trending
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
-import GiftPopup from '@/components/GiftPopup'
+import RoulettePopup from '@/components/RoulettePopup'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import AuthorsCarousel from '@/components/AuthorsCarousel'
 import CosmosBooks from '@/components/CosmosBooks'
 import CatalogDownload from '@/components/home/CatalogDownload'
 import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
+import { getPrimaryImage } from '@/lib/utils/image'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -677,7 +678,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       <ScrollReveal key={book.id} delay={idx * 150} animation="animate-reveal-up">
                         <Link href={`/community/market/${book.id}`} className="group h-full relative bg-white rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-green-100 hover:border-green-500 flex flex-col">
                           <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
-                            {book.image ? <ImageWithFallback src={book.image} alt={book.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-100 to-teal-100"><BookOpen className="w-20 h-20 text-green-300" /></div>}
+                            {book.image && getPrimaryImage(book.image) ? <ImageWithFallback src={getPrimaryImage(book.image)} alt={book.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-100 to-teal-100"><BookOpen className="w-20 h-20 text-green-300" /></div>}
                             <div className="absolute top-4 right-4 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-[9px] font-black uppercase tracking-wider text-green-600 border border-green-200">{book.condition}</div>
                           </div>
                           <div className="p-6 flex-grow flex flex-col">
@@ -813,7 +814,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <GiftPopup />
+      <RoulettePopup />
       <HeaderWithUser />
       <style dangerouslySetInnerHTML={{ __html: `
         body::-webkit-scrollbar { display: none !important; }

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { notifyRemoveFromCart, notifyClearCart } from '@/lib/actions/cart-notify'
+import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -258,6 +259,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                         <Trash2 className="w-4 h-4" />
                                         {t('ClearSelection')}
                                     </button>
+                                )}
+
+                                {/* Upsell Marque-pages */}
+                                {items.length > 0 && (
+                                    <CartBookmarksUpsell />
                                 )}
                             </div>
                         )}

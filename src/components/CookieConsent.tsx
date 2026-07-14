@@ -37,74 +37,58 @@ export default function CookieConsent() {
     if (!isVisible) return null
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] p-3 sm:p-6 flex justify-center pointer-events-none">
-            <div className="w-full max-w-4xl pointer-events-auto">
-                <div className="relative overflow-hidden bg-white/95 backdrop-blur-2xl border border-white/40 shadow-[0_20px_80px_-20px_rgba(0,0,0,0.1)] rounded-3xl sm:rounded-[3rem] p-1 sm:p-2">
-                {/* Subtle Gradient Glow */}
-                <div className="absolute -top-24 -right-24 w-48 h-48 bg-black/5 rounded-full blur-3xl"></div>
+        <div className="fixed bottom-0 left-0 right-0 z-[100] pointer-events-auto bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-8">
                 
-                <div className="relative bg-white/90 rounded-[1.5rem] sm:rounded-[2.2rem] p-5 sm:p-8">
-                    <button 
-                        onClick={() => setIsVisible(false)}
-                        aria-label="Fermer le bandeau des cookies"
-                        className="absolute top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-black transition-all hover:rotate-90 duration-300"
-                    >
-                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-
-                    <div className="flex flex-col gap-4 sm:gap-6">
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-black rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
-                                <Cookie className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <div>
-                                <h3 className="text-sm sm:text-base font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-black">
-                                    {t('Title')}
-                                </h3>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <ShieldCheck className="w-3 h-3 text-gray-400" />
-                                    <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Privacy Secured</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3 sm:space-y-4">
-                            <p className="text-xs sm:text-[13px] font-medium text-gray-600 leading-relaxed">
-                                {t.rich('Description', {
-                                    link: (chunks) => (
-                                        <Link href="/privacy" className="text-black font-bold underline underline-offset-4 decoration-1 hover:decoration-2 transition-all">
-                                            {chunks}
-                                        </Link>
-                                    )
-                                })}
-                            </p>
-                            
-                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-                                <button 
-                                    onClick={handleAccept}
-                                    className="flex-1 px-4 py-3 sm:px-8 sm:py-4 bg-black text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] rounded-xl sm:rounded-2xl hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-black/5"
-                                >
-                                    {t('Accept')}
-                                </button>
-                                <button 
-                                    onClick={handleDecline}
-                                    className="flex-1 px-4 py-3 sm:px-8 sm:py-4 border border-gray-200 text-black text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] rounded-xl sm:rounded-2xl hover:bg-gray-50 transition-all active:scale-95"
-                                >
-                                    {t('LearnMore')}
-                                </button>
-                            </div>
-                            
-                            <div className="flex justify-center mt-2 sm:mt-0">
-                                <button className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-2">
-                                    <Settings2 className="w-3 h-3" />
-                                    Preference Settings
-                                </button>
-                            </div>
-                        </div>
+                {/* Text & Icon */}
+                <div className="flex items-start lg:items-center gap-4 flex-1">
+                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10 hidden sm:flex">
+                        <Cookie className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="pr-8 lg:pr-0">
+                        <h3 className="text-sm font-black uppercase tracking-[0.15em] text-black mb-1">
+                            {t('Title')}
+                        </h3>
+                        <p className="text-xs font-medium text-gray-600 leading-relaxed max-w-3xl">
+                            {t.rich('Description', {
+                                link: (chunks) => (
+                                    <Link href="/privacy" className="text-black font-bold underline underline-offset-4 decoration-1 hover:decoration-2 transition-all">
+                                        {chunks}
+                                    </Link>
+                                )
+                            })}
+                        </p>
                     </div>
                 </div>
+                
+                {/* Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto shrink-0">
+                    <button 
+                        onClick={handleAccept}
+                        className="w-full sm:w-auto px-8 py-3 bg-black text-white text-[11px] font-black uppercase tracking-[0.15em] rounded-xl hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-black/5"
+                    >
+                        {t('Accept')}
+                    </button>
+                    <button 
+                        onClick={handleDecline}
+                        className="w-full sm:w-auto px-8 py-3 border border-gray-200 text-black text-[11px] font-black uppercase tracking-[0.15em] rounded-xl hover:bg-gray-50 transition-all active:scale-95"
+                    >
+                        {t('LearnMore')}
+                    </button>
+                    <button className="hidden sm:flex text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors items-center gap-2 px-2">
+                        <Settings2 className="w-3 h-3" />
+                    </button>
+                </div>
+                
+                {/* Close button - absolute on mobile, static on desktop */}
+                <button 
+                    onClick={() => setIsVisible(false)}
+                    aria-label="Fermer le bandeau des cookies"
+                    className="absolute top-4 right-4 lg:static text-gray-400 hover:text-black transition-all hover:rotate-90 p-1"
+                >
+                    <X className="w-5 h-5" />
+                </button>
             </div>
-        </div>
         </div>
     )
 }

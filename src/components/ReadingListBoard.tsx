@@ -175,7 +175,7 @@ export default function ReadingListBoard({ initialItems, user, children }: Readi
     return (
         <div className="space-y-8">
             {/* Navigation Tabs (All Screens) */}
-            <div className="flex bg-gray-100/80 p-1.5 rounded-2xl gap-1.5 backdrop-blur-sm sticky top-4 z-10 shadow-sm border border-white/50">
+            <div className="flex bg-gray-100/80 p-1.5 rounded-2xl gap-1.5 backdrop-blur-sm sticky top-[72px] md:top-4 z-40 shadow-sm border border-white/50">
                 {[ReadingStatus.TO_READ, ReadingStatus.READING, ReadingStatus.COMPLETED].map((status) => {
                     const { icon: Icon } = statusConfig[status];
                     const isActive = activeTab === status;

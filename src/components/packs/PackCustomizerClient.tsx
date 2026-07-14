@@ -128,7 +128,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                     </div>
                 )}
                 
-                <div className={hasMissingBooks ? 'opacity-50 pointer-events-none' : ''}>
+                <div className={`fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col gap-3 pb-safe md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none md:space-y-4 md:gap-0 ${hasMissingBooks ? 'opacity-50 pointer-events-none' : ''}`}>
                     <WhatsAppOrderButton
                         title={pack.name}
                         price={pack.price}
@@ -136,7 +136,6 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                         type="pack"
                         replacedBooks={replacedBooks}
                     />
-                    <div className="mt-4">
                         <AddToCartButton
                             product={{
                                 id: pack.id,
@@ -147,9 +146,8 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                                 shippingFees: pack.shippingFees,
                                 replacedBooks: Object.keys(replacedBooks).length > 0 ? replacedBooks : undefined
                             }}
-                            className="!py-8 text-xs rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal !rounded-full shadow-2xl hover:shadow-black/20"
+                            className="!py-4 md:!py-8 text-xs rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal !rounded-full shadow-2xl hover:shadow-black/20"
                         />
-                    </div>
                 </div>
             </div>
 

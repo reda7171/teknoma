@@ -238,7 +238,7 @@ export default async function PackDetailPage({
                 />
                 <Header />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-40 md:pb-32">
                     {/* Breadcrumb */}
                     <div className="flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-300 mb-12">
                         <Link href="/" className="hover:text-black transition-colors">{tNav('Home')}</Link>

@@ -180,7 +180,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
             <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo - Dynamique ou Style Pixio */}
-                    <Link href="/" className="flex items-center gap-2 group shrink-0 ltr:mr-32 rtl:ml-32 xl:ltr:mr-48 xl:rtl:ml-48" dir="ltr">
+                    <Link href="/" className="flex items-center gap-2 group shrink-0 lg:ltr:mr-32 lg:rtl:ml-32 xl:ltr:mr-48 xl:rtl:ml-48" dir="ltr">
                         {siteLogo ? (
                             <img 
                                 src={siteLogo} 

@@ -128,17 +128,8 @@ export default function BooksFilters({ params, categories, authors, languages, t
     const tCats = useTranslations('Categories')
     const tCommon = useTranslations('Common')
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [isScrolled, setIsScrolled] = useState(false)
     const [isAllCatsRevealed, setIsAllCatsRevealed] = useState(false)
     const router = useRouter()
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 100)
-        }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
 
     const handleAuthorChange = (value: string) => {
         const newParams = new URLSearchParams()
@@ -383,8 +374,8 @@ export default function BooksFilters({ params, categories, authors, languages, t
             </aside>
 
             {/* Mobile Sticky Top Bar */}
-            <div className={`lg:hidden fixed left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'top-20' : 'top-[80px]'}`}>
-                <div className="bg-white border-b border-gray-100 shadow-sm px-4 py-3">
+            <div className="lg:hidden sticky top-20 z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-2 -mt-4 mb-4">
+                <div className="bg-white border border-gray-100 shadow-lg shadow-black/5 rounded-2xl px-4 py-3">
                     <div className="max-w-7xl mx-auto flex items-center gap-2">
                         {/* Search Author Select (Condensed) */}
                         <AuthorCombobox 

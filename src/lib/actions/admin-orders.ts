@@ -338,7 +338,7 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
             }
 
             const response = await withyouService.createPackage(packageData)
-            trackingID = response?.data?.[0]?.trackingID || response?.trackingID || order.id
+            trackingID = response?.tracking_number || response?.data?.[0]?.trackingID || response?.trackingID || order.id
         } else if (compName.includes('olivraison')) {
             const token = company.apiKey || (await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } }))?.value
             if (!token) throw new Error("Clé API Olivraison manquante")

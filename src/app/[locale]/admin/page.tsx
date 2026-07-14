@@ -7,6 +7,7 @@ import DashboardAnalytics from '@/components/admin/DashboardAnalytics'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import { getSetting } from '@/lib/actions/site-settings'
+import ScanRetourButton from '@/components/admin/ScanRetourButton'
 
 async function getStats() {
     const [booksCount, packsCount, ordersCount, totalRevenue, deliveredCount, pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount] = await Promise.all([
@@ -306,6 +307,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                         <Cpu className="w-4 h-4 text-orange-500" />
                         n8n Server
                     </a>
+                    <ScanRetourButton />
                 </div>
             </div>
 

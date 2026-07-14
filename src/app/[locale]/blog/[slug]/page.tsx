@@ -223,9 +223,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
                 )}
 
-                <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
+                <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24">
                     {/* Fil d'Ariane + btn admin */}
-                    <div className="flex items-center justify-between mb-10">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-8 md:mb-10">
                         <nav className="flex items-center gap-2 text-[10px] rtl:text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-slate-400">
                             <Link href="/blog" className="hover:text-slate-900 transition-colors">Blog</Link>
                             <span>/</span>
@@ -274,7 +274,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     )}
 
                     {/* Méta */}
-                    <div className="flex flex-wrap items-center gap-6 text-[11px] rtl:text-[13px] font-bold uppercase tracking-[0.15em] rtl:tracking-normal text-slate-400 border-t border-slate-200 pt-8">
+                    <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[11px] rtl:text-[13px] font-bold uppercase tracking-[0.15em] rtl:tracking-normal text-slate-400 border-t border-slate-200 pt-6 md:pt-8">
                         {(post.authorName || post.author?.fullName) && (
                             <span className="flex items-center gap-2 text-slate-700">
                                 {(!post.authorName && post.author?.image) ? (
@@ -321,7 +321,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* === IMAGE COVER grande === */}
             {post.coverImage && (
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 md:mt-16 mb-12 md:mb-20">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 md:mt-16 mb-8 md:mb-20">
                     <div className="relative group">
                         {/* Decorative background blocks for editorial look */}
                         <div className="absolute inset-0 bg-black rounded-3xl md:rounded-[3rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl" />
@@ -357,7 +357,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             )}
 
             {/* === CONTENU PRINCIPAL === */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 lg:py-24 pb-32">
                 <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-16 xl:gap-24">
 
                     {/* Colonne article */}
@@ -429,9 +429,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Bio Auteur === */}
                         {(post.authorName || post.author) && (
-                            <div className="mt-12 md:mt-16 p-6 md:p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
+                            <div className="mt-10 md:mt-16 p-5 md:p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
                                 <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-4 md:mb-6">{t('AboutAuthor')}</p>
-                                <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-4 md:gap-6">
                                     <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
                                         {(!post.authorName && post.author?.image) ? (
                                             <Image

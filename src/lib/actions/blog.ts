@@ -78,7 +78,7 @@ export async function getPostBySlug(slug: string, language?: string) {
     if (language) {
         where.language = language
     }
-    
+
     return prisma.post.findFirst({
         where,
         include: {
@@ -151,9 +151,9 @@ export async function getRecentPosts(limit = 3, language: string = 'fr') {
 // ============================================
 
 export async function getAllPosts(
-    page = 1, 
-    limit = 20, 
-    search?: string, 
+    page = 1,
+    limit = 20,
+    search?: string,
     language?: string,
     published?: boolean | null,
     category?: string,
@@ -180,7 +180,7 @@ export async function getAllPosts(
     if (category && category !== 'all') {
         where.category = category
     }
-    
+
     if (authorId && authorId !== 'all') {
         where.authorId = authorId
     }
@@ -419,13 +419,13 @@ export async function incrementPostViews(id: string) {
 export async function deletePostsBulk(ids: string[]) {
     try {
         await verifyAdmin()
-        
+
         await prisma.post.deleteMany({
             where: {
                 id: { in: ids }
             }
         })
-        
+
         revalidatePath('/', 'layout')
         return { success: true }
     } catch (error) {
@@ -440,7 +440,7 @@ export async function deletePostsBulk(ids: string[]) {
 export async function sharePostToN8n(postId: string) {
     try {
         await verifyAdmin()
-        
+
         const post = await prisma.post.findUnique({
             where: { id: postId },
             select: {
@@ -452,13 +452,13 @@ export async function sharePostToN8n(postId: string) {
                 language: true
             }
         })
-        
+
         if (!post) return { success: false, error: 'Article introuvable' }
 
         const { getSetting } = await import('@/lib/actions/site-settings')
         const n8nWebhook = await getSetting('n8n_facebook_webhook')
         const siteUrl = await getSetting('site_url') || 'https://riwaya.store'
-        
+
         if (!n8nWebhook) {
             return { success: false, error: 'Le webhook n8n n\'est pas configuré dans les paramètres du site (clé: n8n_facebook_webhook)' }
         }

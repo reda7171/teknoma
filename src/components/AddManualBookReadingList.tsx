@@ -57,16 +57,26 @@ export default function AddManualBookReadingList() {
     return (
         <div className="mb-8">
             {!isOpen ? (
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
-                >
-                    <Plus className="w-5 h-5" />
-                    Ajouter un livre hors catalogue
-                </button>
+                <>
+                    {/* Desktop Button */}
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="hidden md:flex w-full md:w-auto items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Ajouter un livre hors catalogue
+                    </button>
+                    {/* Mobile FAB */}
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="md:hidden fixed bottom-6 right-4 z-50 flex items-center justify-center w-14 h-14 bg-black text-white rounded-full hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20"
+                    >
+                        <Plus className="w-6 h-6" />
+                    </button>
+                </>
             ) : (
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="fixed inset-0 z-50 md:relative md:z-auto bg-white/95 md:bg-white backdrop-blur-xl md:backdrop-blur-none p-6 md:p-6 md:rounded-2xl md:border md:border-gray-100 shadow-xl overflow-y-auto md:overflow-visible animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex justify-between items-center mb-6 pt-12 md:pt-0">
                         <div className="flex items-center gap-2">
                             <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
                                 <Book className="w-5 h-5 text-emerald-600" />

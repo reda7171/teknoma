@@ -76,14 +76,14 @@ export default function MarketMap({ books, isBlurred }: { books: any[], isBlurre
 
     if (!isLoaded) {
         return (
-            <div className="w-full h-[50vh] sm:h-[60vh] min-h-[300px] sm:min-h-[400px] mb-12 bg-gray-100 animate-pulse rounded-3xl flex items-center justify-center text-gray-400">
+            <div className="w-full h-[calc(100dvh-80px)] sm:h-[60vh] min-h-[300px] sm:min-h-[400px] mb-12 bg-gray-100 animate-pulse flex items-center justify-center text-gray-400">
                 Chargement de la carte...
             </div>
         )
     }
 
     return (
-        <div className="w-full h-[50vh] sm:h-[60vh] min-h-[300px] sm:min-h-[400px] relative z-0">
+        <div className="w-full h-[calc(100dvh-80px)] sm:h-[60vh] min-h-[300px] sm:min-h-[400px] relative z-0">
             <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 center={center}

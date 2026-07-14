@@ -21,7 +21,7 @@ export default async function ReadingListPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+            <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 pb-32 md:pb-8">
                 <h1 className="text-2xl md:text-3xl font-black mb-2 text-black">{t('ReadingList.Title')}</h1>
                 <p className="text-sm md:text-base text-gray-500 mb-6 md:mb-8 font-medium">{t('ReadingList.Subtitle')}</p>
 
