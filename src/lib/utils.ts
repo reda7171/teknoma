@@ -56,3 +56,16 @@ export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, f
     // Si c'est du base64 ou autre chose non géré, on passe par l'API pour que Next.js puisse servir le binaire
     return fallbackApiUrl;
 }
+
+/**
+ * Retourne l'URL de base de l'application, en forçant le domaine public
+ * si l'URL configurée pointe vers localhost ou une IP (fréquent avec un reverse proxy).
+ */
+export function getBaseUrl(): string {
+    let url = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
+    if (url.includes('127.0.0.1') || url.includes('localhost') || url.includes('167.86.108.246')) {
+        url = 'https://riwaya.store';
+    }
+    return url;
+}
+

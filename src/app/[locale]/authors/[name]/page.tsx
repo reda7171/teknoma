@@ -9,7 +9,7 @@ import { Link } from '@/i18n/routing'
 import { ArrowLeft, User } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { normalizeImage, getOgImageUrl } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
 
 // Generate metadata for the author page
@@ -22,7 +22,7 @@ export async function generateMetadata({
     const authorName = decodeURIComponent(name)
     const authorProfile = await getAuthorProfile(authorName)
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+    const baseUrl = getBaseUrl()
 
     let keywords: string[] = []
     let description = ''

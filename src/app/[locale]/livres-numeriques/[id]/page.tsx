@@ -6,7 +6,7 @@ import { Download, FileText, CheckCircle2, Shield, ArrowRight, BookOpen, Star } 
 import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { Link } from '@/i18n/routing'
-import { normalizeImage, getOgImageUrl } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
 import DigitalAddToCartButton from '@/components/DigitalAddToCartButton'
 
 import { getCommunityUser } from '@/lib/actions/community-auth'
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const product = await prisma.digitalProduct.findUnique({ where: { id } })
   if (!product) return { title: 'Livre non trouvé' }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+  const baseUrl = getBaseUrl()
   const imageUrl = getOgImageUrl(product.image, baseUrl, `${baseUrl}/images/og-blog.png`)
 
   return {

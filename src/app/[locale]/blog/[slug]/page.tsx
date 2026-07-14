@@ -19,7 +19,7 @@ import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
-import { getOgImageUrl } from '@/lib/utils'
+import { getOgImageUrl, getBaseUrl } from '@/lib/utils'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     if (!post) return {}
 
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+    const siteUrl = getBaseUrl()
     const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`
     const fallbackApiUrl = `${siteUrl}/api/blog/${post.id}/image`
     const imageUrl = post.coverImage ? getOgImageUrl(post.coverImage, siteUrl, fallbackApiUrl) : null

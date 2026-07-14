@@ -3,7 +3,7 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import WishlistButton from '@/components/WishlistButton'
-import { normalizeImage, getOgImageUrl } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
 import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2 } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import AddToCartButton from '@/components/AddToCartButton'
@@ -45,7 +45,7 @@ export async function generateMetadata({
         }
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+    const baseUrl = getBaseUrl()
     const fallbackApiUrl = `${baseUrl}/api/books/${book.id}/image`
     const imageUrl = getOgImageUrl(book.image, baseUrl, fallbackApiUrl)
 
