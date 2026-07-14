@@ -299,13 +299,22 @@ export default function EditAccessoryPage({
 
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Seller SKU (Jumia)</label>
-                            <input
-                                type="text"
-                                value={(formData as any).sellerSku || ''}
-                                onChange={e => setFormData({ ...formData, sellerSku: e.target.value })}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all font-bold"
-                                placeholder="SKU vendeur pour synchronisation"
-                            />
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={(formData as any).sellerSku || ''}
+                                    onChange={e => setFormData({ ...formData, sellerSku: e.target.value })}
+                                    className="flex-1 w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all font-bold"
+                                    placeholder="SKU vendeur pour synchronisation"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, sellerSku: `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}` })}
+                                    className="px-4 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                >
+                                    Générer
+                                </button>
+                            </div>
                         </div>
 
                         <div>

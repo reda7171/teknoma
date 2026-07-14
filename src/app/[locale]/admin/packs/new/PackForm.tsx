@@ -236,13 +236,25 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
                                 <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700 mb-2">
                                     Seller SKU (Jumia)
                                 </label>
-                                <input
-                                    type="text"
-                                    id="sellerSku"
-                                    name="sellerSku"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                    placeholder="SKU vendeur pour synchronisation"
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        id="sellerSku"
+                                        name="sellerSku"
+                                        className="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="SKU vendeur pour synchronisation"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const input = document.getElementById('sellerSku') as HTMLInputElement;
+                                            if (input) input.value = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                                        }}
+                                        className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
+                                    >
+                                        Générer
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Image */}
