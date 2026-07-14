@@ -94,6 +94,7 @@ export async function publishBooksToJumia(bookIds: string[]) {
                 gtinBarcode: book.isbn || undefined,
                 variation: "1",
                 brand: {
+                    code: 1045133,
                     name: "Generic"
                 },
                 category: {
@@ -174,13 +175,13 @@ export async function checkJumiaAvailability() {
         // 1. Fetch all products from Jumia
         while (hasNextPage) {
             const data = await jumia.getProducts({ size: 100, token })
-            if (!data || !data.content) break
+            if (!data || !data.products) break
             
-            for (const item of data.content) {
-                if (item.skus) {
-                    for (const skuObj of item.skus) {
-                        if (skuObj.sellerSku) {
-                            syncedSkus.add(skuObj.sellerSku)
+            for (const item of data.products) {
+                if (item.variations) {
+                    for (const varObj of item.variations) {
+                        if (varObj.sellerSku) {
+                            syncedSkus.add(varObj.sellerSku)
                         }
                     }
                 }
