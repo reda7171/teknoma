@@ -36,3 +36,23 @@ export function normalizeImage(raw: string | null | undefined): string {
 
     return img
 }
+
+/**
+ * Génère une URL absolue pour l'image Open Graph.
+ * Évite les redirections pour les URL externes ou locales,
+ * et utilise l'API de fallback uniquement pour le Base64.
+ */
+export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, fallbackApiUrl: string): string {
+    const img = normalizeImage(raw);
+    
+    if (img.startsWith('http')) {
+        return img;
+    }
+    
+    if (img.startsWith('/')) {
+        return `${baseUrl}${img}`;
+    }
+    
+    // Si c'est du base64 ou autre chose non géré, on passe par l'API pour que Next.js puisse servir le binaire
+    return fallbackApiUrl;
+}

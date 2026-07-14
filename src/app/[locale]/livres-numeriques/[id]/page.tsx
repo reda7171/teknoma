@@ -6,15 +6,18 @@ import { Download, FileText, CheckCircle2, Shield, ArrowRight, BookOpen, Star } 
 import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { Link } from '@/i18n/routing'
-import { normalizeImage } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl } from '@/lib/utils'
 import DigitalAddToCartButton from '@/components/DigitalAddToCartButton'
 
 import { getCommunityUser } from '@/lib/actions/community-auth'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string, id: string }> }) {
-  const { id } = await params
+  const { locale, id } = await params
   const product = await prisma.digitalProduct.findUnique({ where: { id } })
   if (!product) return { title: 'Livre non trouvé' }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+  const imageUrl = getOgImageUrl(product.image, baseUrl, `${baseUrl}/images/og-blog.png`)
 
   return {
     title: `${product.title} | Riwaya`,
@@ -22,7 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     openGraph: {
       title: `${product.title} | Riwaya`,
       description: product.description || '',
-      images: [product.image || '/og-image.jpg'],
+      images: [imageUrl],
+      url: `${baseUrl}/${locale}/livres-numeriques/${id}`
     }
   }
 }

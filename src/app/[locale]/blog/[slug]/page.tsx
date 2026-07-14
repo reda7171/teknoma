@@ -19,6 +19,7 @@ import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
+import { getOgImageUrl } from '@/lib/utils'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
@@ -33,7 +34,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`
-    const imageUrl = post.coverImage ? `${siteUrl}/api/blog/${post.id}/image` : null
+    const fallbackApiUrl = `${siteUrl}/api/blog/${post.id}/image`
+    const imageUrl = post.coverImage ? getOgImageUrl(post.coverImage, siteUrl, fallbackApiUrl) : null
 
     const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
     const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []

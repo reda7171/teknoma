@@ -3,7 +3,7 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import WishlistButton from '@/components/WishlistButton'
-import { normalizeImage } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl } from '@/lib/utils'
 import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2 } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import AddToCartButton from '@/components/AddToCartButton'
@@ -46,7 +46,8 @@ export async function generateMetadata({
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-    const imageUrl = `${baseUrl}/api/books/${book.id}/image`
+    const fallbackApiUrl = `${baseUrl}/api/books/${book.id}/image`
+    const imageUrl = getOgImageUrl(book.image, baseUrl, fallbackApiUrl)
 
     const localizedTitle = getLocalizedTitle(book, locale)
     const localizedDescriptionText = getLocalizedDescription(book, locale)
@@ -121,7 +122,7 @@ export async function generateMetadata({
             images: [imageUrl],
             type: 'book',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
-            url: `${baseUrl}/${locale}/books/${book.id}`,
+            url: `${baseUrl}${generateBookUrl(book, locale)}`,
         },
         twitter: {
             card: 'summary_large_image',

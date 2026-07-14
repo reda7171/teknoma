@@ -3,7 +3,7 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import AddToCartButton from '@/components/AddToCartButton'
-import { normalizeImage } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl } from '@/lib/utils'
 import { Link } from '@/i18n/routing'
 import { ArrowLeft, Check, Package, Shield, Sparkles, Truck } from 'lucide-react'
 import { notFound } from 'next/navigation'
@@ -30,7 +30,8 @@ export async function generateMetadata({
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-    const imageUrl = pack.image?.startsWith('http') ? pack.image : (pack.books[0]?.book.image || '')
+    const rawImage = pack.image || pack.books[0]?.book.image || '/images/og-packs.png'
+    const imageUrl = getOgImageUrl(rawImage, baseUrl, `${baseUrl}/images/og-packs.png`)
 
     const totalOriginalPrice = pack.books.reduce((sum, pb) => sum + pb.book.price, 0)
     const savings = totalOriginalPrice - pack.price

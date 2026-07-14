@@ -9,7 +9,7 @@ import { Link } from '@/i18n/routing'
 import { ArrowLeft, User } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { normalizeImage } from '@/lib/utils'
+import { normalizeImage, getOgImageUrl } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
 
 // Generate metadata for the author page
@@ -20,6 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
     const { name, locale } = await params
     const authorName = decodeURIComponent(name)
+    const authorProfile = await getAuthorProfile(authorName)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
 
@@ -68,7 +69,8 @@ export async function generateMetadata({
         ]
     }
 
-    const imageUrl = `${baseUrl}/api/authors/${encodeURIComponent(name)}/image`
+    const fallbackApiUrl = `${baseUrl}/api/authors/${encodeURIComponent(name)}/image`
+    const imageUrl = authorProfile?.image ? getOgImageUrl(authorProfile.image, baseUrl, fallbackApiUrl) : fallbackApiUrl
 
     return {
         title: siteTitle,
