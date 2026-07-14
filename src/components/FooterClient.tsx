@@ -165,6 +165,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     <div className="flex gap-8">
                         <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors">{t('Privacy')}</Link>
                         <Link href="/terms" className="text-gray-300 hover:text-white transition-colors">{t('Terms')}</Link>
+                        <Link href="/dmca" className="text-gray-300 hover:text-white transition-colors">DMCA</Link>
                     </div>
                 </div>
             </div>

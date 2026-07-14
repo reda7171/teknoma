@@ -103,6 +103,7 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                             </th>
                             <th className="px-8 py-6">Contenu</th>
                             <th className="px-8 py-6">Auteur</th>
+                            <th className="px-8 py-6">Livre lié</th>
                             <th className="px-8 py-6">Statut</th>
                             <th className="px-8 py-6">Vues</th>
                             <th className="px-8 py-6">Date</th>
@@ -160,6 +161,18 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                             </div>
                                             <span className="text-gray-600 font-bold text-xs">{post.authorName || post.author?.fullName}</span>
                                         </div>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        {post._count?.books > 0 ? (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100">
+                                                <Check className="w-3 h-3" />
+                                                Oui ({post._count.books})
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-gray-50 text-gray-400 border border-gray-100">
+                                                Non
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-8 py-6">
                                         {post.published ? (

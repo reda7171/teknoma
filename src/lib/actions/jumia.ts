@@ -37,6 +37,25 @@ export async function syncBooksStockToJumia() {
     }
 }
 
+function transliterateArabic(text: string): string {
+    if (!text) return text;
+    const map: Record<string, string> = {
+        'ا': 'a', 'أ': 'a', 'إ': 'e', 'آ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'h', 'خ': 'kh',
+        'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'dh',
+        'ع': 'e', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h', 'و': 'w',
+        'ي': 'y', 'ى': 'a', 'ة': 'a', 'ء': '', 'ئ': 'e', 'ؤ': 'o',
+        '٠':'0', '١':'1', '٢':'2', '٣':'3', '٤':'4', '٥':'5', '٦':'6', '٧':'7', '٨':'8', '٩':'9'
+    };
+    return text
+        .replace(/[\u064B-\u065F\u0670]/g, '') // Remove Arabic diacritics
+        .split('')
+        .map(char => map[char] || char)
+        .join('')
+        .replace(/[\u0600-\u06FF]/g, '') // Remove any remaining Arabic characters just in case
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 export async function publishBooksToJumia(bookIds: string[]) {
     try {
         const jumia = await JumiaAPI.getInstance()
@@ -55,15 +74,19 @@ export async function publishBooksToJumia(bookIds: string[]) {
         const shops = await jumia.getShops()
         const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
 
-        const productsPayload = books.map(book => ({
-            name: {
-                value: book.title.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
-                translations: [{ language: "FR", value: book.title.substring(0, 60) }]
-            },
-            description: {
-                value: (book.description || book.title).padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
-                translations: [{ language: "FR", value: book.description || book.title }]
-            },
+        const productsPayload = books.map(book => {
+            const cleanTitle = transliterateArabic(book.title) || `Livre ${book.id.substring(0, 8)}`;
+            const cleanDesc = transliterateArabic(book.description || book.title) || `Description pour le livre ${book.id.substring(0, 8)}`;
+            
+            return {
+                name: {
+                    value: cleanTitle.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
+                    translations: [{ language: "FR", value: cleanTitle.substring(0, 60) }]
+                },
+                description: {
+                    value: cleanDesc.padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
+                    translations: [{ language: "FR", value: cleanDesc }]
+                },
             parentSku: book.id,
             sellerSku: book.isbn || book.id,
             gtinBarcode: book.isbn || undefined,
@@ -85,9 +108,9 @@ export async function publishBooksToJumia(bookIds: string[]) {
             }] : [],
             price: {
                 currency: "MAD",
-                value: book.price,
-                salePrice: book.salePrice ? {
-                    value: book.salePrice,
+                value: book.originalPrice || book.price,
+                salePrice: book.originalPrice ? {
+                    value: book.price,
                     startAt: new Date().toISOString().split('T')[0],
                     endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
                 } : undefined
@@ -111,7 +134,8 @@ export async function publishBooksToJumia(bookIds: string[]) {
                     value: "0.5"
                 }
             ]
-        }))
+        };
+    })
 
         // Appeler la nouvelle méthode createProducts
         const response = await jumia.createProducts(shopId, productsPayload)

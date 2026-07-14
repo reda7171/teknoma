@@ -150,7 +150,15 @@ export async function getRecentPosts(limit = 3, language: string = 'fr') {
 // ADMIN ACTIONS
 // ============================================
 
-export async function getAllPosts(page = 1, limit = 20, search?: string, language?: string) {
+export async function getAllPosts(
+    page = 1, 
+    limit = 20, 
+    search?: string, 
+    language?: string,
+    published?: boolean | null,
+    category?: string,
+    authorId?: string
+) {
     const skip = (page - 1) * limit
     const where: any = {}
 
@@ -158,8 +166,20 @@ export async function getAllPosts(page = 1, limit = 20, search?: string, languag
         where.title = { contains: search }
     }
 
-    if (language) {
+    if (language && language !== 'all') {
         where.language = language
+    }
+
+    if (published !== undefined && published !== null) {
+        where.published = published
+    }
+
+    if (category && category !== 'all') {
+        where.category = category
+    }
+    
+    if (authorId && authorId !== 'all') {
+        where.authorId = authorId
     }
 
     const [posts, total] = await prisma.$transaction([
@@ -171,6 +191,9 @@ export async function getAllPosts(page = 1, limit = 20, search?: string, languag
             include: {
                 author: {
                     select: { fullName: true }
+                },
+                _count: {
+                    select: { books: true }
                 }
             }
         }),
@@ -301,11 +324,11 @@ export async function getPostById(id: string) {
 /**
  * Récupère les articles parlant d'un livre spécifique
  */
-export async function getPostsByBookId(bookId: string, language: string = 'fr') {
+export async function getPostsByBookId(bookId: string, language?: string) {
     return prisma.post.findMany({
         where: {
             published: true,
-            language,
+            ...(language ? { language } : {}),
             books: {
                 some: { id: bookId }
             }

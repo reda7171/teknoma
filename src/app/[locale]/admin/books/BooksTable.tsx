@@ -31,6 +31,7 @@ interface Book {
     orderCount?: number
     productType?: string
     sellerSku?: string | null
+    hasArticle?: boolean
 }
 
 interface ActiveFilters {
@@ -518,6 +519,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Statut
                                         </th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Lié à un article
+                                        </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Actions
                                         </th>
@@ -651,6 +655,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         )}
                                                                     </button>
                                                                 )}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                <span className={book.hasArticle ? 'text-green-600' : 'text-red-600'}>
+                                                                    {book.hasArticle ? 'Oui' : 'Non'}
+                                                                </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                                 <div className="flex items-center justify-end gap-2">

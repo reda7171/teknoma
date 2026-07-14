@@ -177,7 +177,7 @@ export default async function BookDetailPage({
         getSetting('announcement_bar_message'),
         getSetting('announcement_bar_bg_color'),
         getSetting('announcement_bar_text_color'),
-        getPostsByBookId(id, locale),
+        getPostsByBookId(bookId),
         getSetting('adsense_enabled').then(v => v === 'true'),
         getSetting('adsense_publisher_id').then(v => v || ''),
         getSetting('adsense_slot_sidebar').then(v => v || ''),
@@ -410,6 +410,59 @@ export default async function BookDetailPage({
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Related Blog Posts - Articles parlant de ce produit */}
+                            {relatedPosts && relatedPosts.length > 0 && (
+                                <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <FileText className="w-4 h-4 text-blue-600" />
+                                        <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black">
+                                            L'article parle de ce produit
+                                        </h3>
+                                    </div>
+
+                                    <div className="flex flex-col gap-4">
+                                        {relatedPosts.map((post: any) => (
+                                            <Link
+                                                key={post.id}
+                                                href={`/blog/${post.slug}`}
+                                                className="group flex gap-4 bg-white p-3 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow items-center"
+                                            >
+                                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                                                    {post.coverImage ? (
+                                                        <Image
+                                                            src={post.coverImage}
+                                                            alt={post.title}
+                                                            fill
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            unoptimized
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <span className="text-gray-300 font-black text-xs opacity-50">Blog</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0 py-1">
+                                                    {post.publishedAt && (
+                                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                                                            <Calendar className="w-2.5 h-2.5" />
+                                                            {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
+                                                        </p>
+                                                    )}
+                                                    <h4 className="text-xs sm:text-sm font-black text-black leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 mb-1">
+                                                        {post.title}
+                                                    </h4>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-blue-500 inline-flex items-center gap-1 mt-1">
+                                                        Lire l'article
+                                                        <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Info */}
@@ -628,88 +681,7 @@ export default async function BookDetailPage({
                         </div>
                     </div>
 
-                    {/* Related Blog Posts - Articles parlant de ce produit */}
-                    {relatedPosts && relatedPosts.length > 0 && (
-                        <section className="py-8 border-t border-gray-100">
-                            {/* Bloc publicitaire AdSense avant les articles liés */}
-                            {adsenseEnabled && (
-                                <AdBanner
-                                    publisherId={adsensePublisherId}
-                                    slotId={adsenseSidebarSlot}
-                                    label="Publicité — Articles liés"
-                                    format="horizontal"
-                                    className="!my-3 mb-6"
-                                />
-                            )}
 
-                            <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-16 gap-6 md:gap-8 px-2">
-                                <div className="space-y-4">
-                                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full">
-                                        <FileText className="w-4 h-4" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Lecture</span>
-                                    </div>
-                                    <h2 className="text-4xl md:text-6xl font-black text-black tracking-tighter">
-                                        L'article parle de ce produit<span className="text-blue-500">.</span>
-                                    </h2>
-                                </div>
-                                <Link 
-                                    href="/blog" 
-                                    className="text-[10px] font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all flex items-center gap-2"
-                                >
-                                    Voir tout le journal
-                                    <ArrowUpRight className="w-4 h-4" />
-                                </Link>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                                {relatedPosts.map((post: any) => (
-                                    <Link
-                                        key={post.id}
-                                        href={`/blog/${post.slug}`}
-                                        className="group relative bg-white rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full"
-                                    >
-                                        <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
-                                            {post.coverImage ? (
-                                                <Image
-                                                    src={post.coverImage}
-                                                    alt={post.title}
-                                                    fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                                    unoptimized
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                                    <span className="text-gray-300 font-black text-4xl opacity-20">Riwaya</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-8 flex flex-col flex-grow">
-                                            <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">
-                                                {post.publishedAt && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="w-3 h-3" />
-                                                        <span>{new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <h3 className="text-xl font-black text-black leading-tight mb-4 group-hover:text-blue-600 transition-colors line-clamp-2">
-                                                {post.title}
-                                            </h3>
-                                            {post.excerpt && (
-                                                <p className="text-gray-500 text-xs font-medium leading-relaxed mb-6 line-clamp-2">
-                                                    {post.excerpt}
-                                                </p>
-                                            )}
-                                            <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-black">
-                                                <span>Lire l'article</span>
-                                                <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </section>
-                    )}
 
                     {/* Reviews Section */}
                     <section className="py-20 md:py-32 border-t border-gray-100">

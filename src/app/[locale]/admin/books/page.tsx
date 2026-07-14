@@ -58,10 +58,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     if (productTypeFilter === 'all' || productTypeFilter === 'book') {
         const books = await prisma.book.findMany({
             where,
-            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
+            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } } }
         })
         booksStats.push(...books.map(b => ({ stock: b.stock, active: b.active, price: b.price })))
-        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku })))
+        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, hasArticle: (b._count?.posts || 0) > 0 })))
     }
 
     // 2. Fetch Packs

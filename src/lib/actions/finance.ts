@@ -63,13 +63,17 @@ export async function deleteExpense(id: string) {
 }
 
 export async function getPurchaseLots() {
-    await verifyAdmin()
-    return prisma.expense.findMany({
-        where: { 
-            category: 'BOOKS_PURCHASE'
-        },
-        orderBy: { date: 'desc' }
-    })
+    try {
+        await verifyAdmin()
+        return await prisma.expense.findMany({
+            where: { 
+                category: 'BOOKS_PURCHASE'
+            },
+            orderBy: { date: 'desc' }
+        })
+    } catch {
+        return []
+    }
 }
 
 export async function getExpenses() {

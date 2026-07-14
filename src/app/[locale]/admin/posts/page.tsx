@@ -1,7 +1,8 @@
-import { getAllPosts } from '@/lib/actions/blog'
+import { getAllPosts, getPostCategories } from '@/lib/actions/blog'
 import Link from 'next/link'
 import { Plus, Edit, FileText, Globe, TrendingUp } from 'lucide-react'
 import AdminPostsTable from '@/components/admin/AdminPostsTable'
+import AdminPostsFilters from './AdminPostsFilters'
 import { prisma } from '@/lib/prisma'
 
 export default async function AdminPostsPage({
@@ -15,9 +16,12 @@ export default async function AdminPostsPage({
     const searchParamsValues = await searchParams
     const page = typeof searchParamsValues.page === 'string' ? parseInt(searchParamsValues.page) : 1
     const search = typeof searchParamsValues.search === 'string' ? searchParamsValues.search : undefined
-
     const contentLang = typeof searchParamsValues.lang === 'string' ? searchParamsValues.lang : locale;
-    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang)
+    const published = typeof searchParamsValues.published === 'string' ? searchParamsValues.published === 'true' : undefined;
+    const category = typeof searchParamsValues.category === 'string' ? searchParamsValues.category : undefined;
+    const authorId = typeof searchParamsValues.authorId === 'string' ? searchParamsValues.authorId : undefined;
+
+    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId)
 
     const langCountsRaw = await prisma.post.groupBy({
         by: ['language'],
@@ -33,6 +37,22 @@ export default async function AdminPostsPage({
         _sum: { viewCount: true }
     })
     const totalViews = totalViewsAgg._sum.viewCount || 0
+
+    // Fetch filters data
+    const categories = await getPostCategories(contentLang)
+    const authorsRaw = await prisma.user.findMany({
+        where: { posts: { some: {} } },
+        select: { id: true, fullName: true }
+    })
+    const authors = authorsRaw.filter(a => a.fullName).map(a => ({ id: a.id, fullName: a.fullName as string }))
+
+    const activeFilters = {
+        search: search || '',
+        published: typeof searchParamsValues.published === 'string' ? searchParamsValues.published : 'all',
+        category: category || 'all',
+        authorId: authorId || 'all',
+        lang: contentLang
+    }
 
     return (
         <div className="space-y-12">
@@ -75,6 +95,13 @@ export default async function AdminPostsPage({
                     </Link>
                 ))}
             </div>
+
+            <AdminPostsFilters 
+                activeFilters={activeFilters}
+                categories={categories}
+                authors={authors}
+                totalCount={pagination.total}
+            />
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
