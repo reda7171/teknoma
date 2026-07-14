@@ -31,6 +31,7 @@ interface Book {
     orderCount?: number
     productType?: string
     sellerSku?: string | null
+    isSyncedWithJumia?: boolean
     hasArticle?: boolean
 }
 
@@ -577,7 +578,12 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         </div>
                                                                         <div className="text-sm text-gray-500">
                                                                             {book.author}
-                                                                            {book.sellerSku && <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono bg-gray-100 text-gray-600 rounded">SKU: {book.sellerSku}</span>}
+                                                                            {book.sellerSku && (
+                                                                                <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono bg-gray-100 text-gray-600 rounded inline-flex items-center gap-1">
+                                                                                    SKU: {book.sellerSku}
+                                                                                    {book.isSyncedWithJumia && <Check title="Synchronisé avec Jumia" className="w-3 h-3 text-green-500" />}
+                                                                                </span>
+                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                 </div>

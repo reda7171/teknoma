@@ -135,6 +135,7 @@ model Book {
   price           Float
   originalPrice   Float?
   costPrice       Float             @default(0)
+  jumiaPriceMarkup Int              @default(0)
   stock           Int               @default(0)
   image           String            @db.LongText
   category        String?           @db.VarChar(100)
@@ -144,6 +145,7 @@ model Book {
   updatedAt       DateTime          @updatedAt
   sellerId        String?
   status          String            @default("APPROVED")
+  isSyncedWithJumia Boolean         @default(false)
   longDescription String?           @db.LongText
   isBestSeller    Boolean           @default(false)
   previewUrl      String?           @db.LongText
@@ -211,6 +213,7 @@ model Pack {
   updatedAt      DateTime    @updatedAt
   isFreeDelivery Boolean     @default(false)
   shippingFees   Float       @default(0)
+  isSyncedWithJumia Boolean  @default(false)
   descriptionEn  String?     @db.Text
   descriptionFr  String?     @db.Text
   nameEn         String?     @db.VarChar(255)

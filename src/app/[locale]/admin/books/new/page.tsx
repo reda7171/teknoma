@@ -92,6 +92,7 @@ export default function BookForm() {
             previewUrl: formData.get('previewUrl') as string || undefined,
             isOriginal: formData.get('isOriginal') !== 'false', // Par défaut true
             sellerSku: formData.get('sellerSku') as string || undefined,
+            jumiaPriceMarkup: parseInt(formData.get('jumiaPriceMarkup') as string) || 0,
         }
 
         const result = await createBook(input)
@@ -275,6 +276,31 @@ export default function BookForm() {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="150"
                         />
+                    </div>
+
+                    {/* Pourcentage Jumia */}
+                    <div>
+                        <label htmlFor="jumiaPriceMarkup" className="block text-sm font-medium text-gray-700 mb-2">
+                            Pourcentage à ajouter (Prix Jumia)
+                        </label>
+                        <select
+                            id="jumiaPriceMarkup"
+                            name="jumiaPriceMarkup"
+                            defaultValue={0}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        >
+                            <option value="0">0% (Aucun ajout)</option>
+                            <option value="10">10%</option>
+                            <option value="20">20%</option>
+                            <option value="30">30%</option>
+                            <option value="40">40%</option>
+                            <option value="50">50%</option>
+                            <option value="60">60%</option>
+                            <option value="70">70%</option>
+                            <option value="80">80%</option>
+                            <option value="90">90%</option>
+                            <option value="100">100%</option>
+                        </select>
                     </div>
 
                     {/* Coût de revient (Pour Marge) */}

@@ -31,6 +31,7 @@ const BookSchema = z.object({
     previewUrl: z.string().optional(),
     isOriginal: z.boolean().optional().default(true),
     sellerSku: z.string().optional(),
+    jumiaPriceMarkup: z.number().int().min(0).max(100).optional().default(0),
 })
 
 export type BookInput = z.infer<typeof BookSchema>

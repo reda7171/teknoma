@@ -7,6 +7,7 @@ import CatalogButton from '@/components/admin/CatalogButton'
 import CatalogImageButton from '@/components/admin/CatalogImageButton'
 import EmptyLibraryButton from '@/components/admin/EmptyLibraryButton'
 import SyncJumiaStockButton from '@/components/admin/SyncJumiaStockButton'
+import CheckJumiaAvailabilityButton from '@/components/admin/CheckJumiaAvailabilityButton'
 
 import { Prisma } from '@prisma/client'
 
@@ -61,7 +62,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } } }
         })
         booksStats.push(...books.map(b => ({ stock: b.stock, active: b.active, price: b.price })))
-        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, hasArticle: (b._count?.posts || 0) > 0 })))
+        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, hasArticle: (b._count?.posts || 0) > 0 })))
     }
 
     // 2. Fetch Packs
@@ -187,6 +188,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                     </Link>
                     <div className="flex gap-2">
                         <SyncJumiaStockButton />
+                        <CheckJumiaAvailabilityButton />
                         <CatalogButton />
                         <CatalogImageButton />
                     </div>

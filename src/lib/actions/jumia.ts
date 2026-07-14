@@ -78,6 +78,8 @@ export async function publishBooksToJumia(bookIds: string[]) {
             const cleanTitle = transliterateArabic(book.title) || `Livre ${book.id.substring(0, 8)}`;
             const cleanDesc = transliterateArabic(book.description || book.title) || `Description pour le livre ${book.id.substring(0, 8)}`;
             
+            const markupMultiplier = 1 + ((book.jumiaPriceMarkup || 0) / 100);
+
             return {
                 name: {
                     value: cleanTitle.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
@@ -87,34 +89,30 @@ export async function publishBooksToJumia(bookIds: string[]) {
                     value: cleanDesc.padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
                     translations: [{ language: "FR", value: cleanDesc }]
                 },
-            parentSku: book.id,
-            sellerSku: book.isbn || book.id,
-            gtinBarcode: book.isbn || undefined,
-            variation: "1",
-            brand: {
-                code: 1126253, // Generic code based on the provided sample
-                name: "Generic"
-            },
-            category: {
-                // IMPORTANT: Nous utilisons 1000052 (Foreign Language Study) temporairement
-                // car "Bestselling Books" nécessite un code numérique exact que Jumia API ne permet pas de chercher.
-                // Veuillez remplacer 1000052 par le vrai code de "Bestselling Books" quand vous l'aurez.
-                code: 1000052, 
-                name: "Bestselling Books"
-            },
-            images: book.image ? [{
-                url: book.image.startsWith('/') ? `https://riwaya.store${book.image}` : book.image,
-                primary: true
-            }] : [],
-            price: {
-                currency: "MAD",
-                value: book.originalPrice || book.price,
-                salePrice: book.originalPrice ? {
-                    value: book.price,
-                    startAt: new Date().toISOString().split('T')[0],
-                    endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
-                } : undefined
-            },
+                parentSku: book.id,
+                sellerSku: book.sellerSku || book.isbn || book.id,
+                gtinBarcode: book.isbn || undefined,
+                variation: "1",
+                brand: {
+                    name: "Generic"
+                },
+                category: {
+                    code: 1000001, 
+                    name: "Bestselling Books"
+                },
+                images: book.image ? [{
+                    url: book.image.startsWith('/') ? `https://riwaya.store${book.image}` : book.image,
+                    primary: true
+                }] : [],
+                price: {
+                    currency: "MAD",
+                    value: Math.ceil((book.originalPrice || book.price) * markupMultiplier),
+                    salePrice: book.originalPrice ? {
+                        value: Math.ceil(book.price * markupMultiplier),
+                        startAt: new Date().toISOString().split('T')[0],
+                        endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
+                    } : undefined
+                },
             stock: book.stock,
             attributes: [
                 {
@@ -159,5 +157,88 @@ export async function publishBooksToJumia(bookIds: string[]) {
     } catch (error: any) {
         console.error("Erreur publishBooksToJumia:", error)
         return { success: false, message: `Erreur de publication: ${error.message}` }
+    }
+}
+
+export async function checkJumiaAvailability() {
+    try {
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré." }
+        }
+
+        let hasNextPage = true
+        let token: string | undefined
+        const syncedSkus = new Set<string>()
+
+        // 1. Fetch all products from Jumia
+        while (hasNextPage) {
+            const data = await jumia.getProducts({ size: 100, token })
+            if (!data || !data.content) break
+            
+            for (const item of data.content) {
+                if (item.skus) {
+                    for (const skuObj of item.skus) {
+                        if (skuObj.sellerSku) {
+                            syncedSkus.add(skuObj.sellerSku)
+                        }
+                    }
+                }
+            }
+
+            if (data.isLastPage === false && data.nextToken) {
+                token = data.nextToken
+            } else {
+                hasNextPage = false
+            }
+        }
+
+        if (syncedSkus.size === 0) {
+            return { success: false, message: "Aucun produit trouvé sur Jumia." }
+        }
+
+        // 2. Update all Books in database
+        // Reset all to false first
+        await prisma.book.updateMany({
+            data: { isSyncedWithJumia: false }
+        })
+
+        // Then update the ones that exist on Jumia
+        let updatedCount = 0
+        const skuArray = Array.from(syncedSkus)
+        
+        // We do it in chunks to avoid query too large
+        const chunkSize = 100
+        for (let i = 0; i < skuArray.length; i += chunkSize) {
+            const chunk = skuArray.slice(i, i + chunkSize)
+            // match either sellerSku or id
+            const result = await prisma.book.updateMany({
+                where: {
+                    OR: [
+                        { sellerSku: { in: chunk } },
+                        { id: { in: chunk } } // Some fallbacks to book.id
+                    ]
+                },
+                data: { isSyncedWithJumia: true }
+            })
+            updatedCount += result.count
+        }
+
+        // Also do the same for Packs just in case
+        await prisma.pack.updateMany({
+            data: { isSyncedWithJumia: false }
+        })
+        for (let i = 0; i < skuArray.length; i += chunkSize) {
+            const chunk = skuArray.slice(i, i + chunkSize)
+            await prisma.pack.updateMany({
+                where: { sellerSku: { in: chunk } },
+                data: { isSyncedWithJumia: true }
+            })
+        }
+
+        return { success: true, message: `Synchronisation terminée. ${updatedCount} produits trouvés sur Jumia.` }
+    } catch (error: any) {
+        console.error("Erreur checkJumiaAvailability:", error)
+        return { success: false, message: `Erreur: ${error.message}` }
     }
 }

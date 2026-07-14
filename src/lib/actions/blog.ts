@@ -157,7 +157,10 @@ export async function getAllPosts(
     language?: string,
     published?: boolean | null,
     category?: string,
-    authorId?: string
+    authorId?: string,
+    sort?: string,
+    dateFrom?: string,
+    dateTo?: string
 ) {
     const skip = (page - 1) * limit
     const where: any = {}
@@ -182,10 +185,25 @@ export async function getAllPosts(
         where.authorId = authorId
     }
 
+    if (dateFrom || dateTo) {
+        where.createdAt = {}
+        if (dateFrom) where.createdAt.gte = new Date(dateFrom)
+        if (dateTo) {
+            const toDate = new Date(dateTo)
+            toDate.setHours(23, 59, 59, 999)
+            where.createdAt.lte = toDate
+        }
+    }
+
+    let orderBy: any = { createdAt: 'desc' }
+    if (sort === 'oldest') orderBy = { createdAt: 'asc' }
+    if (sort === 'views_desc') orderBy = { viewCount: 'desc' }
+    if (sort === 'views_asc') orderBy = { viewCount: 'asc' }
+
     const [posts, total] = await prisma.$transaction([
         prisma.post.findMany({
             where,
-            orderBy: { createdAt: 'desc' },
+            orderBy,
             skip,
             take: limit,
             include: {

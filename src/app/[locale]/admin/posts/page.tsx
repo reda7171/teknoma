@@ -20,8 +20,11 @@ export default async function AdminPostsPage({
     const published = typeof searchParamsValues.published === 'string' ? searchParamsValues.published === 'true' : undefined;
     const category = typeof searchParamsValues.category === 'string' ? searchParamsValues.category : undefined;
     const authorId = typeof searchParamsValues.authorId === 'string' ? searchParamsValues.authorId : undefined;
+    const sort = typeof searchParamsValues.sort === 'string' ? searchParamsValues.sort : undefined;
+    const dateFrom = typeof searchParamsValues.dateFrom === 'string' ? searchParamsValues.dateFrom : undefined;
+    const dateTo = typeof searchParamsValues.dateTo === 'string' ? searchParamsValues.dateTo : undefined;
 
-    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId)
+    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId, sort, dateFrom, dateTo)
 
     const langCountsRaw = await prisma.post.groupBy({
         by: ['language'],
@@ -51,7 +54,10 @@ export default async function AdminPostsPage({
         published: typeof searchParamsValues.published === 'string' ? searchParamsValues.published : 'all',
         category: category || 'all',
         authorId: authorId || 'all',
-        lang: contentLang
+        lang: contentLang,
+        sort: sort || 'newest',
+        dateFrom: dateFrom || '',
+        dateTo: dateTo || ''
     }
 
     return (

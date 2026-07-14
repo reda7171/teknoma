@@ -10,6 +10,9 @@ interface ActiveFilters {
     category: string;
     authorId: string;
     lang: string;
+    sort: string;
+    dateFrom: string;
+    dateTo: string;
 }
 
 interface AdminPostsFiltersProps {
@@ -56,6 +59,9 @@ export default function AdminPostsFilters({
         if (newFilters.category && newFilters.category !== 'all') params.set('category', newFilters.category)
         if (newFilters.authorId && newFilters.authorId !== 'all') params.set('authorId', newFilters.authorId)
         if (newFilters.lang) params.set('lang', newFilters.lang)
+        if (newFilters.sort && newFilters.sort !== 'newest') params.set('sort', newFilters.sort)
+        if (newFilters.dateFrom) params.set('dateFrom', newFilters.dateFrom)
+        if (newFilters.dateTo) params.set('dateTo', newFilters.dateTo)
         
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
@@ -72,7 +78,10 @@ export default function AdminPostsFilters({
         activeFilters.search || 
         (activeFilters.published && activeFilters.published !== 'all') || 
         (activeFilters.category && activeFilters.category !== 'all') || 
-        (activeFilters.authorId && activeFilters.authorId !== 'all')
+        (activeFilters.authorId && activeFilters.authorId !== 'all') ||
+        (activeFilters.sort && activeFilters.sort !== 'newest') ||
+        activeFilters.dateFrom ||
+        activeFilters.dateTo
     )
 
     return (
@@ -191,6 +200,51 @@ export default function AdminPostsFilters({
                                     <option key={author.id} value={author.id}>{author.fullName}</option>
                                 ))}
                             </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+                        {/* Sort Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                Trier par
+                            </label>
+                            <select
+                                value={activeFilters.sort || 'newest'}
+                                onChange={(e) => handleApplyFilters({ sort: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            >
+                                <option value="newest">Plus récent</option>
+                                <option value="oldest">Plus ancien</option>
+                                <option value="views_desc">Vues décroissantes</option>
+                                <option value="views_asc">Vues croissantes</option>
+                            </select>
+                        </div>
+
+                        {/* Date From */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                Date de début
+                            </label>
+                            <input
+                                type="date"
+                                value={activeFilters.dateFrom || ''}
+                                onChange={(e) => handleApplyFilters({ dateFrom: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            />
+                        </div>
+
+                        {/* Date To */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                Date de fin
+                            </label>
+                            <input
+                                type="date"
+                                value={activeFilters.dateTo || ''}
+                                onChange={(e) => handleApplyFilters({ dateTo: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            />
                         </div>
                     </div>
                 </div>

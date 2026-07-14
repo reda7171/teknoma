@@ -1,0 +1,508 @@
+{
+  "categories": [
+    {
+      "code": 1000001,
+      "name": "Books, Movies and Music",
+      "hasChildren": true,
+      "completePath": "Books, Movies and Music",
+      "attributeSet": {
+        "sid": "9b66c50c-562a-4a98-9eae-0cf133a50f9d",
+        "name": "Books & Magazines"
+      }
+    },
+    {
+      "code": 1000002,
+      "name": "Fashion",
+      "hasChildren": true,
+      "completePath": "Fashion",
+      "attributeSet": {
+        "sid": "1da44991-e439-4ea1-8d29-b25c495f66ed",
+        "name": "Men & Women Clothes"
+      }
+    },
+    {
+      "code": 1000003,
+      "name": "Industrial & Scientific",
+      "hasChildren": true,
+      "completePath": "Industrial & Scientific",
+      "attributeSet": {
+        "sid": "cc1922f9-dcba-4cd7-af72-d1560f1e44ed",
+        "name": "Industrial, Scientific & Power Tools"
+      }
+    },
+    {
+      "code": 1000004,
+      "name": "Electronics",
+      "hasChildren": true,
+      "completePath": "Electronics",
+      "attributeSet": {
+        "sid": "b2aa5656-3171-4451-a13c-220bbe6dafcd",
+        "name": "Electronics & Phone Accessories"
+      }
+    },
+    {
+      "code": 1000005,
+      "name": "Baby Products",
+      "hasChildren": true,
+      "completePath": "Baby Products",
+      "attributeSet": {
+        "sid": "b1a2207e-6a85-41d8-8a67-87c1f9f5d8dc",
+        "name": "Toys & Board Games"
+      }
+    },
+    {
+      "code": 1000006,
+      "name": "Health & Beauty",
+      "hasChildren": true,
+      "completePath": "Health & Beauty",
+      "attributeSet": {
+        "sid": "991ccaa9-018c-4b0e-9680-6fdb016b82c4",
+        "name": "Skincare & Toiletries"
+      }
+    },
+    {
+      "code": 1000007,
+      "name": "Phones & Tablets",
+      "hasChildren": true,
+      "completePath": "Phones & Tablets",
+      "attributeSet": {
+        "sid": "0d022724-b2ba-4907-be60-9002947712a2",
+        "name": "Mobile Phones & Tablets"
+      }
+    },
+    {
+      "code": 1000008,
+      "name": "Home & Office",
+      "hasChildren": true,
+      "completePath": "Home & Office",
+      "attributeSet": {
+        "sid": "f46003f1-2611-47c8-b6dd-a11afd3047e4",
+        "name": "Home  Appliances"
+      }
+    },
+    {
+      "code": 1000009,
+      "name": "Livestock",
+      "hasChildren": true,
+      "completePath": "Livestock",
+      "attributeSet": {
+        "sid": "2cb695ef-706f-485b-bc4d-21d8df1b015a",
+        "name": "Livestock"
+      }
+    },
+    {
+      "code": 1000010,
+      "name": "Sporting Goods",
+      "hasChildren": true,
+      "completePath": "Sporting Goods",
+      "attributeSet": {
+        "sid": "480e0445-b4a6-4794-af6e-62ddd9592022",
+        "name": "Sports & Fitness Equipment"
+      }
+    },
+    {
+      "code": 1000011,
+      "name": "Grocery",
+      "hasChildren": true,
+      "completePath": "Grocery",
+      "attributeSet": {
+        "sid": "34a8fbd7-f55b-4b37-bf51-daa2f6ed0180",
+        "name": "Fresh Food & Grocery"
+      }
+    },
+    {
+      "code": 1000012,
+      "name": "Services",
+      "hasChildren": true,
+      "completePath": "Services",
+      "attributeSet": {
+        "sid": "93811ced-c317-4f7a-819e-e00443a4fb3d",
+        "name": "Deals & Promotions"
+      }
+    },
+    {
+      "code": 1000013,
+      "name": "Pet Supplies",
+      "hasChildren": true,
+      "completePath": "Pet Supplies",
+      "attributeSet": {
+        "sid": "2cb695ef-706f-485b-bc4d-21d8df1b015a",
+        "name": "Livestock"
+      }
+    },
+    {
+      "code": 1000014,
+      "name": "Musical Instruments",
+      "hasChildren": true,
+      "completePath": "Musical Instruments",
+      "attributeSet": {
+        "sid": "b8ef18a9-a959-45ce-9f46-e28330c12768",
+        "name": "Musical Instruments"
+      }
+    },
+    {
+      "code": 1000015,
+      "name": "Garden & Outdoors",
+      "hasChildren": true,
+      "completePath": "Garden & Outdoors",
+      "attributeSet": {
+        "sid": "cc1922f9-dcba-4cd7-af72-d1560f1e44ed",
+        "name": "Industrial, Scientific & Power Tools"
+      }
+    },
+    {
+      "code": 1000016,
+      "name": "Toys & Games",
+      "hasChildren": true,
+      "completePath": "Toys & Games",
+      "attributeSet": {
+        "sid": "b1a2207e-6a85-41d8-8a67-87c1f9f5d8dc",
+        "name": "Toys & Board Games"
+      }
+    },
+    {
+      "code": 1000017,
+      "name": "Automobile",
+      "hasChildren": true,
+      "completePath": "Automobile",
+      "attributeSet": {
+        "sid": "ba808961-18be-4b5b-bf10-076f398f2ed2",
+        "name": "Vehicle & Parts"
+      }
+    },
+    {
+      "code": 1000018,
+      "name": "Computing",
+      "hasChildren": true,
+      "completePath": "Computing",
+      "attributeSet": {
+        "sid": "f13d3c9f-f338-4d0a-acde-51639c7a26e8",
+        "name": "Computers & Laptops"
+      }
+    },
+    {
+      "code": 1000019,
+      "name": "Gaming",
+      "hasChildren": true,
+      "completePath": "Gaming",
+      "attributeSet": {
+        "sid": "20614f0c-25b0-4ce8-9c87-f80d41e76288",
+        "name": "Electronic Gaming"
+      }
+    },
+    {
+      "code": 1000020,
+      "name": "Accessories",
+      "hasChildren": true,
+      "completePath": "Phones & Tablets / Accessories",
+      "attributeSet": {
+        "sid": "b2aa5656-3171-4451-a13c-220bbe6dafcd",
+        "name": "Electronics & Phone Accessories"
+      }
+    },
+    {
+      "code": 1000021,
+      "name": "Accessories",
+      "hasChildren": true,
+      "completePath": "Electronics / Accessories",
+      "attributeSet": {
+        "sid": "b2aa5656-3171-4451-a13c-220bbe6dafcd",
+        "name": "Electronics & Phone Accessories"
+      }
+    },
+    {
+      "code": 1000022,
+      "name": "Abrasive & Finishing Products",
+      "hasChildren": true,
+      "completePath": "Industrial & Scientific / Abrasive & Finishing Products",
+      "attributeSet": {
+        "sid": "cc1922f9-dcba-4cd7-af72-d1560f1e44ed",
+        "name": "Industrial, Scientific & Power Tools"
+      }
+    },
+    {
+      "code": 1000023,
+      "name": "Car Care",
+      "hasChildren": true,
+      "completePath": "Automobile / Car Care",
+      "attributeSet": {
+        "sid": "2f348ff7-2351-4d93-ab16-7613f1e96f96",
+        "name": "Car Accessories"
+      }
+    },
+    {
+      "code": 1000024,
+      "name": "Appliances",
+      "hasChildren": true,
+      "completePath": "Home & Office / Appliances",
+      "attributeSet": {
+        "sid": "f46003f1-2611-47c8-b6dd-a11afd3047e4",
+        "name": "Home  Appliances"
+      }
+    },
+    {
+      "code": 1000025,
+      "name": "Computer Accessories",
+      "hasChildren": true,
+      "completePath": "Computing / Computer Accessories",
+      "attributeSet": {
+        "sid": "b2aa5656-3171-4451-a13c-220bbe6dafcd",
+        "name": "Electronics & Phone Accessories"
+      }
+    },
+    {
+      "code": 1000026,
+      "name": "Digital Games",
+      "hasChildren": true,
+      "completePath": "Gaming / Digital Games",
+      "attributeSet": {
+        "sid": "20614f0c-25b0-4ce8-9c87-f80d41e76288",
+        "name": "Electronic Gaming"
+      }
+    },
+    {
+      "code": 1000027,
+      "name": "Outdoor & Adventure",
+      "hasChildren": true,
+      "completePath": "Sporting Goods / Outdoor & Adventure",
+      "attributeSet": {
+        "sid": "480e0445-b4a6-4794-af6e-62ddd9592022",
+        "name": "Sports & Fitness Equipment"
+      }
+    },
+    {
+      "code": 1000028,
+      "name": "Action Figures & Statues",
+      "hasChildren": true,
+      "completePath": "Toys & Games / Action Figures & Statues",
+      "attributeSet": {
+        "sid": "b1a2207e-6a85-41d8-8a67-87c1f9f5d8dc",
+        "name": "Toys & Board Games"
+      }
+    },
+    {
+      "code": 1000029,
+      "name": "Amplifiers & Effects",
+      "hasChildren": true,
+      "completePath": "Musical Instruments / Amplifiers & Effects",
+      "attributeSet": {
+        "sid": "b8ef18a9-a959-45ce-9f46-e28330c12768",
+        "name": "Musical Instruments"
+      }
+    },
+    {
+      "code": 1000030,
+      "name": "Poultry",
+      "hasChildren": true,
+      "completePath": "Livestock / Poultry",
+      "attributeSet": {
+        "sid": "2cb695ef-706f-485b-bc4d-21d8df1b015a",
+        "name": "Livestock"
+      }
+    },
+    {
+      "code": 1000031,
+      "name": "Art & Humanities",
+      "hasChildren": true,
+      "completePath": "Books, Movies and Music / Art & Humanities",
+      "attributeSet": {
+        "sid": "9b66c50c-562a-4a98-9eae-0cf133a50f9d",
+        "name": "Books & Magazines"
+      }
+    },
+    {
+      "code": 1000032,
+      "name": "Deals",
+      "hasChildren": true,
+      "completePath": "Services / Deals",
+      "attributeSet": {
+        "sid": "93811ced-c317-4f7a-819e-e00443a4fb3d",
+        "name": "Deals & Promotions"
+      }
+    },
+    {
+      "code": 1000033,
+      "name": "Farm & Ranch",
+      "hasChildren": true,
+      "completePath": "Garden & Outdoors / Farm & Ranch",
+      "attributeSet": {
+        "sid": "cc1922f9-dcba-4cd7-af72-d1560f1e44ed",
+        "name": "Industrial, Scientific & Power Tools"
+      }
+    },
+    {
+      "code": 1000034,
+      "name": "Apparel & Accessories",
+      "hasChildren": true,
+      "completePath": "Baby Products / Apparel & Accessories",
+      "attributeSet": {
+        "sid": "4fdf2337-f27b-4adb-b194-2f0db7f7fd53",
+        "name": "Fashion Accessories"
+      }
+    },
+    {
+      "code": 1000035,
+      "name": "Baby & Child Care",
+      "hasChildren": true,
+      "completePath": "Health & Beauty / Baby & Child Care",
+      "attributeSet": {
+        "sid": "991ccaa9-018c-4b0e-9680-6fdb016b82c4",
+        "name": "Skincare & Toiletries"
+      }
+    },
+    {
+      "code": 1000036,
+      "name": "Baby",
+      "hasChildren": true,
+      "completePath": "Fashion / Baby",
+      "attributeSet": {
+        "sid": "1da44991-e439-4ea1-8d29-b25c495f66ed",
+        "name": "Men & Women Clothes"
+      }
+    },
+    {
+      "code": 1000037,
+      "name": "Air Fresheners",
+      "hasChildren": true,
+      "completePath": "Grocery / Air Fresheners",
+      "attributeSet": {
+        "sid": "f7ce2019-52e0-4d19-b4d6-baf6349b89c4",
+        "name": "Cleaning Products"
+      }
+    },
+    {
+      "code": 1000038,
+      "name": "Birds",
+      "hasChildren": true,
+      "completePath": "Pet Supplies / Birds",
+      "attributeSet": {
+        "sid": "2cb695ef-706f-485b-bc4d-21d8df1b015a",
+        "name": "Livestock"
+      }
+    },
+    {
+      "code": 1000039,
+      "name": "Accessories",
+      "hasChildren": true,
+      "completePath": "Toys & Games / Action Figures & Statues / Accessories",
+      "attributeSet": {
+        "sid": "b1a2207e-6a85-41d8-8a67-87c1f9f5d8dc",
+        "name": "Toys & Board Games"
+      }
+    },
+    {
+      "code": 1000040,
+      "name": "Gadgets",
+      "hasChildren": false,
+      "completePath": "Electronics / Accessories / Gadgets",
+      "attributeSet": {
+        "sid": "b2aa5656-3171-4451-a13c-220bbe6dafcd",
+        "name": "Electronics & Phone Accessories"
+      }
+    },
+    {
+      "code": 1000041,
+      "name": "Chickens",
+      "hasChildren": false,
+      "completePath": "Livestock / Poultry / Chickens",
+      "attributeSet": {
+        "sid": "2cb695ef-706f-485b-bc4d-21d8df1b015a",
+        "name": "Livestock"
+      }
+    },
+    {
+      "code": 1000042,
+      "name": "Accessory Combo Packs",
+      "hasChildren": false,
+      "completePath": "Phones & Tablets / Accessories / Accessory Combo Packs",
+      "attributeSet": {
+        "sid": "b2aa5656-3171-4451-a13c-220bbe6dafcd",
+        "name": "Electronics & Phone Accessories"
+      }
+    },
+    {
+      "code": 1000043,
+      "name": "Baby Boys",
+      "hasChildren": true,
+      "completePath": "Fashion / Baby / Baby Boys",
+      "attributeSet": {
+        "sid": "1da44991-e439-4ea1-8d29-b25c495f66ed",
+        "name": "Men & Women Clothes"
+      }
+    },
+    {
+      "code": 1000044,
+      "name": "Agricultural & Construction Machinery",
+      "hasChildren": true,
+      "completePath": "Garden & Outdoors / Farm & Ranch / Agricultural & Construction Machinery",
+      "attributeSet": {
+        "sid": "cc1922f9-dcba-4cd7-af72-d1560f1e44ed",
+        "name": "Industrial, Scientific & Power Tools"
+      }
+    },
+    {
+      "code": 1000045,
+      "name": "Special Deals",
+      "hasChildren": false,
+      "completePath": "Services / Deals / Special Deals",
+      "attributeSet": {
+        "sid": "93811ced-c317-4f7a-819e-e00443a4fb3d",
+        "name": "Deals & Promotions"
+      }
+    },
+    {
+      "code": 1000046,
+      "name": "Health Care",
+      "hasChildren": true,
+      "completePath": "Health & Beauty / Baby & Child Care / Health Care",
+      "attributeSet": {
+        "sid": "956ce4ce-cd12-43e3-9e44-6a66b67a8855",
+        "name": "Dietary Supplements & Vitamins"
+      }
+    },
+    {
+      "code": 1000047,
+      "name": "Baby Boys",
+      "hasChildren": true,
+      "completePath": "Baby Products / Apparel & Accessories / Baby Boys",
+      "attributeSet": {
+        "sid": "4fdf2337-f27b-4adb-b194-2f0db7f7fd53",
+        "name": "Fashion Accessories"
+      }
+    },
+    {
+      "code": 1000048,
+      "name": "Electric",
+      "hasChildren": false,
+      "completePath": "Grocery / Air Fresheners / Electric",
+      "attributeSet": {
+        "sid": "34a8fbd7-f55b-4b37-bf51-daa2f6ed0180",
+        "name": "Fresh Food & Grocery"
+      }
+    },
+    {
+      "code": 1000049,
+      "name": "Cooking Appliances",
+      "hasChildren": true,
+      "completePath": "Home & Office / Appliances / Cooking Appliances",
+      "attributeSet": {
+        "sid": "f46003f1-2611-47c8-b6dd-a11afd3047e4",
+        "name": "Home  Appliances"
+      }
+    },
+    {
+      "code": 1000050,
+      "name": "Mac",
+      "hasChildren": false,
+      "completePath": "Gaming / Digital Games / Mac",
+      "attributeSet": {
+        "sid": "20614f0c-25b0-4ce8-9c87-f80d41e76288",
+        "name": "Electronic Gaming"
+      }
+    }
+  ],
+  "page": {
+    "current": 1,
+    "totalOfPages": 555
+  }
+}
