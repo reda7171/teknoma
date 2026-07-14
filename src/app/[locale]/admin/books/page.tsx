@@ -7,7 +7,6 @@ import CatalogButton from '@/components/admin/CatalogButton'
 import CatalogImageButton from '@/components/admin/CatalogImageButton'
 import EmptyLibraryButton from '@/components/admin/EmptyLibraryButton'
 import SyncJumiaStockButton from '@/components/admin/SyncJumiaStockButton'
-import CheckJumiaAvailabilityButton from '@/components/admin/CheckJumiaAvailabilityButton'
 
 import { Prisma } from '@prisma/client'
 
@@ -188,7 +187,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                     </Link>
                     <div className="flex gap-2">
                         <SyncJumiaStockButton />
-                        <CheckJumiaAvailabilityButton />
                         <CatalogButton />
                         <CatalogImageButton />
                     </div>

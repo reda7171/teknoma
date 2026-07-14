@@ -521,6 +521,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                             Statut
                                         </th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Jumia
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Lié à un article
                                         </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -581,7 +584,6 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                             {book.sellerSku && (
                                                                                 <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono bg-gray-100 text-gray-600 rounded inline-flex items-center gap-1">
                                                                                     SKU: {book.sellerSku}
-                                                                                    {book.isSyncedWithJumia && <Check title="Synchronisé avec Jumia" className="w-3 h-3 text-green-500" />}
                                                                                 </span>
                                                                             )}
                                                                         </div>
@@ -661,6 +663,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         )}
                                                                     </button>
                                                                 )}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                <span className={book.isSyncedWithJumia ? 'text-green-600' : 'text-gray-400'}>
+                                                                    {book.isSyncedWithJumia ? <Check className="w-4 h-4 mx-auto" /> : '-'}
+                                                                </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <span className={book.hasArticle ? 'text-green-600' : 'text-red-600'}>
