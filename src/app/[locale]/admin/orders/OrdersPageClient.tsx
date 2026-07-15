@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import OrderFilters from './OrderFilters'
 import OrdersTableClient from './OrdersTableClient'
 import ImportOrdersButton from '@/components/admin/ImportOrdersButton'
 import ExportOrdersButton from '@/components/admin/ExportOrdersButton'
 import BulkSyncDeliveryButton from '@/components/admin/BulkSyncDeliveryButton'
 import ScanRetourButton from '@/components/admin/ScanRetourButton'
+import AdminOrdersEvolutionChart from '@/components/admin/AdminOrdersEvolutionChart'
 
 interface OrdersPageClientProps {
     orders: any[]
@@ -31,6 +32,24 @@ export default function OrdersPageClient({
 }: OrdersPageClientProps) {
     const [searchTerm, setSearchTerm] = useState('')
     const [shippingFilter, setShippingFilter] = useState('')
+
+    const evolutionData = useMemo(() => {
+        const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
+        
+        orders.forEach(order => {
+            if (order.status !== 'CANCELLED' && order.status !== 'RETURNED') {
+                const date = new Date(order.createdAt)
+                const dateStr = date.toISOString().split('T')[0]
+                if (!evolutionMap[dateStr]) {
+                    evolutionMap[dateStr] = { date: dateStr, count: 0, revenue: 0 }
+                }
+                evolutionMap[dateStr].count++
+                evolutionMap[dateStr].revenue += order.total
+            }
+        })
+
+        return Object.values(evolutionMap)
+    }, [orders])
 
     return (
         <div className="space-y-6">
@@ -63,6 +82,9 @@ export default function OrdersPageClient({
                     </p>
                 </div>
             </div>
+
+            {/* Evolution Chart */}
+            <AdminOrdersEvolutionChart data={evolutionData} />
 
             <div className="flex flex-col gap-8">
                 {/* Search & Filters */}

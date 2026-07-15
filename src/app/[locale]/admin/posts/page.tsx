@@ -1,9 +1,10 @@
 import { getAllPosts, getPostCategories } from '@/lib/actions/blog'
 import Link from 'next/link'
-import { Plus, Edit, FileText, Globe, TrendingUp } from 'lucide-react'
+import { Plus, Edit, FileText, Globe, TrendingUp, Clock } from 'lucide-react'
 import AdminPostsTable from '@/components/admin/AdminPostsTable'
 import AdminPostsFilters from './AdminPostsFilters'
 import { prisma } from '@/lib/prisma'
+import AdminPostsEvolutionChart from '@/components/admin/AdminPostsEvolutionChart'
 
 export default async function AdminPostsPage({
     params,
@@ -36,11 +37,14 @@ export default async function AdminPostsPage({
         return acc
     }, {} as Record<string, number>)
 
-    // Calculate total views using Prisma
-    const totalViewsAgg = await prisma.post.aggregate({
-        _sum: { viewCount: true }
+    // Calculate total views and read time using Prisma
+    const totalsAgg = await prisma.post.aggregate({
+        _sum: { viewCount: true, totalReadTime: true }
     })
-    const totalViews = totalViewsAgg._sum.viewCount || 0
+    const totalViews = totalsAgg._sum.viewCount || 0
+    const totalReadTimeSeconds = totalsAgg._sum.totalReadTime || 0
+    const avgReadTimeSeconds = totalViews > 0 ? Math.round(totalReadTimeSeconds / totalViews) : 0
+    const avgReadTimeFormatted = `${Math.floor(avgReadTimeSeconds / 60)}m ${avgReadTimeSeconds % 60}s`
 
     // Fetch filters data
     const categories = await getPostCategories(contentLang)
@@ -54,6 +58,24 @@ export default async function AdminPostsPage({
         select: { id: true, title: true },
         orderBy: { title: 'asc' }
     })
+
+    // Fetch data for evolution chart
+    const allPostsData = await prisma.post.findMany({
+        select: {
+            language: true,
+            createdAt: true
+        }
+    })
+
+    // Fetch top countries visiting the blog
+    const topCountriesRaw = await prisma.pageView.groupBy({
+        by: ['country'],
+        where: { url: { contains: '/blog' }, country: { not: null } },
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 5
+    })
+    const topCountries = topCountriesRaw
 
     const activeFilters = {
         search: search || '',
@@ -117,24 +139,46 @@ export default async function AdminPostsPage({
                 totalCount={pagination.total}
             />
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                    { label: "Total Articles", value: pagination.total, icon: FileText, color: "bg-black" },
-                    { label: "Articles Publiés", value: posts.filter(p => p.published).length, icon: Globe, color: "bg-blue-600" },
-                    { label: "Brouillons", value: posts.filter(p => !p.published).length, icon: Edit, color: "bg-gray-200" },
-                    { label: "Vues Globales", value: totalViews, icon: TrendingUp, color: "bg-emerald-500" }
-                ].map((stat, i) => (
-                    <div key={i} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center`}>
+            {/* Quick Stats & Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+                    {[
+                        { label: "Total Articles", value: pagination.total, icon: FileText, color: "bg-black" },
+                        { label: "Articles Publiés", value: posts.filter(p => p.published).length, icon: Globe, color: "bg-blue-600" },
+                        { label: "Vues Globales", value: totalViews, icon: TrendingUp, color: "bg-emerald-500" },
+                        { label: "Temps Lecture (Moyen)", value: avgReadTimeFormatted, icon: Clock, color: "bg-amber-500" }
+                    ].map((stat, i) => (
+                        <div key={i} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-4">
+                            <div className={`w-12 h-12 ${stat.color} rounded-2xl flex items-center justify-center shrink-0`}>
                                 <stat.icon className={`w-5 h-5 ${stat.color === 'bg-gray-200' ? 'text-gray-600' : 'text-white'}`} />
                             </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">{stat.label}</p>
+                                <p className="text-xl font-black text-black tracking-tight">{stat.value}</p>
+                            </div>
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{stat.label}</p>
-                        <p className="text-2xl font-black text-black tracking-tight">{stat.value}</p>
+                    ))}
+                </div>
+                <div className="lg:col-span-2">
+                    <AdminPostsEvolutionChart data={allPostsData} />
+                </div>
+            </div>
+
+            {/* Top Countries Section */}
+            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+                <h3 className="text-[12px] font-black uppercase tracking-widest text-gray-400 mb-4">Pays Visiteurs (Top 5)</h3>
+                {topCountries.length > 0 ? (
+                    <div className="flex flex-wrap gap-4">
+                        {topCountries.map((c, idx) => (
+                            <div key={idx} className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                <span className="font-bold text-sm">{c.country}</span>
+                                <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded-full">{c._count.id} vues</span>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                ) : (
+                    <div className="text-gray-400 text-sm font-medium italic">Aucune donnée de visite pour le moment (ouvrez un article de blog pour tester).</div>
+                )}
             </div>
 
             {/* Posts Table component */}

@@ -127,6 +127,8 @@ export async function getJumiaStats() {
         let delivered = 0
         let revenue = 0
         
+        const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
+        
         orders.forEach((o: any) => {
             const st = (o.status || o.Status || o.Statuses?.[0] || '').toUpperCase()
             if (st === 'PENDING') pending++
@@ -137,14 +139,30 @@ export async function getJumiaStats() {
             if (!isNaN(price) && st !== 'CANCELED' && st !== 'FAILED' && st !== 'RETURNED') {
                 revenue += price
             }
+
+            // Timeline evolution based on createdAt
+            const createdAt = o.createdAt || o.CreatedAt || o.created_at
+            if (createdAt) {
+                const dateStr = createdAt.split('T')[0] // YYYY-MM-DD
+                if (!evolutionMap[dateStr]) {
+                    evolutionMap[dateStr] = { date: dateStr, count: 0, revenue: 0 }
+                }
+                evolutionMap[dateStr].count++
+                if (!isNaN(price)) {
+                    evolutionMap[dateStr].revenue += price
+                }
+            }
         })
+        
+        const evolutionData = Object.values(evolutionMap).sort((a, b) => a.date.localeCompare(b.date))
         
         return {
             total: orders.length,
             pending,
             shipped,
             delivered,
-            revenue
+            revenue,
+            evolutionData
         }
     } catch (e) {
         return null

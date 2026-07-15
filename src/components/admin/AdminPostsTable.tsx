@@ -149,7 +149,9 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                                 </div>
                                             )}
                                             <div>
-                                                <div className="font-black text-black line-clamp-1 max-w-md uppercase tracking-tight group-hover:text-blue-600 transition-colors">{post.title}</div>
+                                                <Link href={`/${locale}/admin/posts/${post.id}`} className="font-black text-black line-clamp-1 max-w-md uppercase tracking-tight group-hover:text-blue-600 transition-colors hover:underline">
+                                                    {post.title}
+                                                </Link>
                                                 <div className="text-[10px] text-gray-400 font-bold mt-1 tracking-wider">/{post.slug}</div>
                                             </div>
                                         </div>

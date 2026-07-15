@@ -394,7 +394,7 @@ export async function getRelatedPosts(postId: string, category: string | null, l
 /**
  * Incrémente le compteur de vues d'un article
  */
-export async function incrementPostViews(id: string) {
+export async function incrementPostViews(id: string, country?: string) {
     try {
         const post = await prisma.post.update({
             where: { id },
@@ -404,11 +404,27 @@ export async function incrementPostViews(id: string) {
 
         try {
             const { sendTelegramMessage } = await import('@/lib/telegram')
-            await sendTelegramMessage(`📖 <b>Nouvelle lecture d'article !</b>\n\n📌 <b>Titre:</b> ${post.title}\n👁️ <b>Vues totales:</b> ${post.viewCount}`)
+            const countryInfo = country && country !== 'Inconnu' ? `\n🌍 <b>Pays:</b> ${country}` : ''
+            await sendTelegramMessage(`📖 <b>Nouvelle lecture d'article !</b>\n\n📌 <b>Titre:</b> ${post.title}\n👁️ <b>Vues totales:</b> ${post.viewCount}${countryInfo}`)
         } catch (e) {
             console.error("Erreur envoi telegram view:", e)
         }
 
+        return { success: true }
+    } catch (error) {
+        return { success: false }
+    }
+}
+
+/**
+ * Log le temps de lecture d'un article
+ */
+export async function logPostReadTime(id: string, seconds: number) {
+    try {
+        await prisma.post.update({
+            where: { id },
+            data: { totalReadTime: { increment: Math.min(seconds, 300) } } // Cap à 5 min max par requête pour éviter les abus
+        })
         return { success: true }
     } catch (error) {
         return { success: false }

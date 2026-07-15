@@ -19,7 +19,7 @@ export default async function CallCenterPage() {
             }
         },
         orderBy: {
-            createdAt: 'desc'
+            createdAt: 'asc'
         },
         include: {
             items: true

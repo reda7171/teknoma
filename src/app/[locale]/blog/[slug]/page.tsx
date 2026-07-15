@@ -6,7 +6,7 @@ import Footer from '@/components/FooterWithFeatures'
 import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { Metadata } from 'next'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import remarkHtml from 'remark-html'
 import remarkGfm from 'remark-gfm'
 import { remark } from 'remark'
@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic'
 const CommentsSection = dynamic(() => import('@/components/blog/CommentsSection'), { loading: () => <div className="h-32 bg-slate-50 animate-pulse rounded-2xl" /> })
 const ShareArticle = dynamic(() => import('@/components/blog/ShareArticle'))
 import ReadingProgress from '@/components/blog/ReadingProgress'
+import PostTimeTracker from '@/components/blog/PostTimeTracker'
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
@@ -82,7 +83,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     if (!post) notFound()
 
-    await incrementPostViews(post.id)
+    const headersList = await headers()
+    const country = headersList.get('cf-ipcountry') || headersList.get('x-vercel-ip-country') || 'Inconnu'
+    await incrementPostViews(post.id, country)
 
     const cookieStore = await cookies()
     const adminRole = cookieStore.get('admin-role')?.value
@@ -112,6 +115,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* Barre de progression lecture */}
             <ReadingProgress />
+            <PostTimeTracker postId={post.id} />
 
             <Header />
 

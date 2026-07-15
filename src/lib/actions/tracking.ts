@@ -14,6 +14,10 @@ export async function trackPageView(data: {
         const userAgent = (headersList.get('user-agent') || '').substring(0, 1000)
         const safeUrl = data.url.substring(0, 2000)
         const safeReferrer = (data.referrer || '').substring(0, 2000)
+        
+        // Extract IP and Country if available (Cloudflare or Vercel)
+        const country = headersList.get('cf-ipcountry') || headersList.get('x-vercel-ip-country') || 'Inconnu'
+        const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || headersList.get('cf-connecting-ip')
 
         await prisma.pageView.create({
             data: {
@@ -21,7 +25,9 @@ export async function trackPageView(data: {
                 referrer: safeReferrer || null,
                 userId: data.userId || null,
                 sessionId: data.sessionId || null,
-                userAgent: userAgent || null
+                userAgent: userAgent || null,
+                country: country,
+                ip: ip || null
             }
         })
     } catch (error) {

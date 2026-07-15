@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText } from 'lucide-react'
 import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull } from './actions'
+import JumiaOrdersEvolutionChart from '@/components/admin/JumiaOrdersEvolutionChart'
 
 export default function JumiaOrdersClient() {
     const [orders, setOrders] = useState<any[]>([])
@@ -353,6 +354,10 @@ export default function JumiaOrdersClient() {
                         <p className="text-3xl font-black text-slate-800">{stats.revenue.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
                     </div>
                 </div>
+            )}
+
+            {stats && stats.evolutionData && (
+                <JumiaOrdersEvolutionChart data={stats.evolutionData} />
             )}
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

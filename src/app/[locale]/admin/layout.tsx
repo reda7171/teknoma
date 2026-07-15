@@ -146,6 +146,7 @@ export default function AdminLayout({
                 { name: 'Consignation (FBJ)', href: `/${lang}/admin/jumia-consignment`, icon: Package },
                 { name: 'Point de Vente (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },
                 { name: 'Centre d\'Appels', href: `/${lang}/admin/call-center`, icon: Headset },
+                { name: 'Relances (Follow-up)', href: `/${lang}/admin/follow-up`, icon: MessageCircle },
                 { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
                 { name: 'Listes Scolaires', href: `/${lang}/admin/school-lists`, icon: FileText, featureKey: 'feature_deposer_liste' },
                 { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },

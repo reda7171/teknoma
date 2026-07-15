@@ -1,7 +1,11 @@
 'use client'
 
 import { Link, usePathname } from '@/i18n/routing'
-import { BookOpen, ShoppingCart, Search, Menu, X, User } from 'lucide-react'
+import { 
+    BookOpen, ShoppingCart, Search, Menu, X, User,
+    Home, Book, Users, Package, FileText, Newspaper, 
+    Monitor, Baby, Usb, UsersRound
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import CartDrawer from './CartDrawer'
 import { useCartStore } from '@/store/cart'
@@ -42,6 +46,20 @@ interface HeaderProps {
 }
 
 export default function Header({ user, notificationDropdown, navigation, features = {}, siteLogo = null }: HeaderProps = { user: null }) {
+    const getIconForUrl = (url: string, className = "w-4 h-4") => {
+        if (url === '/') return <Home className={className} />
+        if (url.includes('/books')) return <Book className={className} />
+        if (url.includes('/authors')) return <Users className={className} />
+        if (url.includes('/packs')) return <Package className={className} />
+        if (url.includes('/deposer-liste')) return <FileText className={className} />
+        if (url.includes('/blog')) return <Newspaper className={className} />
+        if (url.includes('/livres-numeriques')) return <Monitor className={className} />
+        if (url.includes('/mon-enfant')) return <Baby className={className} />
+        if (url.includes('/cle-usb')) return <Usb className={className} />
+        if (url.includes('/community')) return <UsersRound className={className} />
+        return null
+    }
+
     const pathname = usePathname()
     const t = useTranslations('Navigation')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -134,16 +152,16 @@ export default function Header({ user, notificationDropdown, navigation, feature
 
     const displayItems = mounted ? totalItems : 0
     const defaultNavItems = [
-        ...(features.deposerListe === true ? [{ href: '/deposer-liste', label: t('DeposerListe') }] : []),
+        { href: '/', label: t('Home') },
         { href: '/books', label: t('Books') },
         { href: '/authors', label: t('Authors') },
-        { href: '/blog', label: t('Journal'), isJournal: true },
         ...(features.packs === true ? [{ href: '/packs', label: t('Packs') }] : []),
+        ...(features.deposerListe === true ? [{ href: '/deposer-liste', label: t('DeposerListe') }] : []),
+        { href: '/blog', label: t('Journal'), isJournal: true },
         ...(features.digital === true ? [{ href: '/livres-numeriques', label: t('Digital') }] : []),
         ...(features.kids === true ? [{ href: '/mon-enfant', label: t('Kids') }] : []),
         ...(features.usb === true ? [{ href: '/cle-usb', label: t('UsbKey') }] : []),
         ...(features.exchange === true ? [{ href: '/community/market', label: t('Community') }] : []),
-        { href: '/', label: t('Home') },
     ]
 
     const navItems = navigation && navigation.length > 0
@@ -200,9 +218,9 @@ export default function Header({ user, notificationDropdown, navigation, feature
                     </Link>
 
                     {/* Desktop Navigation - Elegant & Clean */}
-                    <nav className="hidden lg:flex items-center space-x-10 min-w-max h-8">
+                    <nav className="hidden lg:flex items-center gap-6 xl:gap-10 min-w-max h-8">
                         {/* Navigation Items - Only render client side after mounting */}
-                        {mounted && finalNavItems.map((item: any) => {
+                        {mounted && finalNavItems.slice(0, 4).map((item: any) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                             const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.href.includes('/livres-numeriques') || item.isJournal || item.href.includes('/deposer-liste')
 
@@ -244,9 +262,10 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative group ${isActive ? 'text-black border-b-2 border-black pb-1' : 'text-gray-900 hover:text-black'}`}
+                                    className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative group flex items-center gap-1.5 ${isActive ? 'text-black border-b-2 border-black pb-1' : 'text-gray-900 hover:text-black'}`}
                                 >
-                                    {item.label}
+                                    {getIconForUrl(item.href, "w-4 h-4")}
+                                    <span>{item.label}</span>
                                     {!isActive && (
                                         <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-black group-hover:w-4 transition-all duration-300" />
                                     )}
@@ -275,6 +294,13 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                 </div>
                             </button>
                             {mounted && <UserDropdown user={user} features={features} />}
+                            <button 
+                                onClick={() => setMobileMenuOpen(true)}
+                                className="w-10 h-10 border-2 border-transparent hover:bg-gray-50 rounded-full flex items-center justify-center transition-all ml-2 rtl:ml-0 rtl:mr-2"
+                                aria-label="Menu principal"
+                            >
+                                <Menu className="w-6 h-6 text-gray-900" />
+                            </button>
                         </div>
 
                         {/* Mobile Menu Button -> Replaced by Search Icon on mobile */}
@@ -310,9 +336,15 @@ export default function Header({ user, notificationDropdown, navigation, feature
                 </div>
             )}
 
-            {/* Full-screen Mobile Menu Drawer */}
+            {/* Global Menu Drawer (Mobile & Desktop) */}
+            {mobileMenuOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-[55] transition-opacity"
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+            )}
             <div 
-                className={`md:hidden fixed inset-0 bg-white z-[60] transform transition-transform duration-300 ease-in-out ${
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full md:w-96 bg-white z-[60] transform transition-transform duration-300 ease-in-out shadow-2xl ${
                     mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                 }`}
                 suppressHydrationWarning
@@ -373,8 +405,9 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     <div className="flex justify-between items-center w-full">
-                                        <span className={`${isSpecial ? 'uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black' : ''}`}>
-                                            {item.label}
+                                        <span className={`flex items-center gap-2 ${isSpecial ? 'uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black' : ''}`}>
+                                            {getIconForUrl(item.href, "w-5 h-5")}
+                                            <span>{item.label}</span>
                                             {isJournal && <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />}
                                         </span>
                                         {isSpecial && <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : vibrantActiveBg}`} />}

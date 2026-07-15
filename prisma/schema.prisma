@@ -127,55 +127,55 @@ model LoginHistory {
 }
 
 model Book {
-  id              String            @id @default(uuid())
-  title           String            @db.VarChar(255)
-  author          String            @db.VarChar(255)
-  description     String            @db.Text
-  isbn            String?           @unique @db.VarChar(20)
-  price           Float
-  originalPrice   Float?
-  costPrice       Float             @default(0)
-  jumiaPriceMarkup Int              @default(0)
-  stock           Int               @default(0)
-  image           String            @db.LongText
-  category        String?           @db.VarChar(100)
-  language        String            @default("fr") @db.VarChar(10)
-  active          Boolean           @default(true)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  sellerId        String?
-  status          String            @default("APPROVED")
-  isSyncedWithJumia Boolean         @default(false)
+  id                String            @id @default(uuid())
+  title             String            @db.VarChar(255)
+  author            String            @db.VarChar(255)
+  description       String            @db.Text
+  isbn              String?           @unique @db.VarChar(20)
+  price             Float
+  originalPrice     Float?
+  costPrice         Float             @default(0)
+  stock             Int               @default(0)
+  image             String            @db.LongText
+  category          String?           @db.VarChar(100)
+  language          String            @default("fr") @db.VarChar(10)
+  active            Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  sellerId          String?
+  status            String            @default("APPROVED")
+  longDescription   String?           @db.LongText
+  isBestSeller      Boolean           @default(false)
+  previewUrl        String?           @db.LongText
+  imageAlt          String?           @db.VarChar(500)
+  imageTitle        String?           @db.VarChar(500)
+  displayOrder      Int               @default(0)
+  isOriginal        Boolean           @default(true)
+  bestChapters      String?           @db.Text
+  bestFor           String?           @db.Text
+  bestLessons       String?           @db.Text
+  bestQuote         String?           @db.Text
+  descriptionEn     String?           @db.Text
+  descriptionFr     String?           @db.Text
+  titleEn           String?           @db.VarChar(255)
+  titleFr           String?           @db.VarChar(255)
+  fbclid            String?           @db.VarChar(255)
+  ttclid            String?           @db.VarChar(255)
+  utmCampaign       String?           @db.VarChar(255)
+  utmMedium         String?           @db.VarChar(100)
+  utmSource         String?           @db.VarChar(100)
+  sellerSku         String?           @db.VarChar(100)
+  jumiaPriceMarkup  Int               @default(0)
+  isSyncedWithJumia Boolean           @default(false)
   jumiaStock        Int?
-  longDescription String?           @db.LongText
-  isBestSeller    Boolean           @default(false)
-  previewUrl      String?           @db.LongText
-  imageAlt        String?           @db.VarChar(500)
-  imageTitle      String?           @db.VarChar(500)
-  displayOrder    Int               @default(0)
-  isOriginal      Boolean           @default(true)
-  bestChapters    String?           @db.Text
-  bestFor         String?           @db.Text
-  bestLessons     String?           @db.Text
-  bestQuote       String?           @db.Text
-  descriptionEn   String?           @db.Text
-  descriptionFr   String?           @db.Text
-  titleEn         String?           @db.VarChar(255)
-  titleFr         String?           @db.VarChar(255)
-  fbclid          String?           @db.VarChar(255)
-  ttclid          String?           @db.VarChar(255)
-  utmCampaign     String?           @db.VarChar(255)
-  utmMedium       String?           @db.VarChar(100)
-  utmSource       String?           @db.VarChar(100)
-  sellerSku       String?           @db.VarChar(100)
-  reservations    BookReservation[]
-  seller          User?             @relation("SellerBooks", fields: [sellerId], references: [id])
-  orderItems      OrderItem[]
-  packBooks       PackBook[]
-  readingLists    ReadingList[]
-  reviews         Review[]
-  wishlists       Wishlist[]
-  posts           Post[]            @relation("PostBooks")
+  reservations      BookReservation[]
+  seller            User?             @relation("SellerBooks", fields: [sellerId], references: [id])
+  orderItems        OrderItem[]
+  packBooks         PackBook[]
+  readingLists      ReadingList[]
+  reviews           Review[]
+  wishlists         Wishlist[]
+  posts             Post[]            @relation("PostBooks")
 
   @@index([category])
   @@index([active])
@@ -203,28 +203,28 @@ model JumiaActionLog {
 }
 
 model Pack {
-  id             String      @id @default(uuid())
-  name           String      @db.VarChar(255)
-  description    String?     @db.Text
-  price          Float
-  costPrice      Float       @default(0)
-  image          String?     @db.VarChar(500)
-  active         Boolean     @default(true)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  isFreeDelivery Boolean     @default(false)
-  shippingFees   Float       @default(0)
-  jumiaPriceMarkup  Float?   @default(0) // Marge Jumia en % (ex: 15 pour 15%)
-  isSyncedWithJumia Boolean  @default(false)
+  id                String      @id @default(uuid())
+  name              String      @db.VarChar(255)
+  description       String?     @db.Text
+  price             Float
+  costPrice         Float       @default(0)
+  image             String?     @db.VarChar(500)
+  active            Boolean     @default(true)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  isFreeDelivery    Boolean     @default(false)
+  shippingFees      Float       @default(0)
+  descriptionEn     String?     @db.Text
+  descriptionFr     String?     @db.Text
+  nameEn            String?     @db.VarChar(255)
+  nameFr            String?     @db.VarChar(255)
+  sellerSku         String?     @db.VarChar(100)
+  isSyncedWithJumia Boolean     @default(false)
+  jumiaPriceMarkup  Float?      @default(0)
   jumiaStock        Int?
-  descriptionEn  String?     @db.Text
-  descriptionFr  String?     @db.Text
-  nameEn         String?     @db.VarChar(255)
-  nameFr         String?     @db.VarChar(255)
-  sellerSku      String?     @db.VarChar(100)
-  orderItems     OrderItem[]
-  books          PackBook[]
-  wishlists      Wishlist[]
+  orderItems        OrderItem[]
+  books             PackBook[]
+  wishlists         Wishlist[]
 
   @@index([active])
   @@map("packs")
@@ -268,6 +268,8 @@ model Order {
   sellerId        String?
   customerId      String?
   shippingCompany String?              @db.VarChar(100)
+  followUpCount   Int                  @default(0)
+  lastFollowUp    DateTime?
   items           OrderItem[]
   statusHistory   OrderStatusHistory[]
   customer        Customer?            @relation(fields: [customerId], references: [id])
@@ -296,6 +298,7 @@ model Customer {
   lastOrderDate DateTime @default(now())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  password      String?  @db.VarChar(255)
   orders        Order[]
 
   @@index([phone])
@@ -640,6 +643,7 @@ model Post {
   updatedAt   DateTime  @updatedAt
   tags        String?   @db.Text
   viewCount   Int       @default(0)
+  totalReadTime Int     @default(0)
   category    String?   @db.VarChar(100)
   language    String    @default("fr") @db.VarChar(10)
   authorName  String?   @db.VarChar(255)
@@ -739,10 +743,10 @@ model AuthorProfile {
   birthYear   Int?
   deathYear   Int?
   influences  String?  @db.Text
-  quote       String?  @db.Text
-  genres      String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  genres      String?  @db.Text
+  quote       String?  @db.Text
 
   @@map("author_profiles")
 }
