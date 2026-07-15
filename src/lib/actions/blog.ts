@@ -75,9 +75,6 @@ export async function getPostBySlug(slug: string, language?: string) {
         .toLowerCase()
 
     const where: any = { slug: normalizedSlug, published: true }
-    if (language) {
-        where.language = language
-    }
 
     return prisma.post.findFirst({
         where,
@@ -160,7 +157,8 @@ export async function getAllPosts(
     authorId?: string,
     sort?: string,
     dateFrom?: string,
-    dateTo?: string
+    dateTo?: string,
+    bookId?: string
 ) {
     const skip = (page - 1) * limit
     const where: any = {}
@@ -183,6 +181,10 @@ export async function getAllPosts(
 
     if (authorId && authorId !== 'all') {
         where.authorId = authorId
+    }
+
+    if (bookId && bookId !== 'all') {
+        where.books = { some: { id: bookId } }
     }
 
     if (dateFrom || dateTo) {

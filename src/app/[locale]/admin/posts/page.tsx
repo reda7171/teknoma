@@ -20,11 +20,12 @@ export default async function AdminPostsPage({
     const published = typeof searchParamsValues.published === 'string' ? searchParamsValues.published === 'true' : undefined;
     const category = typeof searchParamsValues.category === 'string' ? searchParamsValues.category : undefined;
     const authorId = typeof searchParamsValues.authorId === 'string' ? searchParamsValues.authorId : undefined;
+    const bookId = typeof searchParamsValues.bookId === 'string' ? searchParamsValues.bookId : undefined;
     const sort = typeof searchParamsValues.sort === 'string' ? searchParamsValues.sort : undefined;
     const dateFrom = typeof searchParamsValues.dateFrom === 'string' ? searchParamsValues.dateFrom : undefined;
     const dateTo = typeof searchParamsValues.dateTo === 'string' ? searchParamsValues.dateTo : undefined;
 
-    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId, sort, dateFrom, dateTo)
+    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId, sort, dateFrom, dateTo, bookId)
 
     const langCountsRaw = await prisma.post.groupBy({
         by: ['language'],
@@ -48,12 +49,18 @@ export default async function AdminPostsPage({
         select: { id: true, fullName: true }
     })
     const authors = authorsRaw.filter(a => a.fullName).map(a => ({ id: a.id, fullName: a.fullName as string }))
+    
+    const books = await prisma.book.findMany({
+        select: { id: true, title: true },
+        orderBy: { title: 'asc' }
+    })
 
     const activeFilters = {
         search: search || '',
         published: typeof searchParamsValues.published === 'string' ? searchParamsValues.published : 'all',
         category: category || 'all',
         authorId: authorId || 'all',
+        bookId: bookId || 'all',
         lang: contentLang,
         sort: sort || 'newest',
         dateFrom: dateFrom || '',
@@ -106,6 +113,7 @@ export default async function AdminPostsPage({
                 activeFilters={activeFilters}
                 categories={categories}
                 authors={authors}
+                books={books}
                 totalCount={pagination.total}
             />
 

@@ -12,6 +12,8 @@ const AuthorProfileSchema = z.object({
     image: z.string().optional(),
     nationality: z.string().optional(),
     birthYear: z.number().optional().nullable(),
+    quote: z.string().optional(),
+    genres: z.string().optional(),
 })
 
 export type AuthorProfileInput = z.infer<typeof AuthorProfileSchema>
@@ -44,6 +46,8 @@ export async function getAllAuthors() {
                 image: profile?.image || null,
                 nationality: profile?.nationality || null,
                 birthYear: profile?.birthYear || null,
+                quote: profile?.quote || null,
+                genres: profile?.genres || null,
                 hasProfile: !!profile
             }
         })
@@ -70,6 +74,8 @@ export async function upsertAuthorProfile(input: AuthorProfileInput) {
                 image: validatedData.image,
                 nationality: validatedData.nationality,
                 birthYear: validatedData.birthYear,
+                quote: validatedData.quote,
+                genres: validatedData.genres,
             },
             create: {
                 name: validatedData.name,
@@ -77,6 +83,8 @@ export async function upsertAuthorProfile(input: AuthorProfileInput) {
                 image: validatedData.image,
                 nationality: validatedData.nationality,
                 birthYear: validatedData.birthYear,
+                quote: validatedData.quote,
+                genres: validatedData.genres,
             }
         })
 

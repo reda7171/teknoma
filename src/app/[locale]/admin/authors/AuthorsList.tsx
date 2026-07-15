@@ -14,6 +14,8 @@ interface Author {
     image: string | null
     nationality: string | null
     birthYear: number | null
+    quote: string | null
+    genres: string | null
     hasProfile: boolean
 }
 
@@ -59,7 +61,9 @@ export default function AuthorsList({ initialAuthors }: { initialAuthors: Author
             bio: editingAuthor.bio || undefined,
             nationality: editingAuthor.nationality || undefined,
             birthYear: editingAuthor.birthYear || undefined,
-            image: editingAuthor.image || undefined
+            image: editingAuthor.image || undefined,
+            quote: editingAuthor.quote || undefined,
+            genres: editingAuthor.genres || undefined
         })
 
         if (result.success) {
@@ -307,6 +311,28 @@ export default function AuthorsList({ initialAuthors }: { initialAuthors: Author
                                     onChange={(e) => setEditingAuthor({ ...editingAuthor, bio: e.target.value })}
                                     className="w-full px-8 py-6 bg-gray-50 border border-gray-100 rounded-[2.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-bold text-xs leading-relaxed shadow-inner resize-none"
                                     placeholder="RACONTEZ L'HISTOIRE DE CET AUTEUR..."
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Citation Célèbre</label>
+                                <textarea
+                                    rows={3}
+                                    value={editingAuthor.quote || ''}
+                                    onChange={(e) => setEditingAuthor({ ...editingAuthor, quote: e.target.value })}
+                                    className="w-full px-8 py-6 bg-gray-50 border border-gray-100 rounded-[2.5rem] focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-bold text-xs italic leading-relaxed shadow-inner resize-none"
+                                    placeholder="EX: CEUX QUI NE PENSENT RIEN NE SE TROMPENT JAMAIS..."
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Genres Littéraires (Séparés par des virgules)</label>
+                                <input
+                                    type="text"
+                                    value={editingAuthor.genres || ''}
+                                    onChange={(e) => setEditingAuthor({ ...editingAuthor, genres: e.target.value })}
+                                    className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-black text-[10px] uppercase tracking-widest shadow-inner"
+                                    placeholder="EX: LITTÉRATURE CLASSIQUE, PHILOSOPHIE..."
                                 />
                             </div>
 

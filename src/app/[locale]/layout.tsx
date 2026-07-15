@@ -54,28 +54,65 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   const t = await getTranslations({ locale, namespace: 'HomePage.seo' });
 
-  const title = seoTitle || t('Title') || "Riwaya | Librairie en Ligne au Maroc - Livres, Packs & Échange de Livres";
-  const description = seoDescription || t('Description') || "Découvrez Riwaya, la librairie en ligne n°1 au Maroc. Achetez des livres de développement personnel, business, philosophie et romans. Échangez vos livres avec notre communauté. Livraison rapide partout au Maroc, paiement à la livraison.";
+  const title = seoTitle || t('Title') || "Riwaya: 1ère Librairie en ligne à Casablanca, Rabat & au Maroc";
+  const description = seoDescription || t('Description') || "Votre librairie en ligne n°1 au Maroc ! Livraison rapide à Casablanca, Rabat & partout au Maroc. Commandez vos livres au meilleur prix : romans, English books, mangas, scolaire et fournitures.";
 
   const keywordsFr = [
     "meilleure librairie en ligne au maroc", "meilleure librairie", "a7san librairie en ligne f maghrib", "a7san maktaba",
     "livres maroc", "librairie en ligne maroc", "achat livres maroc", "riwaya",
-    "librairie casablanca", "librairie rabat", "librairie marrakech", "librairie tanger",
+    "librairie casablanca", "librairie rabat", "librairie marrakech", "librairie tanger", "librairie agadir", "librairie fès", "librairie meknes",
     "développement personnel maroc", "livres business maroc", "philosophie maroc",
     "romans maroc", "packs de livres", "échange de livres maroc", "livraison livres maroc",
-    "paiement à la livraison", "COD maroc", "livraison gratuite livres"
+    "paiement à la livraison", "COD maroc", "livraison gratuite livres",
+    "fournitures scolaires", "cartables", "beaux-arts", "english books in morocco", 
+    "booktok maroc", "mangaka", "bd maroc", "nouveautés livres maroc", 
+    "rentrée scolaire maroc", "livres pour enfant",
+    "trousses", "cahiers", "fournitures de bureau", "littérature française", "littérature arabe",
+    "psychologie", "livres islamiques", "coran", "livres de cuisine", "thriller", "polar",
+    "acheter des livres pas cher maroc", "meilleur site pour acheter des livres maroc", "librairie papeterie maroc",
+    "promotion livres maroc", "livres originaux maroc", "livres en anglais casablanca",
+    "riwaya", "books", "library", "libriry", "livre", "kotob", "ktoba", "ktoba darija", "chri ktoba maroc", "ktoba rkhas",
+    "riwaya.store", "riwaya store", "ktouba", "ktouba darija", "chri ktouba", "livres en darija", "koutoub", 
+    "mktaba", "mktaba online", "maktaba en ligne", "ktabi", "chri ktabi", "qra ktab", "qra ktoba", 
+    "book store maroc", "librairie en ligne darija", "livres occasion maroc", "echange ktoba"
   ];
 
   const keywordsAr = [
     "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب", "مكتبة رواية",
     "a7san librairie en ligne f maghrib", "a7san maktaba", "meilleure librairie en ligne au maroc",
     "كتب المغرب", "مكتبة على الانترنت المغرب", "شراء كتب المغرب", "رواية",
-    "مكتبة الدار البيضاء", "مكتبة الرباط", "مكتبة مراكش", "مكتبة طنجة",
+    "مكتبة الدار البيضاء", "مكتبة الرباط", "مكتبة مراكش", "مكتبة طنجة", "مكتبة أكادير", "مكتبة فاس", "مكتبة مكناس",
     "تطوير الذات", "كتب أعمال", "فلسفة", "روايات", "باقات كتب",
-    "تبادل الكتب المغرب", "توصيل الكتب", "الدفع عند الاستلام", "توصيل مجاني"
+    "تبادل الكتب المغرب", "توصيل الكتب", "الدفع عند الاستلام", "توصيل مجاني",
+    "أدوات مدرسية", "كتب إنجليزية", "كتب أطفال", "مانغا", "أفضل الكتب العربية", 
+    "الدخول المدرسي", "محافظ مدرسية", "روايات عربية",
+    "مقلمات", "أقلام", "دفاتر", "أدوات مكتبية", "أدب عربي", "علم النفس",
+    "كتب إسلامية", "قرآن كريم", "كتب الطبخ", "روايات بوليسية",
+    "شراء كتب رخيصة في المغرب", "أفضل موقع لشراء الكتب في المغرب", "مكتبة قرطاسية المغرب",
+    "تخفيضات الكتب المغرب", "كتب أصلية المغرب", "كتب بالإنجليزية الدار البيضاء",
+    "riwaya", "books", "library", "libriry", "livre", "kotob", "ktoba", "ktoba darija", "كتب دارجة", "شري كتوبا", "رواية ستور",
+    "كتوبا", "كتوبا دارجة", "شري كتوبا", "كتب بالدارجة", "مكتبة أونلاين", "مكتبتي", "شري كتابي", 
+    "قرا كتاب", "قرا كتوبا", "تبادل الكتوبا", "كتب مستعملة المغرب", "كتوبا رخاص", "مكتبة دارجة"
   ];
 
-  const baseKeywords = locale === 'ar' ? keywordsAr : keywordsFr;
+  const keywordsEn = [
+    "best online bookstore in morocco", "bookstore morocco", "buy books online morocco", "riwaya store",
+    "english books in morocco", "bookstore casablanca", "bookstore rabat", "bookstore marrakech",
+    "bookstore tangier", "bookstore agadir", "bookstore fes", "bookstore meknes", "online bookshop morocco",
+    "buy english books casablanca", "novels morocco", "self development books morocco", "self help books morocco",
+    "business books morocco", "booktok morocco", "manga morocco", "buy manga online morocco", "children books morocco",
+    "school supplies morocco", "backpacks morocco", "buy cheap books morocco", "cheap english books morocco",
+    "cash on delivery books morocco", "free delivery books morocco", "discount books morocco", "original books morocco",
+    "islamic books english morocco", "quran english translation morocco", "islamic literature in english",
+    "cookbooks", "thriller", "psychology books", "fantasy books morocco", "sci-fi books morocco", "classic literature morocco",
+    "stationery morocco", "office supplies morocco", "notebooks morocco", "calculators morocco", "pens and pencils morocco", 
+    "back to school morocco", "bestselling books morocco",
+    "riwaya", "books", "library", "libriry", "livre", "kotob", "ktoba", "ktoba darija",
+    "ktoba morocco", "moroccan bookstore", "buy ktoba online", "riwaya books", "darija books", 
+    "books in darija", "moroccan literature", "morocco library", "ktouba shop"
+  ];
+
+  const baseKeywords = locale === 'ar' ? keywordsAr : (locale === 'en' ? keywordsEn : keywordsFr);
   const keywords = seoKeywords ? seoKeywords.split(',').map(k => k.trim()) : baseKeywords;
   const ogLocale = locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA';
 

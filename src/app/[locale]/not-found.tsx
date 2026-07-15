@@ -2,10 +2,15 @@ import { Home, BookOpen } from 'lucide-react'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import FooterWithFeatures from '@/components/FooterWithFeatures'
 import { Link } from '@/i18n/routing'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages, getLocale } from 'next-intl/server'
 
-export default function NotFound() {
+export default async function NotFound() {
+  const messages = await getMessages()
+  const locale = await getLocale()
+
   return (
-    <>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <HeaderWithUser />
 
       <div className="min-h-screen bg-pixio-cream flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -46,6 +51,6 @@ export default function NotFound() {
       </div>
 
       <FooterWithFeatures />
-    </>
+    </NextIntlClientProvider>
   )
 }

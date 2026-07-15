@@ -87,3 +87,26 @@ export async function getAuthorProfile(name: string) {
     })
 }
 
+/**
+ * Récupère des auteurs similaires
+ */
+export async function getSimilarAuthors(currentAuthorName: string, limit: number = 4) {
+    const authors = await prisma.authorProfile.findMany({
+        where: {
+            name: {
+                not: currentAuthorName
+            }
+        },
+        take: limit,
+        // Since we don't have complex similarity, just order by book count or randomly. 
+        // Ordering by createdAt desc for now.
+        orderBy: {
+            createdAt: 'desc'
+        }
+    })
+    
+    // Si on n'a pas trouvé assez de profils complets, on pourrait chercher dans les livres
+    // Mais pour l'instant, on retourne ce qu'on trouve dans les profils
+    return authors;
+}
+

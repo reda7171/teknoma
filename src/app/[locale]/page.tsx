@@ -116,7 +116,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
   // Lire le contenu depuis DB avec fallback sur la valeur i18n
-  const c = (key: string, fallback: string): string => (homepageContent as Record<string, string>)[key] || fallback
+  const c = (key: string, fallback: string): string => {
+    const dbValue = (homepageContent as Record<string, string>)[key]
+    // Les textes personnalisés via l'admin sont sauvegardés en une seule langue (généralement FR).
+    // On ne les utilise que si la locale correspond au français pour ne pas casser les traductions AR et EN.
+    if (locale === 'fr' && dbValue) return dbValue
+    return fallback
+  }
 
   const getSectionProps = (key: string, defaultBg: string) => {
     const bg = homeSettings[`bg_${key}`] || defaultBg

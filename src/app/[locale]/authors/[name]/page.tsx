@@ -11,7 +11,9 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
-
+import ShareArticle from '@/components/blog/ShareArticle'
+import { getSimilarAuthors } from '@/lib/db/authors'
+import { Quote } from 'lucide-react'
 // Generate metadata for the author page
 export async function generateMetadata({
     params,
@@ -119,9 +121,10 @@ export default async function AuthorPage({
     const tBook = await getTranslations('BookDetail')
     const tCommon = await getTranslations('Common')
 
-    const [books, authorProfile] = await Promise.all([
+    const [books, authorProfile, similarAuthors] = await Promise.all([
         getBooks({ author: authorName, active: true, limit: 100 }),
-        getAuthorProfile(authorName)
+        getAuthorProfile(authorName),
+        getSimilarAuthors(authorName)
     ])
 
     // Mock data for Eckhart Tolle if no profile found (temporary for demo)
@@ -138,7 +141,7 @@ export default async function AuthorPage({
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-
+    const shareTitle = `${authorName} - ${locale === 'ar' ? 'كتب ومؤلفات | مكتبة رواية' : locale === 'en' ? 'Books and Biography | Riwaya' : 'Livres et Biographie | Riwaya'}`
     const jsonLd = [
         {
             "@context": "https://schema.org",
@@ -212,9 +215,9 @@ export default async function AuthorPage({
                     {/* Back Button */}
                     <Link
                         href="/books"
-                        className="inline-flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 group transition-colors rtl:flex-row-reverse"
+                        className="inline-flex items-center gap-4 text-sm md:text-base font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 group transition-colors rtl:flex-row-reverse"
                     >
-                        <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:translate-x-1" />
+                        <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:translate-x-1" />
                         <span>{tBook('BackToSelection')}</span>
                     </Link>
 
@@ -237,6 +240,17 @@ export default async function AuthorPage({
                                     {authorName}<span className="text-gray-200">.</span>
                                 </h1>
 
+                                {/* Genres Badges */}
+                                {profile?.genres && (
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                        {profile.genres.split(',').map((genre, idx) => (
+                                            <span key={idx} className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                                                {genre.trim()}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+
                                 {profile?.nationality && (
                                     <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6">
                                         {profile.nationality} {profile.birthYear ? `• ${profile.birthYear}` : ''}
@@ -251,11 +265,27 @@ export default async function AuthorPage({
                                     </div>
                                 )}
 
-                                <div className="flex items-center gap-4">
-                                    <div className="h-px bg-gray-100 w-20"></div>
-                                    <p className="text-lg font-black text-gray-400 uppercase tracking-widest">
-                                        {tAuthor('BooksCount', { count: books.length })}
-                                    </p>
+                                {/* Quote */}
+                                {profile?.quote && (
+                                    <div className="mb-10 relative">
+                                        <Quote className="absolute -top-4 -left-4 w-12 h-12 text-gray-100 -z-10 rtl:-right-4 rtl:left-auto" />
+                                        <blockquote className="text-2xl md:text-3xl font-serif italic text-gray-800 leading-snug pl-6 border-l-4 border-black rtl:pr-6 rtl:pl-0 rtl:border-r-4 rtl:border-l-0">
+                                            "{profile.quote}"
+                                        </blockquote>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-gray-100 pt-8 mt-10 gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-px bg-gray-100 w-20 hidden md:block"></div>
+                                        <p className="text-lg font-black text-gray-400 uppercase tracking-widest">
+                                            {tAuthor('BooksCount', { count: books.length })}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <ShareArticle title={shareTitle} />
+                                    </div>
                                 </div>
                             </div>
 
@@ -287,6 +317,40 @@ export default async function AuthorPage({
                                 {tCommon('NoResultsDesc')}
                             </p>
                         </div>
+                    )}
+                    
+                    {/* Similar Authors */}
+                    {similarAuthors.length > 0 && (
+                        <section className="mt-20">
+                            <div className="flex items-center justify-between mb-10">
+                                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                                    {locale === 'ar' ? 'القراء يحبون أيضا' : locale === 'en' ? 'Readers also like' : 'Les lecteurs aiment aussi'}
+                                </h2>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                {similarAuthors.map((simAuthor) => (
+                                    <Link
+                                        key={simAuthor.id}
+                                        href={`/authors/${encodeURIComponent(simAuthor.name)}`}
+                                        className="group bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-black transition-all flex flex-col items-center text-center"
+                                    >
+                                        <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gray-50 border-2 border-gray-100 group-hover:border-black transition-colors">
+                                            {simAuthor.image ? (
+                                                <ImageWithFallback src={simAuthor.image} alt={simAuthor.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User className="w-12 h-12 text-gray-300 mx-auto mt-6" />
+                                            )}
+                                        </div>
+                                        <h3 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                            {simAuthor.name}
+                                        </h3>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">
+                                            {tAuthor('AuthorLabel')}
+                                        </p>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
                     )}
                 </div>
 

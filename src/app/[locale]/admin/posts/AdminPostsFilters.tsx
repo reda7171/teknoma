@@ -9,6 +9,7 @@ interface ActiveFilters {
     published: string;
     category: string;
     authorId: string;
+    bookId?: string;
     lang: string;
     sort: string;
     dateFrom: string;
@@ -19,6 +20,7 @@ interface AdminPostsFiltersProps {
     activeFilters: ActiveFilters;
     categories: string[];
     authors: { id: string, fullName: string }[];
+    books?: { id: string, title: string }[];
     totalCount: number;
 }
 
@@ -26,6 +28,7 @@ export default function AdminPostsFilters({
     activeFilters,
     categories,
     authors,
+    books = [],
     totalCount
 }: AdminPostsFiltersProps) {
     const [isOpen, setIsOpen] = useState(false)
@@ -58,6 +61,7 @@ export default function AdminPostsFilters({
         if (newFilters.published && newFilters.published !== 'all') params.set('published', newFilters.published)
         if (newFilters.category && newFilters.category !== 'all') params.set('category', newFilters.category)
         if (newFilters.authorId && newFilters.authorId !== 'all') params.set('authorId', newFilters.authorId)
+        if (newFilters.bookId && newFilters.bookId !== 'all') params.set('bookId', newFilters.bookId)
         if (newFilters.lang) params.set('lang', newFilters.lang)
         if (newFilters.sort && newFilters.sort !== 'newest') params.set('sort', newFilters.sort)
         if (newFilters.dateFrom) params.set('dateFrom', newFilters.dateFrom)
@@ -79,6 +83,7 @@ export default function AdminPostsFilters({
         (activeFilters.published && activeFilters.published !== 'all') || 
         (activeFilters.category && activeFilters.category !== 'all') || 
         (activeFilters.authorId && activeFilters.authorId !== 'all') ||
+        (activeFilters.bookId && activeFilters.bookId !== 'all') ||
         (activeFilters.sort && activeFilters.sort !== 'newest') ||
         activeFilters.dateFrom ||
         activeFilters.dateTo
@@ -203,7 +208,25 @@ export default function AdminPostsFilters({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-4 border-t border-gray-100">
+                        {/* Book Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Tag className="w-3 h-3" /> {/* Or Book icon if you prefer */}
+                                Livre lié
+                            </label>
+                            <select
+                                value={activeFilters.bookId || 'all'}
+                                onChange={(e) => handleApplyFilters({ bookId: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            >
+                                <option value="all">Tous les livres</option>
+                                {books.map(book => (
+                                    <option key={book.id} value={book.id}>{book.title}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         {/* Sort Filter */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">

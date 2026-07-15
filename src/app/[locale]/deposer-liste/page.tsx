@@ -54,6 +54,15 @@ export default async function DeposerListePage() {
                 <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-teal-400/10 blur-[120px] translate-x-1/3 translate-y-1/3 rounded-full"></div>
             </section>
 
+            {/* SEO Text Block */}
+            <section className="py-12 px-4 bg-white border-b border-gray-100">
+                <div className="max-w-4xl mx-auto text-center">
+                    <p className="text-sm md:text-base text-gray-500 leading-relaxed font-medium">
+                        {t('seoText')}
+                    </p>
+                </div>
+            </section>
+
             <Footer />
         </div>
     )

@@ -18,12 +18,12 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
     const t = useTranslations('Navigation')
 
     return (
-        <nav className="flex mb-6 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide" aria-label="Breadcrumb">
-            <ol className="flex items-center gap-2 text-xs rtl:text-sm font-medium text-gray-500">
+        <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex flex-wrap items-center gap-2 text-xs rtl:text-sm font-medium text-gray-500">
                 <li className="flex items-center">
                     <Link href="/" className="hover:text-black transition-colors flex items-center gap-1">
                         <Home className="w-3 h-3" />
-                        <span className="hidden sm:inline">{t('Home')}</span>
+                        <span>{t('Home')}</span>
                     </Link>
                 </li>
                 
@@ -38,7 +38,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                                 {item.label}
                             </Link>
                         ) : (
-                            <span className="text-black font-bold truncate max-w-[150px] sm:max-w-xs" aria-current="page">
+                            <span className="text-black font-bold break-words line-clamp-2 max-w-[200px] sm:max-w-xs" aria-current="page">
                                 {item.label}
                             </span>
                         )}

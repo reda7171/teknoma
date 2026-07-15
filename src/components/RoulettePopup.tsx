@@ -164,15 +164,15 @@ export default function RoulettePopup() {
                             <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/30">
                                 <Gift className="w-7 h-7 text-white" />
                             </div>
-                            <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">
+                            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 tracking-tight">
                                 Tentez votre chance !
                             </h2>
-                            <p className="text-gray-400 text-sm mb-6 font-medium leading-relaxed">
+                            <p className="text-gray-200 text-base sm:text-lg mb-6 font-medium leading-relaxed">
                                 Vous avez <strong className="text-cyan-400">{attemptsLeft}</strong> {attemptsLeft > 1 ? 'essais' : 'essai'}. Tournez la roue pour gagner un cadeau exceptionnel !
                             </p>
                             
                             {showLostMessage && attemptsLeft > 0 && (
-                                <div className="text-pink-400 text-sm font-bold mb-4 bg-pink-500/10 border border-pink-500/20 py-2 px-4 rounded-xl animate-bounce">
+                                <div className="text-pink-300 text-base sm:text-lg font-bold mb-4 bg-pink-500/10 border border-pink-500/20 py-3 px-5 rounded-xl animate-bounce">
                                     Oh non, c'est perdu ! Il vous reste {attemptsLeft} {attemptsLeft > 1 ? 'essais' : 'essai'}.
                                 </div>
                             )}
@@ -182,10 +182,10 @@ export default function RoulettePopup() {
                             <div className="w-14 h-14 bg-gradient-to-br from-gray-700 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-gray-600">
                                 <AlertCircle className="w-7 h-7 text-gray-300" />
                             </div>
-                            <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">
+                            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 tracking-tight">
                                 Dommage...
                             </h2>
-                            <p className="text-gray-400 text-sm font-medium mb-6">
+                            <p className="text-gray-300 text-base sm:text-lg font-medium mb-6">
                                 Vous avez épuisé vos 3 tentatives. Plus de chance la prochaine fois !
                             </p>
                         </div>
@@ -194,12 +194,12 @@ export default function RoulettePopup() {
                             <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-orange-500/30 animate-pulse">
                                 <Sparkles className="w-8 h-8 text-white" />
                             </div>
-                            <h2 className="text-3xl sm:text-4xl font-black text-white mb-2 tracking-tight">
+                            <h2 className="text-4xl sm:text-5xl font-black text-white mb-3 tracking-tight">
                                 BINGO !
                             </h2>
-                            <p className="text-lg text-gray-300 font-medium mb-8">
+                            <p className="text-xl sm:text-2xl text-gray-200 font-medium mb-8">
                                 Vous avez gagné : 
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 uppercase block mt-2 text-3xl font-black drop-shadow-sm">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 uppercase block mt-2 text-4xl sm:text-5xl font-black drop-shadow-sm">
                                     {wonPrize}
                                 </span>
                             </p>
@@ -218,8 +218,8 @@ export default function RoulettePopup() {
                             </div>
                         </div>
                         
-                        {/* Conteneur de la roue avec bordure premium */}
-                        <div className="w-full h-full rounded-full border-[6px] sm:border-8 border-[#1E293B] shadow-[0_0_30px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden bg-[#0F172A] p-1">
+                        {/* Conteneur de la roue avec bordure premium dorée */}
+                        <div className="w-full h-full rounded-full border-[6px] sm:border-8 border-transparent bg-gradient-to-br from-yellow-300 via-yellow-600 to-yellow-800 shadow-[0_0_40px_rgba(234,179,8,0.4),inset_0_0_20px_rgba(0,0,0,0.8)] relative overflow-hidden p-1" style={{ backgroundClip: 'padding-box' }}>
                             <div 
                                 className="w-full h-full rounded-full relative overflow-hidden shadow-inner"
                                 style={{
@@ -240,8 +240,8 @@ export default function RoulettePopup() {
                                             }}
                                         >
                                             <span 
-                                                className="text-[10px] sm:text-xs font-black uppercase tracking-wider block drop-shadow-md"
-                                                style={{ color: prize.textColor, transform: 'rotate(0deg)', maxWidth: '50px', textAlign: 'center', lineHeight: '1.2' }}
+                                                className="text-[11px] sm:text-[14px] font-black uppercase tracking-wider block drop-shadow-md"
+                                                style={{ color: prize.textColor, transform: 'rotate(0deg)', maxWidth: '60px', textAlign: 'center', lineHeight: '1.2' }}
                                             >
                                                 {prize.label}
                                             </span>
@@ -261,34 +261,34 @@ export default function RoulettePopup() {
                         <button
                             onClick={spinWheel}
                             disabled={isSpinning}
-                            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-4 sm:py-5 rounded-2xl font-black uppercase tracking-widest transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-[1.02] active:scale-[0.98] border border-cyan-400/30"
+                            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-4 sm:py-6 rounded-2xl font-black uppercase tracking-widest text-base sm:text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:scale-[1.02] active:scale-[0.98] border border-cyan-400/50"
                         >
                             {isSpinning ? 'La roue tourne...' : (attemptsLeft < 3 && showLostMessage ? 'Réessayer' : 'Tourner la roue')}
                         </button>
                     ) : hasSpun ? (
                         <div className="w-full space-y-4 animate-fade-in-up">
-                            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-400 p-4 rounded-2xl text-xs font-bold text-left flex gap-4 shadow-inner">
-                                <AlertCircle className="w-6 h-6 shrink-0 text-green-500" />
+                            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-400 p-5 rounded-2xl text-sm font-bold text-left flex gap-4 shadow-inner">
+                                <AlertCircle className="w-8 h-8 shrink-0 text-green-500" />
                                 <div>
-                                    <p className="text-sm text-green-300">Cadeau enregistré !</p>
-                                    <p className="font-medium mt-1 text-green-400/80">Ajoutez 4 livres à votre panier pour débloquer votre cadeau lors de la validation.</p>
+                                    <p className="text-base sm:text-lg text-green-300">Cadeau enregistré !</p>
+                                    <p className="font-medium mt-1 text-green-100 text-sm sm:text-base">Ajoutez 4 livres à votre panier pour débloquer votre cadeau lors de la validation.</p>
                                 </div>
                             </div>
                             
                             <div className="pt-2">
-                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-3">Partagez votre chance</p>
+                                <p className="text-xs sm:text-sm text-gray-300 font-black uppercase tracking-[0.2em] mb-4">Partagez votre chance</p>
                                 <div className="flex gap-3">
                                     <button 
                                         onClick={handleShareWhatsApp}
-                                        className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/30 py-3.5 rounded-xl font-bold text-sm hover:bg-[#25D366] hover:text-white transition-all duration-300"
+                                        className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/30 py-4 rounded-xl font-bold text-base hover:bg-[#25D366] hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(37,211,102,0.2)]"
                                     >
-                                        <Share2 className="w-4 h-4" /> WhatsApp
+                                        <Share2 className="w-5 h-5" /> WhatsApp
                                     </button>
                                     <button 
                                         onClick={handleShareFacebook}
-                                        className="flex-1 flex items-center justify-center gap-2 bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/30 py-3.5 rounded-xl font-bold text-sm hover:bg-[#1877F2] hover:text-white transition-all duration-300"
+                                        className="flex-1 flex items-center justify-center gap-2 bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/30 py-4 rounded-xl font-bold text-base hover:bg-[#1877F2] hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(24,119,242,0.2)]"
                                     >
-                                        <Share2 className="w-4 h-4" /> Facebook
+                                        <Share2 className="w-5 h-5" /> Facebook
                                     </button>
                                 </div>
                             </div>

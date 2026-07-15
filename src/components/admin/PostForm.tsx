@@ -487,7 +487,12 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                             {/* Book List */}
                             <div className="max-h-60 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-100">
                                 {allBooks
-                                    .filter(b => b.title.toLowerCase().includes(bookSearch.toLowerCase()) && !selectedBookIds.includes(b.id))
+                                    .filter(b => {
+                                        if (selectedBookIds.includes(b.id)) return false;
+                                        if (!bookSearch.trim()) return true;
+                                        const searchTerms = bookSearch.toLowerCase().split(/\s+/).filter(Boolean);
+                                        return searchTerms.some(term => b.title.toLowerCase().includes(term));
+                                    })
                                     .map(book => (
                                         <button
                                             key={book.id}

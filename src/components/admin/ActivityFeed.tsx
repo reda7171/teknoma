@@ -24,6 +24,18 @@ interface ActivityFeedProps {
 
 export default function ActivityFeed({ initialActivity }: ActivityFeedProps) {
     const [searchTerm, setSearchTerm] = useState('')
+    const [referrerFilter, setReferrerFilter] = useState('all')
+
+    const getHostname = (url: string | null) => {
+        if (!url) return 'Direct'
+        try {
+            return new URL(url).hostname
+        } catch {
+            return 'Direct'
+        }
+    }
+
+    const uniqueReferrers = Array.from(new Set(initialActivity.map(v => getHostname(v.referrer)))).sort()
 
     const filteredActivity = initialActivity.filter(view => {
         const search = searchTerm.toLowerCase()
@@ -36,16 +48,13 @@ export default function ActivityFeed({ initialActivity }: ActivityFeedProps) {
         const countryMatch = view.country?.toLowerCase().includes(search)
         const deviceMatch = view.device?.toLowerCase().includes(search)
         
-        return urlMatch || userMatch || referrerMatch || sessionMatch || cityMatch || countryMatch || deviceMatch
-    })
+        const matchesSearch = urlMatch || userMatch || referrerMatch || sessionMatch || cityMatch || countryMatch || deviceMatch
+        
+        const hostname = getHostname(view.referrer)
+        const matchesReferrer = referrerFilter === 'all' || hostname === referrerFilter
 
-    const getHostname = (url: string) => {
-        try {
-            return new URL(url).hostname
-        } catch {
-            return 'Direct'
-        }
-    }
+        return matchesSearch && matchesReferrer
+    })
 
     return (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -58,15 +67,33 @@ export default function ActivityFeed({ initialActivity }: ActivityFeedProps) {
                     </span>
                 </div>
                 
-                <div className="relative w-full md:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher (URL, User, Source...)"
-                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                    <div className="relative">
+                        <select
+                            value={referrerFilter}
+                            onChange={(e) => setReferrerFilter(e.target.value)}
+                            className="appearance-none pl-4 pr-10 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-gray-600"
+                        >
+                            <option value="all">Toutes les sources</option>
+                            {uniqueReferrers.map(ref => (
+                                <option key={ref} value={ref}>{ref}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Rechercher (URL, User, Source...)"
+                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 

@@ -505,7 +505,7 @@ export default async function BookDetailPage({
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                className={`w-3 h-3 ${i < Math.round(averageRating) ? 'fill-black text-black' : 'text-gray-100'}`}
+                                                className={`w-3 h-3 ${i < Math.round(averageRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-100'}`}
                                             />
                                         ))}
                                     </div>

@@ -739,6 +739,8 @@ model AuthorProfile {
   birthYear   Int?
   deathYear   Int?
   influences  String?  @db.Text
+  quote       String?  @db.Text
+  genres      String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
