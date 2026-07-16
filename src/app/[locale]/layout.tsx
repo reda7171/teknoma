@@ -226,6 +226,7 @@ export default async function LocaleLayout({
   const tiktok = await getSetting('contact_tiktok');
   const youtube = await getSetting('contact_youtube');
   const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
+  const whatsappChannelUrl = await getSetting('social_whatsapp_channel');
   const injectedHeadTags = await getSetting('seo_injected_head_tags');
   const fbPixelId = await getSetting('facebook_pixel_id') || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
   const googleSearchConsoleId = await getSetting('google_search_console_id') || await getSetting('seo_google_verification');
@@ -368,7 +369,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <Toaster />
           <CookieConsent />
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
-          <WhatsAppChannelButton />
+          <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
           <Suspense fallback={null}>
             <PixelTracker />

@@ -1,10 +1,14 @@
 import axios from 'axios';
 import { Product } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { Platform } from 'react-native';
 
-// Remplacez par l'adresse IP de votre ordinateur (ex: http://192.168.1.XX:3000) si vous testez sur un appareil physique.
-// Pour l'émulateur Android, vous pouvez souvent utiliser http://10.0.2.2:3000
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.60.171:3000/api/mobile';
+// L'URL de base s'adapte automatiquement :
+// - 10.0.2.2 pour l'émulateur Android
+// - localhost pour Web/iOS
+// - Ou l'URL définie dans le fichier .env
+const defaultUrl = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api/mobile' : 'http://localhost:3000/api/mobile';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || defaultUrl;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

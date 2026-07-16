@@ -1,0 +1,34 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "home": "الرئيسية",
+    "explore": "اكتشف",
+    "exchange": "مبادلة",
+    "cart": "عربة التسوق",
+    "profile": "الملف الشخصي"
+  },
+  "exchange": {
+    "title": "تبادل الكتب",
+    "credits": "رصيدي:",
+    "requests": "طلباتي",
+    "offer": "تقديم عرض",
+    "accept": "قبول",
+    "reject": "رفض",
+    "status": {
+      "pending": "قيد الانتظار",
+      "accepted": "مقبول",
+      "rejected": "مرفوض",
+      "completed": "مكتمل"
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "dark_mode": "الوضع الداكن",
+    "light_mode": "الوضع الفاتح"
+  }
+}

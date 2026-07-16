@@ -247,6 +247,18 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                            Chaîne WhatsApp
+                        </label>
+                        <input
+                            type="url"
+                            value={settings.social_whatsapp_channel || ''}
+                            onChange={(e) => handleChange('social_whatsapp_channel', e.target.value)}
+                            placeholder="https://chat.whatsapp.com/..."
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                        />
+                    </div>
                 </div>
             </div>
 

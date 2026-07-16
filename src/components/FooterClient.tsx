@@ -27,6 +27,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
     const tTrack = useTranslations('Tracking');
+    const tJoinUs = useTranslations('JoinUs');
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -107,6 +108,11 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                     </Link>
                                 </li>
                             )}
+                            <li suppressHydrationWarning>
+                                <Link href="/join-us" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>
+                                    {tJoinUs('heroTitle1')} {tJoinUs('heroTitle2')}
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                     <div>

@@ -34,7 +34,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="wishlist"
         options={{
-          title: t('wishlist'),
+          href: null,
         }}
       />
       
@@ -49,6 +49,13 @@ export default function AppTabs() {
       {/* Masquer checkout et order-confirmation des onglets */}
       <Tabs.Screen name="checkout" options={{ href: null }} />
       <Tabs.Screen name="order-confirmation" options={{ href: null }} />
+
+      <Tabs.Screen
+        name="exchange"
+        options={{
+          title: t('exchange'),
+        }}
+      />
 
       <Tabs.Screen
         name="cart"
@@ -69,7 +76,7 @@ export default function AppTabs() {
       <Tabs.Screen
         name="orders"
         options={{
-          title: 'Commandes',
+          href: null,
         }}
       />
       

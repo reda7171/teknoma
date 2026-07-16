@@ -14,6 +14,8 @@ import SetPixelView from '@/components/SetPixelView'
 import { getSetting } from '@/lib/actions/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
 import PackCustomizerClient from '@/components/packs/PackCustomizerClient'
+import { getCommunityUser } from '@/lib/actions/community-auth'
+import { Edit } from 'lucide-react'
 
 export async function generateMetadata({
     params,
@@ -90,12 +92,13 @@ export default async function PackDetailPage({
     const t = await getTranslations('PackDetail')
     const tPacks = await getTranslations('Packs')
     const tNav = await getTranslations('Navigation')
-    const [whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor] = await Promise.all([
+    const [whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, user] = await Promise.all([
         getSetting('contact_whatsapp'),
         getSetting('announcement_bar_enabled'),
         getSetting('announcement_bar_message'),
         getSetting('announcement_bar_bg_color'),
-        getSetting('announcement_bar_text_color')
+        getSetting('announcement_bar_text_color'),
+        getCommunityUser()
     ])
 
     if (!pack) {
@@ -248,13 +251,25 @@ export default async function PackDetailPage({
                         <span className="text-black">{pack.name}</span>
                     </div>
 
-                    <Link
-                        href="/packs"
-                        className="inline-flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400 hover:text-black mb-12 group transition-colors"
-                    >
-                        <ArrowLeft className="w-3 h-3 rtl:rotate-180 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
-                        <span>{t('BackToBundles')}</span>
-                    </Link>
+                    <div className="flex justify-between items-center mb-12">
+                        <Link
+                            href="/packs"
+                            className="inline-flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400 hover:text-black group transition-colors"
+                        >
+                            <ArrowLeft className="w-3 h-3 rtl:rotate-180 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
+                            <span>{t('BackToBundles')}</span>
+                        </Link>
+
+                        {user?.role === 'ADMIN' && (
+                            <Link
+                                href={`/admin/packs/${pack.id}`}
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full text-xs font-black uppercase hover:bg-gray-800 transition-all hover:-translate-y-1 shadow-lg shadow-black/20"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Modifier le pack
+                            </Link>
+                        )}
+                    </div>
 
                     {/* Hero Pack */}
                     <div className="bg-white rounded-[3rem] overflow-hidden shadow-2xl shadow-black/5 border border-gray-100 mb-32">

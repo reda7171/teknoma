@@ -1281,5 +1281,25 @@
     "sending": "Envoi en cours...",
     "send": "Envoyer ma liste",
     "seoText": "Riwaya.store est votre librairie en ligne au Maroc. Nous proposons un large choix de livres (romans, mangas, beaux-arts, livres pour enfants, développement personnel et anglais) ainsi que toutes les fournitures scolaires (cartables, trousses, indispensables de la rentrée). Déposez votre liste scolaire en ligne et profitez d'une livraison rapide à domicile partout au Maroc (Casablanca, Rabat, Tanger, etc.). Tous nos produits sont 100% authentiques avec possibilité de paiement cash à la livraison ou par carte bancaire sécurisée."
+  },
+  "JoinUs": {
+    "heroTag": "Opportunité",
+    "heroTitle1": "Rejoignez",
+    "heroTitle2": "l'équipe",
+    "heroDescription": "Le blog Riwaya recherche un blogueur talentueux et créatif pour un poste officiel sur le blog. Si vous êtes talentueux, que vous aimez bloguer et que vous avez de nombreuses idées, nous vous recherchons. Écrivez un article d'essai + une présentation de vous-même et envoyez le tout à Riwaya team.",
+    "conditionsTitle": "Conditions de participation",
+    "conditionsDescription": "Merci d'avoir choisi de contribuer par vos sujets au blog Riwaya, nous vous invitons à lire ces conditions pour que votre sujet soit publié :",
+    "condition1Title": "Nous n'acceptons pas les sujets copiés",
+    "condition1Desc": "La politique du blog Riwaya depuis 31 ans repose sur l'enrichissement du contenu technique arabe et par conséquent, nous n'acceptons aucun sujet copié entièrement d'autres sites. En revanche, nous acceptons les sujets rédigés à votre manière, même s'ils proviennent d'une ou plusieurs sources.",
+    "condition2Title": "Nous n'acceptons pas les sujets déjà abordés",
+    "condition2Desc": "Bien sûr, nous ne pouvons pas publier des sujets qui ont déjà été publiés afin d'éviter les répétitions.",
+    "condition3Title": "Nous n'acceptons pas les sujets contenant des codes ou logiciels d'activation",
+    "condition3Desc": "Au blog Riwaya, nous veillons à ne pas enfreindre les droits de propriété intellectuelle. En revanche, nous acceptons tout sujet incluant des codes d'activation officiels obtenus par des moyens légaux.",
+    "condition4Title": "Nous n'acceptons pas les sujets mal formulés",
+    "condition4Desc": "Nous faisons tous des erreurs, et quelques petites fautes ne posent pas de problème, mais si elles rendent les phrases incompréhensibles ou si les fautes d'orthographe sont trop nombreuses, la publication est impossible.",
+    "applyTitle": "Comment postuler",
+    "applyDescription": "Afin de nous envoyer votre article, veuillez l'écrire dans un fichier Word et l'envoyer au blog via WhatsApp.",
+    "applyButton": "Contactez-nous sur WhatsApp",
+    "applyThanks": "Merci"
   }
 }

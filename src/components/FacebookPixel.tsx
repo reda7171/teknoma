@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 
@@ -28,6 +28,12 @@ export default function FacebookPixel({ pixelId: propPixelId }: { pixelId?: stri
     const searchParams = useSearchParams()
     const pixelId = propPixelId || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID
 
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
     useEffect(() => {
         if (!pixelId || !window.fbq) return
         if (pathname?.includes('/admin')) return
@@ -35,7 +41,7 @@ export default function FacebookPixel({ pixelId: propPixelId }: { pixelId?: stri
         window.fbq('track', 'PageView')
     }, [pathname, searchParams, pixelId])
 
-    if (!pixelId || pathname?.includes('/admin')) {
+    if (!isMounted || !pixelId || pathname?.includes('/admin')) {
         return null
     }
 

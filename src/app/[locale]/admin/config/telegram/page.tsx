@@ -29,6 +29,7 @@ export default async function TelegramConfigPage() {
         notifyRegister: await getSetting('telegram_notify_register') === 'true',
         notifyChat: await getSetting('telegram_notify_chat') === 'true',
         notifyLowStock: await getSetting('telegram_notify_low_stock') !== 'false', // Défaut true
+        notifyArticleRead: await getSetting('telegram_notify_article_read') !== 'false', // Défaut true
         notifyDailySummary: await getSetting('telegram_notify_daily_summary') !== 'false', // Défaut true
         notifyReviews: await getSetting('telegram_notify_reviews') !== 'false', // Défaut true
         statsVisitors: await getSetting('telegram_stats_visitors') === 'true',
@@ -41,6 +42,7 @@ export default async function TelegramConfigPage() {
         templateRegister: await getSetting('telegram_template_register') || `👤 <b>Nouveau Compte Créé</b>\n\n📛 <b>Nom:</b> {{fullName}}\n📧 <b>Email:</b> {{email}}\n{{phone}}📍 <b>Ville:</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n🔑 <b>Rôle:</b> {{role}}\n🌐 <b>IP:</b> {{ip}}\n📅 <b>Date:</b> {{date}}`,
         templateReview: await getSetting('telegram_template_review') || `⭐ <b>Nouvel Avis Client</b>\n\n👤 <b>Client:</b> {{fullName}}\n⭐ <b>Note:</b> {{rating}}/5\n💬 <b>Message:</b> <i>{{comment}}</i>\n\n📥 <i>Action requise :</i>`,
         templateLowStock: await getSetting('telegram_template_low_stock') || `⚠️ <b>Alerte Stock Faible</b>\n\n📖 <b>Livre:</b> {{title}}\n📦 <b>Stock restant:</b> <b>{{stock}}</b>\n\n<i>Action rapide disponible :</i>`,
+        templateArticleRead: await getSetting('telegram_template_article_read') || `📖 <b>Nouvelle lecture d'article !</b>\n\n📌 <b>Titre:</b> {{title}}\n👁️ <b>Vues totales:</b> {{viewCount}}\n🌍 <b>Pays:</b> {{country}}`,
         templateWhatsapp: await getSetting('whatsapp_template_order') || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`,
     }
 

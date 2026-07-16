@@ -1370,5 +1370,25 @@
     "sending": "Sending...",
     "send": "Send my list",
     "seoText": "Riwaya.store is your online bookstore in Morocco. We offer a wide selection of books (novels, manga, fine arts, children's books, personal development, and English books) as well as all school supplies (school bags, pencil cases, and back-to-school essentials). Drop your school list online and enjoy fast home delivery anywhere in Morocco (Casablanca, Rabat, Tangier, etc.). All our products are 100% authentic with secure payment by credit card or cash on delivery."
+  },
+  "JoinUs": {
+    "heroTag": "Job Opportunity",
+    "heroTitle1": "Join",
+    "heroTitle2": "the Team",
+    "heroDescription": "Riwaya blog is looking for a talented and creative blogger for an official position on the blog. If you are talented, love blogging, and have many ideas, we are looking for you. Write a sample post + an introduction about yourself and send everything to Riwaya team.",
+    "conditionsTitle": "Participation Conditions",
+    "conditionsDescription": "Thank you for choosing to contribute your topics to Riwaya blog. We invite you to read these conditions so your topic can be published:",
+    "condition1Title": "We do not accept fully copied topics",
+    "condition1Desc": "Riwaya blog's policy over the past 31 years has been based on enriching Arabic technical content, therefore we do not accept topics copied entirely from other sites. On the other hand, we accept topics written in your own words even if they come from one or multiple sources.",
+    "condition2Title": "We do not accept previously covered topics",
+    "condition2Desc": "Of course, we cannot publish topics that have already been published in order to avoid repetition.",
+    "condition3Title": "We do not accept topics containing activation codes or software",
+    "condition3Desc": "At Riwaya blog, we ensure not to violate intellectual property rights. However, we accept topics containing official activation codes obtained through legal means.",
+    "condition4Title": "We do not accept poorly written topics",
+    "condition4Desc": "We all make mistakes, and a few minor errors are fine, but if they make sentences incomprehensible or if there are too many spelling mistakes, it is impossible to publish.",
+    "applyTitle": "How to Apply",
+    "applyDescription": "In order to send us your post, please write it in a Word file and send it to the blog via WhatsApp.",
+    "applyButton": "Contact us via WhatsApp",
+    "applyThanks": "Thank you"
   }
 }

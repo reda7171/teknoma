@@ -403,9 +403,30 @@ export async function incrementPostViews(id: string, country?: string) {
         })
 
         try {
+            const { getSetting } = await import('@/lib/actions/site-settings')
+            
+            // Check if notification is enabled
+            const notifyEnabled = await getSetting('telegram_notify_article_read')
+            if (notifyEnabled === 'false') {
+                return { success: true } // Silently exit without sending
+            }
+
             const { sendTelegramMessage } = await import('@/lib/telegram')
-            const countryInfo = country && country !== 'Inconnu' ? `\n🌍 <b>Pays:</b> ${country}` : ''
-            await sendTelegramMessage(`📖 <b>Nouvelle lecture d'article !</b>\n\n📌 <b>Titre:</b> ${post.title}\n👁️ <b>Vues totales:</b> ${post.viewCount}${countryInfo}`)
+            
+            const defaultTemplate = `📖 <b>Nouvelle lecture d'article !</b>\n\n📌 <b>Titre:</b> {{title}}\n👁️ <b>Vues totales:</b> {{viewCount}}\n🌍 <b>Pays:</b> {{country}}`
+            const template = await getSetting('telegram_template_article_read') || defaultTemplate
+            
+            let message = template
+                .replace(/{{title}}/g, post.title)
+                .replace(/{{viewCount}}/g, post.viewCount.toString())
+                
+            if (country && country !== 'Inconnu') {
+                message = message.replace(/{{country}}/g, country)
+            } else {
+                message = message.replace(/{{country}}/g, 'Inconnu')
+            }
+
+            await sendTelegramMessage(message)
         } catch (e) {
             console.error("Erreur envoi telegram view:", e)
         }

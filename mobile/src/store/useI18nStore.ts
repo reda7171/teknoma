@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { I18nManager } from 'react-native';
 
-type Language = 'fr' | 'ar';
+type Language = 'fr' | 'ar' | 'en';
 
 interface I18nState {
   language: Language;
@@ -25,6 +25,7 @@ const translations = {
     clear_data: 'Effacer le cache et les données',
     language: 'Langue',
     dark_mode: 'Thème Sombre',
+    exchange: 'Échange',
   },
   ar: {
     home: 'الرئيسية',
@@ -41,6 +42,24 @@ const translations = {
     clear_data: 'مسح الذاكرة والبيانات',
     language: 'اللغة',
     dark_mode: 'الوضع الداكن',
+    exchange: 'مبادلة',
+  },
+  en: {
+    home: 'Home',
+    cart: 'Cart',
+    settings: 'Settings',
+    wishlist: 'Wishlist',
+    search_placeholder: 'Search for a book, author...',
+    all: 'All',
+    packs: 'Packs',
+    books: 'Books',
+    recent: 'Recently viewed',
+    clear: 'Clear',
+    support: 'Contact support',
+    clear_data: 'Clear cache and data',
+    language: 'Language',
+    dark_mode: 'Dark Mode',
+    exchange: 'Exchange',
   }
 };
 

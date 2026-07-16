@@ -2,17 +2,22 @@
 
 import { usePathname } from 'next/navigation'
 
-export default function WhatsAppChannelButton() {
+interface Props {
+    url?: string
+}
+
+export default function WhatsAppChannelButton({ url }: Props) {
     const pathname = usePathname()
 
     // Ne pas afficher dans l'admin, le checkout, ni login/register
-    if (pathname?.includes('/admin') || pathname?.includes('/checkout') || pathname?.includes('/login')) {
+    // ou s'il n'y a pas d'URL paramétrée
+    if (!url || pathname?.includes('/admin') || pathname?.includes('/checkout') || pathname?.includes('/login')) {
         return null
     }
 
     return (
         <a
-            href="https://chat.whatsapp.com/BEKvpmcSTP73Y6zKvFR4oI?s=sw&p=a&ilr=1"
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="fixed left-0 top-1/2 -translate-y-1/2 z-50 flex items-center bg-[#25D366] text-white p-2 sm:p-3 rounded-r-xl shadow-lg hover:bg-[#128C7E] transition-all group"

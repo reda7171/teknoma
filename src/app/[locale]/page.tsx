@@ -406,7 +406,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     <p className="text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0">
                       {c('hero_description', t('hero.Description'))}
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <div className="hidden lg:flex flex-row gap-4 justify-start">
                       <Link href="/books" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-black text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
                         <span>{c('hero_btn_shop', t('hero.ShopLibrary'))}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
@@ -436,6 +436,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       />
                     );
                   })()}
+                </div>
+                {/* Mobile buttons (under cosmos) */}
+                <div className="flex lg:hidden flex-col sm:flex-row gap-4 justify-center w-full mt-4 z-10 px-4">
+                  <Link href="/books" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-black text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
+                    <span>{c('hero_btn_shop', t('hero.ShopLibrary'))}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                  </Link>
+                  <Link href="/packs" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black font-black text-xs uppercase tracking-widest rounded-full border-2 border-gray-100 hover:border-black transition-all hover:-translate-y-1">
+                    <span>{c('hero_btn_packs', t('hero.OurBundles'))}</span>
+                  </Link>
                 </div>
               </div>
             </div>

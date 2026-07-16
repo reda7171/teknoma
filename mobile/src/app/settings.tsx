@@ -47,11 +47,11 @@ export default function SettingsScreen() {
   };
 
   const handleLanguageToggle = () => {
-    const newLang = language === 'fr' ? 'ar' : 'fr';
+    const newLang = language === 'fr' ? 'ar' : language === 'ar' ? 'en' : 'fr';
     setLanguage(newLang);
     Alert.alert(
       'Redémarrage requis',
-      'Veuillez redémarrer l\'application pour appliquer les changements de direction (RTL).'
+      'Veuillez redémarrer l\'application pour appliquer les changements de langue et de direction.'
     );
   };
 
@@ -101,6 +101,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={{ height: 1, backgroundColor: colors.backgroundSelected }} />
                 <SettingRow label="Mes Commandes" onPress={() => router.push('/orders')} />
+                <SettingRow label={t('wishlist')} onPress={() => router.push('/wishlist')} />
                 <SettingRow label="Se déconnecter" onPress={handleLogout} isDanger />
               </>
             ) : (
@@ -113,7 +114,7 @@ export default function SettingsScreen() {
           <Text style={[styles.sectionTitle, { color: colors.textSecondary, textAlign: language === 'ar' ? 'right' : 'left' }]}>Apparence</Text>
           <View style={[styles.card, { backgroundColor: colors.backgroundElement }]}>
             <SettingRow label={t('dark_mode')} toggleValue={isDark} onToggle={() => Alert.alert('Info', 'Pour l\'instant, Riwaya suit le thème système de votre appareil.')} />
-            <SettingRow label={t('language')} value={language === 'fr' ? 'Français' : 'العربية'} onPress={handleLanguageToggle} />
+            <SettingRow label={t('language')} value={language === 'fr' ? 'Français' : language === 'ar' ? 'العربية' : 'English'} onPress={handleLanguageToggle} />
           </View>
         </View>
 

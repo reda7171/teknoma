@@ -17,6 +17,7 @@ interface Props {
         notifyRegister: boolean
         notifyChat: boolean
         notifyLowStock: boolean
+        notifyArticleRead: boolean
         notifyDailySummary: boolean
         notifyReviews: boolean
         statsVisitors: boolean
@@ -28,6 +29,7 @@ interface Props {
         templateRegister?: string
         templateReview?: string
         templateLowStock?: string
+        templateArticleRead?: string
         templateWhatsapp?: string
     }
 }
@@ -60,6 +62,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             await updateSetting('telegram_notify_register', String(settings.notifyRegister), 'config', 'Notif Inscription')
             await updateSetting('telegram_notify_chat', String(settings.notifyChat), 'config', 'Notif ChatBot')
             await updateSetting('telegram_notify_low_stock', String(settings.notifyLowStock), 'config', 'Notif Stock Faible')
+            await updateSetting('telegram_notify_article_read', String(settings.notifyArticleRead), 'config', 'Notif Lecture Article')
             await updateSetting('telegram_notify_daily_summary', String(settings.notifyDailySummary), 'config', 'Résumé Journalier')
             await updateSetting('telegram_notify_reviews', String(settings.notifyReviews), 'config', 'Notif Avis Clients')
             await updateSetting('telegram_stats_visitors', String(settings.statsVisitors), 'config', 'Stats Visiteurs (Bilan)')
@@ -73,6 +76,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             if (settings.templateRegister !== undefined) await updateSetting('telegram_template_register', settings.templateRegister, 'config', 'Template Inscription')
             if (settings.templateReview !== undefined) await updateSetting('telegram_template_review', settings.templateReview, 'config', 'Template Avis')
             if (settings.templateLowStock !== undefined) await updateSetting('telegram_template_low_stock', settings.templateLowStock, 'config', 'Template Stock')
+            if (settings.templateArticleRead !== undefined) await updateSetting('telegram_template_article_read', settings.templateArticleRead, 'config', 'Template Lecture Article')
             if (settings.templateWhatsapp !== undefined) await updateSetting('whatsapp_template_order', settings.templateWhatsapp, 'config', 'Template WhatsApp')
 
             setMessage('Configuration enregistrée avec succès !')
@@ -191,6 +195,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                         { id: 'notifyChat', label: 'ChatBot (IA)', desc: 'Alertes lors des discussions avec l\'assistant' },
                         { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer' },
                         { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités' },
+                        { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu' },
                         { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
                         { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },
                         { id: 'notifySearch', label: 'Recherches & Filtres', desc: 'Alertes lors de recherches dans le catalogue' },
@@ -313,6 +318,16 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                             value={settings.templateLowStock || ''}
                             onChange={(e) => setSettings({ ...settings, templateLowStock: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[13px] font-black text-gray-900">Nouvelle Lecture d'Article (Telegram)</label>
+                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{title}}, {{viewCount}}, {{country}}"}</p>
+                        <textarea 
+                            value={settings.templateArticleRead || ''}
+                            onChange={(e) => setSettings({ ...settings, templateArticleRead: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
                         />
                     </div>
                 </div>
