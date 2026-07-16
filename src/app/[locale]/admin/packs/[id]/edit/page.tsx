@@ -30,6 +30,7 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
                 name: pack.name,
                 description: pack.description || '',
                 price: pack.price,
+                originalPrice: pack.originalPrice,
                 image: pack.image || '',
                 isFreeDelivery: pack.isFreeDelivery,
                 shippingFees: pack.shippingFees,

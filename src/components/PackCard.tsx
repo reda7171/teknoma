@@ -15,6 +15,7 @@ interface PackCardProps {
     nameEn?: string | null
     description?: string | null
     price: number
+    originalPrice?: number | null
     image: string | null
     shippingFees?: number
     books: Array<{
@@ -34,6 +35,7 @@ export default function PackCard({
     nameFr,
     nameEn,
     price,
+    originalPrice,
     image,
     books,
     shippingFees,
@@ -43,8 +45,9 @@ export default function PackCard({
     const locale = useLocale()
     const addItem = useCartStore((state) => state.addItem)
     const { openCart, showNotification } = useUIStore()
-    const totalOriginalPrice = books.reduce((sum: number, pb: any) => sum + pb.book.price, 0)
-    const savings = totalOriginalPrice - price
+    const totalOriginalPrice = Math.round(originalPrice || books.reduce((sum: number, pb: any) => sum + pb.book.price, 0))
+    const displayPrice = Math.round(price)
+    const savings = totalOriginalPrice - displayPrice
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
 
     const displayName = locale === 'fr' && nameFr ? nameFr : locale === 'en' && nameEn ? nameEn : name;
@@ -72,7 +75,7 @@ export default function PackCard({
                     item={{
                         id,
                         title: displayName,
-                        price,
+                        price: displayPrice,
                         image: image || (books && books.length > 0 ? books[0].book.image : '/images/placeholder.jpg'),
                         type: 'PACK',
                         slug: `/packs/${id}`
@@ -135,7 +138,7 @@ export default function PackCard({
                     <div className="flex items-center justify-between">
                         <span className="text-[11px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-black">{t('PackPrice')}</span>
                         <span className="text-3xl font-black text-black tracking-tighter">
-                            {price} <span className="text-[10px] rtl:text-xs font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">MAD</span>
+                            {displayPrice} <span className="text-[10px] rtl:text-xs font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">MAD</span>
                         </span>
                     </div>
 
@@ -149,7 +152,7 @@ export default function PackCard({
                                     type: 'PACK',
                                     id,
                                     title: displayName,
-                                    price,
+                                    price: displayPrice,
                                     image: image || (books.length > 0 ? books[0].book.image : '/images/placeholder-pack.jpg'),
                                     booksCount: books.length,
                                     shippingFees,

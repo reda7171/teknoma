@@ -70,7 +70,7 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
     }
 
     const selectedBooksData = books.filter(b => selectedBooks.includes(b.id))
-    const totalOriginalPrice = selectedBooksData.reduce((sum, b) => sum + b.price, 0)
+    const totalOriginalPrice = Math.round(selectedBooksData.reduce((sum, b) => sum + b.price, 0))
 
     // Filter and group books
     const filteredBooks = books.filter(book => {
@@ -93,7 +93,7 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
         const name = (document.getElementById('name') as HTMLInputElement)?.value || 'Nouveau Pack';
         const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
         const priceStr = (document.getElementById('price') as HTMLInputElement)?.value;
-        const price = priceStr ? parseFloat(priceStr) : totalOriginalPrice;
+        const price = priceStr ? Math.round(parseFloat(priceStr)) : totalOriginalPrice;
 
         setPackPreviewData({
             name,
@@ -122,7 +122,8 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
         const input: PackInput = {
             name: formData.get('name') as string,
             description: formData.get('description') as string || undefined,
-            price: parseFloat(formData.get('price') as string),
+            price: Math.round(parseFloat(formData.get('price') as string)),
+            originalPrice: formData.get('originalPrice') ? Math.round(parseFloat(formData.get('originalPrice') as string)) : undefined,
             image: formData.get('image') as string || undefined,
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
@@ -209,10 +210,31 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
                                 />
                             </div>
 
+                            {/* Original Price */}
+                            <div>
+                                <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Prix de vente (MAD) <span className="text-gray-400 text-xs">(Optionnel, affiché barré)</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    id="originalPrice"
+                                    name="originalPrice"
+                                    min="0"
+                                    step="1"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="500"
+                                />
+                                {selectedBooks.length > 0 && (
+                                    <p className="mt-2 text-sm text-gray-600">
+                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} MAD</span>
+                                    </p>
+                                )}
+                            </div>
+
                             {/* Price */}
                             <div>
                                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Prix du pack (MAD) <span className="text-red-500">*</span>
+                                    Prix de promotion (MAD) <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -220,15 +242,10 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
                                     name="price"
                                     required
                                     min="0"
-                                    step="0.01"
+                                    step="1"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="450"
                                 />
-                                {selectedBooks.length > 0 && (
-                                    <p className="mt-2 text-sm text-gray-600">
-                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} MAD</span>
-                                    </p>
-                                )}
                             </div>
 
                             {/* Seller SKU */}
@@ -410,7 +427,7 @@ export default function PackForm({ books, whatsappPhone }: { books: Book[], what
                                                             </span>
                                                         </p>
                                                     </div>
-                                                    <span className="text-sm font-black text-black ml-2">{book.price} MAD</span>
+                                                    <span className="text-sm font-black text-black ml-2">{Math.round(book.price)} MAD</span>
                                                 </label>
                                             ))}
                                         </div>

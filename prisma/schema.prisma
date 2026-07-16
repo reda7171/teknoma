@@ -207,6 +207,7 @@ model Pack {
   name              String      @db.VarChar(255)
   description       String?     @db.Text
   price             Float
+  originalPrice     Float?
   costPrice         Float       @default(0)
   image             String?     @db.VarChar(500)
   active            Boolean     @default(true)

@@ -26,6 +26,7 @@ interface PackEditFormProps {
         name: string
         description: string
         price: number
+        originalPrice?: number | null
         image: string
         isFreeDelivery: boolean
         shippingFees: number
@@ -93,7 +94,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
         const input: PackInput = {
             name: formData.get('name') as string,
             description: formData.get('description') as string || undefined,
-            price: parseFloat(formData.get('price') as string),
+            price: Math.round(parseFloat(formData.get('price') as string)),
+            originalPrice: formData.get('originalPrice') ? Math.round(parseFloat(formData.get('originalPrice') as string)) : undefined,
             image: formData.get('image') as string || undefined,
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
@@ -130,7 +132,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     }
 
     const selectedBooksData = books.filter(b => selectedBooks.includes(b.id))
-    const totalOriginalPrice = selectedBooksData.reduce((sum, b) => sum + b.price, 0)
+    const totalOriginalPrice = Math.round(selectedBooksData.reduce((sum, b) => sum + b.price, 0))
 
     // Filter and group books
     const filteredBooks = books.filter(book => {
@@ -214,10 +216,32 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                 />
                             </div>
 
+                            {/* Original Price */}
+                            <div>
+                                <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Prix de vente (MAD) <span className="text-gray-400 text-xs">(Optionnel, affiché barré)</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    id="originalPrice"
+                                    name="originalPrice"
+                                    min="0"
+                                    step="1"
+                                    defaultValue={pack.originalPrice ? Math.round(pack.originalPrice) : ''}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="500"
+                                />
+                                {selectedBooks.length > 0 && (
+                                    <p className="mt-2 text-sm text-gray-600">
+                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} MAD</span>
+                                    </p>
+                                )}
+                            </div>
+
                             {/* Price */}
                             <div>
                                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Prix du pack (MAD) <span className="text-red-500">*</span>
+                                    Prix de promotion (MAD) <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -225,16 +249,11 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     name="price"
                                     required
                                     min="0"
-                                    step="0.01"
-                                    defaultValue={pack.price}
+                                    step="1"
+                                    defaultValue={Math.round(pack.price)}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="450"
                                 />
-                                {selectedBooks.length > 0 && (
-                                    <p className="mt-2 text-sm text-gray-600">
-                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} MAD</span>
-                                    </p>
-                                )}
                             </div>
 
                             {/* Seller SKU */}
@@ -410,7 +429,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                                             </span>
                                                         </p>
                                                     </div>
-                                                    <span className="text-sm font-black text-black ml-2">{book.price} MAD</span>
+                                                    <span className="text-sm font-black text-black ml-2">{Math.round(book.price)} MAD</span>
                                                 </label>
                                             ))}
                                         </div>

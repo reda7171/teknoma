@@ -76,37 +76,69 @@ export async function getPurchaseLots() {
     }
 }
 
-export async function getExpenses() {
+export async function getExpenses(filters?: { month?: number, year?: number }) {
     await verifyAdmin()
+    
+    let where: any = {}
+    
+    if (filters?.month && filters?.year) {
+        // Mois en JS: 0 = Janvier, 11 = Décembre
+        // On veut le début du mois (ex: 1er Janvier) et la fin (ex: 31 Janvier)
+        const start = new Date(filters.year, filters.month - 1, 1)
+        const end = new Date(filters.year, filters.month, 0, 23, 59, 59, 999)
+        where.date = { gte: start, lte: end }
+    } else if (filters?.year) {
+        const start = new Date(filters.year, 0, 1)
+        const end = new Date(filters.year, 11, 31, 23, 59, 59, 999)
+        where.date = { gte: start, lte: end }
+    }
+
     return prisma.expense.findMany({
+        where,
         orderBy: { date: 'desc' }
     })
 }
 
-export async function getFinancialStats() {
+export async function getFinancialStats(filters?: { month?: number, year?: number }) {
     await verifyAdmin()
+
+    let expenseWhere: any = {}
+    let orderWhere: any = { status: 'DELIVERED' }
+
+    if (filters?.month && filters?.year) {
+        const start = new Date(filters.year, filters.month - 1, 1)
+        const end = new Date(filters.year, filters.month, 0, 23, 59, 59, 999)
+        expenseWhere.date = { gte: start, lte: end }
+        orderWhere.createdAt = { gte: start, lte: end }
+    } else if (filters?.year) {
+        const start = new Date(filters.year, 0, 1)
+        const end = new Date(filters.year, 11, 31, 23, 59, 59, 999)
+        expenseWhere.date = { gte: start, lte: end }
+        orderWhere.createdAt = { gte: start, lte: end }
+    }
 
     // Total Expenses
     const expensesAgg = await prisma.expense.aggregate({
-        where: { type: 'EXPENSE' },
+        where: { type: 'EXPENSE', ...expenseWhere },
         _sum: { amount: true }
     })
 
     // Total Incomes
     const incomesAgg = await prisma.expense.aggregate({
-        where: { type: 'INCOME' },
+        where: { type: 'INCOME', ...expenseWhere },
         _sum: { amount: true }
     })
 
     // Expenses by Category
     const byCategory = await prisma.expense.groupBy({
         by: ['category'],
+        where: expenseWhere,
         _sum: { amount: true }
     })
 
     // Commands (Chiffre d'affaire) and Cost (Pour Marge)
     const orders = await prisma.order.findMany({
-        where: { status: 'DELIVERED' },
+        where: orderWhere,
         include: {
             items: {
                 include: {
@@ -143,4 +175,82 @@ export async function getFinancialStats() {
             amount: c._sum.amount || 0
         }))
     }
+}
+
+export async function getChartData(filters?: { month?: number, year?: number }) {
+    await verifyAdmin()
+
+    let expenseWhere: any = {}
+    let orderWhere: any = { status: 'DELIVERED' }
+
+    if (filters?.month && filters?.year) {
+        const start = new Date(filters.year, filters.month - 1, 1)
+        const end = new Date(filters.year, filters.month, 0, 23, 59, 59, 999)
+        expenseWhere.date = { gte: start, lte: end }
+        orderWhere.createdAt = { gte: start, lte: end }
+    } else if (filters?.year) {
+        const start = new Date(filters.year, 0, 1)
+        const end = new Date(filters.year, 11, 31, 23, 59, 59, 999)
+        expenseWhere.date = { gte: start, lte: end }
+        orderWhere.createdAt = { gte: start, lte: end }
+    }
+
+    const expenses = await prisma.expense.findMany({ where: expenseWhere })
+    const orders = await prisma.order.findMany({
+        where: orderWhere,
+        include: {
+            items: {
+                include: {
+                    book: { select: { costPrice: true } },
+                    pack: { select: { costPrice: true } }
+                }
+            }
+        }
+    })
+
+    const isMonthView = !!(filters?.month && filters?.year)
+    const dataMap = new Map<string, { name: string, revenue: number, profit: number }>()
+
+    if (isMonthView) {
+        const daysInMonth = new Date(filters!.year!, filters!.month!, 0).getDate()
+        for (let i = 1; i <= daysInMonth; i++) {
+            dataMap.set(i.toString(), { name: `${i}`, revenue: 0, profit: 0 })
+        }
+    } else {
+        const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+        months.forEach((m, i) => {
+            dataMap.set(i.toString(), { name: m, revenue: 0, profit: 0 })
+        })
+    }
+
+    for (const order of orders) {
+        let totalCost = 2.65 + (order.shippingFees || 0)
+        for (const item of order.items) {
+            const itemCost = ((item as any).costPrice && (item as any).costPrice > 0)
+                ? (item as any).costPrice
+                : ((item as any).book?.costPrice || (item as any).pack?.costPrice || 0)
+            totalCost += itemCost * item.quantity
+        }
+        
+        const dateKey = isMonthView ? order.createdAt.getDate().toString() : order.createdAt.getMonth().toString()
+        const entry = dataMap.get(dateKey)
+        if (entry) {
+            entry.revenue += order.total
+            entry.profit += (order.total - totalCost)
+        }
+    }
+
+    for (const exp of expenses) {
+        const dateKey = isMonthView ? exp.date.getDate().toString() : exp.date.getMonth().toString()
+        const entry = dataMap.get(dateKey)
+        if (entry) {
+            if (exp.type === 'EXPENSE' && exp.category !== 'BOOKS_PURCHASE') {
+                entry.profit -= exp.amount
+            } else if (exp.type === 'INCOME') {
+                entry.profit += exp.amount
+            }
+        }
+    }
+
+    return Array.from(dataMap.values())
 }

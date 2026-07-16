@@ -35,8 +35,9 @@ export async function generateMetadata({
     const rawImage = pack.image || pack.books[0]?.book.image || '/images/og-packs.png'
     const imageUrl = getOgImageUrl(rawImage, baseUrl, `${baseUrl}/images/og-packs.png`)
 
-    const totalOriginalPrice = pack.books.reduce((sum, pb) => sum + pb.book.price, 0)
-    const savings = totalOriginalPrice - pack.price
+    const totalOriginalPrice = Math.round(pack.originalPrice || pack.books.reduce((sum, pb) => sum + pb.book.price, 0))
+    const displayPrice = Math.round(pack.price)
+    const savings = totalOriginalPrice - displayPrice
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
 
     const bookTitles = pack.books.map(pb => pb.book.title).join(', ')
@@ -55,7 +56,7 @@ export async function generateMetadata({
 
     return {
         title: `${pack.name} - Pack de ${pack.books.length} Livres | Riwaya`,
-        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... Économisez ${savingsPercent}% (${savings} MAD). Prix: ${pack.price} MAD. Livraison rapide au Maroc.`,
+        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... Économisez ${savingsPercent}% (${savings} MAD). Prix: ${displayPrice} MAD. Livraison rapide au Maroc.`,
         keywords,
         openGraph: {
             title: `${pack.name} - Économisez ${savingsPercent}%`,
@@ -68,7 +69,7 @@ export async function generateMetadata({
         twitter: {
             card: 'summary_large_image',
             title: `${pack.name} - ${savingsPercent}% de réduction`,
-            description: `Pack de ${pack.books.length} livres à ${pack.price} MAD au lieu de ${totalOriginalPrice} MAD`,
+            description: `Pack de ${pack.books.length} livres à ${displayPrice} MAD au lieu de ${totalOriginalPrice} MAD`,
             images: imageUrl ? [imageUrl] : [],
         },
         alternates: {
@@ -105,8 +106,9 @@ export default async function PackDetailPage({
         notFound()
     }
 
-    const totalOriginalPrice = pack.books.reduce((sum, pb) => sum + pb.book.price, 0)
-    const savings = totalOriginalPrice - pack.price
+    const totalOriginalPrice = Math.round(pack.originalPrice || pack.books.reduce((sum, pb) => sum + pb.book.price, 0))
+    const displayPrice = Math.round(pack.price)
+    const savings = totalOriginalPrice - displayPrice
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
@@ -124,7 +126,7 @@ export default async function PackDetailPage({
             offers: {
                 '@type': 'AggregateOffer',
                 priceCurrency: 'MAD',
-                lowPrice: pack.price,
+                lowPrice: displayPrice,
                 highPrice: totalOriginalPrice,
                 offerCount: 1,
                 availability: 'https://schema.org/InStock',
@@ -194,10 +196,10 @@ export default async function PackDetailPage({
                 acceptedAnswer: {
                     '@type': 'Answer',
                     text: locale === 'ar'
-                        ? `سعر باقة ${pack.name} هو ${pack.price} درهم مغربي، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%. الدفع عند الاستلام.`
+                        ? `سعر باقة ${pack.name} هو ${displayPrice} درهم مغربي، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%. الدفع عند الاستلام.`
                         : locale === 'en'
-                            ? `The ${pack.name} pack costs ${pack.price} MAD instead of ${totalOriginalPrice} MAD for individual purchases. Save ${savingsPercent}%. Payment on delivery.`
-                            : `Le pack ${pack.name} est à ${pack.price} MAD au lieu de ${totalOriginalPrice} MAD à l'achat individuel. Économisez ${savingsPercent}%. Paiement à la livraison.`
+                            ? `The ${pack.name} pack costs ${displayPrice} MAD instead of ${totalOriginalPrice} MAD for individual purchases. Save ${savingsPercent}%. Payment on delivery.`
+                            : `Le pack ${pack.name} est à ${displayPrice} MAD au lieu de ${totalOriginalPrice} MAD à l'achat individuel. Économisez ${savingsPercent}%. Paiement à la livraison.`
                 }
             },
             {
@@ -230,7 +232,7 @@ export default async function PackDetailPage({
                 <SetPixelView
                     id={pack.id}
                     title={pack.name}
-                    price={pack.price}
+                    price={displayPrice}
                     category="Packs"
                 />
                 <AnnouncementBar
@@ -262,7 +264,7 @@ export default async function PackDetailPage({
 
                         {user?.role === 'ADMIN' && (
                             <Link
-                                href={`/admin/packs/${pack.id}`}
+                                href={`/admin/packs/${pack.id}/edit`}
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full text-xs font-black uppercase hover:bg-gray-800 transition-all hover:-translate-y-1 shadow-lg shadow-black/20"
                             >
                                 <Edit className="w-4 h-4" />
@@ -328,7 +330,7 @@ export default async function PackDetailPage({
                                         </span>
                                     </div>
                                     <div className="flex items-baseline gap-3">
-                                        <span className="text-7xl font-black text-black tracking-tighter leading-none">{pack.price}</span>
+                                        <span className="text-7xl font-black text-black tracking-tighter leading-none">{displayPrice}</span>
                                         <span className="text-2xl text-gray-300 font-black uppercase tracking-widest">MAD</span>
                                     </div>
                                 </div>

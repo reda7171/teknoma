@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Wallet, Search, Filter } from 'lucide-react'
+import { Wallet, Search, Filter, Download } from 'lucide-react'
 import ExpenseRowActions from '@/components/admin/ExpenseRowActions'
 
 interface Expense {
@@ -27,6 +27,30 @@ export default function ExpensesTable({ expenses }: { expenses: Expense[] }) {
 
         return matchesSearch && matchesCategory
     })
+
+    const exportToCSV = () => {
+        const headers = ['Date', 'Opération', 'Description', 'Catégorie', 'Type', 'Montant']
+        const csvContent = [
+            headers.join(','),
+            ...filteredExpenses.map(e => [
+                new Date(e.date).toLocaleDateString('fr-FR'),
+                `"${e.title.replace(/"/g, '""')}"`,
+                `"${(e.description || '').replace(/"/g, '""')}"`,
+                e.category,
+                e.type,
+                e.amount
+            ].join(','))
+        ].join('\n')
+
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement('a')
+        const url = URL.createObjectURL(blob)
+        link.setAttribute('href', url)
+        link.setAttribute('download', `transactions_${new Date().toISOString().split('T')[0]}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
 
     return (
         <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
@@ -65,6 +89,15 @@ export default function ExpensesTable({ expenses }: { expenses: Expense[] }) {
                             className="w-full pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-black placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-black/5"
                         />
                     </div>
+                    
+                    {/* Export CSV */}
+                    <button 
+                        onClick={exportToCSV}
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors w-full sm:w-auto"
+                    >
+                        <Download className="w-4 h-4" />
+                        Export CSV
+                    </button>
                 </div>
             </div>
             

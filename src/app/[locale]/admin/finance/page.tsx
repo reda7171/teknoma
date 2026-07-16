@@ -1,12 +1,16 @@
 import { isAuthenticated } from '@/lib/actions/auth'
-import { getExpenses, getFinancialStats } from '@/lib/actions/finance'
+import { getExpenses, getFinancialStats, getChartData } from '@/lib/actions/finance'
 import { Plus, Trash2, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import ExpenseForm from '@/components/admin/ExpenseForm'
 import ExpensesTable from '@/components/admin/ExpensesTable'
+import MonthYearFilter from '@/components/admin/MonthYearFilter'
+import FinanceChart from '@/components/admin/FinanceChart'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default async function FinancePage(props: { params: Promise<{ locale: string }> }) {
+export default async function FinancePage(props: { params: Promise<{ locale: string }>, searchParams?: Promise<{ month?: string, year?: string }> }) {
     const params = await props.params
+    const searchParams = await props.searchParams
     const { locale } = params
 
     const isAuth = await isAuthenticated()
@@ -14,8 +18,14 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
         redirect(`/${locale}/admin/login`)
     }
 
-    const expenses = await getExpenses()
-    const stats = await getFinancialStats()
+    const filters = {
+        month: searchParams?.month ? parseInt(searchParams.month) : undefined,
+        year: searchParams?.year ? parseInt(searchParams.year) : new Date().getFullYear()
+    }
+
+    const expenses = await getExpenses(filters)
+    const stats = await getFinancialStats(filters)
+    const chartData = await getChartData(filters)
 
     // Chiffre d'Affaire
     const grossRevenue = stats.totalRevenue
@@ -49,11 +59,17 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                     </p>
                 </div>
                 
-                <div className="flex items-center gap-3 bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100">
-                    <Wallet className="w-5 h-5 text-emerald-600" />
-                    <span className="text-emerald-600 text-[10px] font-black uppercase tracking-widest">
-                        Solde: {cashBalance.toFixed(0)} MAD
-                    </span>
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                    <Suspense fallback={<div className="h-10 w-48 bg-gray-100 rounded-2xl animate-pulse" />}>
+                        <MonthYearFilter />
+                    </Suspense>
+                    
+                    <div className="flex items-center gap-3 bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100">
+                        <Wallet className="w-5 h-5 text-emerald-600" />
+                        <span className="text-emerald-600 text-[10px] font-black uppercase tracking-widest">
+                            Solde: {cashBalance.toFixed(0)} MAD
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -81,6 +97,9 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                     </div>
                 ))}
             </div>
+
+            {/* Chart Section */}
+            <FinanceChart data={chartData} />
 
             {/* Partenaires (Reda & Amine) Premium Layout */}
             <div className="bg-black rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
