@@ -53,6 +53,7 @@
     "react-facebook-pixel": "^1.0.4",
     "react-hook-form": "^7.71.1",
     "react-pageflip": "^2.0.3",
+    "react-quill": "^2.0.0",
     "recharts": "^3.7.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",

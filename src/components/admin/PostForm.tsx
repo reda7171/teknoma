@@ -216,9 +216,22 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+                {/* Navigation des sections (Sticky) */}
+                <div className="lg:col-span-3 sticky top-4 z-40 bg-white/90 backdrop-blur-md p-2 rounded-2xl border border-gray-200 shadow-sm flex flex-wrap gap-2 md:gap-4 justify-center md:justify-start">
+                    <a href="#section-general" className="px-4 py-2 text-xs md:text-sm font-bold text-gray-600 hover:text-black hover:bg-gray-100 rounded-xl transition-colors">
+                        1. Informations Générales
+                    </a>
+                    <a href="#section-content" className="px-4 py-2 text-xs md:text-sm font-bold text-gray-600 hover:text-black hover:bg-gray-100 rounded-xl transition-colors">
+                        2. Contenu de l'article
+                    </a>
+                    <a href="#section-settings" className="px-4 py-2 text-xs md:text-sm font-bold text-gray-600 hover:text-black hover:bg-gray-100 rounded-xl transition-colors">
+                        3. Paramètres & Médias
+                    </a>
+                </div>
+
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+                    <div id="section-general" className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8 scroll-mt-24">
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">Titre de l'article</label>
@@ -367,15 +380,17 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                     </div>
                     
-                    <PostSectionEditor
-                        initialContent={post?.content || ''}
-                        onChange={setContent}
-                        lang={lang as 'fr' | 'ar' | 'en'}
-                        postTitle={title}
-                    />
+                    <div id="section-content" className="scroll-mt-24">
+                        <PostSectionEditor
+                            initialContent={post?.content || ''}
+                            onChange={setContent}
+                            lang={lang as 'fr' | 'ar' | 'en'}
+                            postTitle={title}
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-6">
+                <div id="section-settings" className="space-y-6 scroll-mt-24">
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6">
                         <h3 className="font-bold text-gray-900">Publication</h3>
 

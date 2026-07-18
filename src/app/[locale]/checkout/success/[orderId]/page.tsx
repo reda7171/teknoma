@@ -58,8 +58,53 @@ export default async function OrderSuccessPage({
                             </div>
 
                             <div className="pt-8 border-t border-gray-100">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">{t('TotalPaid')}</p>
-                                <p className="text-4xl font-black text-black tracking-tighter">{order.total} <span className="text-[10px] uppercase font-black text-gray-400 ml-1">MAD</span></p>
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black mb-6">Récapitulatif de la commande</h3>
+                                <div className="space-y-4 mb-8">
+                                    {order.items.map((item: any) => (
+                                        <div key={item.id} className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                {item.book?.image || item.pack?.image || item.digitalProduct?.image ? (
+                                                    <div className="w-12 h-16 relative rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                                        <img 
+                                                            src={item.book?.image || item.pack?.image || item.digitalProduct?.image} 
+                                                            alt={item.book?.title || item.pack?.name || item.digitalProduct?.title}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-12 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                        <Package className="w-5 h-5 text-gray-400" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.book?.title || item.pack?.name || item.digitalProduct?.title}</p>
+                                                    <p className="text-xs font-bold text-gray-400">Quantité : {item.quantity}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm font-black text-black whitespace-nowrap ml-4">{item.price * item.quantity} MAD</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="flex justify-between items-center mb-2">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sous-total</p>
+                                    <p className="text-sm font-bold text-black">{order.subtotal} MAD</p>
+                                </div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Livraison</p>
+                                    <p className="text-sm font-bold text-black">{order.shippingFees === 0 ? 'Gratuite' : `${order.shippingFees} MAD`}</p>
+                                </div>
+                                {order.discount > 0 && (
+                                    <div className="flex justify-between items-center mb-4">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-green-500">Réduction</p>
+                                        <p className="text-sm font-bold text-green-500">-{order.discount} MAD</p>
+                                    </div>
+                                )}
+                                
+                                <div className="flex justify-between items-end pt-4 border-t border-gray-100 border-dashed">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('TotalPaid')}</p>
+                                    <p className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{order.total} <span className="text-[10px] uppercase font-black text-gray-400 ml-1">MAD</span></p>
+                                </div>
                             </div>
 
                             <div className="space-y-4">

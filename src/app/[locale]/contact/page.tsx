@@ -34,47 +34,47 @@ export default async function ContactPage() {
 
                     {/* Contact Info */}
                     <div className="space-y-12 md:space-y-16">
-                        <div className="space-y-6">
-                            <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-4">
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 bg-black text-white rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4">
                                 <Globe className="w-3 h-3" />
                                 Support Client
                             </div>
-                            <h1 className="text-5xl md:text-6xl lg:text-8xl font-black text-black tracking-tighter leading-none italic">
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-black tracking-tighter leading-none italic break-words">
                                 Contactez<br />Nous<span className="text-gray-200">.</span>
                             </h1>
-                            <p className="text-base md:text-lg font-bold text-gray-400 uppercase tracking-tight max-w-md">
+                            <p className="text-sm sm:text-base md:text-lg font-bold text-gray-400 uppercase tracking-tight max-w-md">
                                 Notre équipe est à votre écoute pour toute question concernant vos commandes ou nos ouvrages.
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-                            <div className="space-y-4 group">
-                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
-                                    <Mail className="w-5 h-5" />
+                        <div className="grid grid-cols-2 gap-6 sm:gap-10">
+                            <div className="space-y-3 sm:space-y-4 group flex flex-col items-center text-center">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
+                                    <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Email Direct</h3>
-                                <p className="text-sm font-black text-black">{email}</p>
+                                <h3 className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-gray-300">Email Direct</h3>
+                                <p className="text-xs sm:text-sm font-black text-black break-words">{email}</p>
                             </div>
-                            <div className="space-y-4 group">
-                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
-                                    <Phone className="w-5 h-5" />
+                            <div className="space-y-3 sm:space-y-4 group flex flex-col items-center text-center">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
+                                    <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Téléphone</h3>
-                                <p className="text-sm font-black text-black">{phone}</p>
+                                <h3 className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-gray-300">Téléphone</h3>
+                                <p className="text-xs sm:text-sm font-black text-black break-words">{phone}</p>
                             </div>
-                            <div className="space-y-4 group">
-                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
-                                    <MapPin className="w-5 h-5" />
+                            <div className="space-y-3 sm:space-y-4 group flex flex-col items-center text-center">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
+                                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Siège Social</h3>
-                                <p className="text-sm font-black text-black">{address}</p>
+                                <h3 className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-gray-300">Siège Social</h3>
+                                <p className="text-xs sm:text-sm font-black text-black break-words">{address}</p>
                             </div>
-                            <div className="space-y-4 group">
-                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
-                                    <Clock className="w-5 h-5" />
+                            <div className="space-y-3 sm:space-y-4 group flex flex-col items-center text-center">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-black group-hover:text-white transition-all duration-500">
+                                    <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Horaires</h3>
-                                <p className="text-sm font-black text-black">Lun - Sam : 09h - 19h</p>
+                                <h3 className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-gray-300">Horaires</h3>
+                                <p className="text-xs sm:text-sm font-black text-black break-words">Lun - Sam : 09h - 19h</p>
                             </div>
                         </div>
 

@@ -223,6 +223,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             fill
                             className="object-cover blur-2xl scale-110"
                             priority
+                            unoptimized
                         />
                     </div>
                 )}
@@ -288,6 +289,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         width={48}
                                         height={48}
                                         className="rounded-full object-cover ring-2 ring-slate-200 w-12 h-12"
+                                        unoptimized
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
@@ -340,6 +342,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     alt=""
                                     fill
                                     className="object-cover opacity-30 blur-[40px] scale-125 saturate-150"
+                                    unoptimized
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-100/50 to-transparent" />
                             </div>
@@ -351,6 +354,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 fill
                                 className="object-contain z-10 drop-shadow-2xl group-hover:scale-105 transition-transform duration-700"
                                 priority
+                                unoptimized
                             />
                             
                             {/* Inner highlight */}
@@ -444,6 +448,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 width={64}
                                                 height={64}
                                                 className="object-cover w-full h-full"
+                                                unoptimized
                                             />
                                         ) : (
                                             <User className="w-6 h-6 md:w-7 md:h-7 text-slate-400" />

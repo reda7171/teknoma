@@ -3,6 +3,67 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
+import dynamic from 'next/dynamic'
+import 'react-quill/dist/quill.snow.css'
+
+const ReactQuill = dynamic(() => import('react-quill'), { 
+    ssr: false, 
+    loading: () => <div className="h-32 bg-gray-50 animate-pulse rounded-2xl flex items-center justify-center text-gray-400">Chargement de l'éditeur...</div>
+})
+
+function imageHandler(this: any) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/jpeg, image/png, image/webp, image/gif');
+    input.click();
+
+    input.onchange = async () => {
+        const file = input.files ? input.files[0] : null;
+        if (!file) return;
+
+        const quill = this.quill;
+        const range = quill.getSelection(true);
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                quill.insertEmbed(range.index, 'image', data.url);
+                quill.setSelection(range.index + 1);
+            } else {
+                alert(data.error || "Erreur lors de l'upload de l'image");
+            }
+        } catch (error) {
+            alert("Erreur lors de l'upload de l'image");
+        }
+    };
+}
+
+const quillModules = {
+    toolbar: {
+        container: [
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'font': [] }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'align': [] }],
+            ['link', 'image', 'video'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['clean']
+        ],
+        handlers: {
+            image: imageHandler
+        }
+    }
+}
 
 export interface Section {
     id: string
@@ -259,14 +320,33 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                 </button>
                             </div>
                             
-                            <textarea
-                                value={section.content}
-                                onChange={(e) => handleSectionChange(section.id, 'content', e.target.value)}
-                                rows={Math.max(4, section.content.split('\n').length)}
-                                placeholder="Contenu de la section (Markdown supporté)..."
-                                className="w-full bg-white px-6 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-sans text-base text-gray-800 placeholder:text-gray-300 resize-y leading-[1.8]"
-                                style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
-                            />
+                            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden focus-within:ring-2 focus-within:ring-black focus-within:border-transparent transition-all">
+                                <ReactQuill 
+                                    theme="snow"
+                                    value={section.content}
+                                    onChange={(content) => handleSectionChange(section.id, 'content', content)}
+                                    modules={quillModules}
+                                    placeholder="Contenu de la section (Texte riche)..."
+                                    className="w-full text-gray-800"
+                                />
+                                <style jsx global>{`
+                                    .ql-toolbar.ql-snow {
+                                        border: none;
+                                        border-bottom: 1px solid #f3f4f6;
+                                        padding: 12px;
+                                        background: #faf9f8;
+                                    }
+                                    .ql-container.ql-snow {
+                                        border: none;
+                                        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                                        font-size: 16px;
+                                    }
+                                    .ql-editor {
+                                        min-height: 150px;
+                                        padding: 16px;
+                                    }
+                                `}</style>
+                            </div>
                         </div>
                     </div>
                 ))}
