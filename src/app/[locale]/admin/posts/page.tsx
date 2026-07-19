@@ -67,10 +67,31 @@ export default async function AdminPostsPage({
         }
     })
 
+    // Fetch language stats
+    const langStatsRaw = await prisma.post.groupBy({
+        by: ['language'],
+        _sum: { viewCount: true },
+        _min: { createdAt: true }
+    })
+    
+    const langStats = langStatsRaw.map(stat => {
+        const totalViews = stat._sum.viewCount || 0
+        const oldestDate = stat._min.createdAt || new Date()
+        const daysSince = Math.max(1, Math.ceil((new Date().getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24)))
+        const viewsPerDay = Math.round(totalViews / daysSince)
+        
+        return {
+            language: stat.language,
+            totalViews,
+            viewsPerDay
+        }
+    })
+    const langNames: Record<string, string> = { fr: 'Français', ar: 'Arabe', en: 'Anglais' }
+
     // Fetch top countries visiting the blog
     const topCountriesRaw = await prisma.pageView.groupBy({
         by: ['country'],
-        where: { url: { contains: '/blog' }, country: { not: null } },
+        where: { url: { contains: '/blog' }, country: { not: null, not: 'Inconnu' } },
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
         take: 5
@@ -114,21 +135,28 @@ export default async function AdminPostsPage({
             {/* Tabs */}
             <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
                 {[
+                    { id: 'all', label: 'Toutes' },
                     { id: 'fr', label: 'Français' },
                     { id: 'ar', label: 'العربية' },
                     { id: 'en', label: 'English' }
-                ].map(tab => (
-                    <Link
-                        key={tab.id}
-                        href={`/${locale}/admin/posts?lang=${tab.id}`}
-                        className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${contentLang === tab.id ? 'bg-black text-white shadow-md' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100'}`}
-                    >
-                        {tab.label}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] ${contentLang === tab.id ? 'bg-white/20' : 'bg-gray-200'}`}>
-                            {langCounts[tab.id] || 0}
-                        </span>
-                    </Link>
-                ))}
+                ].map(tab => {
+                    const count = tab.id === 'all' 
+                        ? Object.values(langCounts).reduce((a, b) => a + b, 0)
+                        : (langCounts[tab.id] || 0);
+                    
+                    return (
+                        <Link
+                            key={tab.id}
+                            href={`/${locale}/admin/posts?lang=${tab.id}`}
+                            className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${contentLang === tab.id ? 'bg-black text-white shadow-md' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100'}`}
+                        >
+                            {tab.label}
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] ${contentLang === tab.id ? 'bg-white/20' : 'bg-gray-200'}`}>
+                                {count}
+                            </span>
+                        </Link>
+                    )
+                })}
             </div>
 
             <AdminPostsFilters 
@@ -138,6 +166,23 @@ export default async function AdminPostsPage({
                 books={books}
                 totalCount={pagination.total}
             />
+
+            {/* Stats par Langue */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {langStats.map(stat => (
+                    <div key={stat.language} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-center">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-[12px] font-black uppercase tracking-widest text-gray-400">Blog {langNames[stat.language] || stat.language}</h3>
+                            <Globe className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <div className="flex items-end gap-2">
+                            <span className="text-3xl font-black text-black leading-none">{stat.viewsPerDay}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">vues / jour</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-4">Total : {stat.totalViews} vues</p>
+                    </div>
+                ))}
+            </div>
 
             {/* Quick Stats & Chart */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

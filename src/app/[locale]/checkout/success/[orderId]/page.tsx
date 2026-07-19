@@ -5,7 +5,7 @@ import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowR
 import { notFound } from 'next/navigation'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
-
+import Script from 'next/script'
 export default async function OrderSuccessPage({
     params,
 }: {
@@ -20,8 +20,33 @@ export default async function OrderSuccessPage({
         notFound()
     }
 
+    const estimatedDeliveryDate = new Date(order.createdAt)
+    estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 3)
+    const estimatedDeliveryDateStr = estimatedDeliveryDate.toISOString().split('T')[0]
+
+    const products = order.items
+        .filter((item: any) => item.book?.isbn)
+        .map((item: any) => ({ gtin: item.book.isbn }))
+
     return (
         <div className="min-h-screen bg-pixio-cream">
+            <Script src="https://apis.google.com/js/platform.js?onload=renderOptIn" strategy="afterInteractive" />
+            <Script id="google-customer-reviews" strategy="afterInteractive" dangerouslySetInnerHTML={{
+                __html: `
+                    window.renderOptIn = function() {
+                        window.gapi.load('surveyoptin', function() {
+                            window.gapi.surveyoptin.render({
+                                "merchant_id": 5826844744,
+                                "order_id": "${order.id}",
+                                "email": "${order.email || ''}",
+                                "delivery_country": "MA",
+                                "estimated_delivery_date": "${estimatedDeliveryDateStr}",
+                                "products": ${JSON.stringify(products)}
+                            });
+                        });
+                    }
+                `
+            }} />
             <Header />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">

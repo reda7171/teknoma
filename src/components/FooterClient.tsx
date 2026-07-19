@@ -34,7 +34,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
     };
 
     return (
-        <footer className="bg-black text-white relative">
+        <footer id="main-footer" className="bg-black text-white relative">
             {/* Top Bar with Back to Top */}
             <div className="bg-black border-b border-white/5 h-16 w-full flex items-center ltr:justify-end rtl:justify-start px-4 sm:px-6 lg:px-8">
                 <button

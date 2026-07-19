@@ -505,7 +505,9 @@
     }
   },
   "BookDetail": {
-    "BackToSelection": "العودة إلى القائمة",
+    "AboutAuthor": "عن الكاتب",
+    "DiscoverMore": "اكتشف المزيد",
+    "BackToSelection": "العودة إلى التحديد",
     "OnlyLeft": "بقي {stock} فقط",
     "FastMove": "شحن سريع",
     "Secured": "آمن",

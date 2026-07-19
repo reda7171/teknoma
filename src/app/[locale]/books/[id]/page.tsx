@@ -1,4 +1,5 @@
 import { getBookById, getBooks, getPopularBooks } from '@/lib/db/books'
+import { getAuthorProfile } from '@/lib/db/authors'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
@@ -17,6 +18,7 @@ import { getCommunityUser } from '@/lib/actions/community-auth'
 import { Metadata } from 'next'
 import SetPixelView from '@/components/SetPixelView'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import StickyBottomActions from '@/components/StickyBottomActions'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/actions/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
@@ -168,7 +170,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
-    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile] = await Promise.all([
         getBookReviews(bookId),
         getBookAverageRating(bookId),
         book.category ? getCategoryConfigByName(book.category) : Promise.resolve(null),
@@ -182,6 +184,7 @@ export default async function BookDetailPage({
         getSetting('adsense_enabled').then(v => v === 'true'),
         getSetting('adsense_publisher_id').then(v => v || ''),
         getSetting('adsense_slot_sidebar').then(v => v || ''),
+        getAuthorProfile(book.author)
     ])
 
     const { average: averageRating, count: reviewCount } = ratingData
@@ -464,6 +467,39 @@ export default async function BookDetailPage({
                                     </div>
                                 </div>
                             )}
+
+                            {/* Author Profile Card */}
+                            <div className="mt-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5 group hover:shadow-md transition-shadow">
+                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-full overflow-hidden border-4 border-gray-50 shadow-inner group-hover:border-gray-100 transition-colors mx-auto sm:mx-0">
+                                    {authorProfile?.image ? (
+                                        <ImageWithFallback
+                                            src={authorProfile.image}
+                                            alt={book.author}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                            <UserIcon className="w-8 h-8 text-gray-300" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
+                                    <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
+                                        {book.author}
+                                    </Link>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
+                                        {authorProfile?.bio || (locale === 'ar' ? `كاتب متميز قدم العديد من الأعمال الرائعة التي أثرت المكتبة العربية.` : locale === 'en' ? `An outstanding author who has contributed many remarkable works.` : `Un auteur exceptionnel qui a contribué à de nombreuses œuvres remarquables.`)}
+                                    </p>
+                                    <Link 
+                                        href={`/authors/${encodeURIComponent(book.author)}`}
+                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
+                                    >
+                                        {tBook('DiscoverMore') || 'Découvrir plus'}
+                                        <ArrowUpRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Info */}
@@ -546,7 +582,7 @@ export default async function BookDetailPage({
                                     </div>
                                 )}
 
-                                <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col gap-3 pb-safe md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none md:space-y-4 md:gap-0">
+                                <StickyBottomActions>
                                     {book.stock > 0 && (
                                         <WhatsAppOrderButton
                                             title={displayTitle}
@@ -576,7 +612,7 @@ export default async function BookDetailPage({
                                             Lire un extrait
                                         </a>
                                     )}
-                                </div>
+                                </StickyBottomActions>
 
                                 {book.stock <= 0 && (
                                     <div className="space-y-4 mt-4">
@@ -628,7 +664,7 @@ export default async function BookDetailPage({
                             )}
 
                             {/* Tabs Layout */}
-                            <div className="flex flex-col gap-12 pt-12 border-t border-gray-100">
+                            <div className="flex flex-col gap-12 pt-8 md:pt-12 border-t border-gray-100">
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-4">
                                         <Package className="w-4 h-4 text-black" />
@@ -660,6 +696,7 @@ export default async function BookDetailPage({
                                 </div>
                             </div>
 
+
                             {/* Category Quote (Cultural Aspect) */}
                             {categoryConfig?.quote && (
                                 <div className="mt-32 relative group">
@@ -685,7 +722,7 @@ export default async function BookDetailPage({
 
 
                     {/* Reviews Section */}
-                    <section className="py-20 md:py-32 border-t border-gray-100">
+                    <section className="py-10 md:py-32 border-t border-gray-100">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24">
                             <div className="lg:col-span-1 space-y-10">
                                 <div className="space-y-4">
@@ -710,8 +747,8 @@ export default async function BookDetailPage({
 
                     {/* Similar Books */}
                     {filteredSimilarBooks.length > 0 && (
-                        <section className="py-32 border-t border-gray-100">
-                            <div className="flex items-center justify-between mb-20 px-2">
+                        <section className="py-8 md:py-32 border-t border-gray-100">
+                            <div className="flex items-center justify-between mb-8 md:mb-20 px-2">
                                 <h2 className="text-4xl font-black text-black tracking-tighter">{tBook('RecommendedReads')}<span className="text-gray-200">.</span></h2>
                                 <Link href="/books" className="text-[10px] rtl:text-xs rtl:tracking-normal font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all">
                                     {tBook('ExploreAll')}
@@ -727,7 +764,7 @@ export default async function BookDetailPage({
 
                     {/* FAQ Section */}
                     {faqQuestions.length > 0 && (
-                        <section className="py-32 border-t border-gray-100">
+                        <section className="py-8 md:py-32 border-t border-gray-100">
                             <div className="flex flex-col md:flex-row gap-16">
                                 <div className="md:w-1/3">
                                     <h2 className="text-4xl font-black text-black tracking-tighter mb-4">

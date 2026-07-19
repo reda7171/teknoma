@@ -14,6 +14,7 @@ import dynamic from 'next/dynamic'
 
 const CommentsSection = dynamic(() => import('@/components/blog/CommentsSection'), { loading: () => <div className="h-32 bg-slate-50 animate-pulse rounded-2xl" /> })
 const ShareArticle = dynamic(() => import('@/components/blog/ShareArticle'))
+const TableOfContents = dynamic(() => import('@/components/blog/TableOfContents'))
 import ReadingProgress from '@/components/blog/ReadingProgress'
 import PostTimeTracker from '@/components/blog/PostTimeTracker'
 import { getTranslations } from 'next-intl/server'
@@ -96,7 +97,25 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         .use(remarkHtml, { sanitize: false })
         .use(remarkGfm)
         .process(post.content)
-    const contentHtml = processedContent.toString()
+    let contentHtml = processedContent.toString()
+
+    // Add unique IDs to h2 and h3 tags
+    const usedIds = new Set<string>();
+    contentHtml = contentHtml.replace(/<(h[23])>(.*?)<\/\1>/g, (match, tag, text) => {
+        const cleanText = text.replace(/<[^>]+>/g, '');
+        let baseId = cleanText.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/(^-|-$)+/g, '');
+        if (!baseId) baseId = `section`;
+        
+        let finalId = baseId;
+        let counter = 1;
+        while (usedIds.has(finalId)) {
+            finalId = `${baseId}-${counter}`;
+            counter++;
+        }
+        usedIds.add(finalId);
+        
+        return `<${tag} id="${finalId}">${text}</${tag}>`;
+    });
 
     const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
     const readingTime = estimateReadingTime(post.content)
@@ -568,6 +587,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* === Sidebar sticky === */}
                     <aside className="hidden lg:block">
                         <div className="sticky top-24 space-y-8">
+                            
+                            {/* Sommaire / TOC */}
+                            <TableOfContents />
 
                             {/* Partage */}
                             <div className="bg-gray-50 rounded-3xl p-6">

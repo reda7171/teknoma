@@ -3,7 +3,9 @@
 import React, { useState } from 'react'
 import { Package, Calendar, MapPin, Phone, Download } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/routing'
+import { Link, useRouter } from '@/i18n/routing'
+import { cancelMyOrder } from '@/lib/actions/orders'
+import { useUIStore } from '@/store/ui'
 
 interface OrderListProps {
     orders: any[]
@@ -12,6 +14,29 @@ interface OrderListProps {
 
 export default function OrderList({ orders, locale }: OrderListProps) {
     const t = useTranslations('Orders')
+    const { showNotification } = useUIStore()
+    const router = useRouter()
+    const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null)
+
+    const handleCancelOrder = async (orderId: string) => {
+        if (!confirm(locale === 'ar' ? 'هل أنت متأكد من إلغاء هذا الطلب؟' : locale === 'en' ? 'Are you sure you want to cancel this order?' : 'Êtes-vous sûr de vouloir annuler cette commande ?')) {
+            return
+        }
+        
+        try {
+            setCancellingOrderId(orderId)
+            await cancelMyOrder(orderId)
+            showNotification(
+                locale === 'ar' ? 'تم إلغاء الطلب بنجاح' : locale === 'en' ? 'Order cancelled successfully' : 'Commande annulée avec succès',
+                'success'
+            )
+            router.refresh()
+        } catch (error: any) {
+            showNotification(error.message, 'error')
+        } finally {
+            setCancellingOrderId(null)
+        }
+    }
 
     if (orders.length === 0) {
         return (
@@ -60,10 +85,19 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                                 <p className="text-2xl font-black text-black">
                                     {order.total.toFixed(2)} DH
                                 </p>
+                                {order.status === 'PENDING' && (
+                                    <button
+                                        onClick={() => handleCancelOrder(order.id)}
+                                        disabled={cancellingOrderId === order.id}
+                                        className="text-red-600 bg-white border-2 border-red-100 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:border-red-200 transition-all active:scale-95 disabled:opacity-50"
+                                    >
+                                        {cancellingOrderId === order.id ? '...' : (locale === 'ar' ? 'إلغاء الطلب' : locale === 'en' ? 'Cancel Order' : 'Annuler')}
+                                    </button>
+                                )}
                                 {order.status !== 'CANCELLED' && !order.trackingID && (
                                     <Link
                                         href={`/tracking?orderId=${order.id}&contact=${order.phone || order.email || ''}`}
-                                        className="text-black bg-white border-2 border-black px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all active:scale-95"
+                                        className="text-black bg-white border-2 border-black px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all active:scale-95 text-center"
                                     >
                                         {t('TrackButton')}
                                     </Link>

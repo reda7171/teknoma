@@ -20,6 +20,7 @@ const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
 const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 const UtmTracker = dynamic(() => import('@/components/UtmTracker'))
+import DelayedScripts from '@/components/DelayedScripts'
 
 
 const outfit = Outfit({
@@ -237,16 +238,18 @@ export default async function LocaleLayout({
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning>
       <head>
-        {/* Google Tag Manager */}
+        {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         <Script
           id="gtm-script"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            __html: `setTimeout(function(){
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MSD75KHT');`
+})(window,document,'script','dataLayer','GTM-MSD75KHT');
+}, 3500);`
           }}
         />
         {/* End Google Tag Manager */}
@@ -371,12 +374,33 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
           <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
-          <Suspense fallback={null}>
-            <PixelTracker />
-            <FacebookPixel pixelId={fbPixelId} />
-            <GoogleAnalytics gaId={googleAnalyticsId || ''} />
-          </Suspense>
+          <DelayedScripts>
+            <Suspense fallback={null}>
+              <PixelTracker />
+              <FacebookPixel pixelId={fbPixelId} />
+              <GoogleAnalytics gaId={googleAnalyticsId || ''} />
+            </Suspense>
+          </DelayedScripts>
         </NextIntlClientProvider>
+        
+        {/* Google Customer Reviews Badge */}
+        <Script id="merchant-widget-script" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" strategy="lazyOnload" />
+        <Script id="merchant-widget-init" strategy="lazyOnload">
+          {`
+            function initMerchantWidget() {
+              if (typeof merchantwidget !== 'undefined') {
+                merchantwidget.start({
+                  merchant_id: 5826844744,
+                  position: 'BOTTOM_RIGHT',
+                  region: 'MA'
+                });
+              } else {
+                setTimeout(initMerchantWidget, 500);
+              }
+            }
+            initMerchantWidget();
+          `}
+        </Script>
       </body>
     </html>
   );

@@ -7,7 +7,8 @@ import { Edit, FileText, User, ExternalLink, Trash2, Copy, Check } from 'lucide-
 import DeletePostButton from '@/components/admin/DeletePostButton'
 import ShareToN8nButton from '@/components/admin/ShareToN8nButton'
 import { deletePostsBulk } from '@/lib/actions/blog'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 
 interface AdminPostsTableProps {
     posts: any[]
@@ -16,9 +17,33 @@ interface AdminPostsTableProps {
 
 export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps) {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
+
+    const currentSort = searchParams.get('sort') || 'newest'
+
+    const handleSort = (column: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        let newSort = ''
+        if (column === 'seo') {
+            newSort = currentSort === 'seo_desc' ? 'seo_asc' : 'seo_desc'
+        } else if (column === 'status') {
+            newSort = currentSort === 'status_desc' ? 'status_asc' : 'status_desc'
+        } else if (column === 'views') {
+            newSort = currentSort === 'views_desc' ? 'views_asc' : 'views_desc'
+        }
+        params.set('sort', newSort)
+        router.push(`${pathname}?${params.toString()}`)
+    }
+
+    const SortIcon = ({ column }: { column: string }) => {
+        if (currentSort === `${column}_asc`) return <ArrowUp className="w-3 h-3 ml-1 inline" />
+        if (currentSort === `${column}_desc`) return <ArrowDown className="w-3 h-3 ml-1 inline" />
+        return null
+    }
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
@@ -104,8 +129,15 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                             <th className="px-8 py-6">Contenu</th>
                             <th className="px-8 py-6">Auteur</th>
                             <th className="px-8 py-6">Livre lié</th>
-                            <th className="px-8 py-6">Statut</th>
-                            <th className="px-8 py-6">Vues</th>
+                            <th className="px-8 py-6 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('seo')}>
+                                Score SEO <SortIcon column="seo" />
+                            </th>
+                            <th className="px-8 py-6 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('status')}>
+                                Statut <SortIcon column="status" />
+                            </th>
+                            <th className="px-8 py-6 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('views')}>
+                                Vues <SortIcon column="views" />
+                            </th>
                             <th className="px-8 py-6">Date</th>
                             <th className="px-8 py-6 text-right">Actions</th>
                         </tr>
@@ -175,6 +207,44 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                                 Non
                                             </span>
                                         )}
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        {(() => {
+                                            let score = 0;
+                                            let wordCount = 0;
+                                            let hasImage = false;
+                                            let hasLink = false;
+                                            
+                                            const contentStr = post.content || '';
+                                            
+                                            if (contentStr.includes('<img') || /!\[.*?\]\(.*?\)/.test(contentStr)) {
+                                                hasImage = true;
+                                            }
+                                            
+                                            if (contentStr.includes('<a href=') || /(?<!!)\[.*?\]\(.*?\)/.test(contentStr)) {
+                                                hasLink = true;
+                                            }
+                                            
+                                            const plainText = contentStr.replace(/<[^>]*>?/gm, '').replace(/[#*`_]/g, '');
+                                            wordCount = plainText.split(/\s+/).filter(Boolean).length;
+                                            
+                                            score += Math.min(50, Math.floor(wordCount / 10)); // up to 50 pts for words (500 words = max)
+                                            if (hasImage) score += 25;
+                                            if (hasLink) score += 25;
+                                            
+                                            const scoreColor = score >= 80 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : score >= 50 ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-red-50 text-red-600 border-red-100';
+                                            
+                                            return (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${scoreColor}`}>
+                                                        {score}/100
+                                                    </span>
+                                                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider text-center mt-1">
+                                                        {wordCount} Mots
+                                                    </span>
+                                                </div>
+                                            )
+                                        })()}
                                     </td>
                                     <td className="px-8 py-6">
                                         {post.published ? (

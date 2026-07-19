@@ -406,3 +406,39 @@ export async function getOrderStats() {
         return null
     }
 }
+
+export async function cancelMyOrder(orderId: string) {
+    const cookieStore = await cookies()
+    const userEmail = cookieStore.get('userEmail')?.value
+    const user = await getCommunityUser()
+
+    const emailToUse = user ? user.email : userEmail
+
+    if (!emailToUse) {
+        throw new Error('Non autorisé')
+    }
+
+    try {
+        const order = await prisma.order.findUnique({
+            where: { id: orderId }
+        })
+
+        if (!order || order.email !== emailToUse) {
+            throw new Error('Commande introuvable')
+        }
+
+        if (order.status !== 'PENDING') {
+            throw new Error('Cette commande ne peut plus être annulée')
+        }
+
+        await prisma.order.update({
+            where: { id: orderId },
+            data: { status: 'CANCELLED' }
+        })
+
+        return { success: true }
+    } catch (error: any) {
+        console.error('Error cancelling order:', error)
+        throw new Error(error.message || 'Erreur lors de l\'annulation de la commande')
+    }
+}

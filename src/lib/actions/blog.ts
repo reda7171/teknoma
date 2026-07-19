@@ -201,6 +201,10 @@ export async function getAllPosts(
     if (sort === 'oldest') orderBy = { createdAt: 'asc' }
     if (sort === 'views_desc') orderBy = { viewCount: 'desc' }
     if (sort === 'views_asc') orderBy = { viewCount: 'asc' }
+    if (sort === 'seo_desc') orderBy = { seoScore: 'desc' }
+    if (sort === 'seo_asc') orderBy = { seoScore: 'asc' }
+    if (sort === 'status_desc') orderBy = { published: 'desc' }
+    if (sort === 'status_asc') orderBy = { published: 'asc' }
 
     const [posts, total] = await prisma.$transaction([
         prisma.post.findMany({

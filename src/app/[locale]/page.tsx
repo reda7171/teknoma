@@ -776,8 +776,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <section key={key} {...getSectionProps('home_section_blog', 'bg-white')} className={`py-32 relative overflow-hidden ${getSectionProps('home_section_blog', 'bg-white').className || ''}`}>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 text-[20vw] font-black text-gray-50 opacity-[0.03] select-none pointer-events-none whitespace-nowrap">JOURNAL RIWAYA</div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
-                <ScrollReveal className="space-y-4 max-w-xl">
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+                <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-[11px] rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{c('journal_subtitle', t('Journal.Subtitle') || 'Notre Journal')}</span></div>
                   <h2 className="text-5xl md:text-7xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.9]">{c('journal_title_part1', t('Journal.TitlePart1') || 'Derniers Articles')}<br /><span className="text-gray-400 italic">{c('journal_title_part2', t('Journal.TitlePart2') || 'à Découvrir')}</span></h2>
                 </ScrollReveal>

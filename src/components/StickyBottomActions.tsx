@@ -1,0 +1,35 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
+export default function StickyBottomActions({ children }: { children: React.ReactNode }) {
+    const [isHidden, setIsHidden] = useState(false)
+
+    useEffect(() => {
+        const footer = document.getElementById('main-footer')
+        if (!footer) return
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsHidden(entry.isIntersecting)
+            },
+            {
+                root: null,
+                threshold: 0,
+                rootMargin: '0px'
+            }
+        )
+
+        observer.observe(footer)
+
+        return () => {
+            observer.disconnect()
+        }
+    }, [])
+
+    return (
+        <div className={`fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col gap-3 pb-safe md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none md:space-y-4 md:gap-0 transition-all duration-300 ease-in-out ${isHidden ? 'translate-y-full md:translate-y-0 opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto' : 'translate-y-0 opacity-100 pointer-events-auto'}`}>
+            {children}
+        </div>
+    )
+}

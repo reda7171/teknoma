@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-const defaultLlmsText = `# Riwaya — Librairie en ligne au Maroc
+const defaultLlmsText = `# Riwaya
 
 > Riwaya est la meilleure librairie en ligne au Maroc. Vente de livres, packs de livres et échange de livres entre lecteurs. Livraison COD partout au Maroc.
 
@@ -13,11 +13,13 @@ Riwaya (رواية) est une librairie e-commerce marocaine spécialisée dans :
 - L'échange de livres entre lecteurs
 - La livraison Cash on Delivery (COD) partout au Maroc
 
-**Site** : https://riwaya.store  
-**Langues** : Français, Arabe, Anglais  
-**Pays** : Maroc (MA)  
-**Devise** : MAD (Dirham marocain)  
-**Paiement** : Cash on Delivery uniquement
+## Liens
+
+- [Accueil](https://riwaya.store/): Page d'accueil de la librairie.
+- [Livres](https://riwaya.store/books): Catalogue complet des livres.
+- [Packs](https://riwaya.store/packs): Packs promotionnels de livres.
+- [Auteurs](https://riwaya.store/authors): Liste des auteurs.
+- [Blog](https://riwaya.store/blog): Articles et ressources sur la lecture.
 `
 
 export async function GET() {
@@ -31,7 +33,7 @@ export async function GET() {
         return new NextResponse(content, {
             status: 200,
             headers: {
-                'Content-Type': 'text/plain',
+                'Content-Type': 'text/markdown; charset=utf-8',
                 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
             }
         })
@@ -39,7 +41,7 @@ export async function GET() {
         return new NextResponse(defaultLlmsText, {
             status: 200,
             headers: {
-                'Content-Type': 'text/plain',
+                'Content-Type': 'text/markdown; charset=utf-8',
             }
         })
     }

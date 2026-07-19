@@ -9,7 +9,7 @@ import { createOrder } from '@/lib/actions/orders'
 import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import CouponInput from '@/components/CouponInput'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { getActiveGifts } from '@/lib/actions/gifts'
@@ -44,6 +44,7 @@ export default function CheckoutClient({
     const [coupon, setCoupon] = useState<any>(null)
     const [gifts, setGifts] = useState<any[]>([])
     const t = useTranslations('Checkout')
+    const locale = useLocale()
 
     // Pré-remplir le formulaire si l'utilisateur est connecté
     const defaultValues: Partial<CheckoutForm> = user ? {
@@ -195,8 +196,14 @@ export default function CheckoutClient({
         fbPixelEvents.addPaymentInfo()
 
         if (minOrderAmount > 0 && finalTotal < minOrderAmount) {
-            setError(`Le montant minimum du panier pour commander est de ${minOrderAmount} MAD.`)
-            showNotification(`Le montant minimum du panier pour commander est de ${minOrderAmount} MAD.`, 'error')
+            const minAmountMsg = locale === 'ar' 
+                ? `الحد الأدنى للطلب هو ${minOrderAmount} درهم.` 
+                : locale === 'en' 
+                ? `The minimum order amount is ${minOrderAmount} MAD.` 
+                : `Le montant minimum du panier pour commander est de ${minOrderAmount} MAD.`
+                
+            setError(minAmountMsg)
+            showNotification(minAmountMsg, 'error')
             setIsSubmitting(false)
             return
         }

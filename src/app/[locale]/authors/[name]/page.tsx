@@ -304,24 +304,9 @@ export default async function AuthorPage({
                         </div>
                     </div>
 
-                    {/* Books Grid */}
-                    {books.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-                            {books.map((book) => (
-                                <BookCard key={book.id} {...book} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-20">
-                            <p className="text-xl font-bold text-gray-300 uppercase tracking-widest">
-                                {tCommon('NoResultsDesc')}
-                            </p>
-                        </div>
-                    )}
-                    
                     {/* Similar Authors */}
                     {similarAuthors.length > 0 && (
-                        <section className="mt-20">
+                        <section className="mb-20">
                             <div className="flex items-center justify-between mb-10">
                                 <h2 className="text-3xl font-black text-slate-900 tracking-tight">
                                     {locale === 'ar' ? 'القراء يحبون أيضا' : locale === 'en' ? 'Readers also like' : 'Les lecteurs aiment aussi'}
@@ -352,6 +337,23 @@ export default async function AuthorPage({
                             </div>
                         </section>
                     )}
+
+                    {/* Books Grid */}
+                    {books.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                            {books.map((book) => (
+                                <BookCard key={book.id} {...book} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20">
+                            <p className="text-xl font-bold text-gray-300 uppercase tracking-widest">
+                                {tCommon('NoResultsDesc')}
+                            </p>
+                        </div>
+                    )}
+                    
+                    {/* The Similar Authors section was moved from here */}
                 </div>
 
                 {/* FAQ Section */}

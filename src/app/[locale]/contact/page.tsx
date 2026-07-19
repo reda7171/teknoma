@@ -112,7 +112,7 @@ export default async function ContactPage() {
                                 <h3 className="text-xl font-black text-blue-950 mb-2">Laissez-nous un avis sur Google !</h3>
                                 <p className="text-blue-800 font-medium text-sm mb-4">Votre opinion compte beaucoup pour nous. Merci de partager votre expérience.</p>
                                 <a
-                                    href="https://g.page/r/YOUR_GOOGLE_REVIEW_LINK/review"
+                                    href="https://maps.app.goo.gl/nwtkWtehXCZkt3Cm7"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center px-6 py-3 bg-white text-blue-600 border border-blue-200 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-blue-50 transition-colors shadow-sm"

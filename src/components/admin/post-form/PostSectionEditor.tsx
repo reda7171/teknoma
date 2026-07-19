@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import dynamic from 'next/dynamic'
-import 'react-quill/dist/quill.snow.css'
+import 'react-quill-new/dist/quill.snow.css'
 
-const ReactQuill = dynamic(() => import('react-quill'), { 
+const ReactQuill = dynamic(() => import('react-quill-new'), { 
     ssr: false, 
     loading: () => <div className="h-32 bg-gray-50 animate-pulse rounded-2xl flex items-center justify-center text-gray-400">Chargement de l'éditeur...</div>
 })
@@ -64,6 +64,17 @@ const quillModules = {
         }
     }
 }
+
+const quillFormats = [
+    'header',
+    'font',
+    'size',
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'align',
+    'link', 'image', 'video',
+    'list'
+]
 
 export interface Section {
     id: string
@@ -177,6 +188,40 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
 
     const handleAddSection = () => {
         setSections([...sections, { id: Date.now().toString(), title: '', content: '' }])
+    }
+
+    const handleAddImageSection = () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = 'image/jpeg, image/png, image/webp, image/gif'
+        input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0]
+            if (!file) return
+
+            const formData = new FormData()
+            formData.append('file', file)
+
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                const data = await res.json()
+
+                if (data.success) {
+                    setSections([...sections, { 
+                        id: Date.now().toString(), 
+                        title: '', 
+                        content: `<p><img src="${data.url}" alt="Image illustratrice" style="border-radius:1rem; width:100%; object-fit:cover;" /></p>` 
+                    }])
+                } else {
+                    alert(data.error || "Erreur lors de l'upload de l'image")
+                }
+            } catch (error) {
+                alert("Erreur lors de l'upload de l'image")
+            }
+        }
+        input.click()
     }
 
     const handleRemoveSection = (id: string) => {
@@ -326,6 +371,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                     value={section.content}
                                     onChange={(content) => handleSectionChange(section.id, 'content', content)}
                                     modules={quillModules}
+                                    formats={quillFormats}
                                     placeholder="Contenu de la section (Texte riche)..."
                                     className="w-full text-gray-800"
                                 />
@@ -352,14 +398,24 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                 ))}
             </div>
 
-            <button
-                type="button"
-                onClick={handleAddSection}
-                className="w-full py-6 border-2 border-dashed border-gray-200 rounded-3xl text-gray-500 font-bold hover:bg-gray-50 hover:border-black hover:text-black transition-all flex items-center justify-center gap-2"
-            >
-                <Plus className="w-5 h-5" />
-                Ajouter une section
-            </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                    type="button"
+                    onClick={handleAddSection}
+                    className="w-full py-6 border-2 border-dashed border-gray-200 rounded-3xl text-gray-500 font-bold hover:bg-gray-50 hover:border-black hover:text-black transition-all flex items-center justify-center gap-2"
+                >
+                    <Plus className="w-5 h-5" />
+                    Ajouter une section
+                </button>
+                <button
+                    type="button"
+                    onClick={handleAddImageSection}
+                    className="w-full py-6 border-2 border-dashed border-gray-200 rounded-3xl text-gray-500 font-bold hover:bg-gray-50 hover:border-black hover:text-black transition-all flex items-center justify-center gap-2"
+                >
+                    <ImageIcon className="w-5 h-5" />
+                    Ajouter une image
+                </button>
+            </div>
         </div>
     )
 }

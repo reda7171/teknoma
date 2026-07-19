@@ -505,6 +505,8 @@
     }
   },
   "BookDetail": {
+    "AboutAuthor": "À propos de l'auteur",
+    "DiscoverMore": "Découvrir plus",
     "BackToSelection": "Retour à la sélection",
     "OnlyLeft": "Plus que {stock} exemplaires",
     "FastMove": "Envoi Rapide",

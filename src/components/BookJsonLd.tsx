@@ -28,9 +28,8 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
-      // Schema Book — pour les moteurs de réponse AI
       {
-        "@type": "Book",
+        "@type": ["Book", "Product"],
         "@id": bookUrl,
         "name": displayTitle,
         "author": {
@@ -49,18 +48,10 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         ...(book.category ? { "genre": book.category } : {}),
         ...(book.numberOfPages ? { "numberOfPages": book.numberOfPages } : {}),
         "description": displayDescription,
-        // Speakable : les sections que les assistants vocaux doivent lire
         "speakable": {
           "@type": "SpeakableSpecification",
           "cssSelector": ["h1", ".book-description", ".book-price"]
-        }
-      },
-      // Schema Product — pour les rich results e-commerce
-      {
-        "@type": "Product",
-        "name": displayTitle,
-        "image": imageUrl,
-        "description": displayDescription,
+        },
         "brand": {
           "@type": "Brand",
           "name": "Riwaya"
@@ -86,11 +77,40 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           },
           "hasMerchantReturnPolicy": {
             "@type": "MerchantReturnPolicy",
+            "applicableCountry": "MA",
             "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-            "merchantReturnDays": 7
+            "merchantReturnDays": 7,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnShippingFees"
+          },
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": 35,
+              "currency": "MAD"
+            },
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "MA"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "handlingTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 0,
+                "maxValue": 1,
+                "unitCode": "DAY"
+              },
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 1,
+                "maxValue": 3,
+                "unitCode": "DAY"
+              }
+            }
           }
         },
-        // Action d'achat directe — signal fort pour AEO
         "potentialAction": {
           "@type": "BuyAction",
           "target": bookUrl,

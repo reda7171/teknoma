@@ -63,10 +63,41 @@ export default function middleware(request: NextRequest) {
         return NextResponse.redirect(newUrl)
     }
 
+    // Forcer la redirection de la racine vers /ar (ignorer les cookies de langue)
+    if (pathname === '/') {
+        const newUrl = request.nextUrl.clone()
+        newUrl.pathname = '/ar'
+        const redirectResponse = NextResponse.redirect(newUrl)
+        
+        // 2. Ajouter les headers de sécurité (OWASP) pour la redirection
+        const cspHeader = [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://maps.googleapis.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "img-src 'self' data: https: blob:",
+            "font-src 'self' data: https://fonts.gstatic.com",
+            "media-src 'self' https://assets.mixkit.co",
+            "connect-src 'self' https:",
+            "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com",
+            "worker-src 'none'",
+            "object-src 'none'",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+        ].join('; ')
+        
+        redirectResponse.headers.set('Content-Security-Policy', cspHeader)
+        redirectResponse.headers.set('X-Frame-Options', 'DENY')
+        redirectResponse.headers.set('X-Content-Type-Options', 'nosniff')
+        redirectResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+        
+        return redirectResponse
+    }
+
     // 2. Ajouter les headers de sécurité (OWASP)
     const cspHeader = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://maps.googleapis.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: https: blob:",
         "font-src 'self' data: https://fonts.gstatic.com",

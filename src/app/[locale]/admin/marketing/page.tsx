@@ -136,6 +136,13 @@ export default function MarketingPage() {
         setBulkPreviewOpen(true)
     }
 
+    const handleSinglePreview = (assetName: string) => {
+        setSelectedAssets([assetName])
+        setSlideIndex(0)
+        setPublishProgress({})
+        setBulkPreviewOpen(true)
+    }
+
     // Publication groupée depuis le modal
     const handleBulkPublish = async () => {
         const selected = assets.filter(a => selectedAssets.includes(a.name))
@@ -496,7 +503,14 @@ export default function MarketingPage() {
                                 </p>
 
                                 {/* Partage via n8n */}
-                                <div className="pt-3 border-t border-slate-100 grid grid-cols-4 gap-2">
+                                <div className="pt-3 border-t border-slate-100 grid grid-cols-5 gap-2">
+                                    <button 
+                                        onClick={() => handleSinglePreview(asset.name)}
+                                        title="Prévisualiser"
+                                        className="flex items-center justify-center p-2 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                    </button>
                                     <button 
                                         onClick={() => handlePublish(asset, 'facebook')}
                                         title="Publier sur Facebook"
