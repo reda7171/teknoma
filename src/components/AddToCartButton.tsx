@@ -61,6 +61,17 @@ export default function AddToCartButton({
                         replacedBooks: product.replacedBooks,
                     })
 
+                    // Fire Confetti
+                    import('canvas-confetti').then((confetti) => {
+                        confetti.default({
+                            particleCount: 80,
+                            spread: 60,
+                            origin: { y: 0.8 },
+                            colors: ['#000000', '#10b981', '#3b82f6', '#f59e0b'],
+                            zIndex: 9999
+                        });
+                    });
+
                     // Facebook Pixel Tracking
                     fbPixelEvents.addToCart({
                         id: product.id,

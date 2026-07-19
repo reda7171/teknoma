@@ -21,7 +21,7 @@ export default async function DeposerListePage() {
             <Header />
             
             <section 
-                className="relative py-32 px-4 border-b border-gray-100 min-h-[calc(100vh-80px)] flex flex-col justify-center bg-cover bg-center"
+                className="relative py-12 md:py-24 px-4 border-b border-gray-100 min-h-[calc(100vh-120px)] md:min-h-[calc(100vh-80px)] flex flex-col justify-center bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/back-to-school-bg.png')" }}
             >
                 {/* Overlay pour la lisibilité */}
@@ -44,7 +44,7 @@ export default async function DeposerListePage() {
                         <DeposerListeForm />
                     </div>
                     
-                    <div className="mt-16 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                    <div className="mt-8 md:mt-16 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
                         <p className="text-xl md:text-2xl font-black text-black leading-tight" dangerouslySetInnerHTML={{ __html: t.raw('teamMsg') }}></p>
                     </div>
                 </div>

@@ -64,7 +64,7 @@ export default function ReadingListStats({ items }: ReadingListStatsProps) {
                         <div className="space-y-1">
                             <h4 className="text-2xl font-black tracking-tight" suppressHydrationWarning>{stat.value}</h4>
                             <div className="flex flex-col">
-                                <span className={`text-[10px] uppercase font-black tracking-widest ${stat.color.includes('text-white') ? 'text-white/60' : 'text-gray-400'}`}>
+                                <span className={`text-[10px] uppercase font-black tracking-widest rtl:tracking-normal ${stat.color.includes('text-white') ? 'text-white/60' : 'text-gray-400'}`}>
                                     {stat.label}
                                 </span>
                                 <span

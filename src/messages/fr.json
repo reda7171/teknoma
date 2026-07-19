@@ -117,85 +117,23 @@
     "Description": "Veuillez lire attentivement nos conditions d'utilisation. Elles définissent les règles d'utilisation de la plateforme Riwaya."
   },
   "AboutPage": {
-    "Hero": {
-      "Title": "Notre Histoire",
-      "Subtitle": "Découvrez qui nous sommes et notre mission pour démocratiser la lecture au Maroc."
-    },
-    "Quote": {
-      "Text": "Un livre est un rêve que vous tenez entre vos mains.",
-      "Source": "Sagesse Littéraire"
-    },
-    "Mission": {
-      "Badge": "Notre Mission",
-      "Title1": "Connecter les esprits",
-      "Title2": "à travers les livres.",
-      "Desc1": "Chez Riwaya, nous croyons au pouvoir de la lecture pour transformer des vies. Notre mission est de rendre les livres accessibles, abordables et disponibles pour tous.",
-      "Desc2": "Nous construisons plus qu'une simple librairie, nous bâtissons une communauté de lecteurs passionnés."
-    },
-    "Values": {
-      "Passion": {
-        "Title": "Passion",
-        "Desc": "L'amour des livres est au cœur de tout ce que nous faisons."
-      },
-      "Quality": {
-        "Title": "Qualité",
-        "Desc": "Nous sélectionnons soigneusement chaque livre de notre catalogue."
-      },
-      "Trust": {
-        "Title": "Confiance",
-        "Desc": "Nous bâtissons des relations durables avec nos lecteurs."
-      },
-      "Proximity": {
-        "Title": "Proximité",
-        "Desc": "Toujours à votre écoute pour vous conseiller la meilleure lecture."
-      }
-    },
-    "Team": {
-      "Title": "L'équipe Riwaya",
-      "Subtitle": "Les personnes derrière la magie",
-      "Member1": {
-        "Name": "Ahmed Benali",
-        "Role": "Fondateur",
-        "Bio": "Passionné par la littérature depuis son plus jeune âge, Ahmed a fondé Riwaya pour partager cette passion."
-      },
-      "Member2": {
-        "Name": "Youssef El Idrissi",
-        "Role": "Directeur Technique",
-        "Bio": "Youssef s'assure que votre expérience sur la plateforme soit fluide et agréable."
-      },
-      "Member3": {
-        "Name": "Sara Benali",
-        "Role": "Responsable Éditoriale",
-        "Bio": "Sara sélectionne les meilleurs titres et packs pour nos lecteurs."
-      },
-      "Member4": {
-        "Name": "Fatima Zahra",
-        "Role": "Service Client",
-        "Bio": "Fatima est toujours prête à vous aider et à répondre à vos questions."
-      }
-    },
-    "WhyUs": {
-      "Title": "Pourquoi nous choisir",
-      "Subtitle": "Notre engagement envers vous",
-      "LiveStock": {
-        "Title": "Stock en temps réel",
-        "Desc": "Disponibilité garantie de nos livres."
-      },
-      "ExpertHelp": {
-        "Title": "Conseil expert",
-        "Desc": "Une équipe de passionnés pour vous guider."
-      },
-      "SafeArrival": {
-        "Title": "Livraison sécurisée",
-        "Desc": "Vos livres arrivent en parfait état."
-      }
-    },
-    "CTA": {
-      "Title": "Commencez votre voyage",
-      "Subtitle": "Explorez notre collection de livres et de packs",
-      "SelectLibrary": "Voir la Librairie",
-      "ViewBundles": "Découvrir les Packs"
-    }
+    "OurStory": "Notre Histoire",
+    "HeroDesc": "Plus qu'une librairie, une destination pour les esprits curieux et les amoureux du savoir.",
+    "OurMission": "Notre Mission",
+    "MissionDesc": "Depuis notre création, nous nous efforçons de rendre la lecture accessible à tous au Maroc. Nous croyons fermement que chaque livre a le pouvoir de transformer une vie, d'élargir les horizons et de stimuler l'imagination. Notre objectif est de créer un pont entre les auteurs et les lecteurs, en offrant une sélection diversifiée d'œuvres qui répondent à toutes les curiosités. Avec Riwaya, la culture s'invite chez vous, où que vous soyez, pour nourrir votre esprit au quotidien.",
+    "PassionTitle": "Passion",
+    "PassionDesc": "Sélectionnés avec soin par des passionnés de littérature, pour garantir que chaque livre proposé soit une véritable découverte et une source d'inspiration.",
+    "CommunityTitle": "Communauté",
+    "CommunityDesc": "Unir les lecteurs marocains autour d'une plateforme unique, créer un espace d'échange et de partage pour célébrer ensemble notre amour commun pour la lecture.",
+    "WhyRiwaya": "Pourquoi Riwaya ?",
+    "QualityTitle": "Qualité Garantie",
+    "QualityDesc": "Livres originaux uniquement, vérifiés avant envoi.",
+    "DeliveryTitle": "Livraison Rapide",
+    "DeliveryDesc": "Expédition partout au Maroc en 24/48h.",
+    "SupportTitle": "Service Client",
+    "SupportDesc": "Une équipe dédiée pour vous accompagner 7j/7.",
+    "OurLocation": "Notre Emplacement",
+    "VisitUs": "Venez nous rendre visite à Rabat"
   },
   "AuthorsPage": {
     "Title": "Nos Auteurs | Riwaya",
@@ -212,7 +150,7 @@
   },
   "HomePage": {
     "hero": {
-      "Badge": "Sélections 2024",
+      "Badge": "Sélections 2026",
       "TitlePart1": "Beau",
       "TitlePart2": "Savoir.",
       "Description": "Découvrez une sélection premium de volumes qui transforment votre vision du monde. Le savoir, avec style.",
@@ -358,7 +296,10 @@
       "Logout": "Déconnexion",
       "LogoutLoading": "Déconnexion...",
       "LogoutSuccess": "Déconnexion réussie",
-      "DefaultUser": "Utilisateur"
+      "DefaultUser": "Utilisateur",
+      "Favorites": "Mes favoris",
+      "AdminPanel": "Panneau Admin",
+      "InfluencerDashboard": "Dashboard"
     }
   },
   "Footer": {
@@ -532,7 +473,8 @@
     "Reflections": "{count} Réflexions",
     "RecommendedReads": "Lectures Recommandées",
     "ExploreAll": "Tout explorer",
-    "FrequentlyBoughtTogether": "Achetez-le avec"
+    "FrequentlyBoughtTogether": "Achetez-le avec",
+    "ArticleMentions": "L'article parle de ce produit"
   },
   "Cart": {
     "Title": "Votre Panier",
@@ -922,6 +864,15 @@
         "MarkFinished": "Marquer comme terminé",
         "Delete": "Supprimer",
         "ConfirmDelete": "Êtes-vous sûr ?"
+      },
+      "ManualBook": {
+        "AddManual": "Ajouter un livre hors catalogue",
+        "NewBook": "Nouveau livre personnel",
+        "Title": "Titre",
+        "TitleEx": "Ex: L'Alchimiste",
+        "Author": "Auteur",
+        "AuthorEx": "Ex: Paulo Coelho",
+        "TotalPages": "Pages totales"
       }
     },
     "Chat": {
@@ -1060,7 +1011,8 @@
     "Subtitle": "Inspiration, Culture & Idées pour l'esprit moderne",
     "NoPosts": "Aucun article publié pour le moment.",
     "ComingSoon": "Revenez bientôt pour découvrir nos prochaines publications.",
-    "ReadArticle": "Lire l'article"
+    "ReadArticle": "Lire l'article",
+    "All": "Tous"
   },
   "Orders": {
     "Title": "Mes Commandes",
@@ -1165,10 +1117,10 @@
     }
   },
   "CookieConsent": {
-    "Title": "Cookies & Vie Privée",
-    "Description": "Nous utilisons des cookies pour améliorer votre expérience et diffuser des annonces adaptées via Google AdSense. En continuant, vous acceptez notre <link>politique de confidentialité</link>.",
+    "Title": "Consentement aux Cookies",
+    "Description": "Nous utilisons des cookies pour améliorer votre expérience, analyser notre trafic et vous proposer des offres personnalisées. En savoir plus dans notre <link>Politique de confidentialité</link>.",
     "Accept": "Accepter tout",
-    "LearnMore": "En savoir plus"
+    "LearnMore": "Gérer les cookies"
   },
   "KidsProductDetail": {
     "NotFoundTitle": "Produit introuvable | Riwaya",
@@ -1240,7 +1192,9 @@
       "WhatsApp": "WhatsApp",
       "CopyLink": "Copier le lien",
       "LinkCopied": "Lien copié !"
-    }
+    },
+    "TableOfContents": "Sommaire",
+    "Blog": "Blog"
   },
   "BlogComments": {
     "CommentsTitle": "Commentaires",
@@ -1303,5 +1257,91 @@
     "applyDescription": "Afin de nous envoyer votre article, veuillez l'écrire dans un fichier Word et l'envoyer au blog via WhatsApp.",
     "applyButton": "Contactez-nous sur WhatsApp",
     "applyThanks": "Merci"
+  },
+  "ContactPage": {
+    "CustomerSupport": "Support Client",
+    "Title1": "Contactez",
+    "Title2": "Nous",
+    "Description": "Notre équipe est à votre écoute pour toute question concernant vos commandes ou nos ouvrages.",
+    "DirectEmail": "Email Direct",
+    "Phone": "Téléphone",
+    "Headquarters": "Siège Social",
+    "Hours": "Horaires",
+    "HoursDetail": "Lun - Sam : 09h - 19h",
+    "WhatsAppTitle": "Rejoignez notre chaîne WhatsApp",
+    "WhatsAppDesc": "Ne manquez aucune de nos offres exclusives, nouveautés et promotions.",
+    "Subscribe": "S'abonner",
+    "GoogleTitle": "Laissez-nous un avis sur Google !",
+    "GoogleDesc": "Votre opinion compte beaucoup pour nous. Merci de partager votre expérience.",
+    "WriteReview": "Rédiger un avis",
+    "SocialNetworks": "Nos Réseaux Sociaux",
+    "FullName": "Nom Complet",
+    "YourName": "Votre nom",
+    "EmailLabel": "Email",
+    "EmailPlaceholder": "votre@email.com",
+    "Subject": "Objet",
+    "SubjectPlaceholder": "Comment pouvons-nous vous aider ?",
+    "MessageLabel": "Message",
+    "MessagePlaceholder": "Votre message...",
+    "SendMessage": "Envoyer le Message"
+  },
+  "ReturnPolicyPage": {
+    "Title1": "Retours et",
+    "Title2": "Remboursements",
+    "Section1Title": "1. Droit de rétractation",
+    "Section1Desc": "Conformément à la législation en vigueur, vous disposez d'un délai de <bold>7 jours</bold> à compter de la réception de votre commande pour demander un échange ou un retour si le produit ne vous convient pas.",
+    "Section2Title": "2. Conditions de retour",
+    "Section2Desc": "Pour être éligible à un retour, votre livre doit être dans le même état que celui dans lequel vous l'avez reçu (non lu, sans marques, pliures ou annotations). L'emballage original doit être conservé.",
+    "Section3Title": "3. Articles défectueux",
+    "Section3Desc": "Si vous recevez un livre endommagé ou présentant un défaut de fabrication, nous nous engageons à le remplacer gratuitement dans les plus brefs délais.",
+    "Section4Title": "4. Procédure de retour",
+    "Section4Desc": "Pour initier un retour, veuillez contacter notre service client via WhatsApp ou par email à admin@riwaya.store. Veuillez inclure votre numéro de commande et des photos si le produit est défectueux."
+  },
+  "ShippingPolicyPage": {
+    "Title": "Politique de Livraison",
+    "Section1Title": "1. Zones de livraison",
+    "Section1Desc": "<bold>Riwaya</bold> livre dans toutes les villes du Royaume du Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou dans les zones plus reculées, nous nous assurons que vos livres arrivent à bon port.",
+    "Section2Title": "2. Délais de livraison",
+    "Section2Desc": "Nos délais de livraison varient généralement entre <bold>24h et 48h</bold> ouvrables pour les grandes villes. Pour les autres régions, le délai peut s'étendre jusqu'à 4 jours ouvrables.",
+    "Section3Title": "3. Frais de livraison",
+    "Section3Desc": "Les frais de livraison sont calculés lors de la validation de votre commande. Nous offrons régulièrement la livraison gratuite pour les commandes dépassant un certain montant (voir offres en cours sur la page d'accueil).",
+    "Section4Title": "4. Suivi de commande",
+    "Section4Desc": "Une fois votre commande expédiée, vous recevrez une confirmation par SMS ou WhatsApp avec les informations nécessaires pour suivre l'état de votre livraison."
+  },
+  "PrivacyPage": {
+    "Title": "Politique de Confidentialité",
+    "Section1Title": "1. Introduction",
+    "Section1Desc": "Chez <bold>Riwaya</bold>, accessible via riwaya.store, l'une de nos priorités majeures est la confidentialité de nos visiteurs. Ce document contient les types d'informations collectées et enregistrées par Riwaya et comment nous les utilisons.",
+    "Section2Title": "2. Utilisation de Google AdSense",
+    "Section2Desc": "Google, en tant que fournisseur tiers, utilise des cookies pour diffuser des annonces sur notre site. L'utilisation du cookie DART par Google lui permet de diffuser des annonces aux visiteurs de notre site en fonction de leur visite sur riwaya.store et d'autres sites sur Internet. Les visiteurs peuvent choisir de ne pas utiliser le cookie DART en consultant la politique de confidentialité du réseau d'annonces Google et de contenu.",
+    "Section3Title": "3. Fichiers Journaux (Log Files)",
+    "Section3Desc": "Riwaya suit une procédure standard d'utilisation des fichiers journaux. Ces fichiers enregistrent les visiteurs lorsqu'ils visitent des sites Web. Les informations collectées comprennent les adresses de protocole Internet (IP), le type de navigateur, le fournisseur de services Internet (FAI), l'horodatage, les pages de référence/sortie et éventuellement le nombre de clics.",
+    "Section4Title": "4. Cookies et Balises Web",
+    "Section4Desc": "Comme tout autre site Web, Riwaya utilise des 'cookies'. Ces cookies sont utilisés pour stocker des informations, notamment les préférences des visiteurs et les pages du site Web auxquelles le visiteur a accédé. Ces informations sont utilisées pour optimiser l'expérience des utilisateurs en personnalisant le contenu de nos pages Web.",
+    "Section5Title": "5. RGPD et Droits des Utilisateurs",
+    "Section5Desc": "Nous tenons à nous assurer que vous connaissez tous vos droits en matière de protection des données. Chaque utilisateur a droit à l'accès, à la rectification, à l'effacement, à la limitation du traitement et au droit à la portabilité des données. Si vous souhaitez exercer l'un de ces droits, veuillez nous contacter.",
+    "Section6Title": "6. Informations pour les enfants",
+    "Section6Desc": "Une autre de nos priorités est la protection des enfants lors de l'utilisation d'Internet. Nous encourageons les parents et les tuteurs à observer, participer et/ou surveiller et guider leur activité en ligne. Riwaya ne collecte sciemment aucune information personnelle identifiable auprès d'enfants de moins de 13 ans."
+  },
+  "CookieBanner": {
+    "Message": "Nous utilisons des cookies pour améliorer votre expérience sur notre site et personnaliser les annonces. En continuant à naviguer, vous acceptez notre utilisation des cookies.",
+    "Accept": "Accepter",
+    "Decline": "Refuser",
+    "PrivacyLink": "En savoir plus"
+  },
+  "TermsPage": {
+    "Title": "Conditions Générales de Vente",
+    "Section1Title": "1. Introduction",
+    "Section1Desc": "Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions effectuées sur le site <bold>Riwaya</bold>. En utilisant notre plateforme ou en passant commande, vous acceptez ces conditions dans leur intégralité.",
+    "Section2Title": "2. Commandes et Paiement",
+    "Section2Desc": "Toutes les commandes sont soumises à la disponibilité des stocks. Nous proposons le paiement à la livraison (Cash on Delivery). Le paiement est exigé au moment où la commande est remise au client par notre service de livraison.",
+    "Section3Title": "3. Livraison et Expédition",
+    "Section3Desc": "Nous livrons partout au Maroc. Les délais de livraison varient en fonction de votre ville et de la disponibilité des produits. Riwaya s'efforce de respecter les délais annoncés mais n'est pas responsable des retards liés aux sociétés de transport.",
+    "Section4Title": "4. Retours et Remboursements",
+    "Section4Desc": "Si un article reçu est défectueux ou non conforme, vous disposez d'un délai défini dans notre politique de retour pour nous contacter. Les livres doivent être retournés dans leur état d'origine.",
+    "Section5Title": "5. Propriété Intellectuelle",
+    "Section5Desc": "L'ensemble du contenu présent sur le site riwaya.store (textes, images, logos) est protégé par les droits d'auteur. Toute reproduction non autorisée est strictement interdite.",
+    "Section6Title": "6. Modifications des conditions",
+    "Section6Desc": "Riwaya se réserve le droit de modifier ces CGV à tout moment. Les modifications prendront effet dès leur publication sur le site. Nous vous encourageons à consulter cette page régulièrement."
   }
 }

@@ -65,7 +65,7 @@ export default function ReadingListBoard({ initialItems, user, children }: Readi
                 <div className={`flex items-center gap-2 p-3 rounded-xl font-bold ${color}`}>
                     <Icon className="w-5 h-5" />
                     <span>{label}</span>
-                    <span className="ml-auto bg-white/50 px-2 py-0.5 rounded text-xs">{columnItems.length}</span>
+                    <span className="ms-auto bg-white/50 px-2.5 py-0.5 rounded-full text-xs shadow-sm">{columnItems.length}</span>
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -102,11 +102,13 @@ export default function ReadingListBoard({ initialItems, user, children }: Readi
                                         const progress = item.totalPages > 0 ? Math.min((item.currentPage / item.totalPages) * 100, 100) : 0;
                                         return (
                                             <>
-                                                <div className="w-full bg-gray-100 rounded-full h-2 mb-1">
+                                                <div className="w-full bg-gray-100 rounded-full h-2 mb-1 overflow-hidden shadow-inner">
                                                     <div
-                                                        className="bg-emerald-600 h-2 rounded-full transition-all"
+                                                        className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2 rounded-full transition-all duration-500 relative"
                                                         style={{ width: `${progress}%` }}
-                                                    />
+                                                    >
+                                                        <div className="absolute top-0 right-0 bottom-0 w-4 bg-white/20 blur-[2px]" />
+                                                    </div>
                                                 </div>
                                                 <div className="flex justify-between text-[10px] text-gray-500 mb-3">
                                                     <span>{Math.round(progress)}%</span>

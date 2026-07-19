@@ -19,10 +19,14 @@ export default function ShareArticle({ title, vertical = false }: Props) {
         setUrl(window.location.href)
     }, [])
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(url)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(url)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        } catch (err) {
+            console.error('Failed to copy text: ', err)
+        }
     }
 
     if (!url) return null

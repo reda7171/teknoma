@@ -59,8 +59,8 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-16 mb-12 md:mb-20">
-                    <div className="space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 mb-12 md:mb-20">
+                    <div className="space-y-6 col-span-2 md:col-span-1">
                         <Link href="/" className="flex items-center gap-2 group">
                             {siteLogo ? (
                                 <img
@@ -125,7 +125,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                             <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Contact')}</Link></li>
                         </ul>
                     </div>
-                    <div>
+                    <div className="col-span-2 md:col-span-1">
                         <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Journal')}</h3>
                         <ul className="space-y-4 mb-8">
                             <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{tNav('Journal')}</Link></li>

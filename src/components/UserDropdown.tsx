@@ -158,7 +158,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                                 <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
                                     <ShieldCheck className="w-4 h-4 text-blue-600 group-hover:text-white" />
                                 </div>
-                                <span className="text-sm font-bold text-blue-700 group-hover:text-blue-800">Panneau Admin</span>
+                                <span className="text-sm font-bold text-blue-700 group-hover:text-blue-800">{t('UserMenu.AdminPanel')}</span>
                             </Link>
                         )}
 
@@ -171,7 +171,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                                 <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors">
                                     <Sparkles className="w-4 h-4 text-purple-600 group-hover:text-white" />
                                 </div>
-                                <span className="text-sm font-bold text-purple-700 group-hover:text-purple-800">Dashboard</span>
+                                <span className="text-sm font-bold text-purple-700 group-hover:text-purple-800">{t('UserMenu.InfluencerDashboard')}</span>
                             </Link>
                         )}
 
@@ -183,7 +183,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                             <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-red-500 transition-colors">
                                 <Heart className="w-4 h-4 text-gray-600 group-hover:text-white" />
                             </div>
-                            <span className="text-sm font-bold text-gray-700 group-hover:text-red-600">Mes favoris</span>
+                            <span className="text-sm font-bold text-gray-700 group-hover:text-red-600">{t('UserMenu.Favorites')}</span>
                         </Link>
 
                         <Link

@@ -2,8 +2,10 @@
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { Truck, Clock, MapPin, ShieldCheck, Globe } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export default async function ShippingPolicyPage() {
+    const t = await getTranslations('ShippingPolicyPage')
     return (
         <div className="min-h-screen bg-pixio-cream">
             <Header />
@@ -14,43 +16,43 @@ export default async function ShippingPolicyPage() {
                     </div>
                     
                     <h1 className="text-5xl font-black text-black tracking-tighter mb-12 italic">
-                        Politique de Livraison<span className="text-gray-200">.</span>
+                        {t('Title')}<span className="text-gray-200">.</span>
                     </h1>
 
-                    <div className="prose prose-lg max-w-none text-gray-500 font-bold uppercase tracking-tight text-xs space-y-12">
+                    <div className="prose prose-lg max-w-none text-gray-500 font-bold uppercase tracking-tight text-xs space-y-12 rtl:text-right">
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <MapPin className="w-5 h-5" /> 1. Zones de livraison
+                                <MapPin className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section1Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                <strong>Riwaya</strong> livre dans toutes les villes du Royaume du Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou dans les zones plus reculées, nous nous assurons que vos livres arrivent à bon port.
+                                {t.rich('Section1Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <Clock className="w-5 h-5" /> 2. Délais de livraison
+                                <Clock className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section2Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Nos délais de livraison varient généralement entre <strong>24h et 48h</strong> ouvrables pour les grandes villes. Pour les autres régions, le délai peut s'étendre jusqu'à 4 jours ouvrables.
+                                {t.rich('Section2Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <ShieldCheck className="w-5 h-5" /> 3. Frais de livraison
+                                <ShieldCheck className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section3Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Les frais de livraison sont calculés lors de la validation de votre commande. Nous offrons régulièrement la livraison gratuite pour les commandes dépassant un certain montant (voir offres en cours sur la page d'accueil).
+                                {t.rich('Section3Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <Globe className="w-5 h-5" /> 4. Suivi de commande
+                                <Globe className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section4Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Une fois votre commande expédiée, vous recevrez une confirmation par SMS ou WhatsApp avec les informations nécessaires pour suivre l'état de votre livraison.
+                                {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
                     </div>

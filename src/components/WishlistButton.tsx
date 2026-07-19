@@ -72,6 +72,15 @@ export default function WishlistButton({ item, className, showText = false, vari
 
                 if (res.success) {
                     addItem(item)
+                    // Fire Confetti
+                    import('canvas-confetti').then((confetti) => {
+                        confetti.default({
+                            particleCount: 50,
+                            spread: 50,
+                            origin: { y: 0.8 },
+                            colors: ['#ef4444', '#f43f5e', '#ec4899'] // Pink/Red colors for heart
+                        });
+                    });
                     // Facebook Pixel Tracking
                     fbPixelEvents.addToWishlist({
                         id: item.id,

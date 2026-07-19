@@ -392,7 +392,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         return (
           <section key={key} {...heroProps} className={`relative overflow-hidden py-1 ${heroProps.className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col lg:flex-row items-center gap-8">
+              <div className="flex flex-col-reverse lg:flex-row items-center gap-8">
                 <div className="flex-1">
                   <ScrollReveal animation="animate-reveal-up" delay={200} className="space-y-8 text-center lg:text-start">
                     <div className="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0">

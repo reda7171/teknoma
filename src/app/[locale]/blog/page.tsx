@@ -98,15 +98,15 @@ export default async function BlogPage({
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <Link
                             href="/blog"
-                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                         >
-                            Tous
+                            {t('All')}
                         </Link>
                         {categories.map((cat) => (
                             <Link
                                 key={cat}
                                 href={`/blog?category=${cat}`}
-                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                             >
                                 {cat}
                             </Link>
@@ -169,11 +169,14 @@ export default async function BlogPage({
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="w-3 h-3" />
                                                 <span>
-                                                    {new Date(post.publishedAt).toLocaleDateString('fr-FR', {
-                                                        day: 'numeric',
-                                                        month: 'short',
-                                                        year: 'numeric'
-                                                    })}
+                                                    {new Date(post.publishedAt).toLocaleDateString(
+                                                        locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR', 
+                                                        {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        }
+                                                    )}
                                                 </span>
                                             </div>
                                         )}
@@ -201,11 +204,11 @@ export default async function BlogPage({
                                     )}
 
                                     <div className="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black group-hover:tracking-[0.3em] transition-all">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-black group-hover:tracking-[0.3em] rtl:group-hover:tracking-normal transition-all">
                                             {t('ReadArticle')}
                                         </span>
                                         <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center group-hover:bg-pixio-pink transition-colors">
-                                            <ArrowRight className="w-4 h-4 text-white -rotate-45 group-hover:rotate-0 transition-transform" />
+                                            <ArrowRight className="w-4 h-4 text-white -rotate-45 rtl:-scale-x-100 group-hover:rotate-0 transition-transform" />
                                         </div>
                                     </div>
                                 </div>
@@ -224,11 +227,11 @@ export default async function BlogPage({
                                 aria-label="Page précédente"
                                 className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl bg-white border border-gray-100 text-black hover:bg-black hover:text-white transition-all shadow-sm hover:scale-105 duration-300"
                             >
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-5 h-5 rtl:rotate-180" />
                             </Link>
                         ) : (
                             <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-5 h-5 rtl:rotate-180" />
                             </div>
                         )}
 
@@ -261,11 +264,11 @@ export default async function BlogPage({
                                 aria-label="Page suivante"
                                 className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl bg-white border border-gray-100 text-black hover:bg-black hover:text-white transition-all shadow-sm hover:scale-105 duration-300"
                             >
-                                <ChevronRight className="w-5 h-5" />
+                                <ChevronRight className="w-5 h-5 rtl:rotate-180" />
                             </Link>
                         ) : (
                             <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">
-                                <ChevronRight className="w-5 h-5" />
+                                <ChevronRight className="w-5 h-5 rtl:rotate-180" />
                             </div>
                         )}
                     </div>

@@ -251,7 +251,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* Fil d'Ariane + btn admin */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-8 md:mb-10">
                         <nav className="flex items-center gap-2 text-[10px] rtl:text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-slate-400">
-                            <Link href="/blog" className="hover:text-slate-900 transition-colors">Blog</Link>
+                            <Link href="/blog" className="hover:text-slate-900 transition-colors">{t('Blog')}</Link>
                             <span>/</span>
                             {post.category && (
                                 <>
@@ -286,13 +286,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     )}
 
                     {/* Titre principal */}
-                    <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.2] md:leading-[1] tracking-tighter mb-6 md:mb-8 max-w-4xl break-words">
+                    <h1 dir={post.language === 'ar' ? 'rtl' : 'ltr'} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.2] md:leading-[1] tracking-tighter mb-6 md:mb-8 max-w-4xl break-words">
                         {post.title}
                     </h1>
 
                     {/* Extrait */}
                     {post.excerpt && (
-                        <p className="text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed mb-8 md:mb-10 max-w-3xl font-medium">
+                        <p dir={post.language === 'ar' ? 'rtl' : 'ltr'} className="text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed mb-8 md:mb-10 max-w-3xl font-medium">
                             {post.excerpt}
                         </p>
                     )}
@@ -385,10 +385,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* === CONTENU PRINCIPAL === */}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 lg:py-24 pb-32">
-                <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-16 xl:gap-24">
+                <div className="flex flex-col lg:flex-row gap-16 xl:gap-24 items-start">
 
                     {/* Colonne article */}
-                    <div>
+                    <div className="flex-1 w-full min-w-0">
                         {/* AdSense haut */}
                         {adsenseEnabled === 'true' && (
                             <AdBanner
@@ -401,6 +401,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {/* Corps de l'article */}
                         <article
                             id="article-content"
+                            dir={post.language === 'ar' ? 'rtl' : 'ltr'}
                             className="prose prose-base md:prose-lg max-w-none rtl:text-[18px] md:rtl:text-[22px] rtl:font-bold rtl:leading-[2] md:rtl:leading-[2.5]
                                 prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900
                                 prose-h2:text-2xl md:prose-h2:text-3xl lg:prose-h2:text-4xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:text-[24px] md:rtl:prose-h2:text-[34px]
@@ -585,11 +586,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
 
                     {/* === Sidebar sticky === */}
-                    <aside className="hidden lg:block">
-                        <div className="sticky top-24 space-y-8">
+                    <aside className="hidden lg:block w-[280px] shrink-0 sticky top-24 space-y-8 h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain pb-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                             
                             {/* Sommaire / TOC */}
-                            <TableOfContents />
+                            <TableOfContents language={post.language} />
 
                             {/* Partage */}
                             <div className="bg-gray-50 rounded-3xl p-6">
@@ -705,7 +705,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     <BookOpen className="w-4 h-4 text-white" />
                                 </div>
                             </Link>
-                        </div>
                     </aside>
                 </div>
             </div>

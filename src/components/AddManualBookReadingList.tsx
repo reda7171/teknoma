@@ -13,7 +13,7 @@ export default function AddManualBookReadingList() {
     const [loading, setLoading] = useState(false)
     const { showNotification } = useUIStore()
     const router = useRouter()
-    const t = useTranslations('Common')
+    const t = useTranslations('Community')
 
     const [formData, setFormData] = useState({
         title: '',
@@ -64,7 +64,7 @@ export default function AddManualBookReadingList() {
                         className="hidden md:flex w-full md:w-auto items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
                     >
                         <Plus className="w-5 h-5" />
-                        Ajouter un livre hors catalogue
+                        {t('ReadingList.ManualBook.AddManual')}
                     </button>
                     {/* Mobile FAB */}
                     <button
@@ -81,7 +81,7 @@ export default function AddManualBookReadingList() {
                             <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
                                 <Book className="w-5 h-5 text-emerald-600" />
                             </div>
-                            <h3 className="font-black text-xl text-black">Nouveau livre personnel</h3>
+                            <h3 className="font-black text-xl text-black">{t('ReadingList.ManualBook.NewBook')}</h3>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
@@ -93,29 +93,29 @@ export default function AddManualBookReadingList() {
 
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Titre</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase mx-1">{t('ReadingList.ManualBook.Title')}</label>
                             <input
                                 required
                                 type="text"
-                                placeholder="Ex: L'Alchimiste"
+                                placeholder={t('ReadingList.ManualBook.TitleEx')}
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all font-medium"
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Auteur</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase mx-1">{t('ReadingList.ManualBook.Author')}</label>
                             <input
                                 required
                                 type="text"
-                                placeholder="Ex: Paulo Coelho"
+                                placeholder={t('ReadingList.ManualBook.AuthorEx')}
                                 value={formData.author}
                                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all font-medium"
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Pages totales</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase mx-1">{t('ReadingList.ManualBook.TotalPages')}</label>
                             <input
                                 required
                                 type="number"
@@ -131,7 +131,7 @@ export default function AddManualBookReadingList() {
                             className="bg-black text-white px-6 py-3.5 rounded-xl font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-                            {t('AddToList')}
+                            {t('ReadingList.AddBook')}
                         </button>
                     </form>
                 </div>

@@ -266,7 +266,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
       </head>
       <body
-        className={`${outfit.className} font-sans antialiased bg-white overflow-x-clip`}
+        className={`${outfit.className} font-sans antialiased bg-white`}
         suppressHydrationWarning
       >
         {/* Google Tag Manager (noscript) */}

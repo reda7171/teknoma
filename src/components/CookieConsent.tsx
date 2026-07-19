@@ -41,12 +41,12 @@ export default function CookieConsent() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-8">
                 
                 {/* Text & Icon */}
-                <div className="flex items-start lg:items-center gap-4 flex-1">
+                <div className="flex items-start lg:items-center gap-4 flex-1 rtl:text-right">
                     <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10 hidden sm:flex">
                         <Cookie className="w-5 h-5 text-white" />
                     </div>
                     <div className="pr-8 lg:pr-0">
-                        <h3 className="text-sm font-black uppercase tracking-[0.15em] text-black mb-1">
+                        <h3 className="text-sm font-black uppercase tracking-[0.15em] text-black mb-1 rtl:tracking-normal">
                             {t('Title')}
                         </h3>
                         <p className="text-xs font-medium text-gray-600 leading-relaxed max-w-3xl">
@@ -65,13 +65,13 @@ export default function CookieConsent() {
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto shrink-0">
                     <button 
                         onClick={handleAccept}
-                        className="w-full sm:w-auto px-8 py-3 bg-black text-white text-[11px] font-black uppercase tracking-[0.15em] rounded-xl hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-black/5"
+                        className="w-full sm:w-auto px-8 py-3 bg-black text-white text-[11px] font-black uppercase tracking-[0.15em] rtl:tracking-normal rounded-xl hover:bg-gray-900 transition-all active:scale-95 shadow-xl shadow-black/5"
                     >
                         {t('Accept')}
                     </button>
                     <button 
                         onClick={handleDecline}
-                        className="w-full sm:w-auto px-8 py-3 border border-gray-200 text-black text-[11px] font-black uppercase tracking-[0.15em] rounded-xl hover:bg-gray-50 transition-all active:scale-95"
+                        className="w-full sm:w-auto px-8 py-3 border border-gray-200 text-black text-[11px] font-black uppercase tracking-[0.15em] rtl:tracking-normal rounded-xl hover:bg-gray-50 transition-all active:scale-95"
                     >
                         {t('LearnMore')}
                     </button>
@@ -84,7 +84,7 @@ export default function CookieConsent() {
                 <button 
                     onClick={() => setIsVisible(false)}
                     aria-label="Fermer le bandeau des cookies"
-                    className="absolute top-4 right-4 lg:static text-gray-400 hover:text-black transition-all hover:rotate-90 p-1"
+                    className="absolute top-4 right-4 rtl:left-4 rtl:right-auto lg:static text-gray-400 hover:text-black transition-all hover:rotate-90 p-1"
                 >
                     <X className="w-5 h-5" />
                 </button>

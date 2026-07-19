@@ -18,6 +18,7 @@ import { getCommunityUser } from '@/lib/actions/community-auth'
 import { Metadata } from 'next'
 import SetPixelView from '@/components/SetPixelView'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import TiltImage from '@/components/TiltImage'
 import StickyBottomActions from '@/components/StickyBottomActions'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/actions/site-settings'
@@ -25,7 +26,7 @@ import AnnouncementBar from '@/components/AnnouncementBar'
 import { getPostsByBookId } from '@/lib/actions/blog'
 import Image from 'next/image'
 import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import BookSubNav from '@/components/BookSubNav'
 import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
 import AdBanner from '@/components/AdBanner'
@@ -322,7 +323,14 @@ export default async function BookDetailPage({
 
                 <Header />
 
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-40">
+                <BookSubNav 
+                    bookTitle={book.title}
+                    homeLabel={tNav('Home')}
+                    booksLabel={tNav('Books')}
+                    backLabel={tBook('BackToSelection') || 'Retour à la sélection'}
+                />
+
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-40">
                     {/* Bloc publicitaire AdSense avant le fil d'Ariane */}
                     {adsenseEnabled && (
                         <AdBanner
@@ -333,23 +341,6 @@ export default async function BookDetailPage({
                             className="!my-3"
                         />
                     )}
-
-                    {/* Breadcrumb Section */}
-                    <Breadcrumbs 
-                        items={[
-                            { label: tNav('Books'), href: '/books' },
-                            { label: book.title }
-                        ]} 
-                    />
-
-                    {/* Back Button */}
-                    <Link
-                        href="/books"
-                        className="inline-flex items-center gap-4 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 group transition-colors rtl:flex-row-reverse"
-                    >
-                        <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:translate-x-1" />
-                        <span>{tBook('BackToSelection')}</span>
-                    </Link>
 
                     {/* Product Detail */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 mb-10 md:mb-32">
@@ -371,10 +362,10 @@ export default async function BookDetailPage({
                                             className="bg-white/90 backdrop-blur-md shadow-2xl hover:bg-white w-12 h-12 rounded-full"
                                         />
                                     </div>
-                                    <ImageWithFallback
+                                    <TiltImage
                                         src={book.image}
                                         alt={displayTitle}
-                                        className="w-full h-full object-cover rounded-[2rem] transition-transform duration-700 group-hover:scale-[1.02]"
+                                        className="w-full h-full object-cover transition-transform duration-700"
                                     />
                                     {book.stock <= 5 && book.stock > 0 && (
                                         <div className="absolute top-6 right-6 rtl:left-6 rtl:right-auto z-20">
@@ -421,7 +412,7 @@ export default async function BookDetailPage({
                                     <div className="flex items-center gap-2 mb-6">
                                         <FileText className="w-4 h-4 text-blue-600" />
                                         <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black">
-                                            L'article parle de ce produit
+                                            {tBook('ArticleMentions')}
                                         </h3>
                                     </div>
 

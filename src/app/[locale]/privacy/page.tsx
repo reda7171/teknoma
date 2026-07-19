@@ -5,6 +5,7 @@ import Footer from '@/components/Footer'
 import { Shield, Lock, Eye, FileText, Database, Bell, UserCheck } from 'lucide-react'
 
 export default async function PrivacyPage() {
+    const t = await getTranslations('PrivacyPage')
     return (
         <div className="min-h-screen bg-pixio-cream">
             <Header />
@@ -15,61 +16,61 @@ export default async function PrivacyPage() {
                     </div>
                     
                     <h1 className="text-5xl font-black text-black tracking-tighter mb-12 italic">
-                        Politique de Confidentialité<span className="text-gray-200">.</span>
+                        {t('Title')}<span className="text-gray-200">.</span>
                     </h1>
 
-                    <div className="prose prose-lg max-w-none text-gray-500 font-bold uppercase tracking-tight text-xs space-y-12">
+                    <div className="prose prose-lg max-w-none text-gray-500 font-bold uppercase tracking-tight text-xs space-y-12 rtl:text-right">
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <Lock className="w-5 h-5" /> 1. Introduction
+                                <Lock className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section1Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Chez <strong>Riwaya</strong>, accessible via riwaya.store, l'une de nos priorités majeures est la confidentialité de nos visiteurs. Ce document contient les types d'informations collectées et enregistrées par Riwaya et comment nous les utilisons.
+                                {t.rich('Section1Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <Eye className="w-5 h-5" /> 2. Utilisation de Google AdSense
+                                <Eye className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section2Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Google, en tant que fournisseur tiers, utilise des cookies pour diffuser des annonces sur notre site. L'utilisation du cookie DART par Google lui permet de diffuser des annonces aux visiteurs de notre site en fonction de leur visite sur riwaya.store et d'autres sites sur Internet. Les visiteurs peuvent choisir de ne pas utiliser le cookie DART en consultant la politique de confidentialité du réseau d'annonces Google et de contenu.
+                                {t.rich('Section2Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <Database className="w-5 h-5" /> 3. Fichiers Journaux (Log Files)
+                                <Database className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section3Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Riwaya suit une procédure standard d'utilisation des fichiers journaux. Ces fichiers enregistrent les visiteurs lorsqu'ils visitent des sites Web. Les informations collectées comprennent les adresses de protocole Internet (IP), le type de navigateur, le fournisseur de services Internet (FAI), l'horodatage, les pages de référence/sortie et éventuellement le nombre de clics.
+                                {t.rich('Section3Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <Bell className="w-5 h-5" /> 4. Cookies et Balises Web
+                                <Bell className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section4Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Comme tout autre site Web, Riwaya utilise des 'cookies'. Ces cookies sont utilisés pour stocker des informations, notamment les préférences des visiteurs et les pages du site Web auxquelles le visiteur a accédé. Ces informations sont utilisées pour optimiser l'expérience des utilisateurs en personnalisant le contenu de nos pages Web.
+                                {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <UserCheck className="w-5 h-5" /> 5. RGPD et Droits des Utilisateurs
+                                <UserCheck className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section5Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Nous tenons à nous assurer que vous connaissez tous vos droits en matière de protection des données. Chaque utilisateur a droit à l'accès, à la rectification, à l'effacement, à la limitation du traitement et au droit à la portabilité des données. Si vous souhaitez exercer l'un de ces droits, veuillez nous contacter.
+                                {t.rich('Section5Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
 
                         <section className="space-y-6">
                             <h2 className="text-black text-xl font-black flex items-center gap-4">
-                                <FileText className="w-5 h-5" /> 6. Informations pour les enfants
+                                <FileText className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section6Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                Une autre de nos priorités est la protection des enfants lors de l'utilisation d'Internet. Nous encourageons les parents et les tuteurs à observer, participer et/ou surveiller et guider leur activité en ligne. Riwaya ne collecte sciemment aucune information personnelle identifiable auprès d'enfants de moins de 13 ans.
+                                {t.rich('Section6Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
                     </div>

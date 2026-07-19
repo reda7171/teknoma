@@ -118,7 +118,7 @@ export default function WhatsAppButton({ phone }: WhatsAppButtonProps) {
             onClick={handleClick}
             onMouseDown={handleTouchStart}
             onTouchStart={handleTouchStart}
-            className={`fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl group ${isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab hover:scale-110 animate-bounce'}`}
+            className={`fixed bottom-24 md:bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl group ${isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab hover:scale-110 animate-bounce'}`}
             aria-label="Contact us on WhatsApp"
             style={{ 
                 animationDuration: isDragging ? '0s' : '3s',
