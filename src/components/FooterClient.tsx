@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { Link } from '@/i18n/routing'
-import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtSign } from 'lucide-react'
+import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtSign, CheckCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl';
 
 interface FooterProps {
@@ -21,6 +22,49 @@ interface FooterProps {
         youtube?: string | null
         threads?: string | null
     }
+}
+
+// Formulaire newsletter fictif avec message de confirmation
+function NewsletterForm({ t }: { t: any }) {
+    const [email, setEmail] = useState('')
+    const [subscribed, setSubscribed] = useState(false)
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!email.trim()) return
+        setSubscribed(true)
+    }
+
+    if (subscribed) {
+        return (
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
+                <p className="text-white text-sm font-bold">You will receive our news !</p>
+            </div>
+        )
+    }
+
+    return (
+        <>
+            <p className="text-gray-300 text-sm font-medium mb-4">{t('NewsletterText')}</p>
+            <form onSubmit={handleSubmit} className="flex gap-2">
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    required
+                    className="bg-gray-900 border-none rounded-2xl px-4 py-3 text-xs focus:ring-1 focus:ring-white outline-none w-full font-bold text-white placeholder-gray-600"
+                />
+                <button
+                    type="submit"
+                    className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] rtl:text-xs font-black uppercase shadow-lg hover:bg-gray-200 transition-all active:scale-95 shrink-0"
+                >
+                    {t('Join')}
+                </button>
+            </form>
+        </>
+    )
 }
 
 export default function FooterClient({ features = {}, siteLogo = null, socials = {} }: FooterProps = {}) {
@@ -130,11 +174,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         <ul className="space-y-4 mb-8">
                             <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{tNav('Journal')}</Link></li>
                         </ul>
-                        <p className="text-gray-300 text-sm font-medium mb-4">{t('NewsletterText')}</p>
-                        <div className="flex gap-2">
-                            <input type="email" placeholder="Email" className="bg-gray-900 border-none rounded-2xl px-4 py-3 text-xs focus:ring-1 focus:ring-white outline-none w-full font-bold text-white placeholder-gray-600" />
-                            <button className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] rtl:text-xs font-black uppercase shadow-lg hover:bg-gray-200 transition-all active:scale-95">{t('Join')}</button>
-                        </div>
+                        <NewsletterForm t={t} />
                     </div>
                 </div>
 
