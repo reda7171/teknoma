@@ -188,8 +188,8 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0] + 'T00:00:00Z'
-                        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0] + 'T23:59:59Z'
+                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+                        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
                         
                         let allOrders: any[] = []
                         let hasMore = true
@@ -198,7 +198,7 @@ export async function POST(req: Request) {
                             const response = await jumia.getOrders(100, nextToken, undefined, monthStart, monthEnd)
                             const orders = response?.orders || response?.data?.orders || []
                             allOrders = allOrders.concat(orders)
-                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
+                            nextToken = response?.nextToken || response?.data?.nextToken
                             if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
                         }
                         
@@ -213,19 +213,28 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0] + 'T00:00:00Z'
-                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0] + 'T23:59:59Z'
-                        
                         let allOrders: any[] = []
-                        let hasMore = true
-                        let nextToken: string | undefined = undefined
-                        while (hasMore) {
-                            const response = await jumia.getOrders(100, nextToken, undefined, yearStart, yearEnd)
-                            const orders = response?.orders || response?.data?.orders || []
-                            allOrders = allOrders.concat(orders)
-                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
-                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
-                        }
+                        
+                        const year = now.getFullYear();
+                        const quarters = [
+                            { start: `${year}-01-01`, end: `${year}-03-31` },
+                            { start: `${year}-04-01`, end: `${year}-06-30` },
+                            { start: `${year}-07-01`, end: `${year}-09-30` },
+                            { start: `${year}-10-01`, end: `${year}-12-31` }
+                        ];
+
+                        await Promise.all(quarters.map(async (q) => {
+                            let hasMore = true
+                            let nextToken: string | undefined = undefined
+                            while (hasMore) {
+                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                if (!response) break;
+                                const orders = response?.orders || response?.data?.orders || []
+                                allOrders.push(...orders)
+                                nextToken = response?.nextToken || response?.data?.nextToken
+                                if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
+                            }
+                        }));
 
                         const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
                         const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
@@ -238,21 +247,28 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0] + 'T00:00:00Z'
-                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0] + 'T23:59:59Z'
-                        
-                        await answerCallbackQuery(callbackId, 'Génération du graphique...', token)
-
                         let allOrders: any[] = []
-                        let hasMore = true
-                        let nextToken: string | undefined = undefined
-                        while (hasMore) {
-                            const response = await jumia.getOrders(100, nextToken, undefined, yearStart, yearEnd)
-                            const orders = response?.orders || response?.data?.orders || []
-                            allOrders = allOrders.concat(orders)
-                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
-                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
-                        }
+                        
+                        const year = now.getFullYear();
+                        const quarters = [
+                            { start: `${year}-01-01`, end: `${year}-03-31` },
+                            { start: `${year}-04-01`, end: `${year}-06-30` },
+                            { start: `${year}-07-01`, end: `${year}-09-30` },
+                            { start: `${year}-10-01`, end: `${year}-12-31` }
+                        ];
+
+                        await Promise.all(quarters.map(async (q) => {
+                            let hasMore = true
+                            let nextToken: string | undefined = undefined
+                            while (hasMore) {
+                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                if (!response) break;
+                                const orders = response?.orders || response?.data?.orders || []
+                                allOrders.push(...orders)
+                                nextToken = response?.nextToken || response?.data?.nextToken
+                                if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
+                            }
+                        }));
 
                         const monthlyRevenue = Array(12).fill(0)
                         const monthlyTotalOrders = Array(12).fill(0)
@@ -318,24 +334,35 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
-                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0] + 'T00:00:00Z'
-                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0] + 'T23:59:59Z'
+                        const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+                        const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
                         
                         await answerCallbackQuery(callbackId, 'Génération comparatif en cours...', token)
 
-                        let allOrders: any[] = []
-                        let hasMore = true
-                        let nextToken: string | undefined = undefined
-                        while (hasMore) {
-                            const response = await jumia.getOrders(100, nextToken, undefined, yearStart, yearEnd)
-                            const orders = response?.orders || response?.data?.orders || []
-                            allOrders = allOrders.concat(orders)
-                            nextToken = response?.nextPageToken || response?.data?.nextPageToken
-                            if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
-                        }
+                        let allJumiaOrders: any[] = []
+                        const year = now.getFullYear();
+                        const quarters = [
+                            { start: `${year}-01-01`, end: `${year}-03-31` },
+                            { start: `${year}-04-01`, end: `${year}-06-30` },
+                            { start: `${year}-07-01`, end: `${year}-09-30` },
+                            { start: `${year}-10-01`, end: `${year}-12-31` }
+                        ];
+
+                        await Promise.all(quarters.map(async (q) => {
+                            let hasMore = true
+                            let nextToken: string | undefined = undefined
+                            while (hasMore) {
+                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                if (!response) break;
+                                const orders = response?.orders || response?.data?.orders || []
+                                allJumiaOrders.push(...orders)
+                                nextToken = response?.nextToken || response?.data?.nextToken
+                                if (!nextToken || orders.length === 0 || allJumiaOrders.length > 10000) hasMore = false
+                            }
+                        }));
 
                         const monthlyJumiaRevenue = Array(12).fill(0)
-                        allOrders.forEach(o => {
+                        allJumiaOrders.forEach(o => {
                             if (o.createdAt && o.status && (o.status.toUpperCase() !== 'CANCELED' && o.status.toUpperCase() !== 'RETURNED')) {
                                 const month = new Date(o.createdAt).getMonth()
                                 const amount = parseFloat(o.totalAmountLocal?.value || '0')
@@ -950,8 +977,8 @@ export async function POST(req: Request) {
                         const jumia = await JumiaAPI.getInstance()
                         if (jumia) {
                             // Jumia uses ISO format.
-                            const createdAfter = start.toISOString()
-                            const createdBefore = end.toISOString()
+                            const createdAfter = start.toISOString().split('T')[0]
+                            const createdBefore = end.toISOString().split('T')[0]
 
                             // On demande jusqu'à 500 commandes pour couvrir un mois entier
                             const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
@@ -1124,11 +1151,66 @@ export async function POST(req: Request) {
                     ? new Date(firstOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
                     : 'Inconnue'
 
+                let jumiaStats = { count: 0, revenue: 0, canceled: 0 }
+                try {
+                    const { JumiaAPI } = await import('@/lib/jumia-api')
+                    const jumia = await JumiaAPI.getInstance()
+                    if (jumia && firstOrder?.createdAt) {
+                        const startYear = new Date(firstOrder.createdAt).getFullYear();
+                        const currentYear = new Date().getFullYear();
+                        const quarters: {start: string, end: string}[] = [];
+                        for(let y = startYear; y <= currentYear; y++) {
+                            quarters.push({ start: `${y}-01-01`, end: `${y}-03-31` });
+                            quarters.push({ start: `${y}-04-01`, end: `${y}-06-30` });
+                            quarters.push({ start: `${y}-07-01`, end: `${y}-09-30` });
+                            quarters.push({ start: `${y}-10-01`, end: `${y}-12-31` });
+                        }
+                        
+                        let allOrders: any[] = []
+                        await Promise.all(quarters.map(async (q) => {
+                            let hasMore = true
+                            let nextToken: string | undefined = undefined
+                            while (hasMore) {
+                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                if (!response) break;
+                                const orders = response?.orders || response?.data?.orders || []
+                                allOrders.push(...orders)
+                                nextToken = response?.nextToken || response?.data?.nextToken
+                                if (!nextToken || orders.length === 0 || allOrders.length > 20000) hasMore = false
+                            }
+                        }));
+                        
+                        for (const o of allOrders) {
+                            const status = (o.status || o.Status || '').toLowerCase()
+                            jumiaStats.count++
+                            const isCanceled = status === 'canceled' || status === 'failed' || status === 'returned'
+                            if (!isCanceled) {
+                                jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
+                            } else {
+                                jumiaStats.canceled++
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Erreur stats globales Jumia:', e)
+                }
+
+                const totalSite = total
+                const revenueSite = revenue._sum.total || 0
+                const totalCombined = totalSite + jumiaStats.count
+                const revenueCombined = revenueSite + jumiaStats.revenue
+
                 const text = `🗂️ <b>STATISTIQUES GLOBALES</b>\n\n` +
                     `📅 <b>Depuis :</b> ${since}\n` +
-                    `📦 <b>Total commandes :</b> ${total}\n` +
-                    `💰 <b>CA total :</b> <b>${(revenue._sum.total || 0).toFixed(2)} MAD</b>\n\n` +
-                    `📊 <b>Par statut :</b>\n${statusLines}`
+                    `📦 <b>Total commandes (Site + Jumia) :</b> ${totalCombined}\n` +
+                    `💰 <b>CA total (Site + Jumia) :</b> <b>${revenueCombined.toFixed(2)} MAD</b>\n\n` +
+                    `🔵 <b>SITE WEB :</b>\n` +
+                    `📦 Commandes Site : ${totalSite}\n` +
+                    `💰 CA Site : <b>${revenueSite.toFixed(2)} MAD</b>\n` +
+                    `\n🟠 <b>JUMIA :</b>\n` +
+                    `📦 Commandes Jumia : ${jumiaStats.count}\n` +
+                    `💰 CA Jumia : <b>${jumiaStats.revenue.toFixed(2)} MAD</b>\n` +
+                    `\n📊 <b>Détail Site par statut :</b>\n${statusLines}`
 
                 await answerCallbackQuery(callbackId, '🗂️ Stats globales chargées', token)
                 await sendTelegramMessage(text, message?.chat?.id.toString(), token)

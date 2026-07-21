@@ -269,6 +269,27 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         }
     }
 
+    const handleVerifyJumiaSku = async (e: React.MouseEvent, bookId: string, sellerSku: string | null) => {
+        e.stopPropagation();
+        setLoading(bookId + '-verify');
+        try {
+            const { verifyJumiaSku } = await import('@/lib/actions/jumia');
+            const result = await verifyJumiaSku(bookId, sellerSku);
+            if (result.success) {
+                setToast({ msg: `✅ ${result.message}`, ok: true });
+                router.refresh();
+            } else {
+                setToast({ msg: `❌ ${result.message}`, ok: false });
+            }
+        } catch (err: any) {
+            setToast({ msg: '❌ Erreur lors de la vérification Jumia', ok: false });
+        } finally {
+            setLoading(null);
+            setTimeout(() => setToast(null), 3000);
+        }
+    }
+
+
     async function handleDelete(id: string, title: string) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${title}" ?`)) {
             return
@@ -668,10 +689,21 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     </button>
                                                                 )}
                                                             </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                                                <span className={book.isSyncedWithJumia ? 'text-green-600' : 'text-gray-400'}>
-                                                                    {book.isSyncedWithJumia ? <Check className="w-4 h-4 mx-auto" /> : '-'}
-                                                                </span>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium group relative">
+                                                                <div className="group-hover:opacity-0 transition-opacity flex justify-center items-center h-6">
+                                                                    <span className={book.isSyncedWithJumia ? 'text-green-600' : 'text-gray-400'}>
+                                                                        {book.isSyncedWithJumia ? <Check className="w-4 h-4 mx-auto" /> : '-'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button 
+                                                                        onClick={(e) => handleVerifyJumiaSku(e, book.id, book.sellerSku || null)}
+                                                                        disabled={loading === book.id + '-verify'}
+                                                                        className="bg-orange-500 text-white px-2 py-1 rounded text-[10px] font-bold hover:bg-orange-600 shadow-sm disabled:opacity-50"
+                                                                    >
+                                                                        {loading === book.id + '-verify' ? '...' : 'Verify'}
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <span className={book.jumiaStock != null && book.stock === book.jumiaStock ? 'text-green-600' : 'text-red-600'}>

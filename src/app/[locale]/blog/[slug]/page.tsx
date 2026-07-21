@@ -17,6 +17,7 @@ const ShareArticle = dynamic(() => import('@/components/blog/ShareArticle'))
 const TableOfContents = dynamic(() => import('@/components/blog/TableOfContents'))
 import ReadingProgress from '@/components/blog/ReadingProgress'
 import PostTimeTracker from '@/components/blog/PostTimeTracker'
+import BlogDynamicContent from '@/components/blog/BlogDynamicContent'
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
@@ -94,8 +95,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     // Convertir markdown → HTML
     const processedContent = await remark()
-        .use(remarkHtml, { sanitize: false })
         .use(remarkGfm)
+        .use(remarkHtml, { sanitize: false })
         .process(post.content)
     let contentHtml = processedContent.toString()
 
@@ -408,8 +409,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-h3:text-xl md:prose-h3:text-2xl rtl:prose-h3:text-[20px] md:rtl:prose-h3:text-[30px]
                                 prose-p:text-slate-800 prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:text-[16px] md:prose-p:text-[18px] rtl:prose-p:text-[18px] md:rtl:prose-p:text-[22px] rtl:prose-p:leading-[2] md:rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
                                 prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors break-words
-                                prose-blockquote:border-l-4 prose-blockquote:border-slate-500 prose-blockquote:bg-slate-50 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:not-italic
-                                prose-blockquote:text-slate-800 prose-blockquote:font-bold prose-blockquote:my-8 prose-blockquote:text-sm md:prose-blockquote:text-base
                                 prose-strong:text-slate-900 prose-strong:font-black
                                 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600 prose-code:break-all
                                 prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8 prose-pre:overflow-x-auto
@@ -421,8 +420,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 #article-content p { margin-bottom: 2rem !important; margin-top: 1rem !important; }
                                 #article-content h2 { margin-top: 4rem !important; margin-bottom: 1.5rem !important; }
                                 #article-content h3 { margin-top: 3rem !important; margin-bottom: 1rem !important; }
+                                #article-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; border: 1px solid #e5e7eb; font-size: 0.95em; }
+                                #article-content th, #article-content td { border: 1px solid #e5e7eb; padding: 1rem; text-align: left; }
+                                #article-content th { background-color: #f9fafb; font-weight: 700; color: #111827; }
+                                [dir="rtl"] #article-content th, [dir="rtl"] #article-content td { text-align: right; }
+                                
+                                #article-content blockquote { position: relative; padding: 2.5rem 3rem; margin: 3rem 0; background: linear-gradient(to right, #f8fafc, #ffffff); border-left: 5px solid #0f172a; border-radius: 0 1.5rem 1.5rem 0; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); overflow: hidden; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; }
+                                #article-content blockquote::before { content: "“"; position: absolute; top: -1rem; left: 1rem; font-size: 8rem; color: #e2e8f0; font-family: Georgia, serif; line-height: 1; opacity: 0.4; pointer-events: none; }
+                                [dir="rtl"] #article-content blockquote { border-left: 1px solid #f1f5f9; border-right: 5px solid #0f172a; border-radius: 1.5rem 0 0 1.5rem; background: linear-gradient(to left, #f8fafc, #ffffff); }
+                                [dir="rtl"] #article-content blockquote::before { left: auto; right: 1rem; content: "”"; }
+                                #article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
+                                #article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
                             `}</style>
-                            <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
+                            <BlogDynamicContent html={contentHtml} />
                         </article>
 
                         {/* AdSense bas */}

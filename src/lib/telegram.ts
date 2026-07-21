@@ -114,11 +114,11 @@ export async function sendOrderNotification(order: {
     });
 
     const activeShippingCompanies = orderData?.shippingCompany ? [orderData.shippingCompany] : [];
-    const shippingButtons = activeShippingCompanies.map(comp => {
+    const shippingButtons = activeShippingCompanies.map(compName => {
         // Map the company to its corresponding command
         // This is a naive mapping based on ID. We can refine it later if needed.
-        const cmd = comp.name.toLowerCase().includes('olivraison') ? 'so' : 'sw';
-        return { text: `🚀 Expédier ${comp.name}`, callback_data: `${cmd}:${order.id}` };
+        const cmd = compName.toLowerCase().includes('olivraison') ? 'so' : 'sw';
+        return { text: `🚀 Expédier ${compName}`, callback_data: `${cmd}:${order.id}` };
     });
 
     const inline_keyboard = [

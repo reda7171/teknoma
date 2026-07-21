@@ -37,24 +37,6 @@ export async function syncBooksStockToJumia() {
     }
 }
 
-function transliterateArabic(text: string): string {
-    if (!text) return text;
-    const map: Record<string, string> = {
-        'ا': 'a', 'أ': 'a', 'إ': 'e', 'آ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'h', 'خ': 'kh',
-        'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'dh',
-        'ع': 'e', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h', 'و': 'w',
-        'ي': 'y', 'ى': 'a', 'ة': 'a', 'ء': '', 'ئ': 'e', 'ؤ': 'o',
-        '٠':'0', '١':'1', '٢':'2', '٣':'3', '٤':'4', '٥':'5', '٦':'6', '٧':'7', '٨':'8', '٩':'9'
-    };
-    return text
-        .replace(/[\u064B-\u065F\u0670]/g, '') // Remove Arabic diacritics
-        .split('')
-        .map(char => map[char] || char)
-        .join('')
-        .replace(/[\u0600-\u06FF]/g, '') // Remove any remaining Arabic characters just in case
-        .replace(/\s+/g, ' ')
-        .trim();
-}
 
 export async function publishBooksToJumia(bookIds: string[]) {
     try {
@@ -75,19 +57,27 @@ export async function publishBooksToJumia(bookIds: string[]) {
         const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
 
         const productsPayload = books.map(book => {
-            const cleanTitle = transliterateArabic(book.title) || `Livre ${book.id.substring(0, 8)}`;
-            const cleanDesc = transliterateArabic(book.description || book.title) || `Description pour le livre ${book.id.substring(0, 8)}`;
+            const titleAr = book.title || `Livre ${book.id.substring(0, 8)}`;
+            const titleFr = book.titleFr || titleAr;
+            const descAr = book.description || book.title || `Description pour le livre ${book.id.substring(0, 8)}`;
+            const descFr = book.longDescription || book.description || descAr;
             
             const markupMultiplier = 1 + ((book.jumiaPriceMarkup || 0) / 100);
 
             return {
                 name: {
-                    value: cleanTitle.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
-                    translations: [{ language: "FR", value: cleanTitle.substring(0, 60) }]
+                    value: titleAr.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
+                    translations: [
+                        { language: "AR", value: titleAr.substring(0, 60) },
+                        { language: "FR", value: titleFr.substring(0, 60) }
+                    ]
                 },
                 description: {
-                    value: cleanDesc.padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
-                    translations: [{ language: "FR", value: cleanDesc }]
+                    value: descAr.padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
+                    translations: [
+                        { language: "AR", value: descAr },
+                        { language: "FR", value: descFr }
+                    ]
                 },
                 parentSku: book.id,
                 sellerSku: book.sellerSku || book.isbn || book.id,
@@ -234,3 +224,47 @@ export async function checkJumiaAvailability() {
         return { success: false, message: `Erreur: ${error.message}` }
     }
 }
+
+export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
+    try {
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré." }
+        }
+
+        const skuToVerify = sellerSku || bookId;
+        
+        // Use getCatalogStock or getProducts with sellerSku
+        const data = await jumia.getCatalogStock({ sellerSku: skuToVerify, size: 1 })
+        
+        if (data && data.products && data.products.length > 0) {
+            const product = data.products[0];
+            const stock = product.globalStock !== undefined ? product.globalStock : null;
+            
+            await prisma.book.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: true, jumiaStock: stock }
+            });
+            await prisma.pack.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: true, jumiaStock: stock }
+            });
+            
+            return { success: true, message: `SKU trouvé ! Stock Jumia: ${stock}` }
+        } else {
+            await prisma.book.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            });
+            await prisma.pack.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            });
+            return { success: false, message: "SKU introuvable sur Jumia." }
+        }
+    } catch (error: any) {
+        console.error("Erreur verifyJumiaSku:", error)
+        return { success: false, message: `Erreur: ${error.message}` }
+    }
+}
+

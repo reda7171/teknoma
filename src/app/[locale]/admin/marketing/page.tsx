@@ -55,6 +55,7 @@ export default function MarketingPage() {
     const [bulkPlatform, setBulkPlatform] = useState<'facebook' | 'instagram' | 'all'>('all')
     // Tabs & Media
     const [activeTab, setActiveTab] = useState<'creatives' | 'media'>('creatives')
+    const [activeMediaTab, setActiveMediaTab] = useState<'books' | 'authors' | 'blog'>('books')
     const [mediaItems, setMediaItems] = useState<{books: any[], authors: any[], blogPosts: any[]}>({ books: [], authors: [], blogPosts: [] })
     
     // Watermark
@@ -453,34 +454,34 @@ export default function MarketingPage() {
 
             {activeTab === 'media' && (
                 <div className="space-y-12 pb-24">
-                    {/* Statistiques Media */}
+                    {/* Statistiques Media / Sous-onglets */}
                     <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                        <button onClick={() => setActiveMediaTab('books')} className={`p-6 rounded-3xl border shadow-sm flex flex-col items-center justify-center transition-all ${activeMediaTab === 'books' ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/30' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
                             <div className="text-3xl mb-2">📚</div>
                             <h3 className="font-bold text-slate-600 text-sm">Livres</h3>
                             <p className="text-3xl font-black text-slate-900 mt-2">{mediaItems.books.length}</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                        </button>
+                        <button onClick={() => setActiveMediaTab('authors')} className={`p-6 rounded-3xl border shadow-sm flex flex-col items-center justify-center transition-all ${activeMediaTab === 'authors' ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/30' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
                             <div className="text-3xl mb-2">✍️</div>
                             <h3 className="font-bold text-slate-600 text-sm">Auteurs</h3>
                             <p className="text-3xl font-black text-slate-900 mt-2">{mediaItems.authors.length}</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                        </button>
+                        <button onClick={() => setActiveMediaTab('blog')} className={`p-6 rounded-3xl border shadow-sm flex flex-col items-center justify-center transition-all ${activeMediaTab === 'blog' ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/30' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
                             <div className="text-3xl mb-2">📝</div>
                             <h3 className="font-bold text-slate-600 text-sm">Blog</h3>
                             <p className="text-3xl font-black text-slate-900 mt-2">{mediaItems.blogPosts.length}</p>
-                        </div>
+                        </button>
                     </div>
 
                     {/* Section Livres */}
-                    {mediaItems.books.length > 0 && (
+                    {activeMediaTab === 'books' && mediaItems.books.length > 0 && (
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
                                 <span>📚</span> Couvertures de Livres
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.books.map(book => {
-                                    const imgUrl = book.image.startsWith('http') ? book.image : `/uploads/books/${book.image}`
+                                    const imgUrl = book.image.startsWith('http') ? book.image : (book.image.startsWith('/') ? book.image : `/uploads/books/${book.image}`)
                                     return (
                                         <div key={book.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-[3/4] relative bg-slate-900">
@@ -499,14 +500,14 @@ export default function MarketingPage() {
                     )}
 
                     {/* Section Auteurs */}
-                    {mediaItems.authors.length > 0 && (
+                    {activeMediaTab === 'authors' && mediaItems.authors.length > 0 && (
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
                                 <span>✍️</span> Photos d'Auteurs
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.authors.map(author => {
-                                    const imgUrl = author.image.startsWith('http') ? author.image : `/uploads/${author.image}`
+                                    const imgUrl = author.image.startsWith('http') ? author.image : (author.image.startsWith('/') ? author.image : `/uploads/${author.image}`)
                                     return (
                                         <div key={author.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-square relative bg-slate-900">
@@ -525,14 +526,14 @@ export default function MarketingPage() {
                     )}
 
                     {/* Section Blog */}
-                    {mediaItems.blogPosts.length > 0 && (
+                    {activeMediaTab === 'blog' && mediaItems.blogPosts.length > 0 && (
                         <div>
                             <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
                                 <span>📝</span> Images du Blog
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.blogPosts.map(post => {
-                                    const imgUrl = post.coverImage.startsWith('http') ? post.coverImage : `/${post.coverImage.replace(/^\/+/, '')}`
+                                    const imgUrl = post.coverImage.startsWith('http') ? post.coverImage : (post.coverImage.startsWith('/') ? post.coverImage : `/uploads/${post.coverImage}`)
                                     return (
                                         <div key={post.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-video relative bg-slate-900">

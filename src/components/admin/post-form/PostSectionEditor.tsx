@@ -183,10 +183,23 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
         const parts = initialContent.split(/^(?=#+ )/m)
         const parsedSections: Section[] = parts.map((part, index) => {
             const match = part.match(/^(#+)\s+(.*)\n([\s\S]*)$/)
+            let title = ''
+            let content = part.trim()
+            
             if (match) {
-                return { id: String(Date.now() + index), title: match[2], content: match[3].trim(), blockType: 'text' }
+                title = match[2]
+                content = match[3].trim()
             }
-            return { id: String(Date.now() + index), title: '', content: part.trim(), blockType: 'text' }
+            
+            let blockType: BlockType = 'text'
+            if (content.startsWith('<!-- VIDEO_BLOCK')) blockType = 'video'
+            else if (content.startsWith('<!-- CHART_BLOCK')) blockType = 'chart'
+            else if (content.startsWith('<!-- AD_BANNER')) blockType = 'ad'
+            else if (content.startsWith('<!-- POLL_BLOCK')) blockType = 'poll'
+            else if (content.startsWith('|') && content.includes('|-')) blockType = 'table'
+            else if (content.startsWith('>')) blockType = 'quote'
+
+            return { id: String(Date.now() + index), title, content, blockType }
         })
         if (parsedSections.length === 0) parsedSections.push({ id: Date.now().toString(), title: '', content: '', blockType: 'text' })
         setSections(parsedSections)
@@ -369,7 +382,11 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         <ReactQuill
                                             theme="snow"
                                             value={section.content}
-                                            onChange={(content) => handleSectionChange(section.id, 'content', content)}
+                                            onChange={(content, delta, source) => {
+                                                if (source === 'user' && content !== section.content) {
+                                                    handleSectionChange(section.id, 'content', content)
+                                                }
+                                            }}
                                             modules={quillModules}
                                             formats={quillFormats}
                                             placeholder="Contenu de la section (Texte riche)..."
