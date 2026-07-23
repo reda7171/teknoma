@@ -34,10 +34,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Impossible de lire les dimensions de l\'image' }, { status: 500 })
         }
 
-        // Calculer la taille du logo (25% de la plus petite dimension)
-        const maxLogoSize = Math.max(30, Math.round(Math.min(metadata.width, metadata.height) * 0.25))
+        // Calculer la taille du logo (35% de la plus petite dimension)
+        const maxLogoSize = Math.max(50, Math.round(Math.min(metadata.width, metadata.height) * 0.35))
 
         const logoBuffer = await sharp(logoPath)
+            .trim() // Enlever les marges transparentes du logo
             .resize({ width: maxLogoSize, height: maxLogoSize, fit: 'inside' })
             .toBuffer()
 
@@ -54,11 +55,13 @@ export async function POST(req: NextRequest) {
         const finalGravity = validGravities.includes(gravity) ? gravity : 'southeast'
 
         // Superposer le logo
-        await baseImage
+        await sharp(baseImagePath)
+            .withMetadata() // Préserver les métadonnées (orientation EXIF, etc.)
             .composite([
                 {
                     input: logoBuffer,
-                    gravity: finalGravity
+                    gravity: finalGravity,
+                    blend: 'over'
                 }
             ])
             .toFile(outputPath)

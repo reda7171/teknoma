@@ -26,8 +26,8 @@ export async function GET(req: Request) {
 
         // Vérifier les commandes retournées récentes
         const [returnedResponse, canceledResponse] = await Promise.all([
-            jumia.getOrders(50, undefined, 'RETURNED', createdAfter, createdBefore),
-            jumia.getOrders(50, undefined, 'CANCELED', createdAfter, createdBefore)
+            jumia.getOrders(50, undefined, 'returned', createdAfter, createdBefore),
+            jumia.getOrders(50, undefined, 'canceled', createdAfter, createdBefore)
         ])
 
         const returnedOrders = returnedResponse?.orders || returnedResponse?.data?.orders || []

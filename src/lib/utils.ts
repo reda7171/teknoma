@@ -14,6 +14,10 @@ export function normalizeImage(raw: string | null | undefined): string {
     const img = raw?.trim() || ''
     if (!img) return '/book-placeholder.png'
     
+    if (process.env.NODE_ENV === 'development' && (img.startsWith('/uploads/') || img.startsWith('uploads/'))) {
+        return `https://riwaya.store${img.startsWith('/') ? img : '/' + img}`;
+    }
+
     // Déjà une URL ou déjà formaté
     if (img.startsWith('http') || img.startsWith('data:') || img.startsWith('/')) {
         // Ignorer si c'est un message d'erreur

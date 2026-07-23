@@ -164,7 +164,7 @@ model Book {
   utmCampaign       String?           @db.VarChar(255)
   utmMedium         String?           @db.VarChar(100)
   utmSource         String?           @db.VarChar(100)
-  sellerSku         String?           @db.VarChar(100)
+  sellerSku         String?           @unique @db.VarChar(100)
   jumiaPriceMarkup  Int               @default(0)
   isSyncedWithJumia Boolean           @default(false)
   jumiaStock        Int?
@@ -219,7 +219,7 @@ model Pack {
   descriptionFr     String?     @db.Text
   nameEn            String?     @db.VarChar(255)
   nameFr            String?     @db.VarChar(255)
-  sellerSku         String?     @db.VarChar(100)
+  sellerSku         String?     @unique @db.VarChar(100)
   isSyncedWithJumia Boolean     @default(false)
   jumiaPriceMarkup  Float?      @default(0)
   jumiaStock        Int?
@@ -879,7 +879,7 @@ model ExtraProduct {
   warranty    String?     @db.VarChar(255)
   weight      String?     @db.VarChar(255)
   images      Json?
-  sellerSku   String?     @db.VarChar(100)
+  sellerSku   String?     @unique @db.VarChar(100)
   orderItems  OrderItem[]
 
   @@index([category])

@@ -33,6 +33,14 @@ export default function ImageInput({ defaultValue, bookTitle }: ImageInputProps)
         }
     }
 
+    const handleClear = () => {
+        setCurrentUrl('')
+        setFileName('')
+        setPreview(null)
+        const fileInput = document.getElementById('imageFile') as HTMLInputElement
+        if (fileInput) fileInput.value = ''
+    }
+
     return (
         <div className="space-y-4">
             {/* Champ pour l'URL ou le chemin */}
@@ -79,7 +87,16 @@ export default function ImageInput({ defaultValue, bookTitle }: ImageInputProps)
             </div>
 
             {/* Prévisualisation */}
-            <div className="flex gap-6 mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div className="flex gap-6 mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 relative">
+                {(currentUrl || fileName) && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="absolute top-2 right-2 text-xs font-semibold text-red-600 hover:text-red-800 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                        Supprimer l'image
+                    </button>
+                )}
                 {/* Prévisualisation nouveau fichier */}
                 {fileName ? (
                     <div>

@@ -9,12 +9,12 @@ import { createAuditLog } from './audit'
 // Schéma de validation pour un livre
 import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/books'
 
-const BookSchema = z.object({
-    title: z.string().min(1, 'Le titre est requis'),
+const BookSchemaBase = z.object({
+    title: z.string().optional().default(""),
     titleFr: z.string().optional(),
     titleEn: z.string().optional(),
     author: z.string().min(1, 'L\'auteur est requis'),
-    description: z.string().min(10, 'La description doit contenir au moins 10 caractères'),
+    description: z.string().optional().default(""),
     descriptionFr: z.string().optional(),
     descriptionEn: z.string().optional(),
     longDescription: z.string().optional(),
@@ -32,9 +32,35 @@ const BookSchema = z.object({
     isOriginal: z.boolean().optional().default(true),
     sellerSku: z.string().optional(),
     jumiaPriceMarkup: z.number().int().min(0).max(100).optional().default(0),
+    isSyncedWithJumia: z.boolean().optional(),
 })
 
-export type BookInput = z.infer<typeof BookSchema>
+const BookSchema = BookSchemaBase.superRefine((data, ctx) => {
+    if (data.language === 'ar') {
+        if (!data.title || data.title.trim() === '') {
+            ctx.addIssue({ path: ['title'], code: z.ZodIssueCode.custom, message: "Le titre en arabe est requis" })
+        }
+        if (!data.description || data.description.trim() === '') {
+            ctx.addIssue({ path: ['description'], code: z.ZodIssueCode.custom, message: "La description en arabe est requise" })
+        }
+    } else if (data.language === 'fr') {
+        if (!data.titleFr || data.titleFr.trim() === '') {
+            ctx.addIssue({ path: ['titleFr'], code: z.ZodIssueCode.custom, message: "Le titre en français est requis" })
+        }
+        if (!data.descriptionFr || data.descriptionFr.trim() === '') {
+            ctx.addIssue({ path: ['descriptionFr'], code: z.ZodIssueCode.custom, message: "La description en français est requise" })
+        }
+    } else if (data.language === 'en') {
+        if (!data.titleEn || data.titleEn.trim() === '') {
+            ctx.addIssue({ path: ['titleEn'], code: z.ZodIssueCode.custom, message: "Le titre en anglais est requis" })
+        }
+        if (!data.descriptionEn || data.descriptionEn.trim() === '') {
+            ctx.addIssue({ path: ['descriptionEn'], code: z.ZodIssueCode.custom, message: "La description en anglais est requise" })
+        }
+    }
+})
+
+export type BookInput = z.infer<typeof BookSchemaBase>
 
 export type BookResult =
     | { success: true; bookId: string }

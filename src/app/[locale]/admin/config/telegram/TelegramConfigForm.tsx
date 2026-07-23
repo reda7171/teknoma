@@ -189,13 +189,13 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                 <h3 className="text-lg font-black text-black mb-6">Notifications actives</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
-                        { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client' },
-                        { id: 'notifyRegister', label: 'Nouvelles inscriptions', desc: 'Alertes lors de la création d\'un compte' },
+                        { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client', templateKey: 'templateOrder', templateVars: '{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}' },
+                        { id: 'notifyRegister', label: 'Nouvelles inscriptions', desc: 'Alertes lors de la création d\'un compte', templateKey: 'templateRegister', templateVars: '{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}' },
                         { id: 'notifyCart', label: 'Ajout au panier', desc: 'Alertes quand un client remplit son panier' },
                         { id: 'notifyChat', label: 'ChatBot (IA)', desc: 'Alertes lors des discussions avec l\'assistant' },
-                        { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer' },
-                        { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités' },
-                        { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu' },
+                        { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer', templateKey: 'templateReview', templateVars: '{{fullName}}, {{rating}}, {{comment}}' },
+                        { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
+                        { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu', templateKey: 'templateArticleRead', templateVars: '{{title}}, {{viewCount}}, {{country}}' },
                         { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
                         { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },
                         { id: 'notifySearch', label: 'Recherches & Filtres', desc: 'Alertes lors de recherches dans le catalogue' },
@@ -203,20 +203,33 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                         { id: 'statsRegistrations', label: 'Stats: Inscriptions', desc: 'Inclure les nouveaux comptes dans le /bilan' },
                         { id: 'statsTopViews', label: 'Stats: Livres les plus vus', desc: 'Inclure le top consultations dans le /bilan' },
                     ].map((item) => (
-                        <div key={item.id} className="flex items-center justify-between p-5 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-lg hover:border-blue-100 group">
-                            <div className="flex-1 pr-6">
-                                <p className="text-[13px] font-black text-gray-900 group-hover:text-blue-600 transition-colors">{item.label}</p>
-                                <p className="text-[11px] text-gray-400 font-bold mt-0.5 leading-tight">{item.desc}</p>
+                        <div key={item.id} className="flex flex-col p-5 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-lg hover:border-blue-100 group">
+                            <div className="flex items-center justify-between">
+                                <div className="flex-1 pr-6">
+                                    <p className="text-[13px] font-black text-gray-900 group-hover:text-blue-600 transition-colors">{item.label}</p>
+                                    <p className="text-[11px] text-gray-400 font-bold mt-0.5 leading-tight">{item.desc}</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        className="sr-only peer"
+                                        checked={(settings as any)[item.id]}
+                                        onChange={(e) => setSettings({ ...settings, [item.id]: e.target.checked })}
+                                    />
+                                    <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
+                                </label>
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input 
-                                    type="checkbox" 
-                                    className="sr-only peer"
-                                    checked={(settings as any)[item.id]}
-                                    onChange={(e) => setSettings({ ...settings, [item.id]: e.target.checked })}
-                                />
-                                <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
-                            </label>
+                            {item.templateKey && (settings as any)[item.id] && (
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <p className="text-[11px] text-gray-500 font-bold mb-2">Variables : {item.templateVars}</p>
+                                    <textarea 
+                                        value={(settings as any)[item.templateKey] || ''}
+                                        onChange={(e) => setSettings({ ...settings, [item.templateKey]: e.target.value })}
+                                        className="w-full px-3 py-2 bg-white border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-xs"
+                                        placeholder={`Template pour ${item.label}`}
+                                    />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -272,62 +285,12 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
 
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[13px] font-black text-gray-900">Notification Nouvelle Commande (Telegram)</label>
-                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}"}</p>
-                        <textarea 
-                            value={settings.templateOrder || ''}
-                            onChange={(e) => setSettings({ ...settings, templateOrder: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[120px] text-sm"
-                        />
-                    </div>
-                    
-                    <div className="space-y-2">
                         <label className="text-[13px] font-black text-gray-900">Confirmation Commande (WhatsApp)</label>
                         <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{shortId}}, {{city}}"}</p>
                         <textarea 
                             value={settings.templateWhatsapp || ''}
                             onChange={(e) => setSettings({ ...settings, templateWhatsapp: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-green-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-sm"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[13px] font-black text-gray-900">Nouvelle Inscription (Telegram)</label>
-                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}"}</p>
-                        <textarea 
-                            value={settings.templateRegister || ''}
-                            onChange={(e) => setSettings({ ...settings, templateRegister: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[13px] font-black text-gray-900">Nouvel Avis Client (Telegram)</label>
-                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{rating}}, {{comment}}"}</p>
-                        <textarea 
-                            value={settings.templateReview || ''}
-                            onChange={(e) => setSettings({ ...settings, templateReview: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[13px] font-black text-gray-900">Alerte Stock Faible (Telegram)</label>
-                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{title}}, {{stock}}"}</p>
-                        <textarea 
-                            value={settings.templateLowStock || ''}
-                            onChange={(e) => setSettings({ ...settings, templateLowStock: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-sm"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[13px] font-black text-gray-900">Nouvelle Lecture d'Article (Telegram)</label>
-                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{title}}, {{viewCount}}, {{country}}"}</p>
-                        <textarea 
-                            value={settings.templateArticleRead || ''}
-                            onChange={(e) => setSettings({ ...settings, templateArticleRead: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
                         />
                     </div>
                 </div>

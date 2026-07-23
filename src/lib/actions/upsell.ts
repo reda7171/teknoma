@@ -14,7 +14,6 @@ export async function getBookmarksUpsell() {
         return {
             id: book.id,
             title: book.title,
-            titleAr: book.titleAr,
             titleEn: book.titleEn,
             price: book.price,
             image: book.image,

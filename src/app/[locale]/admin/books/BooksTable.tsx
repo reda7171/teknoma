@@ -18,6 +18,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 interface Book {
     id: string
     title: string
+    titleFr?: string | null
+    titleEn?: string | null
     author: string
     price: number
     stock: number
@@ -256,6 +258,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
             const result = await publishBooksToJumia(selectedIds)
             if (result.success) {
                 setToast({ msg: `✅ ${result.message}`, ok: true })
+                setOrderedBooks(prev => prev.map(book => 
+                    selectedIds.includes(book.id) 
+                        ? { ...book, isSyncedWithJumia: true } 
+                        : book
+                ))
                 setSelectedIds([])
             } else {
                 setToast({ msg: `❌ ${result.message}`, ok: false })
@@ -277,6 +284,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
             const result = await verifyJumiaSku(bookId, sellerSku);
             if (result.success) {
                 setToast({ msg: `✅ ${result.message}`, ok: true });
+                setOrderedBooks(prev => prev.map(book => 
+                    book.id === bookId 
+                        ? { ...book, isSyncedWithJumia: true, jumiaStock: result.stock !== undefined ? result.stock : book.jumiaStock } 
+                        : book
+                ));
                 router.refresh();
             } else {
                 setToast({ msg: `❌ ${result.message}`, ok: false });
@@ -596,9 +608,10 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
                                                                             <Link 
                                                                                 href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
+                                                                                locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
                                                                             >
-                                                                                {book.title}
+                                                                                {book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title}
                                                                             </Link>
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}

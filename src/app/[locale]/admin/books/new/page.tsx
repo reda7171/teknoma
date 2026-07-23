@@ -18,7 +18,8 @@ export default function BookForm() {
     const [selectedAuthor, setSelectedAuthor] = useState<string>('')
     const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false)
     const authorInputRef = useRef<HTMLDivElement>(null)
-    const [currentLang, setCurrentLang] = useState<'ar' | 'fr'>('ar')
+    const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
+    const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
 
     useEffect(() => {
         getPurchaseLots().then(data => {
@@ -79,9 +80,11 @@ export default function BookForm() {
         const input: BookInput = {
             title: formData.get('title_ar') as string,
             titleFr: formData.get('title_fr') as string || undefined,
+            titleEn: formData.get('title_en') as string || undefined,
             author: formData.get('author') as string,
             description: formData.get('description_ar') as string,
             descriptionFr: formData.get('description_fr') as string || undefined,
+            descriptionEn: formData.get('description_en') as string || undefined,
             isbn: formData.get('isbn') as string || undefined,
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
@@ -153,18 +156,28 @@ export default function BookForm() {
                         />
                         <span className={`text-sm font-medium ${currentLang === 'fr' ? 'text-orange-500' : 'text-gray-500'}`}>French</span>
                     </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="lang_toggle" 
+                            checked={currentLang === 'en'} 
+                            onChange={() => setCurrentLang('en')} 
+                            className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className={`text-sm font-medium ${currentLang === 'en' ? 'text-orange-500' : 'text-gray-500'}`}>English</span>
+                    </label>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Titre */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Titre <span className="text-red-500">*</span>
+                            Titre {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
                             name="title_ar"
-                            required={currentLang === 'ar'}
+                            required={bookLanguage === 'ar'}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en arabe"
@@ -172,10 +185,18 @@ export default function BookForm() {
                         <input
                             type="text"
                             name="title_fr"
-                            required={currentLang === 'fr'}
+                            required={bookLanguage === 'fr'}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en français"
+                        />
+                        <input
+                            type="text"
+                            name="title_en"
+                            required={bookLanguage === 'en'}
+                            style={{ display: currentLang === 'en' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Titre en anglais"
                         />
                     </div>
 
@@ -416,15 +437,15 @@ export default function BookForm() {
                         </legend>
                         <div className="flex flex-wrap gap-4">
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                                <input type="radio" name="language" value="fr" defaultChecked className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <input type="radio" name="language" value="fr" checked={bookLanguage === 'fr'} onChange={(e) => { setBookLanguage('fr'); setCurrentLang('fr'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                                 <span className="text-sm font-medium text-gray-900">Français</span>
                             </label>
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                                <input type="radio" name="language" value="ar" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <input type="radio" name="language" value="ar" checked={bookLanguage === 'ar'} onChange={(e) => { setBookLanguage('ar'); setCurrentLang('ar'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                                 <span className="text-sm font-medium text-gray-900">Arabe</span>
                             </label>
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                                <input type="radio" name="language" value="en" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <input type="radio" name="language" value="en" checked={bookLanguage === 'en'} onChange={(e) => { setBookLanguage('en'); setCurrentLang('en'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                                 <span className="text-sm font-medium text-gray-900">Anglais</span>
                             </label>
                         </div>
@@ -456,11 +477,11 @@ export default function BookForm() {
                     {/* Description */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Description <span className="text-red-500">*</span>
+                            Description {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             name="description_ar"
-                            required={currentLang === 'ar'}
+                            required={bookLanguage === 'ar'}
                             rows={4}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -468,11 +489,19 @@ export default function BookForm() {
                         />
                         <textarea
                             name="description_fr"
-                            required={currentLang === 'fr'}
+                            required={bookLanguage === 'fr'}
                             rows={4}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Description détaillée du livre en français..."
+                        />
+                        <textarea
+                            name="description_en"
+                            required={bookLanguage === 'en'}
+                            rows={4}
+                            style={{ display: currentLang === 'en' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Description détaillée du livre en anglais..."
                         />
                     </div>
 

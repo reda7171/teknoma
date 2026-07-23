@@ -55,25 +55,41 @@ export async function publishBooksToJumia(bookIds: string[]) {
 
         const shops = await jumia.getShops()
         const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
+        const productsToCreate: any[] = [];
+        const productsToUpdate: any[] = [];
 
-        const productsPayload = books.map(book => {
-            const titleAr = book.title || `Livre ${book.id.substring(0, 8)}`;
-            const titleFr = book.titleFr || titleAr;
-            const descAr = book.description || book.title || `Description pour le livre ${book.id.substring(0, 8)}`;
-            const descFr = book.longDescription || book.description || descAr;
+        for (const book of books) {
+            const titleAr = book.title || book.titleEn || book.titleFr || `Livre ${book.id.substring(0, 8)}`;
+            const titleFr = book.titleFr || book.titleEn || titleAr;
             
+            const descArRaw = book.description || book.descriptionEn || book.descriptionFr || titleAr;
+            const descFrRaw = book.descriptionFr || book.descriptionEn || book.longDescription || descArRaw;
+            
+            const padDesc = (desc: string) => {
+                const suffix = " - Découvrez ce livre fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
+                return desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+            };
+
+            const descAr = padDesc(descArRaw);
+            const descFr = padDesc(descFrRaw);
+
             const markupMultiplier = 1 + ((book.jumiaPriceMarkup || 0) / 100);
 
-            return {
+            // Jumia's default 'value' is validated as English, so it rejects Arabic characters.
+            // We use French or a fallback Latin string for the default 'value', and put Arabic in translations.
+            const baseName = (titleFr && /[a-zA-Z]/.test(titleFr)) ? titleFr : `Book - ${book.sellerSku || book.id.substring(0, 8)}`;
+            const baseDesc = (descFr && /[a-zA-Z]/.test(descFr)) ? descFr : `Quality book - ${book.sellerSku || book.id.substring(0, 8)}`;
+
+            const payload: any = {
                 name: {
-                    value: titleAr.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
+                    value: baseName.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
                     translations: [
                         { language: "AR", value: titleAr.substring(0, 60) },
                         { language: "FR", value: titleFr.substring(0, 60) }
                     ]
                 },
                 description: {
-                    value: descAr.padEnd(150, ' ') + " - Achetez vos livres préférés avec Jumia et Riwaya !",
+                    value: padDesc(baseDesc),
                     translations: [
                         { language: "AR", value: descAr },
                         { language: "FR", value: descFr }
@@ -104,47 +120,88 @@ export async function publishBooksToJumia(bookIds: string[]) {
                         endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
                     } : undefined
                 },
-            stock: book.stock,
-            attributes: [
-                {
-                    name: "isbn",
-                    value: book.isbn || "N/A"
-                },
-                {
-                    name: "short_description",
-                    value: `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li><li>Qualité garantie par Riwaya</li></ul>`
-                },
-                {
-                    name: "model",
-                    value: "Standard"
-                },
-                {
-                    name: "product_weight",
-                    value: "0.5"
-                }
-            ]
-        };
-    })
-
-        // Appeler la nouvelle méthode createProducts
-        const response = await jumia.createProducts(shopId, productsPayload)
-        
-        if (response?.feedId) {
-            // Wait briefly to see if it processes immediately (often does for errors)
-            await new Promise(r => setTimeout(r, 2500))
-            const feedRes = await jumia.getFeed(response.feedId)
+                stock: book.stock,
+                attributes: [
+                    {
+                        name: "isbn",
+                        value: book.isbn || "N/A"
+                    },
+                    {
+                        name: "short_description",
+                        value: `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`
+                    },
+                    {
+                        name: "model",
+                        value: "Standard"
+                    },
+                    {
+                        name: "product_weight",
+                        value: "0.5"
+                    }
+                ]
+            };
+            let productId = null;
+            try {
+                // Toujours vérifier si le produit existe sur Jumia via l'API, 
+                // même si isSyncedWithJumia est false dans notre base de données.
+                const jumiaProd = await jumia.getProducts({ sellerSku: payload.sellerSku });
+                productId = jumiaProd?.products?.[0]?.id || jumiaProd?.products?.[0]?.sid || jumiaProd?.data?.[0]?.sid || jumiaProd?.[0]?.sid;
+            } catch (err) {
+                console.error("Error fetching productId for", payload.sellerSku, err);
+            }
             
-            if (feedRes?.status === 'FAILED') {
-                const itemError = feedRes.feedItems?.[0]?.errorMessage || 'Erreurs de validation'
-                const globalErrors = feedRes.feedItems?.[0]?.errors?.globalMessages?.join(', ') || ''
-                return { 
-                    success: false, 
-                    message: `Jumia a rejeté le produit: ${itemError} ${globalErrors}`.trim()
-                }
+            if (productId) {
+                payload.id = productId;
+                productsToUpdate.push(payload);
+            } else {
+                productsToCreate.push(payload);
             }
         }
 
-        return { success: true, message: `${books.length} livre(s) envoyés pour publication sur Jumia. (ID: ${response?.feedId})`, response }
+        let createResponse: any = null;
+        let updateResponse: any = null;
+
+        if (productsToCreate.length > 0) {
+            createResponse = await jumia.createProducts(shopId, productsToCreate);
+        }
+        
+        if (productsToUpdate.length > 0) {
+            updateResponse = await jumia.updateProducts(productsToUpdate, shopId);
+        }
+        
+        const checkFeed = async (response: any) => {
+            if (response?.feedId) {
+                // Wait briefly to see if it processes immediately (often does for errors)
+                await new Promise(r => setTimeout(r, 2500))
+                const feedRes = await jumia.getFeed(response.feedId)
+                
+                if (feedRes?.status === 'FAILED') {
+                    const itemError = feedRes.feedItems?.[0]?.errorMessage || 'Erreurs de validation'
+                    const globalErrors = feedRes.feedItems?.[0]?.errors?.globalMessages?.join(', ') || ''
+                    return `Jumia a rejeté le produit: ${itemError} ${globalErrors}`.trim()
+                }
+            }
+            return null;
+        };
+
+        const error1 = createResponse ? await checkFeed(createResponse) : null;
+        const error2 = updateResponse ? await checkFeed(updateResponse) : null;
+
+        if (error1 || error2) {
+            return { 
+                success: false, 
+                message: [error1, error2].filter(Boolean).join(' | ') 
+            }
+        }
+
+        // Mettre à jour le statut isSyncedWithJumia dans la base de données
+        await prisma.book.updateMany({
+            where: { id: { in: bookIds } },
+            data: { isSyncedWithJumia: true }
+        });
+
+        const feedIds = [createResponse?.feedId, updateResponse?.feedId].filter(Boolean).join(', ');
+        return { success: true, message: `${books.length} livre(s) envoyés pour publication/mise à jour sur Jumia. (Feed IDs: ${feedIds})` }
     } catch (error: any) {
         console.error("Erreur publishBooksToJumia:", error)
         return { success: false, message: `Erreur de publication: ${error.message}` }
@@ -250,7 +307,7 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
                 data: { isSyncedWithJumia: true, jumiaStock: stock }
             });
             
-            return { success: true, message: `SKU trouvé ! Stock Jumia: ${stock}` }
+            return { success: true, message: `SKU trouvé ! Stock Jumia: ${stock}`, stock }
         } else {
             await prisma.book.updateMany({
                 where: { id: bookId },

@@ -63,6 +63,7 @@ export default function MarketingPage() {
     const [watermarkModalOpen, setWatermarkModalOpen] = useState(false)
     const [watermarkImageUrl, setWatermarkImageUrl] = useState('')
     const [watermarkGravity, setWatermarkGravity] = useState('southeast')
+    const [watermarkStatus, setWatermarkStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
     
     const fetchMedia = async () => {
         try {
@@ -85,6 +86,7 @@ export default function MarketingPage() {
     const openWatermarkModal = (imgUrl: string) => {
         setWatermarkImageUrl(imgUrl)
         setWatermarkGravity('southeast')
+        setWatermarkStatus('idle')
         setWatermarkModalOpen(true)
     }
 
@@ -94,7 +96,7 @@ export default function MarketingPage() {
         const gravity = watermarkGravity
 
         setIsWatermarking(prev => ({ ...prev, [imageUrl]: true }))
-        setWatermarkModalOpen(false)
+        setWatermarkStatus('loading')
         try {
             const res = await fetch('/api/admin/marketing/media/watermark', {
                 method: 'POST',
@@ -103,13 +105,21 @@ export default function MarketingPage() {
             })
             const data = await res.json()
             if (data.success) {
-                alert('Image filigranée avec succès ! Elle est maintenant dans "Créatives Marketing".')
+                setWatermarkStatus('success')
                 fetchAssets()
+                setTimeout(() => {
+                    setWatermarkModalOpen(false)
+                    setWatermarkStatus('idle')
+                }, 2000)
             } else {
+                setWatermarkStatus('error')
                 alert(data.error || "Erreur lors de l'ajout du filigrane")
+                setTimeout(() => setWatermarkStatus('idle'), 2000)
             }
         } catch (error) {
+            setWatermarkStatus('error')
             alert('Erreur technique')
+            setTimeout(() => setWatermarkStatus('idle'), 2000)
         } finally {
             setIsWatermarking(prev => ({ ...prev, [imageUrl]: false }))
         }
@@ -825,43 +835,62 @@ export default function MarketingPage() {
                             </div>
 
                             <div className="space-y-6">
-                                <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Choisissez l'emplacement</label>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {[
-                                            { id: 'northwest', label: 'Haut Gauche' },
-                                            { id: 'north', label: 'Haut Centre' },
-                                            { id: 'northeast', label: 'Haut Droite' },
-                                            { id: 'west', label: 'Milieu Gauche' },
-                                            { id: 'center', label: 'Centre' },
-                                            { id: 'east', label: 'Milieu Droite' },
-                                            { id: 'southwest', label: 'Bas Gauche' },
-                                            { id: 'south', label: 'Bas Centre' },
-                                            { id: 'southeast', label: 'Bas Droite' }
-                                        ].map(pos => (
-                                            <button
-                                                key={pos.id}
-                                                onClick={() => setWatermarkGravity(pos.id)}
-                                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all h-24 ${
-                                                    watermarkGravity === pos.id 
-                                                        ? 'bg-indigo-50 border-indigo-600 text-indigo-600' 
-                                                        : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
-                                                }`}
-                                            >
-                                                <div className={`w-3 h-3 rounded-full mb-2 ${watermarkGravity === pos.id ? 'bg-indigo-600' : 'bg-slate-300'}`} />
-                                                <span className="text-[10px] font-black uppercase text-center leading-tight">{pos.label}</span>
-                                            </button>
-                                        ))}
+                                {watermarkStatus === 'loading' ? (
+                                    <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                                        <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
+                                        <p className="font-bold text-slate-700">Application du filigrane en cours...</p>
                                     </div>
-                                </div>
+                                ) : watermarkStatus === 'success' ? (
+                                    <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                            <span className="text-green-600 text-3xl font-black">✓</span>
+                                        </div>
+                                        <p className="font-bold text-slate-700 text-center">
+                                            Image filigranée avec succès !<br/>
+                                            <span className="text-sm text-slate-500 font-normal">Retrouvez-la dans vos Créatives Marketing</span>
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Choisissez l'emplacement</label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {[
+                                                    { id: 'northwest', label: 'Haut Gauche' },
+                                                    { id: 'north', label: 'Haut Centre' },
+                                                    { id: 'northeast', label: 'Haut Droite' },
+                                                    { id: 'west', label: 'Milieu Gauche' },
+                                                    { id: 'center', label: 'Centre' },
+                                                    { id: 'east', label: 'Milieu Droite' },
+                                                    { id: 'southwest', label: 'Bas Gauche' },
+                                                    { id: 'south', label: 'Bas Centre' },
+                                                    { id: 'southeast', label: 'Bas Droite' }
+                                                ].map(pos => (
+                                                    <button
+                                                        key={pos.id}
+                                                        onClick={() => setWatermarkGravity(pos.id)}
+                                                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all h-24 ${
+                                                            watermarkGravity === pos.id 
+                                                                ? 'bg-indigo-50 border-indigo-600 text-indigo-600' 
+                                                                : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <div className={`w-3 h-3 rounded-full mb-2 ${watermarkGravity === pos.id ? 'bg-indigo-600' : 'bg-slate-300'}`} />
+                                                        <span className="text-[10px] font-black uppercase text-center leading-tight">{pos.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                <button 
-                                    onClick={handleWatermark}
-                                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest rounded-2xl transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
-                                >
-                                    <Stamp className="w-5 h-5" />
-                                    Appliquer le Logo
-                                </button>
+                                        <button 
+                                            onClick={handleWatermark}
+                                            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest rounded-2xl transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                        >
+                                            <Stamp className="w-5 h-5" />
+                                            Appliquer le Logo
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

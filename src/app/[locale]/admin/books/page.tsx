@@ -25,8 +25,11 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         ...(searchQuery && {
             OR: [
                 { title: { contains: searchQuery } },
+                { titleFr: { contains: searchQuery } },
+                { titleEn: { contains: searchQuery } },
                 { author: { contains: searchQuery } },
-                { category: { contains: searchQuery } }
+                { category: { contains: searchQuery } },
+                { sellerSku: { contains: searchQuery } }
             ]
         }),
         ...(statusParam === 'no-image' && {
@@ -68,7 +71,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     if (productTypeFilter === 'all' || productTypeFilter === 'pack') {
         const packWhere: any = {}
         if (searchQuery) {
-            packWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } } ]
+            packWhere.OR = [ { name: { contains: searchQuery } }, { nameFr: { contains: searchQuery } }, { nameEn: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
         }
         if (statusParam === 'active') packWhere.active = true
         if (statusParam === 'inactive') packWhere.active = false
@@ -81,6 +84,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         allProducts.push(...packs.map(p => ({
             id: p.id,
             title: p.name,
+            titleFr: p.nameFr,
+            titleEn: p.nameEn,
             author: 'Pack',
             price: p.price,
             stock: 999, // Packs don't have stock
@@ -102,7 +107,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     if (productTypeFilter === 'all' || ['kids', 'usb', 'bookmarks'].includes(productTypeFilter)) {
         const extraWhere: any = {}
         if (searchQuery) {
-            extraWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } } ]
+            extraWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
         }
         if (productTypeFilter !== 'all') {
             extraWhere.category = productTypeFilter.toUpperCase()
@@ -118,6 +123,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         allProducts.push(...extras.map(e => ({
             id: e.id,
             title: e.name,
+            titleFr: null,
+            titleEn: null,
             author: 'Accessoire',
             price: e.price,
             stock: e.stock,
