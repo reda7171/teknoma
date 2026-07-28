@@ -5,7 +5,7 @@ import { OrderStatus } from '@prisma/client';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fullName, phone, address, city, comment, total, discount, couponCode, items } = body;
+    const { fullName, phone, address, city, comment, total, discount, couponCode, items, paymentMethod } = body;
 
     if (!fullName || !phone || !address || !city || !items || !items.length) {
       return NextResponse.json({ success: false, error: 'Données manquantes' }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         discount: discount || 0,
         couponCode: couponCode || null,
         status: OrderStatus.PENDING,
-        paymentMethod: 'COD',
+        paymentMethod: paymentMethod || 'COD',
         items: {
           create: items.map((item: any) => ({
             type: item.type === 'PACK' ? 'PACK' : 'BOOK',

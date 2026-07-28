@@ -22,14 +22,13 @@ export async function getAuthorsData(): Promise<AuthorData[]> {
                 by: ['author'],
                 where: { active: true },
                 _count: {
-                    _all: true
-                },
-                orderBy: {
-                    _count: {
-                        author: 'desc'
-                    }
+                    _all: true,
+                    author: true // Ensuring author count is present if orderBy uses it, though we will sort in JS
                 }
             })
+
+            // Sort manually
+            bookStats.sort((a, b) => b._count._all - a._count._all)
 
             // Récupérer les auteurs ayant au moins un livre en stock
             const authorsWithStock = await prisma.book.findMany({

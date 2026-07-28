@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://192.168.60.171:3000';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 function normalizeImage(image: string | null | undefined): string {
   if (!image) return `${SITE_URL}/placeholder-book.png`;
@@ -11,9 +11,9 @@ function normalizeImage(image: string | null | undefined): string {
 
 export async function GET(
   _req: Request,
-  { params }: { params: { bookId: string } }
+  { params }: { params: Promise<{ bookId: string }> }
 ) {
-  const { bookId } = params;
+  const { bookId } = await params;
 
   try {
     // Récupère la catégorie du livre actuel

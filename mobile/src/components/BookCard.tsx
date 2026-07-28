@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import { Product } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
+import { playFavoriteSound } from '@/utils/sounds';
 
 interface BookCardProps {
   product: Product;
@@ -21,16 +22,16 @@ export const BookCard = ({ product, showWishlist = true }: BookCardProps) => {
   // Applique le bon thème dynamiquement
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
-  const { toggle, isInWishlist } = useWishlistStore();
-  const liked = isInWishlist(product.id);
+  const toggle = useWishlistStore((state) => state.toggle);
+  const items = useWishlistStore((state) => state.items);
+  const liked = items.some((p) => p.id === product.id);
 
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.backgroundElement }]}
-      onPress={() => router.push(`/book/${product.id}`)}
-      activeOpacity={0.8}
-    >
-      <View>
+    <View style={[styles.card, { backgroundColor: colors.backgroundElement }]}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => router.push(`/book/${product.id}`)}
+      >
         <Animated.View sharedTransitionTag={`book-image-${product.id}`} style={styles.imageContainer}>
           <Image
             source={product.image}
@@ -39,36 +40,46 @@ export const BookCard = ({ product, showWishlist = true }: BookCardProps) => {
             transition={300}
           />
         </Animated.View>
-        {showWishlist && (
-          <TouchableOpacity
-            style={styles.heartBtn}
-            onPress={(e) => { e.stopPropagation(); toggle(product); }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={[styles.heart, liked && styles.heartActive]}>
-              {liked ? '♥' : '♡'}
-            </Text>
-          </TouchableOpacity>
-        )}
-        {product.type === 'PACK' && (
-          <View style={styles.packBadge}>
-            <Text style={styles.packBadgeText}>PACK</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.infoContainer}>
-        <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
-          {product.title}
-        </Text>
-        {product.author && (
-          <Text style={[styles.author, { color: colors.textSecondary }]} numberOfLines={1}>
-            {product.author}
+        <View style={styles.infoContainer}>
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
+            {product.title}
           </Text>
-        )}
-        <Text style={styles.price}>{product.price.toFixed(2)} MAD</Text>
-      </View>
-    </TouchableOpacity>
+          {product.author && (
+            <TouchableOpacity onPress={() => router.push(`/author/${encodeURIComponent(product.author)}`)}>
+              <Text style={[styles.author, { color: colors.textSecondary }]} numberOfLines={1}>
+                {product.author}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <Text style={styles.price}>{product.price.toFixed(2)} MAD</Text>
+        </View>
+      </TouchableOpacity>
+
+      {showWishlist && (
+        <TouchableOpacity
+          style={styles.heartBtn}
+          onPress={() => {
+            if (!liked) playFavoriteSound();
+            toggle(product);
+          }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Text style={[styles.heart, liked && styles.heartActive]}>
+            {liked ? '♥' : '♡'}
+          </Text>
+        </TouchableOpacity>
+      )}
+      {product.type === 'PACK' && (
+        <View style={styles.packBadge}>
+          <Text style={styles.packBadgeText}>PACK</Text>
+        </View>
+      )}
+      {product.language && (
+        <View style={[styles.langBadge, product.type === 'PACK' ? { top: 32 } : {}]}>
+          <Text style={styles.langBadgeText}>{product.language.toUpperCase()}</Text>
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -77,7 +88,7 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     borderRadius: Spacing.three,
     overflow: 'hidden',
-    marginBottom: Spacing.three,
+    marginBottom: Spacing.six,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -96,6 +107,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
+    zIndex: 10,
+    elevation: 10,
     backgroundColor: 'rgba(255,255,255,0.85)',
     width: 32,
     height: 32,
@@ -115,6 +128,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   packBadgeText: { color: '#FFF', fontSize: 10, fontWeight: '800' },
+  langBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  langBadgeText: { color: '#FFF', fontSize: 10, fontWeight: 'bold' },
   infoContainer: { padding: Spacing.two },
   title:  { fontSize: 14, fontWeight: '600', marginBottom: 4 },
   author: { fontSize: 12, marginBottom: 8 },

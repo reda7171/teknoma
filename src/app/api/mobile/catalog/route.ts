@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // URL publique du site (remplace en production par ton domaine réel)
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://192.168.60.171:3000';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 // Normalise un chemin relatif en URL absolue
 function normalizeImage(image: string | null | undefined): string {
@@ -19,6 +19,9 @@ export async function GET(request: Request) {
   const search = searchParams.get('search')?.trim() || '';
   const category = searchParams.get('category')?.trim() || '';
   const sort = searchParams.get('sort')?.trim() || 'newest';
+  const language = searchParams.get('language')?.trim() || '';
+  const minPrice = parseFloat(searchParams.get('minPrice') || '');
+  const maxPrice = parseFloat(searchParams.get('maxPrice') || '');
 
   try {
     // Construction de la clause where
@@ -32,6 +35,14 @@ export async function GET(request: Request) {
     if (category) {
       whereClause.category = category;
     }
+    if (language) {
+      whereClause.language = language;
+    }
+    if (!isNaN(minPrice) || !isNaN(maxPrice)) {
+      whereClause.price = {};
+      if (!isNaN(minPrice)) whereClause.price.gte = minPrice;
+      if (!isNaN(maxPrice)) whereClause.price.lte = maxPrice;
+    }
 
     // Construction de la clause orderBy
     let orderByClause: any = { createdAt: 'desc' };
@@ -43,7 +54,7 @@ export async function GET(request: Request) {
     const [books, packs, totalBooks] = await Promise.all([
       prisma.book.findMany({
         where: whereClause,
-        select: { id: true, title: true, author: true, price: true, image: true, category: true },
+        select: { id: true, title: true, author: true, price: true, image: true, category: true, description: true, language: true },
         take: limit,
         skip,
         orderBy: orderByClause,
@@ -51,7 +62,7 @@ export async function GET(request: Request) {
       // Les packs sont toujours chargés en entier (petite quantité)
       page === 1 ? prisma.pack.findMany({
         where: { active: true },
-        select: { id: true, name: true, price: true, image: true },
+        select: { id: true, name: true, price: true, image: true, description: true },
         take: 10,
         orderBy: { createdAt: 'desc' },
       }) : Promise.resolve(null),
@@ -63,7 +74,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       books: books.map(b => ({ ...b, image: normalizeImage(b.image), type: 'BOOK' })),
-      packs: packs ? packs.map(p => ({ ...p, title: p.name, image: normalizeImage(p.image), type: 'PACK' })) : undefined,
+      packs: packs ? packs.map(p => ({ ...p, title: p.name, image: normalizeImage(p.image), type: 'PACK', description: p.description ?? '' })) : undefined,
       pagination: { page, limit, total: totalBooks, hasMore, nextPage: hasMore ? page + 1 : null },
     });
   } catch (error) {

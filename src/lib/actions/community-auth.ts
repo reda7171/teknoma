@@ -237,10 +237,7 @@ export async function getCommunityUser() {
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                ownedBooks: true,
-            }
+            where: { id: userId }
         })
 
         return user

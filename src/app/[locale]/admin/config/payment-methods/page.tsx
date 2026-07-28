@@ -22,6 +22,9 @@ export default async function PaymentMethodsPage() {
   const cmiStoreKey = await getSetting('payment_cmi_store_key') || ''
   const cmiMode = await getSetting('payment_cmi_mode') || 'test'
 
+  const bankTransferEnabled = await getSetting('payment_bank_transfer_enabled') === 'true'
+  const bankTransferAccounts = await getSetting('payment_bank_transfer_accounts') || '[]'
+
   const initialSettings = {
       codEnabled,
       paypalEnabled,
@@ -34,7 +37,9 @@ export default async function PaymentMethodsPage() {
       cmiEnabled,
       cmiClientId,
       cmiStoreKey,
-      cmiMode
+      cmiMode,
+      bankTransferEnabled,
+      bankTransferAccounts
   }
 
   return (

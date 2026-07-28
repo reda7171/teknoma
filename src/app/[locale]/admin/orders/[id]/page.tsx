@@ -123,6 +123,33 @@ export default async function OrderDetailsPage({
                                     <p className="font-bold text-gray-900">{order.phone}</p>
                                 </div>
                             </div>
+
+                            {/* Méthode de paiement */}
+                            {(order as any).paymentMethod && (
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-emerald-50 rounded-lg shrink-0">
+                                        <ShoppingBag className="w-5 h-5 text-emerald-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 uppercase font-black">Mode de paiement</p>
+                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider mt-1 ${
+                                            (order as any).paymentMethod === 'COD'           ? 'bg-amber-100 text-amber-800' :
+                                            (order as any).paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
+                                            (order as any).paymentMethod === 'STRIPE'        ? 'bg-indigo-100 text-indigo-800' :
+                                            (order as any).paymentMethod === 'PAYPAL'        ? 'bg-blue-100 text-blue-800' :
+                                            (order as any).paymentMethod === 'CMI'           ? 'bg-orange-100 text-orange-800' :
+                                            'bg-gray-100 text-gray-700'
+                                        }`}>
+                                            {(order as any).paymentMethod === 'COD'           ? 'Paiement à la livraison' :
+                                             (order as any).paymentMethod === 'BANK_TRANSFER' ? 'Virement Bancaire' :
+                                             (order as any).paymentMethod === 'STRIPE'        ? 'Carte Bancaire (Stripe)' :
+                                             (order as any).paymentMethod === 'PAYPAL'        ? 'PayPal' :
+                                             (order as any).paymentMethod === 'CMI'           ? 'CMI' :
+                                             (order as any).paymentMethod}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

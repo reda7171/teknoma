@@ -31,7 +31,10 @@ export async function getTopReaders(limit: number = 10): Promise<TopReader[]> {
         if (!topReaders.length) return []
 
         // Fetch user details
-        const userIds = topReaders.map(r => r.userId)
+        const userIds = topReaders.map(r => r.userId).filter(Boolean) as string[]
+        
+        if (!userIds.length) return []
+        
         const users = await prisma.user.findMany({
             where: {
                 id: {

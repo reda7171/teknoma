@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import jwt from 'jsonwebtoken';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://192.168.60.171:3000';
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_riwaya_mobile_key_2026';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 function normalizeImage(image: string | null | undefined): string {
   if (!image) return `${SITE_URL}/placeholder-book.png`;
@@ -11,9 +14,9 @@ function normalizeImage(image: string | null | undefined): string {
 
 export async function GET(
   _req: Request,
-  { params }: { params: { bookId: string } }
+  { params }: { params: Promise<{ bookId: string }> }
 ) {
-  const { bookId } = params;
+  const { bookId } = await params;
 
   try {
     // Récupère les avis approuvés du livre
@@ -25,6 +28,7 @@ export async function GET(
         rating: true,
         comment: true,
         city: true,
+        customerId: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -50,13 +54,25 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: { bookId: string } }
+  { params }: { params: Promise<{ bookId: string }> }
 ) {
-  const { bookId } = params;
+  const { bookId } = await params;
 
   try {
     const body = await req.json();
     const { fullName, rating, comment } = body;
+
+    let customerId = null;
+    const authHeader = req.headers.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded: any = jwt.verify(token, JWT_SECRET);
+        customerId = decoded.id;
+      } catch (e) {
+        // Token invalide, on l'ignore
+      }
+    }
 
     if (!fullName || !rating || !comment) {
       return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 });
@@ -68,7 +84,8 @@ export async function POST(
         fullName,
         rating: Number(rating),
         comment,
-        isApproved: true, // Auto-approuvé pour l'instant (décision du plan d'implémentation)
+        isApproved: true, // Auto-approuvé pour l'instant
+        customerId,
       },
     });
 

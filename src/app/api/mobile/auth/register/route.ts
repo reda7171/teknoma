@@ -24,23 +24,37 @@ export async function POST(req: Request) {
       },
     });
 
-    if (existingCustomer) {
-      return NextResponse.json({ error: 'Ce numéro de téléphone ou cet email est déjà utilisé' }, { status: 409 });
-    }
-
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create customer
-    const customer = await prisma.customer.create({
-      data: {
-        email: email || null,
-        password: hashedPassword,
-        fullName,
-        phone: phone || '', // Phone is required in schema
-      },
-    });
+    let customer;
+
+    if (existingCustomer) {
+      if (existingCustomer.password) {
+        return NextResponse.json({ error: 'Ce numéro de téléphone ou cet email est déjà utilisé par un compte actif. Veuillez vous connecter.' }, { status: 409 });
+      } else {
+        // Le compte a été créé lors d'une commande COD (pas de mot de passe) -> On le met à jour
+        customer = await prisma.customer.update({
+          where: { id: existingCustomer.id },
+          data: {
+            password: hashedPassword,
+            fullName,
+            email: email || existingCustomer.email,
+          },
+        });
+      }
+    } else {
+      // Create new customer
+      customer = await prisma.customer.create({
+        data: {
+          email: email || null,
+          password: hashedPassword,
+          fullName,
+          phone: phone || '', // Phone is required in schema
+        },
+      });
+    }
 
     // Generate JWT
     const token = jwt.sign(

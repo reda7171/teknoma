@@ -18,7 +18,6 @@ export async function getAllExchanges() {
                         fullName: true,
                         email: true,
                         city: true,
-                        rating: true,
                     }
                 },
                 responder: {
@@ -27,7 +26,6 @@ export async function getAllExchanges() {
                         fullName: true,
                         email: true,
                         city: true,
-                        rating: true,
                     }
                 },
                 bookRequested: {
@@ -76,7 +74,6 @@ export async function getExchangeById(id: string) {
                         fullName: true,
                         email: true,
                         city: true,
-                        rating: true,
                         image: true,
                     }
                 },
@@ -86,7 +83,6 @@ export async function getExchangeById(id: string) {
                         fullName: true,
                         email: true,
                         city: true,
-                        rating: true,
                         image: true,
                     }
                 },

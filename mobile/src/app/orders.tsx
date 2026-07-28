@@ -8,6 +8,8 @@ import { useColorScheme } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { getOrders } from '@/services/api';
 import { useRouter } from 'expo-router';
+import { useI18nStore } from '@/store/useI18nStore';
+import { Ionicons } from '@expo/vector-icons';
 
 /* Couleur par statut */
 const STATUS_COLOR: Record<string, string> = {
@@ -43,6 +45,7 @@ export default function OrdersScreen() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useI18nStore();
 
   const handleSearch = async () => {
     if (!input.trim()) return;
@@ -56,11 +59,11 @@ export default function OrdersScreen() {
       if (data.success) {
         setOrders(data.orders);
       } else {
-        setError('Aucune commande trouvée.');
+        setError(t('no_orders_found'));
         setOrders([]);
       }
     } catch {
-      setError('Erreur de connexion. Vérifiez votre réseau.');
+      setError(t('conn_error_network'));
       setOrders([]);
     } finally {
       setLoading(false);
@@ -78,11 +81,16 @@ export default function OrdersScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Mes Commandes</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Suivez l'état de vos livraisons
-          </Text>
+        <View style={[styles.header, { flexDirection: 'row', alignItems: 'center' }]}>
+          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 16 }}>
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
+          </TouchableOpacity>
+          <View>
+            <Text style={[styles.title, { color: colors.text }]}>{t('my_orders')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              {t('track_orders')}
+            </Text>
+          </View>
         </View>
 
         {/* Mode toggle */}
@@ -92,7 +100,7 @@ export default function OrdersScreen() {
             onPress={() => { setMode('phone'); setInput(''); setOrders([]); setSearched(false); }}
           >
             <Text style={[styles.modeBtnText, mode === 'phone' && styles.modeBtnTextActive]}>
-              Téléphone
+              {t('phone_mode')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -100,32 +108,28 @@ export default function OrdersScreen() {
             onPress={() => { setMode('id'); setInput(''); setOrders([]); setSearched(false); }}
           >
             <Text style={[styles.modeBtnText, mode === 'id' && styles.modeBtnTextActive]}>
-              N° Commande
+              {t('order_id_mode')}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Champ de recherche */}
+        {/* Search Input */}
         <View style={styles.searchRow}>
           <TextInput
-            style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text, flex: 1 }]}
-            placeholder={mode === 'phone' ? 'Ex: 0612345678' : 'Votre numéro de commande'}
+            style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text }]}
+            placeholder={mode === 'phone' ? t('placeholder_phone') : t('placeholder_order_id')}
             placeholderTextColor={colors.textSecondary}
-            keyboardType={mode === 'phone' ? 'phone-pad' : 'default'}
             value={input}
             onChangeText={setInput}
-            onSubmitEditing={handleSearch}
-            returnKeyType="search"
+            keyboardType={mode === 'phone' ? 'phone-pad' : 'default'}
+            autoCapitalize="none"
           />
           <TouchableOpacity
             style={[styles.searchBtn, (!input.trim() || loading) && { opacity: 0.5 }]}
             onPress={handleSearch}
             disabled={!input.trim() || loading}
           >
-            {loading
-              ? <ActivityIndicator color="white" size="small" />
-              : <Text style={styles.searchBtnText}>Chercher</Text>
-            }
+            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.searchBtnText}>{t('search_orders')}</Text>}
           </TouchableOpacity>
         </View>
 
@@ -147,48 +151,46 @@ export default function OrdersScreen() {
                 {orders.map((order) => (
                   <TouchableOpacity 
                     key={order.id} 
-                    style={[styles.card, { backgroundColor: colors.backgroundElement }]}
+                    style={[styles.orderCard, { backgroundColor: colors.backgroundElement }]}
                     onPress={() => router.push(`/order/${order.id}` as any)}
                   >
+                {/* Header card */}
+                <View style={styles.orderHeader}>
+                  <View>
+                    <Text style={[styles.orderId, { color: colors.text }]}>{t('order_id')}{order.id}</Text>
+                    <Text style={[styles.orderDate, { color: colors.textSecondary }]}>{formatDate(order.createdAt)}</Text>
+                  </View>
+                  <View style={[styles.statusBadge, { backgroundColor: STATUS_COLOR[order.status] || '#9CA3AF' }]}>
+                    <Text style={styles.statusText}>{order.statusLabel || order.status}</Text>
+                  </View>
+                </View>
 
-                    {/* Badge statut */}
-                    <View style={[styles.statusBadge, { backgroundColor: STATUS_COLOR[order.status] + '20' }]}>
-                      <View style={[styles.statusDot, { backgroundColor: STATUS_COLOR[order.status] || '#6B7280' }]} />
-                      <Text style={[styles.statusText, { color: STATUS_COLOR[order.status] || '#6B7280' }]}>
-                        {order.statusLabel}
-                      </Text>
+                {/* Details */}
+                <View style={styles.orderDetails}>
+                  <View style={styles.detailRow}>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('city_lbl')}</Text>
+                    <Text style={[styles.detailValue, { color: colors.text }]}>{order.city}</Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('total')}</Text>
+                    <Text style={[styles.detailValue, { color: colors.text }]}>{order.total.toFixed(2)} MAD</Text>
+                  </View>
+                  {order.trackingID && (
+                    <View style={styles.detailRow}>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('tracking_id')}</Text>
+                      <Text style={[styles.detailValue, { color: '#0274DF', fontWeight: 'bold' }]}>{order.trackingID}</Text>
                     </View>
+                  )}
+                </View>
 
-                    {/* Infos commande */}
-                    <Text style={[styles.orderId, { color: colors.textSecondary }]}>
-                      #{order.id.substring(0, 8).toUpperCase()}
-                    </Text>
-                    <Text style={[styles.orderDate, { color: colors.textSecondary }]}>
-                      {formatDate(order.createdAt)} · {order.city}
-                    </Text>
-
-                    {/* Articles */}
-                    <View style={[styles.divider, { backgroundColor: colors.backgroundSelected }]} />
-                    {order.items.map((item, i) => (
-                      <Text key={i} style={[styles.itemLine, { color: colors.text }]}>
-                        {item.quantity}× {item.name ?? '—'}
-                      </Text>
-                    ))}
-
-                    {/* Total */}
-                    <View style={[styles.divider, { backgroundColor: colors.backgroundSelected }]} />
-                    <View style={styles.totalRow}>
-                      <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>Total</Text>
-                      <Text style={styles.totalValue}>{order.total.toFixed(2)} MAD</Text>
-                    </View>
-
-                    {/* Tracking */}
-                    {order.trackingID && (
-                      <Text style={[styles.tracking, { color: colors.textSecondary }]}>
-                        Suivi : {order.trackingID}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
+                {/* Articles */}
+                <View style={[styles.divider, { backgroundColor: colors.backgroundSelected }]} />
+                {order.items.map((item, i) => (
+                  <Text key={i} style={[styles.itemLine, { color: colors.text }]}>
+                    {item.quantity}× {item.name ?? '—'}
+                  </Text>
+                ))}
+              </TouchableOpacity>
                 ))}
               </>
             )}
@@ -213,8 +215,8 @@ const styles = StyleSheet.create({
   modeBtnTextActive: { color: '#FFFFFF' },
   /* Recherche */
   searchRow:      { flexDirection: 'row', gap: Spacing.two, marginBottom: Spacing.four },
-  input:          { padding: Spacing.three, borderRadius: 12, fontSize: 16 },
-  searchBtn:      { backgroundColor: '#0274DF', paddingHorizontal: Spacing.three, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  input:          { flex: 1, padding: Spacing.three, borderRadius: 12, fontSize: 16 },
+  searchBtn:      { backgroundColor: '#0274DF', paddingHorizontal: 20, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   searchBtnText:  { color: '#FFF', fontWeight: '700', fontSize: 15 },
   /* État vide */
   empty:          { alignItems: 'center', paddingVertical: Spacing.six },

@@ -7,6 +7,7 @@ import { Colors, Spacing } from '@/constants/theme';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useRecentStore } from '@/store/useRecentStore';
 import { BookCard } from '@/components/BookCard';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function WishlistScreen() {
   const router = useRouter();
@@ -20,7 +21,12 @@ export default function WishlistScreen() {
       <ScrollView contentContainerStyle={styles.container}>
 
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Mes Favoris</Text>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.push('/')} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.title, { color: colors.text }]}>Mes Favoris</Text>
+          </View>
           {items.length > 0 && (
             <TouchableOpacity onPress={clear}>
               <Text style={styles.clearText}>Tout supprimer</Text>
@@ -79,6 +85,8 @@ export default function WishlistScreen() {
 const styles = StyleSheet.create({
   container:      { padding: Spacing.four, paddingBottom: 100 },
   header:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.four },
+  headerLeft:     { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  backBtn:        { padding: Spacing.one },
   title:          { fontSize: 28, fontWeight: '800' },
   clearText:      { fontSize: 14, color: '#EF4444', fontWeight: '600' },
   count:          { fontSize: 14, marginBottom: Spacing.three },

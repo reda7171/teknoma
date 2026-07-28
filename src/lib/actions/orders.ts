@@ -29,7 +29,7 @@ const OrderSchema = z.object({
     utmCampaign: z.string().max(255).optional(),
     fbclid: z.string().max(255).optional(),
     ttclid: z.string().max(255).optional(),
-    paymentMethod: z.enum(['COD', 'STRIPE', 'PAYPAL', 'CMI']).optional()
+    paymentMethod: z.enum(['COD', 'STRIPE', 'PAYPAL', 'CMI', 'BANK_TRANSFER']).optional()
 })
 
 export async function getOrders() {

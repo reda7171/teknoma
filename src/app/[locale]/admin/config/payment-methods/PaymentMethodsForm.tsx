@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign } from 'lucide-react'
+import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2 } from 'lucide-react'
 import { updateSetting } from '@/lib/actions/site-settings'
 import { useUIStore } from '@/store/ui'
 
@@ -18,10 +18,25 @@ interface PaymentSettings {
     cmiClientId: string
     cmiStoreKey: string
     cmiMode: string
+    bankTransferEnabled: boolean
+    bankTransferAccounts: string
+}
+
+interface BankAccount {
+    bankName: string;
+    accountName: string;
+    rib: string;
 }
 
 export default function PaymentMethodsForm({ initialSettings }: { initialSettings: PaymentSettings }) {
     const [settings, setSettings] = useState<PaymentSettings>(initialSettings)
+    const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(() => {
+        try {
+            return JSON.parse(initialSettings.bankTransferAccounts || '[]')
+        } catch {
+            return []
+        }
+    })
     const [isLoading, setIsLoading] = useState(false)
     const showNotification = useUIStore(state => state.showNotification)
 
@@ -46,6 +61,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
             await updateSetting('payment_cmi_store_key', settings.cmiStoreKey, 'config', 'Store Key CMI')
             await updateSetting('payment_cmi_mode', settings.cmiMode, 'config', 'Mode CMI')
             
+            await updateSetting('payment_bank_transfer_enabled', String(settings.bankTransferEnabled), 'config', 'Virement bancaire')
+            await updateSetting('payment_bank_transfer_accounts', JSON.stringify(bankAccounts), 'config', 'Comptes bancaires')
+            
             showNotification('Méthodes de paiement mises à jour avec succès', 'success')
         } catch (error) {
             console.error('Erreur lors de la mise à jour des paiements:', error)
@@ -53,6 +71,22 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const addBankAccount = () => {
+        setBankAccounts([...bankAccounts, { bankName: '', accountName: '', rib: '' }])
+    }
+
+    const updateBankAccount = (index: number, field: keyof BankAccount, value: string) => {
+        const newAccounts = [...bankAccounts]
+        newAccounts[index][field] = value
+        setBankAccounts(newAccounts)
+    }
+
+    const removeBankAccount = (index: number) => {
+        const newAccounts = [...bankAccounts]
+        newAccounts.splice(index, 1)
+        setBankAccounts(newAccounts)
     }
 
     return (
@@ -260,6 +294,101 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                 <div className="mt-4 p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800">
                     <strong>Documentation CMI :</strong> Le système génère automatiquement l'empreinte SHA-512 pour sécuriser vos paiements. Si CMI vous demande de leur fournir une "Callback URL", donnez-leur : <code>https://riwaya.store/api/webhooks/cmi</code>.
                 </div>
+            </div>
+
+            {/* Virement Bancaire */}
+            <div className={`bg-white p-6 md:p-8 rounded-[2rem] border transition-all shadow-sm space-y-6 ${settings.bankTransferEnabled ? 'border-teal-200 ring-2 ring-teal-50' : 'border-slate-100'}`}>
+                <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
+                    <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600">
+                        <Landmark className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-black text-slate-900">Virement Bancaire</h2>
+                        <p className="text-sm text-slate-500">Le client vous transfère l'argent sur votre compte bancaire.</p>
+                    </div>
+                    <div className="ml-auto">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                className="sr-only peer" 
+                                checked={settings.bankTransferEnabled}
+                                onChange={(e) => setSettings({ ...settings, bankTransferEnabled: e.target.checked })}
+                            />
+                            <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-teal-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                {settings.bankTransferEnabled && (
+                    <div className="pt-2 space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <label className="block text-sm font-bold text-slate-700">Comptes bancaires</label>
+                            <button
+                                type="button"
+                                onClick={addBankAccount}
+                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Ajouter un compte
+                            </button>
+                        </div>
+                        
+                        {bankAccounts.length === 0 ? (
+                            <div className="text-center p-8 bg-slate-50 rounded-xl border border-slate-200 border-dashed text-slate-500 text-sm">
+                                Aucun compte bancaire configuré. Cliquez sur "Ajouter un compte" pour commencer.
+                            </div>
+                        ) : (
+                            bankAccounts.map((account, index) => (
+                                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl relative">
+                                    <div className="md:col-span-3">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1">Nom de la banque</label>
+                                        <input
+                                            type="text"
+                                            value={account.bankName}
+                                            onChange={(e) => updateBankAccount(index, 'bankName', e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
+                                            placeholder="Ex: CIH Bank"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-3">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1">Nom du titulaire</label>
+                                        <input
+                                            type="text"
+                                            value={account.accountName}
+                                            onChange={(e) => updateBankAccount(index, 'accountName', e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
+                                            placeholder="Ex: Entreprise SARL"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-5">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1">RIB / IBAN</label>
+                                        <input
+                                            type="text"
+                                            value={account.rib}
+                                            onChange={(e) => updateBankAccount(index, 'rib', e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm font-mono"
+                                            placeholder="RIB à 24 chiffres ou IBAN"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-1 flex items-end justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => removeBankAccount(index)}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors w-full flex justify-center"
+                                            title="Supprimer"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                        
+                        <div className="mt-4 p-4 bg-teal-50 border border-teal-100 rounded-xl text-sm text-teal-800">
+                            <strong>Fonctionnement :</strong> Lors du paiement, le client verra ces coordonnées pour effectuer le virement. La commande sera en attente jusqu'à ce que vous confirmiez la réception du paiement.
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="flex justify-end pt-4">

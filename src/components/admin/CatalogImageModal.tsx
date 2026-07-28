@@ -36,7 +36,8 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
         booksPerPage: 24,
         format: 'catalog',
         scaleX: 1.0,
-        scaleY: 1.0
+        scaleY: 1.0,
+        showPrice: true
     })
     const captureRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -304,6 +305,19 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                             </div>
 
                             <div>
+                                <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Prix</label>
+                                <label className="flex items-center gap-2 cursor-pointer py-1">
+                                    <input 
+                                        type="checkbox"
+                                        checked={config.showPrice}
+                                        onChange={(e) => setConfig({...config, showPrice: e.target.checked})}
+                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                                    />
+                                    <span className="text-sm font-semibold text-gray-700">Afficher le prix</span>
+                                </label>
+                            </div>
+
+                            <div>
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Livres par image</label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {(config.format === 'post' ? [2, 4, 6, 9] : [12, 24, 48, 96]).map(num => (
@@ -394,7 +408,9 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                                     </div>
                                                 )}
                                                 <p dir="auto" className="font-black text-center mb-4 leading-tight" style={{ color: config.textColor, fontSize: config.format === 'post' ? '24px' : '30px' }}>{book.title}</p>
-                                                <div className="px-8 py-2 rounded-full font-black text-white" style={{ backgroundColor: config.primaryColor, fontSize: config.format === 'post' ? '20px' : '24px' }}>{book.price} MAD</div>
+                                                {config.showPrice && (
+                                                    <div className="px-8 py-2 rounded-full font-black text-white" style={{ backgroundColor: config.primaryColor, fontSize: config.format === 'post' ? '20px' : '24px' }}>{book.price} MAD</div>
+                                                )}
                                             </div>
                                         )})}
                                     </div>
@@ -509,19 +525,21 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                                 }}>
                                                     {book.title}
                                                 </h3>
-                                                <div style={{ 
-                                                    backgroundColor: config.primaryColor, 
-                                                    color: '#ffffff', 
-                                                    padding: isPost ? '14px 40px' : '22px 65px', 
-                                                    borderRadius: '100px', 
-                                                    fontSize: isPost ? '26px' : '42px', 
-                                                    fontWeight: '950', 
-                                                    marginTop: 'auto',
-                                                    boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
-                                                    whiteSpace: 'nowrap'
-                                                }}>
-                                                    {book.price} MAD
-                                                </div>
+                                                {config.showPrice && (
+                                                    <div style={{ 
+                                                        backgroundColor: config.primaryColor, 
+                                                        color: '#ffffff', 
+                                                        padding: isPost ? '14px 40px' : '22px 65px', 
+                                                        borderRadius: '100px', 
+                                                        fontSize: isPost ? '26px' : '42px', 
+                                                        fontWeight: '950', 
+                                                        marginTop: 'auto',
+                                                        boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        {book.price} MAD
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )

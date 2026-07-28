@@ -23,7 +23,7 @@ interface CheckoutForm {
     address: string
     city: string
     comment?: string
-    paymentMethod: 'COD' | 'STRIPE' | 'PAYPAL' | 'CMI'
+    paymentMethod: 'COD' | 'STRIPE' | 'PAYPAL' | 'CMI' | 'BANK_TRANSFER'
 }
 
 export default function CheckoutClient({ 
@@ -33,7 +33,7 @@ export default function CheckoutClient({
 }: { 
     user?: { fullName?: string | null; email: string; image?: string | null } | null;
     minOrderAmount?: number;
-    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean }
+    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string }[] }
 }) {
     const router = useRouter()
     const { items, getTotalPrice, clearCart } = useCartStore()
@@ -544,6 +544,47 @@ export default function CheckoutClient({
                                         </div>
                                     </div>
                                 </label>
+                            )}
+
+                            {paymentSettings?.bankTransferEnabled && (
+                                <div>
+                                    <label className={`relative flex items-center p-8 border-2 rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'border-teal-600 bg-teal-50/30' : 'border-transparent bg-pixio-cream/30 hover:border-teal-400'}`}>
+                                        <input 
+                                            type="radio" 
+                                            value="BANK_TRANSFER" 
+                                            {...register('paymentMethod')}
+                                            className="sr-only"
+                                        />
+                                        <div className="w-16 h-16 bg-teal-50 border border-teal-100 text-teal-600 rounded-2xl flex items-center justify-center shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                        </div>
+                                        <div className="ml-8">
+                                            <p className="font-black text-black text-xl tracking-tight">Virement Bancaire</p>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Transférez le montant sur notre compte bancaire</p>
+                                        </div>
+                                        <div className="ml-auto rtl:mr-auto rtl:ml-0">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                                                <CheckCircle className="w-5 h-5" />
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    {/* Coordonnées bancaires affichées si sélectionné */}
+                                    {watch('paymentMethod') === 'BANK_TRANSFER' && paymentSettings?.bankTransferAccounts && paymentSettings.bankTransferAccounts.length > 0 && (
+                                        <div className="mt-4 space-y-3">
+                                            {paymentSettings.bankTransferAccounts.map((account, idx) => (
+                                                <div key={idx} className="p-5 bg-teal-50 border border-teal-100 rounded-2xl">
+                                                    <p className="text-xs font-black uppercase tracking-widest text-teal-600 mb-3">{account.bankName}</p>
+                                                    <div className="space-y-1">
+                                                        <p className="text-sm font-bold text-gray-700">Titulaire : <span className="font-black text-black">{account.accountName}</span></p>
+                                                        <p className="text-sm font-bold text-gray-700">RIB / IBAN : <span className="font-mono font-black text-black tracking-wider">{account.rib}</span></p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Votre commande sera traitée après confirmation du virement.</p>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </form>

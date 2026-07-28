@@ -9,59 +9,11 @@ interface I18nState {
   t: (key: string) => string;
 }
 
-const translations = {
-  fr: {
-    home: 'Accueil',
-    cart: 'Panier',
-    settings: 'Paramètres',
-    wishlist: 'Favoris',
-    search_placeholder: 'Rechercher un livre, un auteur...',
-    all: 'Tout',
-    packs: 'Packs',
-    books: 'Livres',
-    recent: 'Vus récemment',
-    clear: 'Effacer',
-    support: 'Contacter le support',
-    clear_data: 'Effacer le cache et les données',
-    language: 'Langue',
-    dark_mode: 'Thème Sombre',
-    exchange: 'Échange',
-  },
-  ar: {
-    home: 'الرئيسية',
-    cart: 'السلة',
-    settings: 'الإعدادات',
-    wishlist: 'المفضلة',
-    search_placeholder: 'ابحث عن كتاب، كاتب...',
-    all: 'الكل',
-    packs: 'باقات',
-    books: 'كتب',
-    recent: 'شوهد مؤخرا',
-    clear: 'مسح',
-    support: 'اتصل بالدعم',
-    clear_data: 'مسح الذاكرة والبيانات',
-    language: 'اللغة',
-    dark_mode: 'الوضع الداكن',
-    exchange: 'مبادلة',
-  },
-  en: {
-    home: 'Home',
-    cart: 'Cart',
-    settings: 'Settings',
-    wishlist: 'Wishlist',
-    search_placeholder: 'Search for a book, author...',
-    all: 'All',
-    packs: 'Packs',
-    books: 'Books',
-    recent: 'Recently viewed',
-    clear: 'Clear',
-    support: 'Contact support',
-    clear_data: 'Clear cache and data',
-    language: 'Language',
-    dark_mode: 'Dark Mode',
-    exchange: 'Exchange',
-  }
-};
+import fr from '../i18n/fr.json';
+import ar from '../i18n/ar.json';
+import en from '../i18n/en.json';
+
+const translations = { fr, ar, en };
 
 export const useI18nStore = create<I18nState>((set, get) => ({
   language: 'fr', // Par défaut

@@ -29,7 +29,8 @@ export async function getAllAuthors() {
         const uniqueAuthors = await prisma.book.groupBy({
             by: ['author'],
             _count: {
-                _all: true
+                _all: true,
+                author: true
             }
         })
 
@@ -41,7 +42,7 @@ export async function getAllAuthors() {
             const profile = profiles.find(p => p.name === item.author)
             return {
                 name: item.author,
-                bookCount: item._count._all,
+                bookCount: item._count._all || 0,
                 bio: profile?.bio || null,
                 image: profile?.image || null,
                 nationality: profile?.nationality || null,

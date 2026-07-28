@@ -176,14 +176,7 @@ export async function getAllUsers(page = 1) {
                     credits: true,
                     image: true,
                     isBanned: true,
-                    createdAt: true,
-                    _count: {
-                        select: {
-                            ownedBooks: true,
-                            sentExchanges: true,
-                            receivedExchanges: true
-                        }
-                    }
+                    createdAt: true
                 }
             }),
             (prisma as any).user.count()

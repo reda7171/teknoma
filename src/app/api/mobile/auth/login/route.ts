@@ -24,15 +24,15 @@ export async function POST(req: Request) {
       },
     });
 
-    if (!customer) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!customer || !customer.password) {
+      return NextResponse.json({ error: 'Compte introuvable. Veuillez créer un compte.' }, { status: 401 });
     }
 
-    // Verify password
+    // Vérification du mot de passe
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     
     if (!isPasswordValid) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ error: 'Mot de passe incorrect' }, { status: 401 });
     }
 
     // Generate JWT
@@ -50,6 +50,8 @@ export async function POST(req: Request) {
         email: customer.email,
         fullName: customer.fullName,
         phone: customer.phone,
+        image: customer.image,
+        credits: customer.credits,
       }
     });
 

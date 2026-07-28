@@ -28,6 +28,7 @@ interface Order {
     shippingCompanyName?: string | null
     shippingCompanySupportPhone?: string | null
     deliveryStatus?: string | null
+    paymentMethod?: string | null
     items: OrderItem[]
 }
 
@@ -154,6 +155,7 @@ export default function OrdersTableClient({
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Marge Nette</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Livraison</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Paiement</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
                             <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -161,7 +163,7 @@ export default function OrdersTableClient({
                     <tbody className="divide-y divide-gray-200">
                         {filteredOrders.length === 0 ? (
                             <tr>
-                                <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
                                     Aucune commande trouvée.
                                 </td>
                             </tr>
@@ -246,6 +248,22 @@ export default function OrdersTableClient({
                                             </div>
                                         ) : (
                                             <span className="text-xs text-gray-400">—</span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {order.paymentMethod ? (
+                                            <span className={`px-2.5 py-1 inline-flex text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider ${
+                                                order.paymentMethod === 'COD'           ? 'bg-amber-100 text-amber-800' :
+                                                order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
+                                                order.paymentMethod === 'STRIPE'        ? 'bg-indigo-100 text-indigo-800' :
+                                                order.paymentMethod === 'PAYPAL'        ? 'bg-blue-100 text-blue-800' :
+                                                order.paymentMethod === 'CMI'           ? 'bg-orange-100 text-orange-800' :
+                                                'bg-gray-100 text-gray-700'
+                                            }`}>
+                                                {order.paymentMethod === 'BANK_TRANSFER' ? 'Virement' : order.paymentMethod}
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-gray-400">COD</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">

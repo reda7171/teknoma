@@ -7,6 +7,9 @@ export interface Product {
   price: number;
   image: string;
   type: 'BOOK' | 'PACK';
+  description?: string;
+  category?: string;
+  language?: string;
 }
 
 export interface CartItem {

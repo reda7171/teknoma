@@ -13,6 +13,10 @@ export default async function CheckoutPage() {
     const cmiEnabled = await getSetting('payment_cmi_enabled') === 'true'
     const codEnabledStr = await getSetting('payment_cod_enabled')
     const codEnabled = codEnabledStr === 'true' || codEnabledStr === null // Default to true if not set
+    const bankTransferEnabled = await getSetting('payment_bank_transfer_enabled') === 'true'
+    const bankTransferAccountsRaw = await getSetting('payment_bank_transfer_accounts') || '[]'
+    let bankTransferAccounts: { bankName: string; accountName: string; rib: string }[] = []
+    try { bankTransferAccounts = JSON.parse(bankTransferAccountsRaw) } catch {}
 
     const userProps = user ? {
         fullName: user.fullName,
@@ -26,7 +30,7 @@ export default async function CheckoutPage() {
             <CheckoutClient 
                 user={userProps} 
                 minOrderAmount={Number(minAmount)} 
-                paymentSettings={{ stripeEnabled, codEnabled, paypalEnabled, cmiEnabled }}
+                paymentSettings={{ stripeEnabled, codEnabled, paypalEnabled, cmiEnabled, bankTransferEnabled, bankTransferAccounts }}
             />
             <Footer />
         </div>

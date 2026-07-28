@@ -212,22 +212,8 @@ export default function POSClient({
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Vérification en continu de la connexion (polling)
-    const checkConnection = async () => {
-      if (!navigator.onLine) {
-        setIsOffline(true);
-        return;
-      }
-      try {
-        const res = await fetch('/favicon.ico', { method: 'HEAD', cache: 'no-store' });
-        setIsOffline(!res.ok);
-      } catch (e) {
-        setIsOffline(true);
-      }
-    };
-
-    const interval = setInterval(checkConnection, 10000);
-
+    // Remove aggressive logo.png pinging as it can trigger false positives
+    // when using adblockers, CORS policies, or dev server issues
     
     // Load offline orders
     const saved = localStorage.getItem('pos_offline_orders');
@@ -273,7 +259,6 @@ export default function POSClient({
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      clearInterval(interval);
     };
   }, [books, packs, accessories]);
 

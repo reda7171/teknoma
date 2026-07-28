@@ -65,47 +65,40 @@ model SiteSettings {
 }
 
 model User {
-  id                String         @id @default(uuid())
-  email             String         @unique
-  password          String
-  role              UserRole       @default(ADMIN)
-  isBanned          Boolean        @default(false)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  fullName          String?        @db.VarChar(255)
-  locale            String         @default("fr") @db.VarChar(5)
-  city              String?        @db.VarChar(100)
-  address           String?        @db.VarChar(500)
-  neighborhood      String?        @db.VarChar(100)
-  credits           Int            @default(10)
-  rating            Float          @default(5)
-  image             String?        @db.VarChar(500)
-  bio               String?        @db.Text
-  instagram         String?        @db.VarChar(100)
-  facebook          String?        @db.VarChar(100)
-  twitter           String?        @db.VarChar(100)
-  phone             String?        @db.VarChar(20)
-  managedLanguages  String?        @db.VarChar(50)
-  sellerBooks       Book[]         @relation("SellerBooks")
-  comments          Comment[]
-  coupons           Coupon[]       @relation("AffiliateCoupons")
-  ownedBooks        ExchangeBook[] @relation("OwnedBooks")
-  sentExchanges     Exchange[]     @relation("SentExchanges")
-  receivedExchanges Exchange[]     @relation("ReceivedExchanges")
-  expenses          Expense[]
-  loginHistory      LoginHistory[]
-  messages          Message[]
-  notifications     Notification[]
-  sellerOrderItems  OrderItem[]    @relation("SellerOrderItems")
-  sellerOrders      Order[]        @relation("SellerOrders")
-  pageViews         PageView[]
-  posts             Post[]
-  ratingsGiven      Rating[]       @relation("RatingsGiven")
-  ratingsReceived   Rating[]       @relation("RatingsReceived")
-  readingList       ReadingList[]
-  reportsGiven      Report[]       @relation("ReportsGiven")
-  reportsReceived   Report[]       @relation("ReportsReceived")
-  wishlist          Wishlist[]
+  id               String         @id @default(uuid())
+  email            String         @unique
+  password         String
+  role             UserRole       @default(ADMIN)
+  isBanned         Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  fullName         String?        @db.VarChar(255)
+  locale           String         @default("fr") @db.VarChar(5)
+  city             String?        @db.VarChar(100)
+  address          String?        @db.VarChar(500)
+  neighborhood     String?        @db.VarChar(100)
+  credits          Int            @default(10)
+  rating           Float          @default(5)
+  image            String?        @db.VarChar(500)
+  bio              String?        @db.Text
+  instagram        String?        @db.VarChar(100)
+  facebook         String?        @db.VarChar(100)
+  twitter          String?        @db.VarChar(100)
+  phone            String?        @db.VarChar(20)
+  expoPushToken    String?        @db.VarChar(255)
+  managedLanguages String?        @db.VarChar(50)
+  sellerBooks      Book[]         @relation("SellerBooks")
+  comments         Comment[]
+  coupons          Coupon[]       @relation("AffiliateCoupons")
+  expenses         Expense[]
+  loginHistory     LoginHistory[]
+  notifications    Notification[]
+  sellerOrderItems OrderItem[]    @relation("SellerOrderItems")
+  sellerOrders     Order[]        @relation("SellerOrders")
+  pageViews        PageView[]
+  posts            Post[]
+  readingList      ReadingList[]
+  wishlist         Wishlist[]
 
   @@index([email])
   @@index([role])
@@ -207,7 +200,6 @@ model Pack {
   name              String      @db.VarChar(255)
   description       String?     @db.Text
   price             Float
-  originalPrice     Float?
   costPrice         Float       @default(0)
   image             String?     @db.VarChar(500)
   active            Boolean     @default(true)
@@ -223,6 +215,7 @@ model Pack {
   isSyncedWithJumia Boolean     @default(false)
   jumiaPriceMarkup  Float?      @default(0)
   jumiaStock        Int?
+  originalPrice     Float?
   orderItems        OrderItem[]
   books             PackBook[]
   wishlists         Wishlist[]
@@ -288,19 +281,32 @@ model Order {
 }
 
 model Customer {
-  id            String   @id @default(uuid())
-  fullName      String   @db.VarChar(255)
-  email         String?  @db.VarChar(255)
-  phone         String   @unique @db.VarChar(20)
-  address       String?  @db.VarChar(500)
-  city          String?  @db.VarChar(100)
-  totalOrders   Int      @default(0)
-  totalSpent    Float    @default(0)
-  lastOrderDate DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  password      String?  @db.VarChar(255)
-  orders        Order[]
+  id                String         @id @default(uuid())
+  fullName          String         @db.VarChar(255)
+  email             String?        @db.VarChar(255)
+  phone             String         @unique @db.VarChar(20)
+  address           String?        @db.VarChar(500)
+  city              String?        @db.VarChar(100)
+  totalOrders       Int            @default(0)
+  totalSpent        Float          @default(0)
+  lastOrderDate     DateTime       @default(now())
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  password          String?        @db.VarChar(255)
+  expoPushToken     String?        @db.VarChar(255)
+  credits           Int            @default(10)
+  image             String?        @db.VarChar(500)
+  ownedBooks        ExchangeBook[] @relation("OwnedBooks")
+  sentExchanges     Exchange[]     @relation("SentExchanges")
+  receivedExchanges Exchange[]     @relation("ReceivedExchanges")
+  messages          Message[]
+  orders            Order[]
+  ratingsGiven      Rating[]       @relation("RatingsGiven")
+  ratingsReceived   Rating[]       @relation("RatingsReceived")
+  reading_list      ReadingList[]
+  reportsGiven      Report[]       @relation("ReportsGiven")
+  reportsReceived   Report[]       @relation("ReportsReceived")
+  reviews           Review[]
 
   @@index([phone])
   @@index([email])
@@ -385,6 +391,8 @@ model Review {
   city       String?  @db.VarChar(100)
   image      String?  @db.VarChar(500)
   book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([bookId])
   @@index([isApproved])
@@ -405,7 +413,9 @@ model ExchangeBook {
   status       String        @default("AVAILABLE")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  owner        User          @relation("OwnedBooks", fields: [ownerId], references: [id], onDelete: Cascade)
+  latitude     Float?
+  longitude    Float?
+  owner        Customer      @relation("OwnedBooks", fields: [ownerId], references: [id], onDelete: Cascade)
   offeredIn    Exchange[]    @relation("BookOffered")
   requestedIn  Exchange[]    @relation("BookRequested")
   reports      Report[]
@@ -435,8 +445,8 @@ model Exchange {
   chat            Chat?
   bookOffered     ExchangeBook?  @relation("BookOffered", fields: [bookOfferedId], references: [id])
   bookRequested   ExchangeBook   @relation("BookRequested", fields: [bookRequestedId], references: [id])
-  requester       User           @relation("SentExchanges", fields: [requesterId], references: [id])
-  responder       User           @relation("ReceivedExchanges", fields: [responderId], references: [id])
+  requester       Customer       @relation("SentExchanges", fields: [requesterId], references: [id])
+  responder       Customer       @relation("ReceivedExchanges", fields: [responderId], references: [id])
   rating          Rating?
 
   @@index([requesterId])
@@ -467,7 +477,7 @@ model Message {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender    User     @relation(fields: [senderId], references: [id])
+  sender    Customer @relation(fields: [senderId], references: [id])
 
   @@index([chatId])
   @@index([senderId])
@@ -511,8 +521,8 @@ model Rating {
   comment    String?  @db.Text
   createdAt  DateTime @default(now())
   exchange   Exchange @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
-  fromUser   User     @relation("RatingsGiven", fields: [fromUserId], references: [id])
-  toUser     User     @relation("RatingsReceived", fields: [toUserId], references: [id])
+  fromUser   Customer @relation("RatingsGiven", fields: [fromUserId], references: [id])
+  toUser     Customer @relation("RatingsReceived", fields: [toUserId], references: [id])
 
   @@index([exchangeId])
   @@index([fromUserId])
@@ -530,9 +540,9 @@ model Report {
   targetBookId String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  reporter     User          @relation("ReportsGiven", fields: [reporterId], references: [id])
+  reporter     Customer      @relation("ReportsGiven", fields: [reporterId], references: [id])
   targetBook   ExchangeBook? @relation(fields: [targetBookId], references: [id])
-  targetUser   User?         @relation("ReportsReceived", fields: [targetUserId], references: [id])
+  targetUser   Customer?     @relation("ReportsReceived", fields: [targetUserId], references: [id])
 
   @@index([reporterId])
   @@index([targetUserId])
@@ -609,7 +619,7 @@ model MenuItem {
 
 model ReadingList {
   id          String        @id @default(uuid())
-  userId      String
+  userId      String?
   bookId      String?
   title       String
   author      String
@@ -621,12 +631,15 @@ model ReadingList {
   finishedAt  DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  customerId  String?
   book        Book?         @relation(fields: [bookId], references: [id])
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customers   Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
   @@index([bookId], map: "reading_list_bookId_fkey")
+  @@index([customerId])
   @@map("reading_list")
 }
 
@@ -644,10 +657,10 @@ model Post {
   updatedAt     DateTime  @updatedAt
   tags          String?   @db.Text
   viewCount     Int       @default(0)
-  totalReadTime Int       @default(0)
   category      String?   @db.VarChar(100)
   language      String    @default("fr") @db.VarChar(10)
   authorName    String?   @db.VarChar(255)
+  totalReadTime Int       @default(0)
   comments      Comment[]
   author        User      @relation(fields: [authorId], references: [id])
   books         Book[]    @relation("PostBooks")

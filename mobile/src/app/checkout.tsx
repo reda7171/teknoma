@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useCartStore } from '@/store/useCartStore';
 import { submitOrder, validateCoupon } from '@/services/api';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
+import { useI18nStore } from '@/store/useI18nStore';
+
+// URL de base du serveur (sans /api/mobile)
+const SERVER_URL = process.env.EXPO_PUBLIC_API_URL
+  ? process.env.EXPO_PUBLIC_API_URL.replace('/api/mobile', '')
+  : Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
 
 export default function CheckoutScreen() {
   const router = useRouter();
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const { t } = useI18nStore();
 
   const { items, getSubtotal, clearCart } = useCartStore();
   const subtotal = getSubtotal();
@@ -32,6 +39,23 @@ export default function CheckoutScreen() {
 
   const [loading, setLoading] = useState(false);
 
+  // Modes de paiement actifs depuis l'admin
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'BANK_TRANSFER'>('COD');
+  const [paymentSettings, setPaymentSettings] = useState<{
+    cod: boolean;
+    bankTransfer: boolean;
+    bankTransferAccounts: { bankName: string; accountName: string; rib: string }[];
+  }>({ cod: true, bankTransfer: false, bankTransferAccounts: [] });
+
+  useEffect(() => {
+    fetch(`${SERVER_URL}/api/mobile/settings`)
+      .then(r => r.json())
+      .then(data => {
+        if (data?.paymentMethods) setPaymentSettings(data.paymentMethods);
+      })
+      .catch(() => {/* silencieux */});
+  }, []);
+
   const total = subtotal - discount;
 
   const handleCoupon = async () => {
@@ -43,14 +67,14 @@ export default function CheckoutScreen() {
       if (res.success) {
         setDiscount(res.coupon.discount);
         setCouponCode(res.coupon.code);
-        setCouponMsg({ text: `Code appliqué — -${res.coupon.discount.toFixed(2)} MAD`, ok: true });
+        setCouponMsg({ text: `${t('code_applied')} — -${res.coupon.discount.toFixed(2)} MAD`, ok: true });
       } else {
         setDiscount(0);
         setCouponCode('');
         setCouponMsg({ text: res.error, ok: false });
       }
     } catch {
-      setCouponMsg({ text: 'Erreur de connexion', ok: false });
+      setCouponMsg({ text: t('conn_error'), ok: false });
     } finally {
       setCouponLoading(false);
     }
@@ -65,7 +89,7 @@ export default function CheckoutScreen() {
 
   const handleSubmit = async () => {
     if (!formData.fullName || !formData.phone || !formData.address || !formData.city) {
-      alert('Veuillez remplir tous les champs obligatoires.');
+      Alert.alert(t('req_fields'), t('fill_req_fields'));
       return;
     }
 
@@ -76,6 +100,7 @@ export default function CheckoutScreen() {
         total,
         discount,
         couponCode: couponCode || null,
+        paymentMethod,
         items: items.map(i => ({
           productId: i.product.id,
           quantity: i.quantity,
@@ -102,8 +127,8 @@ export default function CheckoutScreen() {
           },
         });
       }
-    } catch {
-      alert('Une erreur est survenue lors de la validation de la commande.');
+    } catch (e: any) {
+      Alert.alert('Erreur', e?.response?.data?.error || t('order_error'));
     } finally {
       setLoading(false);
     }
@@ -112,9 +137,9 @@ export default function CheckoutScreen() {
   if (items.length === 0) {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={{ color: colors.text }}>Votre panier est vide.</Text>
+        <Text style={{ color: colors.text }}>{t('empty_cart')}</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>Retour</Text>
+          <Text style={styles.backText}>{t('back')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -125,17 +150,17 @@ export default function CheckoutScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backText}>← Retour</Text>
+            <Text style={styles.backText}>← {t('back')}</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>Paiement (COD)</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('payment_cod')}</Text>
         </View>
 
         {/* Formulaire */}
         <View style={styles.form}>
           {[
-            { key: 'fullName', label: 'Nom complet *', placeholder: 'Ex: Amine Benali' },
-            { key: 'phone',    label: 'Téléphone *',   placeholder: 'Ex: 0612345678', keyboard: 'phone-pad' },
-            { key: 'city',     label: 'Ville *',        placeholder: 'Ex: Casablanca' },
+            { key: 'fullName', label: t('fullname'), placeholder: 'Ex: Amine Benali' },
+            { key: 'phone',    label: t('phone'),   placeholder: 'Ex: 0612345678', keyboard: 'phone-pad' },
+            { key: 'city',     label: t('city'),        placeholder: 'Ex: Casablanca' },
           ].map(({ key, label, placeholder, keyboard }) => (
             <View key={key} style={styles.inputGroup}>
               <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
@@ -151,99 +176,134 @@ export default function CheckoutScreen() {
           ))}
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Adresse de livraison *</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('address')}</Text>
             <TextInput
-              style={[styles.input, styles.textArea, { backgroundColor: colors.backgroundElement, color: colors.text }]}
-              placeholder="Votre adresse complète"
+              style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text, height: 80, textAlignVertical: 'top' }]}
+              placeholder="Ex: 12 Rue des Lilas, Maarif"
               placeholderTextColor={colors.textSecondary}
               multiline
-              numberOfLines={3}
               value={formData.address}
               onChangeText={(v) => setFormData({ ...formData, address: v })}
             />
           </View>
-
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Commentaire (Optionnel)</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('comment')}</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text }]}
-              placeholder="Ex: Appeler avant livraison"
+              style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text, height: 80, textAlignVertical: 'top' }]}
+              placeholder="Instructions de livraison..."
               placeholderTextColor={colors.textSecondary}
+              multiline
               value={formData.comment}
               onChangeText={(v) => setFormData({ ...formData, comment: v })}
             />
           </View>
         </View>
 
-        {/* Bloc coupon */}
-        <View style={[styles.couponBox, { backgroundColor: colors.backgroundElement }]}>
-          <Text style={[styles.label, { color: colors.text, marginBottom: Spacing.two }]}>Code promo</Text>
-          {couponCode ? (
-            <View style={styles.couponApplied}>
-              <Text style={{ color: '#10B981', fontWeight: '700', flex: 1 }}>
-                {couponCode} — -{discount.toFixed(2)} MAD
-              </Text>
-              <TouchableOpacity onPress={removeCoupon}>
-                <Text style={{ color: '#EF4444', fontWeight: '700' }}>Supprimer</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.couponRow}>
-              <TextInput
-                style={[styles.couponInput, { backgroundColor: colors.background, color: colors.text, flex: 1 }]}
-                placeholder="CODE123"
-                placeholderTextColor={colors.textSecondary}
-                value={couponInput}
-                onChangeText={setCouponInput}
-                autoCapitalize="characters"
-              />
-              <TouchableOpacity
-                style={[styles.couponBtn, (!couponInput.trim() || couponLoading) && { opacity: 0.5 }]}
-                onPress={handleCoupon}
-                disabled={!couponInput.trim() || couponLoading}
-              >
-                {couponLoading
-                  ? <ActivityIndicator color="#FFF" size="small" />
-                  : <Text style={styles.couponBtnText}>Appliquer</Text>
-                }
-              </TouchableOpacity>
-            </View>
-          )}
+        {/* Section Code Promo */}
+        <View style={[styles.couponSection, { backgroundColor: colors.backgroundElement }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('have_coupon')}</Text>
+          <View style={styles.couponRow}>
+            <TextInput
+              style={[styles.couponInput, { backgroundColor: colors.background, color: colors.text, flex: 1 }]}
+              placeholder="CODE123"
+              placeholderTextColor={colors.textSecondary}
+              value={couponInput}
+              onChangeText={setCouponInput}
+              autoCapitalize="characters"
+            />
+            <TouchableOpacity
+              style={[styles.couponBtn, (!couponInput.trim() || couponLoading) && { opacity: 0.5 }]}
+              onPress={handleCoupon}
+              disabled={couponLoading || !couponInput.trim()}
+            >
+              {couponLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.couponBtnText}>{t('apply_coupon')}</Text>}
+            </TouchableOpacity>
+          </View>
           {couponMsg && (
-            <Text style={[styles.couponMsg, { color: couponMsg.ok ? '#10B981' : '#EF4444' }]}>
-              {couponMsg.text}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, justifyContent: 'space-between' }}>
+              <Text style={{ color: couponMsg.ok ? '#10B981' : '#EF4444', fontSize: 13 }}>{couponMsg.text}</Text>
+              {couponMsg.ok && (
+                <TouchableOpacity onPress={removeCoupon}>
+                  <Text style={{ color: '#EF4444', fontSize: 13, fontWeight: 'bold' }}>{t('remove')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
 
         {/* Récapitulatif montant */}
         <View style={[styles.summaryBox, { backgroundColor: colors.backgroundElement }]}>
           <View style={styles.summaryRow}>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Sous-total</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('subtotal')}</Text>
             <Text style={[styles.summaryValue, { color: colors.text }]}>{subtotal.toFixed(2)} MAD</Text>
           </View>
           {discount > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: '#10B981' }]}>Réduction</Text>
+              <Text style={[styles.summaryLabel, { color: '#10B981' }]}>{t('discount')}</Text>
               <Text style={{ color: '#10B981', fontWeight: '700' }}>-{discount.toFixed(2)} MAD</Text>
             </View>
           )}
           <View style={[styles.divider, { backgroundColor: colors.backgroundSelected }]} />
           <View style={styles.summaryRow}>
-            <Text style={[styles.totalLabel, { color: colors.text }]}>Total à payer (COD)</Text>
+            <Text style={[styles.totalLabel, { color: colors.text }]}>{t('total_cod')}</Text>
             <Text style={styles.totalValue}>{total.toFixed(2)} MAD</Text>
           </View>
         </View>
 
-        <TouchableOpacity
-          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading
-            ? <ActivityIndicator color="white" />
-            : <Text style={styles.submitText}>Confirmer la commande</Text>
-          }
+        {/* Modes de paiement */}
+        {(paymentSettings.cod || paymentSettings.bankTransfer) && (
+          <View style={[styles.paymentSection, { backgroundColor: colors.backgroundElement }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Mode de paiement</Text>
+
+            {paymentSettings.cod && (
+              <TouchableOpacity
+                style={[styles.paymentOption, paymentMethod === 'COD' && styles.paymentOptionActive]}
+                onPress={() => setPaymentMethod('COD')}
+              >
+                <View style={[styles.paymentRadio, paymentMethod === 'COD' && styles.paymentRadioActive]} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.paymentLabel, { color: colors.text }]}>Paiement à la livraison (COD)</Text>
+                  <Text style={[styles.paymentDesc, { color: colors.textSecondary }]}>Payez en cash à la réception</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {paymentSettings.bankTransfer && (
+              <>
+                <TouchableOpacity
+                  style={[styles.paymentOption, paymentMethod === 'BANK_TRANSFER' && styles.paymentOptionActiveTeal]}
+                  onPress={() => setPaymentMethod('BANK_TRANSFER')}
+                >
+                  <View style={[styles.paymentRadio, paymentMethod === 'BANK_TRANSFER' && styles.paymentRadioTeal]} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.paymentLabel, { color: colors.text }]}>Virement Bancaire</Text>
+                    <Text style={[styles.paymentDesc, { color: colors.textSecondary }]}>Transférez sur notre compte bancaire</Text>
+                  </View>
+                </TouchableOpacity>
+
+                {paymentMethod === 'BANK_TRANSFER' && paymentSettings.bankTransferAccounts.length > 0 && (
+                  <View style={styles.bankDetails}>
+                    {paymentSettings.bankTransferAccounts.map((acc, i) => (
+                      <View key={i} style={styles.bankCard}>
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: '#0D9488', marginBottom: 6, textTransform: 'uppercase' }}>{acc.bankName}</Text>
+                        <Text style={{ fontSize: 13, color: colors.text }}>Titulaire : <Text style={{ fontWeight: '700' }}>{acc.accountName}</Text></Text>
+                        <Text style={{ fontSize: 13, color: colors.text, marginTop: 2 }}>RIB : <Text style={{ fontWeight: '700', fontVariant: ['tabular-nums'] }}>{acc.rib}</Text></Text>
+                      </View>
+                    ))}
+                    <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 8 }}>Votre commande sera traitée après confirmation du virement.</Text>
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        )}
+
+        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.submitBtnText}>{t('confirm_order')} - {total.toFixed(2)} MAD</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -262,7 +322,9 @@ const styles = StyleSheet.create({
   label:           { fontSize: 15, fontWeight: '500' },
   input:           { padding: Spacing.three, borderRadius: 10, fontSize: 16 },
   textArea:        { minHeight: 80, textAlignVertical: 'top' },
+  sectionTitle:    { fontSize: 16, fontWeight: '700', marginBottom: Spacing.two },
   /* Coupon */
+  couponSection:   { borderRadius: 14, padding: Spacing.three, marginBottom: Spacing.three },
   couponBox:       { borderRadius: 14, padding: Spacing.three, marginBottom: Spacing.three },
   couponRow:       { flexDirection: 'row', gap: Spacing.two },
   couponInput:     { padding: Spacing.two, borderRadius: 8, fontSize: 15 },
@@ -270,6 +332,18 @@ const styles = StyleSheet.create({
   couponBtnText:   { color: '#FFF', fontWeight: '700', fontSize: 14 },
   couponApplied:   { flexDirection: 'row', alignItems: 'center' },
   couponMsg:       { fontSize: 13, marginTop: 6 },
+  /* Modes de paiement */
+  paymentSection:  { borderRadius: 14, padding: Spacing.three, marginBottom: Spacing.three, gap: Spacing.two },
+  paymentOption:   { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three, borderRadius: 10, borderWidth: 1.5, borderColor: 'transparent', backgroundColor: 'rgba(0,0,0,0.04)' },
+  paymentOptionActive:     { borderColor: '#0274DF', backgroundColor: 'rgba(2,116,223,0.06)' },
+  paymentOptionActiveTeal: { borderColor: '#0D9488', backgroundColor: 'rgba(13,148,136,0.06)' },
+  paymentRadio:    { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#CBD5E1', backgroundColor: 'white' },
+  paymentRadioActive: { borderColor: '#0274DF', backgroundColor: '#0274DF' },
+  paymentRadioTeal:   { borderColor: '#0D9488', backgroundColor: '#0D9488' },
+  paymentLabel:    { fontSize: 14, fontWeight: '600' },
+  paymentDesc:     { fontSize: 12, marginTop: 2 },
+  bankDetails:     { marginTop: Spacing.two, gap: Spacing.two },
+  bankCard:        { backgroundColor: 'rgba(13,148,136,0.08)', borderRadius: 10, padding: Spacing.three, borderWidth: 1, borderColor: 'rgba(13,148,136,0.2)' },
   /* Résumé */
   summaryBox:      { borderRadius: 14, padding: Spacing.three, marginBottom: Spacing.four },
   summaryRow:      { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.two },
@@ -278,6 +352,9 @@ const styles = StyleSheet.create({
   divider:         { height: 1, marginVertical: Spacing.two },
   totalLabel:      { fontSize: 16, fontWeight: '700' },
   totalValue:      { fontSize: 18, fontWeight: '800', color: '#0274DF' },
+  /* Bouton */
+  submitBtn:       { backgroundColor: '#0274DF', paddingVertical: Spacing.three, borderRadius: 12, alignItems: 'center', marginTop: Spacing.two },
+  submitBtnText:   { color: 'white', fontSize: 18, fontWeight: 'bold' },
   submitButton:    { backgroundColor: '#0274DF', paddingVertical: Spacing.three, borderRadius: 12, alignItems: 'center' },
   submitButtonDisabled: { opacity: 0.6 },
   submitText:      { color: 'white', fontSize: 18, fontWeight: 'bold' },

@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Dimensions,
   FlatList, Animated,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useAppStore } from '@/store/useAppStore';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -11,7 +12,7 @@ const { width, height } = Dimensions.get('window');
 const SLIDES = [
   {
     id: '1',
-    icon: '📚',
+    image: require('@/assets/images/onboarding1.png'),
     title: 'Bienvenue sur Riwaya',
     subtitle: 'La meilleure librairie en ligne au Maroc. Des livres pour tous les goûts, livrés chez vous.',
     bg: '#0274DF',
@@ -19,7 +20,7 @@ const SLIDES = [
   },
   {
     id: '2',
-    icon: '🔥',
+    image: require('@/assets/images/onboarding2.png'),
     title: 'Packs & Promotions',
     subtitle: 'Économisez plus avec nos packs exclusifs — jusqu\'à 30% de réduction sur une sélection de livres.',
     bg: '#1A1A2E',
@@ -27,7 +28,7 @@ const SLIDES = [
   },
   {
     id: '3',
-    icon: '🚚',
+    image: require('@/assets/images/onboarding3.png'),
     title: 'Paiement à la livraison',
     subtitle: 'Commandez maintenant, payez à la réception. Aucune carte bancaire nécessaire.',
     bg: '#064E3B',
@@ -75,7 +76,7 @@ export function Onboarding() {
         }}
         renderItem={({ item }) => (
           <View style={[styles.slide, { backgroundColor: item.bg, width }]}>
-            <Text style={styles.slideIcon}>{item.icon}</Text>
+            <Image source={item.image} style={styles.slideImage} contentFit="contain" />
             <Text style={[styles.slideTitle, { color: '#FFFFFF' }]}>{item.title}</Text>
             <Text style={[styles.slideSubtitle, { color: 'rgba(255,255,255,0.8)' }]}>
               {item.subtitle}
@@ -116,7 +117,7 @@ export function Onboarding() {
 const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: '#000' },
   slide:        { height, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 20 },
-  slideIcon:    { fontSize: 80, marginBottom: 16 },
+  slideImage:   { width: width * 0.8, height: width * 0.8, marginBottom: 16, borderRadius: 24 },
   slideTitle:   { fontSize: 30, fontWeight: '900', textAlign: 'center', lineHeight: 36 },
   slideSubtitle:{ fontSize: 16, textAlign: 'center', lineHeight: 24 },
   accentBar:    { width: 60, height: 4, borderRadius: 2, marginTop: 8 },
