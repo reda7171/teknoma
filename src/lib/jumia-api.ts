@@ -115,10 +115,10 @@ export class JumiaAPI {
             url += `&status=${status}`
         }
         if (createdAfter) {
-            url += `&createdAfter=${createdAfter}`
+            url += `&createdAfter=${encodeURIComponent(createdAfter)}`
         }
         if (createdBefore) {
-            url += `&createdBefore=${createdBefore}`
+            url += `&createdBefore=${encodeURIComponent(createdBefore)}`
         }
         return this.request(url)
     }
