@@ -47,6 +47,14 @@ export async function GET(req: NextRequest) {
 
         // Fire & forget : on n'attend pas la réponse de n8n
         const webhookUrl = N8N_WEBHOOK_URL
+        
+        const facebookAccessToken = await getSetting('facebook_access_token')
+        const instagramAccountId = await getSetting('instagram_account_id')
+        const tiktokAccessToken = await getSetting('tiktok_access_token')
+        const tiktokCreatorId = await getSetting('tiktok_creator_id')
+        const tiktokAppId = await getSetting('tiktok_app_id')
+        const tiktokClientSecret = await getSetting('tiktok_client_secret')
+
         for (const post of duePosts) {
             let platforms: string[] = []
             try {
@@ -77,7 +85,13 @@ export async function GET(req: NextRequest) {
                     platform,
                     scheduleAt: '',
                     source: 'riwaya-cron',
-                    postId: post.id
+                    postId: post.id,
+                    facebook_access_token: facebookAccessToken,
+                    instagram_account_id: instagramAccountId,
+                    tiktok_access_token: tiktokAccessToken,
+                    tiktok_creator_id: tiktokCreatorId,
+                    tiktok_app_id: tiktokAppId,
+                    tiktok_client_secret: tiktokClientSecret
                 }))
             }
 

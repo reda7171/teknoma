@@ -22,9 +22,9 @@ export async function GET(req: Request) {
         }
 
         const now = new Date()
-        // Format pour l'API Jumia ISO 8601
-        const createdAfter = lastCheckDate.toISOString()
-        const createdBefore = now.toISOString()
+        // Format pour l'API Jumia ISO 8601 (sans les millisecondes)
+        const createdAfter = lastCheckDate.toISOString().replace(/\.\d{3}Z$/, 'Z')
+        const createdBefore = now.toISOString().replace(/\.\d{3}Z$/, 'Z')
 
         const response = await jumia.getOrders(100, undefined, undefined, createdAfter, createdBefore)
         const orders = response?.orders || response?.data?.orders || []

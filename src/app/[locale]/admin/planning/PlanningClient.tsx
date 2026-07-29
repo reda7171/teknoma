@@ -473,9 +473,17 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         const shuffledTimes = [...possibleTimes].sort(() => 0.5 - Math.random());
         
         let newPostsCount = 0;
+        let errorsCount = 0;
 
         for (let i = 0; i < unprogrammed.length; i++) {
             const book = unprogrammed[i];
+            
+            if (book.image && book.image.startsWith('data:image')) {
+                console.error(`Impossible d'auto-programmer ${book.title}: L'image est en Base64.`);
+                errorsCount++;
+                continue;
+            }
+            
             const timeSlot = shuffledTimes[i % shuffledTimes.length];
             const link = `https://riwaya.store/fr/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
             const content = `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
@@ -505,16 +513,20 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     const updatedPost = { ...data.post, date: new Date(data.post.date), platforms: parsedPlatforms };
                     setPosts(prev => [...prev, updatedPost]);
                     newPostsCount++;
+                } else {
+                    console.error('Erreur API autoplanning:', data.error);
+                    errorsCount++;
                 }
             } catch (error) {
-                console.error('Erreur autoplanning', error);
+                console.error('Erreur autoplanning exception:', error);
+                errorsCount++;
             }
         }
 
         if (newPostsCount > 0) {
-            showToast(`${newPostsCount} post(s) programmé(s) avec succès`, 'success');
+            showToast(`${newPostsCount} post(s) programmé(s) avec succès${errorsCount > 0 ? ` (${errorsCount} échecs)` : ''}`, 'success');
         } else {
-            showToast('Erreur lors de la programmation', 'error');
+            showToast('Erreur lors de la programmation. Vérifiez les images (Base64 non supporté).', 'error');
         }
         setIsLoading(false);
     }

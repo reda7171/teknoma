@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
         const price = body.price || item?.price || 0;
 
         // Construire le payload envoyé à n8n
-        const payload = {
+        const baseItem = {
             itemId: item?.id || 'marketing',
             itemType,
             title: title,
@@ -126,8 +126,8 @@ export async function POST(req: NextRequest) {
             image: imageUrl,
             isVideo: isVideo,
             isPack: itemType === 'PACK',
-            booksList: body.books || (itemType === 'PACK' ? (item as any).books?.map((b: any) => b.book?.title || b.title) : []),
-            bookUrl: itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : '',
+            booksList: body.books || (itemType === 'PACK' ? (item as any)?.books?.map((b: any) => b.book?.title || b.title) || [] : []),
+            bookUrl: itemType === 'BOOK' && item?.id ? `${baseUrl}/fr/books/${item.id}` : '',
             packUrl: itemType === 'PACK' ? `${baseUrl}/fr/packs` : '',
             itemUrl: item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
             // Texte à publier avec lien intégré
@@ -135,7 +135,6 @@ export async function POST(req: NextRequest) {
             description: body.customCaption || item?.description || '',
             longDescription: item?.longDescription || '',
             format,
-            platform,
             scheduleAt: scheduleAt || '',
             source: 'riwaya-admin',
             facebook_access_token: facebookAccessToken,
@@ -145,6 +144,20 @@ export async function POST(req: NextRequest) {
             tiktok_app_id: tiktokAppId,
             tiktok_client_secret: tiktokClientSecret,
             postId: body.postId || ''
+        }
+        
+        let platformsArray = ['facebook']
+        if (platform === 'both' || platform === 'all') {
+            platformsArray = ['facebook', 'instagram', 'tiktok']
+        } else if (platform) {
+            platformsArray = [platform]
+        }
+
+        const payload = {
+            batch: platformsArray.map(p => ({
+                ...baseItem,
+                platform: p
+            }))
         }
 
         // Envoyer au webhook n8n
@@ -159,8 +172,7 @@ export async function POST(req: NextRequest) {
             n8nRes = await fetch(N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Envelopper le payload dans un tableau 'batch' pour correspondre au nouveau workflow
-                body: JSON.stringify({ batch: [payload] }),
+                body: JSON.stringify(payload),
                 signal: controller.signal
             })
         } catch (fetchError: any) {

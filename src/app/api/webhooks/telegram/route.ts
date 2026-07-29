@@ -649,7 +649,7 @@ export async function POST(req: Request) {
                     
                     const finalCaption = (customCaption && customCaption.length > 0) ? customCaption : (item?.description || title)
 
-                    const payload = {
+                    const baseItem = {
                         itemId: item?.id || 'marketing',
                         itemType,
                         title: title,
@@ -664,7 +664,6 @@ export async function POST(req: Request) {
                         itemUrl: item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
                         caption: finalCaption,
                         format: 'story',
-                        platform,
                         source: 'telegram-bot-action',
                         
                         facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
@@ -679,6 +678,20 @@ export async function POST(req: Request) {
                     if (!n8nWebhookUrl) throw new Error('n8n non configuré')
 
                     await answerCallbackQuery(callbackId, `🚀 Publication ${platform} lancée...`, token)
+
+                    let platformsArray = ['facebook']
+                    if (platform === 'both' || platform === 'all') {
+                        platformsArray = ['facebook', 'instagram', 'tiktok']
+                    } else if (platform) {
+                        platformsArray = [platform]
+                    }
+
+                    const payload = {
+                        batch: platformsArray.map(p => ({
+                            ...baseItem,
+                            platform: p
+                        }))
+                    }
 
                     fetch(n8nWebhookUrl, {
                         method: 'POST',
@@ -1751,7 +1764,7 @@ export async function POST(req: Request) {
                             const postUrl = `${baseUrl}/fr/blog/${post.slug}`
                             const imageUrl = post.coverImage ? (post.coverImage.startsWith('http') ? post.coverImage : `${baseUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`) : `${baseUrl}/images/default-blog.jpg`
                             
-                            const payload = {
+                            const baseItem = {
                                 itemId: post.id,
                                 itemType: 'BLOG',
                                 title: post.title,
@@ -1760,10 +1773,16 @@ export async function POST(req: Request) {
                                 isVideo: false,
                                 isPack: false,
                                 format: 'feed',
-                                platform: 'all',
                                 source: 'telegram-bot-action',
                                 facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
                                 instagram_account_id: (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value
+                            }
+                            
+                            const payload = {
+                                batch: ['facebook', 'instagram', 'tiktok'].map(p => ({
+                                    ...baseItem,
+                                    platform: p
+                                }))
                             }
                             fetch(n8nWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(console.error)
                             
