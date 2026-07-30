@@ -461,13 +461,17 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     }
 
     const handleAutoScheduleAll = async () => {
+        console.log('[PlanningClient] Clic sur Auto-programmer détecté ! Lancement...');
         setIsLoading(true);
         const unprogrammed = dailySuggestions.filter(b => !b.isProgrammed);
         if (unprogrammed.length === 0) {
+            console.log('[PlanningClient] Toutes les suggestions sont déjà programmées.');
             showToast('Toutes les suggestions sont déjà programmées', 'success');
             setIsLoading(false);
             return;
         }
+        
+        console.log(`[PlanningClient] ${unprogrammed.length} posts à auto-programmer trouvés.`);
 
         const possibleTimes = ['10:00', '12:30', '15:00', '18:00', '19:30', '20:00', '21:00'];
         const shuffledTimes = [...possibleTimes].sort(() => 0.5 - Math.random());

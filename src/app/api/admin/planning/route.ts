@@ -74,12 +74,16 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Envoyer à n8n immédiatement
-        console.log(`[Planning API] Envoi immédiat à n8n de ${batch.length} actions pour le post ${post.id}`)
+        console.log(`[Planning API] Envoi immédiat à n8n (${n8nWebhookUrl}) de ${batch.length} actions pour le post ${post.id}`)
         fetch(n8nWebhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ batch })
-        }).catch(err => console.error('[Planning API] Erreur envoi n8n:', err))
+        }).then(res => {
+            console.log(`[Planning API] Réponse de n8n: ${res.status} ${res.statusText}`)
+        }).catch(err => {
+            console.error('[Planning API] Erreur envoi n8n:', err)
+        })
 
         return NextResponse.json({ success: true, post })
     } catch (error: any) {
