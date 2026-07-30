@@ -1792,6 +1792,79 @@ export async function POST(req: Request) {
                     }
                 }
             }
+            // Commande /auto-pro : auto-programmer les livres du jour vers n8n
+            else if (text.startsWith('/AUTO-PRO')) {
+                await sendTelegramMessage(`⏳ <b>Auto-programmation en cours...</b>`, chatId.toString(), token)
+                try {
+                    const books = await prisma.book.findMany({
+                        where: { active: true, stock: { gt: 0 } },
+                        take: 7,
+                        orderBy: { createdAt: 'desc' },
+                        select: { id: true, title: true, author: true, image: true }
+                    })
+                    if (books.length === 0) {
+                        await sendTelegramMessage(`❌ Aucun livre disponible.`, chatId.toString(), token)
+                    } else {
+                        const n8nWebhookUrl = (await prisma.siteSettings.findUnique({ where: { key: 'n8n_webhook_url' } }))?.value || process.env.N8N_WEBHOOK_URL
+                        if (!n8nWebhookUrl) {
+                            await sendTelegramMessage(`❌ n8n webhook non configuré.`, chatId.toString(), token)
+                        } else {
+                            const facebookToken = (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value || ''
+                            const instagramId = (await prisma.siteSettings.findUnique({ where: { key: 'instagram_account_id' } }))?.value || ''
+                            const possibleTimes = ['10:00', '12:30', '15:00', '18:00', '19:30', '20:00', '21:00']
+                            const today = new Date()
+                            let successCount = 0
+
+                            for (let i = 0; i < books.length; i++) {
+                                const book = books[i]
+                                const rawImage = book.image || ''
+                                const imageUrl = rawImage.startsWith('http') && !rawImage.includes('127.0.0.1')
+                                    ? rawImage
+                                    : `https://riwaya.store${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`
+                                if (!rawImage) continue
+
+                                const timeSlot = possibleTimes[i % possibleTimes.length]
+                                const [hours, minutes] = timeSlot.split(':')
+                                const scheduleAt = new Date(today)
+                                scheduleAt.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+                                if (scheduleAt <= today) scheduleAt.setDate(scheduleAt.getDate() + 1)
+
+                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://riwaya.store/fr/book/${book.id}\n\n#livre #lecture #riwaya`
+                                const post = await prisma.scheduledPost.create({
+                                    data: {
+                                        date: scheduleAt,
+                                        time: timeSlot,
+                                        content: caption,
+                                        platforms: JSON.stringify(['facebook', 'instagram']),
+                                        mediaUrl: imageUrl,
+                                        status: 'PUBLISHED'
+                                    }
+                                })
+
+                                const batch = ['facebook', 'instagram'].map(p => ({
+                                    itemId: post.id,
+                                    itemType: 'POST',
+                                    caption,
+                                    image: imageUrl,
+                                    platform: p,
+                                    scheduleAt: scheduleAt.toISOString(),
+                                    facebook_access_token: facebookToken,
+                                    instagram_account_id: instagramId,
+                                }))
+                                fetch(n8nWebhookUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ batch })
+                                }).catch(console.error)
+                                successCount++
+                            }
+                            await sendTelegramMessage(`✅ <b>${successCount} livre(s) auto-programmé(s) !</b>\n\nLes publications partiront aux heures prévues.`, chatId.toString(), token)
+                        }
+                    }
+                } catch (e: any) {
+                    await sendTelegramMessage(`❌ Erreur : ${e.message}`, chatId.toString(), token)
+                }
+            }
         }
 
         return NextResponse.json({ ok: true })
