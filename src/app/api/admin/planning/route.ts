@@ -51,10 +51,16 @@ export async function POST(req: NextRequest) {
         const tiktokAppId = await getSetting('tiktok_app_id')
         const tiktokClientSecret = await getSetting('tiktok_client_secret')
 
-        const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-        // Convertir l'URL image relative en URL absolue
+        // URL publique du site (jamais localhost)
+        const rawBase = process.env.NEXT_PUBLIC_APP_URL || ''
+        const appBaseUrl = rawBase.includes('127.0.0.1') || rawBase.includes('localhost')
+            ? 'https://riwaya.store'
+            : (rawBase || 'https://riwaya.store')
+        // Convertir l'URL image relative en URL absolue publique
         const absoluteImage = mediaUrl
-            ? (mediaUrl.startsWith('http') ? mediaUrl : `${appBaseUrl}${mediaUrl}`)
+            ? (mediaUrl.startsWith('http') && !mediaUrl.includes('127.0.0.1') && !mediaUrl.includes('localhost')
+                ? mediaUrl
+                : `https://riwaya.store${mediaUrl.startsWith('/') ? mediaUrl : `/${mediaUrl}`}`)
             : ''
 
         const batch = []
