@@ -78,12 +78,12 @@ export default function middleware(request: NextRequest) {
             "font-src 'self' data: https://fonts.gstatic.com",
             "media-src 'self' https://assets.mixkit.co",
             "connect-src 'self' https:",
-            "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com",
+            "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://www.facebook.com https://staticxx.facebook.com",
             "worker-src 'none'",
             "object-src 'none'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action 'self' https://www.facebook.com",
         ].join('; ')
         
         redirectResponse.headers.set('Content-Security-Policy', cspHeader)
@@ -103,12 +103,12 @@ export default function middleware(request: NextRequest) {
         "font-src 'self' data: https://fonts.gstatic.com",
         "media-src 'self' https://assets.mixkit.co",
         "connect-src 'self' https:",
-        "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com",
+        "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://www.facebook.com https://staticxx.facebook.com",
         "worker-src 'none'",
         "object-src 'none'",
         "frame-ancestors 'none'",
         "base-uri 'self'",
-        "form-action 'self'",
+        "form-action 'self' https://www.facebook.com",
     ].join('; ')
 
     // Passer le CSP à Next.js via la requête

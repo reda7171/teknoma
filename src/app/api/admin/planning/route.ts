@@ -55,13 +55,19 @@ export async function POST(req: NextRequest) {
         const tiktokAppId = await getSetting('tiktok_app_id')
         const tiktokClientSecret = await getSetting('tiktok_client_secret')
 
+        const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+        // Convertir l'URL image relative en URL absolue
+        const absoluteImage = mediaUrl
+            ? (mediaUrl.startsWith('http') ? mediaUrl : `${appBaseUrl}${mediaUrl}`)
+            : ''
+
         const batch = []
         for (const platform of platforms) {
             batch.push({
                 itemId: post.id,
                 itemType: 'POST',
                 caption: content || 'Riwaya Post',
-                image: mediaUrl || '',
+                image: absoluteImage,
                 platform: platform,
                 scheduleAt: new Date(date).toISOString(),
                 facebook_access_token: facebookAccessToken,
