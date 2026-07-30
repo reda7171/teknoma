@@ -34,13 +34,9 @@ export async function POST(req: NextRequest) {
             }
         })
 
-        // 2. Récupérer l'URL du webhook n8n
+        // 2. Récupérer l'URL du webhook n8n (priorité à la DB)
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
-        let n8nWebhookUrl = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
-
-        if (n8nWebhookUrl && (n8nWebhookUrl.includes('://n8n') || n8nWebhookUrl.includes('://localhost'))) {
-            n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || n8nWebhookUrl
-        }
+        const n8nWebhookUrl = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
 
         if (!n8nWebhookUrl) {
             console.error('n8nWebhookUrl non défini, post sauvegardé mais non envoyé à n8n');
