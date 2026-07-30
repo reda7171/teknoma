@@ -56,14 +56,12 @@ export async function POST(req: NextRequest) {
         const tiktokClientSecret = await getSetting('tiktok_client_secret')
 
         const batch = []
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://riwaya.store'
-        
         for (const platform of platforms) {
             batch.push({
                 itemId: post.id,
                 itemType: 'POST',
                 caption: content || 'Riwaya Post',
-                image: mediaUrl ? (mediaUrl.startsWith('http') ? mediaUrl : `${siteUrl}${mediaUrl}`) : '',
+                image: mediaUrl || '',
                 platform: platform,
                 scheduleAt: new Date(date).toISOString(),
                 facebook_access_token: facebookAccessToken,
