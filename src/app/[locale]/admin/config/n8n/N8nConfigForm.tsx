@@ -5,13 +5,14 @@ import { updateSetting } from '@/lib/actions/site-settings'
 import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string }) {
+export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId, initialThreadsAccessToken }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string, initialThreadsAccessToken: string }) {
     const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl)
     const [instagramWebhookUrl, setInstagramWebhookUrl] = useState(initialInstagramWebhookUrl)
     const [facebookAccessToken, setFacebookAccessToken] = useState(initialFacebookAccessToken)
     const [instagramAccountId, setInstagramAccountId] = useState(initialInstagramAccountId)
     const [instagramToken, setInstagramToken] = useState(initialInstagramToken)
     const [threadsAccountId, setThreadsAccountId] = useState(initialThreadsAccountId)
+    const [threadsAccessToken, setThreadsAccessToken] = useState(initialThreadsAccessToken)
     const [loading, setLoading] = useState(false)
     const [isTesting, setIsTesting] = useState(false)
     const [message, setMessage] = useState('')
@@ -29,6 +30,7 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
             await updateSetting('instagram_account_id', instagramAccountId, 'config', 'Instagram Account ID')
             await updateSetting('instagram_token', instagramToken, 'config', 'Instagram Token')
             await updateSetting('threads_account_id', threadsAccountId, 'config', 'Threads Account ID')
+            await updateSetting('threads_access_token', threadsAccessToken, 'config', 'Threads Access Token')
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
         } catch (error) {
@@ -143,6 +145,22 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                 />
                 <p className="mt-2 text-xs text-gray-500 font-medium">
                     L'ID du compte Threads.
+                </p>
+            </div>
+
+            <div>
+                <label htmlFor="threadsAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
+                    Threads Access Token
+                </label>
+                <textarea
+                    id="threadsAccessToken"
+                    value={threadsAccessToken}
+                    onChange={(e) => setThreadsAccessToken(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
+                    placeholder="Entrez le jeton d'accès Threads..."
+                />
+                <p className="mt-2 text-xs text-gray-500 font-medium">
+                    Jeton d'accès longue durée généré via Meta Developer pour l'API Threads.
                 </p>
             </div>
 

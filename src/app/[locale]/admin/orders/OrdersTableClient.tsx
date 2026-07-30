@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, Search, Trash2, Phone } from 'lucide-react'
-import { bulkDeleteOrders, syncDeliveryStatus } from '@/lib/actions/admin-orders'
+import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
 interface OrderItem {
@@ -39,6 +39,8 @@ interface OrdersTableClientProps {
     statusLabels: Record<string, string>
     searchTerm: string
     shippingFilter?: string
+    paymentFilter?: string
+    cityFilter?: string
 }
 
 export default function OrdersTableClient({
@@ -47,7 +49,9 @@ export default function OrdersTableClient({
     statusColors,
     statusLabels,
     searchTerm,
-    shippingFilter = ''
+    shippingFilter = '',
+    paymentFilter = '',
+    cityFilter = ''
 }: OrdersTableClientProps) {
     const router = useRouter()
     const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -70,13 +74,30 @@ export default function OrdersTableClient({
         }
     }
 
+    const handleStatusChange = async (orderId: string, newStatus: string) => {
+        if (!confirm('Voulez-vous vraiment changer le statut de cette commande ?')) return
+        try {
+            const res = await updateOrderStatus(orderId, newStatus as any)
+            if (res.success) {
+                router.refresh()
+            } else {
+                alert(res.error || 'Erreur lors de la mise à jour')
+            }
+        } catch (error) {
+            alert('Erreur serveur')
+        }
+    }
+
     const filteredOrders = orders.filter(order => {
         const matchesSearch = order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.phone.includes(searchTerm) ||
             order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.city.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesShipping = shippingFilter ? order.shippingCompany === shippingFilter : true;
-        return matchesSearch && matchesShipping;
+        const matchesPayment = paymentFilter ? order.paymentMethod === paymentFilter : true;
+        const matchesCity = cityFilter ? order.city?.trim() === cityFilter : true;
+
+        return matchesSearch && matchesShipping && matchesPayment && matchesCity;
     })
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -252,14 +273,13 @@ export default function OrdersTableClient({
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {order.paymentMethod ? (
-                                            <span className={`px-2.5 py-1 inline-flex text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider ${
-                                                order.paymentMethod === 'COD'           ? 'bg-amber-100 text-amber-800' :
-                                                order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
-                                                order.paymentMethod === 'STRIPE'        ? 'bg-indigo-100 text-indigo-800' :
-                                                order.paymentMethod === 'PAYPAL'        ? 'bg-blue-100 text-blue-800' :
-                                                order.paymentMethod === 'CMI'           ? 'bg-orange-100 text-orange-800' :
-                                                'bg-gray-100 text-gray-700'
-                                            }`}>
+                                            <span className={`px-2.5 py-1 inline-flex text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider ${order.paymentMethod === 'COD' ? 'bg-amber-100 text-amber-800' :
+                                                    order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
+                                                        order.paymentMethod === 'STRIPE' ? 'bg-indigo-100 text-indigo-800' :
+                                                            order.paymentMethod === 'PAYPAL' ? 'bg-blue-100 text-blue-800' :
+                                                                order.paymentMethod === 'CMI' ? 'bg-orange-100 text-orange-800' :
+                                                                    'bg-gray-100 text-gray-700'
+                                                }`}>
                                                 {order.paymentMethod === 'BANK_TRANSFER' ? 'Virement' : order.paymentMethod}
                                             </span>
                                         ) : (
@@ -267,14 +287,23 @@ export default function OrdersTableClient({
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}>
-                                            {statusLabels[order.status as keyof typeof statusLabels]}
-                                        </span>
+                                        <select
+                                            value={order.status}
+                                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                            className={`px-3 py-1 appearance-none text-xs leading-5 font-bold rounded-full border-0 cursor-pointer outline-none focus:ring-2 focus:ring-black transition-colors ${statusColors[order.status as keyof typeof statusColors]}`}
+                                            title="Changer le statut"
+                                        >
+                                            {Object.entries(statusLabels).map(([val, label]) => (
+                                                <option key={val} value={val} className="bg-white text-black font-medium">
+                                                    {label}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right flex items-center justify-end gap-2">
-                                        <a 
-                                            href={`https://wa.me/212${order.phone.replace(/^0+/, '')}?text=Bonjour ${order.fullName}, votre commande a bien été reçue sur Riwaya.`} 
-                                            target="_blank" 
+                                        <a
+                                            href={`https://wa.me/212${order.phone.replace(/^0+/, '')}?text=Bonjour ${order.fullName}, votre commande a bien été reçue sur Riwaya.`}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-1 text-green-600 hover:text-green-900 font-bold text-sm bg-green-50 px-3 py-1 rounded-lg transition-colors"
                                         >

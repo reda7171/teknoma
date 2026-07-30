@@ -193,6 +193,11 @@ export default function Header({ user, notificationDropdown, navigation, feature
         finalNavItems = [{ href: '/deposer-liste', label: t('DeposerListe'), isJournal: false }, ...finalNavItems]
     }
 
+    // Toujours afficher le Journal si absent du menu personnalisé
+    if (!finalNavItems.some((i: any) => i.href.includes('/blog') || i.isJournal)) {
+        finalNavItems = [...finalNavItems, { href: '/blog', label: t('Journal'), isJournal: true }]
+    }
+
     return (
         <header className="sticky top-0 z-50 bg-white shadow-sm">
             <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
@@ -220,7 +225,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
                     {/* Desktop Navigation - Elegant & Clean */}
                     <nav className="hidden lg:flex items-center gap-6 xl:gap-10 min-w-max h-8">
                         {/* Navigation Items - Only render client side after mounting */}
-                        {mounted && finalNavItems.slice(0, 4).map((item: any) => {
+                        {mounted && finalNavItems.slice(0, 6).map((item: any) => {
                             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                             const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.href.includes('/livres-numeriques') || item.isJournal || item.href.includes('/deposer-liste')
 

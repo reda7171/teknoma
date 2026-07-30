@@ -230,6 +230,7 @@ export default function ShippingCompaniesClient({ initialCompanies, initialDefau
                             </div>
 
                             <div className="space-y-1.5 mb-5">
+                                <p className="text-xs text-gray-600"><span className="font-bold">Chiffre d'Affaire:</span> <span className="text-green-600 font-black">{comp.revenue ? comp.revenue.toFixed(2) : '0.00'} MAD</span></p>
                                 <p className="text-xs text-gray-600"><span className="font-bold">API Key:</span> {comp.apiKey ? '••••••••' : <span className="text-gray-300">Non défini</span>}</p>
                                 <p className="text-xs text-gray-600"><span className="font-bold">Support:</span> {comp.supportPhone || <span className="text-gray-300">Non défini</span>}</p>
                             </div>

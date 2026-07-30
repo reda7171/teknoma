@@ -23,7 +23,8 @@ import { ChevronLeft, ChevronRight,
     Megaphone,
     Plus,
     Stamp,
-    FolderOpen
+    FolderOpen,
+    AtSign
 } from 'lucide-react'
 import Image from 'next/image'
 import LaunchFacebookAdModal from '@/components/admin/LaunchFacebookAdModal'
@@ -52,7 +53,7 @@ export default function MarketingPage() {
     const [selectedAssets, setSelectedAssets] = useState<string[]>([])
     const [selectionMode, setSelectionMode] = useState(false)
     const [bulkPublishing, setBulkPublishing] = useState(false)
-    const [bulkPlatform, setBulkPlatform] = useState<'facebook' | 'instagram' | 'all'>('all')
+    const [bulkPlatform, setBulkPlatform] = useState<'facebook' | 'instagram' | 'threads' | 'all'>('all')
     // Tabs & Media
     const [activeTab, setActiveTab] = useState<'creatives' | 'media'>('creatives')
     const [activeMediaTab, setActiveMediaTab] = useState<'books' | 'authors' | 'blog'>('books')
@@ -110,6 +111,7 @@ export default function MarketingPage() {
                 setTimeout(() => {
                     setWatermarkModalOpen(false)
                     setWatermarkStatus('idle')
+                    setActiveTab('creatives')
                 }, 2000)
             } else {
                 setWatermarkStatus('error')
@@ -703,7 +705,7 @@ export default function MarketingPage() {
                                 </p>
 
                                 {/* Partage via n8n */}
-                                <div className="pt-3 border-t border-slate-100 grid grid-cols-5 gap-2">
+                                <div className="pt-3 border-t border-slate-100 grid grid-cols-6 gap-2">
                                     <button 
                                         onClick={() => handleSinglePreview(asset.name)}
                                         title="Prévisualiser"
@@ -724,6 +726,13 @@ export default function MarketingPage() {
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-pink-50 text-slate-400 hover:text-pink-600 rounded-xl transition-all"
                                     >
                                         <Instagram className="w-4 h-4" />
+                                    </button>
+                                    <button 
+                                        onClick={() => handlePublish(asset, 'threads')}
+                                        title="Publier sur Threads"
+                                        className="flex items-center justify-center p-2 bg-slate-50 hover:bg-black text-slate-400 hover:text-white rounded-xl transition-all"
+                                    >
+                                        <AtSign className="w-4 h-4" />
                                     </button>
                                     <button 
                                         onClick={() => handlePublish(asset, 'tiktok')}
@@ -1003,6 +1012,7 @@ export default function MarketingPage() {
                                     <option value="all">Toutes plateformes</option>
                                     <option value="facebook">Facebook</option>
                                     <option value="instagram">Instagram</option>
+                                    <option value="threads">Threads</option>
                                 </select>
                                 <button
                                     onClick={handleBulkPublish}

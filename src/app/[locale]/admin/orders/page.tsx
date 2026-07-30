@@ -77,6 +77,22 @@ export default async function AdminOrdersPage(props: {
         }, 0)
     }
 
+    const companies = await prisma.shippingCompany.findMany({
+        where: { isActive: true }
+    })
+
+    const paymentSettings = await prisma.siteSettings.findMany({
+        where: { key: { in: ['payment_cod_enabled', 'payment_bank_transfer_enabled', 'payment_paypal_enabled', 'payment_stripe_enabled', 'payment_cmi_enabled'] } }
+    })
+    
+    const activePaymentMethods = {
+        COD: paymentSettings.find(s => s.key === 'payment_cod_enabled')?.value === 'true',
+        BANK_TRANSFER: paymentSettings.find(s => s.key === 'payment_bank_transfer_enabled')?.value === 'true',
+        PAYPAL: paymentSettings.find(s => s.key === 'payment_paypal_enabled')?.value === 'true',
+        STRIPE: paymentSettings.find(s => s.key === 'payment_stripe_enabled')?.value === 'true',
+        CMI: paymentSettings.find(s => s.key === 'payment_cmi_enabled')?.value === 'true',
+    }
+
     return (
         <OrdersPageClient 
             orders={orders as any}
@@ -85,6 +101,8 @@ export default async function AdminOrdersPage(props: {
             statusLabels={statusLabels}
             currentStatus={searchParams.status}
             stats={stats}
+            shippingCompanies={companies}
+            activePaymentMethods={activePaymentMethods}
         />
     )
 }

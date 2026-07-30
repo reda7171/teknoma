@@ -1,4 +1,3 @@
-
 import { getBooks } from '@/lib/db/books'
 import { getAuthorProfile } from '@/lib/db/authors'
 import Header from '@/components/HeaderWithUser'
@@ -6,7 +5,7 @@ import Footer from '@/components/FooterWithFeatures'
 import BookCard from '@/components/BookCard'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { ArrowLeft, User } from 'lucide-react'
+import { ArrowLeft, User, Edit } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
@@ -14,6 +13,8 @@ import ImageWithFallback from '@/components/ImageWithFallback'
 import ShareArticle from '@/components/blog/ShareArticle'
 import { getSimilarAuthors } from '@/lib/db/authors'
 import { Quote } from 'lucide-react'
+import { isAuthenticated } from '@/lib/actions/auth'
+
 // Generate metadata for the author page
 export async function generateMetadata({
     params,
@@ -120,6 +121,7 @@ export default async function AuthorPage({
     const tAuthor = await getTranslations('AuthorsPage')
     const tBook = await getTranslations('BookDetail')
     const tCommon = await getTranslations('Common')
+    const isAuth = await isAuthenticated()
 
     const [books, authorProfile, similarAuthors] = await Promise.all([
         getBooks({ author: authorName, active: true, limit: 100 }),
@@ -231,9 +233,21 @@ export default async function AuthorPage({
                         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
                             {/* Author Info */}
                             <div className="lg:col-span-2">
-                                <div className="inline-flex items-center gap-3 px-5 py-2 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-[0.3em] mb-8">
-                                    <User className="w-3 h-3" />
-                                    <span>{tAuthor('AuthorLabel')}</span>
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-[0.3em]">
+                                        <User className="w-3 h-3" />
+                                        <span>{tAuthor('AuthorLabel')}</span>
+                                    </div>
+                                    
+                                    {isAuth && (
+                                        <Link 
+                                            href={`/admin/authors?search=${encodeURIComponent(authorName)}`} 
+                                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-200 transition-colors"
+                                        >
+                                            <Edit className="w-3 h-3" />
+                                            Modifier
+                                        </Link>
+                                    )}
                                 </div>
 
                                 <h1 className="text-5xl md:text-8xl font-black text-black leading-none tracking-tighter mb-8">

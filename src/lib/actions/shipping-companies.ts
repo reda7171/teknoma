@@ -8,9 +8,32 @@ import { updateSetting } from '@/lib/actions/site-settings'
 export async function getShippingCompanies() {
     try {
         await verifyAdmin()
-        return await prisma.shippingCompany.findMany({
-            orderBy: { createdAt: 'desc' }
+        const companies = await prisma.shippingCompany.findMany({
+            orderBy: [
+                { isActive: 'desc' },
+                { createdAt: 'desc' }
+            ]
         })
+
+        const revenues = await prisma.order.groupBy({
+            by: ['shippingCompany'],
+            _sum: {
+                shippingFees: true
+            },
+            where: {
+                shippingCompany: { not: null },
+                status: {
+                    in: ['SHIPPED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED']
+                }
+            }
+        })
+
+        const revenueMap = new Map(revenues.map(r => [r.shippingCompany, r._sum.shippingFees || 0]))
+
+        return companies.map(c => ({
+            ...c,
+            revenue: revenueMap.get(c.id) || 0
+        }))
     } catch (error) {
         console.error('Erreur getShippingCompanies:', error)
         return []

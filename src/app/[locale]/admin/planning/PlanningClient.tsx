@@ -29,6 +29,7 @@ export interface SuggestedBook {
     author: string
     isProgrammed: boolean
     type?: 'book' | 'pack'
+    stock?: number
 }
 
 export default function PlanningClient({ initialPosts, availableBooks = [] }: { initialPosts: ScheduledPost[], availableBooks?: any[] }) {
@@ -716,7 +717,14 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 </div>
                                 <div className={`flex-1 min-w-0 ${book.isProgrammed ? 'opacity-60' : ''}`}>
                                     <p className="font-bold text-slate-900 text-sm truncate">{book.title}</p>
-                                    <p className="text-xs text-slate-500 truncate">{book.author}</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-xs text-slate-500 truncate max-w-[120px]">{book.author}</p>
+                                        {book.stock !== undefined && (
+                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${book.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                Stock: {book.stock}
+                                            </span>
+                                        )}
+                                    </div>
                                     {!book.isProgrammed && (
                                         <button 
                                             onClick={() => {

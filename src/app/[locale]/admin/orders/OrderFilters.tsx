@@ -13,7 +13,14 @@ interface OrderFiltersProps {
     onSearchChange: (val: string) => void
     shippingFilter?: string
     onShippingFilterChange?: (val: string) => void
+    paymentFilter?: string
+    onPaymentFilterChange?: (val: string) => void
+    cityFilter?: string
+    onCityFilterChange?: (val: string) => void
     totalCount: number
+    shippingCompanies?: any[]
+    activePaymentMethods?: Record<string, boolean>
+    cities?: string[]
 }
 
 export default function OrderFilters({
@@ -24,7 +31,14 @@ export default function OrderFilters({
     onSearchChange,
     shippingFilter = '',
     onShippingFilterChange = () => {},
-    totalCount
+    paymentFilter = '',
+    onPaymentFilterChange,
+    cityFilter = '',
+    onCityFilterChange,
+    totalCount,
+    shippingCompanies = [],
+    activePaymentMethods = {},
+    cities = []
 }: OrderFiltersProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
@@ -135,8 +149,47 @@ export default function OrderFilters({
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
                             >
                                 <option value="">Toutes les sociétés</option>
-                                <option value="withyou">WithYou</option>
-                                <option value="olivraison">Olivraison</option>
+                                {shippingCompanies.map(comp => (
+                                    <option key={comp.id} value={comp.id}>{comp.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Payment Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Filter className="w-3 h-3" />
+                                Paiement
+                            </label>
+                            <select
+                                value={paymentFilter}
+                                onChange={(e) => onPaymentFilterChange && onPaymentFilterChange(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            >
+                                <option value="">Tous les paiements</option>
+                                {activePaymentMethods.COD && <option value="COD">Paiement à la livraison (COD)</option>}
+                                {activePaymentMethods.BANK_TRANSFER && <option value="BANK_TRANSFER">Virement bancaire</option>}
+                                {activePaymentMethods.STRIPE && <option value="STRIPE">Carte bancaire (Stripe)</option>}
+                                {activePaymentMethods.PAYPAL && <option value="PAYPAL">PayPal</option>}
+                                {activePaymentMethods.CMI && <option value="CMI">CMI</option>}
+                            </select>
+                        </div>
+
+                        {/* City Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Filter className="w-3 h-3" />
+                                Ville
+                            </label>
+                            <select
+                                value={cityFilter}
+                                onChange={(e) => onCityFilterChange && onCityFilterChange(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            >
+                                <option value="">Toutes les villes</option>
+                                {cities.map(city => (
+                                    <option key={city} value={city}>{city}</option>
+                                ))}
                             </select>
                         </div>
 

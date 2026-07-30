@@ -25,7 +25,7 @@ export default async function PlanningPage() {
         // Fetch active books for suggestions
         const books = await prisma.book.findMany({
             where: { active: true },
-            select: { id: true, title: true, image: true, author: true },
+            select: { id: true, title: true, image: true, author: true, stock: true },
         })
 
         // Fetch active packs

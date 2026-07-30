@@ -20,6 +20,8 @@ interface OrdersPageClientProps {
         totalRevenue: number
         totalNetProfit: number
     }
+    shippingCompanies: any[]
+    activePaymentMethods: Record<string, boolean>
 }
 
 export default function OrdersPageClient({
@@ -28,10 +30,19 @@ export default function OrdersPageClient({
     statusColors,
     statusLabels,
     currentStatus,
-    stats
+    stats,
+    shippingCompanies,
+    activePaymentMethods
 }: OrdersPageClientProps) {
     const [searchTerm, setSearchTerm] = useState('')
     const [shippingFilter, setShippingFilter] = useState('')
+    const [paymentFilter, setPaymentFilter] = useState('')
+    const [cityFilter, setCityFilter] = useState('')
+
+    const uniqueCities = useMemo(() => {
+        const cities = orders.map(o => o.city?.trim()).filter(Boolean)
+        return Array.from(new Set(cities)).sort()
+    }, [orders])
 
     const evolutionData = useMemo(() => {
         const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
@@ -96,7 +107,14 @@ export default function OrdersPageClient({
                     onSearchChange={setSearchTerm}
                     shippingFilter={shippingFilter}
                     onShippingFilterChange={setShippingFilter}
+                    paymentFilter={paymentFilter}
+                    onPaymentFilterChange={setPaymentFilter}
+                    cityFilter={cityFilter}
+                    onCityFilterChange={setCityFilter}
                     totalCount={orders.length}
+                    shippingCompanies={shippingCompanies}
+                    activePaymentMethods={activePaymentMethods}
+                    cities={uniqueCities as string[]}
                 />
 
                 {/* Table Content */}
@@ -108,6 +126,8 @@ export default function OrdersPageClient({
                         statusLabels={statusLabels}
                         searchTerm={searchTerm}
                         shippingFilter={shippingFilter}
+                        paymentFilter={paymentFilter}
+                        cityFilter={cityFilter}
                     />
                 </div>
             </div>

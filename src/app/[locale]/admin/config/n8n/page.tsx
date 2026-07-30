@@ -23,6 +23,7 @@ export default async function N8nConfigPage() {
     const instagramAccountId = await getSetting('instagram_account_id') || ''
     const instagramToken = await getSetting('instagram_token') || ''
     const threadsAccountId = await getSetting('threads_account_id') || ''
+    const threadsAccessToken = await getSetting('threads_access_token') || ''
 
     return (
         <div className="space-y-12">
@@ -56,6 +57,7 @@ export default async function N8nConfigPage() {
                         initialInstagramAccountId={instagramAccountId}
                         initialInstagramToken={instagramToken}
                         initialThreadsAccountId={threadsAccountId}
+                        initialThreadsAccessToken={threadsAccessToken}
                     />
                 </div>
             </div>
