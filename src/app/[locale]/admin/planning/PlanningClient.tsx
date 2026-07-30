@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, X, Image as ImageIcon, Send, Facebook, Instagram, Music, AtSign, CheckCircle, AlertCircle, Loader2, Edit2, RefreshCw, Filter, Smartphone, Star } from 'lucide-react'
+import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, X, Image as ImageIcon, Send, Facebook, Instagram, Music, AtSign, CheckCircle, AlertCircle, Loader2, Edit2, RefreshCw, Filter, Smartphone, Star, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
@@ -535,6 +535,24 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         setIsLoading(false);
     }
 
+    const handleClearCalendar = async () => {
+        if (!confirm('Voulez-vous vraiment vider tout le calendrier des publications ?')) return;
+        setIsLoading(true);
+        try {
+            const res = await fetch('/api/admin/planning', { method: 'DELETE' });
+            if (res.ok) {
+                setPosts([]);
+                showToast('Calendrier vidé avec succès', 'success');
+            } else {
+                showToast('Erreur lors du nettoyage du calendrier', 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('Erreur lors du nettoyage du calendrier', 'error');
+        }
+        setIsLoading(false);
+    }
+
     const getPostsForTime = (time: string) => {
         return posts.filter(post => 
             isSameDay(post.date, selectedDate) && 
@@ -654,12 +672,20 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                             <button 
+                                onClick={handleClearCalendar}
+                                disabled={isLoading}
+                                className="p-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors border border-red-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
+                                title="Vider le calendrier"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" /> Tout Vider
+                            </button>
+                            <button 
                                 onClick={handleAutoScheduleAll}
                                 disabled={isLoading}
                                 className="p-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors border border-green-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
                                 title="Programmer aléatoirement"
                             >
-                                <Plus className="w-3.5 h-3.5" /> Auto-programmer
+                                {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Auto-programmer
                             </button>
                             <button 
                                 onClick={() => generateSuggestions(new Date().getTime())}

@@ -56,12 +56,14 @@ export async function POST(req: NextRequest) {
         const tiktokClientSecret = await getSetting('tiktok_client_secret')
 
         const batch = []
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://riwaya.store'
+        
         for (const platform of platforms) {
             batch.push({
                 itemId: post.id,
                 itemType: 'POST',
                 caption: content || 'Riwaya Post',
-                image: mediaUrl || '',
+                image: mediaUrl ? (mediaUrl.startsWith('http') ? mediaUrl : `${siteUrl}${mediaUrl}`) : '',
                 platform: platform,
                 scheduleAt: new Date(date).toISOString(),
                 facebook_access_token: facebookAccessToken,
@@ -88,6 +90,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, post })
     } catch (error: any) {
         console.error('[Planning API] Error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        await verifyAdmin()
+        // Delete all scheduled posts
+        await prisma.scheduledPost.deleteMany()
+        return NextResponse.json({ success: true, message: 'Calendrier vidé' })
+    } catch (error: any) {
+        console.error('[Planning API] Delete Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
