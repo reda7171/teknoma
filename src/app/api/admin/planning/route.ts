@@ -79,19 +79,24 @@ export async function POST(req: NextRequest) {
             })
         }
 
-        // 4. Envoyer à n8n immédiatement
-        console.log(`[Planning API] Envoi immédiat à n8n (${n8nWebhookUrl}) de ${batch.length} actions pour le post ${post.id}`)
-        fetch(n8nWebhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ batch })
-        }).then(res => {
-            console.log(`[Planning API] Réponse de n8n: ${res.status} ${res.statusText}`)
-        }).catch(err => {
-            console.error('[Planning API] Erreur envoi n8n:', err)
-        })
+        // 4. Envoyer à n8n et attendre la réponse (pour déboguer)
+        console.log(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${batch.length} items`)
+        let n8nStatus = 'not_sent'
+        let n8nError = null
+        try {
+            const n8nRes = await fetch(n8nWebhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ batch })
+            })
+            n8nStatus = `${n8nRes.status} ${n8nRes.statusText}`
+            console.log(`[Planning API] Réponse n8n: ${n8nStatus}`)
+        } catch (err: any) {
+            n8nError = err.message
+            console.error(`[Planning API] Erreur fetch n8n: ${err.message}`)
+        }
 
-        return NextResponse.json({ success: true, post })
+        return NextResponse.json({ success: true, post, n8nStatus, n8nError, n8nUrl: n8nWebhookUrl })
     } catch (error: any) {
         console.error('[Planning API] Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 })
