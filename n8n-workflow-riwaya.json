@@ -387,14 +387,29 @@
     },
     {
       "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "threads-wait",
+      "name": "Threads - Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        840,
+        780
+      ],
+      "webhookId": "threads-wait-webhook"
+    },
+    {
+      "parameters": {
         "method": "POST",
-        "url": "={{ 'https://graph.threads.net/v1.0/' + ($json.threads_account_id || 'me') + '/threads_publish' }}",
+        "url": "={{ 'https://graph.threads.net/v1.0/' + ($('Threads?').item.json.threads_account_id || 'me') + '/threads_publish' }}",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "access_token",
-              "value": "={{ $json.threads_access_token }}"
+              "value": "={{ $('Threads?').item.json.threads_access_token }}"
             }
           ]
         },
@@ -602,6 +617,17 @@
       ]
     },
     "Threads - Créer Container": {
+      "main": [
+        [
+          {
+            "node": "Threads - Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threads - Wait": {
       "main": [
         [
           {

@@ -104,11 +104,11 @@ export async function POST(req: NextRequest) {
             imageUrl = `${baseUrl}${imagePath}`;
         }
 
-        // --- PROXY HTTPS POUR META (Instagram/Facebook) ---
+        // --- PROXY HTTPS POUR META (Instagram/Facebook/Threads) ---
         // Instagram/Facebook exigent HTTPS. On utilise wsrv.nl comme proxy gratuit pour les images.
         const isVideo = imageUrl && (imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm'));
         
-        if (imageUrl && !isVideo && (platform === 'instagram' || platform === 'facebook' || platform === 'both' || platform === 'all')) {
+        if (imageUrl && !isVideo && (platform === 'instagram' || platform === 'facebook' || platform === 'threads' || platform === 'both' || platform === 'all')) {
             imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&q=85`;
             console.log('[N8N PUBLISH] Using Proxy URL for Meta:', imageUrl);
         }
