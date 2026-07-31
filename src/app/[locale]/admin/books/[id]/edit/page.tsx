@@ -8,6 +8,9 @@ import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
+import CatalogImageModal from '@/components/admin/CatalogImageModal'
+import BookCreativeModal from '@/components/admin/BookCreativeModal'
+import { ImageIcon, Wand2 } from 'lucide-react'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
     const router = useRouter()
@@ -30,6 +33,10 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [book, setBook] = useState<any>(null)
     const [lots, setLots] = useState<any[]>([])
     const [selectedCost, setSelectedCost] = useState<string>('0')
+
+    const [bookImage, setBookImage] = useState<string>('')
+    const [isCatalogOpen, setIsCatalogOpen] = useState(false)
+    const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
     
     // Nouveaux states pour les champs gérés avec Gemini
     const [description, setDescription] = useState<string>('')
@@ -74,6 +81,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setSelectedAuthor(result.data.author || '')
                 setCurrentLang(result.data.language === 'en' ? 'en' : result.data.language === 'fr' ? 'fr' : 'ar')
                 setBookLanguage((result.data.language as 'ar' | 'fr' | 'en') || 'fr')
+                setBookImage(result.data.image || '')
             } else {
                 setError(result.error || 'Livre introuvable')
             }
@@ -123,7 +131,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             title: formData.get('title_ar') as string,
             titleFr: formData.get('title_fr') as string || undefined,
             titleEn: formData.get('title_en') as string || undefined,
-            author: formData.get('author') as string,
+            author: selectedAuthor,
             description: description,
             descriptionFr: descriptionFr || undefined,
             descriptionEn: formData.get('description_en') as string || undefined,
@@ -133,9 +141,9 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
             stock: parseInt(formData.get('stock') as string),
-            image: imageUrl,
+            image: imageUrl || bookImage,
             category: formData.get('category') as string || undefined,
-            language: formData.get('language') as string || 'fr',
+            language: bookLanguage,
             active: formData.get('active') === 'true',
             status: formData.get('status') as string || 'APPROVED',
             isBestSeller: formData.get('isBestSeller') === 'true',
@@ -681,10 +689,30 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
                     {/* Image URL ou Upload */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Image <span className="text-red-500">*</span>
-                        </label>
-                        <ImageInput defaultValue={book.image} bookTitle={book.title} />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Image <span className="text-red-500">*</span>
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCatalogOpen(true)}
+                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
+                                >
+                                    <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
+                                    depuis Médiathèque
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setCreativeFormat('post')}
+                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
+                                >
+                                    <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                                    depuis Créatives Marketing
+                                </button>
+                            </div>
+                        </div>
+                        <ImageInput defaultValue={bookImage} bookTitle={book.title} />
                     </div>
 
                     {/* Description courte */}
@@ -804,6 +832,29 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     </button>
                 </div>
             </form>
+
+            <BookCreativeModal
+                isOpen={creativeFormat !== null}
+                onClose={() => setCreativeFormat(null)}
+                format={creativeFormat!}
+                book={book ? {
+                    id: book.id,
+                    title: book.title,
+                    author: book.author || selectedAuthor,
+                    price: book.price,
+                    image: bookImage,
+                    category: book.category
+                } : null}
+            />
+
+            <CatalogImageModal
+                isOpen={isCatalogOpen}
+                onClose={() => setIsCatalogOpen(false)}
+                onSelect={(url) => {
+                    setBookImage(url)
+                    setIsCatalogOpen(false)
+                }}
+            />
         </div>
     )
 }

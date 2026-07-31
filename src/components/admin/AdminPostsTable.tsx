@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Edit, FileText, User, ExternalLink, Trash2, Copy, Check } from 'lucide-react'
 import DeletePostButton from '@/components/admin/DeletePostButton'
 import ShareToN8nButton from '@/components/admin/ShareToN8nButton'
-import { deletePostsBulk } from '@/lib/actions/blog'
+import { deletePostsBulk, updatePost } from '@/lib/actions/blog'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 
@@ -247,15 +247,30 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                         })()}
                                     </td>
                                     <td className="px-8 py-6">
-                                        {post.published ? (
-                                            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                Publié
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 border border-gray-200">
-                                                Brouillon
-                                            </span>
-                                        )}
+                                        <select
+                                            value={post.published ? 'published' : 'draft'}
+                                            onChange={async (e) => {
+                                                const isPublished = e.target.value === 'published';
+                                                try {
+                                                    const res = await updatePost(post.id, { published: isPublished });
+                                                    if (res.success) {
+                                                        router.refresh();
+                                                    } else {
+                                                        alert(res.error || 'Erreur lors de la mise à jour');
+                                                    }
+                                                } catch (err) {
+                                                    alert('Erreur lors de la mise à jour');
+                                                }
+                                            }}
+                                            className={`outline-none text-[10px] font-black uppercase tracking-widest rounded-full px-4 py-1.5 border appearance-none cursor-pointer text-center ${
+                                                post.published 
+                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                                : 'bg-gray-100 text-gray-500 border-gray-200'
+                                            }`}
+                                        >
+                                            <option value="published" className="bg-white text-emerald-600">Publié</option>
+                                            <option value="draft" className="bg-white text-gray-500">Brouillon</option>
+                                        </select>
                                     </td>
                                     <td className="px-8 py-6 text-gray-400 font-bold text-xs">
                                         {post.viewCount || 0}

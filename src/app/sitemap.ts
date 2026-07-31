@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })
         bookUrls = locales.flatMap((locale) =>
             books.map((book) => ({
-                url: `${baseUrl}${generateBookUrl(book, locale)}`,
+                url: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,
                 lastModified: book.updatedAt,
                 changeFrequency: 'weekly' as const,
                 priority: 0.7,

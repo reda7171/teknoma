@@ -4,6 +4,15 @@ import CartClient from '@/components/cart/CartClient'
 import { getSetting } from '@/lib/actions/site-settings'
 import { getPopularBooks } from '@/lib/db/books'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    robots: {
+        index: false,
+        follow: false,
+    },
+}
+
 export default async function CartPage() {
     const minAmount = await getSetting('min_order_amount', '0')
     const recommendedBooks = await getPopularBooks(4)

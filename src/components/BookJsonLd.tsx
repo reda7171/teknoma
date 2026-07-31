@@ -36,7 +36,8 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "Person",
           "name": book.author
         },
-        "isbn": book.isbn || `RIWAYA-${book.id}`,
+        "sku": book.id,
+        ...(book.isbn ? { "isbn": book.isbn } : {}),
         "inLanguage": locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
         "publisher": {
           "@type": "Organization",
@@ -81,7 +82,12 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
             "merchantReturnDays": 7,
             "returnMethod": "https://schema.org/ReturnByMail",
-            "returnFees": "https://schema.org/ReturnShippingFees"
+            "returnFees": "https://schema.org/ReturnShippingFees",
+            "returnShippingFeesAmount": {
+              "@type": "MonetaryAmount",
+              "value": 35,
+              "currency": "MAD"
+            }
           },
           "shippingDetails": {
             "@type": "OfferShippingDetails",

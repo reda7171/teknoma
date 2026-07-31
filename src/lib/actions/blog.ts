@@ -158,7 +158,8 @@ export async function getAllPosts(
     sort?: string,
     dateFrom?: string,
     dateTo?: string,
-    bookId?: string
+    bookId?: string,
+    hasImage?: string
 ) {
     const skip = (page - 1) * limit
     const where: any = {}
@@ -185,6 +186,19 @@ export async function getAllPosts(
 
     if (bookId && bookId !== 'all') {
         where.books = { some: { id: bookId } }
+    }
+
+    if (hasImage && hasImage !== 'all') {
+        if (hasImage === 'true') {
+            where.coverImage = { not: null, notIn: ['', '/book-placeholder.png'] }
+        } else if (hasImage === 'false') {
+            where.OR = [
+                ...(where.OR || []),
+                { coverImage: null },
+                { coverImage: '' },
+                { coverImage: '/book-placeholder.png' }
+            ]
+        }
     }
 
     if (dateFrom || dateTo) {

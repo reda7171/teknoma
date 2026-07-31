@@ -40,15 +40,20 @@ export async function GET() {
             const endDateDate = coupon.expiresAt ? new Date(coupon.expiresAt) : new Date(now.getFullYear() + 1, now.getMonth(), now.getDate())
             const endDate = endDateDate.toISOString()
 
+            const minAmountXml = coupon.minAmount ? `\n        <g:minimum_purchase_amount>${coupon.minAmount} MAD</g:minimum_purchase_amount>` : ''
+            const discountXml = coupon.type === 'PERCENTAGE' 
+                ? `\n        <g:percent_off>${coupon.discount}</g:percent_off>` 
+                : `\n        <g:money_off_amount>${coupon.discount} MAD</g:money_off_amount>`
+
             xml += `
     <item>
         <g:promotion_id>${promoId}</g:promotion_id>
-        <g:product_applicability>ALL_PRODUCTS</g:product_applicability>
+        <g:product_applicability>SPECIFIC_PRODUCTS</g:product_applicability>
         <g:offer_type>GENERIC_CODE</g:offer_type>
         <g:generic_code>${promoId}</g:generic_code>
         <g:long_title>${longTitle}</g:long_title>
         <g:promotion_effective_dates>${startDate}/${endDate}</g:promotion_effective_dates>
-        <g:redemption_channel>ONLINE</g:redemption_channel>
+        <g:redemption_channel>ONLINE</g:redemption_channel>${minAmountXml}${discountXml}
     </item>`
         }
 

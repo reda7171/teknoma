@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { generateBookUrl } from '@/lib/i18n-utils'
 
 function escapeXml(unsafe: string) {
     if (!unsafe) return ''
@@ -20,8 +21,15 @@ export async function GET() {
         const books = await prisma.book.findMany({
             where: { active: true }
         })
+        
+        const now = new Date()
+        const allCoupons = await prisma.coupon.findMany({
+            where: { isActive: true }
+        })
+        const coupons = allCoupons.filter(c => !c.expiresAt || c.expiresAt >= now)
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+        // Utiliser directement l'URL de production pour éviter les problèmes de compilation locale
+        const baseUrl = 'https://www.riwaya.store'
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
         xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n`
@@ -31,7 +39,8 @@ export async function GET() {
         xml += `    <description>Riwaya Bookstore - The best books available.</description>\n`
 
         for (const book of books) {
-            const productUrl = `${baseUrl}/${book.language}/books/${book.id}`
+            const locale = book.language === 'en' || book.language === 'fr' ? book.language : 'ar'
+            const productUrl = `${baseUrl}/${locale}${generateBookUrl(book, locale)}`
             const imageUrl = book.image?.startsWith('http') ? book.image : `${baseUrl}${book.image}`
             const availability = book.stock > 0 ? 'in_stock' : 'out_of_stock'
             const condition = book.isOriginal ? 'new' : 'used'
@@ -53,6 +62,13 @@ export async function GET() {
             
             if (book.category) {
                 xml += `      <g:product_type>${escapeXml(book.category)}</g:product_type>\n`
+            }
+
+            // Map all active promotions to every product
+            if (coupons && coupons.length > 0) {
+                for (const coupon of coupons) {
+                    xml += `      <g:promotion_id>${escapeXml(coupon.code)}</g:promotion_id>\n`
+                }
             }
 
             xml += `    </item>\n`

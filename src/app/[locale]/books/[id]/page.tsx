@@ -125,7 +125,7 @@ export async function generateMetadata({
             images: [imageUrl],
             type: 'book',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
-            url: `${baseUrl}${generateBookUrl(book, locale)}`,
+            url: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,
         },
         twitter: {
             card: 'summary_large_image',
@@ -134,12 +134,12 @@ export async function generateMetadata({
             images: [imageUrl],
         },
         alternates: {
-            canonical: `${baseUrl}${generateBookUrl(book, locale)}`,
+            canonical: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,
             languages: {
-                'ar': `${baseUrl}${generateBookUrl(book, 'ar')}`,
-                'fr': `${baseUrl}${generateBookUrl(book, 'fr')}`,
-                'en': `${baseUrl}${generateBookUrl(book, 'en')}`,
-                'x-default': `${baseUrl}${generateBookUrl(book, 'ar')}`,
+                'ar': `${baseUrl}/ar${generateBookUrl(book, 'ar')}`,
+                'fr': `${baseUrl}/fr${generateBookUrl(book, 'fr')}`,
+                'en': `${baseUrl}/en${generateBookUrl(book, 'en')}`,
+                'x-default': `${baseUrl}/ar${generateBookUrl(book, 'ar')}`,
             },
         },
     }
@@ -548,7 +548,7 @@ export default async function BookDetailPage({
                                 <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-black/5">
                                     <div className="flex items-baseline gap-3 mb-3 md:mb-4">
                                         <span className="text-4xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
-                                        <span className="text-xl font-black text-gray-300 uppercase tracking-widest">MAD</span>
+                                        <span className="text-xl font-black text-gray-300 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 className="w-4 h-4 text-black" />
@@ -633,7 +633,7 @@ export default async function BookDetailPage({
                                                     <div className="flex-1 min-w-0">
                                                         <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{fbDisplayTitle}</span>
                                                         <p className="text-[9px] font-bold text-gray-400 mt-0.5 sm:mt-1 truncate">{fbBook.author}</p>
-                                                        <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} MAD</p>
+                                                        <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} {locale === 'ar' ? 'درهم' : 'MAD'}</p>
                                                     </div>
                                                 </Link>
                                                 <AddToCartButton

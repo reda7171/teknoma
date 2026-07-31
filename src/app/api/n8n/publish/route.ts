@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
         
         let platformsArray = ['facebook']
         if (platform === 'both' || platform === 'all') {
-            platformsArray = ['facebook', 'instagram', 'tiktok']
+            platformsArray = ['facebook', 'instagram', 'tiktok', 'threads']
         } else if (platform) {
             platformsArray = [platform]
         }

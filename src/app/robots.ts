@@ -16,8 +16,12 @@ export default function robots(): MetadataRoute.Robots {
                     '/_next',
                     '/static',
                     '/checkout',
+                    '/*/checkout',
                     '/cart',
+                    '/*/cart',
+                    '/*/*/cart',
                     '/orders',
+                    '/*/orders',
                 ],
             },
             // GPTBot (OpenAI / ChatGPT) — autoriser les pages publiques

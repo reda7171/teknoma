@@ -53,7 +53,7 @@ export default function MarketingPage() {
     const [selectedAssets, setSelectedAssets] = useState<string[]>([])
     const [selectionMode, setSelectionMode] = useState(false)
     const [bulkPublishing, setBulkPublishing] = useState(false)
-    const [bulkPlatform, setBulkPlatform] = useState<'facebook' | 'instagram' | 'threads' | 'all'>('all')
+    const [bulkPlatform, setBulkPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'threads' | 'all'>('all')
     // Tabs & Media
     const [activeTab, setActiveTab] = useState<'creatives' | 'media'>('creatives')
     const [activeMediaTab, setActiveMediaTab] = useState<'books' | 'authors' | 'blog'>('books')
@@ -1012,6 +1012,7 @@ export default function MarketingPage() {
                                     <option value="all">Toutes plateformes</option>
                                     <option value="facebook">Facebook</option>
                                     <option value="instagram">Instagram</option>
+                                    <option value="tiktok">TikTok</option>
                                     <option value="threads">Threads</option>
                                 </select>
                                 <button

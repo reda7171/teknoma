@@ -1432,5 +1432,37 @@
     "Section5Desc": "All content on the riwaya.store website (texts, images, logos) is protected by copyright. Any unauthorized reproduction is strictly prohibited.",
     "Section6Title": "6. Changes to Terms",
     "Section6Desc": "Riwaya reserves the right to modify these Terms and Conditions at any time. Changes will take effect immediately upon publication on the site. We encourage you to review this page regularly."
+  },
+  "OurServices": {
+    "title": "Our Services",
+    "subtitle": "Discover all the services Riwaya offers for book lovers",
+    "hero_title": "Upgrade Your Reading Experience",
+    "hero_desc": "From buying and exchanging to special packs and local delivery, we have everything you need.",
+    "services": {
+      "buy": {
+        "title": "Buy Books",
+        "desc": "Explore a wide range of popular books across various categories and genres."
+      },
+      "exchange": {
+        "title": "Book Exchange",
+        "desc": "Exchange books directly with other readers or earn credits for your next read."
+      },
+      "packs": {
+        "title": "Advantageous Packs",
+        "desc": "Save more by buying books in curated packs of 2, 3, or 4 books."
+      },
+      "cod": {
+        "title": "Cash on Delivery",
+        "desc": "Pay easily and securely only when you receive your order."
+      },
+      "sell": {
+        "title": "Sell Your Books",
+        "desc": "Give your used books a second life by selling them on our platform."
+      },
+      "local": {
+        "title": "Local Delivery",
+        "desc": "Fast and reliable delivery to your doorstep."
+      }
+    }
   }
 }

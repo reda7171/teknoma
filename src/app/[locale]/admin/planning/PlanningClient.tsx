@@ -62,7 +62,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedTime, setSelectedTime] = useState('12:00')
     const [newPostContent, setNewPostContent] = useState('')
-    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['facebook'])
+    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['facebook', 'instagram', 'tiktok', 'threads'])
     const [selectedMedia, setSelectedMedia] = useState<Asset | null>(null)
     const [editingPostId, setEditingPostId] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
@@ -240,7 +240,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setEditingPostId(postToEdit.id)
             setSelectedTime(postToEdit.time)
             setNewPostContent(postToEdit.content || '')
-            setSelectedPlatforms(postToEdit.platforms || ['facebook'])
+            setSelectedPlatforms(postToEdit.platforms && postToEdit.platforms.length > 0 ? postToEdit.platforms : ['facebook', 'instagram', 'tiktok', 'threads'])
             if (postToEdit.mediaUrl) {
                 // Find asset or mock it for display
                 const foundAsset = assets.find(a => a.url === postToEdit.mediaUrl)
@@ -253,6 +253,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setEditingPostId(null)
             setSelectedTime(time)
             setNewPostContent('')
+            setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
             setSelectedMedia(null)
         }
         
@@ -348,6 +349,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 setEditingPostId(null)
                 setSelectedTime(timeToSet)
                 setNewPostContent('')
+                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
                 setSelectedMedia(tempMedia as any)
                 setShowAssetsGrid(false)
                 setIsModalOpen(true)
@@ -378,6 +380,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setEditingPostId(null)
             setSelectedTime(time)
             setNewPostContent('')
+            setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
             setSelectedMedia(tempMedia as any)
             setShowAssetsGrid(false)
             setIsModalOpen(true)
@@ -1083,6 +1086,18 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Plateformes</label>
                                 <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => {
+                                            if (selectedPlatforms.length === 4) {
+                                                setSelectedPlatforms([])
+                                            } else {
+                                                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
+                                            }
+                                        }}
+                                        className={`px-3 py-2 rounded-lg border text-xs font-bold uppercase tracking-wide flex items-center justify-center ${selectedPlatforms.length === 4 ? 'border-purple-600 bg-purple-50 text-purple-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                    >
+                                        All
+                                    </button>
                                     <button 
                                         onClick={() => togglePlatform('facebook')}
                                         className={`p-2 rounded-lg border ${selectedPlatforms.includes('facebook') ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}

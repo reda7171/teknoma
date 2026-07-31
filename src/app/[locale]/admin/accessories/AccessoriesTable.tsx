@@ -92,13 +92,22 @@ export default function AccessoriesTable({
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden border border-slate-200 relative">
-                                            {item.image ? (
-                                                <Image src={item.image} alt={item.name} fill className="object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <Package className="w-5 h-5 text-slate-300" />
-                                                </div>
-                                            )}
+                                            {(() => {
+                                                let img = item.image;
+                                                if (img) {
+                                                    try {
+                                                        const parsed = JSON.parse(img);
+                                                        if (Array.isArray(parsed) && parsed.length > 0) img = parsed[0];
+                                                    } catch (e) {}
+                                                }
+                                                if (!img) return (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <Package className="w-5 h-5 text-slate-300" />
+                                                    </div>
+                                                );
+                                                const src = img.startsWith('http') || img.startsWith('/') ? img : `/uploads/images/${img}`;
+                                                return <Image src={src} alt={item.name} fill className="object-cover" />;
+                                            })()}
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</p>

@@ -14,6 +14,7 @@ interface ActiveFilters {
     sort: string;
     dateFrom: string;
     dateTo: string;
+    hasImage: string;
 }
 
 interface AdminPostsFiltersProps {
@@ -66,7 +67,8 @@ export default function AdminPostsFilters({
         if (newFilters.sort && newFilters.sort !== 'newest') params.set('sort', newFilters.sort)
         if (newFilters.dateFrom) params.set('dateFrom', newFilters.dateFrom)
         if (newFilters.dateTo) params.set('dateTo', newFilters.dateTo)
-        
+        if (newFilters.hasImage && newFilters.hasImage !== 'all') params.set('hasImage', newFilters.hasImage)
+
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
     }
@@ -86,7 +88,8 @@ export default function AdminPostsFilters({
         (activeFilters.bookId && activeFilters.bookId !== 'all') ||
         (activeFilters.sort && activeFilters.sort !== 'newest') ||
         activeFilters.dateFrom ||
-        activeFilters.dateTo
+        activeFilters.dateTo ||
+        (activeFilters.hasImage && activeFilters.hasImage !== 'all')
     )
 
     return (
@@ -126,7 +129,7 @@ export default function AdminPostsFilters({
             {/* Filters Panel */}
             {isOpen && (
                 <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-xl animate-in slide-in-from-top-4 duration-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                         {/* Search */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -161,6 +164,33 @@ export default function AdminPostsFilters({
                                         onClick={() => handleApplyFilters({ published: f.id })}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                             (activeFilters.published === f.id) || (!activeFilters.published && f.id === 'all')
+                                            ? 'bg-black text-white' 
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {f.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Image Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Eye className="w-3 h-3" />
+                                Image
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: 'all', label: 'Toutes' },
+                                    { id: 'true', label: 'Avec Image' },
+                                    { id: 'false', label: 'Sans Image' }
+                                ].map((f) => (
+                                    <button
+                                        key={f.id}
+                                        onClick={() => handleApplyFilters({ hasImage: f.id })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            (activeFilters.hasImage === f.id) || (!activeFilters.hasImage && f.id === 'all')
                                             ? 'bg-black text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}

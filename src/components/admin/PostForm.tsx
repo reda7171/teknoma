@@ -7,8 +7,10 @@ import { uploadPostImage } from '@/lib/actions/upload'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
-import { Book as BookIcon, Search, X } from 'lucide-react'
+import { Book as BookIcon, Search, X, Wand2 } from 'lucide-react'
 import { fetchBooks } from '@/lib/actions/books'
+import CatalogImageModal from '@/components/admin/CatalogImageModal'
+import BookCreativeModal from '@/components/admin/BookCreativeModal'
 import { getUsers } from '@/lib/actions/users'
 import { useEffect } from 'react'
 import PostSectionEditor from './post-form/PostSectionEditor'
@@ -44,6 +46,9 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [allBooks, setAllBooks] = useState<any[]>([])
     const [bookSearch, setBookSearch] = useState('')
     const [selectedBookIds, setSelectedBookIds] = useState<string[]>(post?.books?.map((b: any) => b.id) || [])
+
+    const [isCatalogOpen, setIsCatalogOpen] = useState(false)
+    const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
 
     useEffect(() => {
         const loadData = async () => {
@@ -230,8 +235,9 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                     </a>
                 </div>
 
-                <div className="lg:col-span-2 space-y-6">
-                    <div id="section-general" className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8 scroll-mt-24">
+                <div className="lg:col-span-2 space-y-8">
+                    <div id="section-general" className="bg-white/70 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-8 scroll-mt-24 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">Titre de l'article</label>
@@ -260,7 +266,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                 type="text"
                                 value={title}
                                 onChange={handleTitleChange}
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-2xl md:text-3xl text-gray-900 placeholder:text-gray-300"
+                                className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all duration-300 font-bold text-2xl md:text-3xl text-gray-900 placeholder:text-gray-300 shadow-inner"
                                 placeholder="Titre captivant de l'article..."
                                 required
                             />
@@ -289,7 +295,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                             />
                         </div>
 
-                        <div className="bg-[#faf9f8] rounded-2xl p-6 border border-gray-100 space-y-6">
+                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-[2rem] p-6 md:p-8 border border-gray-100 space-y-6 shadow-sm">
                             <div>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Catégorie</label>
                                 <select
@@ -373,7 +379,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                 value={excerpt}
                                 onChange={(e) => setExcerpt(e.target.value)}
                                 rows={3}
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium text-base text-gray-700 placeholder:text-gray-400 resize-none leading-relaxed"
+                                className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all duration-300 font-medium text-base text-gray-700 placeholder:text-gray-400 resize-none leading-relaxed shadow-inner"
                                 placeholder="Bref résumé accrocheur de l'article..."
                             />
                         </div>
@@ -390,9 +396,10 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                     </div>
                 </div>
 
-                <div id="section-settings" className="space-y-6 scroll-mt-24">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6">
-                        <h3 className="font-bold text-gray-900">Publication</h3>
+                <div id="section-settings" className="space-y-8 scroll-mt-24">
+                    <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
+                        <h3 className="font-black text-gray-900 tracking-tight text-lg relative z-10">Publication</h3>
 
                         <div className="flex items-center gap-2">
                             <input
@@ -421,8 +428,28 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6">
-                        <h3 className="font-bold text-gray-900">Image de couverture</h3>
+                    <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
+                        <h3 className="font-black text-gray-900 tracking-tight text-lg relative z-10">Image de couverture</h3>
+
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsCatalogOpen(true)}
+                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
+                            >
+                                <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
+                                depuis Médiathèque
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setCreativeFormat('post')}
+                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
+                            >
+                                <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                                depuis Créatives Marketing
+                            </button>
+                        </div>
 
                         {coverImage ? (
                             <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 group">
@@ -461,8 +488,9 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         </p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6">
-                        <h3 className="font-bold text-gray-900">Livres liés</h3>
+                    <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
+                        <h3 className="font-black text-gray-900 tracking-tight text-lg relative z-10">Livres liés</h3>
                         <p className="text-[10px] text-gray-500 font-medium">L'article sera affiché sur la page de ces produits.</p>
 
                         <div className="space-y-3">
@@ -541,6 +569,29 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                     </div>
                 </div>
             </div>
+
+            <CatalogImageModal
+                isOpen={isCatalogOpen}
+                onClose={() => setIsCatalogOpen(false)}
+                onSelect={(url) => {
+                    setCoverImage(url)
+                    setIsCatalogOpen(false)
+                }}
+            />
+
+            <BookCreativeModal
+                isOpen={creativeFormat !== null}
+                onClose={() => setCreativeFormat(null)}
+                format={creativeFormat!}
+                book={{
+                    id: post?.id || 'new',
+                    title: title || 'Nouvel Article',
+                    author: authorName || 'Riwaya',
+                    price: 0,
+                    image: coverImage,
+                    category: category
+                }}
+            />
         </form>
     )
 }

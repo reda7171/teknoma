@@ -25,8 +25,9 @@ export default async function AdminPostsPage({
     const sort = typeof searchParamsValues.sort === 'string' ? searchParamsValues.sort : undefined;
     const dateFrom = typeof searchParamsValues.dateFrom === 'string' ? searchParamsValues.dateFrom : undefined;
     const dateTo = typeof searchParamsValues.dateTo === 'string' ? searchParamsValues.dateTo : undefined;
+    const hasImage = typeof searchParamsValues.hasImage === 'string' ? searchParamsValues.hasImage : undefined;
 
-    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId, sort, dateFrom, dateTo, bookId)
+    const { posts, pagination } = await getAllPosts(page, 20, search, contentLang, published, category, authorId, sort, dateFrom, dateTo, bookId, hasImage)
 
     const langCountsRaw = await prisma.post.groupBy({
         by: ['language'],
@@ -49,8 +50,8 @@ export default async function AdminPostsPage({
     // Fetch filters data
     const categories = await getPostCategories(contentLang)
     const authorsRaw = await prisma.user.findMany({
-        where: { posts: { some: {} } },
-        select: { id: true, fullName: true }
+        select: { id: true, fullName: true },
+        orderBy: { fullName: 'asc' }
     })
     const authors = authorsRaw.filter(a => a.fullName).map(a => ({ id: a.id, fullName: a.fullName as string }))
     
@@ -107,7 +108,8 @@ export default async function AdminPostsPage({
         lang: contentLang,
         sort: sort || 'newest',
         dateFrom: dateFrom || '',
-        dateTo: dateTo || ''
+        dateTo: dateTo || '',
+        hasImage: hasImage || 'all'
     }
 
     return (

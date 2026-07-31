@@ -131,6 +131,46 @@ export default async function PackDetailPage({
                 offerCount: 1,
                 availability: 'https://schema.org/InStock',
                 url: `${baseUrl}/packs/${pack.id}`,
+                hasMerchantReturnPolicy: {
+                    '@type': 'MerchantReturnPolicy',
+                    applicableCountry: 'MA',
+                    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                    merchantReturnDays: 7,
+                    returnMethod: 'https://schema.org/ReturnByMail',
+                    returnFees: 'https://schema.org/ReturnShippingFees',
+                    returnShippingFeesAmount: {
+                        '@type': 'MonetaryAmount',
+                        value: 35,
+                        currency: 'MAD'
+                    }
+                },
+                shippingDetails: {
+                    '@type': 'OfferShippingDetails',
+                    shippingRate: {
+                        '@type': 'MonetaryAmount',
+                        value: 35,
+                        currency: 'MAD'
+                    },
+                    shippingDestination: {
+                        '@type': 'DefinedRegion',
+                        addressCountry: 'MA'
+                    },
+                    deliveryTime: {
+                        '@type': 'ShippingDeliveryTime',
+                        handlingTime: {
+                            '@type': 'QuantitativeValue',
+                            minValue: 0,
+                            maxValue: 1,
+                            unitCode: 'DAY'
+                        },
+                        transitTime: {
+                            '@type': 'QuantitativeValue',
+                            minValue: 1,
+                            maxValue: 3,
+                            unitCode: 'DAY'
+                        }
+                    }
+                }
             },
             hasVariant: pack.books.map((pb) => ({
                 '@type': 'Book',

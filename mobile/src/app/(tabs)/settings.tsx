@@ -14,6 +14,7 @@ import { getMe, updateProfile, uploadImage, getImageUrl } from '@/services/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'react-native';
+import ReaderCardModal from '@/components/ReaderCardModal';
 
 const WHATSAPP_NUMBER = '212702220575';
 export default function SettingsScreen() {
@@ -30,6 +31,7 @@ export default function SettingsScreen() {
   const { language, setLanguage, t } = useI18nStore();
   const { isLoggedIn, customer, logout, updateCustomer } = useAuthStore();
   const [isGamificationModalVisible, setGamificationModalVisible] = useState(false);
+  const [isReaderCardVisible, setReaderCardVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -243,6 +245,20 @@ export default function SettingsScreen() {
                   </View>
                 </TouchableOpacity>
               )}
+              
+              {/* Carte de Lecteur */}
+              <TouchableOpacity
+                style={[styles.gamificationCard, { backgroundColor: colors.primary, marginTop: 12, borderColor: 'transparent' }]}
+                activeOpacity={0.8}
+                onPress={() => setReaderCardVisible(true)}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                  <Ionicons name="card" size={20} color="#fff" />
+                  <Text style={{ color: '#fff', fontSize: 14, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 }}>
+                    Générer ma carte de lecteur
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity
@@ -408,6 +424,16 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Reader Card Modal */}
+      {isLoggedIn && customer && (
+        <ReaderCardModal
+          visible={isReaderCardVisible}
+          onClose={() => setReaderCardVisible(false)}
+          customer={customer}
+          t={t}
+        />
+      )}
     </SafeAreaView>
   );
 }

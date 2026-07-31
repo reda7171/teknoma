@@ -124,6 +124,36 @@ const nextConfig: NextConfig = {
         destination: '/books',
         permanent: false,
       },
+      {
+        source: '/shop/cart',
+        destination: '/cart',
+        permanent: true,
+      },
+      {
+        source: '/:locale/shop/cart',
+        destination: '/:locale/cart',
+        permanent: true,
+      },
+      {
+        source: '/shop/checkout',
+        destination: '/checkout',
+        permanent: true,
+      },
+      {
+        source: '/:locale/shop/checkout',
+        destination: '/:locale/checkout',
+        permanent: true,
+      },
+      {
+        source: '/shop/:path*',
+        destination: '/books/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:locale/shop/:path*',
+        destination: '/:locale/books/:path*',
+        permanent: true,
+      },
     ]
   },
   experimental: {

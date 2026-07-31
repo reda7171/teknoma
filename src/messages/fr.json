@@ -1343,5 +1343,37 @@
     "Section5Desc": "L'ensemble du contenu présent sur le site riwaya.store (textes, images, logos) est protégé par les droits d'auteur. Toute reproduction non autorisée est strictement interdite.",
     "Section6Title": "6. Modifications des conditions",
     "Section6Desc": "Riwaya se réserve le droit de modifier ces CGV à tout moment. Les modifications prendront effet dès leur publication sur le site. Nous vous encourageons à consulter cette page régulièrement."
+  },
+  "OurServices": {
+    "title": "Nos Services",
+    "subtitle": "Découvrez tous les services que Riwaya propose aux passionnés de lecture",
+    "hero_title": "Améliorez Votre Expérience de Lecture",
+    "hero_desc": "De l'achat et l'échange aux packs spéciaux et la livraison locale, nous avons tout ce dont vous avez besoin.",
+    "services": {
+      "buy": {
+        "title": "Acheter des Livres",
+        "desc": "Explorez un large choix de livres populaires dans diverses catégories et genres."
+      },
+      "exchange": {
+        "title": "Échange de Livres",
+        "desc": "Échangez des livres directement avec d'autres lecteurs ou gagnez des crédits pour votre prochaine lecture."
+      },
+      "packs": {
+        "title": "Packs Avantageux",
+        "desc": "Économisez davantage en achetant des livres en packs de 2, 3 ou 4 livres."
+      },
+      "cod": {
+        "title": "Paiement à la Livraison",
+        "desc": "Payez facilement et en toute sécurité uniquement à la réception de votre commande."
+      },
+      "sell": {
+        "title": "Vendez Vos Livres",
+        "desc": "Donnez une seconde vie à vos livres d'occasion en les vendant sur notre plateforme."
+      },
+      "local": {
+        "title": "Livraison Locale",
+        "desc": "Livraison rapide et fiable directement à votre porte."
+      }
+    }
   }
 }

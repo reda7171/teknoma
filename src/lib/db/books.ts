@@ -270,12 +270,16 @@ export async function getAllAuthors() {
                 distinct: ['author'],
             })
 
-            return authors
-                .map((b: { author: string }) => b.author)
-                .filter((a: string) => a && a.trim() !== '')
-                .sort()
+            // Filter out empty and duplicate authors with different spaces
+            const cleanAuthors = Array.from(new Set(
+                authors
+                    .map((b: { author: string | null }) => b.author?.trim())
+                    .filter((a) => a && a !== '')
+            )) as string[]
+
+            return cleanAuthors.sort((a, b) => a.localeCompare(b))
         },
-        600 // Cache 10 minutes
+        60 // Cache 1 minute instead of 10 for better sync
     )
 }
 

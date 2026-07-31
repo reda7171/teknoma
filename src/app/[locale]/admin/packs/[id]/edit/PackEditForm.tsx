@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2 } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
 import { publishBooksToJumia } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
+import CatalogImageModal from '@/components/admin/CatalogImageModal'
 
 interface Book {
     id: string
@@ -50,6 +51,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [description, setDescription] = useState(pack.description)
     const [packImage, setPackImage] = useState(pack.image)
     const [onlyAvailable, setOnlyAvailable] = useState(true)
+    const [isCatalogOpen, setIsCatalogOpen] = useState(false)
+    const [isCreativeOpen, setIsCreativeOpen] = useState(false)
 
     function toggleBook(bookId: string) {
         setSelectedBooks(prev =>
@@ -284,10 +287,30 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             </div>
 
                             {/* Image */}
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Image du pack
-                                </label>
+                            <div className="space-y-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Image du pack
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCatalogOpen(true)}
+                                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
+                                        >
+                                            <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
+                                            depuis Médiathèque
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setCreativeFormat('post')}
+                                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
+                                        >
+                                            <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                                            depuis Créatives Marketing
+                                        </button>
+                                    </div>
+                                </div>
                                 <ImageInput 
                                     defaultValue={packImage} 
                                     bookTitle={pack.name} 
@@ -516,15 +539,26 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                 isOpen={creativeFormat !== null}
                 onClose={() => setCreativeFormat(null)}
                 format={creativeFormat!}
-                onImageGenerated={(url) => setPackImage(url)}
+                onImageGenerated={(url) => {
+                    setPackImage(url)
+                    setCreativeFormat(null)
+                }}
                 pack={{
                     id: pack.id,
                     name: name,
                     description: description,
-                    price: pack.price,
-                    isFreeDelivery: isFreeDelivery,
+                    ...pack,
                     books: selectedBooksData,
                     whatsappNumber: whatsappPhone
+                }}
+            />
+
+            <CatalogImageModal
+                isOpen={isCatalogOpen}
+                onClose={() => setIsCatalogOpen(false)}
+                onSelect={(url) => {
+                    setPackImage(url)
+                    setIsCatalogOpen(false)
                 }}
             />
         </div>

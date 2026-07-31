@@ -14,14 +14,18 @@ export async function GET(req: Request) {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return NextResponse.json({ error: 'Jumia non configuré' }, { status: 400 })
 
-        // Get last check date from DB
-        const lastCheckSetting = await prisma.siteSettings.findUnique({ where: { key: 'jumia_last_order_check' } })
-        let lastCheckDate = new Date(Date.now() - 30 * 60000) // Default: 30 minutes ago
-        if (lastCheckSetting?.value) {
-            lastCheckDate = new Date(lastCheckSetting.value)
+        // Get recently notified orders from DB
+        const notifiedSetting = await prisma.siteSettings.findUnique({ where: { key: 'jumia_notified_orders' } })
+        let notifiedOrders = new Set<string>()
+        if (notifiedSetting?.value) {
+            try {
+                notifiedOrders = new Set(JSON.parse(notifiedSetting.value))
+            } catch (e) {}
         }
 
         const now = new Date()
+        const lastCheckDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Look back 24 hours to catch delayed orders
+        
         // Format pour l'API Jumia Vendor (attendu : YYYY-MM-DD HH:MM:SS)
         const formatJumiaDate = (d: Date) => d.toISOString().replace('T', ' ').split('.')[0]
         const createdAfter = formatJumiaDate(lastCheckDate)
@@ -30,8 +34,8 @@ export async function GET(req: Request) {
         const response = await jumia.getOrders(100, undefined, undefined, createdAfter, createdBefore)
         const orders = response?.orders || response?.data?.orders || []
 
-        // Filtrer les commandes strictement plus récentes que la dernière vérification
-        const newOrders = orders.filter((o: any) => new Date(o.createdAt).getTime() > lastCheckDate.getTime())
+        // Filtrer les commandes qui n'ont pas encore été notifiées
+        const newOrders = orders.filter((o: any) => !notifiedOrders.has(o.orderNumber?.toString()))
 
         for (const order of newOrders) {
             const amount = order.totalAmountLocal?.value || '0'
@@ -65,11 +69,19 @@ export async function GET(req: Request) {
             }
         }
 
-        // Update last check date to avoid duplicates
+        // Ajouter les nouvelles commandes notifiées à l'ensemble
+        for (const order of newOrders) {
+            if (order.orderNumber) {
+                notifiedOrders.add(order.orderNumber.toString())
+            }
+        }
+
+        // Update notified orders to avoid duplicates (garder les 1000 derniers)
+        const toSave = Array.from(notifiedOrders).slice(-1000)
         await prisma.siteSettings.upsert({
-            where: { key: 'jumia_last_order_check' },
-            update: { value: now.toISOString() },
-            create: { key: 'jumia_last_order_check', value: now.toISOString() }
+            where: { key: 'jumia_notified_orders' },
+            update: { value: JSON.stringify(toSave) },
+            create: { key: 'jumia_notified_orders', value: JSON.stringify(toSave) }
         })
 
         return NextResponse.json({ success: true, count: newOrders.length, message: `${newOrders.length} nouvelles commandes notifiées.` })
