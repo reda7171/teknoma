@@ -209,19 +209,66 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
     
-    const promises = chatIds.map(cid => 
-        fetch(`${TELEGRAM_API}${token}/sendMediaGroup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: cid,
-                media: media.map(m => ({ ...m, parse_mode: 'HTML' }))
-            })
-        }).then(res => res.json())
-    )
+    let isLocalFile = false
+    for (const m of media) {
+        if (!m.media.startsWith('http')) {
+            isLocalFile = true
+            break
+        }
+    }
 
-    const results = await Promise.all(promises)
-    return results[0]
+    if (isLocalFile) {
+        const promises = chatIds.map(async cid => {
+            const formData = new FormData()
+            formData.append('chat_id', cid)
+
+            const mediaArray: any[] = []
+            const fs = await import('fs/promises')
+            const path = await import('path')
+
+            for (let i = 0; i < media.length; i++) {
+                const m = media[i]
+                if (m.media.startsWith('http')) {
+                    mediaArray.push({ type: m.type, media: m.media, caption: m.caption, parse_mode: 'HTML' })
+                } else {
+                    try {
+                        const fileBuffer = await fs.readFile(m.media)
+                        const blob = new Blob([fileBuffer])
+                        const filename = path.basename(m.media)
+                        formData.append(`photo${i}`, blob, filename)
+                        mediaArray.push({ type: m.type, media: `attach://photo${i}`, caption: m.caption, parse_mode: 'HTML' })
+                    } catch (err) {
+                        console.error('[TELEGRAM] Error reading local media file:', m.media, err)
+                    }
+                }
+            }
+            
+            if (mediaArray.length === 0) return null
+            formData.append('media', JSON.stringify(mediaArray))
+
+            return fetch(`${TELEGRAM_API}${token}/sendMediaGroup`, {
+                method: 'POST',
+                body: formData as any
+            }).then(res => res.json())
+        })
+
+        const results = await Promise.all(promises)
+        return results[0]
+    } else {
+        const promises = chatIds.map(cid => 
+            fetch(`${TELEGRAM_API}${token}/sendMediaGroup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: cid,
+                    media: media.map(m => ({ ...m, parse_mode: 'HTML' }))
+                })
+            }).then(res => res.json())
+        )
+
+        const results = await Promise.all(promises)
+        return results[0]
+    }
 }
 
 // Répondre à un callback (bouton pressé)

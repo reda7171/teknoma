@@ -172,8 +172,7 @@ export async function cancelExchange(exchangeId: string, reason?: string) {
         await (prisma as any).exchange.update({
             where: { id: exchangeId },
             data: {
-                status: 'CANCELLED',
-                adminNote: reason
+                status: 'CANCELLED'
             }
         })
 

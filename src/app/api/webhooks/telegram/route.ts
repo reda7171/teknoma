@@ -205,7 +205,11 @@ export async function POST(req: Request) {
                         const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
                         const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
                         const delivered = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
-                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Livrées: <b>${delivered}</b>\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        const canceled = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'CANCELED').length
+                        const failed = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'FAILED').length
+                        const shipped = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'SHIPPED').length
+                        const readyToShip = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'READY_TO_SHIP').length
+                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                     } else if (action === 'yearly_stats') {
@@ -239,7 +243,11 @@ export async function POST(req: Request) {
                         const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
                         const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
                         const delivered = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
-                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Livrées: <b>${delivered}</b>\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        const canceled = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'CANCELED').length
+                        const failed = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'FAILED').length
+                        const shipped = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'SHIPPED').length
+                        const readyToShip = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'READY_TO_SHIP').length
+                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia annuel chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                     } else if (action === 'yearly_chart') {
@@ -572,15 +580,20 @@ export async function POST(req: Request) {
                     const itemId = firstItem.bookId || firstItem.packId
                     const itemType = firstItem.bookId ? 'BOOK' : 'PACK'
 
+                    const shortType = itemType === 'PACK' ? 'P' : 'B'
                     const replyMarkup = {
                         inline_keyboard: [
                             [
-                                { text: '📸 Instagram', callback_data: `pub_creative:${itemId}:${itemType}:instagram` },
-                                { text: '📘 Facebook', callback_data: `pub_creative:${itemId}:${itemType}:facebook` }
+                                { text: '📸 Instagram', callback_data: `pub_c:${itemId}:${shortType}:ig` },
+                                { text: '📘 Facebook', callback_data: `pub_c:${itemId}:${shortType}:fb` }
                             ],
                             [
-                                { text: '🎵 TikTok', callback_data: `pub_creative:${itemId}:${itemType}:tiktok` },
-                                { text: '✈️ Telegram', callback_data: `pub_creative:${itemId}:${itemType}:telegram` }
+                                { text: '🎵 TikTok', callback_data: `pub_c:${itemId}:${shortType}:tt` },
+                                { text: '✈️ Telegram', callback_data: `pub_c:${itemId}:${shortType}:tg` }
+                            ],
+                            [
+                                { text: '🧵 Threads', callback_data: `pub_c:${itemId}:${shortType}:th` },
+                                { text: '🌍 Toutes (All)', callback_data: `pub_c:${itemId}:${shortType}:all` }
                             ]
                         ]
                     }
@@ -598,7 +611,7 @@ export async function POST(req: Request) {
             else if (data && data.startsWith('pub_c:')) {
                 const [, itemId, shortType, shortPlatform] = data.split(':')
                 const itemType = shortType === 'P' ? 'PACK' : 'BOOK'
-                const platformMap: any = { ig: 'instagram', fb: 'facebook', tt: 'tiktok', tg: 'telegram' }
+                const platformMap: any = { ig: 'instagram', fb: 'facebook', tt: 'tiktok', tg: 'telegram', th: 'threads', all: 'all' }
                 const platform = platformMap[shortPlatform] || 'instagram'
 
                 try {
@@ -681,7 +694,7 @@ export async function POST(req: Request) {
 
                     let platformsArray = ['facebook']
                     if (platform === 'both' || platform === 'all') {
-                        platformsArray = ['facebook', 'instagram', 'tiktok']
+                        platformsArray = ['facebook', 'instagram', 'tiktok', 'threads']
                     } else if (platform) {
                         platformsArray = [platform]
                     }
@@ -727,6 +740,10 @@ export async function POST(req: Request) {
                             [
                                 { text: '🎵 TikTok', callback_data: `pub_c:${itemId}:${shortType}:tt` },
                                 { text: '✈️ Telegram', callback_data: `pub_c:${itemId}:${shortType}:tg` }
+                            ],
+                            [
+                                { text: '🧵 Threads', callback_data: `pub_c:${itemId}:${shortType}:th` },
+                                { text: '🌍 Toutes (All)', callback_data: `pub_c:${itemId}:${shortType}:all` }
                             ],
                             [
                                 { text: '✏️ Légende Personnalisée', callback_data: `caption_info` }
@@ -907,8 +924,71 @@ export async function POST(req: Request) {
                 }
             }
             
+            // Format: month_orders:{year}:{month}
+            else if (data && data.startsWith('month_orders:')) {
+                const [, yearStr, monthStr] = data.split(':')
+                const year = parseInt(yearStr)
+                const month = parseInt(monthStr)
+                const start = new Date(year, month, 1)
+                const end = new Date(year, month + 1, 0, 23, 59, 59, 999)
+                
+                const siteOrders = await prisma.order.findMany({
+                    where: { createdAt: { gte: start, lte: end } },
+                    orderBy: { createdAt: 'desc' },
+                    select: { id: true, status: true }
+                })
+                
+                const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+                const label = `${months[month]} ${year}`
+                
+                let orderText = `📦 <b>Détails des Commandes - ${label}</b>\n\n`
+                orderText += `🔵 <b>SITE WEB :</b>\n`
+                let siteCount = 0
+                
+                for (const o of siteOrders) {
+                    if (orderText.length > 3700) {
+                        orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
+                        break
+                    }
+                    orderText += `• #${o.id.substring(0, 8)} - ${o.status}\n`
+                    siteCount++
+                }
+                orderText += `\nTotal Site: <b>${siteOrders.length}</b> commandes\n\n`
+
+                try {
+                    const { JumiaAPI } = await import('@/lib/jumia-api')
+                    const jumia = await JumiaAPI.getInstance()
+                    if (jumia) {
+                        orderText += `🟠 <b>JUMIA :</b>\n`
+                        const createdAfter = start.toISOString().split('T')[0]
+                        const createdBefore = end.toISOString().split('T')[0]
+                        const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
+                        const jumiaOrders = response?.orders || response?.data?.orders || []
+                        
+                        let jumiaCount = 0
+                        for (const o of jumiaOrders) {
+                            if (orderText.length > 3700) {
+                                orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
+                                break
+                            }
+                            const status = (o.status || o.Status || '').toUpperCase()
+                            orderText += `• ${o.OrderNumber || o.orderNumber} - ${status}\n`
+                            jumiaCount++
+                        }
+                        orderText += `\nTotal Jumia: <b>${jumiaOrders.length}</b> commandes\n\n`
+                        orderText += `Total Global: <b>${siteOrders.length + jumiaOrders.length}</b> commandes`
+                    }
+                } catch (e) {
+                    console.error('Erreur stats Jumia:', e)
+                    orderText += `\n⚠️ Impossible de charger les commandes Jumia.`
+                }
+                
+                await answerCallbackQuery(callbackId, `Détails ${label} générés`, token)
+                await sendTelegramMessage(orderText, message?.chat?.id.toString(), token)
+            }
+            
             // Format: stats:{period}
-            else if (data && data.startsWith('stats:') && !['stats:recent_orders', 'stats:compare_months', 'stats:all_time'].includes(data)) {
+            else if (data && data.startsWith('stats:') && !['stats:recent_orders', 'stats:compare_months', 'stats:all_time', 'stats:yearly_chart'].includes(data)) {
                 const [, period] = data.split(':')
                 const now = new Date()
                 let start = new Date(now.setHours(0, 0, 0, 0))
@@ -969,10 +1049,11 @@ export async function POST(req: Request) {
                     const showRegistrations = (await prisma.siteSettings.findUnique({ where: { key: 'telegram_stats_registrations' } }))?.value === 'true'
                     const showViews = (await prisma.siteSettings.findUnique({ where: { key: 'telegram_stats_top_views' } }))?.value === 'true'
 
-                    const [count, revenue, visitors, registrations] = await Promise.all([
-                        prisma.order.count({ where: { createdAt: { gte: start, lte: end }, status: { not: 'CANCELLED' } } }),
-                        prisma.order.aggregate({
-                            where: { createdAt: { gte: start, lte: end }, status: { not: 'CANCELLED' } },
+                    const [orderStats, visitors, registrations] = await Promise.all([
+                        prisma.order.groupBy({
+                            by: ['status'],
+                            where: { createdAt: { gte: start, lte: end } },
+                            _count: true,
                             _sum: { total: true }
                         }),
                         showVisitors ? prisma.pageView.groupBy({
@@ -983,6 +1064,24 @@ export async function POST(req: Request) {
                             where: { createdAt: { gte: start, lte: end }, role: 'USER' }
                         }) : Promise.resolve(0)
                     ])
+
+                    let siteStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
+                    for (const stat of orderStats) {
+                        const status = stat.status;
+                        const count = stat._count;
+                        const revenue = stat._sum.total || 0;
+                        
+                        siteStats.count += count;
+                        
+                        if (status !== 'CANCELLED') {
+                            siteStats.revenue += revenue;
+                        }
+                        
+                        if (status === 'PENDING') siteStats.pending += count;
+                        else if (status === 'SHIPPED') siteStats.shipped += count;
+                        else if (status === 'DELIVERED') siteStats.delivered += count;
+                        else if (status === 'CANCELLED') siteStats.canceled += count;
+                    }
 
                     let jumiaStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
                     try {
@@ -1018,8 +1117,13 @@ export async function POST(req: Request) {
                     }
 
                     let text = `📊 <b>RAPPORT : ${label.toUpperCase()}</b>\n\n` +
-                               `📦 Commandes Site : <b>${count}</b>\n` +
-                               `💰 CA Site : <b>${(revenue._sum.total || 0).toFixed(2)} MAD</b>`
+                               `🔵 <b>SITE WEB :</b>\n` +
+                               `📦 Commandes Total : <b>${siteStats.count}</b>\n` +
+                               `💰 CA Total : <b>${siteStats.revenue.toFixed(2)} MAD</b>\n` +
+                               `⏳ En attente : ${siteStats.pending}\n` +
+                               `🚚 En expédition : ${siteStats.shipped}\n` +
+                               `✅ Livrées : ${siteStats.delivered}\n` +
+                               `❌ Annulées/Retours : ${siteStats.canceled}`
                     
                     text += `\n\n🟠 <b>JUMIA :</b>\n` +
                             `📦 Commandes Total : <b>${jumiaStats.count}</b>\n` +
@@ -1229,6 +1333,50 @@ export async function POST(req: Request) {
                 await sendTelegramMessage(text, message?.chat?.id.toString(), token)
             }
 
+            // Format: stats:yearly_chart
+            else if (data === 'stats:yearly_chart') {
+                const now = new Date()
+                const year = now.getFullYear()
+                const startYear = new Date(year, 0, 1)
+                const endYear = new Date(year, 11, 31, 23, 59, 59)
+                
+                const orders = await prisma.order.findMany({
+                    where: {
+                        createdAt: { gte: startYear, lte: endYear },
+                        status: { not: 'CANCELLED' }
+                    },
+                    select: {
+                        total: true,
+                        createdAt: true
+                    }
+                })
+                
+                const monthlyCA = Array(12).fill(0)
+                for (const o of orders) {
+                    const month = new Date(o.createdAt).getMonth()
+                    monthlyCA[month] += o.total
+                }
+                
+                const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
+                let maxCA = Math.max(...monthlyCA, 1) // avoid div by 0
+                
+                let chartText = `📈 <b>CA ANNUEL ${year} (Site Web)</b>\n\n`
+                let totalYearCA = 0
+                
+                for (let i = 0; i <= now.getMonth(); i++) {
+                    const val = monthlyCA[i]
+                    totalYearCA += val
+                    const blocks = Math.round((val / maxCA) * 10)
+                    const bar = '█'.repeat(blocks) + '▒'.repeat(10 - blocks)
+                    chartText += `<code>${months[i].padEnd(4)} |</code> ${bar} <b>${val.toFixed(0)}</b>\n`
+                }
+                
+                chartText += `\n💰 <b>Total : ${totalYearCA.toFixed(2)} MAD</b>`
+                
+                await answerCallbackQuery(callbackId, '📈 Graphique Annuel chargé', token)
+                await sendTelegramMessage(chartText, message?.chat?.id.toString(), token)
+            }
+
             // Sécurité : toujours répondre pour arrêter le chargement du bouton
             else {
                 await answerCallbackQuery(callbackId, 'Action reçue', token)
@@ -1247,6 +1395,8 @@ export async function POST(req: Request) {
                     `<b>📊 Statistiques & Rapports</b>\n` +
                     `/bilan — Stats site web (aujourd'hui, mois, etc.)\n` +
                     `/rapport — Rapport quotidien immédiat\n` +
+                    `/commandes_mois — Toutes les commandes du mois (Site & Jumia)\n` +
+                    `/2026 — Lister les commandes par mois pour l'année 2026\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
                     `<b>🟠 Jumia</b>\n` +
                     `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n\n` +
@@ -1282,6 +1432,97 @@ export async function POST(req: Request) {
                     `<i>💡 Toutes les commandes sont insensibles à la casse</i>`
                 await sendTelegramMessage(helpText, chatId.toString(), token)
             }
+            else if (text.startsWith('/RUPTURE') || text === 'RUPTURE') {
+                const outOfStockBooks = await prisma.book.findMany({
+                    where: { stock: { lte: 0 } },
+                    select: { title: true, id: true }
+                })
+                
+                if (outOfStockBooks.length === 0) {
+                    await sendTelegramMessage(`✅ <b>Tout est en stock !</b>\nAucun livre n'est actuellement en rupture.`, chatId.toString(), token)
+                } else {
+                    let orderText = `🚨 <b>Livres en rupture de stock (${outOfStockBooks.length})</b>\n\n`
+                    for (const b of outOfStockBooks) {
+                        if (orderText.length > 3800) {
+                            orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
+                            break
+                        }
+                        orderText += `• ${b.title}\n`
+                    }
+                    await sendTelegramMessage(orderText, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/COMMANDES_MOIS') || text === 'COMMANDES_MOIS') {
+                const now = new Date()
+                const start = new Date(now.getFullYear(), now.getMonth(), 1)
+                const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+                
+                const siteOrders = await prisma.order.findMany({
+                    where: { createdAt: { gte: start, lte: end } },
+                    orderBy: { createdAt: 'desc' },
+                    select: { id: true, status: true }
+                })
+                
+                let orderText = `📦 <b>Toutes les Commandes du Mois</b>\n\n`
+                orderText += `🔵 <b>SITE WEB :</b>\n`
+                let siteCount = 0
+                
+                for (const o of siteOrders) {
+                    if (orderText.length > 3700) {
+                        orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
+                        break
+                    }
+                    orderText += `• #${o.id.substring(0, 8)} - ${o.status}\n`
+                    siteCount++
+                }
+                orderText += `\nTotal Site: <b>${siteOrders.length}</b> commandes\n\n`
+
+                try {
+                    const { JumiaAPI } = await import('@/lib/jumia-api')
+                    const jumia = await JumiaAPI.getInstance()
+                    if (jumia) {
+                        orderText += `🟠 <b>JUMIA :</b>\n`
+                        const createdAfter = start.toISOString().split('T')[0]
+                        const createdBefore = end.toISOString().split('T')[0]
+                        const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
+                        const jumiaOrders = response?.orders || response?.data?.orders || []
+                        
+                        let jumiaCount = 0
+                        for (const o of jumiaOrders) {
+                            if (orderText.length > 3700) {
+                                orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
+                                break
+                            }
+                            const status = (o.status || o.Status || '').toUpperCase()
+                            orderText += `• ${o.OrderNumber || o.orderNumber} - ${status}\n`
+                            jumiaCount++
+                        }
+                        orderText += `\nTotal Jumia: <b>${jumiaOrders.length}</b> commandes\n\n`
+                        orderText += `Total Global: <b>${siteOrders.length + jumiaOrders.length}</b> commandes`
+                    }
+                } catch (e) {
+                    console.error('Erreur stats Jumia:', e)
+                    orderText += `\n⚠️ Impossible de charger les commandes Jumia.`
+                }
+                
+                await sendTelegramMessage(orderText, chatId.toString(), token)
+            }
+            else if (text.match(/^\/20\d\d$/)) {
+                const year = text.substring(1)
+                const replyText = `📅 <b>Détails des Commandes - Année ${year}</b>\n\nSélectionnez un mois pour voir la liste des commandes :`
+                const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+                
+                const inline_keyboard = []
+                for (let i = 0; i < 12; i += 2) {
+                    inline_keyboard.push([
+                        { text: months[i], callback_data: `month_orders:${year}:${i}` },
+                        { text: months[i+1], callback_data: `month_orders:${year}:${i+1}` }
+                    ])
+                }
+                
+                const replyMarkup = { inline_keyboard }
+                await sendTelegramMessage(replyText, chatId.toString(), token, replyMarkup)
+            }
             else if (text.startsWith('/BILAN') || text === 'BILAN' || text.startsWith('/STATS')) {
                 const replyText = `📊 <b>Centre de Rapports Riwaya</b>\n\nQue souhaitez-vous consulter ?`
                 const replyMarkup = {
@@ -1307,7 +1548,8 @@ export async function POST(req: Request) {
                             { text: '📊 CA Mensuel Comparé', callback_data: 'stats:compare_months' }
                         ],
                         [
-                            { text: '🗂️ Depuis le Début', callback_data: 'stats:all_time' }
+                            { text: '🗂️ Depuis le Début', callback_data: 'stats:all_time' },
+                            { text: '📈 Graphique Annuel (CA)', callback_data: 'stats:yearly_chart' }
                         ]
                     ]
                 }
@@ -1392,9 +1634,10 @@ export async function POST(req: Request) {
 
                     // Envoyer un album des 3 dernières images pour l'aperçu
                     if (creatives.length > 0) {
+                        const path = await import('path')
                         const album = creatives.slice(0, 3).map(c => ({
                             type: 'photo' as const,
-                            media: `${siteUrl}/uploads/books/${c.name}`,
+                            media: path.join(process.cwd(), 'public', 'uploads', 'books', c.name),
                             caption: `📸 Aperçu : ${c.name}`
                         }))
                         await sendTelegramMediaGroup(album, chatId.toString(), token)
