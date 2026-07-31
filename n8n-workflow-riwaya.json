@@ -360,10 +360,17 @@
     },
     {
       "parameters": {
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "oAuth2Api",
         "method": "POST",
         "url": "={{ 'https://graph.threads.net/v1.0/' + ($json.threads_account_id || 'me') + '/threads' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.threads_access_token }}"
+            }
+          ]
+        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"media_type\": \"{{ $json.image ? 'IMAGE' : 'TEXT' }}\",\n  {{ $json.image ? '\\\"image_url\\\": \\\"' + $json.image + '\\\",' : '' }}\n  \"text\": \"{{ $json.caption }}\"\n}",
@@ -380,10 +387,17 @@
     },
     {
       "parameters": {
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "oAuth2Api",
         "method": "POST",
         "url": "={{ 'https://graph.threads.net/v1.0/' + ($json.threads_account_id || 'me') + '/threads_publish' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.threads_access_token }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "form-urlencoded",
         "bodyParameters": {

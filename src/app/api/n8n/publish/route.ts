@@ -54,6 +54,8 @@ export async function POST(req: NextRequest) {
         // Jeton d'accès Facebook, IG et TikTok (Stocké en DB via l'admin)
         const facebookAccessToken = await getSetting('facebook_access_token')
         const instagramAccountId = await getSetting('instagram_account_id')
+        const threadsAccountId = await getSetting('threads_account_id')
+        const threadsAccessToken = await getSetting('threads_access_token')
         const tiktokAccessToken = await getSetting('tiktok_access_token')
         const tiktokCreatorId = await getSetting('tiktok_creator_id')
         const tiktokAppId = await getSetting('tiktok_app_id')
@@ -139,6 +141,8 @@ export async function POST(req: NextRequest) {
             source: 'riwaya-admin',
             facebook_access_token: facebookAccessToken,
             instagram_account_id: instagramAccountId,
+            threads_account_id: threadsAccountId,
+            threads_access_token: threadsAccessToken,
             tiktok_access_token: tiktokAccessToken,
             tiktok_creator_id: tiktokCreatorId,
             tiktok_app_id: tiktokAppId,
