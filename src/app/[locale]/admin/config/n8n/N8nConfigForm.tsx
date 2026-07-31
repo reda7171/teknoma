@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { updateSetting } from '@/lib/actions/site-settings'
-import { Save } from 'lucide-react'
+import { Save, Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId, initialThreadsAccessToken }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string, initialThreadsAccessToken: string }) {
+export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId, initialThreadsAccessToken, initialTiktokAccessToken, initialTiktokCreatorId, initialTiktokAppId, initialTiktokClientSecret }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string, initialThreadsAccessToken: string, initialTiktokAccessToken?: string, initialTiktokCreatorId?: string, initialTiktokAppId?: string, initialTiktokClientSecret?: string }) {
     const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl)
     const [instagramWebhookUrl, setInstagramWebhookUrl] = useState(initialInstagramWebhookUrl)
     const [facebookAccessToken, setFacebookAccessToken] = useState(initialFacebookAccessToken)
@@ -13,10 +13,19 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
     const [instagramToken, setInstagramToken] = useState(initialInstagramToken)
     const [threadsAccountId, setThreadsAccountId] = useState(initialThreadsAccountId)
     const [threadsAccessToken, setThreadsAccessToken] = useState(initialThreadsAccessToken)
+    const [tiktokAccessToken, setTiktokAccessToken] = useState(initialTiktokAccessToken || '')
+    const [tiktokCreatorId, setTiktokCreatorId] = useState(initialTiktokCreatorId || '')
+    const [tiktokAppId, setTiktokAppId] = useState(initialTiktokAppId || '')
+    const [tiktokClientSecret, setTiktokClientSecret] = useState(initialTiktokClientSecret || '')
     const [loading, setLoading] = useState(false)
     const [isTesting, setIsTesting] = useState(false)
     const [message, setMessage] = useState('')
+    const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
     const router = useRouter()
+
+    const toggleSecret = (key: string) => {
+        setShowSecrets(prev => ({ ...prev, [key]: !prev[key] }))
+    }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -31,6 +40,10 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
             await updateSetting('instagram_token', instagramToken, 'config', 'Instagram Token')
             await updateSetting('threads_account_id', threadsAccountId, 'config', 'Threads Account ID')
             await updateSetting('threads_access_token', threadsAccessToken, 'config', 'Threads Access Token')
+            await updateSetting('tiktok_access_token', tiktokAccessToken, 'config', 'TikTok Access Token')
+            await updateSetting('tiktok_creator_id', tiktokCreatorId, 'config', 'TikTok Creator ID')
+            await updateSetting('tiktok_app_id', tiktokAppId, 'config', 'TikTok App ID')
+            await updateSetting('tiktok_client_secret', tiktokClientSecret, 'config', 'TikTok Client Secret')
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
         } catch (error) {
@@ -86,13 +99,23 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                 <label htmlFor="facebookAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
                     Facebook Access Token
                 </label>
-                <textarea
-                    id="facebookAccessToken"
-                    value={facebookAccessToken}
-                    onChange={(e) => setFacebookAccessToken(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
-                    placeholder="Entrez le jeton d'accès Facebook..."
-                />
+                <div className="relative">
+                    <input
+                        type={showSecrets['facebookAccessToken'] ? 'text' : 'password'}
+                        id="facebookAccessToken"
+                        value={facebookAccessToken}
+                        onChange={(e) => setFacebookAccessToken(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                        placeholder="Entrez le jeton d'accès Facebook..."
+                    />
+                    <button 
+                        type="button" 
+                        onClick={() => toggleSecret('facebookAccessToken')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                        {showSecrets['facebookAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                </div>
                 <p className="mt-2 text-xs text-gray-500 font-medium">
                     Utilisé pour les automatisations liées à Facebook (Pixel, Conversion API, etc.)
                 </p>
@@ -119,13 +142,23 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                 <label htmlFor="instagramToken" className="block text-sm font-bold text-gray-900 mb-2">
                     Instagram Token
                 </label>
-                <textarea
-                    id="instagramToken"
-                    value={instagramToken}
-                    onChange={(e) => setInstagramToken(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
-                    placeholder="Entrez le jeton Instagram..."
-                />
+                <div className="relative">
+                    <input
+                        type={showSecrets['instagramToken'] ? 'text' : 'password'}
+                        id="instagramToken"
+                        value={instagramToken}
+                        onChange={(e) => setInstagramToken(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                        placeholder="Entrez le jeton Instagram..."
+                    />
+                    <button 
+                        type="button" 
+                        onClick={() => toggleSecret('instagramToken')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                        {showSecrets['instagramToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                </div>
                 <p className="mt-2 text-xs text-gray-500 font-medium">
                     Jeton d'accès pour interagir avec l'API Instagram.
                 </p>
@@ -152,16 +185,102 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                 <label htmlFor="threadsAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
                     Threads Access Token
                 </label>
-                <textarea
-                    id="threadsAccessToken"
-                    value={threadsAccessToken}
-                    onChange={(e) => setThreadsAccessToken(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
-                    placeholder="Entrez le jeton d'accès Threads..."
-                />
+                <div className="relative">
+                    <input
+                        type={showSecrets['threadsAccessToken'] ? 'text' : 'password'}
+                        id="threadsAccessToken"
+                        value={threadsAccessToken}
+                        onChange={(e) => setThreadsAccessToken(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                        placeholder="Entrez le jeton d'accès Threads..."
+                    />
+                    <button 
+                        type="button" 
+                        onClick={() => toggleSecret('threadsAccessToken')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                        {showSecrets['threadsAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                </div>
                 <p className="mt-2 text-xs text-gray-500 font-medium">
                     Jeton d'accès longue durée généré via Meta Developer pour l'API Threads.
                 </p>
+            </div>
+
+            <div className="pt-6 border-t border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Configuration TikTok</h3>
+                <div className="space-y-6">
+                    <div>
+                        <label htmlFor="tiktokAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
+                            TikTok Access Token
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showSecrets['tiktokAccessToken'] ? 'text' : 'password'}
+                                id="tiktokAccessToken"
+                                value={tiktokAccessToken}
+                                onChange={(e) => setTiktokAccessToken(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                                placeholder="Entrez le jeton d'accès TikTok..."
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => toggleSecret('tiktokAccessToken')}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showSecrets['tiktokAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="tiktokCreatorId" className="block text-sm font-bold text-gray-900 mb-2">
+                            TikTok Creator ID
+                        </label>
+                        <input
+                            type="text"
+                            id="tiktokCreatorId"
+                            value={tiktokCreatorId}
+                            onChange={(e) => setTiktokCreatorId(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder="Ex: 1234567890"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="tiktokAppId" className="block text-sm font-bold text-gray-900 mb-2">
+                            TikTok App ID (Client Key)
+                        </label>
+                        <input
+                            type="text"
+                            id="tiktokAppId"
+                            value={tiktokAppId}
+                            onChange={(e) => setTiktokAppId(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder="Client Key de votre App TikTok"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="tiktokClientSecret" className="block text-sm font-bold text-gray-900 mb-2">
+                            TikTok Client Secret
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showSecrets['tiktokClientSecret'] ? 'text' : 'password'}
+                                id="tiktokClientSecret"
+                                value={tiktokClientSecret}
+                                onChange={(e) => setTiktokClientSecret(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                                placeholder="Client Secret de votre App TikTok"
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => toggleSecret('tiktokClientSecret')}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showSecrets['tiktokClientSecret'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">

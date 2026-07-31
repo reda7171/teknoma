@@ -102,9 +102,14 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const generateSuggestions = (seed?: number) => {
         if (!availableBooks || availableBooks.length === 0) return;
+        
+        // Exclure les articles avec un stock de 0
+        const inStockItems = availableBooks.filter(item => item.stock === undefined || item.stock > 0);
+        if (inStockItems.length === 0) return;
+
         const currentSeed = seed || new Date().getTime();
         let s = currentSeed;
-        const shuffled = [...availableBooks].sort(() => 0.5 - seededRandom(s++));
+        const shuffled = [...inStockItems].sort(() => 0.5 - seededRandom(s++));
         const picked = shuffled.slice(0, 3);
         const newSuggestions = picked.map(book => {
             const isProgrammed = posts.some(post => 

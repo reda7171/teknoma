@@ -24,6 +24,10 @@ export default async function N8nConfigPage() {
     const instagramToken = await getSetting('instagram_token') || ''
     const threadsAccountId = await getSetting('threads_account_id') || ''
     const threadsAccessToken = await getSetting('threads_access_token') || ''
+    const tiktokAccessToken = await getSetting('tiktok_access_token') || ''
+    const tiktokCreatorId = await getSetting('tiktok_creator_id') || ''
+    const tiktokAppId = await getSetting('tiktok_app_id') || ''
+    const tiktokClientSecret = await getSetting('tiktok_client_secret') || ''
 
     return (
         <div className="space-y-12">
@@ -58,6 +62,10 @@ export default async function N8nConfigPage() {
                         initialInstagramToken={instagramToken}
                         initialThreadsAccountId={threadsAccountId}
                         initialThreadsAccessToken={threadsAccessToken}
+                        initialTiktokAccessToken={tiktokAccessToken}
+                        initialTiktokCreatorId={tiktokCreatorId}
+                        initialTiktokAppId={tiktokAppId}
+                        initialTiktokClientSecret={tiktokClientSecret}
                     />
                 </div>
             </div>

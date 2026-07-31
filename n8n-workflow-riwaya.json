@@ -290,22 +290,24 @@
     },
     {
       "parameters": {
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "oAuth2Api",
         "method": "POST",
-        "url": "https://open.tiktokapis.com/v2/post/publish/video/init/",
+        "url": "https://open.tiktokapis.com/v2/post/publish/content/init/",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Content-Type",
               "value": "application/json; charset=UTF-8"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.tiktok_access_token }}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $json.caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false,\n    \"video_cover_timestamp_ms\": 1000\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    \"video_url\": \"{{ $json.video_url || $json.image }}\"\n  }\n}",
+        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $json.caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    {{ $json.image && !$json.image.toLowerCase().endsWith('.mp4') ? '\\\"photo_images\\\": [\\\"' + $json.image + '\\\"]' : '\\\"video_url\\\": \\\"' + $json.image + '\\\"' }}\n  },\n  \"post_mode\": \"DIRECT_POST\",\n  \"media_type\": \"{{ $json.image && !$json.image.toLowerCase().endsWith('.mp4') ? 'PHOTO' : 'VIDEO' }}\"\n}",
         "options": {}
       },
       "id": "tiktok-post",

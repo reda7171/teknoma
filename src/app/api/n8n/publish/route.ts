@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSetting } from '@/lib/actions/site-settings'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, sendTelegramPhoto } from '@/lib/telegram'
 
 import { verifyAdmin } from '@/lib/actions/auth'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
@@ -214,7 +214,11 @@ export async function POST(req: NextRequest) {
             ? `📅 <b>Publication Programmée</b>\n\nUn post pour <b>${safeTitle}</b> a été programmé sur <b>${platformLabel}</b> via n8n.\n🕒 <b>Date:</b> ${new Date(scheduleAt).toLocaleString('fr-FR')}`
             : `🚀 <b>Nouvelle Publication</b>\n\nUn post pour <b>${safeTitle}</b> a été envoyé à n8n pour publication immédiate sur <b>${platformLabel}</b>.`;
             
-        sendTelegramMessage(messageText).catch(console.error);
+        if (imageUrl && !isVideo) {
+            sendTelegramPhoto(imageUrl, messageText).catch(console.error);
+        } else {
+            sendTelegramMessage(messageText).catch(console.error);
+        }
 
         return NextResponse.json({
             success: true,
