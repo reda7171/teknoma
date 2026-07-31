@@ -44,11 +44,23 @@ export async function GET(req: Request) {
             const orderId = order.number || order.orderNumber;
             
             try {
-                // Récupérer les items pour trouver l'image
-                const itemsResponse = await jumia.getOrderItems(orderId)
-                const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
-                if (items.length > 0) {
-                    imageUrl = items[0].productMainImage || items[0].productImage || undefined
+                // L'API Jumia nécessite l'ID interne (UUID) pour récupérer les items, pas le numéro public
+                const internalId = order.id || orderId
+                const itemsResponse = await jumia.getOrderItems(internalId)
+                
+                // itemsResponse est un tableau de packages, chaque package contient orderItems
+                if (Array.isArray(itemsResponse) && itemsResponse.length > 0) {
+                    const firstPackage = itemsResponse[0]
+                    const items = firstPackage.orderItems || []
+                    if (items.length > 0 && items[0].product) {
+                        imageUrl = items[0].product.imageUrl || items[0].product.productMainImage || undefined
+                    }
+                } else {
+                    // Fallback si la structure est différente
+                    const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
+                    if (items.length > 0) {
+                        imageUrl = items[0].product?.imageUrl || items[0].productMainImage || items[0].productImage || undefined
+                    }
                 }
             } catch (err) {
                 console.error("Erreur récupération image Jumia", err)
