@@ -35,54 +35,66 @@ export async function GET(req: Request) {
         const orders = response?.orders || response?.data?.orders || []
 
         // Filtrer les commandes qui n'ont pas encore été notifiées
-        const newOrders = orders.filter((o: any) => !notifiedOrders.has(o.orderNumber?.toString()))
+        const newOrders = orders.filter((o: any) => !notifiedOrders.has((o.number || o.orderNumber)?.toString()))
 
         for (const order of newOrders) {
             const amount = order.totalAmountLocal?.value || '0'
             let imageUrl: string | undefined = undefined
             
+            const orderId = order.number || order.orderNumber;
+            
             try {
                 // Récupérer les items pour trouver l'image
-                const itemsResponse = await jumia.getOrderItems(order.orderNumber)
+                const itemsResponse = await jumia.getOrderItems(orderId)
                 const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
                 if (items.length > 0) {
                     imageUrl = items[0].productMainImage || items[0].productImage || undefined
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Erreur récupération image Jumia", err)
+            }
 
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${order.orderNumber}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} MAD</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}`
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${orderId}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} MAD</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}`
             
             const replyMarkup = {
                 inline_keyboard: [
                     [
-                        { text: '✅ Ready to Ship', callback_data: `jumia_rts:${order.orderNumber}` },
-                        { text: '❌ Annuler', callback_data: `jumia_cancel:${order.orderNumber}` }
+                        { text: '✅ Ready to Ship', callback_data: `jumia_rts:${orderId}` },
+                        { text: '❌ Annuler', callback_data: `jumia_cancel:${orderId}` }
                     ]
                 ]
             }
 
-            if (imageUrl) {
-                const { sendTelegramPhoto } = await import('@/lib/telegram')
-                await sendTelegramPhoto(imageUrl, text, undefined, undefined, replyMarkup)
-            } else {
-                await sendTelegramMessage(text, undefined, undefined, replyMarkup)
+            try {
+                if (imageUrl) {
+                    const { sendTelegramPhoto } = await import('@/lib/telegram')
+                    await sendTelegramPhoto(imageUrl, text, undefined, undefined, replyMarkup)
+                } else {
+                    await sendTelegramMessage(text, undefined, undefined, replyMarkup)
+                }
+            } catch (telegramErr) {
+                console.error("Erreur lors de l'envoi du message Telegram", telegramErr)
+                // Si l'envoi de la photo échoue (ex: URL invalide), essayer avec un simple message texte
+                if (imageUrl) {
+                    try {
+                        await sendTelegramMessage(text, undefined, undefined, replyMarkup)
+                    } catch (fallbackErr) {
+                        console.error("Erreur fallback Telegram", fallbackErr)
+                    }
+                }
+            }
+
+            // Mettre à jour immédiatement la base de données pour éviter de renvoyer la notif si le script time out après
+            if (orderId) {
+                notifiedOrders.add(orderId.toString())
+                const toSave = Array.from(notifiedOrders).slice(-1000)
+                await prisma.siteSettings.upsert({
+                    where: { key: 'jumia_notified_orders' },
+                    update: { value: JSON.stringify(toSave) },
+                    create: { key: 'jumia_notified_orders', value: JSON.stringify(toSave) }
+                })
             }
         }
-
-        // Ajouter les nouvelles commandes notifiées à l'ensemble
-        for (const order of newOrders) {
-            if (order.orderNumber) {
-                notifiedOrders.add(order.orderNumber.toString())
-            }
-        }
-
-        // Update notified orders to avoid duplicates (garder les 1000 derniers)
-        const toSave = Array.from(notifiedOrders).slice(-1000)
-        await prisma.siteSettings.upsert({
-            where: { key: 'jumia_notified_orders' },
-            update: { value: JSON.stringify(toSave) },
-            create: { key: 'jumia_notified_orders', value: JSON.stringify(toSave) }
-        })
 
         return NextResponse.json({ success: true, count: newOrders.length, message: `${newOrders.length} nouvelles commandes notifiées.` })
     } catch (error: any) {
