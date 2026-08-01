@@ -20,6 +20,7 @@ export interface LaunchAdParams {
     headline: string
     linkUrl: string
     imageUrl: string
+    objective?: string
     targeting: AdTargeting
 }
 
@@ -46,24 +47,36 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         const { accessToken, adAccountId, pageId } = await getFbCredentials()
 
         // 1. Create Campaign
-        const campaignFormData = new URLSearchParams()
-        campaignFormData.append('name', `[Riwaya] ${params.name}`)
-        campaignFormData.append('objective', 'OUTCOME_SALES')
-        campaignFormData.append('status', 'PAUSED') // Toujours créer en pause par sécurité
-        campaignFormData.append('special_ad_categories', '[]')
-        campaignFormData.append('access_token', accessToken)
+        const campaignObjective = params.objective || 'OUTCOME_TRAFFIC'
+        const campaignPayload: any = {
+            name: `[Riwaya] ${params.name}`,
+            objective: campaignObjective,
+            status: 'PAUSED',
+            special_ad_categories: [],
+            is_adset_budget_sharing_enabled: false,
+            access_token: accessToken
+        }
 
         const campaignRes = await fetch(`${FB_API_BASE}/${adAccountId}/campaigns`, {
             method: 'POST',
-            body: campaignFormData
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(campaignPayload)
         })
         const campaignData = await campaignRes.json()
-        if (campaignData.error) throw new Error(`Erreur Création Campagne: ${campaignData.error.message}`)
+        if (campaignData.error) {
+            console.error('FB API Campaign Error Details:', JSON.stringify(campaignData.error))
+            throw new Error(`Erreur Création Campagne: ${campaignData.error.error_user_msg || campaignData.error.message}`)
+        }
         const campaignId = campaignData.id
 
         // 2. Upload Image (from URL)
+        let finalImageUrl = params.imageUrl
+        if (finalImageUrl.startsWith('/')) {
+            finalImageUrl = `https://riwaya.store${finalImageUrl}`
+        }
+        
         const imageFormData = new URLSearchParams()
-        imageFormData.append('url', params.imageUrl)
+        imageFormData.append('url', finalImageUrl)
         imageFormData.append('access_token', accessToken)
 
         const imageRes = await fetch(`${FB_API_BASE}/${adAccountId}/adimages`, {
@@ -96,7 +109,14 @@ export async function launchFacebookAd(params: LaunchAdParams) {
 
         const adSetFormData = new URLSearchParams()
         adSetFormData.append('name', `AdSet - ${params.name}`)
-        adSetFormData.append('optimization_goal', 'LINK_CLICKS') // Ou OFFSITE_CONVERSIONS si pixel configuré
+        
+        // Map objective to optimization goal
+        let optimizationGoal = 'LINK_CLICKS'
+        if (campaignObjective === 'OUTCOME_SALES') optimizationGoal = 'OFFSITE_CONVERSIONS'
+        else if (campaignObjective === 'OUTCOME_ENGAGEMENT') optimizationGoal = 'POST_ENGAGEMENT'
+        
+        adSetFormData.append('optimization_goal', optimizationGoal)
+        
         adSetFormData.append('billing_event', 'IMPRESSIONS')
         adSetFormData.append('bid_amount', '50') // 0.50 MAD par clic en auto (ou utiliser bid_strategy)
         // Convert daily budget from MAD to cents (FB expects lowest denomination)

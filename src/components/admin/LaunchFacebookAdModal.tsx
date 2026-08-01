@@ -31,6 +31,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
     const [primaryText, setPrimaryText] = useState('Découvrez notre nouveau livre ! 📚 Livraison à domicile partout au Maroc (Paiement à la livraison).')
     const [headline, setHeadline] = useState('Commandez maintenant')
     const [selectedCities, setSelectedCities] = useState<string[]>([])
+    const [objective, setObjective] = useState('OUTCOME_TRAFFIC')
 
     if (!isOpen || !asset) return null
 
@@ -54,6 +55,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
                 headline,
                 linkUrl,
                 imageUrl: asset.url,
+                objective,
                 targeting: {
                     cities: selectedCities.map(name => ({ name }))
                 }
@@ -135,6 +137,20 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
                                     onChange={(e) => setDailyBudget(Number(e.target.value))}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium font-mono"
                                 />
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 ml-1">
+                                    <Target className="w-3.5 h-3.5" /> Objectif de Campagne
+                                </label>
+                                <select
+                                    value={objective}
+                                    onChange={(e) => setObjective(e.target.value)}
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium"
+                                >
+                                    <option value="OUTCOME_TRAFFIC">Trafic (Clics sur le lien)</option>
+                                    <option value="OUTCOME_SALES">Ventes (Conversions)</option>
+                                    <option value="OUTCOME_ENGAGEMENT">Engagement</option>
+                                </select>
                             </div>
                             <div>
                                 <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 ml-1">
