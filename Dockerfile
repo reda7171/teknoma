@@ -29,6 +29,8 @@ ENV DATABASE_URL="mysql://riwaya_user:riwaya_pass@127.0.0.1:3906/riwaya_db"
 RUN npx prisma generate
 
 # Build Next.js
+# Ensure no stale host cache is present if .dockerignore failed
+RUN rm -rf .next
 RUN npm run build
 
 # Production image, copy all the files and run next
