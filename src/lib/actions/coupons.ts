@@ -45,6 +45,26 @@ export async function createCoupon(data: z.infer<typeof CouponSchema>) {
     }
 }
 
+export async function updateCoupon(id: string, data: z.infer<typeof CouponSchema>) {
+    try {
+        await verifyAdmin()
+        const validated = CouponSchema.parse(data)
+
+        await prisma.coupon.update({
+            where: { id },
+            data: {
+                ...validated,
+                expiresAt: validated.expiresAt ? new Date(validated.expiresAt) : null,
+            }
+        })
+
+        revalidatePath('/admin/coupons')
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Erreur lors de la modification' }
+    }
+}
+
 export async function deleteCoupon(id: string) {
     try {
         await verifyAdmin()

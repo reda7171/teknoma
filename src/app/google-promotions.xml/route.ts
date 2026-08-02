@@ -32,23 +32,26 @@ export async function GET() {
             if (coupon.expiresAt && coupon.expiresAt < now) continue
 
             const promoId = escapeXml(coupon.code)
-            const typeText = coupon.type === 'PERCENTAGE' ? `${coupon.discount}% de réduction` : `${coupon.discount} MAD de réduction`
-            const minAmountStr = coupon.minAmount ? ` (dès ${coupon.minAmount} MAD)` : ''
+            const discountFormatted = Number(coupon.discount).toFixed(2)
+            const typeText = coupon.type === 'PERCENTAGE' ? `${coupon.discount}% de réduction` : `${discountFormatted} MAD de réduction`
+            
+            const minAmountFormatted = coupon.minAmount ? Number(coupon.minAmount).toFixed(2) : null
+            const minAmountStr = minAmountFormatted ? ` (dès ${minAmountFormatted} MAD)` : ''
             const longTitle = escapeXml(`${typeText}${minAmountStr}`)
             
             const startDate = coupon.createdAt.toISOString()
             const endDateDate = coupon.expiresAt ? new Date(coupon.expiresAt) : new Date(now.getFullYear() + 1, now.getMonth(), now.getDate())
             const endDate = endDateDate.toISOString()
 
-            const minAmountXml = coupon.minAmount ? `\n        <g:minimum_purchase_amount>${coupon.minAmount} MAD</g:minimum_purchase_amount>` : ''
+            const minAmountXml = minAmountFormatted ? `\n        <g:minimum_purchase_amount>${minAmountFormatted} MAD</g:minimum_purchase_amount>` : ''
             const discountXml = coupon.type === 'PERCENTAGE' 
                 ? `\n        <g:percent_off>${coupon.discount}</g:percent_off>` 
-                : `\n        <g:money_off_amount>${coupon.discount} MAD</g:money_off_amount>`
+                : `\n        <g:money_off_amount>${discountFormatted} MAD</g:money_off_amount>`
 
             xml += `
     <item>
         <g:promotion_id>${promoId}</g:promotion_id>
-        <g:product_applicability>SPECIFIC_PRODUCTS</g:product_applicability>
+        <g:product_applicability>ALL_PRODUCTS</g:product_applicability>
         <g:offer_type>GENERIC_CODE</g:offer_type>
         <g:generic_code>${promoId}</g:generic_code>
         <g:long_title>${longTitle}</g:long_title>

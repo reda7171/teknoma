@@ -79,7 +79,7 @@ export async function getPurchaseLots() {
 export async function getExpenses(filters?: { month?: number, year?: number }) {
     await verifyAdmin()
     
-    let where: any = {}
+    let where: any = { financeArchiveId: null }
     
     if (filters?.month && filters?.year) {
         // Mois en JS: 0 = Janvier, 11 = Décembre
@@ -102,8 +102,8 @@ export async function getExpenses(filters?: { month?: number, year?: number }) {
 export async function getFinancialStats(filters?: { month?: number, year?: number }) {
     await verifyAdmin()
 
-    let expenseWhere: any = {}
-    let orderWhere: any = { status: 'DELIVERED' }
+    let expenseWhere: any = { financeArchiveId: null }
+    let orderWhere: any = { status: 'DELIVERED', financeArchiveId: null }
 
     if (filters?.month && filters?.year) {
         const start = new Date(filters.year, filters.month - 1, 1)
@@ -166,6 +166,7 @@ export async function getFinancialStats(filters?: { month?: number, year?: numbe
     }
 
     return {
+        ordersCount: orders.length,
         totalExpenses: expensesAgg._sum.amount || 0,
         totalIncomes: incomesAgg._sum.amount || 0,
         totalRevenue: totalRevenue,
@@ -180,8 +181,8 @@ export async function getFinancialStats(filters?: { month?: number, year?: numbe
 export async function getChartData(filters?: { month?: number, year?: number }) {
     await verifyAdmin()
 
-    let expenseWhere: any = {}
-    let orderWhere: any = { status: 'DELIVERED' }
+    let expenseWhere: any = { financeArchiveId: null }
+    let orderWhere: any = { status: 'DELIVERED', financeArchiveId: null }
 
     if (filters?.month && filters?.year) {
         const start = new Date(filters.year, filters.month - 1, 1)
@@ -253,4 +254,44 @@ export async function getChartData(filters?: { month?: number, year?: number }) 
     }
 
     return Array.from(dataMap.values())
+}
+
+export async function archiveCurrentPeriod(data: { name: string, netProfit: number, revenue: number, expenses: number, shareReda: number, shareAmine: number, ordersCount: number }) {
+    await verifyAdmin()
+    
+    // Create archive record
+    const archive = await prisma.financeArchive.create({
+        data: {
+            periodName: data.name,
+            startDate: new Date(), // Just as placeholder, real start date would be last archive end date but it's okay for now
+            revenue: data.revenue,
+            expenses: data.expenses,
+            netProfit: data.netProfit,
+            shareReda: data.shareReda,
+            shareAmine: data.shareAmine,
+            ordersCount: data.ordersCount
+        }
+    })
+
+    // Update all current DELIVERED orders
+    await prisma.order.updateMany({
+        where: { status: 'DELIVERED', financeArchiveId: null },
+        data: { financeArchiveId: archive.id }
+    })
+
+    // Update all current expenses
+    await prisma.expense.updateMany({
+        where: { financeArchiveId: null },
+        data: { financeArchiveId: archive.id }
+    })
+
+    revalidatePath('/admin/finance')
+    return { success: true }
+}
+
+export async function getFinanceArchives() {
+    await verifyAdmin()
+    return prisma.financeArchive.findMany({
+        orderBy: { createdAt: 'desc' }
+    })
 }

@@ -13,7 +13,7 @@ import { OrderStatus } from '@prisma/client'
  * Mettre à jour le statut d'une commande
  * Si RETURNED ou CANCELLED : réintègre le stock des livres
  */
-export async function updateOrderStatus(orderId: string, status: OrderStatus) {
+export async function updateOrderStatus(orderId: string, status: OrderStatus, options?: { skipSyncToProvider?: boolean, historyComment?: string }) {
     try {
         await verifyAdmin()
 
@@ -41,6 +41,9 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
         const wasAlreadyRestored = ['CANCELLED', 'RETURNED'].includes(prevStatus)
 
         await prisma.$transaction(async (tx) => {
+            // Récupérer la compagnie de livraison
+            const company = order.shippingCompany ? await tx.shippingCompany.findUnique({ where: { id: order.shippingCompany } }) : null;
+
             // Mise à jour statut + historique
             await tx.order.update({
                 where: { id: orderId },
@@ -49,12 +52,27 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
                     statusHistory: {
                         create: {
                             status,
-                            comment: `Statut mis à jour manuellement par l'administrateur`,
+                            comment: options?.historyComment || `Statut mis à jour manuellement par l'administrateur`,
                             createdBy: 'ADMIN'
                         }
                     }
                 }
             })
+
+            // Push status to WithYou if applicable
+            if (!options?.skipSyncToProvider && company?.name.toLowerCase().includes('withyou') && order.trackingID) {
+                let wyStatus = status.toLowerCase()
+                if (status === 'DELIVERED') wyStatus = 'livrer'
+                if (status === 'SHIPPED') wyStatus = 'expedier'
+                if (status === 'RETURNED') wyStatus = 'retour'
+                if (status === 'CANCELLED') wyStatus = 'annuler'
+                
+                try {
+                    await withyouService.updateStatus(order.trackingID, wyStatus)
+                } catch (err) {
+                    console.error('Failed to sync status to WithYou:', err)
+                }
+            }
 
             // Réintégrer le stock si retour/annulation d'une commande qui avait décrémenté le stock
             if (isNowReturned && !wasAlreadyRestored) {
@@ -155,6 +173,29 @@ export async function updateOrderDetails(orderId: string, data: {
     } catch (error) {
         console.error('Erreur mise à jour commande:', error)
         return { success: false, error: 'Impossible de modifier la commande' }
+    }
+}
+
+/**
+ * Modifier manuellement le Tracking ID (Code Colis) d'une commande
+ */
+export async function updateOrderTrackingId(orderId: string, trackingID: string, shippingCompanyId?: string) {
+    try {
+        await verifyAdmin()
+        
+        const dataToUpdate: any = { trackingID }
+        if (shippingCompanyId) {
+            dataToUpdate.shippingCompany = shippingCompanyId
+        }
+
+        await prisma.order.update({
+            where: { id: orderId },
+            data: dataToUpdate
+        })
+        revalidatePath(`/admin/orders/${orderId}`)
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message }
     }
 }
 
@@ -560,7 +601,7 @@ export async function bulkSyncDeliveries() {
 
         const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
         
-        let updatedCount = 0
+        const updatedOrders: any[] = []
         const BATCH_SIZE = 50
 
         const withYouOrders = activeOrders.filter(o => {
@@ -590,8 +631,14 @@ export async function bulkSyncDeliveries() {
                     }
                     
                     for (const item of statusArray) {
-                        const trackingID = item.trackingID || item.trackingId || item.code_tracking
-                        const extStatus = item.status || item.statut
+                        const trackingID = item.id || item.trackingID || item.trackingId || item.code_tracking
+                        const extStatusRaw = item.status || item.statut
+                        let extStatus = ''
+                        if (typeof extStatusRaw === 'object' && extStatusRaw !== null) {
+                            extStatus = extStatusRaw.code || extStatusRaw.label || extStatusRaw.statut || JSON.stringify(extStatusRaw)
+                        } else {
+                            extStatus = String(extStatusRaw || '')
+                        }
                         
                         if (trackingID && extStatus) {
                             const orderToUpdate = batch.find(o => o.trackingID === trackingID)
@@ -607,15 +654,33 @@ export async function bulkSyncDeliveries() {
                                     newInternalStatus = 'CANCELLED'
                                 }
 
+                                // Mettre à jour en base le "deliveryStatus"
                                 await prisma.order.update({
                                     where: { id: orderToUpdate.id },
                                     data: {
                                         deliveryStatus: extStatus,
-                                        deliverySyncAt: new Date(),
-                                        status: newInternalStatus
+                                        deliverySyncAt: new Date()
                                     }
                                 })
-                                updatedCount++
+
+                                // Si le statut interne change, on utilise updateOrderStatus pour gérer le stock
+                                if (newInternalStatus !== orderToUpdate.status) {
+                                    await updateOrderStatus(orderToUpdate.id, newInternalStatus, {
+                                        skipSyncToProvider: true,
+                                        historyComment: `Statut synchronisé depuis le transporteur: ${extStatus}`
+                                    })
+                                }
+                                updatedOrders.push({
+                                    id: orderToUpdate.id,
+                                    trackingID: trackingID,
+                                    fullName: orderToUpdate.fullName,
+                                    oldStatus: orderToUpdate.status,
+                                    newStatus: newInternalStatus,
+                                    deliveryStatus: extStatus,
+                                    phone: orderToUpdate.phone,
+                                    city: orderToUpdate.city,
+                                    company: 'WithYou'
+                                })
                             }
                         }
                     }
@@ -641,7 +706,14 @@ export async function bulkSyncDeliveries() {
                     
                     if (res.ok) {
                         const data = await res.json()
-                        const extStatus = data.status
+                        const extStatusRaw = data.status
+                        let extStatus = ''
+                        if (typeof extStatusRaw === 'object' && extStatusRaw !== null) {
+                            extStatus = extStatusRaw.code || extStatusRaw.label || extStatusRaw.statut || JSON.stringify(extStatusRaw)
+                        } else {
+                            extStatus = String(extStatusRaw || '')
+                        }
+
                         if (extStatus && extStatus !== order.deliveryStatus) {
                             let newInternalStatus = order.status
                             const statusLower = extStatus.toLowerCase()
@@ -654,15 +726,33 @@ export async function bulkSyncDeliveries() {
                                 newInternalStatus = 'CANCELLED'
                             }
 
+                            // Mettre à jour en base le "deliveryStatus"
                             await prisma.order.update({
                                 where: { id: order.id },
                                 data: {
                                     deliveryStatus: extStatus,
-                                    deliverySyncAt: new Date(),
-                                    status: newInternalStatus
+                                    deliverySyncAt: new Date()
                                 }
                             })
-                            updatedCount++
+
+                            // Si le statut interne change, on utilise updateOrderStatus pour gérer le stock
+                            if (newInternalStatus !== order.status) {
+                                await updateOrderStatus(order.id, newInternalStatus, {
+                                    skipSyncToProvider: true,
+                                    historyComment: `Statut synchronisé depuis le transporteur: ${extStatus}`
+                                })
+                            }
+                            updatedOrders.push({
+                                id: order.id,
+                                trackingID: order.trackingID,
+                                fullName: order.fullName,
+                                oldStatus: order.status,
+                                newStatus: newInternalStatus,
+                                deliveryStatus: extStatus,
+                                phone: order.phone,
+                                city: order.city,
+                                company: 'Olivraison'
+                            })
                         }
                     }
                 } catch (err) {
@@ -672,7 +762,7 @@ export async function bulkSyncDeliveries() {
         }
 
         revalidatePath('/admin/orders')
-        return { success: true, updatedCount }
+        return { success: true, updatedCount: updatedOrders.length, updatedOrders }
     } catch (error: any) {
         return { success: false, error: error.message || 'Erreur inconnue' }
     }

@@ -1,10 +1,11 @@
 import { isAuthenticated } from '@/lib/actions/auth'
-import { getExpenses, getFinancialStats, getChartData } from '@/lib/actions/finance'
-import { Plus, Trash2, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { getExpenses, getFinancialStats, getChartData, getFinanceArchives } from '@/lib/actions/finance'
+import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, Archive } from 'lucide-react'
 import ExpenseForm from '@/components/admin/ExpenseForm'
 import ExpensesTable from '@/components/admin/ExpensesTable'
 import MonthYearFilter from '@/components/admin/MonthYearFilter'
 import FinanceChart from '@/components/admin/FinanceChart'
+import ArchivePeriodButton from '@/components/admin/ArchivePeriodButton'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -26,6 +27,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
     const expenses = await getExpenses(filters)
     const stats = await getFinancialStats(filters)
     const chartData = await getChartData(filters)
+    const archives = await getFinanceArchives()
 
     // Chiffre d'Affaire
     const grossRevenue = stats.totalRevenue
@@ -60,10 +62,16 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                 </div>
                 
                 <div className="flex flex-col md:flex-row items-center gap-4">
-                    <Suspense fallback={<div className="h-10 w-48 bg-gray-100 rounded-2xl animate-pulse" />}>
-                        <MonthYearFilter />
-                    </Suspense>
-                    
+                    <ArchivePeriodButton 
+                        stats={{
+                            netProfit,
+                            revenue: grossRevenue,
+                            expenses: operatingExpenses + stats.totalCostOfGoodsSold,
+                            shareReda: netProfit / 2,
+                            shareAmine: netProfit / 2,
+                            ordersCount: stats.ordersCount || 0
+                        }}
+                    />
                     <div className="flex items-center gap-3 bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100">
                         <Wallet className="w-5 h-5 text-emerald-600" />
                         <span className="text-emerald-600 text-[10px] font-black uppercase tracking-widest">
@@ -145,6 +153,57 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
 
             {/* Expenses List Premium */}
             <ExpensesTable expenses={expenses} />
+
+            {/* Archives Section */}
+            {archives.length > 0 && (
+                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 mt-12">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-black">
+                            <Archive className="w-6 h-6" />
+                        </div>
+                        <h2 className="text-2xl font-black text-black tracking-tight">Archives Financières</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {archives.map(archive => (
+                            <div key={archive.id} className="border border-gray-100 rounded-[2rem] p-6 hover:shadow-lg transition-all bg-gray-50/50">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="font-black text-lg">{archive.periodName}</h3>
+                                    <span className="text-[10px] font-black text-gray-400 bg-gray-200 px-3 py-1 rounded-full uppercase">
+                                        {new Date(archive.createdAt).toLocaleDateString('fr-FR')}
+                                    </span>
+                                </div>
+                                
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500 font-medium">Commandes</span>
+                                        <span className="font-bold">{archive.ordersCount}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500 font-medium">Chiffre d'Affaire</span>
+                                        <span className="font-bold">{archive.revenue.toFixed(2)} MAD</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500 font-medium">Bénéfice Net</span>
+                                        <span className="font-black text-emerald-600">{archive.netProfit.toFixed(2)} MAD</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-gray-200 flex justify-between text-xs">
+                                    <div>
+                                        <p className="text-gray-400 font-bold uppercase tracking-widest mb-1">Reda</p>
+                                        <p className="font-black">{archive.shareReda.toFixed(2)} MAD</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-gray-400 font-bold uppercase tracking-widest mb-1">Amine</p>
+                                        <p className="font-black">{archive.shareAmine.toFixed(2)} MAD</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

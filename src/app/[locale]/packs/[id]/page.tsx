@@ -115,7 +115,7 @@ export default async function PackDetailPage({
     const jsonLd = [
         {
             '@context': 'https://schema.org',
-            '@type': 'ProductGroup',
+            '@type': 'Product',
             name: pack.name,
             description: pack.description || `Pack de ${pack.books.length} livres sélectionné par Riwaya.`,
             image: pack.image || pack.books[0]?.book.image,
@@ -172,7 +172,7 @@ export default async function PackDetailPage({
                     }
                 }
             },
-            hasVariant: pack.books.map((pb) => ({
+            isRelatedTo: pack.books.map((pb) => ({
                 '@type': 'Book',
                 name: pb.book.title,
                 author: {

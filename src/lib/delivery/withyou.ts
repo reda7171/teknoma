@@ -170,7 +170,7 @@ class WithYouService {
      * Obtenir le statut des colis
      */
     async getStatus(trackingIDs: string[]) {
-        return this.request('/getstatus', { data: trackingIDs }, 'GET')
+        return this.request('/getstatus', { data: trackingIDs }, 'POST')
     }
 }
 

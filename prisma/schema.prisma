@@ -268,6 +268,8 @@ model Order {
   statusHistory   OrderStatusHistory[]
   customer        Customer?            @relation(fields: [customerId], references: [id])
   seller          User?                @relation("SellerOrders", fields: [sellerId], references: [id])
+  financeArchiveId String?
+  financeArchive  FinanceArchive?      @relation(fields: [financeArchiveId], references: [id])
 
   @@index([status])
   @@index([createdAt])
@@ -277,6 +279,7 @@ model Order {
   @@index([trackingID])
   @@index([customerId])
   @@index([sellerId], map: "orders_sellerId_fkey")
+  @@index([financeArchiveId])
   @@map("orders")
 }
 
@@ -701,11 +704,34 @@ model Expense {
   userId      String?
   type        TransactionType @default(EXPENSE)
   user        User?           @relation(fields: [userId], references: [id])
+  financeArchiveId String?
+  financeArchive  FinanceArchive? @relation(fields: [financeArchiveId], references: [id])
 
   @@index([category])
   @@index([date])
   @@index([userId], map: "expenses_userId_fkey")
+  @@index([financeArchiveId])
   @@map("expenses")
+}
+
+model FinanceArchive {
+  id           String    @id @default(uuid())
+  periodName   String    @db.VarChar(255)
+  startDate    DateTime
+  endDate      DateTime  @default(now())
+  ordersCount  Int       @default(0)
+  revenue      Float     @default(0)
+  expenses     Float     @default(0)
+  netProfit    Float     @default(0)
+  shareReda    Float     @default(0)
+  shareAmine   Float     @default(0)
+  createdAt    DateTime  @default(now())
+
+  orders       Order[]
+  expensesList Expense[]
+
+  @@index([createdAt])
+  @@map("finance_archives")
 }
 
 model PageView {
