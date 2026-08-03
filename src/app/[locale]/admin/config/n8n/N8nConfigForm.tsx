@@ -62,183 +62,237 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
             {message && (
                 <div className={`p-4 rounded-xl text-sm font-medium ${message.includes('succès') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                     {message}
                 </div>
             )}
 
-            <div>
-                <label htmlFor="webhookUrl" className="block text-sm font-bold text-gray-900 mb-2">
-                    URL du Webhook (n8n)
-                </label>
-                <input
-                    type="url"
-                    id="webhookUrl"
-                    value={webhookUrl}
-                    onChange={(e) => setWebhookUrl(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="Ex: https://n8n.votredomaine.com/webhook/..."
-                />
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    Cette URL sera appelée lors d'événements importants (nouvelle commande, etc.)
-                </p>
-            </div>
-
-            <div>
-                <label htmlFor="instagramWebhookUrl" className="block text-sm font-bold text-gray-900 mb-2">
-                    URL du Webhook Instagram (n8n)
-                </label>
-                <input
-                    type="url"
-                    id="instagramWebhookUrl"
-                    value={instagramWebhookUrl}
-                    onChange={(e) => setInstagramWebhookUrl(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="Ex: https://n8n.votredomaine.com/webhook/instagram..."
-                />
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    Ce webhook sera appelé pour déclencher une publication sur Instagram.
-                </p>
-            </div>
-
-            <div>
-                <label htmlFor="facebookAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
-                    Facebook Access Token
-                </label>
-                <div className="relative">
+            {/* --- Général / Automatisation (n8n) --- */}
+            <div className="p-6 rounded-2xl border-l-4 border-l-gray-400 border-t border-r border-b border-gray-100 bg-gray-50 shadow-sm space-y-6">
+                <h3 className="text-lg font-black text-gray-700 flex items-center gap-2">
+                    Automatisation Générale
+                </h3>
+                
+                <div>
+                    <label htmlFor="webhookUrl" className="block text-sm font-bold text-gray-900 mb-2">
+                        URL du Webhook (n8n)
+                    </label>
                     <input
-                        type={showSecrets['facebookAccessToken'] ? 'text' : 'password'}
-                        id="facebookAccessToken"
-                        value={facebookAccessToken}
-                        onChange={(e) => setFacebookAccessToken(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
-                        placeholder="Entrez le jeton d'accès Facebook..."
+                        type="url"
+                        id="webhookUrl"
+                        value={webhookUrl}
+                        onChange={(e) => setWebhookUrl(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="Ex: https://n8n.votredomaine.com/webhook/..."
                     />
-                    <button 
-                        type="button" 
-                        onClick={() => toggleSecret('facebookAccessToken')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                        {showSecrets['facebookAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                    <p className="mt-2 text-xs text-gray-500 font-medium">
+                        Cette URL sera appelée lors d'événements importants (nouvelle commande, etc.)
+                    </p>
                 </div>
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    Utilisé pour les automatisations liées à Facebook (Pixel, Conversion API, etc.)
-                </p>
             </div>
 
-            <div>
-                <label htmlFor="instagramAccountId" className="block text-sm font-bold text-gray-900 mb-2">
-                    Instagram Account ID (ig_user_id)
-                </label>
-                <input
-                    type="text"
-                    id="instagramAccountId"
-                    value={instagramAccountId}
-                    onChange={(e) => setInstagramAccountId(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="Ex: 17841400000000000"
-                />
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    L'ID du compte pro Instagram lié à la page Facebook. Nécessaire pour publier sur Instagram.
-                </p>
+            {/* --- Facebook --- */}
+            <div className="p-6 rounded-2xl border-l-4 border-l-[#1877F2] border-t border-r border-b border-gray-100 bg-[#1877F2]/5 shadow-sm space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h3 className="text-lg font-black text-[#1877F2] flex items-center gap-2">
+                        <svg className="w-6 h-6 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                        </svg>
+                        Facebook
+                    </h3>
+                    {facebookAccessToken ? (
+                        <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">✅ Connecté</span>
+                    ) : (
+                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">❌ Non connecté</span>
+                    )}
+                </div>
+                
+                <div>
+                    <label htmlFor="facebookAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
+                        Facebook Access Token
+                    </label>
+                    <div className="relative">
+                        <input
+                            type={showSecrets['facebookAccessToken'] ? 'text' : 'password'}
+                            id="facebookAccessToken"
+                            value={facebookAccessToken}
+                            onChange={(e) => setFacebookAccessToken(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#1877F2] outline-none transition-all pr-12"
+                            placeholder="Entrez le jeton d'accès Facebook..."
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => toggleSecret('facebookAccessToken')}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1877F2]"
+                        >
+                            {showSecrets['facebookAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500 font-medium">
+                        Utilisé pour les automatisations liées à Facebook (Pixel, Conversion API, etc.)
+                    </p>
+                </div>
             </div>
 
-            <div>
-                <label htmlFor="instagramToken" className="block text-sm font-bold text-gray-900 mb-2">
-                    Instagram Token
-                </label>
-                <div className="relative">
+            {/* --- Instagram --- */}
+            <div className="p-6 rounded-2xl border-l-4 border-l-[#E1306C] border-t border-r border-b border-gray-100 bg-gradient-to-r from-[#E1306C]/5 to-[#F56040]/5 shadow-sm space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h3 className="text-lg font-black text-[#E1306C] flex items-center gap-2">
+                        <svg className="w-6 h-6 text-[#E1306C]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
+                        </svg>
+                        Instagram
+                    </h3>
+                    {instagramToken && instagramAccountId ? (
+                        <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">✅ Connecté</span>
+                    ) : (
+                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">❌ Non connecté</span>
+                    )}
+                </div>
+                
+                <div>
+                    <label htmlFor="instagramWebhookUrl" className="block text-sm font-bold text-gray-900 mb-2">
+                        URL du Webhook Instagram (n8n)
+                    </label>
                     <input
-                        type={showSecrets['instagramToken'] ? 'text' : 'password'}
-                        id="instagramToken"
-                        value={instagramToken}
-                        onChange={(e) => setInstagramToken(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
-                        placeholder="Entrez le jeton Instagram..."
+                        type="url"
+                        id="instagramWebhookUrl"
+                        value={instagramWebhookUrl}
+                        onChange={(e) => setInstagramWebhookUrl(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E1306C] outline-none transition-all"
+                        placeholder="Ex: https://n8n.votredomaine.com/webhook/instagram..."
                     />
-                    <button 
-                        type="button" 
-                        onClick={() => toggleSecret('instagramToken')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                        {showSecrets['instagramToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                    <p className="mt-2 text-xs text-gray-500 font-medium">
+                        Ce webhook sera appelé pour déclencher une publication sur Instagram.
+                    </p>
                 </div>
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    Jeton d'accès pour interagir avec l'API Instagram.
-                </p>
-            </div>
 
-            <div>
-                <label htmlFor="threadsAccountId" className="block text-sm font-bold text-gray-900 mb-2">
-                    Threads Account ID
-                </label>
-                <input
-                    type="text"
-                    id="threadsAccountId"
-                    value={threadsAccountId}
-                    onChange={(e) => setThreadsAccountId(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="Ex: 1234567890"
-                />
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    L'ID du compte Threads.
-                </p>
-            </div>
-
-            <div>
-                <label htmlFor="threadsAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
-                    Threads Access Token
-                </label>
-                <div className="relative">
+                <div>
+                    <label htmlFor="instagramAccountId" className="block text-sm font-bold text-gray-900 mb-2">
+                        Instagram Account ID (ig_user_id)
+                    </label>
                     <input
-                        type={showSecrets['threadsAccessToken'] ? 'text' : 'password'}
-                        id="threadsAccessToken"
-                        value={threadsAccessToken}
-                        onChange={(e) => setThreadsAccessToken(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
-                        placeholder="Entrez le jeton d'accès Threads..."
+                        type="text"
+                        id="instagramAccountId"
+                        value={instagramAccountId}
+                        onChange={(e) => setInstagramAccountId(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E1306C] outline-none transition-all"
+                        placeholder="Ex: 17841400000000000"
                     />
-                    <button 
-                        type="button" 
-                        onClick={() => toggleSecret('threadsAccessToken')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                        {showSecrets['threadsAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                    <p className="mt-2 text-xs text-gray-500 font-medium">
+                        L'ID du compte pro Instagram lié à la page Facebook.
+                    </p>
                 </div>
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    Jeton d'accès longue durée généré via Meta Developer pour l'API Threads.
-                </p>
+
+                <div>
+                    <label htmlFor="instagramToken" className="block text-sm font-bold text-gray-900 mb-2">
+                        Instagram Token
+                    </label>
+                    <div className="relative">
+                        <input
+                            type={showSecrets['instagramToken'] ? 'text' : 'password'}
+                            id="instagramToken"
+                            value={instagramToken}
+                            onChange={(e) => setInstagramToken(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E1306C] outline-none transition-all pr-12"
+                            placeholder="Entrez le jeton Instagram..."
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => toggleSecret('instagramToken')}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#E1306C]"
+                        >
+                            {showSecrets['instagramToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Configuration TikTok</h3>
-                <div className="space-y-6">
+            {/* --- Threads --- */}
+            <div className="p-6 rounded-2xl border-l-4 border-l-black border-t border-r border-b border-gray-100 bg-gray-50 shadow-sm space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h3 className="text-lg font-black text-black flex items-center gap-2">
+                        <svg className="w-6 h-6 text-black" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6855C105.707 61.7381 111.932 64.1366 115.961 68.814C118.893 72.2193 120.854 76.925 121.825 82.8638C114.511 81.6207 106.601 81.2385 98.145 81.7233C74.3247 83.0954 59.0111 96.9879 60.0396 116.292C60.5615 126.084 65.4397 134.508 73.775 140.011C80.8224 144.663 89.899 146.938 99.3323 146.423C111.79 145.74 121.563 140.987 128.381 132.296C133.559 125.696 136.834 117.143 138.28 106.366C144.217 109.949 148.617 114.664 151.047 120.332C155.179 129.967 155.42 145.8 142.501 158.708C131.182 170.016 117.533 174.908 97.0135 175.059C74.2042 174.89 56.9538 167.575 45.7381 153.317C35.2355 139.966 29.8077 120.682 29.6052 96C29.8077 71.3178 35.2355 52.0336 45.7381 38.6827C56.9538 24.4249 74.2039 17.11 97.0132 16.9405C119.988 17.1113 137.539 24.4614 148.184 38.0189C156.46 48.5853 161.648 64.0414 163.765 83.4795L178.683 81.8797C176.242 59.3995 169.957 41.2721 159.508 27.9731C145.549 10.2269 123.639 0.999656 97.0125 0.999656C96.6575 0.999656 96.3025 1.00282 95.9482 1.00914C66.8665 1.25866 44.595 10.3708 29.7432 29.2818C15.4299 47.509 9.3897 71.218 9.58557 96.0002C9.3897 120.782 15.4299 144.491 29.7432 162.719C44.595 181.63 66.8665 190.741 95.9482 190.991C96.3025 190.997 96.6575 191 97.0125 191C123.834 191 141.528 183.921 154.544 170.92C172.062 153.425 171.745 130.654 166.574 118.571C162.368 108.742 154.269 101.408 141.537 88.9883ZM98.4405 129.507C88.0005 130.095 77.1544 125.409 76.6196 115.372C76.2232 107.93 81.9158 99.626 99.0812 98.6368C101.047 98.5234 102.976 98.468 104.871 98.468C111.106 98.468 116.939 99.0737 122.242 100.233C120.264 124.935 108.662 128.946 98.4405 129.507Z" fill="currentColor"></path>
+                        </svg>
+                        Threads
+                    </h3>
+                    {threadsAccessToken ? (
+                        <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">✅ Connecté</span>
+                    ) : (
+                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">❌ Non connecté</span>
+                    )}
+                </div>
+                
+                <div>
+                    <label htmlFor="threadsAccountId" className="block text-sm font-bold text-gray-900 mb-2">
+                        Threads Account ID
+                    </label>
+                    <input
+                        type="text"
+                        id="threadsAccountId"
+                        value={threadsAccountId}
+                        onChange={(e) => setThreadsAccountId(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-black outline-none transition-all"
+                        placeholder="Ex: 1234567890"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="threadsAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
+                        Threads Access Token
+                    </label>
+                    <div className="relative">
+                        <input
+                            type={showSecrets['threadsAccessToken'] ? 'text' : 'password'}
+                            id="threadsAccessToken"
+                            value={threadsAccessToken}
+                            onChange={(e) => setThreadsAccessToken(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-black outline-none transition-all pr-12"
+                            placeholder="Entrez le jeton d'accès Threads..."
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => toggleSecret('threadsAccessToken')}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
+                        >
+                            {showSecrets['threadsAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- TikTok --- */}
+            <div className="p-6 rounded-2xl border-l-4 border-l-[#25F4EE] border-t border-r border-b border-[#FE2C55]/20 bg-[#25F4EE]/5 shadow-sm space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h3 className="text-lg font-black text-[#FE2C55] flex items-center gap-2">
+                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.51 3.25-1.46 4.54-1.25 1.71-3.23 2.75-5.32 2.94-2.12.2-4.28-.27-6.02-1.47-1.74-1.21-2.91-3.05-3.32-5.11-.42-2.12-.04-4.38 1.09-6.22 1.11-1.8 2.87-3.06 4.9-3.55 1.57-.39 3.24-.31 4.75.22v4.06c-.84-.25-1.75-.24-2.6-.04-.84.2-1.59.67-2.14 1.34-.54.67-.84 1.53-.84 2.39 0 1.15.54 2.24 1.44 2.94.9.71 2.08.97 3.2.73 1.12-.24 2.11-.91 2.71-1.88.58-.94.88-2.06.88-3.17V.02z" />
+                        </svg>
+                        TikTok
+                    </h3>
+                    {tiktokAccessToken ? (
+                        <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">✅ Connecté</span>
+                    ) : (
+                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">❌ Non connecté</span>
+                    )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label htmlFor="tiktokAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
-                            TikTok Access Token
+                        <label htmlFor="tiktokAppId" className="block text-sm font-bold text-gray-900 mb-2">
+                            TikTok App ID (Client Key)
                         </label>
-                        <div className="relative">
-                            <input
-                                type={showSecrets['tiktokAccessToken'] ? 'text' : 'password'}
-                                id="tiktokAccessToken"
-                                value={tiktokAccessToken}
-                                onChange={(e) => setTiktokAccessToken(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
-                                placeholder="Entrez le jeton d'accès TikTok..."
-                            />
-                            <button 
-                                type="button" 
-                                onClick={() => toggleSecret('tiktokAccessToken')}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                                {showSecrets['tiktokAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
-                        </div>
+                        <input
+                            type="text"
+                            id="tiktokAppId"
+                            value={tiktokAppId}
+                            onChange={(e) => setTiktokAppId(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#FE2C55] outline-none transition-all"
+                            placeholder="Client Key de votre App TikTok"
+                        />
                     </div>
                     <div>
                         <label htmlFor="tiktokCreatorId" className="block text-sm font-bold text-gray-900 mb-2">
@@ -249,23 +303,13 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                             id="tiktokCreatorId"
                             value={tiktokCreatorId}
                             onChange={(e) => setTiktokCreatorId(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#FE2C55] outline-none transition-all"
                             placeholder="Ex: 1234567890"
                         />
                     </div>
-                    <div>
-                        <label htmlFor="tiktokAppId" className="block text-sm font-bold text-gray-900 mb-2">
-                            TikTok App ID (Client Key)
-                        </label>
-                        <input
-                            type="text"
-                            id="tiktokAppId"
-                            value={tiktokAppId}
-                            onChange={(e) => setTiktokAppId(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="Client Key de votre App TikTok"
-                        />
-                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="tiktokClientSecret" className="block text-sm font-bold text-gray-900 mb-2">
                             TikTok Client Secret
@@ -276,24 +320,60 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                                 id="tiktokClientSecret"
                                 value={tiktokClientSecret}
                                 onChange={(e) => setTiktokClientSecret(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
-                                placeholder="Client Secret de votre App TikTok"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#FE2C55] outline-none transition-all pr-12"
+                                placeholder="Client Secret"
                             />
                             <button 
                                 type="button" 
                                 onClick={() => toggleSecret('tiktokClientSecret')}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FE2C55]"
                             >
                                 {showSecrets['tiktokClientSecret'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="tiktokAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
+                            TikTok Access Token
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showSecrets['tiktokAccessToken'] ? 'text' : 'password'}
+                                id="tiktokAccessToken"
+                                value={tiktokAccessToken}
+                                onChange={(e) => setTiktokAccessToken(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#FE2C55] outline-none transition-all pr-12"
+                                placeholder="Access Token"
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => toggleSecret('tiktokAccessToken')}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FE2C55]"
+                            >
+                                {showSecrets['tiktokAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Configuration Pinterest (API Native)</h3>
-                <div className="space-y-6">
+            {/* --- Pinterest --- */}
+            <div className="p-6 rounded-2xl border-l-4 border-l-[#E60023] border-t border-r border-b border-gray-100 bg-[#E60023]/5 shadow-sm space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h3 className="text-lg font-black text-[#E60023] flex items-center gap-2">
+                        <svg className="w-6 h-6 text-[#E60023]" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/>
+                        </svg>
+                        Pinterest
+                    </h3>
+                    {pinterestAccessToken ? (
+                        <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">✅ Connecté</span>
+                    ) : (
+                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">❌ Non connecté</span>
+                    )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="pinterestAppId" className="block text-sm font-bold text-gray-900 mb-2">
                             Pinterest App ID
@@ -303,44 +383,9 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                             id="pinterestAppId"
                             value={pinterestAppId}
                             onChange={(e) => setPinterestAppId(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E60023] outline-none transition-all"
                             placeholder="Ex: 1597274"
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="pinterestAppSecret" className="block text-sm font-bold text-gray-900 mb-2">
-                            Pinterest App Secret
-                        </label>
-                        <div className="relative">
-                            <input
-                                type={showSecrets['pinterestAppSecret'] ? 'text' : 'password'}
-                                id="pinterestAppSecret"
-                                value={pinterestAppSecret}
-                                onChange={(e) => setPinterestAppSecret(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
-                                placeholder="Entrez l'App Secret..."
-                            />
-                            <button 
-                                type="button" 
-                                onClick={() => toggleSecret('pinterestAppSecret')}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                                {showSecrets['pinterestAppSecret'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex gap-4 items-center">
-                        <a 
-                            href="/api/pinterest/auth"
-                            className="px-6 py-3 bg-[#E60023] hover:bg-[#ad081b] text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
-                        >
-                            Connecter le compte Pinterest
-                        </a>
-                        {pinterestAccessToken && (
-                            <span className="text-sm font-medium text-green-600 flex items-center gap-1">
-                                ✅ Connecté
-                            </span>
-                        )}
                     </div>
                     <div>
                         <label htmlFor="pinterestBoardId" className="block text-sm font-bold text-gray-900 mb-2">
@@ -351,19 +396,52 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                             id="pinterestBoardId"
                             value={pinterestBoardId}
                             onChange={(e) => setPinterestBoardId(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E60023] outline-none transition-all"
                             placeholder="Ex: 123456789"
                         />
-                        <p className="mt-2 text-xs text-gray-500 font-medium">L'ID du tableau dans lequel épingler.</p>
                     </div>
+                </div>
+                
+                <div>
+                    <label htmlFor="pinterestAppSecret" className="block text-sm font-bold text-gray-900 mb-2">
+                        Pinterest App Secret
+                    </label>
+                    <div className="relative">
+                        <input
+                            type={showSecrets['pinterestAppSecret'] ? 'text' : 'password'}
+                            id="pinterestAppSecret"
+                            value={pinterestAppSecret}
+                            onChange={(e) => setPinterestAppSecret(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E60023] outline-none transition-all pr-12"
+                            placeholder="Entrez l'App Secret..."
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => toggleSecret('pinterestAppSecret')}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#E60023]"
+                        >
+                            {showSecrets['pinterestAppSecret'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex gap-4 items-center pt-2">
+                    <a 
+                        href="/api/pinterest/auth"
+                        className="px-6 py-3 bg-[#E60023] hover:bg-[#ad081b] text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
+                    >
+                        Connecter le compte Pinterest
+                    </a>
+
                 </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
+            {/* --- Boutons d'action --- */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                     type="submit"
                     disabled={loading || isTesting}
-                    className="flex-1 sm:flex-none px-8 py-3 bg-black text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 sm:flex-none px-8 py-3 bg-black text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                 >
                     <Save className="w-4 h-4" />
                     {loading ? 'Enregistrement...' : 'Enregistrer'}
@@ -396,40 +474,70 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                             setIsTesting(false)
                         }
                     }}
-                    className="flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-[#E1306C] to-[#F56040] text-white text-sm font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                 >
                     {isTesting ? 'Test en cours...' : 'Tester la publication IG'}
                 </button>
             </div>
 
-            <div className="mt-8 p-6 bg-blue-50 rounded-2xl border border-blue-100">
-                <h3 className="text-blue-900 font-bold flex items-center gap-2 mb-3">
-                    <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs">?</span>
-                    Guide : Comment obtenir le bon jeton ?
+            {/* --- Guide Global --- */}
+            <div className="mt-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                <h3 className="text-gray-900 font-bold flex items-center gap-2 mb-4 text-lg">
+                    <span className="flex items-center justify-center w-8 h-8 bg-black text-white rounded-full text-sm">?</span>
+                    Guide : Comment configurer vos accès ?
                 </h3>
-                <ul className="space-y-3 text-sm text-blue-800/80">
-                    <li className="flex gap-2">
-                        <span className="font-bold text-blue-900">1.</span>
-                        <span>Utilisez un <strong>Page Access Token</strong> (et non un User Token).</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold text-blue-900">2.</span>
-                        <span>Permissions obligatoires : <code className="bg-blue-100 px-1 rounded">pages_manage_posts</code>, <code className="bg-blue-100 px-1 rounded">pages_read_engagement</code> et <code className="bg-blue-100 px-1 rounded">pages_show_list</code>.</span>
-                    </li>
-                    <li className="flex gap-2">
-                        <span className="font-bold text-blue-900">3.</span>
-                        <span>Générez un jeton de <strong>longue durée</strong> via le Graph API Explorer pour éviter l'expiration.</span>
-                    </li>
-                </ul>
-                <div className="mt-4 pt-4 border-t border-blue-100 flex justify-between items-center">
-                    <a 
-                        href="https://developers.facebook.com/tools/explorer/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-xs font-black uppercase tracking-wider text-blue-600 hover:text-blue-700 underline"
-                    >
-                        Ouvrir Facebook Explorer →
-                    </a>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Meta */}
+                    <div className="bg-white p-5 rounded-xl border border-blue-100 shadow-sm">
+                        <h4 className="font-bold text-[#1877F2] mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
+                            Meta (Facebook / Instagram)
+                        </h4>
+                        <ul className="space-y-2 text-xs text-gray-600">
+                            <li>• Générez un <strong>Page Access Token</strong> depuis le <a href="https://developers.facebook.com/tools/explorer/" className="text-blue-600 underline" target="_blank" rel="noreferrer">Graph API Explorer</a>.</li>
+                            <li>• Permissions : <code className="bg-gray-100 px-1 rounded">pages_manage_posts</code>, <code className="bg-gray-100 px-1 rounded">instagram_basic</code>, <code className="bg-gray-100 px-1 rounded">instagram_content_publish</code>.</li>
+                            <li>• Prolongez-le en token <strong>longue durée</strong> (60 jours) ou permanent.</li>
+                        </ul>
+                    </div>
+
+                    {/* TikTok */}
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h4 className="font-bold text-[#FE2C55] mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.51 3.25-1.46 4.54-1.25 1.71-3.23 2.75-5.32 2.94-2.12.2-4.28-.27-6.02-1.47-1.74-1.21-2.91-3.05-3.32-5.11-.42-2.12-.04-4.38 1.09-6.22 1.11-1.8 2.87-3.06 4.9-3.55 1.57-.39 3.24-.31 4.75.22v4.06c-.84-.25-1.75-.24-2.6-.04-.84.2-1.59.67-2.14 1.34-.54.67-.84 1.53-.84 2.39 0 1.15.54 2.24 1.44 2.94.9.71 2.08.97 3.2.73 1.12-.24 2.11-.91 2.71-1.88.58-.94.88-2.06.88-3.17V.02z" /></svg>
+                            TikTok
+                        </h4>
+                        <ul className="space-y-2 text-xs text-gray-600">
+                            <li>• Créez une application sur <a href="https://developers.tiktok.com/" className="text-blue-600 underline" target="_blank" rel="noreferrer">TikTok for Developers</a>.</li>
+                            <li>• Activez l'API de publication (Content Posting API).</li>
+                            <li>• Renseignez la Client Key (App ID) et le Client Secret ci-dessus.</li>
+                        </ul>
+                    </div>
+
+                    {/* Pinterest */}
+                    <div className="bg-white p-5 rounded-xl border border-red-100 shadow-sm">
+                        <h4 className="font-bold text-[#E60023] mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>
+                            Pinterest
+                        </h4>
+                        <ul className="space-y-2 text-xs text-gray-600">
+                            <li>• Créez une application Standard sur le <a href="https://developers.pinterest.com/apps/" className="text-blue-600 underline" target="_blank" rel="noreferrer">Portail Développeur</a>.</li>
+                            <li>• Ajoutez <code className="bg-gray-100 px-1 rounded">http://localhost:3000/api/pinterest/callback</code> (ou URL de prod) aux URIs de redirection.</li>
+                            <li>• Cliquez ensuite sur le bouton "Connecter le compte Pinterest".</li>
+                        </ul>
+                    </div>
+                    
+                    {/* Threads */}
+                    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h4 className="font-bold text-black mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4 text-black" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6855C105.707 61.7381 111.932 64.1366 115.961 68.814C118.893 72.2193 120.854 76.925 121.825 82.8638C114.511 81.6207 106.601 81.2385 98.145 81.7233C74.3247 83.0954 59.0111 96.9879 60.0396 116.292C60.5615 126.084 65.4397 134.508 73.775 140.011C80.8224 144.663 89.899 146.938 99.3323 146.423C111.79 145.74 121.563 140.987 128.381 132.296C133.559 125.696 136.834 117.143 138.28 106.366C144.217 109.949 148.617 114.664 151.047 120.332C155.179 129.967 155.42 145.8 142.501 158.708C131.182 170.016 117.533 174.908 97.0135 175.059C74.2042 174.89 56.9538 167.575 45.7381 153.317C35.2355 139.966 29.8077 120.682 29.6052 96C29.8077 71.3178 35.2355 52.0336 45.7381 38.6827C56.9538 24.4249 74.2039 17.11 97.0132 16.9405C119.988 17.1113 137.539 24.4614 148.184 38.0189C156.46 48.5853 161.648 64.0414 163.765 83.4795L178.683 81.8797C176.242 59.3995 169.957 41.2721 159.508 27.9731C145.549 10.2269 123.639 0.999656 97.0125 0.999656C96.6575 0.999656 96.3025 1.00282 95.9482 1.00914C66.8665 1.25866 44.595 10.3708 29.7432 29.2818C15.4299 47.509 9.3897 71.218 9.58557 96.0002C9.3897 120.782 15.4299 144.491 29.7432 162.719C44.595 181.63 66.8665 190.741 95.9482 190.991C96.3025 190.997 96.6575 191 97.0125 191C123.834 191 141.528 183.921 154.544 170.92C172.062 153.425 171.745 130.654 166.574 118.571C162.368 108.742 154.269 101.408 141.537 88.9883ZM98.4405 129.507C88.0005 130.095 77.1544 125.409 76.6196 115.372C76.2232 107.93 81.9158 99.626 99.0812 98.6368C101.047 98.5234 102.976 98.468 104.871 98.468C111.106 98.468 116.939 99.0737 122.242 100.233C120.264 124.935 108.662 128.946 98.4405 129.507Z" fill="currentColor"></path></svg>
+                            Threads
+                        </h4>
+                        <ul className="space-y-2 text-xs text-gray-600">
+                            <li>• Threads API est disponible pour tous.</li>
+                            <li>• Générez un token via l'espace <a href="https://developers.facebook.com/" className="text-blue-600 underline" target="_blank" rel="noreferrer">Meta for Developers</a> (Produit Threads).</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </form>

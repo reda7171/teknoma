@@ -6,12 +6,14 @@ export async function GET(req: NextRequest) {
     const code = req.nextUrl.searchParams.get('code');
     const error = req.nextUrl.searchParams.get('error');
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store';
+
     if (error) {
-        return NextResponse.redirect(new URL('/fr/admin/config/n8n?error=pinterest_auth_denied', req.url));
+        return NextResponse.redirect(`${baseUrl}/fr/admin/config/n8n?error=pinterest_auth_denied`);
     }
 
     if (!code) {
-        return NextResponse.redirect(new URL('/fr/admin/config/n8n?error=no_code', req.url));
+        return NextResponse.redirect(`${baseUrl}/fr/admin/config/n8n?error=no_code`);
     }
 
     try {
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
         const clientSecret = await getSetting('pinterest_app_secret');
 
         if (!clientId || !clientSecret) {
-            return NextResponse.redirect(new URL('/fr/admin/config/n8n?error=missing_credentials', req.url));
+            return NextResponse.redirect(`${baseUrl}/fr/admin/config/n8n?error=missing_credentials`);
         }
 
         const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/pinterest/callback`;
@@ -48,10 +50,10 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        return NextResponse.redirect(new URL('/fr/admin/config/n8n?success=pinterest_connected', req.url));
+        return NextResponse.redirect(`${baseUrl}/fr/admin/config/n8n?success=pinterest_connected`);
 
     } catch (err: any) {
         console.error('Erreur Pinterest OAuth Callback:', err.response?.data || err.message);
-        return NextResponse.redirect(new URL('/fr/admin/config/n8n?error=pinterest_oauth_failed', req.url));
+        return NextResponse.redirect(`${baseUrl}/fr/admin/config/n8n?error=pinterest_oauth_failed`);
     }
 }
