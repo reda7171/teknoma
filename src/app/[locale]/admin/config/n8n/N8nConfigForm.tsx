@@ -21,6 +21,8 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
     const [pinterestBoardId, setPinterestBoardId] = useState(initialPinterestBoardId || '')
     const [pinterestAppId, setPinterestAppId] = useState(initialPinterestAppId || '')
     const [pinterestAppSecret, setPinterestAppSecret] = useState(initialPinterestAppSecret || '')
+    const [newBoardName, setNewBoardName] = useState('')
+    const [isCreatingBoard, setIsCreatingBoard] = useState(false)
     const [loading, setLoading] = useState(false)
     const [isTesting, setIsTesting] = useState(false)
     const [message, setMessage] = useState('')
@@ -399,6 +401,46 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                             className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E60023] outline-none transition-all"
                             placeholder="Ex: 123456789"
                         />
+                        <div className="flex flex-col sm:flex-row gap-2 mt-3 bg-white p-2 rounded-xl border border-red-100 shadow-sm">
+                            <input
+                                type="text"
+                                value={newBoardName}
+                                onChange={(e) => setNewBoardName(e.target.value)}
+                                className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#E60023] outline-none"
+                                placeholder="Nom du nouveau tableau..."
+                            />
+                            <button
+                                type="button"
+                                disabled={isCreatingBoard || !newBoardName || !pinterestAccessToken}
+                                onClick={async () => {
+                                    setIsCreatingBoard(true)
+                                    setMessage('')
+                                    try {
+                                        const res = await fetch('/api/pinterest/board', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ name: newBoardName })
+                                        })
+                                        const data = await res.json()
+                                        if (data.success && data.board) {
+                                            setPinterestBoardId(data.board.id)
+                                            setNewBoardName('')
+                                            setMessage('Tableau Pinterest créé avec succès ! Pensez à enregistrer la page en bas.')
+                                        } else {
+                                            setMessage('Erreur: ' + (data.error || 'Impossible de créer le tableau'))
+                                        }
+                                    } catch (e) {
+                                        setMessage('Erreur réseau lors de la création du tableau.')
+                                    } finally {
+                                        setIsCreatingBoard(false)
+                                    }
+                                }}
+                                className="px-4 py-2 bg-gray-900 text-white text-xs uppercase tracking-wide font-bold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                            >
+                                {isCreatingBoard ? 'Création...' : 'Créer'}
+                            </button>
+                        </div>
+                        {!pinterestAccessToken && <p className="text-xs text-red-500 mt-1 font-medium">Nécessite de connecter le compte Pinterest d'abord.</p>}
                     </div>
                 </div>
                 
@@ -447,37 +489,6 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                     {loading ? 'Enregistrement...' : 'Enregistrer'}
                 </button>
                 
-                <button
-                    type="button"
-                    disabled={isTesting || !instagramWebhookUrl || !instagramToken || !instagramAccountId}
-                    onClick={async () => {
-                        setIsTesting(true)
-                        setMessage('')
-                        try {
-                            const res = await fetch(instagramWebhookUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    action: 'test_instagram',
-                                    token: instagramToken,
-                                    account_id: instagramAccountId
-                                })
-                            })
-                            if (res.ok) {
-                                setMessage('Test envoyé avec succès !')
-                            } else {
-                                setMessage('Erreur lors du test du webhook.')
-                            }
-                        } catch (e) {
-                            setMessage('Erreur réseau lors du test.')
-                        } finally {
-                            setIsTesting(false)
-                        }
-                    }}
-                    className="flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-[#E1306C] to-[#F56040] text-white text-sm font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-                >
-                    {isTesting ? 'Test en cours...' : 'Tester la publication IG'}
-                </button>
             </div>
 
             {/* --- Guide Global --- */}

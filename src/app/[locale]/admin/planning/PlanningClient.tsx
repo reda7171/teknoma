@@ -62,7 +62,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedTime, setSelectedTime] = useState('12:00')
     const [newPostContent, setNewPostContent] = useState('')
-    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['facebook', 'instagram', 'tiktok', 'threads'])
+    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
     const [selectedMedia, setSelectedMedia] = useState<Asset | null>(null)
     const [editingPostId, setEditingPostId] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
@@ -240,7 +240,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setEditingPostId(postToEdit.id)
             setSelectedTime(postToEdit.time)
             setNewPostContent(postToEdit.content || '')
-            setSelectedPlatforms(postToEdit.platforms && postToEdit.platforms.length > 0 ? postToEdit.platforms : ['facebook', 'instagram', 'tiktok', 'threads'])
+            setSelectedPlatforms(postToEdit.platforms && postToEdit.platforms.length > 0 ? postToEdit.platforms : ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
             if (postToEdit.mediaUrl) {
                 // Find asset or mock it for display
                 const foundAsset = assets.find(a => a.url === postToEdit.mediaUrl)
@@ -253,7 +253,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setEditingPostId(null)
             setSelectedTime(time)
             setNewPostContent('')
-            setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
+            setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
             setSelectedMedia(null)
         }
         
@@ -349,7 +349,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 setEditingPostId(null)
                 setSelectedTime(timeToSet)
                 setNewPostContent('')
-                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
+                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
                 setSelectedMedia(tempMedia as any)
                 setShowAssetsGrid(false)
                 setIsModalOpen(true)
@@ -380,7 +380,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setEditingPostId(null)
             setSelectedTime(time)
             setNewPostContent('')
-            setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
+            setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
             setSelectedMedia(tempMedia as any)
             setShowAssetsGrid(false)
             setIsModalOpen(true)
@@ -661,6 +661,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     <button onClick={() => setPlatformFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${platformFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Réseaux</button>
                     <button onClick={() => setPlatformFilter('facebook')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'facebook' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}><Facebook className="w-3 h-3"/> Facebook</button>
                     <button onClick={() => setPlatformFilter('instagram')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'instagram' ? 'bg-pink-50 text-pink-600' : 'text-slate-500 hover:text-slate-700'}`}><Instagram className="w-3 h-3"/> Instagram</button>
+                    <button onClick={() => setPlatformFilter('tiktok')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'tiktok' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}><Music className="w-3 h-3"/> TikTok</button>
+                    <button onClick={() => setPlatformFilter('threads')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'threads' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}><AtSign className="w-3 h-3"/> Threads</button>
+                    <button onClick={() => setPlatformFilter('pinterest')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'pinterest' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg> Pinterest</button>
                 </div>
                 <div className="flex flex-wrap bg-white rounded-lg p-1 shadow-sm border border-slate-200">
                     <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Statuts</button>
@@ -890,6 +893,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                                                     {post.platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-600" />}
                                                                                     {post.platforms.includes('tiktok') && <Music className="w-3 h-3 text-slate-900" />}
                                                                                     {post.platforms.includes('threads') && <AtSign className="w-3 h-3 text-slate-900" />}
+                                                                                    {post.platforms.includes('pinterest') && <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>}
                                                                                 </div>
                                                                                 <div className="flex gap-1">
                                                                                     <button 
@@ -968,6 +972,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                     {post.platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-600" />}
                                                     {post.platforms.includes('tiktok') && <Music className="w-3 h-3 text-slate-900" />}
                                                     {post.platforms.includes('threads') && <AtSign className="w-3 h-3 text-slate-900" />}
+                                                    {post.platforms.includes('pinterest') && <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>}
                                                 </div>
                                             </div>
                                         ))}
@@ -1088,13 +1093,13 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 <div className="flex gap-2">
                                     <button 
                                         onClick={() => {
-                                            if (selectedPlatforms.length === 4) {
+                                            if (selectedPlatforms.length === 5) {
                                                 setSelectedPlatforms([])
                                             } else {
-                                                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads'])
+                                                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
                                             }
                                         }}
-                                        className={`px-3 py-2 rounded-lg border text-xs font-bold uppercase tracking-wide flex items-center justify-center ${selectedPlatforms.length === 4 ? 'border-purple-600 bg-purple-50 text-purple-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        className={`px-3 py-2 rounded-lg border text-xs font-bold uppercase tracking-wide flex items-center justify-center ${selectedPlatforms.length === 5 ? 'border-purple-600 bg-purple-50 text-purple-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                                     >
                                         All
                                     </button>
@@ -1121,6 +1126,12 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                         className={`p-2 rounded-lg border ${selectedPlatforms.includes('threads') ? 'border-slate-900 bg-slate-100 text-slate-900' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                                     >
                                         <AtSign className="w-5 h-5" />
+                                    </button>
+                                    <button 
+                                        onClick={() => togglePlatform('pinterest')}
+                                        className={`p-2 rounded-lg border ${selectedPlatforms.includes('pinterest') ? 'border-red-600 bg-red-50 text-red-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                    >
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>
                                     </button>
                                 </div>
                             </div>
@@ -1159,14 +1170,42 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                         </button>
                                     </div>
                                 ) : (
-                                    <button 
-                                        onClick={() => setShowAssetsGrid(!showAssetsGrid)}
-                                        className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-slate-300 transition-all"
-                                        disabled={isLoading}
-                                    >
-                                        <ImageIcon className="w-4 h-4" />
-                                        Sélectionner depuis Marketing
-                                    </button>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <label className={`flex-1 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 hover:border-slate-300 cursor-pointer'}`}>
+                                            <ImageIcon className="w-4 h-4" />
+                                            Depuis Médiathèque
+                                            <input 
+                                                type="file" 
+                                                accept="image/*,video/*" 
+                                                className="hidden" 
+                                                disabled={isLoading}
+                                                onChange={(e) => {
+                                                    if (e.target.files && e.target.files.length > 0) {
+                                                        const file = e.target.files[0];
+                                                        const tempUrl = URL.createObjectURL(file);
+                                                        const tempMedia = {
+                                                            name: file.name,
+                                                            url: tempUrl,
+                                                            type: file.type.startsWith('video/') ? 'video' : 'image',
+                                                            createdAt: new Date().toISOString(),
+                                                            file: file
+                                                        };
+                                                        setSelectedMedia(tempMedia as any);
+                                                        setShowAssetsGrid(false);
+                                                    }
+                                                }} 
+                                            />
+                                        </label>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowAssetsGrid(!showAssetsGrid)}
+                                            className="flex-1 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-slate-300 transition-all"
+                                            disabled={isLoading}
+                                        >
+                                            <ImageIcon className="w-4 h-4" />
+                                            Depuis Créatives Marketing
+                                        </button>
+                                    </div>
                                 )}
 
                                 {showAssetsGrid && !selectedMedia && (
