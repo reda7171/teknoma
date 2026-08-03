@@ -85,7 +85,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
             questions: [
                 {
                     q: locale === 'ar' ? 'هل يمكنني إرجاع كتاب؟' : locale === 'en' ? 'Can I return a book?' : 'Puis-je retourner un livre ?',
-                    a: locale === 'ar' ? 'بالتأكيد. لديكم 7 أيام بعد الاستلام لطلب الإرجاع إذا كان الكتاب لا يتطابق مع توقعاتكم أو يحتوي على عيب.' : locale === 'en' ? 'Absolutely. You have 7 days after receipt to request a return if the book does not match your expectations or has a defect.' : "Absolument. Vous disposez de 7 jours après réception pour demander un retour si le livre ne correspond pas à vos attentes ou s'il présente un défaut."
+                    a: locale === 'ar' ? 'بالتأكيد. لديكم 3 أيام بعد الاستلام لطلب الإرجاع إذا كان الكتاب لا يتطابق مع توقعاتكم أو يحتوي على عيب.' : locale === 'en' ? 'Absolutely. You have 3 calendar days after receipt to request a return if the book does not match your expectations or has a defect.' : "Absolument. Vous disposez de 3 jours calendaires après réception pour demander un retour si le livre ne correspond pas à vos attentes ou s'il présente un défaut."
                 },
                 {
                     q: locale === 'ar' ? 'كيف يتم الاسترداد؟' : locale === 'en' ? 'How is the refund processed?' : 'Comment s\'effectue le remboursement ?',

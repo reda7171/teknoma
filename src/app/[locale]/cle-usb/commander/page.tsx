@@ -406,7 +406,7 @@ export default function UsbOrderPage() {
                         {/* Reassurances */}
                         <div className="mt-5 space-y-2 border-t border-gray-100 pt-4">
                             <div className="flex items-center gap-2 text-xs text-gray-400">
-                                <ShieldCheck className="w-4 h-4 text-green-500" /> Satisfait ou remboursé 7 jours
+                                <ShieldCheck className="w-4 h-4 text-green-500" /> Satisfait ou remboursé 3 jours
                             </div>
                             <div className="flex items-center gap-2 text-xs text-gray-400">
                                 <Truck className="w-4 h-4 text-blue-500" /> Livraison 2-4 jours ouvrables

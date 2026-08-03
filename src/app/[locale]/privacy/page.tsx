@@ -25,7 +25,7 @@ export default async function PrivacyPage() {
                                 <Lock className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section1Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section1Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                                {t.rich('Section1Desc', { bold: (chunks) => <strong>{chunks}</strong>, contact: (chunks) => <a href="mailto:admin@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
 
@@ -34,7 +34,7 @@ export default async function PrivacyPage() {
                                 <Eye className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section2Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section2Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                                {t.rich('Section2Desc', { bold: (chunks) => <strong>{chunks}</strong>, contact: (chunks) => <a href="mailto:admin@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
 
@@ -43,7 +43,7 @@ export default async function PrivacyPage() {
                                 <Database className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section3Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section3Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                                {t.rich('Section3Desc', { bold: (chunks) => <strong>{chunks}</strong>, contact: (chunks) => <a href="mailto:admin@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
 
@@ -52,7 +52,7 @@ export default async function PrivacyPage() {
                                 <Bell className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section4Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                                {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong>, link: (chunks) => <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{chunks}</a>, contact: (chunks) => <a href="mailto:admin@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
 
@@ -61,7 +61,7 @@ export default async function PrivacyPage() {
                                 <UserCheck className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section5Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section5Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                                {t.rich('Section5Desc', { bold: (chunks) => <strong>{chunks}</strong>, contact: (chunks) => <a href="mailto:admin@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
 
@@ -70,7 +70,7 @@ export default async function PrivacyPage() {
                                 <FileText className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section6Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section6Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                                {t.rich('Section6Desc', { bold: (chunks) => <strong>{chunks}</strong>, contact: (chunks) => <a href="mailto:admin@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
                     </div>

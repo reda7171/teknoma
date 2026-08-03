@@ -49,18 +49,21 @@ export default function PackCard({
     const displayPrice = Math.round(price)
     const savings = totalOriginalPrice - displayPrice
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
+    const hasDiscount = savings > 0 && savingsPercent > 0
 
     const displayName = locale === 'fr' && nameFr ? nameFr : locale === 'en' && nameEn ? nameEn : name;
 
     return (
         <div className="group relative bg-[#FDFBF7] rounded-[2rem] overflow-hidden border border-gray-100 hover:border-black shadow-sm hover:shadow-2xl transition-all duration-500">
             {/* Savings Badge - Style Pixio */}
-            <div className="absolute top-6 right-6 z-10 pointer-events-none">
-                <div className="bg-pixio-pink text-black px-4 py-2 rounded-full shadow-lg border border-black/5 rotate-12 group-hover:rotate-0 transition-transform">
-                    <p className="text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-center leading-none">{t('Save')}</p>
-                    <p className="text-xl font-black leading-none text-center">-{savingsPercent}%</p>
+            {hasDiscount && (
+                <div className="absolute top-6 right-6 z-10 pointer-events-none">
+                    <div className="bg-pixio-pink text-black px-4 py-2 rounded-full shadow-lg border border-black/5 rotate-12 group-hover:rotate-0 transition-transform">
+                        <p className="text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-center leading-none">{t('Save')}</p>
+                        <p className="text-xl font-black leading-none text-center">-{savingsPercent}%</p>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Pack Icon Badge */}
             <div className="absolute top-6 left-6 z-10">
@@ -130,10 +133,12 @@ export default function PackCard({
 
                 {/* Price Section - Style Pixio */}
                 <div className="bg-white rounded-[1.5rem] p-6 border border-gray-50 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between text-[11px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal">
-                        <span className="text-gray-400">{t('RegularPrice')}</span>
-                        <span className="text-gray-300 line-through">{totalOriginalPrice} MAD</span>
-                    </div>
+                    {hasDiscount && (
+                        <div className="flex items-center justify-between text-[11px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal">
+                            <span className="text-gray-400">{t('RegularPrice')}</span>
+                            <span className="text-gray-300 line-through">{totalOriginalPrice} MAD</span>
+                        </div>
+                    )}
 
                     <div className="flex items-center justify-between">
                         <span className="text-[11px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-black">{t('PackPrice')}</span>

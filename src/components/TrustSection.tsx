@@ -6,13 +6,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useResponsiveAnimation } from '@/hooks/useResponsiveAnimation'
 
 function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?: number }) {
-    const [count, setCount] = useState(0)
-    const [isVisible, setIsVisible] = useState(false)
-    const elementRef = useRef<HTMLDivElement>(null)
-
     // Extraire le nombre et le suffixe (ex: "1500+" -> 1500, "+")
-    const numericValue = parseInt(value.replace(/[^0-9]/g, ''))
+    const numericValue = parseInt(value.replace(/[^0-9]/g, '')) || 0
     const suffix = value.replace(/[0-9]/g, '')
+
+    const [count, setCount] = useState(numericValue)
+    const [isVisible, setIsVisible] = useState(false)
+    const [hasAnimated, setHasAnimated] = useState(false)
+    const elementRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -32,7 +33,7 @@ function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?:
     }, [])
 
     useEffect(() => {
-        if (!isVisible) return
+        if (!isVisible || hasAnimated) return
 
         let start = 0
         const end = numericValue
@@ -46,6 +47,7 @@ function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?:
             current += Math.ceil(range / (duration / 16)) // ~60fps
             if (current >= end) {
                 setCount(end)
+                setHasAnimated(true)
                 clearInterval(timer)
             } else {
                 setCount(current)
@@ -53,7 +55,7 @@ function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?:
         }, 16)
 
         return () => clearInterval(timer)
-    }, [isVisible, numericValue, duration])
+    }, [isVisible, numericValue, duration, hasAnimated])
 
     return (
         <span ref={elementRef} className="tabular-nums">

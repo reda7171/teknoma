@@ -39,6 +39,7 @@ export async function generateMetadata({
     const displayPrice = Math.round(pack.price)
     const savings = totalOriginalPrice - displayPrice
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
+    const hasDiscount = savings > 0 && savingsPercent > 0
 
     const bookTitles = pack.books.map(pb => pb.book.title).join(', ')
 
@@ -48,7 +49,7 @@ export async function generateMetadata({
         'pack de livres maroc',
         'packs livres',
         'livres en promotion maroc',
-        `économiser ${savingsPercent}%`,
+        ...(hasDiscount ? [`économiser ${savingsPercent}%`] : []),
         ...pack.books.map(pb => pb.book.title),
         ...pack.books.map(pb => pb.book.author),
         'librairie en ligne maroc',
@@ -56,11 +57,11 @@ export async function generateMetadata({
 
     return {
         title: `${pack.name} - Pack de ${pack.books.length} Livres | Riwaya`,
-        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... Économisez ${savingsPercent}% (${savings} MAD). Prix: ${displayPrice} MAD. Livraison rapide au Maroc.`,
+        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} MAD). ` : ''}Prix: ${displayPrice} MAD. Livraison rapide au Maroc.`,
         keywords,
         openGraph: {
-            title: `${pack.name} - Économisez ${savingsPercent}%`,
-            description: pack.description?.slice(0, 160) || `Pack de ${pack.books.length} livres sélectionnés. ${savings} MAD d'économie.`,
+            title: hasDiscount ? `${pack.name} - Économisez ${savingsPercent}%` : `${pack.name}`,
+            description: pack.description?.slice(0, 160) || `Pack de ${pack.books.length} livres sélectionnés.${hasDiscount ? ` ${savings} MAD d'économie.` : ''}`,
             images: imageUrl ? [imageUrl] : [],
             type: 'website',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
@@ -68,8 +69,8 @@ export async function generateMetadata({
         },
         twitter: {
             card: 'summary_large_image',
-            title: `${pack.name} - ${savingsPercent}% de réduction`,
-            description: `Pack de ${pack.books.length} livres à ${displayPrice} MAD au lieu de ${totalOriginalPrice} MAD`,
+            title: hasDiscount ? `${pack.name} - ${savingsPercent}% de réduction` : `${pack.name}`,
+            description: `Pack de ${pack.books.length} livres à ${displayPrice} MAD${hasDiscount ? ` au lieu de ${totalOriginalPrice} MAD` : ''}`,
             images: imageUrl ? [imageUrl] : [],
         },
         alternates: {
@@ -110,6 +111,7 @@ export default async function PackDetailPage({
     const displayPrice = Math.round(pack.price)
     const savings = totalOriginalPrice - displayPrice
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
+    const hasDiscount = savings > 0 && savingsPercent > 0
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const jsonLd = [
@@ -135,7 +137,7 @@ export default async function PackDetailPage({
                     '@type': 'MerchantReturnPolicy',
                     applicableCountry: 'MA',
                     returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                    merchantReturnDays: 7,
+                    merchantReturnDays: 3,
                     returnMethod: 'https://schema.org/ReturnByMail',
                     returnFees: 'https://schema.org/ReturnShippingFees',
                     returnShippingFeesAmount: {
@@ -236,10 +238,10 @@ export default async function PackDetailPage({
                 acceptedAnswer: {
                     '@type': 'Answer',
                     text: locale === 'ar'
-                        ? `سعر باقة ${pack.name} هو ${displayPrice} درهم مغربي، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%. الدفع عند الاستلام.`
+                        ? `سعر باقة ${pack.name} هو ${displayPrice} درهم مغربي${hasDiscount ? `، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%.` : '.'} الدفع عند الاستلام.`
                         : locale === 'en'
-                            ? `The ${pack.name} pack costs ${displayPrice} MAD instead of ${totalOriginalPrice} MAD for individual purchases. Save ${savingsPercent}%. Payment on delivery.`
-                            : `Le pack ${pack.name} est à ${displayPrice} MAD au lieu de ${totalOriginalPrice} MAD à l'achat individuel. Économisez ${savingsPercent}%. Paiement à la livraison.`
+                            ? `The ${pack.name} pack costs ${displayPrice} MAD${hasDiscount ? ` instead of ${totalOriginalPrice} MAD for individual purchases. Save ${savingsPercent}%.` : '.'} Payment on delivery.`
+                            : `Le pack ${pack.name} est à ${displayPrice} MAD${hasDiscount ? ` au lieu de ${totalOriginalPrice} MAD à l'achat individuel. Économisez ${savingsPercent}%.` : '.'} Paiement à la livraison.`
                 }
             },
             {
@@ -319,10 +321,12 @@ export default async function PackDetailPage({
                             {/* Image Section */}
                             <div className="bg-pixio-beige p-12 flex items-center justify-center relative min-h-[500px]">
                                 <div className="absolute top-10 right-10 z-10">
-                                    <div className="bg-black text-white px-8 py-8 rounded-[2rem] shadow-2xl transform rotate-6 flex flex-col items-center justify-center">
-                                        <p className="text-[10px] font-black uppercase tracking-widest mb-1">{tPacks('Save')}</p>
-                                        <p className="text-4xl font-black leading-none tracking-tighter">{savingsPercent}%</p>
-                                    </div>
+                                    {hasDiscount && (
+                                        <div className="bg-black text-white px-8 py-8 rounded-[2rem] shadow-2xl transform rotate-6 flex flex-col items-center justify-center">
+                                            <p className="text-[10px] font-black uppercase tracking-widest mb-1">{tPacks('Save')}</p>
+                                            <p className="text-4xl font-black leading-none tracking-tighter">{savingsPercent}%</p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {pack.image ? (
@@ -361,14 +365,16 @@ export default async function PackDetailPage({
 
                                 {/* Price Block */}
                                 <div className="bg-pixio-cream/50 rounded-[2.5rem] p-10 mb-12 border border-gray-50">
-                                    <div className="flex items-center gap-6 mb-4">
-                                        <span className="text-gray-300 text-xl line-through font-black tracking-tighter">
-                                            {totalOriginalPrice} MAD
-                                        </span>
-                                        <span className="text-black font-black bg-pixio-yellow px-4 py-2 rounded-xl text-[10px] rtl:text-xs uppercase tracking-widest rtl:tracking-normal">
-                                            {t('SavingsOff', { amount: savings })}
-                                        </span>
-                                    </div>
+                                    {hasDiscount && (
+                                        <div className="flex items-center gap-6 mb-4">
+                                            <span className="text-gray-300 text-xl line-through font-black tracking-tighter">
+                                                {totalOriginalPrice} MAD
+                                            </span>
+                                            <span className="text-black font-black bg-pixio-yellow px-4 py-2 rounded-xl text-[10px] rtl:text-xs uppercase tracking-widest rtl:tracking-normal">
+                                                {t('SavingsOff', { amount: savings })}
+                                            </span>
+                                        </div>
+                                    )}
                                     <div className="flex items-baseline gap-3">
                                         <span className="text-7xl font-black text-black tracking-tighter leading-none">{displayPrice}</span>
                                         <span className="text-2xl text-gray-300 font-black uppercase tracking-widest">MAD</span>
