@@ -1098,3 +1098,17 @@ enum AdPlacement {
   CHECKOUT
   FOOTER
 }
+
+model InstantOffer {
+  id          String   @id @default(uuid())
+  sessionId   String   @db.VarChar(255)
+  discount    Float
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([sessionId])
+  @@index([status])
+  @@map("instant_offers")
+}
+

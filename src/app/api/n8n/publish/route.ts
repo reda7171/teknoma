@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
         
         let platformsArray = ['facebook']
         if (platform === 'both' || platform === 'all') {
-            platformsArray = ['facebook', 'instagram', 'tiktok', 'threads']
+            platformsArray = ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest']
         } else if (platform) {
             platformsArray = [platform]
         }
@@ -205,9 +205,11 @@ export async function POST(req: NextRequest) {
             ? 'toutes les plateformes' 
             : platform === 'tiktok' 
                 ? 'TikTok' 
-                : platform === 'both' || platform === 'all' 
-                    ? 'Facebook & Instagram' 
-                    : platform.charAt(0).toUpperCase() + platform.slice(1);
+                : platform === 'pinterest'
+                    ? 'Pinterest'
+                    : platform === 'both' || platform === 'all' 
+                        ? 'Toutes les plateformes' 
+                        : platform.charAt(0).toUpperCase() + platform.slice(1);
 
         const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const messageText = scheduleAt 

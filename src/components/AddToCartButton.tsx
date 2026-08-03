@@ -33,6 +33,8 @@ export default function AddToCartButton({
     const addItem = useCartStore((state) => state.addItem)
     const openCart = useUIStore((state) => state.openCart)
     const showNotification = useUIStore((state) => state.showNotification)
+    const sessionId = useCartStore((state) => state.sessionId)
+    const setSessionId = useCartStore((state) => state.setSessionId)
     const t = useTranslations('Common');
 
     return (
@@ -81,7 +83,12 @@ export default function AddToCartButton({
                     })
 
                     // Telegram Notification
-                    notifyAddToCart(product.title, product.price, product.type).catch(console.error)
+                    let currentSessionId = sessionId
+                    if (!currentSessionId) {
+                        currentSessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+                        setSessionId(currentSessionId)
+                    }
+                    notifyAddToCart(product.title, product.price, product.type, currentSessionId).catch(console.error)
 
                     openCart()
                     showNotification(t('AddedToCartSuccess'), 'success')

@@ -5,7 +5,7 @@ import { updateSetting } from '@/lib/actions/site-settings'
 import { Save, Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId, initialThreadsAccessToken, initialTiktokAccessToken, initialTiktokCreatorId, initialTiktokAppId, initialTiktokClientSecret }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string, initialThreadsAccessToken: string, initialTiktokAccessToken?: string, initialTiktokCreatorId?: string, initialTiktokAppId?: string, initialTiktokClientSecret?: string }) {
+export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId, initialThreadsAccessToken, initialTiktokAccessToken, initialTiktokCreatorId, initialTiktokAppId, initialTiktokClientSecret, initialPinterestAccessToken, initialPinterestBoardId, initialPinterestAppId, initialPinterestAppSecret }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string, initialThreadsAccessToken: string, initialTiktokAccessToken?: string, initialTiktokCreatorId?: string, initialTiktokAppId?: string, initialTiktokClientSecret?: string, initialPinterestAccessToken?: string, initialPinterestBoardId?: string, initialPinterestAppId?: string, initialPinterestAppSecret?: string }) {
     const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl)
     const [instagramWebhookUrl, setInstagramWebhookUrl] = useState(initialInstagramWebhookUrl)
     const [facebookAccessToken, setFacebookAccessToken] = useState(initialFacebookAccessToken)
@@ -17,6 +17,10 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
     const [tiktokCreatorId, setTiktokCreatorId] = useState(initialTiktokCreatorId || '')
     const [tiktokAppId, setTiktokAppId] = useState(initialTiktokAppId || '')
     const [tiktokClientSecret, setTiktokClientSecret] = useState(initialTiktokClientSecret || '')
+    const [pinterestAccessToken, setPinterestAccessToken] = useState(initialPinterestAccessToken || '')
+    const [pinterestBoardId, setPinterestBoardId] = useState(initialPinterestBoardId || '')
+    const [pinterestAppId, setPinterestAppId] = useState(initialPinterestAppId || '')
+    const [pinterestAppSecret, setPinterestAppSecret] = useState(initialPinterestAppSecret || '')
     const [loading, setLoading] = useState(false)
     const [isTesting, setIsTesting] = useState(false)
     const [message, setMessage] = useState('')
@@ -44,6 +48,10 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
             await updateSetting('tiktok_creator_id', tiktokCreatorId, 'config', 'TikTok Creator ID')
             await updateSetting('tiktok_app_id', tiktokAppId, 'config', 'TikTok App ID')
             await updateSetting('tiktok_client_secret', tiktokClientSecret, 'config', 'TikTok Client Secret')
+            await updateSetting('pinterest_access_token', pinterestAccessToken, 'config', 'Pinterest Access Token')
+            await updateSetting('pinterest_board_id', pinterestBoardId, 'config', 'Pinterest Board ID')
+            await updateSetting('pinterest_app_id', pinterestAppId, 'config', 'Pinterest App ID')
+            await updateSetting('pinterest_app_secret', pinterestAppSecret, 'config', 'Pinterest App Secret')
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
         } catch (error) {
@@ -279,6 +287,74 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                                 {showSecrets['tiktokClientSecret'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="pt-6 border-t border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Configuration Pinterest (API Native)</h3>
+                <div className="space-y-6">
+                    <div>
+                        <label htmlFor="pinterestAppId" className="block text-sm font-bold text-gray-900 mb-2">
+                            Pinterest App ID
+                        </label>
+                        <input
+                            type="text"
+                            id="pinterestAppId"
+                            value={pinterestAppId}
+                            onChange={(e) => setPinterestAppId(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder="Ex: 1597274"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="pinterestAppSecret" className="block text-sm font-bold text-gray-900 mb-2">
+                            Pinterest App Secret
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showSecrets['pinterestAppSecret'] ? 'text' : 'password'}
+                                id="pinterestAppSecret"
+                                value={pinterestAppSecret}
+                                onChange={(e) => setPinterestAppSecret(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                                placeholder="Entrez l'App Secret..."
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => toggleSecret('pinterestAppSecret')}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showSecrets['pinterestAppSecret'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex gap-4 items-center">
+                        <a 
+                            href="/api/pinterest/auth"
+                            className="px-6 py-3 bg-[#E60023] hover:bg-[#ad081b] text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
+                        >
+                            Connecter le compte Pinterest
+                        </a>
+                        {pinterestAccessToken && (
+                            <span className="text-sm font-medium text-green-600 flex items-center gap-1">
+                                ✅ Connecté
+                            </span>
+                        )}
+                    </div>
+                    <div>
+                        <label htmlFor="pinterestBoardId" className="block text-sm font-bold text-gray-900 mb-2">
+                            Pinterest Board ID
+                        </label>
+                        <input
+                            type="text"
+                            id="pinterestBoardId"
+                            value={pinterestBoardId}
+                            onChange={(e) => setPinterestBoardId(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder="Ex: 123456789"
+                        />
+                        <p className="mt-2 text-xs text-gray-500 font-medium">L'ID du tableau dans lequel épingler.</p>
                     </div>
                 </div>
             </div>

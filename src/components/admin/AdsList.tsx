@@ -114,12 +114,12 @@ export default function AdsList({ ads }: AdsListProps) {
                             <div className="flex items-center gap-6 text-sm">
                                 <div className="flex items-center gap-2">
                                     <Eye className="w-4 h-4 text-gray-400" />
-                                    <span className="font-semibold">{ad.viewCount.toLocaleString()}</span>
+                                    <span className="font-semibold">{ad.viewCount.toLocaleString('fr-FR')}</span>
                                     <span className="text-gray-500">vues</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4 text-gray-400" />
-                                    <span className="font-semibold">{ad.clickCount.toLocaleString()}</span>
+                                    <span className="font-semibold">{ad.clickCount.toLocaleString('fr-FR')}</span>
                                     <span className="text-gray-500">clics</span>
                                 </div>
                                 <div className="flex items-center gap-2">

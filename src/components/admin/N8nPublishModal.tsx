@@ -22,7 +22,7 @@ interface N8nPublishModalProps {
 }
 
 export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPublishModalProps) {
-    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'all'>('all')
+    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'pinterest' | 'all'>('all')
     const [useDescription, setUseDescription] = useState<'short' | 'long'>('short')
     const [scheduleAt, setScheduleAt] = useState('')
     const [loading, setLoading] = useState(false)
@@ -117,18 +117,28 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                 }
             }
 
-            const res = await fetch('/api/n8n/publish', {
+            const isPinterest = platform === 'pinterest'
+            const endpoint = isPinterest ? '/api/pinterest/publish' : '/api/n8n/publish'
+
+            const payload = isPinterest ? {
+                bookId: (book as any).author ? book.id : undefined,
+                packId: !(book as any).author ? book.id : undefined,
+                customImageUrl,
+                customCaption: previewText
+            } : {
+                bookId: (book as any).author ? book.id : undefined,
+                packId: !(book as any).author ? book.id : undefined,
+                format,
+                platform: platform === 'all' ? 'both' : platform,
+                useDescription,
+                scheduleAt: scheduleAt || null,
+                customImageUrl
+            }
+
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bookId: (book as any).author ? book.id : undefined,
-                    packId: !(book as any).author ? book.id : undefined,
-                    format,
-                    platform: platform === 'all' ? 'both' : platform,
-                    useDescription,
-                    scheduleAt: scheduleAt || null,
-                    customImageUrl
-                })
+                body: JSON.stringify(payload)
             })
             const data = await res.json()
             setResult(data)
@@ -308,6 +318,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                         { val: 'facebook', label: 'Facebook', Icon: Facebook, color: 'blue' },
                                         { val: 'instagram', label: 'Instagram', Icon: Instagram, color: 'pink' },
                                         { val: 'tiktok', label: 'TikTok', Icon: Music, color: 'black' },
+                                        { val: 'pinterest', label: 'Pinterest', Icon: ImageIcon, color: 'red' },
                                         { val: 'all', label: 'Toutes', Icon: Send, color: 'gray' },
                                     ] as const).map(({ val, label, Icon, color }) => (
                                         <button

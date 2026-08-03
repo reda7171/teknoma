@@ -59,7 +59,7 @@ function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?:
 
     return (
         <span ref={elementRef} className="tabular-nums">
-            {count.toLocaleString()}{suffix}
+            {count.toLocaleString('fr-FR')}{suffix}
         </span>
     )
 }

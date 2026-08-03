@@ -19,6 +19,8 @@ interface Props {
 export default function DigitalAddToCartButton({ product }: Props) {
   const t = useTranslations('Common')
   const addItem = useCartStore(state => state.addItem)
+  const sessionId = useCartStore(state => state.sessionId)
+  const setSessionId = useCartStore(state => state.setSessionId)
   const openCart = useUIStore(state => state.openCart)
 
   const handleAddToCart = () => {
@@ -31,7 +33,12 @@ export default function DigitalAddToCartButton({ product }: Props) {
     })
 
     // Telegram Notification
-    notifyAddToCart(product.title, product.price, 'DIGITAL').catch(console.error)
+    let currentSessionId = sessionId
+    if (!currentSessionId) {
+        currentSessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        setSessionId(currentSessionId)
+    }
+    notifyAddToCart(product.title, product.price, 'DIGITAL', currentSessionId).catch(console.error)
 
     // Ouvrir le panier
     openCart()

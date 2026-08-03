@@ -33,7 +33,7 @@ export default function ReadingListStats({ items }: ReadingListStatsProps) {
         },
         {
             label: t('TotalVolume'),
-            value: totalPages.toLocaleString(),
+            value: totalPages.toLocaleString('fr-FR'),
             subValue: t('PagesAccumulated'),
             icon: ScrollText,
             color: 'bg-white text-black hover:bg-gray-50 border-gray-100 shadow-sm'
@@ -41,7 +41,7 @@ export default function ReadingListStats({ items }: ReadingListStatsProps) {
         {
             label: t('Progress'),
             value: `${readingProgress}%`,
-            subValue: t('PagesRead', { count: pagesRead.toLocaleString() }),
+            subValue: t('PagesRead', { count: pagesRead.toLocaleString('fr-FR') }),
             icon: GraduationCap,
             color: 'bg-emerald-600 text-white hover:bg-emerald-700 border-emerald-600'
         }

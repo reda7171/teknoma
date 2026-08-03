@@ -21,6 +21,7 @@ export default async function N8nConfigPage() {
     const instagramWebhookUrl = await getSetting('n8n_instagram_webhook_url') || ''
     const facebookAccessToken = await getSetting('facebook_access_token') || ''
     const instagramAccountId = await getSetting('instagram_account_id') || ''
+
     const instagramToken = await getSetting('instagram_token') || ''
     const threadsAccountId = await getSetting('threads_account_id') || ''
     const threadsAccessToken = await getSetting('threads_access_token') || ''
@@ -28,6 +29,10 @@ export default async function N8nConfigPage() {
     const tiktokCreatorId = await getSetting('tiktok_creator_id') || ''
     const tiktokAppId = await getSetting('tiktok_app_id') || ''
     const tiktokClientSecret = await getSetting('tiktok_client_secret') || ''
+    const pinterestAccessToken = await getSetting('pinterest_access_token') || ''
+    const pinterestBoardId = await getSetting('pinterest_board_id') || ''
+    const pinterestAppId = await getSetting('pinterest_app_id') || ''
+    const pinterestAppSecret = await getSetting('pinterest_app_secret') || ''
 
     return (
         <div className="space-y-12">
@@ -66,6 +71,10 @@ export default async function N8nConfigPage() {
                         initialTiktokCreatorId={tiktokCreatorId}
                         initialTiktokAppId={tiktokAppId}
                         initialTiktokClientSecret={tiktokClientSecret}
+                        initialPinterestAccessToken={pinterestAccessToken}
+                        initialPinterestBoardId={pinterestBoardId}
+                        initialPinterestAppId={pinterestAppId}
+                        initialPinterestAppSecret={pinterestAppSecret}
                     />
                 </div>
             </div>

@@ -3,7 +3,7 @@
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getIpIdentifier } from '@/lib/rate-limit'
 
-export async function notifyAddToCart(productTitle: string, price: number, type: string) {
+export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
         
@@ -14,7 +14,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
 
         if (shouldNotify) {
             // On envoie une notification asynchrone
-            await sendTelegramMessage(`🛒 <b>Nouveau Panier</b>\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}`)
+            await sendTelegramMessage(`🛒 <b>Nouveau Panier</b>\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
         }
         
         return { success: true }

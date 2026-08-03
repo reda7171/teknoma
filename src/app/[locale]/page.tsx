@@ -34,7 +34,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const baseKeywords = [
     "رواية", "riwaya", "book", "الكاتب", "authors", "كتب",
     "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب",
-    "a7san librairie en ligne f maghrib", "meilleure librairie en ligne au maroc"
+    "a7san librairie en ligne f maghrib", "meilleure librairie en ligne au maroc",
+    "Livres numériques", "Édition marocaine", "Papeterie", "Scolaire et Pédagogie",
+    "Coffrets", "Abonnements", "Meilleures ventes", "Dernières parutions", 
+    "Idées de cadeaux", "Emmanuel Todd", "One Piece", "Sarah Rivens", "Andre Aciman"
   ];
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';

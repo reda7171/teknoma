@@ -9,6 +9,7 @@ import { Link } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { notifyRemoveFromCart, notifyClearCart } from '@/lib/actions/cart-notify'
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
+import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -96,6 +97,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     onClick={onClose}
                 />
             )}
+            
+            <InstantOfferPopup />
 
             {/* Drawer */}
             <div

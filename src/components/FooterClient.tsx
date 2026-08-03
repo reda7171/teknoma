@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link } from '@/i18n/routing'
 import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtSign, CheckCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl';
+import Script from 'next/script'
 
 interface FooterProps {
     features?: {
@@ -79,6 +80,22 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
 
     return (
         <footer id="main-footer" className="bg-black text-white relative">
+            <Script src="https://apis.google.com/js/platform.js?onload=renderBadge" strategy="afterInteractive" />
+            <Script id="google-customer-reviews-badge" strategy="afterInteractive" dangerouslySetInnerHTML={{
+                __html: `
+                    window.renderBadge = function() {
+                        var ratingBadgeContainer = document.createElement("div");
+                        document.body.appendChild(ratingBadgeContainer);
+                        window.gapi.load('ratingbadge', function() {
+                            window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                "merchant_id": 5826844744,
+                                "position": "BOTTOM_LEFT"
+                            });
+                        });
+                    }
+                `
+            }} />
+
             {/* Top Bar with Back to Top */}
             <div className="bg-black border-b border-white/5 h-16 w-full flex items-center ltr:justify-end rtl:justify-start px-4 sm:px-6 lg:px-8">
                 <button

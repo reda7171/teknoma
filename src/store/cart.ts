@@ -16,12 +16,16 @@ export interface CartItem {
 
 interface CartStore {
     items: CartItem[]
+    sessionId: string | null
+    discount: number | null
 
     // Actions
     addItem: (item: Omit<CartItem, 'quantity'>) => void
     removeItem: (id: string) => void
     updateQuantity: (id: string, quantity: number) => void
     clearCart: () => void
+    setSessionId: (id: string) => void
+    applyDiscount: (discount: number) => void
 
     // Computed
     getTotalPrice: () => number
@@ -33,6 +37,8 @@ export const useCartStore = create<CartStore>()(
     persist(
         (set, get) => ({
             items: [],
+            sessionId: null,
+            discount: null,
 
             // Ajouter un item au panier
             addItem: (item) => {
@@ -79,15 +85,28 @@ export const useCartStore = create<CartStore>()(
 
             // Vider le panier
             clearCart: () => {
-                set({ items: [] })
+                set({ items: [], discount: null })
+            },
+            
+            setSessionId: (id) => {
+                set({ sessionId: id })
+            },
+
+            applyDiscount: (discount) => {
+                set({ discount })
             },
 
             // Calculer le prix total
             getTotalPrice: () => {
-                return get().items.reduce(
-                    (total, item) => total + item.price * item.quantity,
+                const total = get().items.reduce(
+                    (sum, item) => sum + item.price * item.quantity,
                     0
                 )
+                const discount = get().discount
+                if (discount) {
+                    return Math.max(0, total - discount)
+                }
+                return total
             },
 
             // Calculer le nombre total d'items

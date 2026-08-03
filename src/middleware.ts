@@ -72,14 +72,14 @@ export default function middleware(request: NextRequest) {
         // 2. Ajouter les headers de sécurité (OWASP) pour la redirection
         const cspHeader = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://maps.googleapis.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://maps.googleapis.com https://www.gstatic.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "img-src 'self' data: https: blob:",
             "font-src 'self' data: https://fonts.gstatic.com",
             "media-src 'self' https://assets.mixkit.co",
             "connect-src 'self' https:",
             "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://www.facebook.com https://staticxx.facebook.com",
-            "worker-src 'none'",
+            "worker-src 'self' blob:",
             "object-src 'none'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
@@ -97,14 +97,14 @@ export default function middleware(request: NextRequest) {
     // 2. Ajouter les headers de sécurité (OWASP)
     const cspHeader = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://maps.googleapis.com",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://maps.googleapis.com https://www.gstatic.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: https: blob:",
         "font-src 'self' data: https://fonts.gstatic.com",
         "media-src 'self' https://assets.mixkit.co",
         "connect-src 'self' https:",
         "frame-src 'self' https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://www.facebook.com https://staticxx.facebook.com",
-        "worker-src 'none'",
+        "worker-src 'self' blob:",
         "object-src 'none'",
         "frame-ancestors 'none'",
         "base-uri 'self'",

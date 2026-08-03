@@ -154,7 +154,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                 </div>
                                 <div className="bg-orange-50 p-4 rounded-3xl border border-orange-100 shadow-sm w-[calc(50%-6px)]">
                                     <div className="text-orange-600 font-black text-xs mb-1 font-sans">PP</div>
-                                    <div className="text-xl font-black text-black">{totalPages.toLocaleString()}</div>
+                                    <div className="text-xl font-black text-black">{totalPages.toLocaleString('fr-FR')}</div>
                                     <div className="text-[10px] uppercase font-bold text-gray-500">Pages</div>
                                 </div>
                                 <div className="bg-purple-50 p-4 rounded-3xl border border-purple-100 shadow-sm w-[calc(50%-6px)]">

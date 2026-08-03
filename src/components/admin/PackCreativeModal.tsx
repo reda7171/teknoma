@@ -39,7 +39,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     const [isGeneratingDescFR, setIsGeneratingDescFR] = useState(false)
     const [isGeneratingDescAR, setIsGeneratingDescAR] = useState(false)
     const [isPublishing, setIsPublishing] = useState(false)
-    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'all'>('all')
+    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'pinterest' | 'all'>('all')
     const [scheduleAt, setScheduleAt] = useState('')
     const [caption, setCaption] = useState('')
 
@@ -2090,6 +2090,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         { val: 'facebook', label: 'Facebook', Icon: Facebook, color: 'blue' },
                                         { val: 'instagram', label: 'Instagram', Icon: Instagram, color: 'pink' },
                                         { val: 'tiktok', label: 'TikTok', Icon: Music, color: 'black' },
+                                        { val: 'pinterest', label: 'Pinterest', Icon: ImageIcon, color: 'red' },
                                         { val: 'all', label: 'Toutes', Icon: Send, color: 'indigo' },
                                     ] as const).map(({ val, label, Icon, color }) => {
                                         const getPlatformClass = (v: string, c: string) => {
