@@ -572,6 +572,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Stock Jumia
                                         </th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Qté Synch
+                                        </th>
                                         <th 
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                             onClick={() => handleSort('orders')}
@@ -583,9 +586,6 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         </th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Jumia
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Qté Synch
                                         </th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Lié à un article
@@ -696,6 +696,22 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     {book.jumiaStock != null ? `${book.jumiaStock} unités` : '-'}
                                                                 </span>
                                                             </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                {book.jumiaStock != null && book.stock === book.jumiaStock ? (
+                                                                    <span className="text-green-600">Oui</span>
+                                                                ) : (
+                                                                    <div className="flex flex-col items-center gap-1">
+                                                                        <span className="text-red-600">Non</span>
+                                                                        <button 
+                                                                            onClick={(e) => handleSyncQuantity(e, book.id)}
+                                                                            disabled={loading === book.id + '-sync'}
+                                                                            className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-blue-600 shadow-sm disabled:opacity-50 transition-colors"
+                                                                        >
+                                                                            {loading === book.id + '-sync' ? '...' : 'Synch quantity'}
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                                                     {book.orderCount || 0} fois
@@ -749,22 +765,6 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         {loading === book.id + '-verify' ? '...' : 'Verify'}
                                                                     </button>
                                                                 </div>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                                                {book.jumiaStock != null && book.stock === book.jumiaStock ? (
-                                                                    <span className="text-green-600">Oui</span>
-                                                                ) : (
-                                                                    <div className="flex flex-col items-center gap-1">
-                                                                        <span className="text-red-600">Non</span>
-                                                                        <button 
-                                                                            onClick={(e) => handleSyncQuantity(e, book.id)}
-                                                                            disabled={loading === book.id + '-sync'}
-                                                                            className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-blue-600 shadow-sm disabled:opacity-50 transition-colors"
-                                                                        >
-                                                                            {loading === book.id + '-sync' ? '...' : 'Synch quantity'}
-                                                                        </button>
-                                                                    </div>
-                                                                )}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <span className={book.hasArticle ? 'text-green-600' : 'text-red-600'}>
