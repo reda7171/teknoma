@@ -545,6 +545,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         >
                                             <div className="flex items-center">Stock {getSortIcon('stock')}</div>
                                         </th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Stock Jumia
+                                        </th>
                                         <th 
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                             onClick={() => handleSort('orders')}
@@ -663,6 +666,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         {book.stock} unités
                                                                     </span>
                                                                 )}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                <span className={book.jumiaStock != null ? 'text-gray-900' : 'text-gray-400'}>
+                                                                    {book.jumiaStock != null ? `${book.jumiaStock} unités` : '-'}
+                                                                </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
