@@ -1119,3 +1119,18 @@ model InstantOffer {
   @@map("instant_offers")
 }
 
+
+model JumiaConsignment {
+  id                 String   @id @default(uuid())
+  shopId             String
+  businessClientCode String
+  shippingDate       DateTime
+  products           Json     
+  status             String   @default("CREATED")
+  purchaseOrderNumber String? 
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("jumia_consignments")
+}
+

@@ -6,10 +6,11 @@ import { getAllJumiaProducts } from "../jumia-orders/actions"
 export const dynamic = 'force-dynamic'
 
 export default async function JumiaProductsPage({
-    params: { locale }
+    params
 }: {
-    params: { locale: string }
+    params: Promise<{ locale: string }>
 }) {
+    const { locale } = await params
     const t = await getTranslations('Admin')
     
     // On charge tous les produits Jumia

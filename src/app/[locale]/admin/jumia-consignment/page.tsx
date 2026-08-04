@@ -4,10 +4,11 @@ import JumiaConsignmentClient from "./JumiaConsignmentClient"
 import { getJumiaShops } from "../jumia-orders/actions"
 
 export default async function JumiaConsignmentPage({
-    params: { locale }
+    params
 }: {
-    params: { locale: string }
+    params: Promise<{ locale: string }>
 }) {
+    const { locale } = await params
     const t = await getTranslations('Admin')
     
     // Pour la création de FBJ on aura besoin des shops

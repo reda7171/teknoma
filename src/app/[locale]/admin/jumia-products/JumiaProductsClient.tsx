@@ -237,6 +237,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                             <th className="px-4 py-3 text-left font-medium text-slate-500">SKU Vendeur</th>
                             <th className="px-4 py-3 text-left font-medium text-slate-500">Jumia SKU</th>
                             <th className="px-4 py-3 text-left font-medium text-slate-500">Statut QC / Visibilité</th>
+                            <th className="px-4 py-3 text-left font-medium text-slate-500">Stock Actuel</th>
                             <th className="px-4 py-3 text-left font-medium text-slate-500">Prix Jumia</th>
                             <th className="px-4 py-3 text-right font-medium text-slate-500">Actions Rapides</th>
                         </tr>
@@ -312,6 +313,11 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                                                 {businessClient?.visible ? 'Visible' : 'Masqué'}
                                             </span>
                                         </div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className="text-slate-900 font-medium">
+                                            {p.stockActuel !== undefined ? p.stockActuel : (p.variations?.[0]?.quantity ?? 'N/A')}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex flex-col">

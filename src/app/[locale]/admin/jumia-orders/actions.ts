@@ -565,6 +565,34 @@ export async function getAllJumiaProducts() {
             nextToken = res.nextToken
         } while (nextToken)
         
+        // Fetch all stock and merge
+        const jumia = await JumiaAPI.getInstance()
+        if (jumia && allProducts.length > 0) {
+            let allStock: any[] = []
+            let stockNextToken: string | undefined = undefined
+            do {
+                try {
+                    const stockRes = await jumia.getCatalogStock({ token: stockNextToken, size: 100 })
+                    if (stockRes.products && stockRes.products.length > 0) {
+                        allStock = allStock.concat(stockRes.products)
+                    }
+                    stockNextToken = stockRes.nextToken
+                } catch (err) {
+                    break;
+                }
+            } while (stockNextToken)
+            
+            // Merge stock into products
+            allProducts = allProducts.map((p: any) => {
+                const sellerSku = p.sellerSku || (p.variations && p.variations[0]?.sellerSku)
+                const stockItem = allStock.find(s => s.sellerSku === sellerSku)
+                if (stockItem) {
+                    p.stockActuel = stockItem.globalStock
+                }
+                return p
+            })
+        }
+        
         return { products: allProducts }
     } catch (e: any) {
         return { error: e.message, products: allProducts }
