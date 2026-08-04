@@ -92,12 +92,20 @@ export default async function AdminPostsPage({
     // Fetch top countries visiting the blog
     const topCountriesRaw = await prisma.pageView.groupBy({
         by: ['country'],
-        where: { url: { contains: '/blog' }, country: { not: null, not: 'Inconnu' } },
-        _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
-        take: 5
+        where: { url: { contains: '/blog' } },
+        _count: { id: true }
     })
-    const topCountries = topCountriesRaw
+    
+    const countryMap = new Map<string, number>();
+    topCountriesRaw.forEach(c => {
+        const name = c.country && c.country !== 'Inconnu' ? c.country : 'Inconnu';
+        countryMap.set(name, (countryMap.get(name) || 0) + c._count.id);
+    });
+    
+    const topCountries = Array.from(countryMap.entries())
+        .map(([country, count]) => ({ country, _count: { id: count } }))
+        .sort((a, b) => b._count.id - a._count.id)
+        .slice(0, 5);
 
     const activeFilters = {
         search: search || '',

@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
-import { Eye, XCircle, BookOpen, User, ArrowRight, Image as ImageIcon } from 'lucide-react'
-import { cancelExchange } from '@/lib/actions/admin-exchanges'
+import { Eye, XCircle, BookOpen, User, ArrowRight, Image as ImageIcon, Trash2 } from 'lucide-react'
+import { cancelExchange, deleteExchanges } from '@/lib/actions/admin-exchanges'
 import { useRouter } from 'next/navigation'
 import ExchangeCreativeModal from '@/components/admin/ExchangeCreativeModal'
 
@@ -53,7 +53,9 @@ interface Exchange {
 
 export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] }) {
     const [loading, setLoading] = useState<string | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
     const [selectedExchangeForCreative, setSelectedExchangeForCreative] = useState<Exchange | null>(null)
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const router = useRouter()
 
     async function handleCancel(id: string) {
@@ -74,6 +76,42 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
         }
     }
 
+    async function handleBulkDelete() {
+        if (selectedIds.size === 0) return
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} échange(s) ? Cette action est irréversible.`)) {
+            return
+        }
+
+        setIsDeleting(true)
+        const result = await deleteExchanges(Array.from(selectedIds))
+        setIsDeleting(false)
+
+        if (result.success) {
+            setSelectedIds(new Set())
+            router.refresh()
+        } else {
+            alert(result.error)
+        }
+    }
+
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelectedIds(new Set(exchanges.map(ex => ex.id)))
+        } else {
+            setSelectedIds(new Set())
+        }
+    }
+
+    const handleSelect = (id: string, checked: boolean) => {
+        const newSelected = new Set(selectedIds)
+        if (checked) {
+            newSelected.add(id)
+        } else {
+            newSelected.delete(id)
+        }
+        setSelectedIds(newSelected)
+    }
+
     if (exchanges.length === 0) {
         return (
             <div className="text-center py-12">
@@ -84,11 +122,36 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
     }
 
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50/50 border-b border-gray-100">
-                    <tr>
-                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Demandeur</th>
+        <div className="space-y-4">
+            {selectedIds.size > 0 && (
+                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl p-4">
+                    <span className="text-sm font-bold text-blue-800">
+                        {selectedIds.size} échange(s) sélectionné(s)
+                    </span>
+                    <button
+                        onClick={handleBulkDelete}
+                        disabled={isDeleting}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-black uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        {isDeleting ? 'Suppression...' : 'Supprimer'}
+                    </button>
+                </div>
+            )}
+            
+            <div className="overflow-x-auto bg-white rounded-2xl border border-gray-100">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/50 border-b border-gray-100">
+                        <tr>
+                            <th className="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] w-12">
+                                <input
+                                    type="checkbox"
+                                    checked={exchanges.length > 0 && selectedIds.size === exchanges.length}
+                                    onChange={handleSelectAll}
+                                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                                />
+                            </th>
+                            <th className="px-6 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Demandeur</th>
                         <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Livre Demandé</th>
                         <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Cible</th>
                         <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Type</th>
@@ -98,9 +161,17 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                     {exchanges.map((exchange) => (
-                        <tr key={exchange.id} className="hover:bg-gray-50 transition-all group">
+                        <tr key={exchange.id} className={`hover:bg-gray-50 transition-all group ${selectedIds.has(exchange.id) ? 'bg-gray-50/50' : ''}`}>
+                            <td className="px-6 py-6">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedIds.has(exchange.id)}
+                                    onChange={(e) => handleSelect(exchange.id, e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                                />
+                            </td>
                             {/* Demandeur */}
-                            <td className="px-10 py-6">
+                            <td className="px-6 py-6">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg shadow-black/10 font-black text-xs uppercase transition-transform group-hover:scale-110 shrink-0">
                                         {exchange.requester.fullName[0]}
@@ -115,7 +186,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                             </td>
 
                             {/* Livre demandé */}
-                            <td className="px-10 py-6">
+                            <td className="px-6 py-6">
                                 <div className="flex items-center gap-4">
                                     <div className="relative w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-100">
                                         {exchange.bookRequested.image ? (
@@ -141,7 +212,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                             </td>
 
                             {/* Propriétaire */}
-                            <td className="px-10 py-6">
+                            <td className="px-6 py-6">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 font-black text-xs uppercase transition-transform group-hover:scale-110 shrink-0">
                                         {exchange.responder.fullName[0]}
@@ -156,7 +227,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                             </td>
 
                             {/* Type */}
-                            <td className="px-10 py-6 whitespace-nowrap">
+                            <td className="px-6 py-6 whitespace-nowrap">
                                 <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${exchange.type === 'DIRECT'
                                     ? 'bg-purple-50 text-purple-600 border-purple-100'
                                     : 'bg-orange-50 text-orange-600 border-orange-100'
@@ -166,7 +237,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                             </td>
 
                             {/* Statut */}
-                            <td className="px-10 py-6 whitespace-nowrap">
+                            <td className="px-6 py-6 whitespace-nowrap">
                                 <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${STATUS_BADGES[exchange.status]?.className.replace('100', '50').replace('800', '600') || 'bg-gray-50 text-gray-600 border-gray-100'
                                     }`}>
                                     {STATUS_BADGES[exchange.status]?.label || exchange.status}
@@ -177,7 +248,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                             </td>
 
                             {/* Actions */}
-                            <td className="px-10 py-6 text-right">
+                            <td className="px-6 py-6 text-right">
                                 <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => setSelectedExchangeForCreative(exchange)}
@@ -207,6 +278,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                     ))}
                 </tbody>
             </table>
+            </div>
 
             <ExchangeCreativeModal
                 isOpen={!!selectedExchangeForCreative}

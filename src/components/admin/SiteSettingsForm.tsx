@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { updateMultipleSettings } from '@/lib/actions/site-settings'
-import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign } from 'lucide-react'
-
+import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link } from 'lucide-react'
 interface SettingsFormProps {
     initialSettings: Record<string, string>
 }
@@ -244,6 +243,19 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             value={settings.social_threads || ''}
                             onChange={(e) => handleChange('social_threads', e.target.value)}
                             placeholder="https://threads.net/@riwaya"
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                            <Link className="w-4 h-4" />
+                            Pinterest
+                        </label>
+                        <input
+                            type="url"
+                            value={settings.social_pinterest || ''}
+                            onChange={(e) => handleChange('social_pinterest', e.target.value)}
+                            placeholder="https://pinterest.com/riwaya"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>

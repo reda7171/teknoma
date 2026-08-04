@@ -95,6 +95,8 @@ export class JumiaAPI {
         return this.request('/login', 'POST', { email: this.email, password })
     }
 
+
+
     async getToken(clientId: string, clientSecret: string) {
         return this.request('/token', 'POST', { 
             client_id: clientId, 

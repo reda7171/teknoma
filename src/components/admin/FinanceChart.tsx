@@ -26,6 +26,10 @@ export default function FinanceChart({ data }: { data: any[] }) {
                             <stop offset="5%" stopColor="#000000" stopOpacity={0.3}/>
                             <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
                         </linearGradient>
+                        <linearGradient id="colorJumia" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                        </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                     <XAxis 
@@ -72,6 +76,15 @@ export default function FinanceChart({ data }: { data: any[] }) {
                         strokeWidth={4} 
                         fillOpacity={1} 
                         fill="url(#colorProfit)" 
+                    />
+                    <Area 
+                        type="monotone" 
+                        name="Virements Jumia" 
+                        dataKey="jumia" 
+                        stroke="#f97316" 
+                        strokeWidth={4} 
+                        fillOpacity={1} 
+                        fill="url(#colorJumia)" 
                     />
                 </AreaChart>
             </ResponsiveContainer>

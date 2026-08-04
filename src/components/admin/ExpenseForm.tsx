@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createExpense, updateExpense } from '@/lib/actions/finance'
+import { createExpense, updateExpense, getUninvoicedDeliveredOrders } from '@/lib/actions/finance'
 import { ExpenseCategory, TransactionType } from '@prisma/client'
-import { Plus, Loader2, Calculator, Edit2 } from 'lucide-react'
+import { Plus, Loader2, Calculator, Edit2, Package } from 'lucide-react'
 
 const EXPENSE_CATEGORIES = [
     { value: 'TRANSPORT', label: 'Transport' },
@@ -20,7 +20,8 @@ const EXPENSE_CATEGORIES = [
 
 const INCOME_CATEGORIES = [
     { value: 'INCOME_CASH', label: 'Cash (Livraison)' },
-    { value: 'INCOME_DELIVERY', label: 'Virement Société de Livraison' },
+    { value: 'INCOME_DELIVERY', label: 'Facture Société de Livraison' },
+    { value: 'INCOME_JUMIA', label: 'Virement Jumia' },
     { value: 'OTHER', label: 'Autre Entrée' }
 ]
 
@@ -43,6 +44,9 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
     const [title, setTitle] = useState(expense?.title || '')
     const [amount, setAmount] = useState<number | string>(expense?.amount || '')
     const [description, setDescription] = useState(expense?.description || '')
+    const [date, setDate] = useState<string>(
+        expense?.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+    )
 
     // Calculs pour les lots
     const [bookCount, setBookCount] = useState<number | string>('')
@@ -51,6 +55,49 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
     const totalLotCost = (Number(booksCost) || 0) + (Number(transportCost) || 0)
     const averagePrice = Number(bookCount) > 0 ? (totalLotCost / Number(bookCount)) : 0
+
+    // Commandes pour Facture Société de Livraison
+    const [availableOrders, setAvailableOrders] = useState<any[]>([])
+    const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([])
+    const [loadingOrders, setLoadingOrders] = useState(false)
+
+    useEffect(() => {
+        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' && !isEditing) {
+            setLoadingOrders(true)
+            getUninvoicedDeliveredOrders().then(orders => {
+                setAvailableOrders(orders)
+                setLoadingOrders(false)
+            }).catch(() => setLoadingOrders(false))
+        } else {
+            setAvailableOrders([])
+            setSelectedOrderIds([])
+        }
+    }, [type, selectedCategory, isEditing])
+
+    // Auto-calculate amount when orders are selected
+    useEffect(() => {
+        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' && !isEditing) {
+            const total = selectedOrderIds.reduce((sum, id) => {
+                const order = availableOrders.find(o => o.id === id)
+                return sum + (order?.total || 0)
+            }, 0)
+            setAmount(total > 0 ? total : '')
+        }
+    }, [selectedOrderIds, availableOrders, type, selectedCategory, isEditing])
+
+    const toggleOrderSelection = (id: string) => {
+        setSelectedOrderIds(prev => 
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        )
+    }
+
+    const selectAllOrders = () => {
+        if (selectedOrderIds.length === availableOrders.length) {
+            setSelectedOrderIds([])
+        } else {
+            setSelectedOrderIds(availableOrders.map(o => o.id))
+        }
+    }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -63,6 +110,12 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             finalAmount = totalLotCost
             const lotDetails = `Lot de ${bookCount} livres. Prix moyen de revient: ${averagePrice.toFixed(2)} MAD/livre. (Livres: ${booksCost || 0} MAD, Transport: ${transportCost || 0} MAD).`
             finalDescription = description ? `${lotDetails} | ${description}` : lotDetails
+            finalDescription = description ? `${lotDetails} | ${description}` : lotDetails
+        }
+        
+        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0) {
+            const orderDetails = `Facture de livraison pour ${selectedOrderIds.length} commande(s).`
+            finalDescription = description ? `${orderDetails} | ${description}` : orderDetails
         }
 
         const data = {
@@ -71,7 +124,9 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             category: selectedCategory as ExpenseCategory,
             type: type,
             description: finalDescription,
-            unitCost: (isLot && averagePrice > 0) ? averagePrice : (expense?.unitCost || undefined)
+            unitCost: (isLot && averagePrice > 0) ? averagePrice : (expense?.unitCost || undefined),
+            orderIds: selectedOrderIds.length > 0 ? selectedOrderIds : undefined,
+            date: date
         }
 
         if (isEditing) {
@@ -87,6 +142,8 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             setBookCount('')
             setBooksCost('')
             setTransportCost(0)
+            setSelectedOrderIds([])
+            setDate(new Date().toISOString().split('T')[0])
         }
         
         setLoading(false)
@@ -142,11 +199,6 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1">Titre</label>
-                        <input value={title} onChange={e => setTitle(e.target.value)} required className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ex: Livraison Rabat" />
-                    </div>
-
-                    <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1">Catégorie</label>
                         <select 
                             value={selectedCategory} 
@@ -158,6 +210,30 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                 <option key={cat.value} value={cat.value}>{cat.label}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-1">
+                            {type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' ? 'N° de Facture' : 'Titre'}
+                        </label>
+                        <input 
+                            value={title} 
+                            onChange={e => setTitle(e.target.value)} 
+                            required 
+                            className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                            placeholder={type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' ? 'Ex: FAC-2024-001' : 'Ex: Livraison Rabat'} 
+                        />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-1">Date</label>
+                        <input 
+                            type="date"
+                            value={date} 
+                            onChange={e => setDate(e.target.value)} 
+                            required 
+                            className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                        />
                     </div>
 
                     {/* Achat Livres - Option Lot */}
@@ -229,6 +305,76 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                         </div>
                     )}
 
+                    {/* Sélection des commandes pour facture livraison */}
+                    {type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' && !isEditing && (
+                        <div className="md:col-span-2 bg-emerald-50 p-4 border border-emerald-100 rounded-xl space-y-4">
+                            <div className="flex items-center justify-between">
+                                <span className="font-bold text-emerald-900 flex items-center gap-2">
+                                    <Package className="w-5 h-5" />
+                                    Sélectionnez les commandes payées dans cette facture
+                                </span>
+                                {availableOrders.length > 0 && (
+                                    <button 
+                                        type="button" 
+                                        onClick={selectAllOrders}
+                                        className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full hover:bg-emerald-200 transition-colors"
+                                    >
+                                        {selectedOrderIds.length === availableOrders.length ? 'Désélectionner tout' : 'Sélectionner tout'}
+                                    </button>
+                                )}
+                            </div>
+
+                            {loadingOrders ? (
+                                <div className="flex justify-center py-4">
+                                    <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                                </div>
+                            ) : availableOrders.length === 0 ? (
+                                <p className="text-sm text-emerald-700 text-center py-4">Aucune commande livrée en attente de paiement trouvée.</p>
+                            ) : (
+                                <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {availableOrders.map(order => (
+                                            <div 
+                                                key={order.id} 
+                                                onClick={() => toggleOrderSelection(order.id)}
+                                                className={`p-3 rounded-lg border cursor-pointer flex flex-col justify-between transition-all ${
+                                                    selectedOrderIds.includes(order.id) 
+                                                        ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' 
+                                                        : 'bg-white border-emerald-200 hover:border-emerald-400 text-emerald-900 hover:shadow-sm'
+                                                }`}
+                                            >
+                                                <div className="flex items-start gap-3 mb-2">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={selectedOrderIds.includes(order.id)}
+                                                        readOnly
+                                                        className="w-4 h-4 mt-1 rounded text-emerald-600 focus:ring-emerald-500 pointer-events-none"
+                                                    />
+                                                    <div>
+                                                        <p className={`font-bold text-sm ${selectedOrderIds.includes(order.id) ? 'text-white' : 'text-gray-900'}`}>{order.fullName}</p>
+                                                        <p className={`text-xs ${selectedOrderIds.includes(order.id) ? 'text-emerald-100' : 'text-gray-500'}`}>
+                                                            {order.trackingID || 'Sans numéro'} • {order.shippingCompany || 'Standard'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right mt-auto">
+                                                    <p className={`font-black tracking-tight ${selectedOrderIds.includes(order.id) ? 'text-white' : 'text-emerald-700'}`}>
+                                                        {order.total.toFixed(2)} MAD
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="pt-2 flex justify-between items-center text-emerald-800 font-bold text-sm">
+                                <span>{selectedOrderIds.length} commande(s) sélectionnée(s)</span>
+                                <span>Total estimé: {selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0).toFixed(2)} MAD</span>
+                            </div>
+                        </div>
+                    )}
+
                     {(!isLot || selectedCategory !== 'BOOKS_PURCHASE') && (
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1">Montant Total (MAD)</label>
@@ -237,8 +383,13 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                 onChange={e => setAmount(e.target.value)}
                                 type="number" 
                                 step="0.01" 
-                                required={!isLot}
-                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                                required={!isLot && selectedCategory !== 'INCOME_DELIVERY'}
+                                readOnly={selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0}
+                                className={`w-full px-3 py-2 border rounded-lg outline-none transition-all ${
+                                    selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0
+                                    ? 'bg-gray-100 text-gray-600 cursor-not-allowed font-bold'
+                                    : 'bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500'
+                                }`} 
                                 placeholder="0.00" 
                             />
                         </div>

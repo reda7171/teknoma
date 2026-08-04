@@ -199,7 +199,42 @@ export async function updateOrderTrackingId(orderId: string, trackingID: string,
     }
 }
 
+/**
+ * Basculer l'état de paiement d'une commande
+ */
+export async function togglePaymentStatus(orderId: string, isPaid: boolean, expenseId?: string | null) {
+    try {
+        await verifyAdmin()
+        
+        const data: any = { isPaid }
+        if (expenseId !== undefined) {
+            data.expenseId = expenseId
+        }
 
+        await prisma.order.update({
+            where: { id: orderId },
+            data
+        })
+
+        revalidatePath('/admin/orders')
+        revalidatePath(`/admin/orders/${orderId}`)
+
+        const details = isPaid 
+            ? `Statut de paiement modifié vers: Payé${expenseId ? ` (Lié à une facture)` : ''}` 
+            : `Statut de paiement modifié vers: Non payé`
+
+        await createAuditLog({
+            action: 'UPDATE_DETAILS',
+            entity: 'ORDER',
+            entityId: orderId,
+            details
+        })
+
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: 'Impossible de modifier le statut de paiement' }
+    }
+}
 /**
  * Récupérer toutes les commandes (admin)
  */

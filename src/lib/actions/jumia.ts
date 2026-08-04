@@ -2,6 +2,59 @@
 
 import { prisma } from '@/lib/prisma'
 import { JumiaAPI } from '@/lib/jumia-api'
+import { verifyAdmin } from './auth'
+import { sendTelegramMessage } from '@/lib/telegram'
+import { getSetting } from './site-settings'
+
+export async function fetchPaidPayoutStatements() {
+    try {
+        await verifyAdmin()
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré.", statements: [] }
+        }
+
+        // Fetch paid statements (maybe recent ones, last 90 days is default)
+        const response = await jumia.getPayoutStatements({ paid: true })
+        if (response && response.statements) {
+            let newPayoutsCount = 0;
+            const shouldNotify = await getSetting('telegram_notify_jumia_payout') === 'true'
+
+            for (const statement of response.statements) {
+                const existing = await prisma.expense.findFirst({
+                    where: { 
+                        category: 'INCOME_JUMIA',
+                        description: statement.statementNumber 
+                    }
+                })
+
+                if (!existing && statement.payout?.amount) {
+                    await prisma.expense.create({
+                        data: {
+                            title: `Virement Jumia - ${statement.statementNumber}`,
+                            description: statement.statementNumber,
+                            amount: statement.payout.amount,
+                            category: 'INCOME_JUMIA',
+                            type: 'INCOME',
+                            date: new Date(statement.createdAt)
+                        }
+                    })
+                    newPayoutsCount++;
+
+                    if (shouldNotify) {
+                        await sendTelegramMessage(`💰 <b>Nouveau Virement Jumia Enregistré</b>\n\n📌 <b>Référence:</b> ${statement.statementNumber}\n💵 <b>Montant:</b> ${statement.payout.amount} ${statement.payout.currency}\n📅 <b>Date:</b> ${new Date(statement.createdAt).toLocaleDateString('fr-FR')}`)
+                    }
+                }
+            }
+
+            return { success: true, statements: response.statements, newPayoutsCount }
+        }
+        return { success: false, message: "Aucune facture trouvée", statements: [] }
+    } catch (error: any) {
+        console.error("fetchPaidPayoutStatements error:", error)
+        return { success: false, message: error.message, statements: [] }
+    }
+}
 
 export async function syncBooksStockToJumia() {
     try {
@@ -205,6 +258,152 @@ export async function publishBooksToJumia(bookIds: string[]) {
     } catch (error: any) {
         console.error("Erreur publishBooksToJumia:", error)
         return { success: false, message: `Erreur de publication: ${error.message}` }
+    }
+}
+
+export async function publishAccessoriesToJumia(accessoryIds: string[]) {
+    try {
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré ou activé." }
+        }
+
+        const accessories = await prisma.extraProduct.findMany({
+            where: { id: { in: accessoryIds } }
+        })
+
+        if (accessories.length === 0) {
+            return { success: false, message: "Aucun accessoire trouvé pour publication." }
+        }
+
+        const shops = await jumia.getShops()
+        const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
+        const productsToCreate: any[] = [];
+        const productsToUpdate: any[] = [];
+
+        for (const accessory of accessories) {
+            const titleFr = accessory.name;
+            const descFrRaw = accessory.description || titleFr;
+            
+            const padDesc = (desc: string) => {
+                const suffix = " - Découvrez cet accessoire exclusif, parfait pour enrichir votre quotidien. Design unique et finition soignée garantie.";
+                return desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+            };
+
+            const descFr = padDesc(descFrRaw);
+
+            // Accessoires usually don't have markup, just use their price
+            const price = accessory.price;
+
+            const baseName = (titleFr && /[a-zA-Z]/.test(titleFr)) ? titleFr : `Accessory - ${accessory.sellerSku || accessory.id.substring(0, 8)}`;
+            const baseDesc = (descFr && /[a-zA-Z]/.test(descFr)) ? descFr : `Quality accessory - ${accessory.sellerSku || accessory.id.substring(0, 8)}`;
+
+            const payload: any = {
+                name: {
+                    value: baseName.padEnd(15, ' ').substring(0, 60),
+                    translations: [
+                        { language: "FR", value: titleFr.substring(0, 60) }
+                    ]
+                },
+                description: {
+                    value: padDesc(baseDesc),
+                    translations: [
+                        { language: "FR", value: descFr }
+                    ]
+                },
+                parentSku: accessory.id,
+                sellerSku: accessory.sellerSku || `ACC-${accessory.id.substring(0, 8)}`,
+                variation: "1",
+                brand: {
+                    code: 1045133,
+                    name: "Generic"
+                },
+                category: {
+                    code: 1000570, // Generic category for accessories/stationery, fallback
+                    name: "Stationery & Office"
+                },
+                images: accessory.image ? [{
+                    url: accessory.image.startsWith('/') ? `https://riwaya.store${accessory.image}` : accessory.image,
+                    primary: true
+                }] : (accessory.images && accessory.images.length > 0) ? [{
+                    url: accessory.images[0].startsWith('/') ? `https://riwaya.store${accessory.images[0]}` : accessory.images[0],
+                    primary: true
+                }] : [],
+                price: {
+                    currency: "MAD",
+                    value: Math.ceil(price),
+                },
+                stock: accessory.stock,
+                attributes: [
+                    {
+                        name: "short_description",
+                        value: `<ul><li>Produit: ${accessory.name}</li><li>Catégorie: ${accessory.category}</li></ul>`
+                    },
+                    {
+                        name: "model",
+                        value: "Standard"
+                    },
+                    {
+                        name: "product_weight",
+                        value: accessory.weight ? accessory.weight.toString() : "0.2"
+                    }
+                ]
+            };
+            
+            let productId = null;
+            try {
+                const jumiaProd = await jumia.getProducts({ sellerSku: payload.sellerSku });
+                productId = jumiaProd?.products?.[0]?.id || jumiaProd?.products?.[0]?.sid || jumiaProd?.data?.[0]?.sid || jumiaProd?.[0]?.sid;
+            } catch (err) {
+                console.error("Error fetching productId for", payload.sellerSku, err);
+            }
+            
+            if (productId) {
+                payload.id = productId;
+                productsToUpdate.push(payload);
+            } else {
+                productsToCreate.push(payload);
+            }
+        }
+
+        let createResponse: any = null;
+        let updateResponse: any = null;
+
+        if (productsToCreate.length > 0) {
+            createResponse = await jumia.createProducts(shopId, productsToCreate);
+        }
+        
+        if (productsToUpdate.length > 0) {
+            updateResponse = await jumia.updateProducts(productsToUpdate, shopId);
+        }
+        
+        const checkFeed = async (response: any) => {
+            if (response?.feedId) {
+                await new Promise(r => setTimeout(r, 2500))
+                const feedRes = await jumia.getFeed(response.feedId)
+                if (feedRes?.status === 'FAILED') {
+                    const itemError = feedRes.feedItems?.[0]?.errorMessage || 'Erreurs de validation'
+                    const globalErrors = feedRes.feedItems?.[0]?.errors?.globalMessages?.join(', ') || ''
+                    return `Jumia a rejeté le produit: ${itemError} ${globalErrors}`.trim()
+                }
+            }
+            return null;
+        };
+
+        const error1 = createResponse ? await checkFeed(createResponse) : null;
+        const error2 = updateResponse ? await checkFeed(updateResponse) : null;
+
+        if (error1 || error2) {
+            return { 
+                success: false, 
+                message: [error1, error2].filter(Boolean).join(' | ') 
+            }
+        }
+
+        return { success: true, message: "Accessoires publiés/mis à jour avec succès sur Jumia" }
+    } catch (error) {
+        console.error("Erreur publishAccessoriesToJumia:", error)
+        return { success: false, message: "Erreur lors de la publication." }
     }
 }
 

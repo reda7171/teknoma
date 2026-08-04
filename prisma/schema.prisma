@@ -252,6 +252,8 @@ model Order {
   couponCode      String?              @db.VarChar(50)
   status          OrderStatus          @default(PENDING)
   paymentMethod   String               @default("COD") @db.VarChar(50)
+  isPaid          Boolean              @default(false)
+  invoiceNumber   String?              @db.VarChar(100)
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   deliveryLabel   String?              @db.Text
@@ -270,6 +272,8 @@ model Order {
   seller          User?                @relation("SellerOrders", fields: [sellerId], references: [id])
   financeArchiveId String?
   financeArchive  FinanceArchive?      @relation(fields: [financeArchiveId], references: [id])
+  expenseId       String?
+  expense         Expense?             @relation(fields: [expenseId], references: [id])
 
   @@index([status])
   @@index([createdAt])
@@ -280,6 +284,7 @@ model Order {
   @@index([customerId])
   @@index([sellerId], map: "orders_sellerId_fkey")
   @@index([financeArchiveId])
+  @@index([expenseId])
   @@map("orders")
 }
 
@@ -706,6 +711,7 @@ model Expense {
   user        User?           @relation(fields: [userId], references: [id])
   financeArchiveId String?
   financeArchive  FinanceArchive? @relation(fields: [financeArchiveId], references: [id])
+  orders      Order[]
 
   @@index([category])
   @@index([date])
@@ -1086,6 +1092,7 @@ enum ExpenseCategory {
   CASHOUT
   INCOME_CASH
   INCOME_DELIVERY
+  INCOME_JUMIA
 }
 
 enum AdPlacement {

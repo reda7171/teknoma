@@ -312,3 +312,49 @@ export async function getUserExchangeBooks(userId: string) {
         return []
     }
 }
+
+/**
+ * Supprimer plusieurs échanges (admin bulk delete)
+ */
+export async function deleteExchanges(exchangeIds: string[]) {
+    try {
+        await verifyAdmin()
+
+        if (!exchangeIds || exchangeIds.length === 0) {
+            return { success: false, error: 'Aucun échange sélectionné' }
+        }
+
+        const exchanges = await (prisma as any).exchange.findMany({
+            where: { id: { in: exchangeIds } }
+        })
+
+        // On remet dispo les livres concernés si ce n'est pas déjà complété
+        for (const exchange of exchanges) {
+            if (exchange.status !== 'COMPLETED') {
+                if (exchange.bookRequestedId) {
+                    await (prisma as any).exchangeBook.update({
+                        where: { id: exchange.bookRequestedId },
+                        data: { status: 'AVAILABLE' }
+                    }).catch(() => {})
+                }
+                if (exchange.bookOfferedId) {
+                    await (prisma as any).exchangeBook.update({
+                        where: { id: exchange.bookOfferedId },
+                        data: { status: 'AVAILABLE' }
+                    }).catch(() => {})
+                }
+            }
+        }
+
+        // On supprime les échanges
+        await (prisma as any).exchange.deleteMany({
+            where: { id: { in: exchangeIds } }
+        })
+
+        revalidatePath('/admin/exchanges')
+        return { success: true, message: `${exchangeIds.length} échange(s) supprimé(s)` }
+    } catch (error) {
+        console.error('Erreur lors de la suppression en masse:', error)
+        return { success: false, error: 'Impossible de supprimer les échanges' }
+    }
+}

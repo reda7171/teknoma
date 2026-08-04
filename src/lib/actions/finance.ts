@@ -1,9 +1,11 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { ExpenseCategory, TransactionType } from '@prisma/client'
+import { getSetting } from '@/lib/actions/site-settings'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 export async function createExpense(data: {
     title: string
@@ -12,16 +14,40 @@ export async function createExpense(data: {
     type?: TransactionType
     description?: string
     unitCost?: number
+    orderIds?: string[]
+    date?: string | Date
 }) {
     await verifyAdmin()
     try {
-        await prisma.expense.create({
+        const expense = await prisma.expense.create({
             data: {
-                ...data,
-                date: new Date()
+                title: data.title,
+                amount: data.amount,
+                category: data.category,
+                type: data.type,
+                description: data.description,
+                unitCost: data.unitCost,
+                date: data.date ? new Date(data.date) : new Date()
             }
         })
+
+        if (data.orderIds && data.orderIds.length > 0) {
+            await prisma.order.updateMany({
+                where: { id: { in: data.orderIds } },
+                data: { expenseId: expense.id, isPaid: true }
+            })
+        }
         revalidatePath('/admin/finance')
+
+        // Send Notification if it's an Income / Invoice
+        if (data.type === 'INCOME') {
+            const shouldNotify = await getSetting('telegram_notify_invoices') === 'true'
+            if (shouldNotify) {
+                const categoryLabel = data.category === 'INCOME_DELIVERY' ? 'Livraison' : data.category === 'INCOME_JUMIA' ? 'Jumia' : 'Virement'
+                await sendTelegramMessage(`🧾 <b>Nouvelle Facture Saisie</b>\n\n📌 <b>Titre:</b> ${data.title}\n💵 <b>Montant:</b> ${data.amount} DH\n📂 <b>Catégorie:</b> ${categoryLabel}\n📦 <b>Commandes liées:</b> ${data.orderIds?.length || 0}`)
+            }
+        }
+
         return { success: true }
     } catch (error) {
         console.error(error)
@@ -36,12 +62,17 @@ export async function updateExpense(id: string, data: {
     type?: TransactionType
     description?: string
     unitCost?: number | null
+    date?: string | Date
 }) {
     await verifyAdmin()
     try {
+        const updateData: any = { ...data }
+        if (data.date) {
+            updateData.date = new Date(data.date)
+        }
         await prisma.expense.update({
             where: { id },
-            data
+            data: updateData
         })
         revalidatePath('/admin/finance')
         return { success: true }
@@ -96,6 +127,54 @@ export async function getExpenses(filters?: { month?: number, year?: number }) {
     return prisma.expense.findMany({
         where,
         orderBy: { date: 'desc' }
+    })
+}
+
+export async function getUninvoicedDeliveredOrders() {
+    noStore()
+    await verifyAdmin()
+    try {
+        const orders = await prisma.order.findMany({
+            where: {
+                status: 'DELIVERED',
+                expenseId: null
+            },
+            orderBy: { updatedAt: 'desc' },
+            select: {
+                id: true,
+                trackingID: true,
+                fullName: true,
+                total: true,
+                shippingCompany: true
+            }
+        })
+        return orders
+    } catch (error: any) {
+        console.error("Error in getUninvoicedDeliveredOrders:", error)
+        throw error
+    }
+}
+
+export async function getInvoices() {
+    await verifyAdmin()
+    return prisma.expense.findMany({
+        where: {
+            category: {
+                in: ['INCOME_DELIVERY', 'INCOME_JUMIA']
+            }
+        },
+        orderBy: { date: 'desc' },
+        include: {
+            orders: {
+                select: {
+                    id: true,
+                    trackingID: true,
+                    fullName: true,
+                    total: true,
+                    shippingCompany: true
+                }
+            }
+        }
     })
 }
 
@@ -215,12 +294,12 @@ export async function getChartData(filters?: { month?: number, year?: number }) 
     if (isMonthView) {
         const daysInMonth = new Date(filters!.year!, filters!.month!, 0).getDate()
         for (let i = 1; i <= daysInMonth; i++) {
-            dataMap.set(i.toString(), { name: `${i}`, revenue: 0, profit: 0 })
+            dataMap.set(i.toString(), { name: `${i}`, revenue: 0, profit: 0, jumia: 0 })
         }
     } else {
         const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
         months.forEach((m, i) => {
-            dataMap.set(i.toString(), { name: m, revenue: 0, profit: 0 })
+            dataMap.set(i.toString(), { name: m, revenue: 0, profit: 0, jumia: 0 })
         })
     }
 
@@ -249,6 +328,9 @@ export async function getChartData(filters?: { month?: number, year?: number }) 
                 entry.profit -= exp.amount
             } else if (exp.type === 'INCOME') {
                 entry.profit += exp.amount
+                if (exp.category === 'INCOME_JUMIA') {
+                    entry.jumia += exp.amount
+                }
             }
         }
     }

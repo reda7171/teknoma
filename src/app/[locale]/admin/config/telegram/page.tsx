@@ -32,6 +32,8 @@ export default async function TelegramConfigPage() {
         notifyArticleRead: await getSetting('telegram_notify_article_read') !== 'false', // Défaut true
         notifyDailySummary: await getSetting('telegram_notify_daily_summary') !== 'false', // Défaut true
         notifyReviews: await getSetting('telegram_notify_reviews') !== 'false', // Défaut true
+        notifyJumiaPayout: await getSetting('telegram_notify_jumia_payout') === 'true', // Défaut false
+        notifyInvoices: await getSetting('telegram_notify_invoices') === 'true', // Défaut false
         statsVisitors: await getSetting('telegram_stats_visitors') === 'true',
         statsRegistrations: await getSetting('telegram_stats_registrations') === 'true',
         statsTopViews: await getSetting('telegram_stats_top_views') === 'true',

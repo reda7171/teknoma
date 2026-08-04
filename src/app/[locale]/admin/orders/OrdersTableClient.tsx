@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Search, Trash2, Phone } from 'lucide-react'
-import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus } from '@/lib/actions/admin-orders'
+import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle } from 'lucide-react'
+import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
 interface OrderItem {
@@ -29,6 +29,9 @@ interface Order {
     shippingCompanySupportPhone?: string | null
     deliveryStatus?: string | null
     paymentMethod?: string | null
+    isPaid: boolean
+    invoiceNumber?: string | null
+    expense?: { title: string } | null
     items: OrderItem[]
 }
 
@@ -41,6 +44,7 @@ interface OrdersTableClientProps {
     shippingFilter?: string
     paymentFilter?: string
     cityFilter?: string
+    deliveryInvoices?: any[]
 }
 
 export default function OrdersTableClient({
@@ -51,12 +55,18 @@ export default function OrdersTableClient({
     searchTerm,
     shippingFilter = '',
     paymentFilter = '',
-    cityFilter = ''
+    cityFilter = '',
+    deliveryInvoices = []
 }: OrdersTableClientProps) {
     const router = useRouter()
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
     const [syncingId, setSyncingId] = useState<string | null>(null)
+    
+    // Modal state for Invoice Selection
+    const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+    const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<string | null>(null)
+    const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('')
 
     const handleSyncDelivery = async (id: string) => {
         setSyncingId(id)
@@ -79,6 +89,34 @@ export default function OrdersTableClient({
         try {
             const res = await updateOrderStatus(orderId, newStatus as any)
             if (res.success) {
+                router.refresh()
+            } else {
+                alert(res.error || 'Erreur lors de la mise à jour')
+            }
+        } catch (error) {
+            alert('Erreur serveur')
+        }
+    }
+
+    const handlePaymentToggle = async (orderId: string, currentPaidStatus: boolean) => {
+        const newPaidStatus = !currentPaidStatus
+        
+        if (newPaidStatus) {
+            setSelectedOrderForInvoice(orderId)
+            setSelectedInvoiceId('')
+            setShowInvoiceModal(true)
+        } else {
+            if (!confirm('Voulez-vous vraiment marquer cette commande comme non payée ?')) return
+            await executePaymentToggle(orderId, false)
+        }
+    }
+
+    const executePaymentToggle = async (orderId: string, newPaidStatus: boolean, expenseId?: string | null) => {
+        try {
+            const res = await togglePaymentStatus(orderId, newPaidStatus, expenseId)
+            if (res.success) {
+                setShowInvoiceModal(false)
+                setSelectedOrderForInvoice(null)
                 router.refresh()
             } else {
                 alert(res.error || 'Erreur lors de la mise à jour')
@@ -272,19 +310,40 @@ export default function OrdersTableClient({
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        {order.paymentMethod ? (
-                                            <span className={`px-2.5 py-1 inline-flex text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider ${order.paymentMethod === 'COD' ? 'bg-amber-100 text-amber-800' :
-                                                    order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
-                                                        order.paymentMethod === 'STRIPE' ? 'bg-indigo-100 text-indigo-800' :
-                                                            order.paymentMethod === 'PAYPAL' ? 'bg-blue-100 text-blue-800' :
-                                                                order.paymentMethod === 'CMI' ? 'bg-orange-100 text-orange-800' :
-                                                                    'bg-gray-100 text-gray-700'
-                                                }`}>
-                                                {order.paymentMethod === 'BANK_TRANSFER' ? 'Virement' : order.paymentMethod}
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-gray-400">COD</span>
-                                        )}
+                                        <div className="flex flex-col gap-1">
+                                            {order.paymentMethod ? (
+                                                <span className={`px-2.5 py-1 inline-flex w-fit text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider ${order.paymentMethod === 'COD' ? 'bg-amber-100 text-amber-800' :
+                                                        order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
+                                                            order.paymentMethod === 'STRIPE' ? 'bg-indigo-100 text-indigo-800' :
+                                                                order.paymentMethod === 'PAYPAL' ? 'bg-blue-100 text-blue-800' :
+                                                                    order.paymentMethod === 'CMI' ? 'bg-orange-100 text-orange-800' :
+                                                                        'bg-gray-100 text-gray-700'
+                                                    }`}>
+                                                    {order.paymentMethod === 'BANK_TRANSFER' ? 'Virement' : order.paymentMethod}
+                                                </span>
+                                            ) : (
+                                                <span className="w-fit px-2.5 py-1 inline-flex text-xs text-gray-400 bg-gray-100 rounded-lg">COD</span>
+                                            )}
+                                            
+                                            <button 
+                                                onClick={() => handlePaymentToggle(order.id, !!order.isPaid)}
+                                                className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md w-fit cursor-pointer transition-colors ${
+                                                    order.isPaid 
+                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                                                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                }`}
+                                                title="Cliquez pour changer le statut de paiement"
+                                            >
+                                                {order.isPaid ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                                {order.isPaid ? 'Payé' : 'Non payé'}
+                                            </button>
+                                            
+                                            {order.isPaid && (order.expense?.title || order.invoiceNumber) && (
+                                                <span className="text-[9px] font-medium text-gray-500 truncate w-fit max-w-[120px]" title={`Facture: ${order.expense?.title || order.invoiceNumber}`}>
+                                                    Fac: {order.expense?.title || order.invoiceNumber}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <select
@@ -323,6 +382,52 @@ export default function OrdersTableClient({
                     </tbody>
                 </table>
             </div>
+
+            {/* Modal de sélection de facture */}
+            {showInvoiceModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Lier à une facture de livraison</h3>
+                        <p className="text-sm text-gray-600 mb-4">Sélectionnez la facture correspondante pour marquer cette commande comme payée.</p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Facture Société de Livraison (Optionnel)</label>
+                                <select 
+                                    className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white outline-none"
+                                    value={selectedInvoiceId}
+                                    onChange={e => setSelectedInvoiceId(e.target.value)}
+                                >
+                                    <option value="">-- Ne pas lier à une facture --</option>
+                                    {deliveryInvoices.map(inv => (
+                                        <option key={inv.id} value={inv.id}>
+                                            {inv.title} - {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} MAD)
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="flex gap-3 justify-end pt-4">
+                                <button
+                                    onClick={() => {
+                                        setShowInvoiceModal(false)
+                                        setSelectedOrderForInvoice(null)
+                                    }}
+                                    className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={() => selectedOrderForInvoice && executePaymentToggle(selectedOrderForInvoice, true, selectedInvoiceId || null)}
+                                    className="px-4 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-lg transition-colors"
+                                >
+                                    Confirmer et marquer Payé
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

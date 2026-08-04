@@ -1,8 +1,10 @@
 import { isAuthenticated } from '@/lib/actions/auth'
-import { getExpenses, getFinancialStats, getChartData, getFinanceArchives } from '@/lib/actions/finance'
+import { getExpenses, getFinancialStats, getChartData, getFinanceArchives, getInvoices } from '@/lib/actions/finance'
 import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, Archive } from 'lucide-react'
 import ExpenseForm from '@/components/admin/ExpenseForm'
 import ExpensesTable from '@/components/admin/ExpensesTable'
+import InvoicesTable from '@/components/admin/InvoicesTable'
+import JumiaPayoutsTable from '@/components/admin/JumiaPayoutsTable'
 import MonthYearFilter from '@/components/admin/MonthYearFilter'
 import FinanceChart from '@/components/admin/FinanceChart'
 import ArchivePeriodButton from '@/components/admin/ArchivePeriodButton'
@@ -28,6 +30,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
     const stats = await getFinancialStats(filters)
     const chartData = await getChartData(filters)
     const archives = await getFinanceArchives()
+    const invoices = await getInvoices()
 
     // Chiffre d'Affaire
     const grossRevenue = stats.totalRevenue
@@ -150,6 +153,12 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                 </div>
                 <ExpenseForm />
             </div>
+
+            {/* Invoices List */}
+            <InvoicesTable invoices={invoices} />
+
+            {/* Jumia Payouts List */}
+            <JumiaPayoutsTable />
 
             {/* Expenses List Premium */}
             <ExpensesTable expenses={expenses} />

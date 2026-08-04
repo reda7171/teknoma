@@ -22,6 +22,7 @@ interface OrdersPageClientProps {
     }
     shippingCompanies: any[]
     activePaymentMethods: Record<string, boolean>
+    deliveryInvoices: any[]
 }
 
 export default function OrdersPageClient({
@@ -32,7 +33,8 @@ export default function OrdersPageClient({
     currentStatus,
     stats,
     shippingCompanies,
-    activePaymentMethods
+    activePaymentMethods,
+    deliveryInvoices
 }: OrdersPageClientProps) {
     const [searchTerm, setSearchTerm] = useState('')
     const [shippingFilter, setShippingFilter] = useState('')
@@ -128,6 +130,7 @@ export default function OrdersPageClient({
                         shippingFilter={shippingFilter}
                         paymentFilter={paymentFilter}
                         cityFilter={cityFilter}
+                        deliveryInvoices={deliveryInvoices}
                     />
                 </div>
             </div>

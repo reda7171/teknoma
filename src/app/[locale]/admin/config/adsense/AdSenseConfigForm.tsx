@@ -8,10 +8,16 @@ import { useUIStore } from '@/store/ui'
 interface AdsenseSettings {
     enabled: boolean
     publisherId: string
+    adsTxtContent: string
+    autoAdsEnabled: boolean
     slotArticleTop: string
     slotArticleBottom: string
     slotSidebar: string
     slotBetweenBooks: string
+    slotHeader: string
+    slotFooter: string
+    slotInFeed: string
+    slotMultiplex: string
 }
 
 export default function AdsenseConfigForm({ initialSettings }: { initialSettings: AdsenseSettings }) {
@@ -26,10 +32,17 @@ export default function AdsenseConfigForm({ initialSettings }: { initialSettings
         try {
             await updateSetting('adsense_enabled', String(settings.enabled), 'config', 'Activer Google AdSense')
             await updateSetting('adsense_publisher_id', settings.publisherId, 'config', 'ID Éditeur AdSense')
+            await updateSetting('adsense_ads_txt', settings.adsTxtContent, 'config', 'Contenu ads.txt')
+            await updateSetting('adsense_auto_ads_enabled', String(settings.autoAdsEnabled), 'config', 'Annonces Automatiques')
+            
             await updateSetting('adsense_slot_article_top', settings.slotArticleTop, 'config', 'Slot Haut Article')
             await updateSetting('adsense_slot_article_bottom', settings.slotArticleBottom, 'config', 'Slot Bas Article')
             await updateSetting('adsense_slot_sidebar', settings.slotSidebar, 'config', 'Slot Sidebar')
             await updateSetting('adsense_slot_between_books', settings.slotBetweenBooks, 'config', 'Slot Entre les livres')
+            await updateSetting('adsense_slot_header', settings.slotHeader, 'config', 'Slot Header')
+            await updateSetting('adsense_slot_footer', settings.slotFooter, 'config', 'Slot Footer')
+            await updateSetting('adsense_slot_in_feed', settings.slotInFeed, 'config', 'Slot In-Feed')
+            await updateSetting('adsense_slot_multiplex', settings.slotMultiplex, 'config', 'Slot Multiplex')
             
             showNotification('Configuration AdSense mise à jour avec succès', 'success')
         } catch (error) {
@@ -85,9 +98,61 @@ export default function AdsenseConfigForm({ initialSettings }: { initialSettings
                             </p>
                         </div>
 
+                        <div className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50">
+                            <input
+                                type="checkbox"
+                                id="autoAdsEnabled"
+                                checked={settings.autoAdsEnabled}
+                                onChange={(e) => setSettings({ ...settings, autoAdsEnabled: e.target.checked })}
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                            />
+                            <label htmlFor="autoAdsEnabled" className="text-sm font-bold text-slate-700 cursor-pointer">
+                                Activer les annonces automatiques (Auto Ads)
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">
+                                Contenu du fichier ads.txt
+                            </label>
+                            <textarea
+                                value={settings.adsTxtContent}
+                                onChange={(e) => setSettings({ ...settings, adsTxtContent: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all min-h-[100px] font-mono text-sm"
+                                placeholder="google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">
+                                Ce contenu sera servi sur la route /ads.txt de votre site.
+                            </p>
+                        </div>
+
                         <div className="border-t border-slate-100 pt-6 mt-2">
                             <h3 className="text-md font-black text-slate-900 mb-4">Emplacements des blocs d'annonces (Slot ID)</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Slot Header (Haut du site)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.slotHeader}
+                                        onChange={(e) => setSettings({ ...settings, slotHeader: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                        placeholder="Ex: 1122334455"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Slot Footer (Bas du site)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.slotFooter}
+                                        onChange={(e) => setSettings({ ...settings, slotFooter: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                        placeholder="Ex: 5544332211"
+                                    />
+                                </div>
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-2">
                                         Haut de l'article (Journal)
@@ -135,6 +200,30 @@ export default function AdsenseConfigForm({ initialSettings }: { initialSettings
                                         onChange={(e) => setSettings({ ...settings, slotBetweenBooks: e.target.value })}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
                                         placeholder="Ex: 9988776655"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        In-Feed (Dans les grilles de produits)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.slotInFeed}
+                                        onChange={(e) => setSettings({ ...settings, slotInFeed: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                        placeholder="Ex: 1020304050"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Multiplex (Recommandations en bas)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.slotMultiplex}
+                                        onChange={(e) => setSettings({ ...settings, slotMultiplex: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                        placeholder="Ex: 5040302010"
                                     />
                                 </div>
                             </div>

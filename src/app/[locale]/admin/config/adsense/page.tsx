@@ -11,18 +11,32 @@ export default async function AdsenseConfigPage() {
     const enabled = enabledStr === 'true'
     
     const publisherId = await getSetting('adsense_publisher_id') || ''
+    const adsTxtContent = await getSetting('adsense_ads_txt') || ''
+    const autoAdsEnabledStr = await getSetting('adsense_auto_ads_enabled')
+    const autoAdsEnabled = autoAdsEnabledStr === 'true'
+
     const slotArticleTop = await getSetting('adsense_slot_article_top') || ''
     const slotArticleBottom = await getSetting('adsense_slot_article_bottom') || ''
     const slotSidebar = await getSetting('adsense_slot_sidebar') || ''
     const slotBetweenBooks = await getSetting('adsense_slot_between_books') || ''
+    const slotHeader = await getSetting('adsense_slot_header') || ''
+    const slotFooter = await getSetting('adsense_slot_footer') || ''
+    const slotInFeed = await getSetting('adsense_slot_in_feed') || ''
+    const slotMultiplex = await getSetting('adsense_slot_multiplex') || ''
 
     const initialSettings = {
         enabled,
         publisherId,
+        adsTxtContent,
+        autoAdsEnabled,
         slotArticleTop,
         slotArticleBottom,
         slotSidebar,
-        slotBetweenBooks
+        slotBetweenBooks,
+        slotHeader,
+        slotFooter,
+        slotInFeed,
+        slotMultiplex
     }
 
     return (

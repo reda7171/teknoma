@@ -179,6 +179,29 @@ export default function MarketingPage() {
         }
     }
 
+    const handleBulkDelete = async () => {
+        if (selectedAssets.length === 0) return
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedAssets.length} créative(s) ?`)) return
+
+        try {
+            const res = await fetch('/api/admin/marketing/assets/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filenames: selectedAssets })
+            })
+            const data = await res.json()
+            if (data.success) {
+                setAssets(prev => prev.filter(a => !selectedAssets.includes(a.name)))
+                setSelectedAssets([])
+                setSelectionMode(false)
+            } else {
+                alert(data.error || 'Erreur lors de la suppression')
+            }
+        } catch (error) {
+            alert('Erreur technique lors de la suppression')
+        }
+    }
+
     const handlePublish = async (asset: Asset, platform: string) => {
         try {
             const res = await fetch('/api/n8n/publish', {
@@ -387,6 +410,14 @@ export default function MarketingPage() {
                                 <Eye className="w-4 h-4" />
                                 <span className="hidden sm:inline">Prévisualiser {selectedAssets.length} créative{selectedAssets.length > 1 ? 's' : ''}</span>
                                 <span className="sm:hidden">Aperçu ({selectedAssets.length})</span>
+                            </button>
+                            <button
+                                onClick={handleBulkDelete}
+                                className="flex items-center justify-center gap-2 px-5 py-3 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-all active:scale-95 flex-1 md:flex-none whitespace-nowrap"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Supprimer {selectedAssets.length} créative{selectedAssets.length > 1 ? 's' : ''}</span>
+                                <span className="sm:hidden">Suppr. ({selectedAssets.length})</span>
                             </button>
                         </div>
                     )}

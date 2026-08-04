@@ -103,3 +103,24 @@ export async function deleteComment(id: string) {
         return { success: false, error: 'Erreur lors de la suppression' }
     }
 }
+
+/**
+ * Supprimer plusieurs commentaires (Admin)
+ */
+export async function deleteComments(ids: string[]) {
+    try {
+        await verifyAdmin()
+        if (!ids || ids.length === 0) {
+            return { success: false, error: 'Aucun commentaire sélectionné' }
+        }
+        
+        await prisma.comment.deleteMany({
+            where: { id: { in: ids } }
+        })
+
+        revalidatePath('/admin/comments')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Erreur lors de la suppression en masse' }
+    }
+}

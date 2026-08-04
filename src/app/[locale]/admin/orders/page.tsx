@@ -20,6 +20,7 @@ async function getOrders(status?: string) {
                     pack: { select: { name: true, price: true } }
                 }
             },
+            expense: { select: { title: true } }
         },
     })
 
@@ -93,6 +94,12 @@ export default async function AdminOrdersPage(props: {
         CMI: paymentSettings.find(s => s.key === 'payment_cmi_enabled')?.value === 'true',
     }
 
+    const deliveryInvoices = await prisma.expense.findMany({
+        where: { category: 'INCOME_DELIVERY', type: 'INCOME' },
+        orderBy: { date: 'desc' },
+        select: { id: true, title: true, amount: true, date: true, description: true }
+    })
+
     return (
         <OrdersPageClient 
             orders={orders as any}
@@ -103,6 +110,7 @@ export default async function AdminOrdersPage(props: {
             stats={stats}
             shippingCompanies={companies}
             activePaymentMethods={activePaymentMethods}
+            deliveryInvoices={deliveryInvoices}
         />
     )
 }

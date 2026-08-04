@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { publishBooksToJumia } from '@/lib/actions/jumia'
+import { publishAccessoriesToJumia } from '@/lib/actions/jumia'
 
 export default function EditAccessoryPage({ 
     params 
@@ -113,7 +113,7 @@ export default function EditAccessoryPage({
         if (!confirm('Voulez-vous vraiment publier cet accessoire sur Jumia ?')) return
         setIsPushingJumia(true)
         try {
-            const res = await publishBooksToJumia([id])
+            const res = await publishAccessoriesToJumia([id])
             if (res.success) {
                 alert(res.message || 'Accessoire publié avec succès sur Jumia')
             } else {
