@@ -23,6 +23,12 @@ export default function JumiaOrdersClient() {
     const [printInvoiceId, setPrintInvoiceId] = useState<string | null>(null)
     const [readyId, setReadyId] = useState<string | null>(null)
     const [confirmReadyId, setConfirmReadyId] = useState<string | null>(null)
+    
+    // Order items details state
+    const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+    const [orderItems, setOrderItems] = useState<any[]>([])
+    const [loadingItems, setLoadingItems] = useState(false)
+    
     const size = 50
 
     const fetchOrders = async (status: string, token: string | undefined, isNext: boolean = false) => {
@@ -175,6 +181,24 @@ export default function JumiaOrdersClient() {
             setErrorMsg(`Impossible d'imprimer l'étiquette: ${e.message}`)
         } finally {
             setPrintingId(null)
+        }
+    }
+    
+    const handleViewItems = async (orderId: string) => {
+        if (expandedOrder === orderId) {
+            setExpandedOrder(null)
+            return
+        }
+        setExpandedOrder(orderId)
+        setLoadingItems(true)
+        try {
+            const { getJumiaOrderItems } = await import('./actions')
+            const items = await getJumiaOrderItems(orderId)
+            setOrderItems(items)
+        } catch (e: any) {
+            setErrorMsg("Erreur lors du chargement des articles: " + e.message)
+        } finally {
+            setLoadingItems(false)
         }
     }
 
@@ -561,11 +585,94 @@ export default function JumiaOrdersClient() {
                                                                         </button>
                                                                     </>
                                                                 )}
+                                                                
+                                                                <button 
+                                                                    onClick={() => handleViewItems(order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                    disabled={loadingItems && expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                    className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full mt-1 ${
+                                                                        expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber) 
+                                                                        ? 'bg-slate-700 text-white hover:bg-slate-800' 
+                                                                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                                                    }`}
+                                                                >
+                                                                    {loadingItems && expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
+                                                                        <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                    ) : (
+                                                                        <><Eye className="w-3 h-3" /> {expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber) ? 'Fermer' : 'Détails'}</>
+                                                                    )}
+                                                                </button>
                                                             </div>
                                                         )
                                                     })()}
                                                 </td>
                                             </tr>
+                                            {expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber) && (
+                                                <tr key={`items-${order.id || order.OrderId || index}`}>
+                                                    <td colSpan={6} className="p-0 border-b border-slate-100">
+                                                        <div className="bg-slate-50 p-6 border-l-4 border-l-orange-500 shadow-inner">
+                                                            {loadingItems ? (
+                                                                <div className="flex justify-center p-4"><RefreshCw className="w-5 h-5 animate-spin text-orange-400" /></div>
+                                                            ) : orderItems.length === 0 ? (
+                                                                <div className="text-center text-slate-500 p-4">Aucun article trouvé.</div>
+                                                            ) : (
+                                                                <div className="space-y-3">
+                                                                    <h4 className="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                                                        <Package className="w-4 h-4 text-orange-500" />
+                                                                        Articles de la commande ({orderItems.length})
+                                                                    </h4>
+                                                                    <table className="w-full text-left text-xs bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                                                        <thead className="bg-slate-100/50 text-slate-500 border-b border-slate-200">
+                                                                            <tr>
+                                                                                <th className="p-3 font-semibold">Produit</th>
+                                                                                <th className="p-3 font-semibold">SKU Vendeur</th>
+                                                                                <th className="p-3 font-semibold">Statut</th>
+                                                                                <th className="p-3 font-semibold">Prix</th>
+                                                                                <th className="p-3 font-semibold">Tracking</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody className="divide-y divide-slate-100">
+                                                                            {orderItems.map((item: any, idx: number) => (
+                                                                                <tr key={item.id || item.OrderItemId || idx} className="hover:bg-slate-50/50 transition-colors">
+                                                                                    <td className="p-3 flex items-center gap-3">
+                                                                                        {item.product?.imageUrl ? (
+                                                                                            <img src={item.product.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
+                                                                                        ) : (
+                                                                                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-400">
+                                                                                                <Package className="w-5 h-5" />
+                                                                                            </div>
+                                                                                        )}
+                                                                                        <span className="font-medium text-slate-700 line-clamp-2 max-w-[250px]">{item.product?.name || item.Name || 'Produit inconnu'}</span>
+                                                                                    </td>
+                                                                                    <td className="p-3 font-mono text-slate-500">{item.product?.sellerSku || item.Sku}</td>
+                                                                                    <td className="p-3">
+                                                                                        <span className={`inline-flex px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-md ${
+                                                                                            (item.status || item.Status || '').toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
+                                                                                            (item.status || item.Status || '').toLowerCase() === 'canceled' ? 'bg-red-100 text-red-700' :
+                                                                                            (item.status || item.Status || '').toLowerCase() === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                                                                            'bg-orange-100 text-orange-700'
+                                                                                        }`}>
+                                                                                            {item.status || item.Status || 'N/A'}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                    <td className="p-3 font-bold text-slate-900">{item.itemPriceLocal || item.Price} {item.country?.currencyCode || 'MAD'}</td>
+                                                                                    <td className="p-3">
+                                                                                        {item.trackingNumber || item.TrackingCode ? (
+                                                                                            <a href={item.trackingUrl || '#'} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 hover:underline font-mono text-[10px] bg-blue-50 px-2 py-1 rounded-md">
+                                                                                                {item.trackingNumber || item.TrackingCode}
+                                                                                            </a>
+                                                                                        ) : <span className="text-slate-400 italic">Non expédié</span>}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </>
                                         ))
                                     )}
                                 </tbody>
