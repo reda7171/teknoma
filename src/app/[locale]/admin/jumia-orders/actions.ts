@@ -592,6 +592,7 @@ export async function getAllJumiaProducts() {
                 const stockItem = allStock.find(s => s.sellerSku === sellerSku)
                 if (stockItem) {
                     p.stockActuel = stockItem.globalStock
+                    p.stockId = stockItem.id
                 }
                 return p
             })

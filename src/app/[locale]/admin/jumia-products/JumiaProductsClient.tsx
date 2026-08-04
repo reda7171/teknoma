@@ -67,7 +67,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
         try {
             const res = await updateJumiaProductsStock([{
                 sellerSku: sku,
-                id: product.id,
+                id: product.stockId || product.id,
                 stock: newStock
             }])
             if (res.error) throw new Error(res.error)
@@ -93,7 +93,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                 const sku = p.sellerSku || (p.variations && p.variations[0]?.sellerSku)
                 return {
                     sellerSku: sku,
-                    id: p.id,
+                    id: p.stockId || p.id,
                     stock: newStock
                 }
             })
