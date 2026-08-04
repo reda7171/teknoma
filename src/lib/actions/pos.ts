@@ -4,6 +4,20 @@ import { prisma } from '@/lib/prisma';
 import { OrderStatus, OrderItemType } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
+export async function getCustomerByPhone(phone: string) {
+  try {
+    const lastOrder = await prisma.order.findFirst({
+      where: { phone },
+      orderBy: { createdAt: 'desc' },
+      select: { fullName: true, address: true, city: true }
+    });
+    return { success: true, customer: lastOrder };
+  } catch (error) {
+    console.error('getCustomerByPhone Error:', error);
+    return { success: false, error: 'Erreur lors de la récupération du client' };
+  }
+}
+
 export async function createPOSOrder(data: {
   fullName: string;
   phone: string;

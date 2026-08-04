@@ -6,7 +6,7 @@ import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import BarcodeScanner from './BarcodeScanner';
-import { createPOSOrder } from '@/lib/actions/pos';
+import { createPOSOrder, getCustomerByPhone } from '@/lib/actions/pos';
 import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
 import { printReceipt } from '@/lib/utils/printReceipt';
@@ -160,6 +160,7 @@ export default function POSClient({
   const [shippingFees, setShippingFees] = useState<number | ''>(0);
   const [discount, setDiscount] = useState<number | ''>(defaultDiscount || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetchingCustomer, setIsFetchingCustomer] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
@@ -261,6 +262,28 @@ export default function POSClient({
       window.removeEventListener('offline', handleOffline);
     };
   }, [books, packs, accessories]);
+
+  // Autofill customer data when phone number reaches 10 digits
+  useEffect(() => {
+    const phone = customer.phone.replace(/\D/g, '');
+    if (phone.length === 10 && !isOffline) {
+      setIsFetchingCustomer(true);
+      getCustomerByPhone(customer.phone)
+        .then(res => {
+          if (res.success && res.customer) {
+            setCustomer(prev => ({
+              ...prev,
+              fullName: prev.fullName || res.customer!.fullName || '',
+              city: prev.city || res.customer!.city || '',
+              address: prev.address || res.customer!.address || ''
+            }));
+            showNotification('Client existant trouvé ! Champs auto-remplis.', 'success');
+          }
+        })
+        .catch(() => {})
+        .finally(() => setIsFetchingCustomer(false));
+    }
+  }, [customer.phone, isOffline, showNotification]);
 
   useEffect(() => {
     const handleFirstInteraction = () => {
@@ -774,14 +797,19 @@ export default function POSClient({
               onChange={e => setCustomer({...customer, fullName: e.target.value})}
               className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"
             />
-            <div className="grid grid-cols-2 gap-3">
-                <input
-                    type="tel"
-                    placeholder="TÉLÉPHONE *"
-                    value={customer.phone}
-                    onChange={e => setCustomer({...customer, phone: e.target.value})}
-                    className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"
-                />
+            <div className="grid grid-cols-2 gap-3 relative">
+                <div className="relative">
+                    <input
+                        type="tel"
+                        placeholder="TÉLÉPHONE *"
+                        value={customer.phone}
+                        onChange={e => setCustomer({...customer, phone: e.target.value})}
+                        className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"
+                    />
+                    {isFetchingCustomer && (
+                        <RefreshCw className="w-4 h-4 animate-spin text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
+                    )}
+                </div>
                 <div className="relative">
                     <input
                         type="text"
