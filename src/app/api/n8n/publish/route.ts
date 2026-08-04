@@ -60,6 +60,8 @@ export async function POST(req: NextRequest) {
         const tiktokCreatorId = await getSetting('tiktok_creator_id')
         const tiktokAppId = await getSetting('tiktok_app_id')
         const tiktokClientSecret = await getSetting('tiktok_client_secret')
+        const pinterestAccessToken = await getSetting('pinterest_access_token')
+        const pinterestBoardId = await getSetting('pinterest_board_id')
 
         // URL publique (Facebook doit pouvoir accéder à l'image)
         let host = req.headers.get('host') || '';
@@ -147,6 +149,8 @@ export async function POST(req: NextRequest) {
             tiktok_creator_id: tiktokCreatorId,
             tiktok_app_id: tiktokAppId,
             tiktok_client_secret: tiktokClientSecret,
+            pinterest_access_token: pinterestAccessToken,
+            pinterest_board_id: pinterestBoardId,
             postId: body.postId || ''
         }
         
