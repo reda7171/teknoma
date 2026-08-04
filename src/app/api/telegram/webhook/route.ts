@@ -24,6 +24,7 @@ export async function POST(req: Request) {
                 let discount = 0
                 if (offerType === 'offer_10') discount = 10
                 if (offerType === 'offer_20') discount = 20
+                if (offerType === 'offer_30') discount = 30
 
                 if (discount > 0 && sessionId) {
                     await prisma.instantOffer.create({

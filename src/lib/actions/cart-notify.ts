@@ -18,8 +18,9 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
                 replyMarkup = {
                     inline_keyboard: [
                         [
-                            { text: '🎁 Proposer une offre (-10%)', callback_data: `offer_10:${sessionId}` },
-                            { text: '🎁 Offre (-20%)', callback_data: `offer_20:${sessionId}` }
+                            { text: '🎁 -10 Dhs', callback_data: `offer_10:${sessionId}` },
+                            { text: '🎁 -20 Dhs', callback_data: `offer_20:${sessionId}` },
+                            { text: '🎁 -30 Dhs', callback_data: `offer_30:${sessionId}` }
                         ]
                     ]
                 }
