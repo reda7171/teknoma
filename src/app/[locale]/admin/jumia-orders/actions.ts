@@ -587,35 +587,51 @@ export async function getAllJumiaProducts() {
             } while (stockNextToken)
             
             // Check linkage with local products
-            const sellerSkus = allProducts.map((p: any) => p.sellerSku || (p.variations && p.variations[0]?.sellerSku)).filter(Boolean)
+            const sellerSkus: string[] = []
+            allProducts.forEach((p: any) => {
+                if (p.sellerSku) sellerSkus.push(p.sellerSku)
+                if (p.variations) {
+                    p.variations.forEach((v: any) => {
+                        if (v.sellerSku) sellerSkus.push(v.sellerSku)
+                    })
+                }
+            })
+            
             let linkedSkus = new Set<string>()
             
             if (sellerSkus.length > 0) {
-                const [linkedBooks, linkedAccessories] = await Promise.all([
-                    prisma.book.findMany({
-                        where: { sellerSku: { in: sellerSkus } },
-                        select: { sellerSku: true }
-                    }),
-                    prisma.accessory.findMany({
-                        where: { sellerSku: { in: sellerSkus } },
-                        select: { sellerSku: true }
-                    })
-                ])
+                const linkedBooks = await prisma.book.findMany({
+                    where: { sellerSku: { in: sellerSkus } },
+                    select: { sellerSku: true }
+                })
                 
                 linkedBooks.forEach(b => { if (b.sellerSku) linkedSkus.add(b.sellerSku) })
-                linkedAccessories.forEach(a => { if (a.sellerSku) linkedSkus.add(a.sellerSku) })
             }
 
             // Merge stock into products and check if linked
             allProducts = allProducts.map((p: any) => {
-                const sellerSku = p.sellerSku || (p.variations && p.variations[0]?.sellerSku)
-                const stockItem = allStock.find(s => s.sellerSku === sellerSku)
-                if (stockItem) {
-                    p.stockActuel = stockItem.globalStock
-                    p.stockId = stockItem.id
+                // Stock
+                let pSellerSku = p.sellerSku
+                if (!pSellerSku && p.variations && p.variations.length > 0) {
+                    pSellerSku = p.variations[0].sellerSku
+                }
+                if (pSellerSku) {
+                    const stockItem = allStock.find(s => s.sellerSku === pSellerSku)
+                    if (stockItem) {
+                        p.stockActuel = stockItem.globalStock
+                        p.stockId = stockItem.id
+                    }
                 }
                 
-                p.isLinked = sellerSku ? linkedSkus.has(sellerSku) : false
+                // Linkage check
+                let isLinked = false
+                if (p.sellerSku && linkedSkus.has(p.sellerSku)) isLinked = true
+                if (p.variations) {
+                    p.variations.forEach((v: any) => {
+                        if (v.sellerSku && linkedSkus.has(v.sellerSku)) isLinked = true
+                    })
+                }
+                p.isLinked = isLinked
                 
                 return p
             })
