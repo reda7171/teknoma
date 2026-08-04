@@ -213,8 +213,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             })
 
             // Mettre à jour le stock des livres et accessoires
+            const impactedBookIds: string[] = []
             for (const item of data.items) {
                 if (item.type === 'BOOK') {
+                    impactedBookIds.push(item.productId)
                     const updatedBook = await tx.book.update({
                         where: { id: item.productId },
                         data: { stock: { decrement: item.quantity } }
@@ -246,6 +248,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                             if (item.replacedBooks && item.replacedBooks[packBook.bookId]) {
                                 bookIdToDecrement = item.replacedBooks[packBook.bookId].id
                             }
+                            impactedBookIds.push(bookIdToDecrement)
                             await tx.book.update({
                                 where: { id: bookIdToDecrement },
                                 data: { stock: { decrement: item.quantity } }
@@ -253,6 +256,12 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                         }
                     }
                 }
+            }
+
+            if (impactedBookIds.length > 0) {
+                import('@/lib/actions/jumia').then(({ syncJumiaStockForBooksBackground }) => {
+                    syncJumiaStockForBooksBackground(impactedBookIds).catch(console.error);
+                });
             }
 
             return newOrder

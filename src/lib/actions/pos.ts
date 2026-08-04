@@ -78,8 +78,10 @@ export async function createPOSOrder(data: {
 
 
     // Update stock for books
+    const impactedBookIds: string[] = [];
     for (const item of data.items) {
       if (item.type === 'BOOK') {
+        impactedBookIds.push(item.id);
         await prisma.book.update({
           where: { id: item.id },
           data: { stock: { decrement: item.quantity } },
@@ -92,6 +94,7 @@ export async function createPOSOrder(data: {
         });
         if (pack) {
           for (const pb of pack.books) {
+            impactedBookIds.push(pb.bookId);
             await prisma.book.update({
               where: { id: pb.bookId },
               data: { stock: { decrement: item.quantity } },
@@ -104,6 +107,12 @@ export async function createPOSOrder(data: {
           data: { stock: { decrement: item.quantity } },
         });
       }
+    }
+
+    if (impactedBookIds.length > 0) {
+      import('@/lib/actions/jumia').then(({ syncJumiaStockForBooksBackground }) => {
+        syncJumiaStockForBooksBackground(impactedBookIds).catch(console.error);
+      });
     }
 
     revalidatePath('/admin/orders');

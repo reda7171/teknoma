@@ -576,3 +576,30 @@ export async function checkJumiaLinkBySkuExact(sellerSku: string) {
     }
 }
 
+
+export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
+    if (!bookIds || bookIds.length === 0) return;
+    try {
+        const { JumiaAPI } = await import('@/lib/jumia-api');
+        const jumia = await JumiaAPI.getInstance();
+        if (!jumia) return;
+
+        const books = await prisma.book.findMany({
+            where: { id: { in: bookIds }, sellerSku: { not: null } },
+            select: { sellerSku: true, stock: true, isSyncedWithJumia: true }
+        });
+
+        const validBooks = books.filter(b => b.sellerSku && b.isSyncedWithJumia);
+        if (validBooks.length === 0) return;
+
+        const products = validBooks.map(b => ({
+            sellerSku: b.sellerSku,
+            stock: b.stock
+        }));
+
+        console.log("Background syncing stock to Jumia for:", products);
+        await jumia.updateProductsStock(products);
+    } catch (err) {
+        console.error("Error in syncJumiaStockForBooksBackground:", err);
+    }
+}
