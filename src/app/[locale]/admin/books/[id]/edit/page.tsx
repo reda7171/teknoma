@@ -52,6 +52,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr'>('ar')
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
     const [isLinked, setIsLinked] = useState<boolean | null>(null)
+    const [closeAfterSave, setCloseAfterSave] = useState(false)
 
     useEffect(() => {
         getPurchaseLots().then(data => setLots(data)).catch(console.error)
@@ -172,8 +173,14 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         const result = await updateBook(id, input)
 
         if (result.success) {
-            router.push(returnUrl)
-            router.refresh()
+            if (closeAfterSave) {
+                router.push(returnUrl)
+                router.refresh()
+            } else {
+                setLoading(false)
+                // Recharger les données du livre sans quitter la page
+                await loadBook(id)
+            }
         } else {
             setError(result.error)
             setLoading(false)
@@ -834,7 +841,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 </div>
 
                 {/* Actions */}
-                <div className="mt-6 flex items-center justify-end gap-4">
+                <div className="mt-6 flex items-center justify-between gap-4">
+                    {/* Gauche : Push to Jumia */}
                     <button
                         type="button"
                         onClick={handlePushToJumia}
@@ -845,20 +853,33 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         Push to Jumia
                     </button>
                     
-                    <Link
-                        href={returnUrl}
-                        className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        Annuler
-                    </Link>
-                    <button
-                        type="submit"
-                        disabled={loading || isPushingJumia}
-                        className="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <Save className="w-5 h-5 mr-2" />
-                        {loading ? 'Enregistrement...' : 'Enregistrer'}
-                    </button>
+                    {/* Droite : Annuler / Enregistrer / Enregistrer et Fermer */}
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href={returnUrl}
+                            className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            Annuler
+                        </Link>
+                        <button
+                            type="submit"
+                            disabled={loading || isPushingJumia}
+                            onClick={() => setCloseAfterSave(false)}
+                            className="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading && !closeAfterSave ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+                            {loading && !closeAfterSave ? 'Enregistrement...' : 'Enregistrer'}
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading || isPushingJumia}
+                            onClick={() => setCloseAfterSave(true)}
+                            className="inline-flex items-center px-6 py-2 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading && closeAfterSave ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+                            {loading && closeAfterSave ? 'Enregistrement...' : 'Enregistrer et Fermer'}
+                        </button>
+                    </div>
                 </div>
             </form>
 
