@@ -123,6 +123,7 @@ export async function getJumiaStats() {
         const response = await jumia.getOrders(300, undefined, undefined, createdAfter, createdBefore)
         const orders = response?.orders || response?.data?.orders || []
         
+        let total = 0
         let pending = 0
         let shipped = 0
         let delivered = 0
@@ -132,12 +133,23 @@ export async function getJumiaStats() {
         
         orders.forEach((o: any) => {
             const st = (o.status || o.Status || o.Statuses?.[0] || '').toUpperCase()
+            
+            // Ignorer complètement les commandes FAILED et CANCELED pour les stats
+            if (st === 'FAILED' || st === 'CANCELED' || st === 'CANCELLED') {
+                return
+            }
+            
+            total++
             if (st === 'PENDING') pending++
             else if (st === 'READY_TO_SHIP' || st === 'READY-TO-SHIP' || st === 'SHIPPED') shipped++
             else if (st === 'DELIVERED') delivered++
             
             const price = parseFloat(o.totalAmountLocal?.value || o.Price || o.GrandTotal || '0')
-            if (!isNaN(price) && st !== 'CANCELED' && st !== 'FAILED' && st !== 'RETURNED') {
+            
+            // On ne compte pas le revenu pour les commandes RETURNED, mais on les garde dans le total
+            const isValidRevenue = !isNaN(price) && st !== 'RETURNED'
+            
+            if (isValidRevenue) {
                 revenue += price
             }
 
@@ -149,7 +161,7 @@ export async function getJumiaStats() {
                     evolutionMap[dateStr] = { date: dateStr, count: 0, revenue: 0 }
                 }
                 evolutionMap[dateStr].count++
-                if (!isNaN(price)) {
+                if (isValidRevenue) {
                     evolutionMap[dateStr].revenue += price
                 }
             }
@@ -158,7 +170,7 @@ export async function getJumiaStats() {
         const evolutionData = Object.values(evolutionMap).sort((a, b) => a.date.localeCompare(b.date))
         
         return {
-            total: orders.length,
+            total,
             pending,
             shipped,
             delivered,
