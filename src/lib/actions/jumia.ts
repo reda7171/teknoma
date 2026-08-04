@@ -524,3 +524,21 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
     }
 }
 
+
+export async function checkJumiaLinkBySku(sellerSku: string) {
+    if (!sellerSku) return false
+    try {
+        await verifyAdmin()
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) return false
+        
+        const res = await jumia.getProducts({ sellerSku })
+        if (res && res.products && res.products.length > 0) {
+            return true
+        }
+        return false
+    } catch (e) {
+        return false
+    }
+}
+

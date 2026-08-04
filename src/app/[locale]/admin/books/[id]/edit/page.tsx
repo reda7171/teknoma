@@ -6,11 +6,11 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
-import { publishBooksToJumia } from '@/lib/actions/jumia'
+import { publishBooksToJumia, checkJumiaLinkBySku } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
 import CatalogImageModal from '@/components/admin/CatalogImageModal'
 import BookCreativeModal from '@/components/admin/BookCreativeModal'
-import { ImageIcon, Wand2 } from 'lucide-react'
+import { ImageIcon, Wand2, Link2 } from 'lucide-react'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
     const router = useRouter()
@@ -51,6 +51,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [selectedAuthor, setSelectedAuthor] = useState<string>('')
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr'>('ar')
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
+    const [isLinked, setIsLinked] = useState<boolean | null>(null)
 
     useEffect(() => {
         getPurchaseLots().then(data => setLots(data)).catch(console.error)
@@ -82,6 +83,14 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setCurrentLang(result.data.language === 'en' ? 'en' : result.data.language === 'fr' ? 'fr' : 'ar')
                 setBookLanguage((result.data.language as 'ar' | 'fr' | 'en') || 'fr')
                 setBookImage(result.data.image || '')
+                
+                if (result.data.sellerSku) {
+                    checkJumiaLinkBySku(result.data.sellerSku).then(linked => {
+                        setIsLinked(linked)
+                    }).catch(() => setIsLinked(false))
+                } else {
+                    setIsLinked(false)
+                }
             } else {
                 setError(result.error || 'Livre introuvable')
             }
@@ -266,7 +275,21 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Retour à la liste
                 </Link>
-                <h1 className="text-3xl font-bold text-gray-900">Modifier le livre</h1>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-gray-900">Modifier le livre</h1>
+                    {isLinked !== null && (
+                        isLinked ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">
+                                <Link2 className="w-3 h-3 mr-1" />
+                                Linké
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">
+                                Non Linké
+                            </span>
+                        )
+                    )}
+                </div>
                 <p className="mt-2 text-sm text-gray-600">
                     Modifiez les informations du livre "{book.title}"
                 </p>
