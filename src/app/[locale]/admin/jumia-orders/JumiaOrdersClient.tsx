@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText } from 'lucide-react'
 import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull } from './actions'
 import JumiaOrdersEvolutionChart from '@/components/admin/JumiaOrdersEvolutionChart'
@@ -471,8 +471,9 @@ export default function JumiaOrdersClient() {
                                         </tr>
                                     ) : (
                                         orders.map((order: any, index: number) => (
-                                            <tr key={order.id || order.OrderId || index} className="hover:bg-slate-50/50 transition-colors group">
-                                                <td className="p-4 font-bold text-slate-900">{order.number || order.OrderId || order.OrderNumber || 'N/A'}</td>
+                                            <React.Fragment key={order.id || order.OrderId || index}>
+                                                <tr className="hover:bg-slate-50/50 transition-colors group">
+                                                    <td className="p-4 font-bold text-slate-900">{order.number || order.OrderId || order.OrderNumber || 'N/A'}</td>
                                                 <td className="p-4 text-slate-500 font-medium">
                                                     {order.createdAt ? new Date(order.createdAt).toLocaleString('fr-FR', {
                                                         day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -672,7 +673,7 @@ export default function JumiaOrdersClient() {
                                                     </td>
                                                 </tr>
                                             )}
-                                        </>
+                                            </React.Fragment>
                                         ))
                                     )}
                                 </tbody>
