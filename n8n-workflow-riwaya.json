@@ -524,7 +524,7 @@
           "conditions": [
             {
               "id": "cond-pin",
-              "leftValue": "={{ .platform }}",
+              "leftValue": "={{ $json.platform }}",
               "rightValue": "pinterest",
               "operator": {
                 "type": "string",
@@ -533,7 +533,7 @@
             },
             {
               "id": "cond-pin-all",
-              "leftValue": "={{ .platform }}",
+              "leftValue": "={{ $json.platform }}",
               "rightValue": "all",
               "operator": {
                 "type": "string",
@@ -556,17 +556,30 @@
     },
     {
       "parameters": {
-        "board": "",
-        "title": "={{ .title }}",
-        "description": "={{ .caption }}",
-        "link": "={{ .itemUrl }}",
-        "imageUrl": "={{ .image }}",
-        "additionalFields": {}
+        "method": "POST",
+        "url": "https://api.pinterest.com/v5/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.pinterest_access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"board_id\": \"{{ $json.pinterest_board_id }}\",\n  \"title\": \"{{ $json.title }}\",\n  \"description\": \"{{ $json.caption }}\",\n  \"link\": \"{{ $json.itemUrl }}\",\n  \"media_source\": {\n    \"source_type\": \"image_url\",\n    \"url\": \"{{ $json.image }}\"\n  }\n}",
+        "options": {}
       },
       "id": "post-pinterest",
       "name": "Post Pinterest",
-      "type": "n8n-nodes-base.pinterest",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         720,
         940

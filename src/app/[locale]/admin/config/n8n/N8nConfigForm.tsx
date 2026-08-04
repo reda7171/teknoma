@@ -443,6 +443,29 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                         {!pinterestAccessToken && <p className="text-xs text-red-500 mt-1 font-medium">Nécessite de connecter le compte Pinterest d'abord.</p>}
                     </div>
                 </div>
+
+                <div>
+                    <label htmlFor="pinterestAccessToken" className="block text-sm font-bold text-gray-900 mb-2">
+                        Pinterest Access Token
+                    </label>
+                    <div className="relative">
+                        <input
+                            type={showSecrets['pinterestAccessToken'] ? 'text' : 'password'}
+                            id="pinterestAccessToken"
+                            value={pinterestAccessToken}
+                            onChange={(e) => setPinterestAccessToken(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#E60023] outline-none transition-all pr-12"
+                            placeholder="Entrez le jeton d'accès Pinterest..."
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => toggleSecret('pinterestAccessToken')}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#E60023]"
+                        >
+                            {showSecrets['pinterestAccessToken'] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                    </div>
+                </div>
                 
                 <div>
                     <label htmlFor="pinterestAppSecret" className="block text-sm font-bold text-gray-900 mb-2">
