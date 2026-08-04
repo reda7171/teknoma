@@ -49,7 +49,7 @@ export class JumiaAPI {
         this.accessToken = data.access_token
     }
 
-    private async request(endpoint: string, method: string = 'GET', body?: any) {
+    private async request(endpoint: string, method: string = 'GET', body?: any, retries: number = 3): Promise<any> {
         // Nouvelle API Jumia Vendor utilise Bearer Token
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
             method,
@@ -63,9 +63,15 @@ export class JumiaAPI {
 
         if (!response.ok) {
             const errText = await response.text()
-            console.error(`Erreur API Jumia (${response.status}):`, errText)
             
-
+            if (response.status === 429 && retries > 0) {
+                console.warn(`Rate limit Jumia atteint. Nouvelle tentative dans 2 secondes... (${retries} restantes)`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return this.request(endpoint, method, body, retries - 1);
+            }
+            
+            console.warn(`Erreur API Jumia (${response.status}):`, errText)
+            
             throw new Error(`Erreur API Jumia: ${response.statusText} - ${errText}`)
         }
 
