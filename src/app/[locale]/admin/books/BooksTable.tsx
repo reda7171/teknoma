@@ -301,6 +301,30 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         }
     }
 
+    const handleSyncQuantity = async (e: React.MouseEvent, bookId: string) => {
+        e.stopPropagation();
+        setLoading(bookId + '-sync');
+        try {
+            const { publishBooksToJumia } = await import('@/lib/actions/jumia');
+            const result = await publishBooksToJumia([bookId]);
+            if (result.success) {
+                setToast({ msg: `✅ Stock synchronisé avec succès`, ok: true });
+                setOrderedBooks(prev => prev.map(book => 
+                    book.id === bookId 
+                        ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock } 
+                        : book
+                ));
+            } else {
+                setToast({ msg: `❌ ${result.message}`, ok: false });
+            }
+        } catch (err: any) {
+            setToast({ msg: '❌ Erreur lors de la synchronisation du stock', ok: false });
+        } finally {
+            setLoading(null);
+            setTimeout(() => setToast(null), 3000);
+        }
+    }
+
 
     async function handleDelete(id: string, title: string) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${title}" ?`)) {
@@ -727,9 +751,20 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                 </div>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                                                <span className={book.jumiaStock != null && book.stock === book.jumiaStock ? 'text-green-600' : 'text-red-600'}>
-                                                                    {book.jumiaStock != null && book.stock === book.jumiaStock ? 'Oui' : 'Non'}
-                                                                </span>
+                                                                {book.jumiaStock != null && book.stock === book.jumiaStock ? (
+                                                                    <span className="text-green-600">Oui</span>
+                                                                ) : (
+                                                                    <div className="flex flex-col items-center gap-1">
+                                                                        <span className="text-red-600">Non</span>
+                                                                        <button 
+                                                                            onClick={(e) => handleSyncQuantity(e, book.id)}
+                                                                            disabled={loading === book.id + '-sync'}
+                                                                            className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-blue-600 shadow-sm disabled:opacity-50 transition-colors"
+                                                                        >
+                                                                            {loading === book.id + '-sync' ? '...' : 'Synch quantity'}
+                                                                        </button>
+                                                                    </div>
+                                                                )}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <span className={book.hasArticle ? 'text-green-600' : 'text-red-600'}>
