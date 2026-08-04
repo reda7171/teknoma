@@ -551,12 +551,15 @@ export async function getJumiaProducts(params: any = {}) {
     }
 }
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function getAllJumiaProducts() {
     let allProducts: any[] = []
     let nextToken: string | undefined = undefined
 
     try {
         do {
+            if (nextToken) await delay(1000); // Eviter Rate Limit Jumia (429)
             const res = await getJumiaProducts({ token: nextToken, size: 50 })
             if (res.error) break;
             if (res.products && res.products.length > 0) {
@@ -572,6 +575,7 @@ export async function getAllJumiaProducts() {
             let stockNextToken: string | undefined = undefined
             do {
                 try {
+                    if (stockNextToken) await delay(1000); // Eviter Rate Limit Jumia (429)
                     const stockRes = await jumia.getCatalogStock({ token: stockNextToken, size: 100 })
                     if (stockRes.products && stockRes.products.length > 0) {
                         allStock = allStock.concat(stockRes.products)
