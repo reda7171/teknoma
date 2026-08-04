@@ -704,8 +704,8 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium group relative">
                                                                 <div className="group-hover:opacity-0 transition-opacity flex justify-center items-center h-6">
-                                                                    <span className={book.isSyncedWithJumia ? 'text-green-600' : 'text-gray-400'}>
-                                                                        {book.isSyncedWithJumia ? <Check className="w-4 h-4 mx-auto" /> : '-'}
+                                                                    <span className={`px-2 py-1 text-[10px] font-bold rounded-full ${book.isSyncedWithJumia ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                                        {book.isSyncedWithJumia ? 'Linké' : 'Non Linké'}
                                                                     </span>
                                                                 </div>
                                                                 <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
