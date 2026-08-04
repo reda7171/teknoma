@@ -51,6 +51,44 @@ export async function POST(req: Request) {
             
             console.log(`[TELEGRAM CALLBACK] Received ID: ${callbackId}, Data: ${data}`)
 
+            // ─── Boutons offre panier (-10, -20, -30 Dhs) ────────────────────
+            if (data && data.startsWith('offer_')) {
+                const parts = data.split(':')
+                const offerType = parts[0]   // offer_10 | offer_20 | offer_30
+                const sessionId = parts[1]    // sessionId du client
+
+                let discount = 0
+                if (offerType === 'offer_10') discount = 10
+                if (offerType === 'offer_20') discount = 20
+                if (offerType === 'offer_30') discount = 30
+
+                if (discount > 0 && sessionId) {
+                    // Créer l'offre en DB (sera récupérée par le polling du client)
+                    await prisma.instantOffer.create({
+                        data: {
+                            sessionId,
+                            discount,
+                            status: 'PENDING',
+                            expiresAt: new Date(Date.now() + 15 * 60 * 1000)
+                        }
+                    })
+
+                    await answerCallbackQuery(callbackId, `✅ Offre de ${discount} Dhs envoyée au client!`, token)
+
+                    // Mettre à jour le message en retirant les boutons
+                    if (message?.chat?.id && message?.message_id) {
+                        const newText = (message.text || '') + `\n\n✅ <b>Offre de -${discount} Dhs envoyée avec succès!</b>`
+                        await editTelegramMessage(message.chat.id, message.message_id, newText, token, { inline_keyboard: [] })
+                    }
+
+                    return NextResponse.json({ ok: true })
+                }
+
+                await answerCallbackQuery(callbackId, '❌ Erreur offre invalide', token)
+                return NextResponse.json({ ok: true })
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             // Format attendu: os:{orderId}:{STATUS}
             if (data && data.startsWith('os:')) {
                 const parts = data.split(':')
