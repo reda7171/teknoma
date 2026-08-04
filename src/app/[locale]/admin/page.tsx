@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon } from 'lucide-react'
+import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon, ExternalLink, ShoppingBag as JumiaIcon, Zap, Link2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBadgeStats } from '@/lib/actions/analytics'
@@ -47,6 +47,34 @@ async function getStats() {
         totalUsers,
         outOfStockBooks,
         tauxAnnulation
+    }
+}
+
+async function getJumiaStats() {
+    const [totalActions, successActions, errorActions, syncedBooks, booksWithSku] = await Promise.all([
+        prisma.jumiaActionLog.count(),
+        prisma.jumiaActionLog.count({ where: { status: 'SUCCESS' } }),
+        prisma.jumiaActionLog.count({ where: { status: 'ERROR' } }),
+        prisma.book.count({ where: { isSyncedWithJumia: true } }),
+        prisma.book.count({ where: { sellerSku: { not: null } } }),
+    ])
+
+    // Derniere action Jumia
+    const lastAction = await prisma.jumiaActionLog.findFirst({
+        orderBy: { createdAt: 'desc' },
+        select: { action: true, status: true, createdAt: true }
+    })
+
+    const tauxSucces = totalActions > 0 ? Math.round((successActions / totalActions) * 100) : 0
+
+    return {
+        totalActions,
+        successActions,
+        errorActions,
+        syncedBooks,
+        booksWithSku,
+        tauxSucces,
+        lastAction
     }
 }
 
@@ -180,6 +208,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const lowStockBooks = await getLowStockBooks()
     const badgeStats = await getBadgeStats()
     const topPerformers = await getTopPerformers()
+    const jumiaStats = await getJumiaStats()
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
 
     const statCards = [
@@ -337,6 +366,94 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-4 sm:p-6 lg:p-10">
                 <DashboardAnalytics />
             </div>
+
+            {/* ─── KPIs Jumia ─────────────────────────────────────────────────── */}
+            <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
+                <div className="px-6 py-6 md:px-10 md:py-8 border-b border-gray-50 flex justify-between items-center bg-orange-50/30">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+                            <ShoppingBag className="w-4 h-4 text-white" />
+                        </div>
+                        <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                            Performance Jumia
+                        </h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Link href="/admin/jumia-orders" className="text-[9px] font-black text-orange-600 bg-orange-50 border border-orange-200 px-4 py-2 rounded-xl hover:bg-orange-100 transition-all uppercase tracking-widest flex items-center gap-1">
+                            <ExternalLink className="w-3 h-3" />
+                            Commandes
+                        </Link>
+                        <Link href="/admin/jumia-products" className="text-[9px] font-black text-white bg-orange-500 px-4 py-2 rounded-xl hover:bg-orange-600 transition-all uppercase tracking-widest flex items-center gap-1">
+                            <ExternalLink className="w-3 h-3" />
+                            Produits
+                        </Link>
+                    </div>
+                </div>
+                <div className="p-6 md:p-10">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                        {/* Livres avec SKU */}
+                        <div className="flex flex-col items-center justify-center p-6 bg-orange-50/50 rounded-2xl border border-orange-100 group hover:shadow-md transition-all">
+                            <Link2 className="w-6 h-6 text-orange-500 mb-2" />
+                            <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.booksWithSku}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Livres avec SKU</span>
+                        </div>
+                        {/* Synced */}
+                        <div className="flex flex-col items-center justify-center p-6 bg-green-50/50 rounded-2xl border border-green-100 group hover:shadow-md transition-all">
+                            <CheckCircle className="w-6 h-6 text-green-500 mb-2" />
+                            <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.syncedBooks}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Synchro Jumia</span>
+                        </div>
+                        {/* Total Actions */}
+                        <div className="flex flex-col items-center justify-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100 group hover:shadow-md transition-all">
+                            <Zap className="w-6 h-6 text-blue-500 mb-2" />
+                            <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.totalActions}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Actions totales</span>
+                        </div>
+                        {/* Succès */}
+                        <div className="flex flex-col items-center justify-center p-6 bg-green-50/50 rounded-2xl border border-green-100 group hover:shadow-md transition-all">
+                            <CheckCircle className="w-6 h-6 text-emerald-500 mb-2" />
+                            <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.successActions}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Succès</span>
+                        </div>
+                        {/* Erreurs */}
+                        <div className="flex flex-col items-center justify-center p-6 bg-red-50/50 rounded-2xl border border-red-100 group hover:shadow-md transition-all">
+                            <AlertTriangle className="w-6 h-6 text-red-500 mb-2" />
+                            <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.errorActions}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Erreurs</span>
+                        </div>
+                        {/* Taux Succès */}
+                        <div className={`flex flex-col items-center justify-center p-6 rounded-2xl border group hover:shadow-md transition-all ${
+                            jumiaStats.tauxSucces >= 70 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'
+                        }`}>
+                            <BarChart2 className={`w-6 h-6 mb-2 ${jumiaStats.tauxSucces >= 70 ? 'text-emerald-500' : 'text-red-500'}`} />
+                            <span className={`text-3xl font-black tracking-tighter ${
+                                jumiaStats.tauxSucces >= 70 ? 'text-emerald-600' : 'text-red-600'
+                            }`}>{jumiaStats.tauxSucces}%</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Taux Succès</span>
+                        </div>
+                    </div>
+
+                    {/* Dernière action */}
+                    {jumiaStats.lastAction && (
+                        <div className="mt-6 flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                jumiaStats.lastAction.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-red-500'
+                            }`} />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Dernière action :</span>
+                            <span className="text-[10px] font-black text-black uppercase">{jumiaStats.lastAction.action}</span>
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg ${
+                                jumiaStats.lastAction.status === 'SUCCESS'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-red-100 text-red-700'
+                            }`}>{jumiaStats.lastAction.status}</span>
+                            <span className="text-[9px] text-gray-400 ml-auto">
+                                {new Date(jumiaStats.lastAction.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {/* ─────────────────────────────────────────────────────────────────── */}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
                 {/* Marketing Widget Premium */}
