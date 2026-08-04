@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); prisma.exchangeBook.findMany().then(b => { console.log('Total:', b.length); console.log(b.map(x => ({title: x.title, lat: x.latitude, lng: x.longitude}))); prisma.$disconnect() })
