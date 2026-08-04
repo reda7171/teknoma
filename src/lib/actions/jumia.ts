@@ -542,3 +542,37 @@ export async function checkJumiaLinkBySku(sellerSku: string) {
     }
 }
 
+
+export async function checkJumiaLinkBySkuExact(sellerSku: string) {
+    if (!sellerSku) return false;
+    try {
+        await verifyAdmin();
+        const jumia = await JumiaAPI.getInstance();
+        if (!jumia) return false;
+        
+        let nextToken: string | undefined = undefined;
+        do {
+            const res = await jumia.getProducts({ token: nextToken, size: 100 });
+            if (res.error) break;
+            if (res.products && res.products.length > 0) {
+                // Check if any product or its variations has this sellerSku
+                for (const p of res.products) {
+                    if (p.sellerSku === sellerSku) return true;
+                    if (p.variations) {
+                        for (const v of p.variations) {
+                            if (v.sellerSku === sellerSku) return true;
+                        }
+                    }
+                }
+            }
+            nextToken = res.nextToken;
+            // To avoid huge delays, let's just search first few pages or remove delay if Jumia allows it
+            if (nextToken) await new Promise(r => setTimeout(r, 500));
+        } while (nextToken);
+        
+        return false;
+    } catch (e) {
+        return false;
+    }
+}
+

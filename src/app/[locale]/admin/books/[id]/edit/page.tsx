@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
-import { publishBooksToJumia, checkJumiaLinkBySku } from '@/lib/actions/jumia'
+import { publishBooksToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
 import CatalogImageModal from '@/components/admin/CatalogImageModal'
 import BookCreativeModal from '@/components/admin/BookCreativeModal'
@@ -85,10 +85,16 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setBookImage(result.data.image || '')
                 
                 if (result.data.sellerSku) {
-                    checkJumiaLinkBySku(result.data.sellerSku).then(linked => {
+                    console.log('Checking Jumia link for SKU:', result.data.sellerSku);
+                    checkJumiaLinkBySkuExact(result.data.sellerSku).then(linked => {
+                        console.log('Jumia link check result:', linked);
                         setIsLinked(linked)
-                    }).catch(() => setIsLinked(false))
+                    }).catch(err => {
+                        console.error('Error checking Jumia link:', err);
+                        setIsLinked(false)
+                    })
                 } else {
+                    console.log('No sellerSku for this book');
                     setIsLinked(false)
                 }
             } else {
