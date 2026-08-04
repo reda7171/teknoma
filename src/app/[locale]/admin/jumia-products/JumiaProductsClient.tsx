@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { RefreshCw, Package, Tag, ArrowRightLeft } from "lucide-react"
+import { RefreshCw, Package, Tag, ArrowRightLeft, Link2 } from "lucide-react"
 import { getJumiaProducts, updateJumiaProductsStock, updateJumiaProductsPrice, updateJumiaProductsStatus, syncAllJumiaStock } from "../jumia-orders/actions"
 
 interface JumiaProductsClientProps {
@@ -292,7 +292,15 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                                         <div className="text-xs text-slate-500">
                                             {p.brand?.name || "No Brand"} • {p.category?.name || p.primaryCategory?.name || "Non catégorisé"}
                                         </div>
-                                        <div className="text-xs text-slate-500">Créé le : {new Date(p.createdAt).toLocaleDateString()}</div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className="text-xs text-slate-500">Créé le : {new Date(p.createdAt).toLocaleDateString()}</div>
+                                            {p.isLinked && (
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">
+                                                    <Link2 className="w-3 h-3 mr-1" />
+                                                    Linké
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3">
                                         <span className="inline-block border px-2 py-0.5 rounded text-xs bg-slate-50 font-medium">

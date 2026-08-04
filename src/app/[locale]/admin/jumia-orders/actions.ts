@@ -586,7 +586,27 @@ export async function getAllJumiaProducts() {
                 }
             } while (stockNextToken)
             
-            // Merge stock into products
+            // Check linkage with local products
+            const sellerSkus = allProducts.map((p: any) => p.sellerSku || (p.variations && p.variations[0]?.sellerSku)).filter(Boolean)
+            let linkedSkus = new Set<string>()
+            
+            if (sellerSkus.length > 0) {
+                const [linkedBooks, linkedAccessories] = await Promise.all([
+                    prisma.book.findMany({
+                        where: { sellerSku: { in: sellerSkus } },
+                        select: { sellerSku: true }
+                    }),
+                    prisma.accessory.findMany({
+                        where: { sellerSku: { in: sellerSkus } },
+                        select: { sellerSku: true }
+                    })
+                ])
+                
+                linkedBooks.forEach(b => { if (b.sellerSku) linkedSkus.add(b.sellerSku) })
+                linkedAccessories.forEach(a => { if (a.sellerSku) linkedSkus.add(a.sellerSku) })
+            }
+
+            // Merge stock into products and check if linked
             allProducts = allProducts.map((p: any) => {
                 const sellerSku = p.sellerSku || (p.variations && p.variations[0]?.sellerSku)
                 const stockItem = allStock.find(s => s.sellerSku === sellerSku)
@@ -594,6 +614,9 @@ export async function getAllJumiaProducts() {
                     p.stockActuel = stockItem.globalStock
                     p.stockId = stockItem.id
                 }
+                
+                p.isLinked = sellerSku ? linkedSkus.has(sellerSku) : false
+                
                 return p
             })
         }
