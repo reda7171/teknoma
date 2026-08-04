@@ -13,8 +13,24 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
+            let replyMarkup
+            if (sessionId) {
+                replyMarkup = {
+                    inline_keyboard: [
+                        [
+                            { text: '🎁 Proposer une offre (-10%)', callback_data: `offer_10:${sessionId}` },
+                            { text: '🎁 Offre (-20%)', callback_data: `offer_20:${sessionId}` }
+                        ]
+                    ]
+                }
+            }
             // On envoie une notification asynchrone
-            await sendTelegramMessage(`🛒 <b>Nouveau Panier</b>\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
+            await sendTelegramMessage(
+                `🛒 <b>Nouveau Panier</b>\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                undefined,
+                undefined,
+                replyMarkup
+            )
         }
         
         return { success: true }

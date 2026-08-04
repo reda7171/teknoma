@@ -1,10 +1,58 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, answerCallbackQuery, editTelegramMessage } from '@/lib/telegram'
 
 export async function POST(req: Request) {
     try {
         const body = await req.json()
+
+        // Handle button clicks (callback queries)
+        if (body.callback_query) {
+            const callbackQuery = body.callback_query
+            const data = callbackQuery.data
+            const message = callbackQuery.message
+            const chatId = message?.chat?.id
+            const messageId = message?.message_id
+
+            // Handle offer buttons
+            if (data && data.startsWith('offer_')) {
+                // e.g. offer_10:session123
+                const parts = data.split(':')
+                const offerType = parts[0]
+                const sessionId = parts[1]
+                
+                let discount = 0
+                if (offerType === 'offer_10') discount = 10
+                if (offerType === 'offer_20') discount = 20
+
+                if (discount > 0 && sessionId) {
+                    await prisma.instantOffer.create({
+                        data: {
+                            sessionId,
+                            discount,
+                            status: 'PENDING',
+                            expiresAt: new Date(Date.now() + 15 * 60 * 1000) // Valable 15 minutes
+                        }
+                    })
+                    
+                    // Récupérer le token pour répondre
+                    const setting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } })
+                    const token = setting?.value || process.env.TELEGRAM_BOT_TOKEN || ''
+
+                    if (token) {
+                        await answerCallbackQuery(callbackQuery.id, `Offre de ${discount} appliquée!`, token)
+                        
+                        if (chatId && messageId) {
+                            // Mettre à jour le message pour retirer les boutons
+                            const newText = (message.text || 'Nouveau Panier') + `\n\n✅ <b>Offre de ${discount} envoyée avec succès!</b>`
+                            await editTelegramMessage(chatId, messageId, newText, token, { inline_keyboard: [] })
+                        }
+                    }
+                    
+                    return NextResponse.json({ success: true })
+                }
+            }
+        }
 
         // Si le message est une réponse à un autre message
         if (body.message?.reply_to_message) {
