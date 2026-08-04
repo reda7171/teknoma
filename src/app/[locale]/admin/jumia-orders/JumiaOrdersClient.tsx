@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText } from 'lucide-react'
-import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull } from './actions'
+import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull, restoreJumiaOrderStock } from './actions'
 import JumiaOrdersEvolutionChart from '@/components/admin/JumiaOrdersEvolutionChart'
 
 export default function JumiaOrdersClient() {
@@ -23,6 +23,7 @@ export default function JumiaOrdersClient() {
     const [printInvoiceId, setPrintInvoiceId] = useState<string | null>(null)
     const [readyId, setReadyId] = useState<string | null>(null)
     const [confirmReadyId, setConfirmReadyId] = useState<string | null>(null)
+    const [restoreStockId, setRestoreStockId] = useState<string | null>(null)
     
     // Order items details state
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
@@ -110,6 +111,24 @@ export default function JumiaOrdersClient() {
             setErrorMsg(`Impossible d'annuler: ${e.message}`)
         } finally {
             setCancelingId(null)
+        }
+    }
+
+    const handleRestoreStock = async (orderId: string, reason: 'FAILED' | 'CANCELED' | 'RETURNED') => {
+        setRestoreStockId(orderId)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        try {
+            const result = await restoreJumiaOrderStock(orderId, reason)
+            if (result.success) {
+                setSuccessMsg(`Stock de la commande ${orderId} réintégré avec succès.`)
+            } else {
+                setErrorMsg(result.error || 'Erreur lors de la réintégration du stock')
+            }
+        } catch (e: any) {
+            setErrorMsg(`Erreur: ${e.message}`)
+        } finally {
+            setRestoreStockId(null)
         }
     }
 
@@ -602,6 +621,25 @@ export default function JumiaOrdersClient() {
                                                                         <><Eye className="w-3 h-3" /> {expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber) ? 'Fermer' : 'Détails'}</>
                                                                     )}
                                                                 </button>
+
+                                                                {/* Bouton Restaurer Stock pour FAILED/CANCELED/RETURNED */}
+                                                                {(currentStatus === 'failed' || currentStatus === 'canceled' || currentStatus === 'cancelled' || currentStatus === 'returned') && (
+                                                                    <button 
+                                                                        onClick={() => handleRestoreStock(
+                                                                            order.id || order.number || order.OrderId || order.OrderNumber,
+                                                                            currentStatus === 'failed' ? 'FAILED' : currentStatus === 'returned' ? 'RETURNED' : 'CANCELED'
+                                                                        )}
+                                                                        disabled={restoreStockId === (order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                        className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full mt-1 bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+                                                                        title="Réintégrer le stock dans le site + Jumia"
+                                                                    >
+                                                                        {restoreStockId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
+                                                                            <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
+                                                                        ) : (
+                                                                            <><Package className="w-3 h-3" /> Restaurer Stock</>
+                                                                        )}
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         )
                                                     })()}

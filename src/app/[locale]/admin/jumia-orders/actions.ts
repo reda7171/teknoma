@@ -2,6 +2,7 @@
 
 import { JumiaAPI } from '@/lib/jumia-api'
 import { prisma } from '@/lib/prisma'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 export async function getPendingJumiaOrdersCount() {
     try {
@@ -206,6 +207,10 @@ export async function cancelJumiaOrderFull(orderId: string) {
         // Appel final pour annuler
         const cancelResponse = await jumia.cancelOrders(orderItemIds)
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'CANCEL', status: 'SUCCESS' } }).catch(() => {})
+
+        // Réintégrer le stock + sync Jumia en background
+        reintegrateJumiaOrderStock(items, orderId, 'CANCEL').catch(console.error)
+
         return cancelResponse
     } catch (e: any) {
         console.error("Error canceling Jumia order:", e)
@@ -214,7 +219,78 @@ export async function cancelJumiaOrderFull(orderId: string) {
     }
 }
 
+// Réintégre le stock local + Jumia pour les articles d'une commande Jumia annulée/échouée
+async function reintegrateJumiaOrderStock(items: any[], orderId: string, reason: 'CANCEL' | 'FAILED' | 'RETURNED') {
+    try {
+        // Pour chaque article Jumia, trouver le livre local via sellerSku
+        const skuQuantities: Record<string, number> = {}
+        for (const item of items) {
+            const sku = item.sellerSku || item.Sku || item.sku || item.SellerSku
+            const qty = parseInt(item.quantity || item.Quantity || '1', 10) || 1
+            if (sku) skuQuantities[sku] = (skuQuantities[sku] || 0) + qty
+        }
 
+        const skus = Object.keys(skuQuantities)
+        if (skus.length === 0) return
+
+        // Trouver les livres correspondants
+        const books = await prisma.book.findMany({
+            where: { sellerSku: { in: skus } },
+            select: { id: true, title: true, sellerSku: true, stock: true, isSyncedWithJumia: true }
+        })
+
+        if (books.length === 0) return
+
+        const restoredItems: string[] = []
+
+        // Réintégrer dans la base locale
+        for (const book of books) {
+            const qty = skuQuantities[book.sellerSku!]
+            if (!qty) continue
+            await prisma.book.update({
+                where: { id: book.id },
+                data: { stock: { increment: qty } }
+            })
+            restoredItems.push(`• ${book.title} +${qty}`)
+        }
+
+        // Syncer le nouveau stock vers Jumia
+        const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+        await syncJumiaStockForBooksBackground(books.map(b => b.id))
+
+        // Notifier Telegram
+        const reasonLabel = reason === 'CANCEL' ? 'Annulation' : reason === 'FAILED' ? 'Échec' : 'Retour'
+        const msg = `📦 <b>Stock Réintégré [Jumia - ${reasonLabel}]</b>\n\n🆔 Commande: <code>${orderId}</code>\n\n${restoredItems.join('\n')}\n\n✅ Stock local mis à jour + Jumia synchronisé`
+        sendTelegramMessage(msg).catch(console.error)
+    } catch (err) {
+        console.error('reintegrateJumiaOrderStock error:', err)
+    }
+}
+
+// Action publique : réintégrer le stock d'une commande Jumia FAILED/CANCELED/RETURNED
+export async function restoreJumiaOrderStock(orderId: string, reason: 'FAILED' | 'CANCELED' | 'RETURNED' = 'CANCELED') {
+    const jumia = await JumiaAPI.getInstance()
+    if (!jumia) return { success: false, error: "Jumia n'est pas configuré" }
+
+    try {
+        const responseItems = await jumia.getOrderItems(orderId)
+        const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
+        const items = data?.items || data?.data?.items || data || []
+
+        if (!items || !items.length) {
+            return { success: false, error: "Aucun article trouvé pour cette commande." }
+        }
+
+        const reasonKey = reason === 'FAILED' ? 'FAILED' : reason === 'RETURNED' ? 'RETURNED' : 'CANCEL'
+        await reintegrateJumiaOrderStock(items, orderId, reasonKey as any)
+        await prisma.jumiaActionLog.create({ data: { orderId, action: `RESTORE_STOCK_${reason}`, status: 'SUCCESS' } }).catch(() => {})
+        return { success: true }
+    } catch (e: any) {
+        console.error("restoreJumiaOrderStock error:", e)
+        await prisma.jumiaActionLog.create({ data: { orderId, action: `RESTORE_STOCK_${reason}`, status: 'ERROR', detail: e.message } }).catch(() => {})
+        return { success: false, error: e.message }
+    }
+}
 
 export async function packJumiaOrderFull(orderId: string) {
     const jumia = await JumiaAPI.getInstance()
