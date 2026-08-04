@@ -1760,6 +1760,9 @@ export async function POST(req: Request) {
                             { text: '📦 Commandes Jumia Pending', callback_data: 'jumia:pending_orders' }
                         ],
                         [
+                            { text: '💰 3 derniers Paiements', callback_data: 'jumia:last_3_payouts' }
+                        ],
+                        [
                             { text: '📊 Bilan Jumia du mois', callback_data: 'jumia:monthly_stats' }
                         ],
                         [
