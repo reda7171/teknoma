@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw } from 'lucide-react'
 import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -276,6 +276,65 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         }
     }
 
+    // Synchroniser le stock en masse
+    const handleBulkSyncQuantity = async () => {
+        if (selectedIds.length === 0) return
+        setBulkLoading(true)
+        try {
+            const { syncBooksQuantityToJumia } = await import('@/lib/actions/jumia')
+            const result = await syncBooksQuantityToJumia(selectedIds)
+            if (result.success) {
+                setToast({ msg: `✅ ${result.message}`, ok: true })
+                setOrderedBooks(prev => prev.map(book => 
+                    selectedIds.includes(book.id) 
+                        ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock } 
+                        : book
+                ))
+                setSelectedIds([])
+            } else {
+                setToast({ msg: `❌ ${result.message}`, ok: false })
+            }
+            setTimeout(() => setToast(null), 5000)
+        } catch (error) {
+            setToast({ msg: '❌ Erreur de synchronisation', ok: false })
+            setTimeout(() => setToast(null), 5000)
+        } finally {
+            setBulkLoading(false)
+        }
+    }
+
+    // Synchroniser le stock en itérant un par un
+    const handleSyncAllQuantity = async () => {
+        if (selectedIds.length === 0) return
+        setBulkLoading(true)
+        try {
+            const { syncBooksQuantityToJumia } = await import('@/lib/actions/jumia')
+            let successCount = 0
+            for (const id of selectedIds) {
+                const result = await syncBooksQuantityToJumia([id])
+                if (result.success) {
+                    successCount++
+                    setOrderedBooks(prev => prev.map(book => 
+                        book.id === id 
+                            ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock } 
+                            : book
+                    ))
+                }
+            }
+            setToast({ msg: `✅ ${successCount}/${selectedIds.length} stocks synchronisés avec succès`, ok: true })
+            if (successCount === selectedIds.length) {
+                setSelectedIds([])
+            }
+            setTimeout(() => setToast(null), 5000)
+        } catch (error) {
+            setToast({ msg: '❌ Erreur lors de la synchronisation séquentielle', ok: false })
+            setTimeout(() => setToast(null), 5000)
+        } finally {
+            setBulkLoading(false)
+        }
+    }
+
+
     const handleVerifyJumiaSku = async (e: React.MouseEvent, bookId: string, sellerSku: string | null) => {
         e.stopPropagation();
         setLoading(bookId + '-verify');
@@ -305,8 +364,8 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         e.stopPropagation();
         setLoading(bookId + '-sync');
         try {
-            const { publishBooksToJumia } = await import('@/lib/actions/jumia');
-            const result = await publishBooksToJumia([bookId]);
+            const { syncBooksQuantityToJumia } = await import('@/lib/actions/jumia');
+            const result = await syncBooksQuantityToJumia([bookId]);
             if (result.success) {
                 setToast({ msg: `✅ Stock synchronisé avec succès`, ok: true });
                 setOrderedBooks(prev => prev.map(book => 
@@ -514,6 +573,24 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                             >
                                 <Upload className="w-4 h-4" />
                                 Publier Jumia
+                            </button>
+                            <button
+                                onClick={handleBulkSyncQuantity}
+                                disabled={bulkLoading}
+                                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition"
+                                title="Synchroniser uniquement le stock (Global)"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                Synch quantity
+                            </button>
+                            <button
+                                onClick={handleSyncAllQuantity}
+                                disabled={bulkLoading}
+                                className="flex items-center gap-2 bg-cyan-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-cyan-700 transition"
+                                title="Synchroniser le stock un par un (Itératif)"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                Synch all quantity
                             </button>
                             <button
                                 onClick={() => setIsBulkPublishOpen(true)}
@@ -750,20 +827,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     </button>
                                                                 )}
                                                             </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium group relative">
-                                                                <div className="group-hover:opacity-0 transition-opacity flex justify-center items-center h-6">
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                <div className="flex justify-center items-center h-6">
                                                                     <span className={`px-2 py-1 text-[10px] font-bold rounded-full ${book.isSyncedWithJumia ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                                                         {book.isSyncedWithJumia ? 'Linké' : 'Non Linké'}
                                                                     </span>
-                                                                </div>
-                                                                <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <button 
-                                                                        onClick={(e) => handleVerifyJumiaSku(e, book.id, book.sellerSku || null)}
-                                                                        disabled={loading === book.id + '-verify'}
-                                                                        className="bg-orange-500 text-white px-2 py-1 rounded text-[10px] font-bold hover:bg-orange-600 shadow-sm disabled:opacity-50"
-                                                                    >
-                                                                        {loading === book.id + '-verify' ? '...' : 'Verify'}
-                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">

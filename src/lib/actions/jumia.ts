@@ -90,6 +90,46 @@ export async function syncBooksStockToJumia() {
     }
 }
 
+export async function syncBooksQuantityToJumia(bookIds: string[]) {
+    try {
+        await verifyAdmin()
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré ou activé." }
+        }
+
+        const books = await prisma.book.findMany({
+            where: { id: { in: bookIds }, sellerSku: { not: null } }
+        })
+
+        if (books.length === 0) {
+            return { success: false, message: "Aucun livre trouvé avec un SKU Jumia." }
+        }
+
+        const updates = books.map(book => ({
+            sellerSku: book.sellerSku as string,
+            stock: book.stock
+        }))
+
+        const result = await jumia.updateProductsStock(updates)
+        
+        if (result?.feedId) {
+            // Update local DB instantly to match what we sent
+            for (const book of books) {
+                await prisma.book.update({
+                    where: { id: book.id },
+                    data: { jumiaStock: book.stock }
+                })
+            }
+            return { success: true, message: "Stock synchronisé avec Jumia" }
+        }
+
+        return { success: false, message: "Échec de la synchronisation du stock." }
+    } catch (error: any) {
+        return { success: false, message: `Erreur: ${error.message}` }
+    }
+}
+
 
 export async function publishBooksToJumia(bookIds: string[]) {
     try {
@@ -112,11 +152,15 @@ export async function publishBooksToJumia(bookIds: string[]) {
         const productsToUpdate: any[] = [];
 
         for (const book of books) {
+            const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
             const titleAr = book.title || book.titleEn || book.titleFr || `Livre ${book.id.substring(0, 8)}`;
-            const titleFr = book.titleFr || book.titleEn || titleAr;
+            
+            let titleFr = book.titleFr || book.titleEn || `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            if (hasArabic(titleFr)) titleFr = `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
             
             const descArRaw = book.description || book.descriptionEn || book.descriptionFr || titleAr;
-            const descFrRaw = book.descriptionFr || book.descriptionEn || book.longDescription || descArRaw;
+            let descFrRaw = book.descriptionFr || book.descriptionEn || book.longDescription || `Un excellent livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            if (hasArabic(descFrRaw)) descFrRaw = `Un excellent livre à lire - ${book.sellerSku || book.id.substring(0, 8)}`;
             
             const padDesc = (desc: string) => {
                 const suffix = " - Découvrez ce livre fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
@@ -128,21 +172,19 @@ export async function publishBooksToJumia(bookIds: string[]) {
 
             const markupMultiplier = 1 + ((book.jumiaPriceMarkup || 0) / 100);
 
-            // Jumia's default 'value' is validated as English, so it rejects Arabic characters.
-            // We use French or a fallback Latin string for the default 'value', and put Arabic in translations.
-            const baseName = (titleFr && /[a-zA-Z]/.test(titleFr)) ? titleFr : `Book - ${book.sellerSku || book.id.substring(0, 8)}`;
-            const baseDesc = (descFr && /[a-zA-Z]/.test(descFr)) ? descFr : `Quality book - ${book.sellerSku || book.id.substring(0, 8)}`;
+            const baseName = titleFr.padEnd(15, ' ').substring(0, 60);
+            const baseDesc = padDesc(descFr);
 
             const payload: any = {
                 name: {
-                    value: baseName.padEnd(15, ' ').substring(0, 60), // Length must be 15-60
+                    value: baseName, // Length must be 15-60
                     translations: [
                         { language: "AR", value: titleAr.substring(0, 60) },
                         { language: "FR", value: titleFr.substring(0, 60) }
                     ]
                 },
                 description: {
-                    value: padDesc(baseDesc),
+                    value: baseDesc,
                     translations: [
                         { language: "AR", value: descAr },
                         { language: "FR", value: descFr }
