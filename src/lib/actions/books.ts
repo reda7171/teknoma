@@ -187,6 +187,8 @@ export async function updateBook(
     try {
         await verifyAdmin()
         const validatedData = BookSchema.parse(input)
+        
+        const existingBook = await prisma.book.findUnique({ where: { id } })
 
         await prisma.book.update({
             where: { id },
@@ -195,6 +197,19 @@ export async function updateBook(
                 longDescription: validatedData.longDescription || null,
             },
         })
+
+        if (existingBook && existingBook.stock !== validatedData.stock && existingBook.sellerSku) {
+            try {
+                const { JumiaAPI } = await import('@/lib/jumia-api')
+                const jumia = await JumiaAPI.getInstance()
+                await jumia.updateProductsStock([{ sellerSku: existingBook.sellerSku, stock: validatedData.stock }])
+                
+                const { sendTelegramMessage } = await import('@/lib/telegram')
+                await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📖 Livre: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
+            } catch (err) {
+                console.error("Erreur sync jumia:", err)
+            }
+        }
 
         revalidatePath('/admin/books')
         revalidatePath('/books/[id]', 'page')
@@ -238,6 +253,8 @@ export async function updateBookQuick(
 ): Promise<BookResult> {
     try {
         await verifyAdmin()
+        const existingBook = await prisma.book.findUnique({ where: { id } })
+        
         const updated = await prisma.book.update({
             where: { id },
             data: {
@@ -246,6 +263,19 @@ export async function updateBookQuick(
                 active: data.active
             },
         })
+
+        if (existingBook && existingBook.stock !== updated.stock && existingBook.sellerSku) {
+            try {
+                const { JumiaAPI } = await import('@/lib/jumia-api')
+                const jumia = await JumiaAPI.getInstance()
+                await jumia.updateProductsStock([{ sellerSku: existingBook.sellerSku, stock: updated.stock }])
+                
+                const { sendTelegramMessage } = await import('@/lib/telegram')
+                await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📖 Livre: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
+            } catch (err) {
+                console.error("Erreur sync jumia:", err)
+            }
+        }
 
         if (updated.stock < 3) {
             const { sendLowStockNotification } = await import('@/lib/telegram')
