@@ -384,23 +384,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </NextIntlClientProvider>
         
         {/* Google Customer Reviews Badge */}
-        <Script id="merchant-widget-script" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" strategy="lazyOnload" />
-        <Script id="merchant-widget-init" strategy="lazyOnload">
-          {`
-            function initMerchantWidget() {
+        <script id="merchantWidgetScript" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" defer></script>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            document.getElementById('merchantWidgetScript').addEventListener('load', function () {
               if (typeof merchantwidget !== 'undefined') {
                 merchantwidget.start({
                   merchant_id: 5826844744,
-                  position: 'BOTTOM_RIGHT',
+                  position: 'BOTTOM_LEFT',
                   region: 'MA'
                 });
-              } else {
-                setTimeout(initMerchantWidget, 500);
               }
-            }
-            initMerchantWidget();
-          `}
-        </Script>
+            });
+          `
+        }} />
       </body>
     </html>
   );
