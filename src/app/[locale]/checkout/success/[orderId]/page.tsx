@@ -30,15 +30,14 @@ export default async function OrderSuccessPage({
 
     return (
         <div className="min-h-screen bg-pixio-cream">
-            <Script src="https://apis.google.com/js/platform.js?onload=renderOptIn" strategy="afterInteractive" />
-            <Script id="google-customer-reviews" strategy="afterInteractive" dangerouslySetInnerHTML={{
+            <script dangerouslySetInnerHTML={{
                 __html: `
                     window.renderOptIn = function() {
                         window.gapi.load('surveyoptin', function() {
                             window.gapi.surveyoptin.render({
                                 "merchant_id": 5826844744,
                                 "order_id": "${order.id}",
-                                "email": "${order.email || ''}",
+                                ${order.email ? `"email": "${order.email}",` : ''}
                                 "delivery_country": "MA",
                                 "estimated_delivery_date": "${estimatedDeliveryDateStr}",
                                 "products": ${JSON.stringify(products)}
@@ -47,6 +46,7 @@ export default async function OrderSuccessPage({
                     }
                 `
             }} />
+            <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
             <Header />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">
