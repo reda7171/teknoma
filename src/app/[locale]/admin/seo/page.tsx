@@ -7,8 +7,7 @@ import ImageInjectorForm from './ImageInjectorForm'
 import ImageInjectorMetaForm from './ImageInjectorMetaForm'
 import BlogImageInjectorMetaForm from './BlogImageInjectorMetaForm'
 import MarketingImageInjectorMetaForm from './MarketingImageInjectorMetaForm'
-import LlmsConfigForm from './LlmsConfigForm'
-import { Search, Image as ImageIcon, Zap, Code, FileText } from 'lucide-react'
+import { Search, Image as ImageIcon, Zap, Code } from 'lucide-react'
 
 export const metadata = {
     title: 'SEO Expert | Admin Riwaya',
@@ -26,12 +25,11 @@ export default async function SeoConfigPage({
     }
 
     const sp = await searchParams
-    const activeTab = sp?.tab === 'head' ? 'head' : sp?.tab === 'images' ? 'images' : sp?.tab === 'llms' ? 'llms' : 'general'
+    const activeTab = sp?.tab === 'head' ? 'head' : sp?.tab === 'images' ? 'images' : 'general'
 
-    const [seoSettings, injectedTags, llmsContent] = await Promise.all([
+    const [seoSettings, injectedTags] = await Promise.all([
         getSettingsByCategory('seo'),
         getSetting('seo_injected_head_tags'),
-        getSetting('llms_txt_content'),
     ])
 
     // Livres pour l'onglet Image Injector Tools
@@ -62,7 +60,6 @@ export default async function SeoConfigPage({
         { key: 'general', label: 'SEO Expert', icon: Zap },
         { key: 'head', label: 'Inject Head', icon: Code },
         { key: 'images', label: 'Image Injector Tools', icon: ImageIcon },
-        { key: 'llms', label: 'LLMs.txt', icon: FileText },
     ]
 
     return (
@@ -155,10 +152,6 @@ export default async function SeoConfigPage({
                                     imageTitle: a.imageTitle
                                 }))} />
                             )}
-                        </div>
-                    ) : activeTab === 'llms' ? (
-                        <div className="space-y-8 animate-in fade-in duration-500">
-                            <LlmsConfigForm initialContent={llmsContent || `# Riwaya — Librairie en ligne au Maroc\n\n> Riwaya est la meilleure librairie en ligne au Maroc.\n\n## Présentation\n\nRiwaya (رواية) est une librairie e-commerce marocaine.`} />
                         </div>
                     ) : (
                         <div className="space-y-8 animate-in fade-in duration-500">

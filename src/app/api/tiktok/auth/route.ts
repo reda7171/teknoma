@@ -15,7 +15,10 @@ export async function GET(req: NextRequest) {
     }
     clientKey = clientKey.trim();
 
-    const redirectUri = `${req.nextUrl.origin}/api/tiktok/callback`;
+    let redirectUri = `${req.nextUrl.origin}/api/tiktok/callback`;
+    if (redirectUri.includes('0.0.0.0')) {
+        redirectUri = redirectUri.replace('0.0.0.0', 'localhost');
+    }
     const scope = 'user.info.basic,video.upload,video.publish';
     
     // Generate random state for CSRF protection

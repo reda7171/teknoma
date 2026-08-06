@@ -144,6 +144,7 @@ model Book {
   previewUrl        String?           @db.LongText
   imageAlt          String?           @db.VarChar(500)
   imageTitle        String?           @db.VarChar(500)
+  imageKeywords     String?           @db.VarChar(1000)
   displayOrder      Int               @default(0)
   isOriginal        Boolean           @default(true)
   bestChapters      String?           @db.Text

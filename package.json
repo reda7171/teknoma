@@ -37,6 +37,7 @@
     "dotenv": "^17.2.3",
     "exceljs": "^3.4.0",
     "exiftool-vendored": "^37.1.0",
+    "exiftool-vendored.exe": "^13.59.0",
     "fuse.js": "^7.1.0",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",

@@ -10,6 +10,7 @@ interface Book {
     image: string
     altText?: string
     imageTitle?: string
+    imageKeywords?: string
     category?: string
 }
 
@@ -30,7 +31,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
         Object.fromEntries(books.map(b => [b.id, {
             alt: b.altText || `${b.title} - ${b.author} | Riwaya`,
             title: b.imageTitle || `Acheter ${b.title} de ${b.author} sur Riwaya`,
-            keywords: `${b.title}, ${b.author}, livre, riwaya, acheter livre maroc${b.category ? `, ${b.category}` : ''}`
+            keywords: b.imageKeywords || `${b.title}, ${b.author}, livre, riwaya, acheter livre maroc${b.category ? `, ${b.category}` : ''}`
         }]))
     )
     const [message, setMessage] = useState('')
@@ -68,8 +69,11 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ edits })
             })
-            if (res.ok) {
-                setMessage('Toutes les métadonnées images ont été enregistrées !')
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setMessage(`${data.count || Object.keys(edits).length} métadonnées d'images ont été enregistrées !`)
+            } else {
+                setMessage('Erreur lors de la sauvegarde.')
             }
         } catch {
             setMessage('Erreur lors de la sauvegarde.')

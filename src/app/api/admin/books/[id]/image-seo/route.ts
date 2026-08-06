@@ -6,11 +6,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     try {
         await verifyAdmin()
         const { id } = await params
-        const { alt, title } = await req.json()
+        const { alt, title, keywords } = await req.json()
 
         await prisma.book.update({
             where: { id },
-            data: { imageAlt: alt || null, imageTitle: title || null }
+            data: { imageAlt: alt || null, imageTitle: title || null, imageKeywords: keywords || null }
         })
 
         return NextResponse.json({ success: true })

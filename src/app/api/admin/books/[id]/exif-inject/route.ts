@@ -40,14 +40,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             XPTitle: title || book.title,
             Title: title || book.title,
             ObjectName: title || book.title,
-            XPKeywords: kwArray.join(';'), // Windows sometimes prefers semicolon for XPKeywords
+            XPSubject: title || book.title,
+            Subject: title || book.title,
+            XPKeywords: kwArray.join(';'),
             Keywords: kwArray,
-            Subject: kwArray,
-            XPAuthor: book.author,
-            Artist: book.author,
-            Creator: book.author,
-            XPComment: 'Riwaya Bookstore',
-            Description: 'Riwaya Bookstore',
+            Rating: 5,
+            RatingPercent: 99,
+            XPAuthor: `${book.author} | Riwaya`,
+            Artist: `${book.author} | Riwaya`,
+            Creator: `${book.author} | Riwaya`,
+            XPComment: `Acheter ${book.title} de ${book.author} sur la librairie Riwaya Maroc`,
+            Description: `Acheter ${book.title} de ${book.author} sur la librairie Riwaya Maroc`,
+            Copyright: 'Riwaya',
+            Software: 'Riwaya',
         })
 
         // Exiftool creates an _original backup file. We can delete it to save space.
