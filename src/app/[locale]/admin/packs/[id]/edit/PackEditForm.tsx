@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
-import { publishBooksToJumia } from '@/lib/actions/jumia'
+import { publishPacksToJumia } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
 import CatalogImageModal from '@/components/admin/CatalogImageModal'
@@ -160,7 +160,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
         if (!confirm('Voulez-vous vraiment publier ce pack sur Jumia ?')) return
         setIsPushingJumia(true)
         try {
-            const res = await publishBooksToJumia([pack.id])
+            const res = await publishPacksToJumia([pack.id])
             if (res.success) {
                 alert(res.message || 'Pack publié avec succès sur Jumia')
             } else {
