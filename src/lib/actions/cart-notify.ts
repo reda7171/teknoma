@@ -41,7 +41,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
     }
 }
 
-export async function notifyRemoveFromCart(productTitle: string, price: number, type: string) {
+export async function notifyRemoveFromCart(productTitle: string, price: number, type: string, cartTotal?: number, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
         
@@ -51,7 +51,7 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
-            await sendTelegramMessage(`🗑️ <b>Panier Supprimé</b>\n\nUn client vient de retirer un produit de son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}`)
+            await sendTelegramMessage(`🗑️ <b>Panier Supprimé</b>\n\nUn client vient de retirer un produit de son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} MAD${cartTotal !== undefined ? `\n🛒 <b>Total Restant:</b> ${cartTotal.toFixed(2)} MAD` : ''}\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
         }
         
         return { success: true }
@@ -61,7 +61,7 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
     }
 }
 
-export async function notifyClearCart(totalValue: number, totalItems: number) {
+export async function notifyClearCart(totalValue: number, totalItems: number, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
 
@@ -69,7 +69,7 @@ export async function notifyClearCart(totalValue: number, totalItems: number) {
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
-            await sendTelegramMessage(`🗑️ <b>Panier Vidé Complètement</b>\n\nUn client vient de vider entièrement son panier :\n📦 <b>Articles retirés:</b> ${totalItems}\n💰 <b>Valeur perdue:</b> ${totalValue.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}`)
+            await sendTelegramMessage(`🗑️ <b>Panier Vidé Complètement</b>\n\nUn client vient de vider entièrement son panier :\n📦 <b>Articles retirés:</b> ${totalItems}\n💰 <b>Valeur perdue:</b> ${totalValue.toFixed(2)} MAD\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
         }
         
         return { success: true }
