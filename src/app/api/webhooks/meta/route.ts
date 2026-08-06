@@ -25,8 +25,9 @@ export async function POST(request: Request) {
 
         if (body.object === 'instagram' || body.object === 'page') {
             for (const entry of body.entry) {
+                // 1. Handle Messages (Instagram/Messenger)
                 const messaging = entry.messaging
-                if (!messaging) continue
+                if (messaging) {
 
                 for (const event of messaging) {
                     // Check if it's a message and not an echo from our own bot
@@ -65,6 +66,76 @@ export async function POST(request: Request) {
                                     direction: 'INBOUND'
                                 }
                             })
+                        }
+                    }
+                }
+                }
+
+                // 2. Handle Leadgen (Facebook Lead Ads)
+                const changes = entry.changes
+                if (changes) {
+                    for (const change of changes) {
+                        if (change.field === 'leadgen') {
+                            const leadgenId = change.value.leadgen_id
+                            const formId = change.value.form_id
+                            
+                            if (leadgenId) {
+                                // Fetch lead data from Meta Graph API
+                                const META_ACCESS_TOKEN = await getSetting('meta_inbox_access_token', '')
+                                if (META_ACCESS_TOKEN) {
+                                    try {
+                                        const response = await fetch(`https://graph.facebook.com/v19.0/${leadgenId}?access_token=${META_ACCESS_TOKEN}`)
+                                        const leadData = await response.json()
+                                        
+                                        if (leadData && leadData.field_data) {
+                                            let fullName = 'Prospect Facebook'
+                                            let phone = ''
+                                            let email = ''
+                                            let city = 'À confirmer'
+                                            
+                                            // Extract fields
+                                            for (const field of leadData.field_data) {
+                                                if (field.name === 'full_name' || field.name === 'first_name') {
+                                                    fullName = field.values[0] || fullName
+                                                }
+                                                if (field.name === 'phone_number') {
+                                                    phone = field.values[0] || ''
+                                                }
+                                                if (field.name === 'email') {
+                                                    email = field.values[0] || ''
+                                                }
+                                                if (field.name === 'city') {
+                                                    city = field.values[0] || city
+                                                }
+                                            }
+
+                                            // Check if lead already exists to prevent duplicate webhooks
+                                            const existingOrder = await prisma.order.findFirst({
+                                                where: { comment: { contains: leadgenId } }
+                                            })
+
+                                            if (!existingOrder && phone) {
+                                                await prisma.order.create({
+                                                    data: {
+                                                        fullName: fullName,
+                                                        phone: phone,
+                                                        email: email,
+                                                        address: 'À confirmer (Facebook Lead)',
+                                                        city: city,
+                                                        total: 0,
+                                                        shippingFees: 0,
+                                                        comment: `Prospect issu du formulaire Facebook Lead Ads.\nForm ID: ${formId}\nLead ID: ${leadgenId}`,
+                                                        paymentMethod: 'COD'
+                                                    }
+                                                })
+                                                console.log(`Created Order for Lead ID: ${leadgenId}`)
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.error('Error fetching lead data:', err)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
