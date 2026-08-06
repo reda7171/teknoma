@@ -38,11 +38,7 @@ services:
 
   # Application - Next.js
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      network: host
-    image: riwaya-app:latest
+    image: ghcr.io/reda7171/riwaya-app:latest
     container_name: riwaya_app
     restart: always
     ports:

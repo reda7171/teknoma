@@ -9,12 +9,13 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const clientKey = await getSetting('tiktok_app_id');
-    if (!clientKey) {
+    let clientKey = await getSetting('tiktok_app_id');
+    if (!clientKey || !clientKey.trim()) {
         return NextResponse.json({ error: 'TikTok App ID (Client Key) not configured in Settings' }, { status: 400 });
     }
+    clientKey = clientKey.trim();
 
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/api/tiktok/callback`;
+    const redirectUri = `${req.nextUrl.origin}/api/tiktok/callback`;
     const scope = 'user.info.basic,video.upload,video.publish';
     
     // Generate random state for CSRF protection

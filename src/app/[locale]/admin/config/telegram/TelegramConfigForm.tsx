@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateSetting } from '@/lib/actions/site-settings'
-import { Save, Send, Webhook, Trash2, Loader2, Sparkles, MessageCircle } from 'lucide-react'
+import { Save, Send, Webhook, Trash2, Loader2, Sparkles, MessageCircle, Settings, ShieldCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
@@ -140,211 +140,245 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                 </div>
             )}
 
-            <div>
-                <label htmlFor="botToken" className="block text-sm font-bold text-gray-900 mb-2">
-                    Bot Token
-                </label>
-                <input
-                    type="password"
-                    id="botToken"
-                    value={botToken}
-                    onChange={(e) => setBotToken(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwXYz..."
-                />
-                <p className="mt-1 text-xs text-gray-500">Obtenu via @BotFather sur Telegram</p>
-            </div>
-
-            <div>
-                <label htmlFor="chatId" className="block text-sm font-bold text-gray-900 mb-2">
-                    Chat ID
-                </label>
-                <input
-                    type="text"
-                    id="chatId"
-                    value={chatId}
-                    onChange={(e) => setChatId(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="-1001234567890"
-                />
-                <p className="mt-1 text-xs text-gray-500">ID du groupe ou channel. Utilisez @userinfobot pour le trouver.</p>
-            </div>
-
-            <div className="p-5 bg-yellow-50 rounded-2xl border border-yellow-100">
-                <label htmlFor="webhookUrl" className="block text-sm font-bold text-yellow-900 mb-2">
-                    URL de base pour Webhook (HTTPS requis)
-                </label>
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        id="webhookUrl"
-                        value={customAppUrl}
-                        onChange={(e) => setCustomAppUrl(e.target.value)}
-                        className="flex-1 px-4 py-3 rounded-xl border border-yellow-200 focus:ring-2 focus:ring-yellow-500 outline-none transition-all"
-                        placeholder="https://votre-ngrok.ngrok-free.app"
-                    />
-                </div>
-                <p className="mt-2 text-[10px] text-yellow-700 font-bold uppercase italic">
-                    Pour le développement local, utilisez votre URL ngrok ci-dessus.
-                </p>
-            </div>
-
-            <div className="pt-6 border-t border-gray-100">
-                <h3 className="text-lg font-black text-black mb-6">Notifications actives</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[
-                        { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client', templateKey: 'templateOrder', templateVars: '{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}' },
-                        { id: 'notifyRegister', label: 'Nouvelles inscriptions', desc: 'Alertes lors de la création d\'un compte', templateKey: 'templateRegister', templateVars: '{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}' },
-                        { id: 'notifyCart', label: 'Ajout au panier', desc: 'Alertes quand un client remplit son panier' },
-                        { id: 'notifyChat', label: 'ChatBot (IA)', desc: 'Alertes lors des discussions avec l\'assistant' },
-                        { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer', templateKey: 'templateReview', templateVars: '{{fullName}}, {{rating}}, {{comment}}' },
-                        { id: 'notifyJumiaPayout', label: 'Virements Jumia', desc: 'Alertes pour les nouveaux paiements Jumia saisis' },
-                        { id: 'notifyInvoices', label: 'Factures Saisies', desc: 'Alertes quand une facture (livraison, virement) est saisie' },
-                        { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
-                        { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu', templateKey: 'templateArticleRead', templateVars: '{{title}}, {{viewCount}}, {{country}}' },
-                        { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
-                        { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },
-                        { id: 'notifySearch', label: 'Recherches & Filtres', desc: 'Alertes lors de recherches dans le catalogue' },
-                        { id: 'statsVisitors', label: 'Stats: Visiteurs uniques', desc: 'Inclure le trafic dans le /bilan' },
-                        { id: 'statsRegistrations', label: 'Stats: Inscriptions', desc: 'Inclure les nouveaux comptes dans le /bilan' },
-                        { id: 'statsTopViews', label: 'Stats: Livres les plus vus', desc: 'Inclure le top consultations dans le /bilan' },
-                    ].map((item) => (
-                        <div key={item.id} className="flex flex-col p-5 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-lg hover:border-blue-100 group">
-                            <div className="flex items-center justify-between">
-                                <div className="flex-1 pr-6">
-                                    <p className="text-[13px] font-black text-gray-900 group-hover:text-blue-600 transition-colors">{item.label}</p>
-                                    <p className="text-[11px] text-gray-400 font-bold mt-0.5 leading-tight">{item.desc}</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        className="sr-only peer"
-                                        checked={(settings as any)[item.id]}
-                                        onChange={(e) => setSettings({ ...settings, [item.id]: e.target.checked })}
-                                    />
-                                    <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
-                                </label>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                {/* Colonne Gauche Principale */}
+                <div className="xl:col-span-2 space-y-8">
+                    
+                    {/* Paramètres de Connexion */}
+                    <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
+                                <ShieldCheck className="w-6 h-6 text-blue-600" />
                             </div>
-                            {item.templateKey && (settings as any)[item.id] && (
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <p className="text-[11px] text-gray-500 font-bold mb-2">Variables : {item.templateVars}</p>
-                                    <textarea 
-                                        value={(settings as any)[item.templateKey] || ''}
-                                        onChange={(e) => setSettings({ ...settings, [item.templateKey]: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-xs"
-                                        placeholder={`Template pour ${item.label}`}
-                                    />
-                                </div>
-                            )}
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900 tracking-tight">Connexion Telegram</h2>
+                                <p className="text-sm text-gray-400 font-bold">Liez votre bot pour recevoir les notifications</p>
+                            </div>
                         </div>
-                    ))}
+
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="botToken" className="block text-sm font-bold text-gray-900 mb-2">Bot Token</label>
+                                <input
+                                    type="password"
+                                    id="botToken"
+                                    value={botToken}
+                                    onChange={(e) => setBotToken(e.target.value)}
+                                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwXYz..."
+                                />
+                                <p className="mt-1 text-xs text-gray-500">Obtenu via @BotFather sur Telegram</p>
+                            </div>
+
+                            <div>
+                                <label htmlFor="chatId" className="block text-sm font-bold text-gray-900 mb-2">Chat ID</label>
+                                <input
+                                    type="text"
+                                    id="chatId"
+                                    value={chatId}
+                                    onChange={(e) => setChatId(e.target.value)}
+                                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="-1001234567890"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">ID du groupe ou channel. Utilisez @userinfobot pour le trouver.</p>
+                            </div>
+
+                            <div className="p-5 bg-yellow-50 rounded-2xl border border-yellow-100 mt-4">
+                                <label htmlFor="webhookUrl" className="block text-sm font-bold text-yellow-900 mb-2">
+                                    URL de base pour Webhook (HTTPS requis)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="webhookUrl"
+                                    value={customAppUrl}
+                                    onChange={(e) => setCustomAppUrl(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-yellow-200 focus:ring-2 focus:ring-yellow-500 outline-none transition-all"
+                                    placeholder="https://votre-ngrok.ngrok-free.app"
+                                />
+                                <p className="mt-2 text-[10px] text-yellow-700 font-bold uppercase italic">
+                                    Pour le développement local, utilisez votre URL ngrok ci-dessus.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notifications actives */}
+                    <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
+                                <Settings className="w-6 h-6 text-gray-700" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900 tracking-tight">Notifications actives</h2>
+                                <p className="text-sm text-gray-400 font-bold">Choisissez ce que vous souhaitez recevoir</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {[
+                                { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client', templateKey: 'templateOrder', templateVars: '{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}' },
+                                { id: 'notifyRegister', label: 'Nouvelles inscriptions', desc: 'Alertes lors de la création d\'un compte', templateKey: 'templateRegister', templateVars: '{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}' },
+                                { id: 'notifyCart', label: 'Ajout au panier', desc: 'Alertes quand un client remplit son panier' },
+                                { id: 'notifyChat', label: 'ChatBot (IA)', desc: 'Alertes lors des discussions avec l\'assistant' },
+                                { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer', templateKey: 'templateReview', templateVars: '{{fullName}}, {{rating}}, {{comment}}' },
+                                { id: 'notifyJumiaPayout', label: 'Virements Jumia', desc: 'Alertes pour les nouveaux paiements Jumia saisis' },
+                                { id: 'notifyInvoices', label: 'Factures Saisies', desc: 'Alertes quand une facture (livraison, virement) est saisie' },
+                                { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
+                                { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu', templateKey: 'templateArticleRead', templateVars: '{{title}}, {{viewCount}}, {{country}}' },
+                                { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
+                                { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },
+                                { id: 'notifySearch', label: 'Recherches & Filtres', desc: 'Alertes lors de recherches dans le catalogue' },
+                                { id: 'statsVisitors', label: 'Stats: Visiteurs uniques', desc: 'Inclure le trafic dans le /bilan' },
+                                { id: 'statsRegistrations', label: 'Stats: Inscriptions', desc: 'Inclure les nouveaux comptes dans le /bilan' },
+                                { id: 'statsTopViews', label: 'Stats: Livres les plus vus', desc: 'Inclure le top consultations dans le /bilan' },
+                            ].map((item) => (
+                                <div key={item.id} className="flex flex-col p-5 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-lg hover:border-blue-100 group">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1 pr-6">
+                                            <p className="text-[13px] font-black text-gray-900 group-hover:text-blue-600 transition-colors">{item.label}</p>
+                                            <p className="text-[11px] text-gray-400 font-bold mt-0.5 leading-tight">{item.desc}</p>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                className="sr-only peer"
+                                                checked={(settings as any)[item.id]}
+                                                onChange={(e) => setSettings({ ...settings, [item.id]: e.target.checked })}
+                                            />
+                                            <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
+                                        </label>
+                                    </div>
+                                    {item.templateKey && (settings as any)[item.id] && (
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <p className="text-[11px] text-gray-500 font-bold mb-2">Variables : {item.templateVars}</p>
+                                            <textarea 
+                                                value={(settings as any)[item.templateKey] || ''}
+                                                onChange={(e) => setSettings({ ...settings, [item.templateKey]: e.target.value })}
+                                                className="w-full px-3 py-2 bg-white border border-gray-200 focus:border-blue-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-xs"
+                                                placeholder={`Template pour ${item.label}`}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Templates WhatsApp */}
+                    <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center">
+                                <MessageCircle className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900 tracking-tight">Templates WhatsApp</h2>
+                                <p className="text-sm text-gray-400 font-bold">Personnalisez les messages envoyés aux clients</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-[13px] font-black text-gray-900 mb-1">Confirmation Commande (WhatsApp)</label>
+                                <p className="text-[11px] text-gray-500 font-bold mb-2">Variables : {"{{fullName}}, {{shortId}}, {{city}}"}</p>
+                                <textarea 
+                                    value={settings.templateWhatsapp || ''}
+                                    onChange={(e) => setSettings({ ...settings, templateWhatsapp: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-green-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[100px] text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Marketing IDs */}
-            <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-pink-600" />
+                {/* Colonne Droite Actions Rapides & Guides */}
+                <div className="xl:col-span-1 space-y-6">
+                    
+                    {/* Actions collantes */}
+                    <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm sticky top-6">
+                        <h3 className="font-black text-gray-900 mb-4 flex items-center gap-2">
+                            Actions Rapides
+                        </h3>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full px-6 py-3 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                Enregistrer
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleTest}
+                                disabled={testLoading || !botToken || !chatId}
+                                className="w-full px-6 py-3 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {testLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                Tester
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleSetWebhook}
+                                disabled={webhookLoading || !botToken}
+                                className="w-full px-6 py-3 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {webhookLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Webhook className="w-4 h-4" />}
+                                Configurer Webhook
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">Marketing Automation</h2>
-                        <p className="text-sm text-gray-400 font-bold">IDs nécessaires pour n8n et la publication sociale</p>
+
+                    {/* Marketing IDs */}
+                    <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
+                                <Sparkles className="w-5 h-5 text-pink-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-gray-900">Marketing IDs</h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Instagram Business ID</label>
+                                <input 
+                                    type="text" 
+                                    value={settings.instagramId}
+                                    onChange={(e) => setSettings({ ...settings, instagramId: e.target.value })}
+                                    placeholder="Ex: 17841401234567890"
+                                    className="w-full px-4 py-2 mt-1 bg-gray-50 border-2 border-transparent focus:border-pink-600 rounded-xl outline-none font-bold text-gray-900 transition-all text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Facebook Page ID</label>
+                                <input 
+                                    type="text" 
+                                    value={settings.facebookPageId}
+                                    onChange={(e) => setSettings({ ...settings, facebookPageId: e.target.value })}
+                                    placeholder="Ex: 102345678901234"
+                                    className="w-full px-4 py-2 mt-1 bg-gray-50 border-2 border-transparent focus:border-blue-600 rounded-xl outline-none font-bold text-gray-900 transition-all text-sm"
+                                />
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Guide */}
+                    <div className="p-6 bg-blue-50/50 rounded-[2rem] border border-blue-100">
+                        <h3 className="text-blue-900 font-bold mb-4">Comment configurer le bot ?</h3>
+                        <ol className="space-y-3 text-sm text-blue-800/80 list-none">
+                            <li className="flex gap-2 items-start"><span className="font-black text-blue-900 mt-0.5">1.</span> <span>Ouvrez Telegram et cherchez <strong>@BotFather</strong></span></li>
+                            <li className="flex gap-2 items-start"><span className="font-black text-blue-900 mt-0.5">2.</span> <span>Envoyez <code className="bg-blue-100 px-1 rounded text-blue-900 font-mono text-xs">/newbot</code> et suivez les instructions</span></li>
+                            <li className="flex gap-2 items-start"><span className="font-black text-blue-900 mt-0.5">3.</span> <span>Copiez le token fourni et collez-le ci-contre</span></li>
+                            <li className="flex gap-2 items-start"><span className="font-black text-blue-900 mt-0.5">4.</span> <span>Ajoutez le bot à votre groupe/channel admin</span></li>
+                            <li className="flex gap-2 items-start"><span className="font-black text-blue-900 mt-0.5">5.</span> <span>Utilisez <strong>@userinfobot</strong> pour obtenir le Chat ID</span></li>
+                            <li className="flex gap-2 items-start"><span className="font-black text-blue-900 mt-0.5">6.</span> <span>Enregistrez, puis cliquez sur <strong>Configurer Webhook</strong></span></li>
+                        </ol>
+                    </div>
+
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Instagram Business ID</label>
-                        <input 
-                            type="text" 
-                            value={settings.instagramId}
-                            onChange={(e) => setSettings({ ...settings, instagramId: e.target.value })}
-                            placeholder="Ex: 17841401234567890"
-                            className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-pink-600 rounded-2xl outline-none font-bold text-gray-900 transition-all"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Facebook Page ID</label>
-                        <input 
-                            type="text" 
-                            value={settings.facebookPageId}
-                            onChange={(e) => setSettings({ ...settings, facebookPageId: e.target.value })}
-                            placeholder="Ex: 102345678901234"
-                            className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 rounded-2xl outline-none font-bold text-gray-900 transition-all"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Templates de Messages */}
-            <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-6">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
-                        <MessageCircle className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">Templates de Messages</h2>
-                        <p className="text-sm text-gray-400 font-bold">Personnalisez le contenu des notifications envoyées</p>
-                    </div>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-[13px] font-black text-gray-900">Confirmation Commande (WhatsApp)</label>
-                        <p className="text-[11px] text-gray-500 font-bold">Variables : {"{{fullName}}, {{shortId}}, {{city}}"}</p>
-                        <textarea 
-                            value={settings.templateWhatsapp || ''}
-                            onChange={(e) => setSettings({ ...settings, templateWhatsapp: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-green-500 rounded-xl outline-none font-medium text-gray-800 transition-all min-h-[80px] text-sm"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-wrap gap-3">
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Enregistrer
-                </button>
-
-                <button
-                    type="button"
-                    onClick={handleTest}
-                    disabled={testLoading || !botToken || !chatId}
-                    className="px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                    {testLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    Tester
-                </button>
-
-                <button
-                    type="button"
-                    onClick={handleSetWebhook}
-                    disabled={webhookLoading || !botToken}
-                    className="px-6 py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                    {webhookLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Webhook className="w-4 h-4" />}
-                    Configurer Webhook
-                </button>
-            </div>
-
-            {/* Guide */}
-            <div className="mt-6 p-6 bg-blue-50 rounded-2xl border border-blue-100">
-                <h3 className="text-blue-900 font-bold mb-3">Comment configurer le bot ?</h3>
-                <ol className="space-y-2 text-sm text-blue-800/80 list-none">
-                    <li className="flex gap-2"><span className="font-bold text-blue-900">1.</span> Ouvrez Telegram et cherchez <strong>@BotFather</strong></li>
-                    <li className="flex gap-2"><span className="font-bold text-blue-900">2.</span> Envoyez <code className="bg-blue-100 px-1 rounded">/newbot</code> et suivez les instructions</li>
-                    <li className="flex gap-2"><span className="font-bold text-blue-900">3.</span> Copiez le token fourni et collez-le ci-dessus</li>
-                    <li className="flex gap-2"><span className="font-bold text-blue-900">4.</span> Ajoutez le bot à votre groupe/channel admin</li>
-                    <li className="flex gap-2"><span className="font-bold text-blue-900">5.</span> Utilisez <strong>@userinfobot</strong> pour obtenir le Chat ID</li>
-                    <li className="flex gap-2"><span className="font-bold text-blue-900">6.</span> Enregistrez, puis cliquez <strong>Configurer Webhook</strong></li>
-                </ol>
             </div>
         </form>
     )
