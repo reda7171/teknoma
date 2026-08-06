@@ -43,30 +43,42 @@ export async function GET(req: Request) {
             
             const orderId = order.number || order.orderNumber;
             
+            let itemsText = ""
             try {
                 // L'API Jumia nécessite l'ID interne (UUID) pour récupérer les items, pas le numéro public
                 const internalId = order.id || orderId
                 const itemsResponse = await jumia.getOrderItems(internalId)
                 
+                let allItems: any[] = []
+                
                 // itemsResponse est un tableau de packages, chaque package contient orderItems
                 if (Array.isArray(itemsResponse) && itemsResponse.length > 0) {
-                    const firstPackage = itemsResponse[0]
-                    const items = firstPackage.orderItems || []
-                    if (items.length > 0 && items[0].product) {
-                        imageUrl = items[0].product.imageUrl || items[0].product.productMainImage || undefined
+                    for (const pkg of itemsResponse) {
+                        const items = pkg.orderItems || []
+                        allItems = allItems.concat(items)
                     }
                 } else {
                     // Fallback si la structure est différente
-                    const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
-                    if (items.length > 0) {
-                        imageUrl = items[0].product?.imageUrl || items[0].productMainImage || items[0].productImage || undefined
+                    allItems = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
+                }
+                
+                if (allItems.length > 0) {
+                    const firstItem = allItems[0]
+                    imageUrl = firstItem.product?.imageUrl || firstItem.product?.productMainImage || firstItem.imageUrl || firstItem.productMainImage || firstItem.productImage || undefined
+                    
+                    itemsText = "\n\n📦 <b>Articles :</b>\n"
+                    for (const item of allItems) {
+                        const productName = item.product?.name || item.name || item.productName || 'Article inconnu'
+                        const quantity = item.quantity || 1
+                        const price = item.price?.value || item.price || item.unitPrice || '0'
+                        itemsText += `- ${quantity}x ${productName} (<b>${price} MAD</b>)\n`
                     }
                 }
             } catch (err) {
-                console.error("Erreur récupération image Jumia", err)
+                console.error("Erreur récupération image/items Jumia", err)
             }
 
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${orderId}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} MAD</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}`
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${orderId}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} MAD</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}${itemsText}`
             
             const replyMarkup = {
                 inline_keyboard: [

@@ -11,9 +11,11 @@ interface Pack {
     id: string
     name: string
     price: number
+    originalPrice?: number | null
     image: string | null
     description?: string | null
     active: boolean
+    isSyncedWithJumia: boolean
     books: Array<{
         book: {
             id: string
@@ -134,7 +136,13 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                             Livres Inclus
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Prix
+                            Prix Normal
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Prix Promo
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Jumia
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Statut
@@ -191,7 +199,10 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                     )}
                                 </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {pack.originalPrice ? <span className="line-through text-gray-400 mr-2">{pack.originalPrice} MAD</span> : '-'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-blue-600">
                                 {pack.price} MAD
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -215,6 +226,17 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                         </>
                                     )}
                                 </button>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                {pack.isSyncedWithJumia ? (
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-orange-100 text-[10px] font-bold text-orange-800 uppercase tracking-tighter border border-orange-200">
+                                        Publié
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-tighter border border-gray-200">
+                                        Non publié
+                                    </span>
+                                )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="flex items-center justify-end gap-2">

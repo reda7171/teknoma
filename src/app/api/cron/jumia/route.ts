@@ -52,12 +52,41 @@ export async function GET(req: Request) {
                 const price = order.totalAmountLocal?.value || order.Price || order.GrandTotal || "0"
                 const status = order.status || order.Status || "PENDING"
                 
+                let itemsList = ""
+                try {
+                    const internalId = order.id || orderId
+                    const itemsResponse = await jumia.getOrderItems(internalId)
+                    
+                    let allItems: any[] = []
+                    
+                    if (Array.isArray(itemsResponse) && itemsResponse.length > 0) {
+                        for (const pkg of itemsResponse) {
+                            const items = pkg.orderItems || []
+                            allItems = allItems.concat(items)
+                        }
+                    } else {
+                        allItems = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
+                    }
+                    
+                    if (allItems.length > 0) {
+                        itemsList = "\n\n📦 *Articles :*\n"
+                        for (const item of allItems) {
+                            const productName = item.product?.name || item.name || item.productName || 'Article inconnu'
+                            const quantity = item.quantity || 1
+                            const itemPrice = item.price?.value || item.price || item.unitPrice || '0'
+                            itemsList += `- ${quantity}x ${productName} (*${itemPrice} MAD*)\n`
+                        }
+                    }
+                } catch (err) {
+                    console.error("Erreur récupération items Jumia", err)
+                }
+
                 const message = `🛍️ *Nouvelle Commande Jumia !*\n\n` +
                                 `📦 *Numéro :* \`${orderId}\`\n` +
                                 `👤 *Client :* ${customerName}\n` +
                                 `💰 *Total :* ${price} MAD\n` +
                                 `📊 *Statut :* ${status}\n\n` +
-                                `🕒 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}`
+                                `🕒 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}` + itemsList
 
                 const replyMarkup = {
                     inline_keyboard: [

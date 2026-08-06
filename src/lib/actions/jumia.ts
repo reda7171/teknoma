@@ -164,7 +164,8 @@ export async function publishBooksToJumia(bookIds: string[]) {
             
             const padDesc = (desc: string) => {
                 const suffix = " - Découvrez ce livre fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
-                return desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+                const padded = desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+                return padded.replace(/\n/g, '<br/>');
             };
 
             const descAr = padDesc(descArRaw);
@@ -337,7 +338,8 @@ export async function publishPacksToJumia(packIds: string[]) {
             
             const padDesc = (desc: string) => {
                 const suffix = " - Découvrez ce pack fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
-                return desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+                const padded = desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+                return padded.replace(/\n/g, '<br/>');
             };
 
             const descAr = padDesc(descArRaw);
