@@ -303,6 +303,174 @@ export async function publishBooksToJumia(bookIds: string[]) {
     }
 }
 
+export async function publishPacksToJumia(packIds: string[]) {
+    try {
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré ou activé." }
+        }
+
+        const packs = await prisma.pack.findMany({
+            where: { id: { in: packIds } },
+            include: { books: { include: { book: true } } }
+        })
+
+        if (packs.length === 0) {
+            return { success: false, message: "Aucun pack trouvé pour publication." }
+        }
+
+        const shops = await jumia.getShops()
+        const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
+        const productsToCreate: any[] = [];
+        const productsToUpdate: any[] = [];
+
+        for (const pack of packs) {
+            const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
+            const titleAr = pack.name || pack.nameEn || pack.nameFr || `Pack ${pack.id.substring(0, 8)}`;
+            
+            let titleFr = pack.nameFr || pack.nameEn || `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            if (hasArabic(titleFr)) titleFr = `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            
+            const descArRaw = pack.description || pack.descriptionEn || pack.descriptionFr || titleAr;
+            let descFrRaw = pack.descriptionFr || pack.descriptionEn || pack.description || `Un excellent pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            if (hasArabic(descFrRaw)) descFrRaw = `Un excellent pack de livres - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            
+            const padDesc = (desc: string) => {
+                const suffix = " - Découvrez ce pack fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
+                return desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+            };
+
+            const descAr = padDesc(descArRaw);
+            const descFr = padDesc(descFrRaw);
+
+            const markupMultiplier = 1 + ((pack.jumiaPriceMarkup || 0) / 100);
+
+            const baseName = titleFr.padEnd(15, ' ').substring(0, 60);
+            const baseDesc = padDesc(descFr);
+
+            const calculatedStock = pack.books.length > 0 
+                ? Math.min(...pack.books.map(b => b.book.stock))
+                : 0;
+
+            const payload: any = {
+                name: {
+                    value: baseName,
+                    translations: [
+                        { language: "AR", value: titleAr.substring(0, 60) },
+                        { language: "FR", value: titleFr.substring(0, 60) }
+                    ]
+                },
+                description: {
+                    value: baseDesc,
+                    translations: [
+                        { language: "AR", value: descAr },
+                        { language: "FR", value: descFr }
+                    ]
+                },
+                parentSku: pack.id,
+                sellerSku: pack.sellerSku || pack.id,
+                variation: "1",
+                brand: {
+                    code: 1045133,
+                    name: "Generic"
+                },
+                category: {
+                    code: 1000203,
+                    name: "Bestselling Books"
+                },
+                images: pack.image ? [{
+                    url: pack.image.startsWith('/') ? `https://riwaya.store${pack.image}` : pack.image,
+                    primary: true
+                }] : [],
+                price: {
+                    currency: "MAD",
+                    value: Math.ceil((pack.originalPrice || pack.price) * markupMultiplier),
+                    salePrice: pack.originalPrice ? {
+                        value: Math.ceil(pack.price * markupMultiplier),
+                        startAt: new Date().toISOString().split('T')[0],
+                        endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
+                    } : undefined
+                },
+                stock: pack.jumiaStock ?? calculatedStock,
+                attributes: [
+                    {
+                        name: "short_description",
+                        value: `<ul><li>Titre: ${pack.name}</li><li>Type: Pack de Livres</li></ul>`
+                    },
+                    {
+                        name: "model",
+                        value: "Standard"
+                    },
+                    {
+                        name: "product_weight",
+                        value: "1.5"
+                    }
+                ]
+            };
+            
+            let productId = null;
+            try {
+                const jumiaProd = await jumia.getProducts({ sellerSku: payload.sellerSku });
+                productId = jumiaProd?.products?.[0]?.id || jumiaProd?.products?.[0]?.sid || jumiaProd?.data?.[0]?.sid || jumiaProd?.[0]?.sid;
+            } catch (err) {
+                console.error("Error fetching productId for pack", payload.sellerSku, err);
+            }
+            
+            if (productId) {
+                payload.id = productId;
+                productsToUpdate.push(payload);
+            } else {
+                productsToCreate.push(payload);
+            }
+        }
+
+        let createResponse: any = null;
+        let updateResponse: any = null;
+
+        if (productsToCreate.length > 0) {
+            createResponse = await jumia.createProducts(shopId, productsToCreate);
+        }
+        
+        if (productsToUpdate.length > 0) {
+            updateResponse = await jumia.updateProducts(productsToUpdate, shopId);
+        }
+        
+        const checkFeed = async (response: any) => {
+            if (response?.feedId) {
+                await new Promise(r => setTimeout(r, 2500))
+                const feedRes = await jumia.getFeed(response.feedId)
+                if (feedRes?.status === 'FAILED') {
+                    const itemError = feedRes.feedItems?.[0]?.errorMessage || 'Erreurs de validation'
+                    const globalErrors = feedRes.feedItems?.[0]?.errors?.globalMessages?.join(', ') || ''
+                    return `Jumia a rejeté le pack: ${itemError} ${globalErrors}`.trim()
+                }
+            }
+            return null;
+        };
+
+        const error1 = createResponse ? await checkFeed(createResponse) : null;
+        const error2 = updateResponse ? await checkFeed(updateResponse) : null;
+
+        if (error1 || error2) {
+            return { 
+                success: false, 
+                message: [error1, error2].filter(Boolean).join(' | ') 
+            }
+        }
+
+        await prisma.pack.updateMany({
+            where: { id: { in: packIds } },
+            data: { isSyncedWithJumia: true }
+        });
+
+        const feedIds = [createResponse?.feedId, updateResponse?.feedId].filter(Boolean).join(', ');
+        return { success: true, message: `${packs.length} pack(s) envoyés pour publication/mise à jour sur Jumia. (Feed IDs: ${feedIds})` }
+    } catch (error: any) {
+        console.error("Erreur publishPacksToJumia:", error)
+        return { success: false, message: `Erreur de publication: ${error.message}` }
+    }
+}
+
 export async function publishAccessoriesToJumia(accessoryIds: string[]) {
     try {
         const jumia = await JumiaAPI.getInstance()
