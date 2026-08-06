@@ -66,6 +66,7 @@ export default function AdminLayout({
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true) // Collapsed by default
     const [userRole, setUserRole] = useState<string | null>(null)
     const [pendingJumiaCount, setPendingJumiaCount] = useState(0)
+    const [unreadInboxCount, setUnreadInboxCount] = useState(0)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
         'Configuration': false 
     })
@@ -84,6 +85,21 @@ export default function AdminLayout({
             }, 60 * 1000) // update every minute
             return () => clearInterval(interval)
         })
+
+        const fetchUnread = () => {
+            fetch('/api/admin/inbox/conversations')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.conversations) {
+                        const total = data.conversations.reduce((sum: number, c: any) => sum + c.unreadCount, 0)
+                        setUnreadInboxCount(total)
+                    }
+                })
+                .catch(console.error)
+        }
+        fetchUnread()
+        const inboxInterval = setInterval(fetchUnread, 10000)
+        return () => clearInterval(inboxInterval)
     }, [])
 
     const toggleMenu = (name: string) => {
@@ -165,9 +181,10 @@ export default function AdminLayout({
         },
         {
             name: 'Communauté & Avis',
-            href: `/${lang}/admin/reviews`,
+            href: `/${lang}/admin/inbox`,
             icon: MessageSquare,
             children: [
+                { name: 'Messagerie (Inbox)', href: `/${lang}/admin/inbox`, icon: MessageCircle, badge: unreadInboxCount },
                 { name: 'Avis Clients', href: `/${lang}/admin/reviews`, icon: MessageSquare },
                 { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
                 { name: 'Demandes de Livres', href: `/${lang}/admin/requested-books`, icon: Search },

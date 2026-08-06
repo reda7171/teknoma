@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
-import { X, PackageSearch, CheckCircle, AlertCircle, RefreshCcw } from 'lucide-react'
+import { X, PackageSearch, CheckCircle, AlertCircle, RefreshCcw, Search } from 'lucide-react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -14,6 +14,7 @@ interface QRScannerModalProps {
 export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
     const router = useRouter()
     const [scannedCode, setScannedCode] = useState<string | null>(null)
+    const [manualCode, setManualCode] = useState("")
     const [loading, setLoading] = useState(false)
     const [order, setOrder] = useState<any | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -29,6 +30,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
             }
             // Reset state
             setScannedCode(null)
+            setManualCode("")
             setOrder(null)
             setError(null)
             setSuccess(null)
@@ -128,10 +130,18 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
 
     const resetScanner = () => {
         setScannedCode(null)
+        setManualCode("")
         setOrder(null)
         setError(null)
         setSuccess(null)
         startScanner()
+    }
+
+    const handleManualSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (manualCode.trim()) {
+            onScanSuccess(manualCode.trim())
+        }
     }
 
     if (!isOpen) return null
@@ -161,6 +171,30 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 Placez le code QR de livraison Withyou devant la caméra.
                             </p>
                             <div id="reader" className="w-full max-w-sm mx-auto overflow-hidden rounded-2xl border-2 border-gray-200 bg-black"></div>
+                            
+                            <div className="w-full max-w-sm mx-auto mt-6">
+                                <div className="flex items-center justify-center gap-4 mb-4">
+                                    <div className="flex-1 h-px bg-gray-200"></div>
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">OU</span>
+                                    <div className="flex-1 h-px bg-gray-200"></div>
+                                </div>
+                                <form onSubmit={handleManualSubmit} className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Entrer le numéro manuellement" 
+                                        value={manualCode}
+                                        onChange={(e) => setManualCode(e.target.value)}
+                                        className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                    <button 
+                                        type="submit"
+                                        disabled={!manualCode.trim()}
+                                        className="px-4 py-3 bg-black text-white rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-all flex items-center justify-center"
+                                    >
+                                        <Search className="w-5 h-5" />
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     )}
 

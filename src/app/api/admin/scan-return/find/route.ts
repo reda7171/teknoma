@@ -17,7 +17,13 @@ export async function GET(request: Request) {
         }
 
         // Clean trackingID in case of whitespaces
-        const cleanTrackingID = trackingID.trim()
+        let cleanTrackingID = trackingID.trim()
+
+        // If it's a URL, extract the last part (the ID)
+        if (cleanTrackingID.includes('/')) {
+            const parts = cleanTrackingID.split('/').filter(Boolean);
+            cleanTrackingID = parts[parts.length - 1];
+        }
 
         const order = await prisma.order.findFirst({
             where: {

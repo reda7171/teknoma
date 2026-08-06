@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon, ExternalLink, ShoppingBag as JumiaIcon, Zap, Link2 } from 'lucide-react'
+import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon, ExternalLink, ShoppingBag as JumiaIcon, Zap, Link2, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBadgeStats } from '@/lib/actions/analytics'
@@ -206,9 +206,46 @@ async function getTopPerformers() {
         })
     )
 
+    // Meilleurs Revenus (Livres + Packs confondus)
+    const topRevenueBooksRaw = await prisma.orderItem.groupBy({
+        by: ['bookId'],
+        where: { type: 'BOOK', bookId: { not: null }, order: { status: { notIn: ['CANCELLED', 'RETURNED'] } } },
+        _sum: { quantity: true, price: true },
+        orderBy: { _sum: { price: 'desc' } },
+        take: 5
+    })
+    
+    const topRevenuePacksRaw = await prisma.orderItem.groupBy({
+        by: ['packId'],
+        where: { type: 'PACK', packId: { not: null }, order: { status: { notIn: ['CANCELLED', 'RETURNED'] } } },
+        _sum: { quantity: true, price: true },
+        orderBy: { _sum: { price: 'desc' } },
+        take: 5
+    })
+
+    const revBooks = await Promise.all(
+        topRevenueBooksRaw.map(async (item) => {
+            const book = await prisma.book.findUnique({ where: { id: item.bookId! }, select: { id: true, title: true, image: true } })
+            return { id: book?.id, title: book?.title, image: book?.image, type: 'BOOK', totalQuantity: item._sum.quantity || 0, totalRevenue: item._sum.price || 0 }
+        })
+    )
+
+    const revPacks = await Promise.all(
+        topRevenuePacksRaw.map(async (item) => {
+            const pack = await prisma.pack.findUnique({ where: { id: item.packId! }, select: { id: true, name: true, image: true } })
+            return { id: pack?.id, title: pack?.name, image: pack?.image, type: 'PACK', totalQuantity: item._sum.quantity || 0, totalRevenue: item._sum.price || 0 }
+        })
+    )
+
+    const topRevenue = [...revBooks, ...revPacks]
+        .filter(i => i.id)
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+        .slice(0, 5)
+
     return {
         books: booksWithDetails.filter(b => b.id !== null),
-        packs: packsWithDetails.filter(p => p.id !== null)
+        packs: packsWithDetails.filter(p => p.id !== null),
+        topRevenue
     }
 }
 
@@ -451,7 +488,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                         </h2>
                     </div>
                     <div className="p-6 md:p-10">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
                             {/* Top Books */}
                             <div>
                                 <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
@@ -499,6 +536,33 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                                 <div className="flex items-center gap-3 mt-1">
                                                     <span className="text-[10px] font-black text-amber-600">{pack.totalQuantity} VENTES</span>
                                                     <span className="text-[10px] font-black text-emerald-500">{pack.totalRevenue.toFixed(0)} MAD</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Top Revenue */}
+                            <div>
+                                <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
+                                    <TrendingUp className="w-4 h-4 text-emerald-600" />
+                                    Meilleurs Revenus
+                                </h3>
+                                <div className="space-y-4">
+                                    {topPerformers.topRevenue.map((item: any, index: number) => (
+                                        <div key={`${item.type}-${item.id}`} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
+                                            <span className="flex-shrink-0 w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center text-[10px] font-black italic shadow-lg">0{index + 1}</span>
+                                            {item.image && (
+                                                <div className="w-12 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-100 relative">
+                                                    <Image src={item.image} alt={item.title} fill className="object-cover" unoptimized />
+                                                </div>
+                                            )}
+                                            <div className="flex-grow min-w-0">
+                                                <p className="font-black text-[10px] text-black uppercase truncate italic">{item.title}</p>
+                                                <div className="flex items-center gap-3 mt-1">
+                                                    <span className="text-[10px] font-black text-emerald-500">{item.totalRevenue.toFixed(0)} MAD</span>
+                                                    <span className="text-[10px] font-black text-gray-500">{item.totalQuantity} VENTES</span>
                                                 </div>
                                             </div>
                                         </div>
