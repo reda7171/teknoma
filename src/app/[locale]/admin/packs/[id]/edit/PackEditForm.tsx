@@ -133,7 +133,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             return;
         }
 
-        const booksListText = selectedBooksData.map(b => `- ${b.title} (écrit par ${b.author})`).join('\n');
+        const writtenByText = currentLang === 'ar' ? 'تأليف' : currentLang === 'en' ? 'written by' : 'écrit par';
+        const booksListText = selectedBooksData.map(b => `- ${b.title} (${writtenByText} ${b.author})`).join('\n');
         
         let generatedText = '';
         if (currentLang === 'ar') {
