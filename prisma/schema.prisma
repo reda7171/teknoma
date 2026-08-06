@@ -138,6 +138,8 @@ model Book {
   sellerId          String?
   status            String            @default("APPROVED")
   longDescription   String?           @db.LongText
+  longDescriptionFr String?           @db.LongText
+  longDescriptionEn String?           @db.LongText
   isBestSeller      Boolean           @default(false)
   previewUrl        String?           @db.LongText
   imageAlt          String?           @db.VarChar(500)
@@ -161,6 +163,7 @@ model Book {
   jumiaPriceMarkup  Int               @default(0)
   isSyncedWithJumia Boolean           @default(false)
   jumiaStock        Int?
+  isPromoted        Boolean           @default(false)
   reservations      BookReservation[]
   seller            User?             @relation("SellerBooks", fields: [sellerId], references: [id])
   orderItems        OrderItem[]
@@ -216,6 +219,7 @@ model Pack {
   jumiaPriceMarkup  Float?      @default(0)
   jumiaStock        Int?
   originalPrice     Float?
+  isPromoted        Boolean     @default(false)
   orderItems        OrderItem[]
   books             PackBook[]
   wishlists         Wishlist[]

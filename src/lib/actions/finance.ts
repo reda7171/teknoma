@@ -15,6 +15,7 @@ export async function createExpense(data: {
     description?: string
     unitCost?: number
     orderIds?: string[]
+    orderFraisMap?: Record<string, number>
     date?: string | Date
 }) {
     await verifyAdmin()
@@ -32,10 +33,22 @@ export async function createExpense(data: {
         })
 
         if (data.orderIds && data.orderIds.length > 0) {
+            // Associer la dépense aux commandes
             await prisma.order.updateMany({
                 where: { id: { in: data.orderIds } },
                 data: { expenseId: expense.id, isPaid: true }
             })
+            
+            // Mettre à jour les frais de livraison si fournis
+            if (data.orderFraisMap) {
+                const updatePromises = Object.entries(data.orderFraisMap).map(([orderId, frais]) => {
+                    return prisma.order.update({
+                        where: { id: orderId },
+                        data: { shippingFees: frais }
+                    })
+                })
+                await Promise.all(updatePromises)
+            }
         }
         revalidatePath('/admin/finance')
 
@@ -130,14 +143,17 @@ export async function getExpenses(filters?: { month?: number, year?: number }) {
     })
 }
 
-export async function getUninvoicedDeliveredOrders() {
+export async function getUninvoicedDeliveredOrders(currentExpenseId?: string) {
     noStore()
     await verifyAdmin()
     try {
         const orders = await prisma.order.findMany({
             where: {
                 status: 'DELIVERED',
-                expenseId: null
+                ...(currentExpenseId 
+                    ? { OR: [{ expenseId: null }, { expenseId: currentExpenseId }] }
+                    : { expenseId: null }
+                )
             },
             orderBy: { updatedAt: 'desc' },
             select: {
@@ -145,7 +161,9 @@ export async function getUninvoicedDeliveredOrders() {
                 trackingID: true,
                 fullName: true,
                 total: true,
-                shippingCompany: true
+                shippingFees: true,
+                shippingCompany: true,
+                expenseId: true
             }
         })
         return orders

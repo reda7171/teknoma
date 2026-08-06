@@ -221,6 +221,28 @@ export async function POST(req: Request) {
                             await answerCallbackQuery(callbackId, `${orders.length} commande(s) en attente`, token)
                             await sendTelegramMessage(`🟠 <b>${orders.length} Commande(s) Jumia En Attente</b>\n\n${lines}`, message?.chat?.id.toString(), token, { inline_keyboard: keyboard })
                         }
+                    } else if (action === 'last_3_payouts') {
+                        const { getJumiaPayoutStatements } = await import('@/app/[locale]/admin/jumia-orders/actions')
+                        const data = await getJumiaPayoutStatements({ page: 1, size: 3 })
+                        const statements = data?.statements || (Array.isArray(data) ? data : [])
+                        
+                        if (statements.length === 0) {
+                            await answerCallbackQuery(callbackId, '✅ Aucun paiement trouvé', token)
+                        } else {
+                            const lines = statements.slice(0, 3).map((stmt: any) => {
+                                const amount = stmt.amount || stmt.totalAmount || stmt.Amount || '0'
+                                const currency = stmt.currency || stmt.Currency || 'MAD'
+                                const dateStr = stmt.createdAt ? new Date(stmt.createdAt).toLocaleDateString('fr-FR') : 'Inconnue'
+                                const status = stmt.paid || stmt.status === 'paid' ? '✅ Payé' : '⏳ En attente'
+                                const period = stmt.periodStart && stmt.periodEnd 
+                                    ? `(${new Date(stmt.periodStart).toLocaleDateString('fr-FR')} - ${new Date(stmt.periodEnd).toLocaleDateString('fr-FR')})` 
+                                    : ''
+                                return `💰 <b>${amount} ${currency}</b>\n${status} | 📅 ${dateStr} ${period}`
+                            }).join('\n\n')
+                            
+                            await answerCallbackQuery(callbackId, 'Derniers paiements chargés', token)
+                            await sendTelegramMessage(`🟠 <b>Les 3 Derniers Paiements Jumia</b>\n\n${lines}`, message?.chat?.id.toString(), token)
+                        }
                     } else if (action === 'monthly_stats') {
                         const { JumiaAPI } = await import('@/lib/jumia-api')
                         const jumia = await JumiaAPI.getInstance()

@@ -6,7 +6,7 @@ import { useRouter } from '@/i18n/routing'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { createOrder } from '@/lib/actions/orders'
-import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import CouponInput from '@/components/CouponInput'
 import { useTranslations, useLocale } from 'next-intl'
@@ -36,7 +36,7 @@ export default function CheckoutClient({
     paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string }[] }
 }) {
     const router = useRouter()
-    const { items, getTotalPrice, clearCart } = useCartStore()
+    const { items, getTotalPrice, clearCart, discount: instantOfferDiscount } = useCartStore()
     const { showNotification } = useUIStore()
     const [mounted, setMounted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -155,7 +155,8 @@ export default function CheckoutClient({
                     discountAmount = coupon.discount
                 }
             }
-            const currentFinalTotal = Math.max(0, currentSubtotal - discountAmount + shippingFee)
+            const currentInstantDiscount = instantOfferDiscount || 0
+            const currentFinalTotal = Math.max(0, currentSubtotal - discountAmount - currentInstantDiscount + shippingFee)
 
             if (items.length === 0 || (minOrderAmount > 0 && currentFinalTotal < minOrderAmount)) {
                 router.replace('/cart')
@@ -182,8 +183,11 @@ export default function CheckoutClient({
             discountAmount = coupon.discount
         }
     }
+    // Ajout de la remise de l'offre instantanée
+    const instantDiscount = instantOfferDiscount || 0
+    const totalDiscountAmount = discountAmount + instantDiscount
 
-    const finalTotal = Math.max(0, subtotal - discountAmount + shippingFee)
+    const finalTotal = Math.max(0, subtotal - totalDiscountAmount + shippingFee)
 
     // Sélectionner le meilleur cadeau éligible
     const eligibleGift = gifts
@@ -245,7 +249,7 @@ export default function CheckoutClient({
                 comment: finalComment,
                 items: orderItems,
                 couponCode: coupon?.code,
-                discount: discountAmount,
+                discount: totalDiscountAmount,
                 utmSource: localStorage.getItem('utm_source') || undefined,
                 utmMedium: localStorage.getItem('utm_medium') || undefined,
                 utmCampaign: localStorage.getItem('utm_campaign') || undefined,
@@ -670,6 +674,14 @@ export default function CheckoutClient({
                                         <Ticket className="w-4 h-4" /> {t('CodeApplied')}
                                     </span>
                                     <span>-{discountAmount.toFixed(0)} MAD</span>
+                                </div>
+                            )}
+                            {instantDiscount > 0 && (
+                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-green-800 bg-green-100 px-4 py-3 rounded-2xl">
+                                    <span className="flex items-center gap-2">
+                                        <Gift className="w-4 h-4" /> Offre Instantanée
+                                    </span>
+                                    <span>-{instantDiscount.toFixed(0)} MAD</span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">

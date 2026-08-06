@@ -11,8 +11,11 @@ export default function WhatsAppChannelButton({ url }: Props) {
     const pathname = usePathname()
 
     // Ne pas afficher dans l'admin, le checkout, ni login/register
-    // ou s'il n'y a pas d'URL paramétrée
+    // ou s'il n'y a pas d'URL paramétrée, ni sur les pages produit
     if (!url || pathname?.includes('/admin') || pathname?.includes('/checkout') || pathname?.includes('/login')) {
+        return null
+    }
+    if (pathname?.match(/\/(books|packs|mon-enfant|fourniture-bureau)\/[^/]+$/)) {
         return null
     }
 

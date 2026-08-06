@@ -384,8 +384,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </NextIntlClientProvider>
         
         {/* Google Customer Reviews Badge */}
-        <script id="merchantWidgetScript" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" defer></script>
-        <script dangerouslySetInnerHTML={{
+        <Script id="merchantWidgetScript" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" strategy="lazyOnload" />
+        <Script id="merchantWidgetInit" strategy="lazyOnload" dangerouslySetInnerHTML={{
           __html: `
             document.getElementById('merchantWidgetScript').addEventListener('load', function () {
               if (typeof merchantwidget !== 'undefined') {

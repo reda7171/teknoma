@@ -401,7 +401,7 @@ export default function OrdersTableClient({
                                     <option value="">-- Ne pas lier à une facture --</option>
                                     {deliveryInvoices.map(inv => (
                                         <option key={inv.id} value={inv.id}>
-                                            {inv.title} - {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} MAD)
+                                            {inv.title} {inv.description ? `- ${inv.description} ` : ''}- {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} MAD)
                                         </option>
                                     ))}
                                 </select>

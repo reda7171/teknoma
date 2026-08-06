@@ -60,30 +60,93 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
     const [availableOrders, setAvailableOrders] = useState<any[]>([])
     const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([])
     const [loadingOrders, setLoadingOrders] = useState(false)
+    const [rawDeliveryText, setRawDeliveryText] = useState('')
+    const [parsedDeliveryFrais, setParsedDeliveryFrais] = useState(0)
+    const [parsedOrderFraisMap, setParsedOrderFraisMap] = useState<Record<string, number>>({})
+    const [orderSearch, setOrderSearch] = useState('')
 
     useEffect(() => {
-        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' && !isEditing) {
+        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY') {
             setLoadingOrders(true)
-            getUninvoicedDeliveredOrders().then(orders => {
+            getUninvoicedDeliveredOrders(expense?.id).then(orders => {
                 setAvailableOrders(orders)
+                if (isEditing && expense?.id) {
+                    setSelectedOrderIds(orders.filter((o: any) => o.expenseId === expense.id).map((o: any) => o.id))
+                }
                 setLoadingOrders(false)
             }).catch(() => setLoadingOrders(false))
         } else {
             setAvailableOrders([])
-            setSelectedOrderIds([])
+            if (!isEditing) setSelectedOrderIds([])
         }
-    }, [type, selectedCategory, isEditing])
+    }, [type, selectedCategory, isEditing, expense?.id])
+
+    // Parse delivery company text to auto-select orders and calculate net amount
+    useEffect(() => {
+        if (type !== 'INCOME' || selectedCategory !== 'INCOME_DELIVERY') return
+        
+        if (!rawDeliveryText) {
+            setSelectedOrderIds([])
+            setParsedDeliveryFrais(0)
+            setParsedOrderFraisMap({})
+            return
+        }
+        
+        const lines = rawDeliveryText.trim().split('\n')
+        let parsedOrderIds: string[] = []
+        let totalFrais = 0
+        let orderFraisMap: Record<string, number> = {}
+        
+        lines.forEach(line => {
+            const parts = line.trim().split(/\s+/)
+            if (parts.length >= 2 && parts[0] !== '#') {
+                const matchedOrder = availableOrders.find(o => 
+                    (o.trackingID && parts.includes(o.trackingID)) || 
+                    parts.includes(o.id)
+                )
+                
+                if (matchedOrder) {
+                    parsedOrderIds.push(matchedOrder.id)
+                    const fraisStr = parts[parts.length - 1].replace(',', '.')
+                    const frais = parseFloat(fraisStr)
+                    if (!isNaN(frais)) {
+                        totalFrais += frais
+                        orderFraisMap[matchedOrder.id] = frais
+                    }
+                }
+            }
+        })
+        
+        if (parsedOrderIds.length > 0) {
+            setSelectedOrderIds(parsedOrderIds)
+            setParsedDeliveryFrais(totalFrais)
+            setParsedOrderFraisMap(orderFraisMap)
+        }
+    }, [rawDeliveryText, availableOrders, type, selectedCategory])
 
     // Auto-calculate amount when orders are selected
     useEffect(() => {
-        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY' && !isEditing) {
+        if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY') {
             const total = selectedOrderIds.reduce((sum, id) => {
                 const order = availableOrders.find(o => o.id === id)
                 return sum + (order?.total || 0)
             }, 0)
-            setAmount(total > 0 ? total : '')
+
+            const totalFrais = parsedDeliveryFrais > 0 ? parsedDeliveryFrais : selectedOrderIds.reduce((sum, id) => {
+                const order = availableOrders.find(o => o.id === id)
+                return sum + (order?.shippingFees || 0)
+            }, 0)
+
+            const netAmount = total - totalFrais
+            
+            // Ne met à jour automatiquement que si on n'est pas en train d'éditer,
+            // OU si une modification manuelle (sélection ou texte) a été effectuée
+            if (!isEditing || parsedDeliveryFrais > 0 || (selectedOrderIds.length > 0 && availableOrders.length > 0)) {
+                // On met à jour si le net est positif, et on évite d'écraser inutilement à l'ouverture si c'est identique
+                setAmount(netAmount > 0 ? netAmount : '')
+            }
         }
-    }, [selectedOrderIds, availableOrders, type, selectedCategory, isEditing])
+    }, [selectedOrderIds, availableOrders, type, selectedCategory, isEditing, parsedDeliveryFrais])
 
     const toggleOrderSelection = (id: string) => {
         setSelectedOrderIds(prev => 
@@ -126,11 +189,13 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             description: finalDescription,
             unitCost: (isLot && averagePrice > 0) ? averagePrice : (expense?.unitCost || undefined),
             orderIds: selectedOrderIds.length > 0 ? selectedOrderIds : undefined,
+            orderFraisMap: Object.keys(parsedOrderFraisMap).length > 0 ? parsedOrderFraisMap : undefined,
             date: date
         }
 
         if (isEditing) {
             await updateExpense(expense.id, data)
+            setIsOpen(false)
         } else {
             await createExpense(data)
             setTitle('')
@@ -144,10 +209,19 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             setTransportCost(0)
             setSelectedOrderIds([])
             setDate(new Date().toISOString().split('T')[0])
+            setRawDeliveryText('')
+            setParsedDeliveryFrais(0)
+            setParsedOrderFraisMap({})
+            
+            // On recharge les commandes si on est sur la facture de livraison
+            if (type === 'INCOME' && selectedCategory === 'INCOME_DELIVERY') {
+                getUninvoicedDeliveredOrders().then(orders => {
+                    setAvailableOrders(orders)
+                })
+            }
         }
         
         setLoading(false)
-        setIsOpen(false)
     }
 
     if (!isOpen) {
@@ -324,6 +398,25 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                 )}
                             </div>
 
+                            {/* Auto-détection (Copier-coller) */}
+                            <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-sm">
+                                <label className="block text-xs font-bold text-emerald-800 mb-2">
+                                    Détection automatique (Collez le tableau de la société de livraison ici)
+                                </label>
+                                <textarea
+                                    rows={3}
+                                    value={rawDeliveryText}
+                                    onChange={(e) => setRawDeliveryText(e.target.value)}
+                                    placeholder="Ex: 1 W2853960 Errahma livrer 135 35"
+                                    className="w-full px-3 py-2 border rounded-md text-xs font-mono bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                                />
+                                {parsedDeliveryFrais > 0 && (
+                                    <p className="mt-2 text-xs font-bold text-emerald-600">
+                                        ✓ Détection réussie. Frais totaux déduits : {parsedDeliveryFrais} MAD
+                                    </p>
+                                )}
+                            </div>
+
                             {loadingOrders ? (
                                 <div className="flex justify-center py-4">
                                     <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
@@ -332,8 +425,25 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                 <p className="text-sm text-emerald-700 text-center py-4">Aucune commande livrée en attente de paiement trouvée.</p>
                             ) : (
                                 <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="mb-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Rechercher par nom, téléphone, numéro..."
+                                            value={orderSearch}
+                                            onChange={(e) => setOrderSearch(e.target.value)}
+                                            className="w-full px-4 py-2 border border-emerald-100 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {availableOrders.map(order => (
+                                        {availableOrders
+                                            .filter(order => 
+                                                orderSearch === '' || 
+                                                order.fullName.toLowerCase().includes(orderSearch.toLowerCase()) || 
+                                                (order.trackingID && order.trackingID.toLowerCase().includes(orderSearch.toLowerCase())) ||
+                                                (order.phone && order.phone.includes(orderSearch)) ||
+                                                order.id.includes(orderSearch)
+                                            )
+                                            .map(order => (
                                             <div 
                                                 key={order.id} 
                                                 onClick={() => toggleOrderSelection(order.id)}
@@ -370,7 +480,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
                             <div className="pt-2 flex justify-between items-center text-emerald-800 font-bold text-sm">
                                 <span>{selectedOrderIds.length} commande(s) sélectionnée(s)</span>
-                                <span>Total estimé: {selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0).toFixed(2)} MAD</span>
+                                <span>Total estimé: {(selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0) - parsedDeliveryFrais).toFixed(2)} MAD</span>
                             </div>
                         </div>
                     )}

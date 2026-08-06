@@ -71,8 +71,12 @@ export default async function OrderDetailsPage({
                         address: order.address,
                         city: order.city,
                         total: order.total,
-                        comment: order.comment
-                    }} />
+                        comment: order.comment,
+                        shippingCompany: order.shippingCompany,
+                        shippingFees: order.shippingFees
+                    }} 
+                    companies={activeCompanies}
+                    />
                     <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
                 </div>
             </div>

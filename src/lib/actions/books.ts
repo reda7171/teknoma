@@ -18,6 +18,8 @@ const BookSchemaBase = z.object({
     descriptionFr: z.string().optional(),
     descriptionEn: z.string().optional(),
     longDescription: z.string().optional(),
+    longDescriptionFr: z.string().optional(),
+    longDescriptionEn: z.string().optional(),
     isbn: z.string().optional(),
     price: z.number().min(0),
     costPrice: z.number().min(0, 'Le coût ne peut pas être négatif').default(0),

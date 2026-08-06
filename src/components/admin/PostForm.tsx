@@ -9,8 +9,7 @@ import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
 import { Book as BookIcon, Search, X, Wand2 } from 'lucide-react'
 import { fetchBooks } from '@/lib/actions/books'
-import CatalogImageModal from '@/components/admin/CatalogImageModal'
-import BookCreativeModal from '@/components/admin/BookCreativeModal'
+import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { getUsers } from '@/lib/actions/users'
 import { useEffect } from 'react'
 import PostSectionEditor from './post-form/PostSectionEditor'
@@ -28,6 +27,8 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const { showNotification } = useUIStore()
     const [isPending, setIsPending] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
+    const [isRephrasingExcerpt, setIsRephrasingExcerpt] = useState(false)
+    const [isRephrasingTitle, setIsRephrasingTitle] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     // Form state
@@ -47,8 +48,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [bookSearch, setBookSearch] = useState('')
     const [selectedBookIds, setSelectedBookIds] = useState<string[]>(post?.books?.map((b: any) => b.id) || [])
 
-    const [isCatalogOpen, setIsCatalogOpen] = useState(false)
-    const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
+    const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false)
 
     useEffect(() => {
         const loadData = async () => {
@@ -96,6 +96,68 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
             setError('Erreur lors de la génération')
         } finally {
             setIsGenerating(false)
+        }
+    }
+
+    const handleRephraseTitle = async () => {
+        if (!title || title.trim() === '') return
+        if (lang === 'ar') {
+            alert("DeepL Write ne supporte pas l'arabe actuellement.")
+            return
+        }
+        setIsRephrasingTitle(true)
+        try {
+            const res = await fetch('/api/admin/translate/rephrase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: title,
+                    targetLang: lang === 'en' ? 'EN-US' : 'FR'
+                })
+            })
+            const data = await res.json()
+            if (data.success && data.rephrased && data.rephrased.length > 0) {
+                const newTitle = data.rephrased[0]
+                setTitle(newTitle)
+                if (!isEditing && !slug) {
+                    setSlug(newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''))
+                }
+            } else {
+                alert('Erreur DeepL: ' + (data.error || 'Erreur inconnue'))
+            }
+        } catch (err) {
+            alert('Erreur de connexion avec DeepL')
+        } finally {
+            setIsRephrasingTitle(false)
+        }
+    }
+
+    const handleRephraseExcerpt = async () => {
+        if (!excerpt || excerpt.trim() === '') return
+        if (lang === 'ar') {
+            alert("DeepL Write ne supporte pas l'arabe actuellement.")
+            return
+        }
+        setIsRephrasingExcerpt(true)
+        try {
+            const res = await fetch('/api/admin/translate/rephrase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: excerpt,
+                    targetLang: lang === 'en' ? 'EN-US' : 'FR'
+                })
+            })
+            const data = await res.json()
+            if (data.success && data.rephrased && data.rephrased.length > 0) {
+                setExcerpt(data.rephrased[0])
+            } else {
+                alert('Erreur DeepL: ' + (data.error || 'Erreur inconnue'))
+            }
+        } catch (err) {
+            alert('Erreur de connexion avec DeepL')
+        } finally {
+            setIsRephrasingExcerpt(false)
         }
     }
 
@@ -260,6 +322,18 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                         {isGenerating ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                         FR
                                     </button>
+                                    {lang !== 'ar' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRephraseTitle}
+                                            disabled={isRephrasingTitle}
+                                            className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-black uppercase hover:bg-purple-100 disabled:opacity-50 border border-purple-100 flex items-center gap-1"
+                                            title="Améliorer avec DeepL Write"
+                                        >
+                                            {isRephrasingTitle ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Wand2 className="w-2.5 h-2.5" />}
+                                            Améliorer
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             <input
@@ -373,6 +447,18 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                         {isGenerating ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5" />}
                                         FR
                                     </button>
+                                    {lang !== 'ar' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRephraseExcerpt}
+                                            disabled={isRephrasingExcerpt}
+                                            className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-black uppercase hover:bg-purple-100 disabled:opacity-50 border border-purple-100 flex items-center gap-1"
+                                            title="Améliorer avec DeepL Write"
+                                        >
+                                            {isRephrasingExcerpt ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Wand2 className="w-2.5 h-2.5" />}
+                                            Améliorer
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             <textarea
@@ -435,19 +521,11 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         <div className="flex flex-wrap gap-2 mb-2">
                             <button
                                 type="button"
-                                onClick={() => setIsCatalogOpen(true)}
-                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
+                                onClick={() => setIsMediaLibraryOpen(true)}
+                                className="inline-flex items-center px-4 py-2 text-xs font-bold bg-purple-50 text-purple-700 rounded-xl border border-purple-200 hover:bg-purple-100 transition-colors"
                             >
-                                <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                                depuis Médiathèque
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setCreativeFormat('post')}
-                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
-                            >
-                                <Wand2 className="w-3.5 h-3.5 mr-1.5" />
-                                depuis Créatives Marketing
+                                <ImageIcon className="w-4 h-4 mr-2" />
+                                Parcourir la Médiathèque
                             </button>
                         </div>
 
@@ -570,26 +648,12 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                 </div>
             </div>
 
-            <CatalogImageModal
-                isOpen={isCatalogOpen}
-                onClose={() => setIsCatalogOpen(false)}
+            <MediaLibraryModal
+                isOpen={isMediaLibraryOpen}
+                onClose={() => setIsMediaLibraryOpen(false)}
                 onSelect={(url) => {
                     setCoverImage(url)
-                    setIsCatalogOpen(false)
-                }}
-            />
-
-            <BookCreativeModal
-                isOpen={creativeFormat !== null}
-                onClose={() => setCreativeFormat(null)}
-                format={creativeFormat!}
-                book={{
-                    id: post?.id || 'new',
-                    title: title || 'Nouvel Article',
-                    author: authorName || 'Riwaya',
-                    price: 0,
-                    image: coverImage,
-                    category: category
+                    setIsMediaLibraryOpen(false)
                 }}
             />
         </form>

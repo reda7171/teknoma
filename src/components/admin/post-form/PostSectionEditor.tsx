@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2 } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import dynamic from 'next/dynamic'
 import 'react-quill-new/dist/quill.snow.css'
@@ -174,6 +174,9 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     const [isGenerating, setIsGenerating] = useState(false)
     const [activeSectionId, setActiveSectionId] = useState<string | null>(null)
     const [showBlockMenu, setShowBlockMenu] = useState(false)
+    const [deeplStyle, setDeeplStyle] = useState('default')
+    const [deeplTone, setDeeplTone] = useState('default')
+    const [isRephrasing, setIsRephrasing] = useState<string | null>(null)
 
     useEffect(() => {
         if (!initialContent) {
@@ -260,6 +263,37 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
         setSections(getBookTemplateSections(lang).map(s => ({ ...s, id: Date.now() + Math.random().toString() })))
     }
 
+    const handleRephrase = async (sectionId: string, content: string) => {
+        if (!content || content.trim() === '') return
+        if (lang === 'ar') {
+            alert("DeepL Write ne supporte pas l'arabe actuellement.")
+            return
+        }
+        setIsRephrasing(sectionId)
+        try {
+            const res = await fetch('/api/admin/translate/rephrase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: content,
+                    targetLang: lang === 'en' ? 'EN-US' : 'FR',
+                    style: deeplStyle !== 'default' ? deeplStyle : undefined,
+                    tone: deeplTone !== 'default' ? deeplTone : undefined,
+                })
+            })
+            const data = await res.json()
+            if (data.success && data.rephrased && data.rephrased.length > 0) {
+                handleSectionChange(sectionId, 'content', data.rephrased[0])
+            } else {
+                alert('Erreur DeepL: ' + (data.error || 'Erreur inconnue'))
+            }
+        } catch (err) {
+            alert('Erreur de connexion avec DeepL')
+        } finally {
+            setIsRephrasing(null)
+        }
+    }
+
     const handleGenerateContent = async (langToUse: 'fr' | 'ar') => {
         if (!postTitle) { alert("Veuillez d'abord saisir un titre d'article."); return }
         setIsGenerating(true)
@@ -298,19 +332,41 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                     <h3 className="text-xl font-bold text-gray-900">Contenu de l'article</h3>
                     <p className="text-sm text-gray-500 mt-1">Gérez le contenu par blocs pour plus de clarté.</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    <button type="button" onClick={handleApplyTemplate}
-                        className="px-4 py-2 bg-gray-50 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors border border-gray-200 flex items-center gap-2">
-                        <BookIcon className="w-4 h-4" /> Template Livre
-                    </button>
-                    <button type="button" onClick={() => handleGenerateContent('ar')} disabled={isGenerating}
-                        className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold hover:bg-green-100 transition-colors disabled:opacity-50 border border-green-200 flex items-center gap-2">
-                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Générer AR
-                    </button>
-                    <button type="button" onClick={() => handleGenerateContent('fr')} disabled={isGenerating}
-                        className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors disabled:opacity-50 border border-blue-200 flex items-center gap-2">
-                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Générer FR
-                    </button>
+                <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2 self-end">
+                        <button type="button" onClick={handleApplyTemplate}
+                            className="px-4 py-2 bg-gray-50 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors border border-gray-200 flex items-center gap-2">
+                            <BookIcon className="w-4 h-4" /> Template Livre
+                        </button>
+                        <button type="button" onClick={() => handleGenerateContent('ar')} disabled={isGenerating}
+                            className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold hover:bg-green-100 transition-colors disabled:opacity-50 border border-green-200 flex items-center gap-2">
+                            {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Générer AR
+                        </button>
+                        <button type="button" onClick={() => handleGenerateContent('fr')} disabled={isGenerating}
+                            className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors disabled:opacity-50 border border-blue-200 flex items-center gap-2">
+                            {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Générer FR
+                        </button>
+                    </div>
+                    {lang !== 'ar' && (
+                        <div className="flex flex-wrap gap-2 items-center bg-blue-50/50 p-2 rounded-xl border border-blue-100 self-end">
+                            <Wand2 className="w-4 h-4 text-blue-600 ml-1" />
+                            <span className="text-xs font-bold text-blue-800">DeepL Write :</span>
+                            <select value={deeplStyle} onChange={e => setDeeplStyle(e.target.value)} className="text-xs rounded-lg border-blue-200 bg-white text-blue-800 py-1.5 px-3 focus:ring-blue-500">
+                                <option value="default">Style (Auto)</option>
+                                <option value="simple">Simple</option>
+                                <option value="business">Business</option>
+                                <option value="academic">Academic</option>
+                                <option value="casual">Casual</option>
+                            </select>
+                            <select value={deeplTone} onChange={e => setDeeplTone(e.target.value)} className="text-xs rounded-lg border-blue-200 bg-white text-blue-800 py-1.5 px-3 focus:ring-blue-500">
+                                <option value="default">Ton (Auto)</option>
+                                <option value="enthusiastic">Enthusiastic</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="confident">Confident</option>
+                                <option value="diplomatic">Diplomatic</option>
+                            </select>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -350,6 +406,13 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         placeholder="Titre de la section (ex: Introduction)"
                                         className="flex-1 bg-transparent border-none text-lg font-bold text-gray-900 placeholder:text-gray-400 focus:ring-0 p-0"
                                     />
+                                    {bType === 'text' && lang !== 'ar' && (
+                                        <button type="button" onClick={() => handleRephrase(section.id, section.content)} disabled={isRephrasing === section.id}
+                                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold" title="Améliorer avec DeepL Write">
+                                            {isRephrasing === section.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                            <span className="hidden sm:inline">Améliorer</span>
+                                        </button>
+                                    )}
                                     <button type="button" onClick={() => handleRemoveSection(section.id)}
                                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
                                         <Trash2 className="w-5 h-5" />

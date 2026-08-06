@@ -47,8 +47,8 @@ export async function GET(req: Request) {
 
         if (newOrders.length > 0) {
             for (const order of newOrders) {
-                const orderId = order.orderId || order.OrderId || order.orderNumber || "Inconnu"
-                const customerName = order.customerFirstName || order.CustomerFirstName || order.customerLastName || order.CustomerLastName || "Client Jumia"
+                const orderId = order.OrderNumber || order.orderNumber || order.OrderId || order.orderId || order.number || "Inconnu"
+                const customerName = `${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}`.trim() || "Client Jumia"
                 const price = order.totalAmountLocal?.value || order.Price || order.GrandTotal || "0"
                 const status = order.status || order.Status || "PENDING"
                 
@@ -84,6 +84,11 @@ export async function GET(req: Request) {
                 create: { key: 'jumia_last_sync_date', value: maxDate.toISOString() }
             })
         }
+
+        // Déclencher discrètement la vérification des livraisons (sans attendre)
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (req.headers.get('host') ? `https://${req.headers.get('host')}` : 'http://localhost:3000');
+        const tokenQuery = process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : '';
+        fetch(`${baseUrl}/api/cron/jumia-delivered-alert${tokenQuery}`).catch(() => {});
 
         return NextResponse.json({ 
             success: true, 

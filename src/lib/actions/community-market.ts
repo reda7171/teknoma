@@ -92,7 +92,6 @@ export async function getRecentExchangeBooks(limit = 6) {
                         id: true,
                         fullName: true,
                         city: true,
-                        rating: true,
                         image: true,
                     }
                 }

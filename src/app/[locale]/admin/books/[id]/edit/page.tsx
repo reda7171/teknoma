@@ -3,14 +3,13 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Languages } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
-import CatalogImageModal from '@/components/admin/CatalogImageModal'
-import BookCreativeModal from '@/components/admin/BookCreativeModal'
-import { ImageIcon, Wand2, Link2 } from 'lucide-react'
+import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
+import { ImageIcon, Link2 } from 'lucide-react'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
     const router = useRouter()
@@ -35,8 +34,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [selectedCost, setSelectedCost] = useState<string>('0')
 
     const [bookImage, setBookImage] = useState<string>('')
-    const [isCatalogOpen, setIsCatalogOpen] = useState(false)
-    const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false)
     
     // Nouveaux states pour les champs gérés avec Gemini
     const [description, setDescription] = useState<string>('')
@@ -44,6 +42,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [descriptionEn, setDescriptionEn] = useState<string>('')
     const [longDescription, setLongDescription] = useState<string>('')
     const [longDescriptionFr, setLongDescriptionFr] = useState<string>('')
+    const [longDescriptionEn, setLongDescriptionEn] = useState<string>('')
     const [isGeneratingShort, setIsGeneratingShort] = useState(false)
     const [isGeneratingLong, setIsGeneratingLong] = useState(false)
     const [authors, setAuthors] = useState<string[]>([])
@@ -53,6 +52,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
     const [isLinked, setIsLinked] = useState<boolean | null>(null)
     const [closeAfterSave, setCloseAfterSave] = useState(false)
+    const [isTranslating, setIsTranslating] = useState(false)
+    const [translateMsg, setTranslateMsg] = useState<string | null>(null)
 
     useEffect(() => {
         getPurchaseLots().then(data => setLots(data)).catch(console.error)
@@ -60,6 +61,43 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             if (res.success && res.data) setAuthors(res.data)
         }).catch(console.error)
     }, [])
+
+    // Traduction automatique via DeepL (titre + description arabe -> FR + EN)
+    const handleAutoTranslate = async () => {
+        if (!book) return
+        const titleAr = (document.querySelector('input[name="title_ar"]') as HTMLInputElement)?.value || book.title
+        const descAr = description || book.description
+        if (!titleAr && !descAr) {
+            setTranslateMsg('Aucun texte arabe à traduire.')
+            return
+        }
+        setIsTranslating(true)
+        setTranslateMsg(null)
+        try {
+            const res = await fetch('/api/admin/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: 'book', title: titleAr, description: descAr, sourceLang: 'AR' })
+            })
+            const data = await res.json()
+            if (data.titleFr) {
+                const inputFr = document.querySelector('input[name="title_fr"]') as HTMLInputElement
+                if (inputFr) inputFr.value = data.titleFr
+            }
+            if (data.titleEn) {
+                const inputEn = document.querySelector('input[name="title_en"]') as HTMLInputElement
+                if (inputEn) inputEn.value = data.titleEn
+            }
+            if (data.descriptionFr) setDescriptionFr(data.descriptionFr)
+            if (data.descriptionEn) setDescriptionEn(data.descriptionEn)
+            const errs = data.errors?.filter(Boolean) || []
+            setTranslateMsg(errs.length > 0 ? `Partiel: ${errs.join(', ')}` : 'Traduit avec succès ! Vérifiez et sauvegardez.')
+        } catch (e: any) {
+            setTranslateMsg(`Erreur: ${e.message}`)
+        } finally {
+            setIsTranslating(false)
+        }
+    }
 
     useEffect(() => {
         if (bookId) {
@@ -80,6 +118,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setDescriptionEn(result.data.descriptionEn || '')
                 setLongDescription(result.data.longDescription || '')
                 setLongDescriptionFr(result.data.longDescriptionFr || '')
+                setLongDescriptionEn(result.data.longDescriptionEn || '')
                 setSelectedAuthor(result.data.author || '')
                 setCurrentLang(result.data.language === 'en' ? 'en' : result.data.language === 'fr' ? 'fr' : 'ar')
                 setBookLanguage((result.data.language as 'ar' | 'fr' | 'en') || 'fr')
@@ -153,6 +192,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             descriptionEn: formData.get('description_en') as string || undefined,
             longDescription: longDescription || undefined,
             longDescriptionFr: longDescriptionFr || undefined,
+            longDescriptionEn: longDescriptionEn || undefined,
             isbn: formData.get('isbn') as string || undefined,
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
@@ -353,9 +393,26 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Titre */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Titre {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
-                        </label>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Titre {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
+                            </label>
+                            <button
+                                type="button"
+                                onClick={handleAutoTranslate}
+                                disabled={isTranslating}
+                                className="flex items-center gap-1.5 text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                                title="Traduire le titre et la description (arabe -> FR + EN) via DeepL"
+                            >
+                                {isTranslating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Languages className="w-3 h-3" />}
+                                {isTranslating ? 'Traduction...' : 'Traduire avec DeepL'}
+                            </button>
+                        </div>
+                        {translateMsg && (
+                            <p className={`text-xs mb-2 px-3 py-1.5 rounded ${translateMsg.includes('Erreur') || translateMsg.includes('Partiel') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}`}>
+                                {translateMsg}
+                            </p>
+                        )}
                         <input
                             type="text"
                             name="title_ar"
@@ -481,7 +538,6 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         </div>
                     </div>
 
-                    {/* Prix */}
                     {/* Prix */}
                     <div>
                         <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
@@ -732,19 +788,11 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     type="button"
-                                    onClick={() => setIsCatalogOpen(true)}
+                                    onClick={() => setIsMediaModalOpen(true)}
                                     className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
                                 >
                                     <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
-                                    depuis Médiathèque
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setCreativeFormat('post')}
-                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
-                                >
-                                    <Wand2 className="w-3.5 h-3.5 mr-1.5" />
-                                    depuis Créatives Marketing
+                                    Parcourir la Médiathèque
                                 </button>
                             </div>
                         </div>
@@ -822,6 +870,15 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Description détaillée, biographie de l'auteur, contexte du livre en français..."
                         />
+                        <textarea
+                            name="longDescription_en"
+                            rows={8}
+                            value={longDescriptionEn}
+                            onChange={(e) => setLongDescriptionEn(e.target.value)}
+                            style={{ display: currentLang === 'en' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Detailed description, author biography, book context in english..."
+                        />
                     </div>
 
                     {/* Extrait de Lecture (previewUrl) */}
@@ -883,26 +940,12 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 </div>
             </form>
 
-            <BookCreativeModal
-                isOpen={creativeFormat !== null}
-                onClose={() => setCreativeFormat(null)}
-                format={creativeFormat!}
-                book={book ? {
-                    id: book.id,
-                    title: book.title,
-                    author: book.author || selectedAuthor,
-                    price: book.price,
-                    image: bookImage,
-                    category: book.category
-                } : null}
-            />
-
-            <CatalogImageModal
-                isOpen={isCatalogOpen}
-                onClose={() => setIsCatalogOpen(false)}
+            <MediaLibraryModal
+                isOpen={isMediaModalOpen}
+                onClose={() => setIsMediaModalOpen(false)}
                 onSelect={(url) => {
                     setBookImage(url)
-                    setIsCatalogOpen(false)
+                    setIsMediaModalOpen(false)
                 }}
             />
         </div>

@@ -69,6 +69,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [platformFilter, setPlatformFilter] = useState('all')
     const [statusFilter, setStatusFilter] = useState('all')
     const [dailySuggestions, setDailySuggestions] = useState<SuggestedBook[]>([])
+    const [selectedSuggestedProduct, setSelectedSuggestedProduct] = useState<SuggestedBook | null>(null)
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -382,6 +383,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setNewPostContent('')
             setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
             setSelectedMedia(tempMedia as any)
+            setSelectedSuggestedProduct(null)
             setShowAssetsGrid(false)
             setIsModalOpen(true)
         }
@@ -427,7 +429,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             time: selectedTime,
             content: newPostContent,
             platforms: selectedPlatforms,
-            mediaUrl: finalMediaUrl
+            mediaUrl: finalMediaUrl,
+            suggestedProductId: selectedSuggestedProduct?.id,
+            suggestedProductType: selectedSuggestedProduct?.type
         }
 
         try {
@@ -510,7 +514,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 time: timeSlot,
                 content: content,
                 platforms: ['facebook', 'instagram'],
-                mediaUrl: book.image
+                mediaUrl: book.image,
+                suggestedProductId: book.id,
+                suggestedProductType: book.type
             };
 
             try {
@@ -746,6 +752,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                     setNewPostContent(`📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`);
                                                     const newMedia = { name: book.title, url: book.image, type: 'image', createdAt: new Date().toISOString() };
                                                     setSelectedMedia(newMedia as any);
+                                                    setSelectedSuggestedProduct(book);
                                                 }, 50);
                                             }}
                                             className="mt-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors"
@@ -1298,7 +1305,10 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 </button>
                             )}
                             <button 
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => {
+                                    setIsModalOpen(false)
+                                    setSelectedSuggestedProduct(null)
+                                }}
                                 className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-200/50 rounded-xl transition-colors"
                                 disabled={isLoading}
                             >

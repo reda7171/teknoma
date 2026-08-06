@@ -107,6 +107,7 @@ export default function ExpensesTable({ expenses }: { expenses: Expense[] }) {
                         <tr>
                             <th className="px-10 py-6">Date</th>
                             <th className="px-10 py-6">Opération</th>
+                            <th className="px-10 py-6">Description</th>
                             <th className="px-10 py-6">Catégorie</th>
                             <th className="px-10 py-6 text-right">Montant</th>
                             <th className="px-10 py-6 text-right">Actions</th>
@@ -133,10 +134,16 @@ export default function ExpensesTable({ expenses }: { expenses: Expense[] }) {
                                     <td className="px-10 py-6">
                                         <div className="flex flex-col">
                                             <span className="font-black text-black uppercase tracking-tight text-xs">{expense.title}</span>
-                                            {expense.description && (
-                                                <span className="text-[10px] font-bold text-gray-400 mt-1 italic italic">"{expense.description}"</span>
-                                            )}
                                         </div>
+                                    </td>
+                                    <td className="px-10 py-6 max-w-[200px] truncate">
+                                        {expense.description ? (
+                                            <span className="text-[10px] font-bold text-gray-500 italic" title={expense.description}>
+                                                {expense.description}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[10px] text-gray-300">-</span>
+                                        )}
                                     </td>
                                     <td className="px-10 py-6">
                                         <span className="px-3 py-1 bg-gray-100 text-gray-500 text-[9px] font-black rounded-full uppercase tracking-widest border border-gray-200">

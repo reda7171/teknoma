@@ -15,10 +15,13 @@ interface OrderEditModalProps {
         city: string
         total: number
         comment?: string | null
+        shippingCompany?: string | null
+        shippingFees?: number | null
     }
+    companies: { id: string, name: string }[]
 }
 
-export default function OrderEditModal({ order }: OrderEditModalProps) {
+export default function OrderEditModal({ order, companies }: OrderEditModalProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const { showNotification } = useUIStore()
@@ -30,7 +33,9 @@ export default function OrderEditModal({ order }: OrderEditModalProps) {
         address: order.address,
         city: order.city,
         total: order.total,
-        comment: order.comment || ''
+        comment: order.comment || '',
+        shippingCompany: order.shippingCompany || '',
+        shippingFees: order.shippingFees || ''
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +44,8 @@ export default function OrderEditModal({ order }: OrderEditModalProps) {
         try {
             const result = await updateOrderDetails(order.id, {
                 ...form,
-                total: Number(form.total)
+                total: Number(form.total),
+                shippingFees: form.shippingFees !== '' ? Number(form.shippingFees) : null
             })
             if (result.success) {
                 showNotification('Commande modifiée avec succès', 'success')
@@ -125,6 +131,30 @@ export default function OrderEditModal({ order }: OrderEditModalProps) {
                                         value={form.total}
                                         onChange={e => setForm({ ...form, total: Number(e.target.value) })}
                                         required
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Société de livraison</label>
+                                    <select
+                                        value={form.shippingCompany}
+                                        onChange={e => setForm({ ...form, shippingCompany: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium bg-white"
+                                    >
+                                        <option value="">Sélectionner une société</option>
+                                        {companies.map(company => (
+                                            <option key={company.id} value={company.id}>{company.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Frais de livraison (MAD)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={form.shippingFees}
+                                        onChange={e => setForm({ ...form, shippingFees: e.target.value })}
+                                        placeholder="Ex: 35"
                                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium"
                                     />
                                 </div>

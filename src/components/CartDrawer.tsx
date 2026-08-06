@@ -253,20 +253,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                     </div>
                                 ))}
 
-                                {items.length > 0 && (
-                                    <button
-                                        onClick={handleClearCart}
-                                        className="w-full flex items-center justify-center gap-3 p-4 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-white bg-red-50 hover:bg-red-500 transition-all rounded-[1rem] shadow-sm mt-4"
-                                        title="Vider le panier"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        {t('ClearSelection')}
-                                    </button>
-                                )}
-
                                 {/* Upsell Marque-pages */}
                                 {items.length > 0 && (
-                                    <CartBookmarksUpsell />
+                                    <div className="hidden sm:block">
+                                        <CartBookmarksUpsell />
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -275,29 +266,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     {/* Footer - Style Pixio Summary */}
                     {items.length > 0 && (
                         <div className="p-4 sm:p-8 bg-white border-t border-gray-50 space-y-6 sm:space-y-8 pb-safe">
-                            {/* Summary */}
+                            {/* Summary - Total uniquement */}
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest">
-                                    <span className="text-gray-400">{t('Subtotal')}</span>
-                                    <span className="text-black">{totalPrice} MAD</span>
-                                </div>
-                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest">
-                                    <span className="text-gray-400">{t('Delivery')}</span>
-                                    {shippingFee === 0 ? (
-                                        <span className="text-pixio-pink bg-black px-2 py-1 rounded-md">{t('Complimentary')}</span>
-                                    ) : (
-                                        <span className="text-black">{shippingFee} MAD</span>
-                                    )}
-                                </div>
-
-                                {totalPrice < 500 && (
-                                    <div className="p-4 bg-pixio-yellow rounded-2xl border border-black/5">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-black/60">
-                                            {t('FreeShippingAd', { amount: 500 - totalPrice })}
-                                        </p>
-                                    </div>
-                                )}
-                                <div className="flex justify-between items-center pt-6 border-t border-gray-50">
+                                <div className="flex justify-between items-center pt-2">
                                     <span className="text-[13px] font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
                                     <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} MAD</span>
                                 </div>

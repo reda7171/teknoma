@@ -199,7 +199,8 @@ export default function Header({ user, notificationDropdown, navigation, feature
     }
 
     return (
-        <header className="sticky top-0 z-50 bg-white shadow-sm">
+        <>
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
             <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo - Dynamique ou Style Pixio */}
@@ -324,22 +325,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
                 </div>
             </div>
 
-            {/* Predictive Search - Hidden on specific landing pages and checkout flows */}
-            {(!pathname.includes('/mon-enfant') && 
-              !pathname.includes('/cle-usb') && 
-              !pathname.includes('/community/login') && 
-              !pathname.includes('/community/register') && 
-              !pathname.includes('/community/profile/edit') && 
-              !pathname.includes('/cart') && 
-              !pathname.includes('/checkout')) && (
-                <div className={`${mobileSearchOpen ? 'block' : 'hidden'} md:block py-3 bg-[#FDFBF7] shadow-sm md:shadow-none`} suppressHydrationWarning>
-                    <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
-                        <div className="max-w-3xl mx-auto">
-                            <PredictiveSearch />
-                        </div>
-                    </div>
-                </div>
-            )}
+
 
             {/* Global Menu Drawer (Mobile & Desktop) */}
             {mobileMenuOpen && (
@@ -433,5 +419,24 @@ export default function Header({ user, notificationDropdown, navigation, feature
             {/* Mobile Bottom Navigation */}
             <MobileBottomNav onMenuClick={() => setMobileMenuOpen(true)} />
         </header>
+        {/* Spacer pour compenser le header fixe (h-20 = 80px) */}
+        <div className="h-20" />
+        {/* Barre de recherche - hors du header fixe, défile avec la page */}
+        {(!pathname.includes('/mon-enfant') &&
+          !pathname.includes('/cle-usb') &&
+          !pathname.includes('/community/login') &&
+          !pathname.includes('/community/register') &&
+          !pathname.includes('/community/profile/edit') &&
+          !pathname.includes('/cart') &&
+          !pathname.includes('/checkout')) && (
+            <div className={`${mobileSearchOpen ? 'block' : 'hidden'} md:block py-3 bg-[#FDFBF7] shadow-sm`} suppressHydrationWarning>
+                <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
+                    <div className="max-w-3xl mx-auto">
+                        <PredictiveSearch />
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     )
 }

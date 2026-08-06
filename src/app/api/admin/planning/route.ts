@@ -20,7 +20,16 @@ export async function POST(req: NextRequest) {
     try {
         await verifyAdmin()
         const body = await req.json()
-        const { date, time, content, platforms, mediaUrl } = body
+        const { date, time, content, platforms, mediaUrl, suggestedProductId, suggestedProductType } = body
+
+        // If a suggested product was used, flag it as promoted
+        if (suggestedProductId && suggestedProductType) {
+            if (suggestedProductType === 'pack') {
+                await prisma.pack.update({ where: { id: suggestedProductId }, data: { isPromoted: true } }).catch(() => {})
+            } else {
+                await prisma.book.update({ where: { id: suggestedProductId }, data: { isPromoted: true } }).catch(() => {})
+            }
+        }
 
         // 1. Sauvegarder en DB avec status PUBLISHED (pour que le cron l'ignore, vu qu'on l'envoie à n8n directement)
         const post = await prisma.scheduledPost.create({
