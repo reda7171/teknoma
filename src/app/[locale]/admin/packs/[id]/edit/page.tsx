@@ -28,7 +28,11 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
             pack={{
                 id: pack.id,
                 name: pack.name,
+                nameFr: (pack as any).nameFr || '',
+                nameEn: (pack as any).nameEn || '',
                 description: pack.description || '',
+                descriptionFr: (pack as any).descriptionFr || '',
+                descriptionEn: (pack as any).descriptionEn || '',
                 price: pack.price,
                 originalPrice: pack.originalPrice,
                 image: pack.image || '',

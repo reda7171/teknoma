@@ -9,7 +9,11 @@ import { createAuditLog } from './audit'
 // Schéma de validation pour un pack
 const PackSchema = z.object({
     name: z.string().min(1, 'Le nom est requis'),
+    nameFr: z.string().optional(),
+    nameEn: z.string().optional(),
     description: z.string().optional(),
+    descriptionFr: z.string().optional(),
+    descriptionEn: z.string().optional(),
     price: z.number().min(0),
     originalPrice: z.number().min(0).nullable().optional(),
     image: z.string().min(1, 'L\'image est requise').optional(),
@@ -157,7 +161,11 @@ export async function updatePack(
                 where: { id },
                 data: {
                     name: validatedData.name,
+                    nameFr: validatedData.nameFr,
+                    nameEn: validatedData.nameEn,
                     description: validatedData.description,
+                    descriptionFr: validatedData.descriptionFr,
+                    descriptionEn: validatedData.descriptionEn,
                     price: validatedData.price,
                     originalPrice: validatedData.originalPrice,
                     image: validatedData.image,

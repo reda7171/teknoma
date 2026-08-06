@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, ImageIcon, Wand2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
 import { publishBooksToJumia } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
@@ -25,12 +25,17 @@ interface PackEditFormProps {
     pack: {
         id: string
         name: string
+        nameFr?: string
+        nameEn?: string
         description: string
+        descriptionFr?: string
+        descriptionEn?: string
         price: number
         originalPrice?: number | null
         image: string
         isFreeDelivery: boolean
         shippingFees: number
+        sellerSku?: string
         selectedBookIds: string[]
     }
     books: Book[]
@@ -47,12 +52,20 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [isFreeDelivery, setIsFreeDelivery] = useState(pack.isFreeDelivery)
     const [shippingFees, setShippingFees] = useState(pack.shippingFees || 30)
     const [searchQuery, setSearchQuery] = useState('')
-    const [name, setName] = useState(pack.name)
-    const [description, setDescription] = useState(pack.description)
-    const [packImage, setPackImage] = useState(pack.image)
     const [onlyAvailable, setOnlyAvailable] = useState(true)
     const [isCatalogOpen, setIsCatalogOpen] = useState(false)
-    const [isCreativeOpen, setIsCreativeOpen] = useState(false)
+    const [packImage, setPackImage] = useState(pack.image)
+
+    // Champs multilingues
+    const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
+    const [name, setName] = useState(pack.name)
+    const [nameFr, setNameFr] = useState(pack.nameFr || '')
+    const [nameEn, setNameEn] = useState(pack.nameEn || '')
+    const [description, setDescription] = useState(pack.description)
+    const [descriptionFr, setDescriptionFr] = useState(pack.descriptionFr || '')
+    const [descriptionEn, setDescriptionEn] = useState(pack.descriptionEn || '')
+    const [isTranslating, setIsTranslating] = useState(false)
+    const [translateMsg, setTranslateMsg] = useState<string | null>(null)
 
     function toggleBook(bookId: string) {
         setSelectedBooks(prev =>
@@ -73,11 +86,33 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     function toggleAllInCategory(categoryBooks: Book[]) {
         const categoryBookIds = categoryBooks.map(b => b.id)
         const allSelected = categoryBookIds.every(id => selectedBooks.includes(id))
-        
         if (allSelected) {
             setSelectedBooks(prev => prev.filter(id => !categoryBookIds.includes(id)))
         } else {
             setSelectedBooks(prev => Array.from(new Set([...prev, ...categoryBookIds])))
+        }
+    }
+
+    // Traduction automatique AR → FR + EN via DeepL
+    async function handleAutoTranslate() {
+        setIsTranslating(true)
+        setTranslateMsg(null)
+        try {
+            const res = await fetch('/api/admin/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: 'book', title: name, description, sourceLang: 'AR' })
+            })
+            const data = await res.json()
+            if (data.titleFr) setNameFr(data.titleFr)
+            if (data.titleEn) setNameEn(data.titleEn)
+            if (data.descriptionFr) setDescriptionFr(data.descriptionFr)
+            if (data.descriptionEn) setDescriptionEn(data.descriptionEn)
+            setTranslateMsg('Traduction terminée !')
+        } catch {
+            setTranslateMsg('Erreur lors de la traduction.')
+        } finally {
+            setIsTranslating(false)
         }
     }
 
@@ -95,11 +130,15 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
         const formData = new FormData(e.currentTarget)
 
         const input: PackInput = {
-            name: formData.get('name') as string,
-            description: formData.get('description') as string || undefined,
+            name,
+            nameFr: nameFr || undefined,
+            nameEn: nameEn || undefined,
+            description: description || undefined,
+            descriptionFr: descriptionFr || undefined,
+            descriptionEn: descriptionEn || undefined,
             price: Math.round(parseFloat(formData.get('price') as string)),
             originalPrice: formData.get('originalPrice') ? Math.round(parseFloat(formData.get('originalPrice') as string)) : undefined,
-            image: formData.get('image') as string || undefined,
+            image: formData.get('image') as string || packImage || undefined,
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
             bookIds: selectedBooks,
@@ -127,7 +166,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             } else {
                 alert('Erreur: ' + res.message)
             }
-        } catch (err) {
+        } catch {
             alert('Erreur technique lors de la publication')
         } finally {
             setIsPushingJumia(false)
@@ -137,41 +176,41 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const selectedBooksData = books.filter(b => selectedBooks.includes(b.id))
     const totalOriginalPrice = Math.round(selectedBooksData.reduce((sum, b) => sum + b.price, 0))
 
-    // Filter and group books
     const filteredBooks = books.filter(book => {
-        const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                             book.author.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            book.author.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesAvailability = onlyAvailable ? (book.active && book.stock > 0) : true
         return matchesSearch && matchesAvailability
     })
 
     const groupedBooks = filteredBooks.reduce((acc, book) => {
         const category = book.category || 'Non catégorisé'
-        if (!acc[category]) {
-            acc[category] = []
-        }
+        if (!acc[category]) acc[category] = []
         acc[category].push(book)
         return acc
     }, {} as Record<string, typeof books>)
+
+    // Onglets langue
+    const langTabs = [
+        { key: 'ar' as const, label: 'العربية', flag: '🇲🇦' },
+        { key: 'fr' as const, label: 'Français', flag: '🇫🇷' },
+        { key: 'en' as const, label: 'English', flag: '🇬🇧' },
+    ]
 
     return (
         <div>
             {/* Header */}
             <div className="mb-8">
-                <Link
-                    href="/admin/packs"
-                    className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
-                >
+                <Link href="/admin/packs" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Retour à la liste
                 </Link>
                 <h1 className="text-3xl font-bold text-gray-900">Modifier le pack</h1>
                 <p className="mt-2 text-sm text-gray-600">
-                    Modifiez les informations du pack "{pack.name}"
+                    Modifiez les informations du pack &quot;{pack.name}&quot;
                 </p>
             </div>
 
-            {/* Error */}
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-600">{error}</p>
@@ -179,47 +218,119 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             )}
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column - Pack Info */}
+                {/* Left Column */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Pack Details */}
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations du Pack</h2>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-gray-900">Informations du Pack</h2>
+                            {/* Onglets langue */}
+                            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+                                {langTabs.map(tab => (
+                                    <button
+                                        key={tab.key}
+                                        type="button"
+                                        onClick={() => setCurrentLang(tab.key)}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${currentLang === tab.key ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                    >
+                                        <span>{tab.flag}</span>
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Bouton traduction */}
+                        <div className="flex items-center gap-3 mb-4">
+                            <button
+                                type="button"
+                                onClick={handleAutoTranslate}
+                                disabled={isTranslating}
+                                className="flex items-center gap-1.5 text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                            >
+                                {isTranslating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Languages className="w-3 h-3" />}
+                                {isTranslating ? 'Traduction...' : 'Traduire avec DeepL (AR → FR + EN)'}
+                            </button>
+                            {translateMsg && (
+                                <span className={`text-xs px-2 py-1 rounded ${translateMsg.includes('Erreur') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}`}>
+                                    {translateMsg}
+                                </span>
+                            )}
+                        </div>
 
                         <div className="space-y-4">
-                            {/* Name */}
+                            {/* Nom */}
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Nom du pack <span className="text-red-500">*</span>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Nom du pack {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    required
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Ex: Pack Développement Personnel"
-                                />
+                                {currentLang === 'ar' && (
+                                    <input
+                                        type="text"
+                                        required
+                                        value={name}
+                                        onChange={e => setName(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="اسم الحزمة"
+                                        dir="rtl"
+                                    />
+                                )}
+                                {currentLang === 'fr' && (
+                                    <input
+                                        type="text"
+                                        value={nameFr}
+                                        onChange={e => setNameFr(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Nom du pack en français"
+                                    />
+                                )}
+                                {currentLang === 'en' && (
+                                    <input
+                                        type="text"
+                                        value={nameEn}
+                                        onChange={e => setNameEn(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Pack name in English"
+                                    />
+                                )}
                             </div>
 
                             {/* Description */}
                             <div>
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Description
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'}
                                 </label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    rows={3}
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Description du pack..."
-                                />
+                                {currentLang === 'ar' && (
+                                    <textarea
+                                        rows={3}
+                                        value={description}
+                                        onChange={e => setDescription(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="وصف الحزمة..."
+                                        dir="rtl"
+                                    />
+                                )}
+                                {currentLang === 'fr' && (
+                                    <textarea
+                                        rows={3}
+                                        value={descriptionFr}
+                                        onChange={e => setDescriptionFr(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Description du pack en français..."
+                                    />
+                                )}
+                                {currentLang === 'en' && (
+                                    <textarea
+                                        rows={3}
+                                        value={descriptionEn}
+                                        onChange={e => setDescriptionEn(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Pack description in English..."
+                                    />
+                                )}
                             </div>
 
-                            {/* Original Price */}
+                            {/* Prix barré */}
                             <div>
                                 <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 mb-2">
                                     Prix de vente (MAD) <span className="text-gray-400 text-xs">(Optionnel, affiché barré)</span>
@@ -231,7 +342,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     min="0"
                                     step="1"
                                     defaultValue={pack.originalPrice ? Math.round(pack.originalPrice) : ''}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                     placeholder="500"
                                 />
                                 {selectedBooks.length > 0 && (
@@ -241,7 +352,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                 )}
                             </div>
 
-                            {/* Price */}
+                            {/* Prix promo */}
                             <div>
                                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
                                     Prix de promotion (MAD) <span className="text-red-500">*</span>
@@ -254,7 +365,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     min="0"
                                     step="1"
                                     defaultValue={Math.round(pack.price)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                     placeholder="450"
                                 />
                             </div>
@@ -269,15 +380,15 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                         type="text"
                                         id="sellerSku"
                                         name="sellerSku"
-                                        defaultValue={(pack as any).sellerSku || ''}
-                                        className="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        defaultValue={pack.sellerSku || ''}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                                         placeholder="SKU vendeur pour synchronisation"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            const input = document.getElementById('sellerSku') as HTMLInputElement;
-                                            if (input) input.value = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                                            const input = document.getElementById('sellerSku') as HTMLInputElement
+                                            if (input) input.value = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
                                         }}
                                         className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                                     >
@@ -289,9 +400,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             {/* Image */}
                             <div className="space-y-4">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Image du pack
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-700">Image du pack</label>
                                     <div className="flex flex-wrap gap-2">
                                         <button
                                             type="button"
@@ -311,10 +420,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                         </button>
                                     </div>
                                 </div>
-                                <ImageInput 
-                                    defaultValue={packImage} 
-                                    bookTitle={pack.name} 
-                                />
+                                <ImageInput defaultValue={packImage} bookTitle={pack.name} />
                             </div>
 
                             {/* Livraison */}
@@ -325,22 +431,15 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                             type="checkbox"
                                             id="isFreeDelivery"
                                             checked={isFreeDelivery}
-                                            onChange={(e) => setIsFreeDelivery(e.target.checked)}
+                                            onChange={e => setIsFreeDelivery(e.target.checked)}
                                             className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                         />
                                         <label htmlFor="isFreeDelivery" className="text-sm font-bold text-gray-700 cursor-pointer">
                                             Livraison gratuite
                                         </label>
                                     </div>
-
                                     {isFreeDelivery ? (
-                                        <div className="flex items-center gap-3 px-2 py-1 select-none">
-                                            <span className="text-4xl filter drop-shadow-lg">🚚</span>
-                                            <div className="flex flex-col">
-                                                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 leading-none mb-1">Livraison</p>
-                                                <p className="text-xs font-black text-green-500 leading-none">GRATUITE</p>
-                                            </div>
-                                        </div>
+                                        <span className="text-2xl">🚚 <span className="text-xs font-black text-green-500">GRATUITE</span></span>
                                     ) : (
                                         <div className="flex items-center gap-3">
                                             <label htmlFor="shippingFees" className="text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -349,13 +448,11 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                             <select
                                                 id="shippingFees"
                                                 value={shippingFees}
-                                                onChange={(e) => setShippingFees(Number(e.target.value))}
+                                                onChange={e => setShippingFees(Number(e.target.value))}
                                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm font-bold"
                                             >
-                                                {[20, 30, 35, 40, 45].map((fee) => (
-                                                    <option key={fee} value={fee}>
-                                                        {fee} MAD
-                                                    </option>
+                                                {[20, 30, 35, 40, 45].map(fee => (
+                                                    <option key={fee} value={fee}>{fee} MAD</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -365,7 +462,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                         </div>
                     </div>
 
-                    {/* Book Selection */}
+                    {/* Sélection des livres */}
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                             <div>
@@ -373,39 +470,27 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     Sélectionner les livres ({selectedBooks.length} sélectionné{selectedBooks.length > 1 ? 's' : ''})
                                 </h2>
                                 <div className="flex items-center gap-4 mt-1">
-                                    <button
-                                        type="button"
-                                        onClick={toggleAll}
-                                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                                    >
+                                    <button type="button" onClick={toggleAll} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
                                         {selectedBooks.length === books.length ? 'Tout désélectionner' : 'Tout sélectionner'}
                                     </button>
                                     <label className="flex items-center gap-2 cursor-pointer group ml-4">
                                         <div className="relative">
-                                            <input
-                                                type="checkbox"
-                                                checked={onlyAvailable}
-                                                onChange={(e) => setOnlyAvailable(e.target.checked)}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 shadow-inner"></div>
+                                            <input type="checkbox" checked={onlyAvailable} onChange={e => setOnlyAvailable(e.target.checked)} className="sr-only peer" />
+                                            <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 shadow-inner" />
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-green-600 transition-colors">Disponible</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Disponible</span>
                                     </label>
                                 </div>
                             </div>
-                            <div className="w-full sm:w-64">
-                                <input 
-                                    type="text" 
-                                    placeholder="Rechercher par titre ou auteur..." 
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                />
-                            </div>
+                            <input
+                                type="text"
+                                placeholder="Rechercher..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                            />
                         </div>
-
-                        <div className="max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="max-h-96 overflow-y-auto pr-2">
                             {Object.entries(groupedBooks).length === 0 ? (
                                 <p className="text-center text-gray-500 py-8">Aucun livre trouvé</p>
                             ) : (
@@ -415,22 +500,15 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
                                                 {category} ({categoryBooks.length})
                                             </h3>
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleAllInCategory(categoryBooks)}
-                                                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                            >
+                                            <button type="button" onClick={() => toggleAllInCategory(categoryBooks)} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
                                                 {categoryBooks.every(b => selectedBooks.includes(b.id)) ? 'Tout désélectionner' : 'Tout sélectionner'}
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {categoryBooks.map((book) => (
+                                            {categoryBooks.map(book => (
                                                 <label
                                                     key={book.id}
-                                                    className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all ${selectedBooks.includes(book.id)
-                                                            ? 'border-blue-600 bg-blue-50'
-                                                            : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                                                        }`}
+                                                    className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all ${selectedBooks.includes(book.id) ? 'border-blue-600 bg-blue-50' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'}`}
                                                 >
                                                     <input
                                                         type="checkbox"
@@ -441,15 +519,11 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                                     <div className="ml-4 flex-1">
                                                         <p className="text-sm font-black text-gray-900 leading-tight">
                                                             {book.title}
-                                                            {!book.active && (
-                                                                <span className="ml-2 px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Inactif</span>
-                                                            )}
+                                                            {!book.active && <span className="ml-2 px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Inactif</span>}
                                                         </p>
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                                                             {book.author}
-                                                            <span className={`ml-3 ${book.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                                Stock: {book.stock}
-                                                            </span>
+                                                            <span className={`ml-3 ${book.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>Stock: {book.stock}</span>
                                                         </p>
                                                     </div>
                                                     <span className="text-sm font-black text-black ml-2">{Math.round(book.price)} MAD</span>
@@ -463,11 +537,10 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                     </div>
                 </div>
 
-                {/* Right Column - Summary */}
+                {/* Right Column */}
                 <div className="lg:col-span-1">
                     <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Résumé</h2>
-
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Livres sélectionnés:</span>
@@ -483,10 +556,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             <div className="mb-6">
                                 <p className="text-sm font-medium text-gray-700 mb-2">Livres inclus:</p>
                                 <ul className="space-y-1">
-                                    {selectedBooksData.map((book) => (
-                                        <li key={book.id} className="text-xs text-gray-600">
-                                            • {book.title}
-                                        </li>
+                                    {selectedBooksData.map(book => (
+                                        <li key={book.id} className="text-xs text-gray-600">• {book.title}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -524,10 +595,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             >
                                 ✨ Générer Story (FB/Insta)
                             </button>
-                            <Link
-                                href="/admin/packs"
-                                className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                            >
+                            <Link href="/admin/packs" className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                                 Annuler
                             </Link>
                         </div>
@@ -539,27 +607,14 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                 isOpen={creativeFormat !== null}
                 onClose={() => setCreativeFormat(null)}
                 format={creativeFormat!}
-                onImageGenerated={(url) => {
-                    setPackImage(url)
-                    setCreativeFormat(null)
-                }}
-                pack={{
-                    id: pack.id,
-                    name: name,
-                    description: description,
-                    ...pack,
-                    books: selectedBooksData,
-                    whatsappNumber: whatsappPhone
-                }}
+                onImageGenerated={url => { setPackImage(url); setCreativeFormat(null) }}
+                pack={{ id: pack.id, name, description, ...pack, books: selectedBooksData, whatsappNumber: whatsappPhone }}
             />
 
             <CatalogImageModal
                 isOpen={isCatalogOpen}
                 onClose={() => setIsCatalogOpen(false)}
-                onSelect={(url) => {
-                    setPackImage(url)
-                    setIsCatalogOpen(false)
-                }}
+                onSelect={url => { setPackImage(url); setIsCatalogOpen(false) }}
             />
         </div>
     )

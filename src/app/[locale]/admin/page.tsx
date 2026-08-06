@@ -8,33 +8,46 @@ import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import { getSetting } from '@/lib/actions/site-settings'
 import ScanRetourButton from '@/components/admin/ScanRetourButton'
+import BubbleToggle from '@/components/admin/BubbleToggle'
+import StatsGridController from '@/components/admin/StatsGridController'
 
 async function getStats() {
-    const [booksCount, packsCount, ordersCount, totalRevenue, deliveredCount, pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount] = await Promise.all([
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+
+    const [
+        booksCount, packsCount, ordersCount, totalRevenue, deliveredCount,
+        pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount,
+        shippedOrders, confirmedOrders, ordersToday, revenueMonth, returnedCount,
+        stockValueRaw, booksNoImage
+    ] = await Promise.all([
         prisma.book.count({ where: { active: true } }),
         prisma.pack.count({ where: { active: true } }),
-        prisma.order.count({ where: { status: { notIn: ['CANCELLED', 'RETURNED'] } } }), // Commandes valides
-        prisma.order.aggregate({ 
-            where: { status: 'DELIVERED' }, 
-            _sum: { total: true } 
-        }),
-        // Commandes livrées pour le taux de conversion
+        prisma.order.count({ where: { status: { notIn: ['CANCELLED', 'RETURNED'] } } }),
+        prisma.order.aggregate({ where: { status: 'DELIVERED' }, _sum: { total: true } }),
         prisma.order.count({ where: { status: 'DELIVERED' } }),
-        // Nouveaux KPIs:
         prisma.order.count({ where: { status: 'PENDING' } }),
         prisma.user.count(),
         prisma.book.count({ where: { active: true, stock: 0 } }),
         prisma.order.count({ where: { status: { in: ['CANCELLED', 'RETURNED'] } } }),
-        prisma.order.count()
+        prisma.order.count(),
+        // Nouveaux KPIs
+        prisma.order.count({ where: { status: 'SHIPPED' } }),
+        prisma.order.count({ where: { status: 'CONFIRMED' } }),
+        prisma.order.count({ where: { createdAt: { gte: today } } }),
+        prisma.order.aggregate({ where: { createdAt: { gte: firstDayOfMonth }, status: 'DELIVERED' }, _sum: { total: true } }),
+        prisma.order.count({ where: { status: 'RETURNED' } }),
+        prisma.book.aggregate({ where: { active: true }, _sum: { stock: true } }),
+        prisma.book.count({ where: { active: true, image: '' } }),
     ])
 
     const totalRev = totalRevenue._sum.total || 0
-    // Panier moyen = CA / nombre de commandes livrées
     const panierMoyen = deliveredCount > 0 ? totalRev / deliveredCount : 0
-    // Taux conversion = livrées / total des commandes valides (hors annulées/retournées)
     const tauxConversion = ordersCount > 0 ? (deliveredCount / ordersCount) * 100 : 0
-    // Taux d'annulation = annulées+retournées / total des commandes
     const tauxAnnulation = totalOrdersCount > 0 ? (cancelledCount / totalOrdersCount) * 100 : 0
+    const revenueMois = revenueMonth._sum.total || 0
+    const stockTotal = stockValueRaw._sum.stock || 0
 
     return {
         booksCount,
@@ -46,7 +59,14 @@ async function getStats() {
         pendingOrders,
         totalUsers,
         outOfStockBooks,
-        tauxAnnulation
+        tauxAnnulation,
+        shippedOrders,
+        confirmedOrders,
+        ordersToday,
+        revenueMois,
+        returnedCount,
+        stockTotal,
+        booksNoImage,
     }
 }
 
@@ -211,68 +231,27 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const jumiaStats = await getJumiaStats()
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
 
+
     const statCards = [
-        {
-            name: 'Livres Actifs',
-            value: stats.booksCount,
-            icon: BookOpen,
-            color: 'blue',
-        },
-        {
-            name: 'Packs Actifs',
-            value: stats.packsCount,
-            icon: Package,
-            color: 'amber',
-        },
-        {
-            name: 'Commandes',
-            value: stats.ordersCount,
-            icon: ShoppingCart,
-            color: 'green',
-        },
-        {
-            name: 'En Attente',
-            value: stats.pendingOrders,
-            icon: Clock,
-            color: 'yellow',
-        },
-        {
-            name: 'Chiffre d\'affaires',
-            value: `${stats.totalRevenue.toFixed(0)} MAD`,
-            icon: TrendingUp,
-            color: 'orange',
-        },
-        {
-            name: 'Panier Moyen',
-            value: `${stats.panierMoyen.toFixed(0)} MAD`,
-            icon: ShoppingBag,
-            color: 'rose',
-        },
-        {
-            name: 'Utilisateurs',
-            value: stats.totalUsers,
-            icon: Users,
-            color: 'blue',
-        },
-        {
-            name: 'Ruptures Stock',
-            value: stats.outOfStockBooks,
-            icon: AlertTriangle,
-            color: 'red',
-        },
-        {
-            name: 'Taux Conversion',
-            value: `${stats.tauxConversion.toFixed(1)}%`,
-            icon: BarChart2,
-            color: 'teal',
-        },
-        {
-            name: 'Taux Annulation',
-            value: `${stats.tauxAnnulation.toFixed(1)}%`,
-            icon: XOctagon,
-            color: 'gray',
-        },
+        { name: 'Livres Actifs',        value: stats.booksCount,                        iconName: 'BookOpen',    color: 'blue'   },
+        { name: 'Packs Actifs',         value: stats.packsCount,                        iconName: 'Package',     color: 'amber'  },
+        { name: 'Commandes',            value: stats.ordersCount,                       iconName: 'ShoppingCart',color: 'green'  },
+        { name: 'En Attente',           value: stats.pendingOrders,                     iconName: 'Clock',       color: 'yellow' },
+        { name: "Chiffre d'affaires",   value: `${stats.totalRevenue.toFixed(0)} MAD`,  iconName: 'TrendingUp',  color: 'orange' },
+        { name: 'Panier Moyen',         value: `${stats.panierMoyen.toFixed(0)} MAD`,   iconName: 'ShoppingBag', color: 'rose'   },
+        { name: 'Utilisateurs',         value: stats.totalUsers,                        iconName: 'Users',       color: 'blue'   },
+        { name: 'Ruptures Stock',       value: stats.outOfStockBooks,                   iconName: 'AlertTriangle',color: 'red'   },
+        { name: 'Taux Conversion',      value: `${stats.tauxConversion.toFixed(1)}%`,   iconName: 'BarChart2',   color: 'teal'   },
+        { name: 'Taux Annulation',      value: `${stats.tauxAnnulation.toFixed(1)}%`,   iconName: 'XOctagon',    color: 'gray'   },
+        { name: "Cmd Aujourd'hui",      value: stats.ordersToday,                       iconName: 'CalendarDays',color: 'teal'   },
+        { name: 'En Livraison',         value: stats.shippedOrders,                     iconName: 'Truck',       color: 'cyan'   },
+        { name: 'Confirmées',           value: stats.confirmedOrders,                   iconName: 'CheckCircle', color: 'green'  },
+        { name: 'CA du mois',           value: `${stats.revenueMois.toFixed(0)} MAD`,   iconName: 'TrendingUp',  color: 'orange' },
+        { name: 'Retours',              value: stats.returnedCount,                     iconName: 'RefreshCw',   color: 'rose'   },
+        { name: 'Stock Total',          value: stats.stockTotal,                        iconName: 'Archive',     color: 'amber'  },
+        { name: 'Sans Image',           value: stats.booksNoImage,                      iconName: 'ImageOff',    color: 'red'    },
     ]
+
 
     const colorClasses = {
         blue: 'bg-blue-100 text-blue-600',
@@ -284,6 +263,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         yellow: 'bg-yellow-100 text-yellow-600',
         red: 'bg-red-100 text-red-600',
         gray: 'bg-gray-100 text-gray-600',
+        cyan: 'bg-cyan-100 text-cyan-600',
     }
 
     const statusColors = {
@@ -337,30 +317,12 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                         n8n Server
                     </a>
                     <ScanRetourButton />
+                    <BubbleToggle stats={statCards.map(s => ({ name: s.name, value: s.value, color: s.color }))} />
                 </div>
             </div>
 
-            {/* Stats Grid Premium */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                {statCards.map((stat, i) => {
-                    const Icon = stat.icon
-                    return (
-                        <div key={stat.name} className="group bg-white rounded-3xl sm:rounded-[2.5rem] border border-gray-100 p-6 sm:p-8 shadow-xl shadow-black/5 hover:-translate-y-1 transition-all relative overflow-hidden">
-                            <div className="flex flex-col relative z-10">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{stat.name}</p>
-                                <p className="text-3xl font-black text-black tracking-tighter mb-4">{stat.value}</p>
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg ${colorClasses[stat.color as keyof typeof colorClasses]} shadow-current/10`}>
-                                    <Icon className="w-5 h-5" />
-                                </div>
-                            </div>
-                            <div className="mt-6 pt-4 border-t border-gray-50 flex items-center gap-2">
-                                <span className="text-[10px] font-black text-emerald-500 italic">+12%</span>
-                                <span className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">vs mois dernier</span>
-                            </div>
-                        </div>
-                    )
-                })}
-            </div>
+            {/* Stats Grid Premium - controllable */}
+            <StatsGridController cards={statCards} colorClasses={colorClasses} />
 
             {/* Charts Section */}
             <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-4 sm:p-6 lg:p-10">
