@@ -33,6 +33,11 @@ export async function GET(req: NextRequest) {
         params.append('grant_type', 'authorization_code');
         params.append('redirect_uri', redirectUri);
 
+        const codeVerifier = req.cookies.get('tiktok_code_verifier')?.value;
+        if (codeVerifier) {
+            params.append('code_verifier', codeVerifier);
+        }
+
         const response = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', params.toString(), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

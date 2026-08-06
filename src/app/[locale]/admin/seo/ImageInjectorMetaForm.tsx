@@ -73,10 +73,10 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
             if (res.ok && data.success) {
                 setMessage(`${data.count || Object.keys(edits).length} métadonnées d'images ont été enregistrées !`)
             } else {
-                setMessage('Erreur lors de la sauvegarde.')
+                setMessage('Erreur: ' + (data.error || 'Statut ' + res.status))
             }
-        } catch {
-            setMessage('Erreur lors de la sauvegarde.')
+        } catch (e: any) {
+            setMessage('Erreur de requête: ' + e.message)
         } finally {
             setSaving(null)
         }
