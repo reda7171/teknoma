@@ -367,8 +367,8 @@ export async function publishPacksToJumia(packIds: string[]) {
                         { language: "FR", value: descFr }
                     ]
                 },
-                parentSku: pack.id,
-                sellerSku: pack.sellerSku || pack.id,
+                parentSku: pack.id + "_v2",
+                sellerSku: (pack.sellerSku || pack.id) + "_v2",
                 variation: "1",
                 brand: {
                     code: 1045133,
@@ -387,7 +387,7 @@ export async function publishPacksToJumia(packIds: string[]) {
                     value: Math.ceil((pack.originalPrice || pack.price) * markupMultiplier),
                     salePrice: pack.originalPrice ? {
                         value: Math.ceil(pack.price * markupMultiplier),
-                        startAt: new Date().toISOString().split('T')[0],
+                        startAt: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Demain
                         endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
                     } : undefined
                 },
@@ -404,11 +404,15 @@ export async function publishPacksToJumia(packIds: string[]) {
                     {
                         name: "product_weight",
                         value: "1.5"
+                    },
+                    {
+                        name: "isbn",
+                        value: "0000000000"
                     }
                 ]
             };
             
-            let productId = null;
+            /*let productId = null;
             try {
                 const jumiaProd = await jumia.getProducts({ sellerSku: payload.sellerSku });
                 productId = jumiaProd?.products?.[0]?.id || jumiaProd?.products?.[0]?.sid || jumiaProd?.data?.[0]?.sid || jumiaProd?.[0]?.sid;
@@ -417,11 +421,11 @@ export async function publishPacksToJumia(packIds: string[]) {
             }
             
             if (productId) {
-                payload.id = productId;
+                // payload.id = productId; // Let Jumia match by sellerSku
                 productsToUpdate.push(payload);
-            } else {
+            } else {*/
                 productsToCreate.push(payload);
-            }
+            //}
         }
 
         let createResponse: any = null;

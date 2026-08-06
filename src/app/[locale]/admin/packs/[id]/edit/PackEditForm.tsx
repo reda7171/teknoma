@@ -8,6 +8,7 @@ import { updatePack, type PackInput } from '@/lib/actions/packs'
 import { publishPacksToJumia } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
+import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import CatalogImageModal from '@/components/admin/CatalogImageModal'
 
 interface Book {
@@ -46,8 +47,11 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [isPushingJumia, setIsPushingJumia] = useState(false)
+    const [isGeneratingDesc, setIsGeneratingDesc] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false)
+    const [mediaModalTab, setMediaModalTab] = useState<'marketing' | 'books'>('books')
     const [selectedBooks, setSelectedBooks] = useState<string[]>(pack.selectedBookIds)
     const [isFreeDelivery, setIsFreeDelivery] = useState(pack.isFreeDelivery)
     const [shippingFees, setShippingFees] = useState(pack.shippingFees || 30)
@@ -113,6 +117,34 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             setTranslateMsg('Erreur lors de la traduction.')
         } finally {
             setIsTranslating(false)
+        }
+    }
+
+    const generateDescription = () => {
+        const packName = currentLang === 'ar' ? name : currentLang === 'fr' ? (nameFr || name) : (nameEn || name);
+        if (!packName) {
+            alert('Veuillez d\'abord saisir un nom pour le pack.');
+            return;
+        }
+
+        const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
+        if (selectedBooksData.length === 0) {
+            alert('Veuillez d\'abord sélectionner au moins un livre pour ce pack.');
+            return;
+        }
+
+        const booksListText = selectedBooksData.map(b => `- ${b.title} (écrit par ${b.author})`).join('\n');
+        
+        let generatedText = '';
+        if (currentLang === 'ar') {
+            generatedText = `استفد من باقتنا الحصرية: "${packName}"!\n\nتحتوي هذه الباقة على الكتب التالية:\n${booksListText}\n\nاطلبها الآن بأفضل سعر!`;
+            setDescription(generatedText);
+        } else if (currentLang === 'fr') {
+            generatedText = `Profitez de notre pack exclusif : "${packName}" !\n\nCe pack contient les livres suivants :\n${booksListText}\n\nCommandez dès maintenant au meilleur prix !`;
+            setDescriptionFr(generatedText);
+        } else {
+            generatedText = `Enjoy our exclusive pack: "${packName}"!\n\nThis pack contains the following books:\n${booksListText}\n\nOrder now at the best price!`;
+            setDescriptionEn(generatedText);
         }
     }
 
@@ -297,9 +329,18 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
 
                             {/* Description */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Description {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'}
-                                </label>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Description {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'}
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={generateDescription}
+                                        className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100"
+                                    >
+                                        ✨ Générer la description
+                                    </button>
+                                </div>
                                 {currentLang === 'ar' && (
                                     <textarea
                                         rows={3}
@@ -404,7 +445,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     <div className="flex flex-wrap gap-2">
                                         <button
                                             type="button"
-                                            onClick={() => setIsCatalogOpen(true)}
+                                            onClick={() => { setMediaModalTab('books'); setIsMediaModalOpen(true); }}
                                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
                                         >
                                             <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
@@ -412,7 +453,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setCreativeFormat('post')}
+                                            onClick={() => { setMediaModalTab('marketing'); setIsMediaModalOpen(true); }}
                                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
                                         >
                                             <Wand2 className="w-3.5 h-3.5 mr-1.5" />
@@ -615,6 +656,16 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                 isOpen={isCatalogOpen}
                 onClose={() => setIsCatalogOpen(false)}
                 onSelect={url => { setPackImage(url); setIsCatalogOpen(false) }}
+            />
+
+            <MediaLibraryModal
+                isOpen={isMediaModalOpen}
+                onClose={() => setIsMediaModalOpen(false)}
+                initialTab={mediaModalTab}
+                onSelect={(url) => {
+                    setPackImage(url)
+                    setIsMediaModalOpen(false)
+                }}
             />
         </div>
     )

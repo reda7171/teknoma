@@ -19,7 +19,7 @@ interface CartClientProps {
 }
 
 export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }: CartClientProps) {
-    const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart } = useCartStore()
+    const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const [mounted, setMounted] = useState(false)
     const [roulettePrize, setRoulettePrize] = useState<string | null>(null)
     const t = useTranslations('CartPage')
@@ -27,7 +27,8 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
     const handleRemove = async (item: any) => {
         removeItem(item.id)
         try {
-            await notifyRemoveFromCart(item.title, item.price, item.type)
+            const newTotal = useCartStore.getState().getTotalPrice()
+            await notifyRemoveFromCart(item.title, item.price, item.type, newTotal, sessionId || undefined)
         } catch (error) {
             console.error('Erreur notification', error)
         }
@@ -39,7 +40,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
         clearCart()
         try {
             if (count > 0) {
-                await notifyClearCart(value, count)
+                await notifyClearCart(value, count, sessionId || undefined)
             }
         } catch (error) {
             console.error('Erreur notification', error)

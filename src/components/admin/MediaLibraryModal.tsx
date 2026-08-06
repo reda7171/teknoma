@@ -15,19 +15,21 @@ interface MediaLibraryModalProps {
     isOpen: boolean
     onClose: () => void
     onSelect: (url: string) => void
+    initialTab?: 'marketing' | 'books'
 }
 
-export default function MediaLibraryModal({ isOpen, onClose, onSelect }: MediaLibraryModalProps) {
-    const [activeTab, setActiveTab] = useState<'marketing' | 'books'>('books')
+export default function MediaLibraryModal({ isOpen, onClose, onSelect, initialTab = 'books' }: MediaLibraryModalProps) {
+    const [activeTab, setActiveTab] = useState<'marketing' | 'books'>(initialTab)
     const [marketingAssets, setMarketingAssets] = useState<Asset[]>([])
     const [bookImages, setBookImages] = useState<Asset[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if (isOpen) {
+            setActiveTab(initialTab)
             fetchAll()
         }
-    }, [isOpen])
+    }, [isOpen, initialTab])
 
     const fetchAll = async () => {
         setLoading(true)
