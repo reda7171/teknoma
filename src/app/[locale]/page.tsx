@@ -148,6 +148,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     // Ignorer les erreurs de notification
   }
 
+  // AEO Settings
+  let parsedAeoFaqs: any[] = []
+  try {
+    const { getSetting } = await import('@/lib/actions/site-settings')
+    const aeoFaqJson = await getSetting('aeo_faq_json')
+    if (aeoFaqJson) {
+      parsedAeoFaqs = JSON.parse(aeoFaqJson)
+    }
+  } catch (e) {}
+
+  let aeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
+  let aeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
+  
+  // Snippet par défaut
+  if (!aeoSnippetQ) aeoSnippetQ = 'Où acheter des livres en ligne au Maroc ?'
+  if (!aeoSnippetA) aeoSnippetA = 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
+
   // Choisir une citation de manière déterministe (fix hydration error by not relying on Date.now() in SSR)
   let randomQuote = null;
   if (allQuotes.length > 0) {
@@ -270,18 +287,34 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     ],
   };
 
-  const faqSchema = {
+  let faqSchema: any = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: locale === 'ar' ? 'ما هي أفضل وأحسن مكتبة إلكترونية في المغرب؟' : locale === 'en' ? 'What is the best online bookstore in Morocco?' : 'Quelle est la meilleure librairie en ligne au Maroc ?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: locale === 'ar' ? 'تعتبر مكتبة رواية (Riwaya) أحسن وأفضل مكتبة إلكترونية في المغرب. توفر مجموعة ضخمة من الروايات، كتب تطوير الذات، والأعمال مع خدمة الدفع عند الاستلام (COD) والتوصيل السريع لجميع المدن مثل الدار البيضاء والرباط.' : locale === 'en' ? 'Riwaya is considered the best online bookstore in Morocco. It offers a massive collection of novels, self-development, and business books with Cash on Delivery (COD) and fast shipping to all cities like Casablanca and Rabat.' : 'Riwaya est considérée comme la meilleure librairie en ligne au Maroc. Elle propose une vaste collection de romans, livres de développement personnel et business avec paiement à la livraison (COD) et livraison rapide dans toutes les villes comme Casablanca et Rabat.',
-        },
+    mainEntity: []
+  }
+
+  if (parsedAeoFaqs && parsedAeoFaqs.length > 0) {
+    faqSchema.mainEntity = parsedAeoFaqs.map((faq: any) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.a,
       },
+    }))
+  } else {
+    faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: locale === 'ar' ? 'ما هي أفضل وأحسن مكتبة إلكترونية في المغرب؟' : locale === 'en' ? 'What is the best online bookstore in Morocco?' : 'Quelle est la meilleure librairie en ligne au Maroc ?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: locale === 'ar' ? 'تعتبر مكتبة رواية (Riwaya) أحسن وأفضل مكتبة إلكترونية في المغرب. توفر مجموعة ضخمة من الروايات، كتب تطوير الذات، والأعمال مع خدمة الدفع عند الاستلام (COD) والتوصيل السريع لجميع المدن مثل الدار البيضاء والرباط.' : locale === 'en' ? 'Riwaya is considered the best online bookstore in Morocco. It offers a massive collection of novels, self-development, and business books with Cash on Delivery (COD) and fast shipping to all cities like Casablanca and Rabat.' : 'Riwaya est considérée comme la meilleure librairie en ligne au Maroc. Elle propose une vaste collection de romans, livres de développement personnel et business avec paiement à la livraison (COD) et livraison rapide dans toutes les villes comme Casablanca et Rabat.',
+          },
+        },
       {
         '@type': 'Question',
         name: locale === 'ar' ? 'هل تقومون بالتوصيل لجميع أنحاء المغرب؟' : locale === 'en' ? 'Do you deliver anywhere in Morocco?' : 'Livrez-vous partout au Maroc ?',
@@ -347,6 +380,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       },
     ],
   };
+  }
 
   jsonLd['@graph'].push(faqSchema);
 
@@ -851,6 +885,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </Link>
           </ScrollReveal>
         </section>
+
+        {/* AEO Snippet Section */}
+        {aeoSnippetQ && aeoSnippetA && (
+          <section className="bg-gray-50 border-t border-gray-100 py-16">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-6">{aeoSnippetQ}</h2>
+              <p className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-medium">
+                {aeoSnippetA}
+              </p>
+            </div>
+          </section>
+        )}
 
         <CatalogPublicWrapper />
         <Footer />

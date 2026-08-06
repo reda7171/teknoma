@@ -357,6 +357,15 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                         </div>
                     </div>
                 </div>
+
+                <div className="flex gap-4 items-center pt-2">
+                    <a 
+                        href="/api/tiktok/auth"
+                        className="px-6 py-3 bg-[#FE2C55] hover:bg-[#e02049] text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
+                    >
+                        Connecter le compte TikTok
+                    </a>
+                </div>
             </div>
 
             {/* --- Pinterest --- */}
@@ -544,7 +553,8 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                         <ul className="space-y-2 text-xs text-gray-600">
                             <li>• Créez une application sur <a href="https://developers.tiktok.com/" className="text-blue-600 underline" target="_blank" rel="noreferrer">TikTok for Developers</a>.</li>
                             <li>• Activez l'API de publication (Content Posting API).</li>
-                            <li>• Renseignez la Client Key (App ID) et le Client Secret ci-dessus.</li>
+                            <li>• Ajoutez <code className="bg-gray-100 px-1 rounded">http://localhost:3000/api/tiktok/callback</code> (ou URL de prod) aux Redirect URIs.</li>
+                            <li>• Renseignez l'App ID et le Client Secret puis cliquez sur "Connecter le compte TikTok".</li>
                         </ul>
                     </div>
 

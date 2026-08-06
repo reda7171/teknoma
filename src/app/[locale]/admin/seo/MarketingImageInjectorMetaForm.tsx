@@ -1,0 +1,308 @@
+'use client'
+
+import { useState } from 'react'
+import { Image as ImageIcon, Search, CheckCircle2, AlertCircle, Loader2, Tag, Download } from 'lucide-react'
+
+interface Asset {
+    id: string
+    name: string
+    url: string
+    type: string
+    altText?: string
+    imageTitle?: string
+}
+
+interface MarketingImageInjectorMetaFormProps {
+    assets: Asset[]
+}
+
+export default function MarketingImageInjectorMetaForm({ assets }: MarketingImageInjectorMetaFormProps) {
+    const [search, setSearch] = useState('')
+    const [saving, setSaving] = useState<string | null>(null)
+    const [saved, setSaved] = useState<Set<string>>(new Set())
+    
+    // New state for EXIF
+    const [injectingExif, setInjectingExif] = useState<string | null>(null)
+    const [exifSuccess, setExifSuccess] = useState<Set<string>>(new Set())
+
+    const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
+        Object.fromEntries(assets.map(a => [a.id, {
+            alt: a.altText || `${a.name} | Riwaya Promotion`,
+            title: a.imageTitle || `Offre spéciale ${a.name} sur Riwaya`,
+            keywords: `${a.name}, marketing, promotion, offre, riwaya, livre`
+        }]))
+    )
+    const [message, setMessage] = useState('')
+
+    const filtered = assets.filter(a =>
+        a.name?.toLowerCase().includes(search.toLowerCase()) ||
+        a.type?.toLowerCase().includes(search.toLowerCase())
+    )
+
+    async function saveAsset(assetId: string) {
+        setSaving(assetId)
+        try {
+            const res = await fetch(`/api/admin/marketing-assets/${assetId}/image-seo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(edits[assetId])
+            })
+            if (res.ok) {
+                setSaved(prev => new Set([...prev, assetId]))
+                setTimeout(() => setSaved(prev => { const n = new Set(prev); n.delete(assetId); return n }), 2000)
+            }
+        } catch (e) {
+            setMessage('Erreur lors de la sauvegarde.')
+        } finally {
+            setSaving(null)
+        }
+    }
+
+    async function saveAll() {
+        setSaving('all')
+        setMessage('')
+        try {
+            const res = await fetch('/api/admin/marketing-assets/image-seo-bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ edits })
+            })
+            if (res.ok) {
+                setMessage('Toutes les métadonnées des images marketing ont été enregistrées !')
+            }
+        } catch {
+            setMessage('Erreur lors de la sauvegarde.')
+        } finally {
+            setSaving(null)
+        }
+    }
+
+    async function injectExif(assetId: string) {
+        setInjectingExif(assetId)
+        try {
+            const res = await fetch(`/api/admin/marketing-assets/${assetId}/exif-inject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: edits[assetId].title,
+                    keywords: edits[assetId].keywords
+                })
+            })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setExifSuccess(prev => new Set([...prev, assetId]))
+                setTimeout(() => setExifSuccess(prev => { const n = new Set(prev); n.delete(assetId); return n }), 3000)
+            } else {
+                alert(data.error || 'Erreur lors de l\'injection EXIF')
+            }
+        } catch (e) {
+            alert('Erreur réseau lors de l\'injection EXIF.')
+        } finally {
+            setInjectingExif(null)
+        }
+    }
+
+    async function injectExifAll() {
+        setInjectingExif('all')
+        setMessage('')
+        try {
+            const res = await fetch('/api/admin/marketing-assets/exif-inject-bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ edits })
+            })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setMessage(`L'injection EXIF a été effectuée sur ${data.count} images !`)
+            } else {
+                setMessage('Erreur lors de l\'injection EXIF globale.')
+            }
+        } catch {
+            setMessage('Erreur réseau lors de l\'injection EXIF globale.')
+        } finally {
+            setInjectingExif(null)
+        }
+    }
+
+    function autoGenerateAll() {
+        const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
+        
+        const frKeywords = "marketing, offre spéciale, promotion livres, riwaya promo, remise livre, livraison gratuite maroc";
+
+        assets.forEach(a => {
+            updated[a.id] = {
+                alt: `${a.name} - ${a.type} | Promotion Riwaya Maroc`,
+                title: `Offre spéciale ${a.name} sur Riwaya`,
+                keywords: `${a.name}, marketing, promotion, offre, riwaya, livre, ${frKeywords}`
+            }
+        })
+        setEdits(updated)
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Info box */}
+            <div className="flex items-start gap-3 p-4 bg-purple-50 border border-purple-100 rounded-xl">
+                <ImageIcon className="w-5 h-5 text-purple-600 mt-0.5 shrink-0" />
+                <div>
+                    <p className="text-sm font-bold text-purple-800 mb-1">Injection de métadonnées SEO (Marketing)</p>
+                    <p className="text-xs text-purple-700">
+                        Optimisez vos images marketing (Bannières, Packs, Offres). Le texte <strong>Alt</strong> et le <strong>Title</strong> aident l'indexation.
+                        L'injection <strong>EXIF</strong> intègre ces données directement dans le fichier image.
+                    </p>
+                </div>
+            </div>
+
+            {message && (
+                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm font-medium ${message.includes('effectuée') || message.includes('enregistrées') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    {message.includes('effectuée') || message.includes('enregistrées') ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    {message}
+                </div>
+            )}
+
+            {/* Actions globales */}
+            <div className="flex flex-wrap gap-3 items-center">
+                <div className="relative flex-1 min-w-48">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Rechercher une image..."
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none text-sm"
+                    />
+                </div>
+                <button
+                    type="button"
+                    onClick={autoGenerateAll}
+                    className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                    <Tag className="w-4 h-4" />
+                    Auto-générer tout
+                </button>
+                <button
+                    type="button"
+                    onClick={saveAll}
+                    disabled={saving === 'all'}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                    {saving === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    Sauvegarder tout
+                </button>
+                <button
+                    type="button"
+                    onClick={injectExifAll}
+                    disabled={injectingExif === 'all'}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                    {injectingExif === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    Injecter EXIF tout
+                </button>
+            </div>
+
+            {/* Liste des assets */}
+            <div className="space-y-3">
+                {filtered.length === 0 && (
+                    <p className="text-center text-gray-400 text-sm py-8">Aucune image trouvée.</p>
+                )}
+                {filtered.map(asset => (
+                    <div key={asset.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors">
+                        <div className="flex gap-4 items-start">
+                            {/* Image */}
+                            <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                                <img
+                                    src={asset.url || '/placeholder.jpg'}
+                                    alt={edits[asset.id]?.alt || asset.name}
+                                    title={edits[asset.id]?.title || asset.name}
+                                    className="w-full h-full object-cover"
+                                    onError={e => { (e.target as HTMLImageElement).src = '/placeholder.jpg' }}
+                                />
+                            </div>
+
+                            {/* Fields */}
+                            <div className="flex-1 space-y-3">
+                                <div>
+                                    <p className="text-xs font-black text-gray-600 uppercase tracking-widest mb-0.5">{asset.name}</p>
+                                    <p className="text-xs text-gray-400">Type: {asset.type}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
+                                        Alt Text (indexé par Google Images)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={edits[asset.id]?.alt || ''}
+                                        onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], alt: e.target.value } }))}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                        placeholder={`${asset.name} | Promotion Riwaya`}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
+                                        Title (tooltip + SEO)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={edits[asset.id]?.title || ''}
+                                        onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], title: e.target.value } }))}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                        placeholder={`Promotion ${asset.name}`}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
+                                        Mots clés EXIF (séparés par virgule)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={edits[asset.id]?.keywords || ''}
+                                        onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], keywords: e.target.value } }))}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                        placeholder={`Marketing, Promo, Riwaya, ...`}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Save individual */}
+                            <div className="shrink-0 flex flex-col gap-2 mt-8">
+                                <button
+                                    type="button"
+                                    onClick={() => saveAsset(asset.id)}
+                                    disabled={saving === asset.id}
+                                    className="flex items-center justify-center gap-1 px-4 py-2 bg-black text-white text-xs font-black rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+                                >
+                                    {saving === asset.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : saved.has(asset.id) ? (
+                                        <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                    ) : (
+                                        <CheckCircle2 className="w-3 h-3" />
+                                    )}
+                                    {saved.has(asset.id) ? 'Sauvé' : 'Sauver SEO'}
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => injectExif(asset.id)}
+                                    disabled={injectingExif === asset.id}
+                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${exifSuccess.has(asset.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'} disabled:opacity-50`}
+                                >
+                                    {injectingExif === asset.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : exifSuccess.has(asset.id) ? (
+                                        <CheckCircle2 className="w-3 h-3" />
+                                    ) : (
+                                        <Download className="w-3 h-3" />
+                                    )}
+                                    {exifSuccess.has(asset.id) ? 'Injecté !' : 'Injecter EXIF'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}

@@ -143,7 +143,7 @@ export default function CheckoutClient({
 
     useEffect(() => {
         if (mounted && !isSuccess) {
-            const currentSubtotal = getTotalPrice()
+            const currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
             const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
             const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
             const shippingFee = (hasOnlyDigital || hasFreeShippingItem || currentSubtotal >= 500) ? 0 : 30
@@ -170,7 +170,7 @@ export default function CheckoutClient({
         return null
     }
 
-    const subtotal = getTotalPrice()
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
     const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
     const shippingFee = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30

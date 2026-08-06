@@ -127,11 +127,21 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
 
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
+        
+        const frKeywords = "librairie en ligne maroc, acheter livres en ligne maroc, livres en ligne maroc, acheter livre maroc, vente de livres en ligne, librairie en ligne rabat, librairie en ligne casablanca, librairie en ligne maroc pas cher, livres pas cher maroc, commander livre en ligne maroc, livraison livres maroc, livres avec livraison gratuite maroc, romans en ligne maroc, acheter romans maroc, romans pas cher maroc, romans français maroc, romans arabes maroc, romans policiers maroc, romans d'amour maroc, romans historiques maroc, livres développement personnel maroc, acheter livres développement personnel, livres motivation maroc, livres psychologie maroc, livres business maroc, livres entrepreneuriat maroc, livres productivité, livres confiance en soi, acheter livre en ligne, commander livre en ligne, acheter roman en ligne, acheter livres pas cher, livre prix maroc, roman prix maroc, pack livres maroc, pack romans maroc, livres livraison gratuite, librairie livraison maroc";
+        const arKeywords = "مكتبة إلكترونية المغرب, شراء الكتب أونلاين المغرب, شراء الكتب عبر الإنترنت المغرب, شراء روايات المغرب, كتب وروايات المغرب, أفضل الكتب, أفضل الروايات, روايات عربية, روايات عالمية, كتب التنمية الذاتية, كتب تطوير الذات, كتب علم النفس, كتب الأعمال, كتب ريادة الأعمال, كتب التحفيز, كتب الإنتاجية, كتب الثقة بالنفس, كتب ورقية المغرب, شراء كتب أونلاين, توصيل الكتب في المغرب, توصيل الكتب مجانا, مكتبة إلكترونية مغربية, روايات للبيع المغرب, كتب للبيع المغرب";
+        const enKeywords = "online bookstore Morocco, online bookshop Morocco, buy books online Morocco, books online Morocco, buy books Morocco, books for sale Morocco, cheap books Morocco, affordable books Morocco, online library Morocco, book delivery Morocco, free book delivery Morocco, buy novels online Morocco, novels Morocco, fiction books Morocco, Arabic books Morocco, French books Morocco, self development books Morocco, personal development books Morocco, psychology books Morocco, business books Morocco, entrepreneurship books Morocco, productivity books, motivational books, best books to read, book store Morocco";
+
         books.forEach(b => {
+            let baseKeywords = "";
+            if (b.language === 'ar') baseKeywords = arKeywords;
+            else if (b.language === 'en') baseKeywords = enKeywords;
+            else baseKeywords = frKeywords; // Default to French if 'fr' or undefined
+
             updated[b.id] = {
                 alt: `${b.title} - ${b.author}${b.category ? ` | ${b.category}` : ''} | Librairie Riwaya Maroc`,
                 title: `Acheter "${b.title}" de ${b.author} - Livraison rapide au Maroc | Riwaya`,
-                keywords: `${b.title}, ${b.author}, livre, riwaya, acheter livre maroc${b.category ? `, ${b.category}` : ''}`
+                keywords: `${b.title}, ${b.author}, livre, riwaya, acheter livre maroc${b.category ? `, ${b.category}` : ''}, ${baseKeywords}`
             }
         })
         setEdits(updated)

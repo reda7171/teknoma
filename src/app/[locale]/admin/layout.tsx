@@ -197,6 +197,16 @@ export default function AdminLayout({
             ]
         },
         {
+            name: 'Référencement',
+            href: `/${lang}/admin/seo`,
+            icon: Search,
+            children: [
+                { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
+                { name: 'AEO', href: `/${lang}/admin/aeo`, icon: MessageCircle },
+                { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
+            ]
+        },
+        {
             name: 'Système & Config',
             href: `/${lang}/admin/config`,
             icon: Settings,
@@ -214,8 +224,6 @@ export default function AdminLayout({
                 { name: 'Telegram Bot', href: `/${lang}/admin/config/telegram`, icon: MessageCircle },
                 { name: 'Config POS', href: `/${lang}/admin/config/pos`, icon: Monitor, featureKey: 'feature_pos' },
                 { name: 'Google Adsense', href: `/${lang}/admin/config/adsense`, icon: Banknote },
-                { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
-                { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
                 { name: 'Traductions', href: `/${lang}/admin/translations`, icon: Languages },
                 { name: 'Audit Log', href: `/${lang}/admin/audit`, icon: ShieldCheck },
                 { name: 'Base de données', href: `/${lang}/admin/database`, icon: Database },

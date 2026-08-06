@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import SeoConfigForm from './SeoConfigForm'
 import ImageInjectorForm from './ImageInjectorForm'
 import ImageInjectorMetaForm from './ImageInjectorMetaForm'
+import BlogImageInjectorMetaForm from './BlogImageInjectorMetaForm'
+import MarketingImageInjectorMetaForm from './MarketingImageInjectorMetaForm'
 import LlmsConfigForm from './LlmsConfigForm'
 import { Search, Image as ImageIcon, Zap, Code, FileText } from 'lucide-react'
 
@@ -34,12 +36,26 @@ export default async function SeoConfigPage({
 
     // Livres pour l'onglet Image Injector Tools
     let books: any[] = []
+    let posts: any[] = []
+    let assets: any[] = []
     if (activeTab === 'images') {
-        books = await prisma.book.findMany({
-            where: { active: true },
-            orderBy: { title: 'asc' },
-            select: { id: true, title: true, author: true, image: true, category: true, imageAlt: true, imageTitle: true }
-        })
+        if (!sp?.sub || sp?.sub === 'livres') {
+            books = await prisma.book.findMany({
+                where: { active: true },
+                orderBy: { title: 'asc' },
+                select: { id: true, title: true, author: true, image: true, category: true, imageAlt: true, imageTitle: true, language: true }
+            })
+        } else if (sp?.sub === 'blog') {
+            posts = await prisma.post.findMany({
+                orderBy: { createdAt: 'desc' },
+                select: { id: true, title: true, authorName: true, coverImage: true, category: true, imageAlt: true, imageTitle: true, language: true }
+            })
+        } else if (sp?.sub === 'marketing') {
+            assets = await prisma.marketingAsset.findMany({
+                orderBy: { createdAt: 'desc' },
+                select: { id: true, name: true, url: true, type: true, imageAlt: true, imageTitle: true }
+            })
+        }
     }
 
     const tabs = [
@@ -82,8 +98,8 @@ export default async function SeoConfigPage({
                 </div>
             </div>
 
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-12">
-                <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-8 md:p-12 overflow-hidden">
+                <div className={activeTab === 'images' ? "w-full mx-auto" : "max-w-4xl mx-auto"}>
                     {activeTab === 'head' ? (
                         <div className="space-y-8 animate-in fade-in duration-500">
                             <div className="flex items-center gap-4 mb-4">
@@ -108,11 +124,37 @@ export default async function SeoConfigPage({
                                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Édition en masse des balises ALT & TITLE</p>
                                 </div>
                             </div>
-                            <ImageInjectorMetaForm books={books.map(b => ({
-                                ...b,
-                                altText: b.imageAlt,
-                                imageTitle: b.imageTitle
-                            }))} />
+                            
+                            {/* Onglets secondaires pour Images */}
+                            <div className="flex gap-2 border-b border-gray-100 pb-4">
+                                <a href="?tab=images&sub=livres" className={`px-4 py-2 text-sm font-bold rounded-xl ${!sp?.sub || sp?.sub === 'livres' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Images Livres</a>
+                                <a href="?tab=images&sub=blog" className={`px-4 py-2 text-sm font-bold rounded-xl ${sp?.sub === 'blog' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Images Article Blog</a>
+                                <a href="?tab=images&sub=marketing" className={`px-4 py-2 text-sm font-bold rounded-xl ${sp?.sub === 'marketing' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Images Marketing</a>
+                            </div>
+
+                            {(!sp?.sub || sp?.sub === 'livres') && (
+                                <ImageInjectorMetaForm books={books.map(b => ({
+                                    ...b,
+                                    altText: b.imageAlt,
+                                    imageTitle: b.imageTitle
+                                }))} />
+                            )}
+
+                            {sp?.sub === 'blog' && (
+                                <BlogImageInjectorMetaForm posts={posts.map(p => ({
+                                    ...p,
+                                    altText: p.imageAlt,
+                                    imageTitle: p.imageTitle
+                                }))} />
+                            )}
+
+                            {sp?.sub === 'marketing' && (
+                                <MarketingImageInjectorMetaForm assets={assets.map(a => ({
+                                    ...a,
+                                    altText: a.imageAlt,
+                                    imageTitle: a.imageTitle
+                                }))} />
+                            )}
                         </div>
                     ) : activeTab === 'llms' ? (
                         <div className="space-y-8 animate-in fade-in duration-500">

@@ -230,8 +230,8 @@ export async function POST(req: Request) {
                             await answerCallbackQuery(callbackId, '✅ Aucun paiement trouvé', token)
                         } else {
                             const lines = statements.slice(0, 3).map((stmt: any) => {
-                                const amount = stmt.amount || stmt.totalAmount || stmt.Amount || '0'
-                                const currency = stmt.currency || stmt.Currency || 'MAD'
+                                const amount = stmt.payout?.amount ?? stmt.closingBalance ?? stmt.amount ?? '0'
+                                const currency = stmt.payout?.currency ?? stmt.currency ?? 'MAD'
                                 const dateStr = stmt.createdAt ? new Date(stmt.createdAt).toLocaleDateString('fr-FR') : 'Inconnue'
                                 const status = stmt.paid || stmt.status === 'paid' ? '✅ Payé' : '⏳ En attente'
                                 const period = stmt.periodStart && stmt.periodEnd 
