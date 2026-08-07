@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
-import { Edit, Trash2, Eye, EyeOff, Save, Send } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Save, Send, AlertTriangle } from 'lucide-react'
 import { deletePack, togglePackStatus } from '@/lib/actions/packs'
+import { deactivatePackOnJumia } from '@/lib/actions/jumia'
 import N8nPublishModal from '@/components/admin/N8nPublishModal'
 
 interface Pack {
@@ -22,6 +23,7 @@ interface Pack {
             title: string
             author: string
             image: string
+            stock?: number
         }
     }>
 }
@@ -56,6 +58,20 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
 
         if (!result.success) {
             alert(result.error)
+        }
+    }
+
+    async function handleDeactivateJumia(id: string) {
+        if (!confirm('Voulez-vous vraiment désactiver ce pack sur Jumia ?')) return
+        setLoading(id)
+        const result = await deactivatePackOnJumia(id)
+        setLoading(null)
+        if (result.success) {
+            setToast({ msg: result.message, ok: true })
+            setTimeout(() => window.location.reload(), 1500)
+        } else {
+            setToast({ msg: result.message, ok: false })
+            setTimeout(() => setToast(null), 5000)
         }
     }
 
@@ -145,6 +161,9 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                             Jumia
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            État du Pack
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Statut
                         </th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -228,13 +247,36 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                 </button>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                                {pack.isSyncedWithJumia ? (
-                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-orange-100 text-[10px] font-bold text-orange-800 uppercase tracking-tighter border border-orange-200">
-                                        Publié
+                                <div className="flex flex-col gap-2 items-start">
+                                    {pack.isSyncedWithJumia ? (
+                                        <>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-orange-100 text-[10px] font-bold text-orange-800 uppercase tracking-tighter border border-orange-200">
+                                                Publié
+                                            </span>
+                                            <button 
+                                                onClick={() => handleDeactivateJumia(pack.id)}
+                                                disabled={loading === pack.id}
+                                                className="text-[10px] font-bold text-red-600 hover:text-red-800 uppercase tracking-tighter border border-red-200 bg-red-50 px-2 py-1 rounded disabled:opacity-50"
+                                            >
+                                                Désactiver Jumia
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-tighter border border-gray-200">
+                                            Non publié
+                                        </span>
+                                    )}
+                                </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                {pack.books.some(pb => (pb.book.stock || 0) <= 0) ? (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-red-100 text-[10px] font-bold text-red-700 uppercase tracking-tighter border border-red-200">
+                                        <AlertTriangle className="w-3 h-3 mr-1" />
+                                        Incomplet (Livre en rupture)
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-tighter border border-gray-200">
-                                        Non publié
+                                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-100 text-[10px] font-bold text-green-700 uppercase tracking-tighter border border-green-200">
+                                        Complet
                                     </span>
                                 )}
                             </td>
