@@ -35,6 +35,8 @@ const BookSchemaBase = z.object({
     sellerSku: z.string().optional(),
     jumiaPriceMarkup: z.number().int().min(0).max(100).optional().default(0),
     isSyncedWithJumia: z.boolean().optional(),
+    jumiaPackageContent: z.string().optional(),
+    jumiaHighlights: z.string().optional(),
 })
 
 const BookSchema = BookSchemaBase.superRefine((data, ctx) => {

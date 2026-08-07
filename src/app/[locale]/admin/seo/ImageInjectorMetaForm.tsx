@@ -27,6 +27,10 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     const [injectingExif, setInjectingExif] = useState<string | null>(null)
     const [exifSuccess, setExifSuccess] = useState<Set<string>>(new Set())
 
+    // New state for Renaming
+    const [renaming, setRenaming] = useState<string | null>(null)
+    const [renameSuccess, setRenameSuccess] = useState<Set<string>>(new Set())
+
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(books.map(b => [b.id, {
             alt: b.altText || `${b.title} - ${b.author} | Riwaya`,
@@ -64,17 +68,31 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
         setSaving('all')
         setMessage('')
         try {
-            const res = await fetch('/api/admin/books/image-seo-bulk', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ edits })
-            })
-            const data = await res.json()
-            if (res.ok && data.success) {
-                setMessage(`${data.count || Object.keys(edits).length} métadonnées d'images ont été enregistrées !`)
-            } else {
-                setMessage('Erreur: ' + (data.error || 'Statut ' + res.status))
+            const entries = Object.entries(edits)
+            const chunkSize = 50
+            let totalSaved = 0
+
+            for (let i = 0; i < entries.length; i += chunkSize) {
+                const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
+                const res = await fetch('/api/admin/books/image-seo-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ edits: chunk })
+                })
+                
+                const contentType = res.headers.get('content-type')
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Erreur serveur (${res.status}): La réponse n'est pas au format JSON. (Charge utile trop volumineuse ?)`)
+                }
+                
+                const data = await res.json()
+                if (res.ok && data.success) {
+                    totalSaved += data.count || Object.keys(chunk).length
+                } else {
+                    throw new Error(data.error || `Statut ${res.status}`)
+                }
             }
+            setMessage(`${totalSaved} métadonnées d'images ont été enregistrées !`)
         } catch (e: any) {
             setMessage('Erreur de requête: ' + e.message)
         } finally {
@@ -107,23 +125,78 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
         }
     }
 
+    async function renameImage(bookId: string) {
+        setRenaming(bookId)
+        setMessage('')
+        try {
+            const res = await fetch(`/api/admin/books/${bookId}/rename-image`, { method: 'POST' })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setRenameSuccess(prev => new Set([...prev, bookId]))
+            } else {
+                setMessage('Erreur: ' + (data.error || 'Impossible de renommer'))
+            }
+        } catch (e) {
+            setMessage('Erreur réseau lors du renommage.')
+        } finally {
+            setRenaming(null)
+        }
+    }
+
+    async function renameAll() {
+        setRenaming('all')
+        setMessage('')
+        let successCount = 0
+        try {
+            for (const book of filtered) {
+                const res = await fetch(`/api/admin/books/${book.id}/rename-image`, { method: 'POST' })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        successCount++
+                        setRenameSuccess(prev => new Set([...prev, book.id]))
+                    }
+                }
+            }
+            setMessage(`${successCount} images renommées avec succès !`)
+        } catch (e) {
+            setMessage('Erreur réseau lors du renommage global.')
+        } finally {
+            setRenaming(null)
+        }
+    }
+
     async function injectExifAll() {
         setInjectingExif('all')
         setMessage('')
         try {
-            const res = await fetch('/api/admin/books/exif-inject-bulk', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ edits })
-            })
-            const data = await res.json()
-            if (res.ok && data.success) {
-                setMessage(`L'injection EXIF a été effectuée sur ${data.count} images !`)
-            } else {
-                setMessage('Erreur lors de l\'injection EXIF globale.')
+            const entries = Object.entries(edits)
+            const chunkSize = 50
+            let totalInjected = 0
+
+            for (let i = 0; i < entries.length; i += chunkSize) {
+                const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
+                const res = await fetch('/api/admin/books/exif-inject-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ edits: chunk })
+                })
+                
+                const contentType = res.headers.get('content-type')
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Erreur serveur (${res.status}): La réponse n'est pas au format JSON. (Charge utile trop volumineuse ?)`)
+                }
+
+                const data = await res.json()
+                if (res.ok && data.success) {
+                    totalInjected += data.count || Object.keys(chunk).length
+                } else {
+                    throw new Error(data.error || `Statut ${res.status}`)
+                }
             }
-        } catch {
-            setMessage('Erreur réseau lors de l\'injection EXIF globale.')
+            setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
+        } catch (e: any) {
+            setMessage('Erreur réseau lors de l\'injection EXIF globale: ' + e.message)
         } finally {
             setInjectingExif(null)
         }
@@ -210,6 +283,15 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                 >
                     {injectingExif === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Injecter EXIF tout
+                </button>
+                <button
+                    type="button"
+                    onClick={renameAll}
+                    disabled={renaming === 'all'}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-orange-700 transition-colors disabled:opacity-50"
+                >
+                    {renaming === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                    Renommer tout
                 </button>
             </div>
 
@@ -310,6 +392,22 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                         <Download className="w-3 h-3" />
                                     )}
                                     {exifSuccess.has(book.id) ? 'Injecté !' : 'Injecter EXIF'}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => renameImage(book.id)}
+                                    disabled={renaming === book.id}
+                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${renameSuccess.has(book.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-50'} disabled:opacity-50`}
+                                >
+                                    {renaming === book.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : renameSuccess.has(book.id) ? (
+                                        <CheckCircle2 className="w-3 h-3" />
+                                    ) : (
+                                        <ImageIcon className="w-3 h-3" />
+                                    )}
+                                    {renameSuccess.has(book.id) ? 'Renommé !' : 'Renommer fichier'}
                                 </button>
                             </div>
                         </div>

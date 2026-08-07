@@ -22,9 +22,9 @@ export async function fetchPaidPayoutStatements() {
 
             for (const statement of response.statements) {
                 const existing = await prisma.expense.findFirst({
-                    where: { 
+                    where: {
                         category: 'INCOME_JUMIA',
-                        description: statement.statementNumber 
+                        description: statement.statementNumber
                     }
                 })
 
@@ -73,13 +73,29 @@ export async function syncBooksStockToJumia() {
             return { success: true, message: "Aucun livre à synchroniser avec Jumia (sellerSku manquant ou non synchronisé)." }
         }
 
-        const updates = books.map(book => ({
-            sellerSku: book.sellerSku as string,
-            stock: book.stock
-        }))
+        const updates: any[] = []
+        for (const book of books) {
+            try {
+                const data = await jumia.getCatalogStock({ sellerSku: book.sellerSku as string, size: 1 })
+                const sid = data?.products?.[0]?.id
+                if (sid) {
+                    updates.push({
+                        productSid: sid,
+                        sellerSku: book.sellerSku as string,
+                        stock: book.stock
+                    })
+                }
+            } catch (err) {
+                console.error("Error fetching SID for", book.sellerSku, err)
+            }
+        }
+
+        if (updates.length === 0) {
+            return { success: false, message: "Impossible de récupérer les identifiants Jumia (PRODUCT_SID) pour ces produits." }
+        }
 
         const result = await jumia.updateProductsStock(updates)
-        
+
         if (result?.feedId || result?.SuccessResponse) {
             return { success: true, message: `${books.length} livres synchronisés avec succès avec Jumia.` }
         } else {
@@ -106,14 +122,30 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
             return { success: false, message: "Aucun livre trouvé avec un SKU Jumia." }
         }
 
-        const updates = books.map(book => ({
-            sellerSku: book.sellerSku as string,
-            stock: book.stock
-        }))
+        const updates: any[] = []
+        for (const book of books) {
+            try {
+                const data = await jumia.getCatalogStock({ sellerSku: book.sellerSku as string, size: 1 })
+                const sid = data?.products?.[0]?.id
+                if (sid) {
+                    updates.push({
+                        productSid: sid,
+                        sellerSku: book.sellerSku as string,
+                        stock: book.stock
+                    })
+                }
+            } catch (err) {
+                console.error("Error fetching SID for", book.sellerSku, err)
+            }
+        }
+
+        if (updates.length === 0) {
+            return { success: false, message: "Impossible de récupérer les identifiants Jumia (PRODUCT_SID) pour ces produits." }
+        }
 
         const result = await jumia.updateProductsStock(updates)
-        
-        if (result?.feedId || result?.SuccessResponse) {
+
+        if (result?.feedId) {
             // Update local DB instantly to match what we sent
             for (const book of books) {
                 await prisma.book.update({
@@ -124,7 +156,7 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
             return { success: true, message: "Stock synchronisé avec Jumia" }
         }
 
-        return { success: false, message: result?.error || result?.ErrorResponse?.Head?.ErrorMessage || "Échec de la synchronisation du stock." }
+        return { success: false, message: "Échec de la synchronisation du stock." }
     } catch (error: any) {
         return { success: false, message: `Erreur: ${error.message}` }
     }
@@ -154,14 +186,14 @@ export async function publishBooksToJumia(bookIds: string[]) {
         for (const book of books) {
             const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
             const titleAr = book.title || book.titleEn || book.titleFr || `Livre ${book.id.substring(0, 8)}`;
-            
+
             let titleFr = book.titleFr || book.titleEn || `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
             if (hasArabic(titleFr)) titleFr = `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
-            
+
             const descArRaw = book.description || book.descriptionEn || book.descriptionFr || titleAr;
             let descFrRaw = book.descriptionFr || book.descriptionEn || book.longDescription || `Un excellent livre - ${book.sellerSku || book.id.substring(0, 8)}`;
             if (hasArabic(descFrRaw)) descFrRaw = `Un excellent livre à lire - ${book.sellerSku || book.id.substring(0, 8)}`;
-            
+
             const padDesc = (desc: string) => {
                 const suffix = " - Découvrez ce livre fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
                 const padded = desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
@@ -200,7 +232,7 @@ export async function publishBooksToJumia(bookIds: string[]) {
                     name: "Generic"
                 },
                 category: {
-                    code: 1000203, 
+                    code: 1000203,
                     name: "Bestselling Books"
                 },
                 images: book.image ? [{
@@ -224,11 +256,11 @@ export async function publishBooksToJumia(bookIds: string[]) {
                     },
                     {
                         name: "short_description",
-                        value: `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`
+                        value: book.jumiaHighlights || `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`
                     },
                     {
                         name: "package_content",
-                        value: `1 x Livre : ${book.title}`
+                        value: book.jumiaPackageContent || `1 x Livre : ${book.title}`
                     },
                     {
                         name: "model",
@@ -249,7 +281,7 @@ export async function publishBooksToJumia(bookIds: string[]) {
             } catch (err) {
                 console.error("Error fetching productId for", payload.sellerSku, err);
             }
-            
+
             if (productId) {
                 payload.id = productId;
                 productsToUpdate.push(payload);
@@ -264,17 +296,17 @@ export async function publishBooksToJumia(bookIds: string[]) {
         if (productsToCreate.length > 0) {
             createResponse = await jumia.createProducts(shopId, productsToCreate);
         }
-        
+
         if (productsToUpdate.length > 0) {
             updateResponse = await jumia.updateProducts(productsToUpdate, shopId);
         }
-        
+
         const checkFeed = async (response: any) => {
             if (response?.feedId) {
                 // Wait briefly to see if it processes immediately (often does for errors)
                 await new Promise(r => setTimeout(r, 2500))
                 const feedRes = await jumia.getFeed(response.feedId)
-                
+
                 if (feedRes?.status === 'FAILED') {
                     const itemError = feedRes.feedItems?.[0]?.errorMessage || 'Erreurs de validation'
                     const globalErrors = feedRes.feedItems?.[0]?.errors?.globalMessages?.join(', ') || ''
@@ -288,9 +320,9 @@ export async function publishBooksToJumia(bookIds: string[]) {
         const error2 = updateResponse ? await checkFeed(updateResponse) : null;
 
         if (error1 || error2) {
-            return { 
-                success: false, 
-                message: [error1, error2].filter(Boolean).join(' | ') 
+            return {
+                success: false,
+                message: [error1, error2].filter(Boolean).join(' | ')
             }
         }
 
@@ -332,14 +364,14 @@ export async function publishPacksToJumia(packIds: string[]) {
         for (const pack of packs) {
             const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
             const titleAr = pack.name || pack.nameEn || pack.nameFr || `Pack ${pack.id.substring(0, 8)}`;
-            
+
             let titleFr = pack.nameFr || pack.nameEn || `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
             if (hasArabic(titleFr)) titleFr = `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
-            
+
             const descArRaw = pack.description || pack.descriptionEn || pack.descriptionFr || titleAr;
             let descFrRaw = pack.descriptionFr || pack.descriptionEn || pack.description || `Un excellent pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
             if (hasArabic(descFrRaw)) descFrRaw = `Un excellent pack de livres - ${pack.sellerSku || pack.id.substring(0, 8)}`;
-            
+
             const padDesc = (desc: string) => {
                 const suffix = " - Découvrez ce pack fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
                 const padded = desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
@@ -354,7 +386,7 @@ export async function publishPacksToJumia(packIds: string[]) {
             const baseName = titleFr.padEnd(15, ' ').substring(0, 60);
             const baseDesc = padDesc(descFr);
 
-            const calculatedStock = pack.books.length > 0 
+            const calculatedStock = pack.books.length > 0
                 ? Math.min(...pack.books.map(b => b.book.stock))
                 : 0;
 
@@ -401,11 +433,11 @@ export async function publishPacksToJumia(packIds: string[]) {
                 attributes: [
                     {
                         name: "short_description",
-                        value: `<ul><li>Titre: ${pack.name}</li><li>Type: Pack de Livres</li></ul>`
+                        value: pack.jumiaHighlights || `<ul><li>Titre: ${pack.name}</li><li>Type: Pack de Livres</li></ul>`
                     },
                     {
                         name: "package_content",
-                        value: `1 x Pack de livres : ${pack.name}`
+                        value: pack.jumiaPackageContent || `1 x Pack de livres : ${pack.name}`
                     },
                     {
                         name: "model",
@@ -421,7 +453,7 @@ export async function publishPacksToJumia(packIds: string[]) {
                     }
                 ]
             };
-            
+
             /*let productId = null;
             try {
                 const jumiaProd = await jumia.getProducts({ sellerSku: payload.sellerSku });
@@ -434,7 +466,7 @@ export async function publishPacksToJumia(packIds: string[]) {
                 // payload.id = productId; // Let Jumia match by sellerSku
                 productsToUpdate.push(payload);
             } else {*/
-                productsToCreate.push(payload);
+            productsToCreate.push(payload);
             //}
         }
 
@@ -444,11 +476,11 @@ export async function publishPacksToJumia(packIds: string[]) {
         if (productsToCreate.length > 0) {
             createResponse = await jumia.createProducts(shopId, productsToCreate);
         }
-        
+
         if (productsToUpdate.length > 0) {
             updateResponse = await jumia.updateProducts(productsToUpdate, shopId);
         }
-        
+
         const checkFeed = async (response: any) => {
             if (response?.feedId) {
                 await new Promise(r => setTimeout(r, 2500))
@@ -466,9 +498,9 @@ export async function publishPacksToJumia(packIds: string[]) {
         const error2 = updateResponse ? await checkFeed(updateResponse) : null;
 
         if (error1 || error2) {
-            return { 
-                success: false, 
-                message: [error1, error2].filter(Boolean).join(' | ') 
+            return {
+                success: false,
+                message: [error1, error2].filter(Boolean).join(' | ')
             }
         }
 
@@ -508,7 +540,7 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
         for (const accessory of accessories) {
             const titleFr = accessory.name;
             const descFrRaw = accessory.description || titleFr;
-            
+
             const padDesc = (desc: string) => {
                 const suffix = " - Découvrez cet accessoire exclusif, parfait pour enrichir votre quotidien. Design unique et finition soignée garantie.";
                 return desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
@@ -561,11 +593,11 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
                 attributes: [
                     {
                         name: "short_description",
-                        value: `<ul><li>Produit: ${accessory.name}</li><li>Catégorie: ${accessory.category}</li></ul>`
+                        value: accessory.jumiaHighlights || `<ul><li>Produit: ${accessory.name}</li><li>Catégorie: ${accessory.category}</li></ul>`
                     },
                     {
                         name: "package_content",
-                        value: `1 x ${accessory.name}`
+                        value: accessory.jumiaPackageContent || `1 x ${accessory.name}`
                     },
                     {
                         name: "model",
@@ -577,7 +609,7 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
                     }
                 ]
             };
-            
+
             let productId = null;
             try {
                 const jumiaProd = await jumia.getProducts({ sellerSku: payload.sellerSku });
@@ -585,7 +617,7 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
             } catch (err) {
                 console.error("Error fetching productId for", payload.sellerSku, err);
             }
-            
+
             if (productId) {
                 payload.id = productId;
                 productsToUpdate.push(payload);
@@ -600,11 +632,11 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
         if (productsToCreate.length > 0) {
             createResponse = await jumia.createProducts(shopId, productsToCreate);
         }
-        
+
         if (productsToUpdate.length > 0) {
             updateResponse = await jumia.updateProducts(productsToUpdate, shopId);
         }
-        
+
         const checkFeed = async (response: any) => {
             if (response?.feedId) {
                 await new Promise(r => setTimeout(r, 2500))
@@ -622,9 +654,9 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
         const error2 = updateResponse ? await checkFeed(updateResponse) : null;
 
         if (error1 || error2) {
-            return { 
-                success: false, 
-                message: [error1, error2].filter(Boolean).join(' | ') 
+            return {
+                success: false,
+                message: [error1, error2].filter(Boolean).join(' | ')
             }
         }
 
@@ -650,7 +682,7 @@ export async function checkJumiaAvailability() {
         while (hasNextPage) {
             const data = await jumia.getCatalogStock({ size: 100, token })
             if (!data || !data.products) break
-            
+
             for (const item of data.products) {
                 if (item.sellerSku && item.globalStock !== undefined) {
                     syncedSkus.set(item.sellerSku, item.globalStock)
@@ -677,7 +709,7 @@ export async function checkJumiaAvailability() {
         // Then update the ones that exist on Jumia
         let updatedCount = 0
         const skuArray = Array.from(syncedSkus.entries())
-        
+
         for (const [sku, stock] of skuArray) {
             const result = await prisma.book.updateMany({
                 where: {
@@ -717,14 +749,14 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
         }
 
         const skuToVerify = sellerSku || bookId;
-        
+
         // Use getCatalogStock or getProducts with sellerSku
         const data = await jumia.getCatalogStock({ sellerSku: skuToVerify, size: 1 })
-        
+
         if (data && data.products && data.products.length > 0) {
             const product = data.products[0];
             const stock = product.globalStock !== undefined ? product.globalStock : null;
-            
+
             await prisma.book.updateMany({
                 where: { id: bookId },
                 data: { isSyncedWithJumia: true, jumiaStock: stock }
@@ -733,7 +765,7 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
                 where: { id: bookId },
                 data: { isSyncedWithJumia: true, jumiaStock: stock }
             });
-            
+
             return { success: true, message: `SKU trouvé ! Stock Jumia: ${stock}`, stock }
         } else {
             await prisma.book.updateMany({
@@ -759,7 +791,7 @@ export async function checkJumiaLinkBySku(sellerSku: string) {
         await verifyAdmin()
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return false
-        
+
         const res = await jumia.getProducts({ sellerSku })
         if (res && res.products && res.products.length > 0) {
             return true
@@ -777,7 +809,7 @@ export async function checkJumiaLinkBySkuExact(sellerSku: string) {
         await verifyAdmin();
         const jumia = await JumiaAPI.getInstance();
         if (!jumia) return false;
-        
+
         let nextToken: string | undefined = undefined;
         do {
             const res = await jumia.getProducts({ token: nextToken, size: 100 });
@@ -797,7 +829,7 @@ export async function checkJumiaLinkBySkuExact(sellerSku: string) {
             // To avoid huge delays, let's just search first few pages or remove delay if Jumia allows it
             if (nextToken) await new Promise(r => setTimeout(r, 500));
         } while (nextToken);
-        
+
         return false;
     } catch (e) {
         return false;
@@ -820,13 +852,27 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
         const validBooks = books.filter(b => b.sellerSku && b.isSyncedWithJumia);
         if (validBooks.length === 0) return;
 
-        const products = validBooks.map(b => ({
-            sellerSku: b.sellerSku,
-            stock: b.stock
-        }));
+        const updates: any[] = [];
+        for (const book of validBooks) {
+            try {
+                const data = await jumia.getCatalogStock({ sellerSku: book.sellerSku as string, size: 1 })
+                const sid = data?.products?.[0]?.id
+                if (sid) {
+                    updates.push({
+                        productSid: sid,
+                        sellerSku: book.sellerSku as string,
+                        stock: book.stock
+                    })
+                }
+            } catch (err) {
+                console.error("Error fetching SID for background sync", book.sellerSku, err)
+            }
+        }
 
-        console.log("Background syncing stock to Jumia for:", products);
-        await jumia.updateProductsStock(products);
+        console.log("Background syncing stock to Jumia for:", updates);
+        if (updates.length > 0) {
+            await jumia.updateProductsStock(updates);
+        }
     } catch (err) {
         console.error("Error in syncJumiaStockForBooksBackground:", err);
     }

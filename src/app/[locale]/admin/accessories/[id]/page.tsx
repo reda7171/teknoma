@@ -34,7 +34,9 @@ export default function EditAccessoryPage({
         weight: '',
         warranty: '',
         sellerSku: '',
-        active: true
+        active: true,
+        jumiaHighlights: '',
+        jumiaPackageContent: ''
     })
 
     useEffect(() => {
@@ -54,7 +56,9 @@ export default function EditAccessoryPage({
                     weight: data.weight || '',
                     warranty: data.warranty || '',
                     sellerSku: data.sellerSku || '',
-                    active: data.active
+                    active: data.active,
+                    jumiaHighlights: data.jumiaHighlights || '',
+                    jumiaPackageContent: data.jumiaPackageContent || ''
                 })
                 setIsLoading(false)
             })
@@ -314,6 +318,29 @@ export default function EditAccessoryPage({
                                 >
                                     Générer
                                 </button>
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Highlights Jumia (HTML)</label>
+                                <textarea
+                                    rows={3}
+                                    value={(formData as any).jumiaHighlights || ''}
+                                    onChange={e => setFormData({ ...formData, jumiaHighlights: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder={`<ul><li>Produit: ${formData.name}</li></ul>`}
+                                />
+                                <p className="mt-1 text-xs text-slate-400">Laisser vide pour la valeur par défaut</p>
+                            </div>
+
+                            <div className="mt-4">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Contenu du colis Jumia</label>
+                                <input
+                                    type="text"
+                                    value={(formData as any).jumiaPackageContent || ''}
+                                    onChange={e => setFormData({ ...formData, jumiaPackageContent: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder={`1 x ${formData.name}`}
+                                />
+                                <p className="mt-1 text-xs text-slate-400">Laisser vide pour la valeur par défaut</p>
                             </div>
                         </div>
 

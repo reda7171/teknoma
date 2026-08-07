@@ -44,7 +44,9 @@ export async function PATCH(
                 weight: data.weight,
                 warranty: data.warranty,
                 sellerSku: data.sellerSku,
-                active: data.active
+                active: data.active,
+                jumiaHighlights: data.jumiaHighlights,
+                jumiaPackageContent: data.jumiaPackageContent
             }
         })
 
