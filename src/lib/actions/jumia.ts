@@ -65,26 +65,26 @@ export async function syncBooksStockToJumia() {
 
         // Récupérer les livres avec ISBN ou ID (en fonction de ce qui est utilisé comme SellerSku sur Jumia)
         const books = await prisma.book.findMany({
-            where: { active: true },
-            select: { id: true, isbn: true, stock: true }
+            where: { active: true, sellerSku: { not: null }, isSyncedWithJumia: true },
+            select: { id: true, sellerSku: true, stock: true }
         })
 
         if (books.length === 0) {
-            return { success: true, message: "Aucun livre à synchroniser." }
+            return { success: true, message: "Aucun livre à synchroniser avec Jumia (sellerSku manquant ou non synchronisé)." }
         }
 
-        // L'API Jumia attend souvent un feed XML ou JSON pour la mise à jour massive du stock
-        // Exemple avec la nouvelle API: POST /feeds/products/stock ou PUT /catalog/products
-        // Comme nous n'avons pas le schéma exact du feed pour la V3, on simule l'appel ou on utilise le endpoint de maj
-        
         const updates = books.map(book => ({
-            SellerSku: book.isbn || book.id,
-            Quantity: book.stock
+            sellerSku: book.sellerSku as string,
+            stock: book.stock
         }))
 
-        // await jumia.request('/feeds/products/stock', 'POST', { Products: updates })
+        const result = await jumia.updateProductsStock(updates)
         
-        return { success: true, message: `${books.length} livres synchronisés avec succès avec Jumia.` }
+        if (result?.feedId || result?.SuccessResponse) {
+            return { success: true, message: `${books.length} livres synchronisés avec succès avec Jumia.` }
+        } else {
+            return { success: false, message: result?.error || result?.ErrorResponse?.Head?.ErrorMessage || "Erreur de synchronisation Jumia" }
+        }
     } catch (error: any) {
         return { success: false, message: `Erreur: ${error.message}` }
     }
@@ -113,7 +113,7 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
 
         const result = await jumia.updateProductsStock(updates)
         
-        if (result?.feedId) {
+        if (result?.feedId || result?.SuccessResponse) {
             // Update local DB instantly to match what we sent
             for (const book of books) {
                 await prisma.book.update({
@@ -124,7 +124,7 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
             return { success: true, message: "Stock synchronisé avec Jumia" }
         }
 
-        return { success: false, message: "Échec de la synchronisation du stock." }
+        return { success: false, message: result?.error || result?.ErrorResponse?.Head?.ErrorMessage || "Échec de la synchronisation du stock." }
     } catch (error: any) {
         return { success: false, message: `Erreur: ${error.message}` }
     }
@@ -227,6 +227,10 @@ export async function publishBooksToJumia(bookIds: string[]) {
                         value: `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`
                     },
                     {
+                        name: "package_content",
+                        value: `1 x Livre : ${book.title}`
+                    },
+                    {
                         name: "model",
                         value: "Standard"
                     },
@@ -317,7 +321,7 @@ export async function publishPacksToJumia(packIds: string[]) {
         })
 
         if (packs.length === 0) {
-            return { success: false, message: "Aucun pack trouvé pour publication." }
+            return { success: true, message: "Aucun pack trouvé pour publication." }
         }
 
         const shops = await jumia.getShops()
@@ -398,6 +402,10 @@ export async function publishPacksToJumia(packIds: string[]) {
                     {
                         name: "short_description",
                         value: `<ul><li>Titre: ${pack.name}</li><li>Type: Pack de Livres</li></ul>`
+                    },
+                    {
+                        name: "package_content",
+                        value: `1 x Pack de livres : ${pack.name}`
                     },
                     {
                         name: "model",
@@ -489,7 +497,7 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
         })
 
         if (accessories.length === 0) {
-            return { success: false, message: "Aucun accessoire trouvé pour publication." }
+            return { success: true, message: "Aucun accessoire trouvé pour publication." }
         }
 
         const shops = await jumia.getShops()
@@ -554,6 +562,10 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
                     {
                         name: "short_description",
                         value: `<ul><li>Produit: ${accessory.name}</li><li>Catégorie: ${accessory.category}</li></ul>`
+                    },
+                    {
+                        name: "package_content",
+                        value: `1 x ${accessory.name}`
                     },
                     {
                         name: "model",

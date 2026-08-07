@@ -178,11 +178,20 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             sellerSku: formData.get('sellerSku') as string || undefined,
         }
 
+        const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null
+        const action = submitter?.value || 'close'
+
         const result = await updatePack(pack.id, input)
 
         if (result.success) {
-            router.push('/admin/packs')
-            router.refresh()
+            if (action === 'close') {
+                router.push('/admin/packs')
+                router.refresh()
+            } else {
+                setLoading(false)
+                alert('Pack enregistré avec succès !')
+                router.refresh()
+            }
         } else {
             setError(result.error)
             setLoading(false)
@@ -606,14 +615,26 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                         )}
 
                         <div className="space-y-3">
-                            <button
-                                type="submit"
-                                disabled={loading || selectedBooks.length === 0 || isPushingJumia}
-                                className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Save className="w-5 h-5 mr-2" />
-                                {loading ? 'Enregistrement...' : 'Enregistrer'}
-                            </button>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="submit"
+                                    value="stay"
+                                    disabled={loading || selectedBooks.length === 0 || isPushingJumia}
+                                    className="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                >
+                                    <Save className="w-4 h-4 mr-1.5" />
+                                    {loading ? '...' : 'Enregistrer'}
+                                </button>
+                                <button
+                                    type="submit"
+                                    value="close"
+                                    disabled={loading || selectedBooks.length === 0 || isPushingJumia}
+                                    className="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                >
+                                    <Save className="w-4 h-4 mr-1.5" />
+                                    {loading ? '...' : 'Enregistrer & fermer'}
+                                </button>
+                            </div>
                             <button
                                 type="button"
                                 onClick={handlePushToJumia}
