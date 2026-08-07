@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     // Toujours utiliser l'URL de production — TikTok vérifie l'URI exacte enregistrée
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/api/tiktok/callback`;
-    const scope = 'user.info.profile,user.info.stats,video.list';
+    const scope = 'user.info.profile,user.info.stats,video.list,video.upload';
     
     // Generate random state for CSRF protection
     const state = Math.random().toString(36).substring(7);
