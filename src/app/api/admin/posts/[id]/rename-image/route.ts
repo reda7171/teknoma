@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { verifyAuth } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import { verifyAdmin } from '@/lib/actions/auth'
+import { prisma } from '@/lib/prisma'
 import { join } from 'path'
 import { rename, stat } from 'fs/promises'
 import fs from 'fs'
@@ -19,10 +19,7 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        const token = await verifyAuth()
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
+        await verifyAdmin()
 
         const post = await prisma.post.findUnique({
             where: { id: params.id },

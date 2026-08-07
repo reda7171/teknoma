@@ -397,7 +397,7 @@ export default function CheckoutClient({
                                     {...registerWithTracker('phone', {
                                         required: t('Errors.PhoneRequired'),
                                         pattern: {
-                                            value: /^(06|07|05)[0-9]{8}$/,
+                                            value: /^\s*(?:(?:\+|00)212|0)\s*[5-7](?:\s*\d){8}\s*$/,
                                             message: t('Errors.PhoneInvalid')
                                         }
                                     })}
