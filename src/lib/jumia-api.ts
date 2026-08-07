@@ -243,6 +243,10 @@ export class JumiaAPI {
         return this.request('/feeds/products/update', 'POST', payload)
     }
 
+    async updateProductsStatus(products: any[]) {
+        return this.request('/feeds/products/status', 'POST', { products })
+    }
+
     // --- Endpoints Produits (Catalog) ---
 
     async getBrands(page = 1) {

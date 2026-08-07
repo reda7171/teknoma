@@ -877,3 +877,51 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
         console.error("Error in syncJumiaStockForBooksBackground:", err);
     }
 }
+
+export async function deactivatePackOnJumia(packId: string) {
+    try {
+        await verifyAdmin()
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) return { success: false, message: "Jumia n'est pas configuré." }
+
+        const pack = await prisma.pack.findUnique({ where: { id: packId } })
+        if (!pack) return { success: false, message: "Pack introuvable." }
+
+        const sellerSku = (pack.sellerSku || pack.id) + "_v2"
+
+        const jumiaProd = await jumia.getProducts({ sellerSku })
+        const product = jumiaProd?.products?.[0] || jumiaProd?.data?.[0] || jumiaProd?.[0]
+        
+        if (!product || !product.id) {
+            return { success: false, message: "Impossible de trouver le pack sur Jumia." }
+        }
+
+        const createdAtStr = product.createdAt 
+            ? new Date(product.createdAt).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0]
+
+        const response = await jumia.updateProductsStatus([
+            {
+                sellerSku: sellerSku,
+                id: product.id,
+                createdAt: createdAtStr,
+                businessClients: [
+                    { businessClientCode: "jumia-ma", status: "INACTIVE" }
+                ]
+            }
+        ])
+
+        if (response?.feedId || response?.SuccessResponse) {
+            await prisma.pack.update({
+                where: { id: packId },
+                data: { isSyncedWithJumia: false }
+            })
+            return { success: true, message: "Pack désactivé sur Jumia avec succès." }
+        } else {
+            return { success: false, message: "Erreur lors de la désactivation sur Jumia." }
+        }
+    } catch (e: any) {
+        console.error("Erreur deactivatePackOnJumia:", e)
+        return { success: false, message: e.message }
+    }
+}
