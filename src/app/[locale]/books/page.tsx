@@ -154,6 +154,10 @@ export default async function BooksPage({
             <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 lg:py-10 mt-12 lg:mt-10">
+                <h1 className="sr-only">
+                    {params.category ? `Livres ${params.category}` : tBooksPage('Title')}
+                </h1>
+                
                 <div className="flex flex-col lg:flex-row gap-4 xl:gap-6">
                     {/* Sidebar / Mobile Sticky Filters */}
                     <BooksFilters 

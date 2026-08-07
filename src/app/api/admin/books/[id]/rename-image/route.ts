@@ -19,7 +19,7 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        await verifyAdmin()
+        try { await verifyAdmin() } catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 
         const book = await prisma.book.findUnique({
             where: { id: params.id },

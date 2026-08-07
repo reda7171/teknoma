@@ -10,6 +10,7 @@ import { getSetting } from '@/lib/actions/site-settings'
 import ScanRetourButton from '@/components/admin/ScanRetourButton'
 import BubbleToggle from '@/components/admin/BubbleToggle'
 import StatsGridController from '@/components/admin/StatsGridController'
+import { getJumiaStats as getJumiaRemoteStats } from './jumia-orders/actions'
 
 async function getStats() {
     const today = new Date()
@@ -266,6 +267,13 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const badgeStats = await getBadgeStats()
     const topPerformers = await getTopPerformers()
     const jumiaStats = await getJumiaStats()
+    
+    // Timeout-wrapped remote stats to prevent slow loading
+    const jumiaRemoteStats = await Promise.race([
+        getJumiaRemoteStats().catch(() => ({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0 })),
+        new Promise<any>((resolve) => setTimeout(() => resolve({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0 }), 3000))
+    ])
+    
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
 
 
@@ -287,6 +295,12 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Retours',              value: stats.returnedCount,                     iconName: 'RefreshCw',   color: 'rose'   },
         { name: 'Stock Total',          value: stats.stockTotal,                        iconName: 'Archive',     color: 'amber'  },
         { name: 'Sans Image',           value: stats.booksNoImage,                      iconName: 'ImageOff',    color: 'red'    },
+        { name: 'Livres SKU (Jumia)',   value: jumiaStats.booksWithSku,                 iconName: 'Link2',       color: 'orange' },
+        { name: 'Synchro Jumia',        value: jumiaStats.syncedBooks,                  iconName: 'CheckCircle', color: 'green'  },
+        { name: 'Commandes (Jumia)',    value: jumiaRemoteStats?.total || 0,            iconName: 'ShoppingCart',color: 'orange' },
+        { name: 'En Attente (Jumia)',   value: jumiaRemoteStats?.pending || 0,          iconName: 'Clock',       color: 'yellow' },
+        { name: 'Expédiées (Jumia)',    value: jumiaRemoteStats?.shipped || 0,          iconName: 'Truck',       color: 'cyan'   },
+        { name: 'Livrées (Jumia)',      value: jumiaRemoteStats?.delivered || 0,        iconName: 'CheckCircle', color: 'green'  },
     ]
 
 
