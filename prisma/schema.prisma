@@ -164,6 +164,8 @@ model Book {
   jumiaPriceMarkup  Int               @default(0)
   isSyncedWithJumia Boolean           @default(false)
   jumiaStock        Int?
+  jumiaPackageContent String?         @db.VarChar(500)
+  jumiaHighlights     String?         @db.Text
   isPromoted        Boolean           @default(false)
   reservations      BookReservation[]
   seller            User?             @relation("SellerBooks", fields: [sellerId], references: [id])
@@ -219,6 +221,8 @@ model Pack {
   isSyncedWithJumia Boolean     @default(false)
   jumiaPriceMarkup  Float?      @default(0)
   jumiaStock        Int?
+  jumiaPackageContent String?   @db.VarChar(500)
+  jumiaHighlights     String?   @db.Text
   originalPrice     Float?
   isPromoted        Boolean     @default(false)
   orderItems        OrderItem[]
@@ -932,6 +936,8 @@ model ExtraProduct {
   weight      String?     @db.VarChar(255)
   images      Json?
   sellerSku   String?     @unique @db.VarChar(100)
+  jumiaPackageContent String? @db.VarChar(500)
+  jumiaHighlights     String? @db.Text
   orderItems  OrderItem[]
 
   @@index([category])

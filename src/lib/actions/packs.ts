@@ -21,6 +21,8 @@ const PackSchema = z.object({
     shippingFees: z.number().min(0).default(0),
     bookIds: z.array(z.string().uuid()).min(1, 'Le pack doit contenir au moins un livre'),
     sellerSku: z.string().optional(),
+    jumiaPackageContent: z.string().optional(),
+    jumiaHighlights: z.string().optional(),
 })
 
 export type PackInput = z.infer<typeof PackSchema>

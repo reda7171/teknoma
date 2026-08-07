@@ -27,6 +27,10 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
     const [injectingExif, setInjectingExif] = useState<string | null>(null)
     const [exifSuccess, setExifSuccess] = useState<Set<string>>(new Set())
 
+    // New state for Renaming
+    const [renaming, setRenaming] = useState<string | null>(null)
+    const [renameSuccess, setRenameSuccess] = useState<Set<string>>(new Set())
+
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(posts.map(p => [p.id, {
             alt: p.altText || `${p.title} - ${p.authorName || 'Riwaya'} | Blog Riwaya`,
@@ -64,16 +68,27 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
         setSaving('all')
         setMessage('')
         try {
-            const res = await fetch('/api/admin/posts/image-seo-bulk', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ edits })
-            })
-            if (res.ok) {
-                setMessage('Toutes les métadonnées images du blog ont été enregistrées !')
+            const entries = Object.entries(edits)
+            const chunkSize = 50
+
+            for (let i = 0; i < entries.length; i += chunkSize) {
+                const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
+                const res = await fetch('/api/admin/posts/image-seo-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ edits: chunk })
+                })
+                
+                const contentType = res.headers.get('content-type')
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Erreur serveur (${res.status}): Réponse non JSON.`)
+                }
+                
+                if (!res.ok) throw new Error('Erreur API')
             }
-        } catch {
-            setMessage('Erreur lors de la sauvegarde.')
+            setMessage('Toutes les métadonnées images du blog ont été enregistrées !')
+        } catch (e: any) {
+            setMessage('Erreur lors de la sauvegarde: ' + e.message)
         } finally {
             setSaving(null)
         }
@@ -104,23 +119,78 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
         }
     }
 
+    async function renameImage(postId: string) {
+        setRenaming(postId)
+        setMessage('')
+        try {
+            const res = await fetch(`/api/admin/posts/${postId}/rename-image`, { method: 'POST' })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setRenameSuccess(prev => new Set([...prev, postId]))
+            } else {
+                setMessage('Erreur: ' + (data.error || 'Impossible de renommer'))
+            }
+        } catch (e) {
+            setMessage('Erreur réseau lors du renommage.')
+        } finally {
+            setRenaming(null)
+        }
+    }
+
+    async function renameAll() {
+        setRenaming('all')
+        setMessage('')
+        let successCount = 0
+        try {
+            for (const post of filtered) {
+                const res = await fetch(`/api/admin/posts/${post.id}/rename-image`, { method: 'POST' })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        successCount++
+                        setRenameSuccess(prev => new Set([...prev, post.id]))
+                    }
+                }
+            }
+            setMessage(`${successCount} images renommées avec succès !`)
+        } catch (e) {
+            setMessage('Erreur réseau lors du renommage global.')
+        } finally {
+            setRenaming(null)
+        }
+    }
+
     async function injectExifAll() {
         setInjectingExif('all')
         setMessage('')
         try {
-            const res = await fetch('/api/admin/posts/exif-inject-bulk', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ edits })
-            })
-            const data = await res.json()
-            if (res.ok && data.success) {
-                setMessage(`L'injection EXIF a été effectuée sur ${data.count} images !`)
-            } else {
-                setMessage('Erreur lors de l\'injection EXIF globale.')
+            const entries = Object.entries(edits)
+            const chunkSize = 50
+            let totalInjected = 0
+
+            for (let i = 0; i < entries.length; i += chunkSize) {
+                const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
+                const res = await fetch('/api/admin/posts/exif-inject-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ edits: chunk })
+                })
+                
+                const contentType = res.headers.get('content-type')
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Erreur serveur (${res.status}): Réponse non JSON.`)
+                }
+
+                const data = await res.json()
+                if (res.ok && data.success) {
+                    totalInjected += data.count || Object.keys(chunk).length
+                } else {
+                    throw new Error(data.error || `Statut ${res.status}`)
+                }
             }
-        } catch {
-            setMessage('Erreur réseau lors de l\'injection EXIF globale.')
+            setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
+        } catch (e: any) {
+            setMessage('Erreur réseau lors de l\'injection EXIF globale: ' + e.message)
         } finally {
             setInjectingExif(null)
         }
@@ -206,6 +276,15 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                 >
                     {injectingExif === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Injecter EXIF tout
+                </button>
+                <button
+                    type="button"
+                    onClick={renameAll}
+                    disabled={renaming === 'all'}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                >
+                    {renaming === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                    Renommer tout
                 </button>
             </div>
 
@@ -306,6 +385,22 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                         <Download className="w-3 h-3" />
                                     )}
                                     {exifSuccess.has(post.id) ? 'Injecté !' : 'Injecter EXIF'}
+                                </button>
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => renameImage(post.id)}
+                                    disabled={renaming === post.id}
+                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${renameSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'} disabled:opacity-50`}
+                                >
+                                    {renaming === post.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : renameSuccess.has(post.id) ? (
+                                        <CheckCircle2 className="w-3 h-3" />
+                                    ) : (
+                                        <ImageIcon className="w-3 h-3" />
+                                    )}
+                                    {renameSuccess.has(post.id) ? 'Renommé !' : 'Renommer fichier'}
                                 </button>
                             </div>
                         </div>

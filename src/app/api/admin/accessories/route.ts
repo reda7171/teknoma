@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
                 weight: data.weight,
                 warranty: data.warranty,
                 sellerSku: data.sellerSku,
-                active: data.active !== undefined ? data.active : true
+                active: data.active !== undefined ? data.active : true,
+                jumiaHighlights: data.jumiaHighlights,
+                jumiaPackageContent: data.jumiaPackageContent
             }
         })
 

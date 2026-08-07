@@ -208,6 +208,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             sellerSku: formData.get('sellerSku') as string || undefined,
             jumiaPriceMarkup: parseInt(formData.get('jumiaPriceMarkup') as string) || 0,
             isSyncedWithJumia: formData.get('isSyncedWithJumia') === 'true',
+            jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
+            jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
         }
 
         const result = await updateBook(id, input)
@@ -777,6 +779,42 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             <option value="true" className="text-green-600 font-medium">✅ Oui (Synchronisé)</option>
                             <option value="false" className="text-gray-500 font-medium">❌ Non (Pas encore)</option>
                         </select>
+                    </div>
+
+                    {/* Jumia Highlights */}
+                    <div className="md:col-span-2">
+                        <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700 mb-2">
+                            Highlights Jumia (Description courte HTML)
+                        </label>
+                        <textarea
+                            id="jumiaHighlights"
+                            name="jumiaHighlights"
+                            rows={3}
+                            defaultValue={book.jumiaHighlights || ''}
+                            placeholder={`<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="mt-1 text-sm text-gray-500">
+                            Laisser vide pour utiliser la valeur par défaut. Recommandé : une liste HTML <code>&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code>
+                        </p>
+                    </div>
+
+                    {/* Jumia Package Content */}
+                    <div className="md:col-span-2">
+                        <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700 mb-2">
+                            Contenu du colis Jumia (What's in the box)
+                        </label>
+                        <input
+                            type="text"
+                            id="jumiaPackageContent"
+                            name="jumiaPackageContent"
+                            defaultValue={book.jumiaPackageContent || ''}
+                            placeholder={`1 x Livre : ${book.title}`}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="mt-1 text-sm text-gray-500">
+                            Exemple: "1 x Livre" ou "1 x Livre avec marque-page". Laisser vide pour la valeur par défaut.
+                        </p>
                     </div>
 
                     {/* Image URL ou Upload */}

@@ -176,6 +176,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             shippingFees: isFreeDelivery ? 0 : shippingFees,
             bookIds: selectedBooks,
             sellerSku: formData.get('sellerSku') as string || undefined,
+            jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
+            jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
         }
 
         const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null
@@ -510,6 +512,42 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     )}
                                 </div>
                             </div>
+
+                            {/* Jumia Highlights */}
+                            <div className="mt-4">
+                                <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Highlights Jumia (Description courte HTML)
+                                </label>
+                                <textarea
+                                    id="jumiaHighlights"
+                                    name="jumiaHighlights"
+                                    rows={3}
+                                    defaultValue={pack.jumiaHighlights || ''}
+                                    placeholder={`<ul><li>Titre: ${pack.name}</li><li>Type: Pack de Livres</li></ul>`}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Laisser vide pour utiliser la valeur par défaut. Recommandé : une liste HTML.
+                                </p>
+                            </div>
+
+                            {/* Jumia Package Content */}
+                            <div className="mt-4">
+                                <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Contenu du colis Jumia (What's in the box)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="jumiaPackageContent"
+                                    name="jumiaPackageContent"
+                                    defaultValue={pack.jumiaPackageContent || ''}
+                                    placeholder={`1 x Pack de livres : ${pack.name}`}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Exemple: "3 x Livres". Laisser vide pour la valeur par défaut.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -614,17 +652,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             </div>
                         )}
 
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    type="submit"
-                                    value="stay"
-                                    disabled={loading || selectedBooks.length === 0 || isPushingJumia}
-                                    className="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                >
-                                    <Save className="w-4 h-4 mr-1.5" />
-                                    {loading ? '...' : 'Enregistrer'}
-                                </button>
+                            <div className="space-y-3">
                                 <button
                                     type="submit"
                                     value="close"
@@ -632,10 +660,9 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                     className="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                                 >
                                     <Save className="w-4 h-4 mr-1.5" />
-                                    {loading ? '...' : 'Enregistrer & fermer'}
+                                    {loading ? '...' : 'Enregistrer et fermer'}
                                 </button>
-                            </div>
-                            <button
+                                <button
                                 type="button"
                                 onClick={handlePushToJumia}
                                 disabled={isPushingJumia || loading}
