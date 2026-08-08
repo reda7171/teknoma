@@ -441,6 +441,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 [dir="rtl"] #article-content blockquote::before { left: auto; right: 1rem; content: "”"; }
                                 #article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
                                 #article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
+                            `}</style>
                             {(() => {
                                 if (post.books && post.books.length > 0) {
                                     // Diviser par H2 pour injecter le CTA au milieu (avant le 2ème H2 s'il existe)
