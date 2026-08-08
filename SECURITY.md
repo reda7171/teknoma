@@ -17,7 +17,7 @@ We take the security of Riwaya and our users' data very seriously. If you discov
 ### How to report
 Please **do not** report security vulnerabilities through public GitHub issues.
 
-Instead, please report them via email to: **admin@riwaya.com**
+Instead, please report them via email to: **redaazizi@hottmail.com**
 
 ### What to expect
 - We will acknowledge receipt of your vulnerability report within 48 hours.
