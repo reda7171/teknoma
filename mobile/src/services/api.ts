@@ -276,3 +276,15 @@ export const removeFromReadingList = async (id: string) => {
   const response = await api.delete(`/reading-list/${id}`);
   return response.data;
 };
+
+// --- BLOG ---
+
+export const getBlogPosts = async (page = 1, limit = 10) => {
+  const response = await api.get(`/blog?page=${page}&limit=${limit}`);
+  return response.data;
+};
+
+export const getBlogPost = async (slug: string) => {
+  const response = await api.get(`/blog/${slug}`);
+  return response.data;
+};

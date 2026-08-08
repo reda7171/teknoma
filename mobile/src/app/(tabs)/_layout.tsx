@@ -105,6 +105,17 @@ export default function AppTabs() {
         }}
       />
 
+      {/* ── Blog ── */}
+      <Tabs.Screen
+        name="blog"
+        options={{
+          title: 'Blog',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'newspaper' : 'newspaper-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+
       {/* ── Paramètres ── */}
       <Tabs.Screen
         name="settings"

@@ -12,6 +12,8 @@ interface CreateNotificationParams {
     link?: string
 }
 
+import { sendPushNotification } from '@/lib/expo-push'
+
 // Créer une notification
 export async function createNotification(params: CreateNotificationParams) {
     try {
@@ -24,6 +26,21 @@ export async function createNotification(params: CreateNotificationParams) {
                 link: params.link
             }
         })
+
+        // Send Push Notification if user has an expoPushToken
+        const userWithToken = await prisma.customer.findUnique({
+            where: { id: params.userId },
+            select: { expoPushToken: true }
+        })
+
+        if (userWithToken?.expoPushToken) {
+            await sendPushNotification(
+                userWithToken.expoPushToken, 
+                params.title, 
+                params.message, 
+                { url: params.link }
+            )
+        }
 
         revalidatePath('/community')
         return { success: true, notification }

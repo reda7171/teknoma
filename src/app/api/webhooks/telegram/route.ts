@@ -2135,7 +2135,7 @@ export async function POST(req: Request) {
                                 scheduleAt.setHours(parseInt(hours), parseInt(minutes), 0, 0)
                                 if (scheduleAt <= today) scheduleAt.setDate(scheduleAt.getDate() + 1)
 
-                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://riwaya.store/fr/book/${book.id}\n\n#livre #lecture #riwaya`
+                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://riwaya.store/fr/books/${book.id}\n\n#livre #lecture #riwaya`
                                 const post = await prisma.scheduledPost.create({
                                     data: {
                                         date: scheduleAt,
