@@ -46,7 +46,11 @@ export async function PATCH(
                 sellerSku: data.sellerSku,
                 active: data.active,
                 jumiaHighlights: data.jumiaHighlights,
-                jumiaPackageContent: data.jumiaPackageContent
+                jumiaPackageContent: data.jumiaPackageContent,
+                isSyncedWithJumia: data.isSyncedWithJumia,
+                jumiaPriceMarkup: data.jumiaPriceMarkup !== undefined ? parseFloat(data.jumiaPriceMarkup) : undefined,
+                jumiaProductSid: data.jumiaProductSid,
+                jumiaStock: data.jumiaStock !== undefined ? parseInt(data.jumiaStock) : undefined
             }
         })
 

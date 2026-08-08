@@ -140,6 +140,8 @@ model Book {
   longDescription   String?           @db.LongText
   longDescriptionFr String?           @db.LongText
   longDescriptionEn String?           @db.LongText
+  jumiaProductSid   String?           @db.VarChar(100)
+  jumiaQcStatus     String?           @db.VarChar(50)
   isBestSeller      Boolean           @default(false)
   previewUrl        String?           @db.LongText
   imageAlt          String?           @db.VarChar(500)
@@ -221,8 +223,10 @@ model Pack {
   isSyncedWithJumia Boolean     @default(false)
   jumiaPriceMarkup  Float?      @default(0)
   jumiaStock        Int?
+  jumiaProductSid   String?     @db.VarChar(100)
+  jumiaQcStatus     String?     @db.VarChar(50)
   jumiaPackageContent String?   @db.VarChar(500)
-  jumiaHighlights     String?   @db.Text
+  jumiaHighlights     String?   @db.VarChar(2000)
   originalPrice     Float?
   isPromoted        Boolean     @default(false)
   orderItems        OrderItem[]
@@ -938,6 +942,10 @@ model ExtraProduct {
   sellerSku   String?     @unique @db.VarChar(100)
   jumiaPackageContent String? @db.VarChar(500)
   jumiaHighlights     String? @db.Text
+  isSyncedWithJumia   Boolean @default(false)
+  jumiaPriceMarkup    Float?  @default(0)
+  jumiaStock          Int?
+  jumiaProductSid     String? @db.VarChar(100)
   orderItems  OrderItem[]
 
   @@index([category])
@@ -1180,3 +1188,18 @@ model SocialMessage {
   @@map("social_messages")
 }
 
+
+model CronLog {
+  id        String   @id @default(uuid())
+  jobName   String   @db.VarChar(100)
+  status    String   @db.VarChar(50)
+  message   String   @db.Text
+  details   Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([jobName])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("cron_logs")
+}

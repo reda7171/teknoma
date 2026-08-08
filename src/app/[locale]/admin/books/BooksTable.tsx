@@ -774,20 +774,20 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                 </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                            <div className="flex flex-col items-center gap-1">
                                                                 {book.jumiaStock != null && book.stock === book.jumiaStock ? (
                                                                     <span className="text-green-600">Oui</span>
                                                                 ) : (
-                                                                    <div className="flex flex-col items-center gap-1">
-                                                                        <span className="text-red-600">Non</span>
-                                                                        <button 
-                                                                            onClick={(e) => handleSyncQuantity(e, book.id)}
-                                                                            disabled={loading === book.id + '-sync'}
-                                                                            className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-blue-600 shadow-sm disabled:opacity-50 transition-colors"
-                                                                        >
-                                                                            {loading === book.id + '-sync' ? '...' : 'Synch quantity'}
-                                                                        </button>
-                                                                    </div>
+                                                                    <span className="text-red-600">Non</span>
                                                                 )}
+                                                                <button 
+                                                                    onClick={(e) => handleSyncQuantity(e, book.id)}
+                                                                    disabled={loading === book.id + '-sync'}
+                                                                    className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-blue-600 shadow-sm disabled:opacity-50 transition-colors"
+                                                                >
+                                                                    {loading === book.id + '-sync' ? '...' : 'Synch quantity'}
+                                                                </button>
+                                                            </div>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">

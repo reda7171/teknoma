@@ -36,6 +36,8 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('ALL')
+    const [stockFilter, setStockFilter] = useState('ALL')
+    const [sortFilter, setSortFilter] = useState('NAME_ASC')
 
     async function handleDelete(id: string, name: string) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${name}" ?`)) {
@@ -108,15 +110,30 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
 
     const filteredPacks = packs.filter(pack => {
         const matchesSearch = pack.name.toLowerCase().includes(search.toLowerCase())
-        if (statusFilter === 'ACTIVE') return pack.active && matchesSearch
-        if (statusFilter === 'INACTIVE') return !pack.active && matchesSearch
-        return matchesSearch
+        
+        let matchesStatus = true
+        if (statusFilter === 'ACTIVE') matchesStatus = pack.active
+        if (statusFilter === 'INACTIVE') matchesStatus = !pack.active
+        if (statusFilter === 'NO_IMAGE') matchesStatus = !pack.image
+        
+        let matchesStock = true
+        const isOutOfStock = pack.books.some(b => (b.book.stock || 0) <= 0)
+        if (stockFilter === 'IN_STOCK') matchesStock = !isOutOfStock
+        if (stockFilter === 'OUT_OF_STOCK') matchesStock = isOutOfStock
+        
+        return matchesSearch && matchesStatus && matchesStock
+    }).sort((a, b) => {
+        if (sortFilter === 'NAME_ASC') return a.name.localeCompare(b.name)
+        if (sortFilter === 'NAME_DESC') return b.name.localeCompare(a.name)
+        if (sortFilter === 'PRICE_ASC') return a.price - b.price
+        if (sortFilter === 'PRICE_DESC') return b.price - a.price
+        return 0
     })
 
     return (
         <div className="overflow-x-auto relative flex flex-col">
             <div className="p-4 bg-white border-b border-gray-200 flex flex-wrap gap-4 items-center justify-between">
-                <div className="flex gap-4 flex-1">
+                <div className="flex gap-4 flex-1 flex-wrap">
                     <input 
                         type="text" 
                         placeholder="Rechercher un pack par nom..." 
@@ -132,6 +149,26 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                         <option value="ALL">Tous les statuts</option>
                         <option value="ACTIVE">Actifs uniquement</option>
                         <option value="INACTIVE">Inactifs uniquement</option>
+                        <option value="NO_IMAGE">Sans Image</option>
+                    </select>
+                    <select 
+                        className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={stockFilter}
+                        onChange={(e) => setStockFilter(e.target.value)}
+                    >
+                        <option value="ALL">Tous les stocks</option>
+                        <option value="IN_STOCK">En stock</option>
+                        <option value="OUT_OF_STOCK">En rupture (livres manquants)</option>
+                    </select>
+                    <select 
+                        className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={sortFilter}
+                        onChange={(e) => setSortFilter(e.target.value)}
+                    >
+                        <option value="NAME_ASC">Nom (A-Z)</option>
+                        <option value="NAME_DESC">Nom (Z-A)</option>
+                        <option value="PRICE_ASC">Prix croissant</option>
+                        <option value="PRICE_DESC">Prix décroissant</option>
                     </select>
                 </div>
             </div>
@@ -194,9 +231,19 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                             />
                                         </div>
                                     )}
-                                    <div>
-                                        <div className="text-sm font-bold text-gray-900">{pack.name}</div>
-                                        <div className="text-sm text-gray-500">{pack.books.length} livre{pack.books.length > 1 ? 's' : ''}</div>
+                                    <div className="flex flex-col">
+                                        <Link 
+                                            href={`/admin/packs/${pack.id}/edit`}
+                                            className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                                        >
+                                            {pack.name}
+                                        </Link>
+                                        <div className="text-sm text-gray-500">
+                                            {pack.books.length} livre{pack.books.length > 1 ? 's' : ''}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 font-mono mt-0.5">
+                                            SKU: {pack.sellerSku || pack.id}
+                                        </div>
                                     </div>
                                 </div>
                             </td>

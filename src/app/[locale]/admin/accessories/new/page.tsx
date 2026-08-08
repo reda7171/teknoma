@@ -31,7 +31,11 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
         warranty: '',
         active: true,
         jumiaHighlights: '',
-        jumiaPackageContent: ''
+        jumiaPackageContent: '',
+        jumiaProductSid: '',
+        isSyncedWithJumia: false,
+        jumiaPriceMarkup: '0',
+        jumiaStock: ''
     })
 
     /* Upload fichiers multiples vers /api/admin/upload */
@@ -219,6 +223,88 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                     onChange={e => setFormData({ ...formData, warranty: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
                                     placeholder="Ex: 1 an"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Jumia Configuration */}
+                    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+                            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                Configuration Jumia
+                            </h3>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Synchronisé avec Jumia</label>
+                                <select
+                                    value={formData.isSyncedWithJumia ? 'true' : 'false'}
+                                    onChange={e => setFormData({ ...formData, isSyncedWithJumia: e.target.value === 'true' })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                >
+                                    <option value="false">❌ Non (Pas encore)</option>
+                                    <option value="true">✅ Oui (Synchronisé)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Seller SKU Jumia</label>
+                                <input
+                                    type="text"
+                                    value={formData.sellerSku}
+                                    onChange={e => setFormData({ ...formData, sellerSku: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder="Ex: ACC-001"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Product SID (Requis pour maj)</label>
+                                <input
+                                    type="text"
+                                    value={formData.jumiaProductSid}
+                                    onChange={e => setFormData({ ...formData, jumiaProductSid: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder="Ex: 5b4e1234-..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Stock Virtuel Jumia (Optionnel)</label>
+                                <input
+                                    type="number"
+                                    value={formData.jumiaStock}
+                                    onChange={e => setFormData({ ...formData, jumiaStock: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder="Laisser vide pour sync auto"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Marge Jumia (DH)</label>
+                                <input
+                                    type="number"
+                                    value={formData.jumiaPriceMarkup}
+                                    onChange={e => setFormData({ ...formData, jumiaPriceMarkup: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Package Content Jumia</label>
+                                <input
+                                    type="text"
+                                    value={formData.jumiaPackageContent}
+                                    onChange={e => setFormData({ ...formData, jumiaPackageContent: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder={`1 x Accessoire`}
+                                />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Highlights Jumia (HTML)</label>
+                                <textarea
+                                    value={formData.jumiaHighlights}
+                                    onChange={e => setFormData({ ...formData, jumiaHighlights: e.target.value })}
+                                    rows={3}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder={`<ul><li>Titre: Accessoire</li></ul>`}
                                 />
                             </div>
                         </div>

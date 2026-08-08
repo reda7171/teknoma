@@ -27,6 +27,13 @@ export async function GET(request: Request) {
         })
 
         if (activeOrders.length === 0) {
+            await prisma.cronLog.create({
+                data: {
+                    jobName: "sync-delivery",
+                    status: "SUCCESS",
+                    message: "Aucune commande active à synchroniser",
+                }
+            })
             return NextResponse.json({ success: true, message: 'No active orders to sync', updatedCount: 0 })
         }
 
@@ -150,6 +157,15 @@ export async function GET(request: Request) {
             }
         }
 
+        await prisma.cronLog.create({
+            data: {
+                jobName: "sync-delivery",
+                status: errors.length > 0 ? "WARNING" : "SUCCESS",
+                message: `Synchronisation de livraison terminée. ${updatedCount} commandes mises à jour.`,
+                details: { updatedCount, errors: errors.length > 0 ? errors : undefined }
+            }
+        })
+
         return NextResponse.json({ 
             success: true, 
             message: `Sync complete`, 
@@ -159,6 +175,16 @@ export async function GET(request: Request) {
         
     } catch (error: any) {
         console.error('CRON Sync Error:', error)
+        
+        await prisma.cronLog.create({
+            data: {
+                jobName: "sync-delivery",
+                status: "ERROR",
+                message: error.message || "Erreur lors de la synchro livraison",
+                details: { stack: error.stack }
+            }
+        }).catch(e => console.error("Erreur log cron:", e))
+
         return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 }

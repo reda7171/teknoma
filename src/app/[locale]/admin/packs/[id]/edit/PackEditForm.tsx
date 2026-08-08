@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
-import { publishPacksToJumia } from '@/lib/actions/jumia'
+import { publishPacksToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
@@ -37,6 +37,7 @@ interface PackEditFormProps {
         isFreeDelivery: boolean
         shippingFees: number
         sellerSku?: string
+        jumiaProductSid?: string
         selectedBookIds: string[]
     }
     books: Book[]
@@ -59,6 +60,17 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [onlyAvailable, setOnlyAvailable] = useState(true)
     const [isCatalogOpen, setIsCatalogOpen] = useState(false)
     const [packImage, setPackImage] = useState(pack.image)
+    const [isLinked, setIsLinked] = useState(false)
+
+    useEffect(() => {
+        if (pack.sellerSku) {
+            checkJumiaLinkBySkuExact(pack.sellerSku, pack.jumiaProductSid).then(linked => {
+                setIsLinked(linked)
+            }).catch(err => {
+                setIsLinked(false)
+            })
+        }
+    }, [pack.sellerSku, pack.jumiaProductSid])
 
     // Champs multilingues
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
@@ -70,6 +82,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [descriptionEn, setDescriptionEn] = useState(pack.descriptionEn || '')
     const [isTranslating, setIsTranslating] = useState(false)
     const [translateMsg, setTranslateMsg] = useState<string | null>(null)
+    const [isGeneratingHighlights, setIsGeneratingHighlights] = useState(false)
+    const [isGeneratingContent, setIsGeneratingContent] = useState(false)
 
     function toggleBook(bookId: string) {
         setSelectedBooks(prev =>
@@ -146,6 +160,76 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
         } else {
             generatedText = `Enjoy our exclusive pack: "${packName}"!\n\nThis pack contains the following books:\n${booksListText}\n\nOrder now at the best price!`;
             setDescriptionEn(generatedText);
+        }
+    }
+
+    const generateHighlightsAI = async () => {
+        const packName = currentLang === 'ar' ? name : currentLang === 'fr' ? (nameFr || name) : (nameEn || name);
+        if (!packName) return alert('Veuillez saisir un nom pour le pack');
+        
+        const el = document.getElementById('jumiaHighlights') as HTMLTextAreaElement;
+        let textToImprove = el?.value?.trim();
+        
+        if (!textToImprove) {
+            const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
+            const lis = selectedBooksData.map(b => `<li>${b.title}</li>`).join('');
+            textToImprove = `<ul><li>Titre: ${packName}</li><li>Contient:</li>${lis}</ul>`;
+            el.value = textToImprove;
+            return; // If it was empty, we just set the default HTML. DeepL might break HTML tags.
+        }
+        
+        setIsGeneratingHighlights(true);
+        try {
+            const res = await fetch('/api/admin/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: 'texts', texts: [textToImprove], targetLang: 'FR' })
+            });
+            const data = await res.json();
+            if (data.success && data.translations && data.translations[0]) {
+                if (el) el.value = data.translations[0];
+            } else if (data.error) {
+                alert('Erreur DeepL: ' + data.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur lors de la traduction');
+        } finally {
+            setIsGeneratingHighlights(false);
+        }
+    }
+
+    const generateContentAI = async () => {
+        const packName = currentLang === 'ar' ? name : currentLang === 'fr' ? (nameFr || name) : (nameEn || name);
+        if (!packName) return alert('Veuillez saisir un nom pour le pack');
+        
+        const el = document.getElementById('jumiaPackageContent') as HTMLInputElement;
+        let textToImprove = el?.value?.trim();
+        
+        if (!textToImprove) {
+            const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
+            const booksTitles = selectedBooksData.map(b => b.title).join(', ');
+            textToImprove = `1 x Pack de livres : ${packName} (${booksTitles})`;
+        }
+        
+        setIsGeneratingContent(true);
+        try {
+            const res = await fetch('/api/admin/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: 'texts', texts: [textToImprove], targetLang: 'FR' })
+            });
+            const data = await res.json();
+            if (data.success && data.translations && data.translations[0]) {
+                if (el) el.value = data.translations[0];
+            } else if (data.error) {
+                alert('Erreur DeepL: ' + data.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur lors de la traduction');
+        } finally {
+            setIsGeneratingContent(false);
         }
     }
 
@@ -249,7 +333,38 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Retour à la liste
                 </Link>
-                <h1 className="text-3xl font-bold text-gray-900">Modifier le pack</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-3xl font-bold text-gray-900">Modifier le pack</h1>
+                    <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-2">
+                        <span className="text-sm font-medium text-gray-500">État du Pack :</span>
+                        {selectedBooksData.length === 0 ? (
+                            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider border border-gray-200">Vide</span>
+                        ) : selectedBooksData.some(b => b.stock <= 0) ? (
+                            <span className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold uppercase tracking-wider border border-red-200 flex items-center gap-1">
+                                <AlertTriangle className="w-4 h-4" /> Incomplet ({selectedBooksData.filter(b => b.stock <= 0).length} livre(s) en rupture)
+                            </span>
+                        ) : (
+                            <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider border border-green-200 flex items-center gap-1">
+                                <CheckCircle2 className="w-4 h-4" /> Complet
+                            </span>
+                        )}
+                    </div>
+                    {pack.sellerSku && (
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border flex items-center gap-1 ${isLinked ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                            {isLinked ? (
+                                <>
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Lié à Jumia
+                                </>
+                            ) : (
+                                <>
+                                    <AlertTriangle className="w-4 h-4" />
+                                    Non Linké
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
                 <p className="mt-2 text-sm text-gray-600">
                     Modifiez les informations du pack &quot;{pack.name}&quot;
                 </p>
@@ -515,9 +630,14 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
 
                             {/* Jumia Highlights */}
                             <div className="mt-4">
-                                <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Highlights Jumia (Description courte HTML)
-                                </label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700">
+                                        Highlights Jumia (Description courte HTML)
+                                    </label>
+                                    <button type="button" onClick={generateHighlightsAI} disabled={isGeneratingHighlights} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
+                                        {isGeneratingHighlights ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL'}
+                                    </button>
+                                </div>
                                 <textarea
                                     id="jumiaHighlights"
                                     name="jumiaHighlights"
@@ -533,9 +653,14 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
 
                             {/* Jumia Package Content */}
                             <div className="mt-4">
-                                <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Contenu du colis Jumia (What's in the box)
-                                </label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700">
+                                        Contenu du colis Jumia (What's in the box)
+                                    </label>
+                                    <button type="button" onClick={generateContentAI} disabled={isGeneratingContent} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
+                                        {isGeneratingContent ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL'}
+                                    </button>
+                                </div>
                                 <input
                                     type="text"
                                     id="jumiaPackageContent"
@@ -629,6 +754,11 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                 {/* Right Column */}
                 <div className="lg:col-span-1">
                     <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
+                        {packImage && (
+                            <div className="mb-6 flex justify-center">
+                                <img src={packImage} alt="Pack" className="w-full max-w-sm rounded-lg shadow-sm border border-gray-100 object-cover" />
+                            </div>
+                        )}
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Résumé</h2>
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm">
@@ -646,7 +776,12 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                 <p className="text-sm font-medium text-gray-700 mb-2">Livres inclus:</p>
                                 <ul className="space-y-1">
                                     {selectedBooksData.map(book => (
-                                        <li key={book.id} className="text-xs text-gray-600">• {book.title}</li>
+                                        <li key={book.id} className="text-xs text-gray-600 flex justify-between border-b border-gray-50 pb-1 last:border-0 last:pb-0">
+                                            <span className="truncate pr-2">• {book.title}</span>
+                                            <span className={`font-semibold whitespace-nowrap ${book.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                Qté: {book.stock}
+                                            </span>
+                                        </li>
                                     ))}
                                 </ul>
                             </div>

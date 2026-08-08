@@ -66,7 +66,7 @@ export async function syncBooksStockToJumia() {
         // Récupérer les livres avec ISBN ou ID (en fonction de ce qui est utilisé comme SellerSku sur Jumia)
         const books = await prisma.book.findMany({
             where: { active: true, sellerSku: { not: null }, isSyncedWithJumia: true },
-            select: { id: true, sellerSku: true, stock: true }
+            select: { id: true, sellerSku: true, stock: true, jumiaProductSid: true, jumiaQcStatus: true }
         })
 
         if (books.length === 0) {
@@ -76,12 +76,28 @@ export async function syncBooksStockToJumia() {
         const updates: any[] = []
         for (const book of books) {
             try {
-                const data = await jumia.getCatalogStock({ sellerSku: book.sellerSku as string, size: 1 })
-                const sid = data?.products?.[0]?.id
+                let sid = (book as any).jumiaProductSid;
+                let sellerSku = book.sellerSku as string;
+                
+                if (!sid) {
+                    const cleanSku = (book.sellerSku as string).trim();
+                    let data = await jumia.getProducts({ sellerSku: cleanSku })
+                    let product = data?.products?.[0] || data?.data?.[0] || data?.[0]
+                    
+                    if (!product || !product.id) {
+                        data = await jumia.getProducts({ sellerSku: cleanSku + '_v2' })
+                        product = data?.products?.[0] || data?.data?.[0] || data?.[0]
+                    }
+                    
+                    const variation = product?.variations?.find((v: any) => v.sellerSku?.trim() === (book.sellerSku as string).trim() || v.sellerSku?.trim() === (book.sellerSku as string).trim() + '_v2')
+                    sid = variation?.id || product?.id
+                    sellerSku = variation?.sellerSku?.trim() || book.sellerSku as string
+                }
+                
                 if (sid) {
                     updates.push({
-                        productSid: sid,
-                        sellerSku: book.sellerSku as string,
+                        id: sid,
+                        sellerSku: sellerSku,
                         stock: book.stock
                     })
                 }
@@ -125,12 +141,28 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
         const updates: any[] = []
         for (const book of books) {
             try {
-                const data = await jumia.getCatalogStock({ sellerSku: book.sellerSku as string, size: 1 })
-                const sid = data?.products?.[0]?.id
+                let sid = book.jumiaProductSid;
+                let sellerSku = book.sellerSku as string;
+                
+                if (!sid) {
+                    const cleanSku = (book.sellerSku as string).trim();
+                    let data = await jumia.getProducts({ sellerSku: cleanSku })
+                    let product = data?.products?.[0] || data?.data?.[0] || data?.[0]
+                    
+                    if (!product || !product.id) {
+                        data = await jumia.getProducts({ sellerSku: cleanSku + '_v2' })
+                        product = data?.products?.[0] || data?.data?.[0] || data?.[0]
+                    }
+                    
+                    const variation = product?.variations?.find((v: any) => v.sellerSku?.trim() === (book.sellerSku as string).trim() || v.sellerSku?.trim() === (book.sellerSku as string).trim() + '_v2')
+                    sid = variation?.id || product?.id
+                    sellerSku = variation?.sellerSku?.trim() || book.sellerSku as string
+                }
+                
                 if (sid) {
                     updates.push({
-                        productSid: sid,
-                        sellerSku: book.sellerSku as string,
+                        id: sid,
+                        sellerSku: sellerSku,
                         stock: book.stock
                     })
                 }
@@ -750,12 +782,16 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
 
         const skuToVerify = sellerSku || bookId;
 
-        // Use getCatalogStock or getProducts with sellerSku
-        const data = await jumia.getCatalogStock({ sellerSku: skuToVerify, size: 1 })
+        // Use getProducts to find the variation, then getCatalogStock to get its stock
+        const dataProd = await jumia.getProducts({ sellerSku: skuToVerify })
+        const productData = dataProd?.products?.[0] || dataProd?.data?.[0] || dataProd?.[0]
+        const variation = productData?.variations?.find((v: any) => v.sellerSku === skuToVerify || v.sellerSku === skuToVerify + '_v2')
+        const sid = variation?.id || productData?.id
 
-        if (data && data.products && data.products.length > 0) {
-            const product = data.products[0];
-            const stock = product.globalStock !== undefined ? product.globalStock : null;
+        if (sid) {
+            const stockData = await jumia.getCatalogStock({ productSids: [sid] })
+            const product = stockData?.products?.[0]
+            const stock = product?.globalStock !== undefined ? product.globalStock : null;
 
             await prisma.book.updateMany({
                 where: { id: bookId },
@@ -803,35 +839,47 @@ export async function checkJumiaLinkBySku(sellerSku: string) {
 }
 
 
-export async function checkJumiaLinkBySkuExact(sellerSku: string) {
-    if (!sellerSku) return false;
+export async function checkJumiaLinkBySkuExact(sellerSku: string, sid?: string | null) {
+    if (sellerSku) sellerSku = sellerSku.trim();
+    if (!sellerSku && !sid) return false;
     try {
         await verifyAdmin();
         const jumia = await JumiaAPI.getInstance();
         if (!jumia) return false;
 
-        let nextToken: string | undefined = undefined;
-        do {
-            const res = await jumia.getProducts({ token: nextToken, size: 100 });
-            if (res.error) break;
-            if (res.products && res.products.length > 0) {
-                // Check if any product or its variations has this sellerSku
-                for (const p of res.products) {
-                    if (p.sellerSku === sellerSku) return true;
-                    if (p.variations) {
-                        for (const v of p.variations) {
-                            if (v.sellerSku === sellerSku) return true;
-                        }
+        if (sid) {
+            const res = await jumia.getProducts({ sids: [sid] });
+            if (!res.error && res.products && res.products.length > 0) return true;
+        }
+
+        if (!sellerSku) return false;
+
+        const checkSku = async (sku: string) => {
+            const res = await jumia.getProducts({ sellerSku: sku });
+            if (res.error) return false;
+            let products = res.products || res.data || res;
+            if (!Array.isArray(products)) products = [products];
+            for (const p of products) {
+                if (!p) continue;
+                if (p.sellerSku?.trim() === sku.trim()) return true;
+                if (p.variations) {
+                    for (const v of p.variations) {
+                        if (v.sellerSku?.trim() === sku.trim()) return true;
                     }
                 }
             }
-            nextToken = res.nextToken;
-            // To avoid huge delays, let's just search first few pages or remove delay if Jumia allows it
-            if (nextToken) await new Promise(r => setTimeout(r, 500));
-        } while (nextToken);
+            return false;
+        }
+
+        const found = await checkSku(sellerSku);
+        if (found) return true;
+
+        const foundV2 = await checkSku(sellerSku + '_v2');
+        if (foundV2) return true;
 
         return false;
-    } catch (e) {
+    } catch (error) {
+        console.error('Error checking jumia link:', error);
         return false;
     }
 }
@@ -846,7 +894,7 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
 
         const books = await prisma.book.findMany({
             where: { id: { in: bookIds }, sellerSku: { not: null } },
-            select: { sellerSku: true, stock: true, isSyncedWithJumia: true }
+            select: { id: true, sellerSku: true, stock: true, isSyncedWithJumia: true, jumiaProductSid: true, jumiaQcStatus: true }
         });
 
         const validBooks = books.filter(b => b.sellerSku && b.isSyncedWithJumia);
@@ -855,12 +903,43 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
         const updates: any[] = [];
         for (const book of validBooks) {
             try {
-                const data = await jumia.getCatalogStock({ sellerSku: book.sellerSku as string, size: 1 })
-                const sid = data?.products?.[0]?.id
+                let sid = book.jumiaProductSid;
+                let sellerSku = book.sellerSku as string;
+                let qcStatus = book.jumiaQcStatus;
+                
+                if (!sid) {
+                    let data = await jumia.getProducts({ sellerSku: book.sellerSku as string })
+                    let product = data?.products?.[0] || data?.data?.[0] || data?.[0]
+                    
+                    if (!product || !product.id) {
+                        data = await jumia.getProducts({ sellerSku: book.sellerSku + '_v2' })
+                        product = data?.products?.[0] || data?.data?.[0] || data?.[0]
+                    }
+                    
+                    const variation = product?.variations?.find((v: any) => v.sellerSku === book.sellerSku || v.sellerSku === book.sellerSku + '_v2')
+                    sid = variation?.id || product?.id
+                    sellerSku = variation?.sellerSku || book.sellerSku as string
+                    
+                    const client = variation?.businessClients?.find((bc: any) => bc.code === 'jumia-ma' || bc.status)
+                    qcStatus = client?.qc?.status || 'UNKNOWN'
+
+                    if (sid) {
+                        await prisma.book.update({
+                            where: { id: book.id },
+                            data: { jumiaProductSid: sid, jumiaQcStatus: qcStatus }
+                        })
+                    }
+                }
+                
                 if (sid) {
+                    if (qcStatus !== 'APPROVED') {
+                        console.warn(`Skipping Jumia sync for ${book.sellerSku} - QC Status is ${qcStatus}`);
+                        continue;
+                    }
+                    
                     updates.push({
                         productSid: sid,
-                        sellerSku: book.sellerSku as string,
+                        sellerSku: sellerSku,
                         stock: book.stock
                     })
                 }
@@ -887,11 +966,17 @@ export async function deactivatePackOnJumia(packId: string) {
         const pack = await prisma.pack.findUnique({ where: { id: packId } })
         if (!pack) return { success: false, message: "Pack introuvable." }
 
-        const sellerSku = (pack.sellerSku || pack.id) + "_v2"
+        let sellerSku = (pack.sellerSku || pack.id) + "_v2"
 
-        const jumiaProd = await jumia.getProducts({ sellerSku })
-        const product = jumiaProd?.products?.[0] || jumiaProd?.data?.[0] || jumiaProd?.[0]
+        let jumiaProd = await jumia.getProducts({ sellerSku })
+        let product = jumiaProd?.products?.[0] || jumiaProd?.data?.[0] || jumiaProd?.[0]
         
+        if (!product || !product.id) {
+            sellerSku = pack.sellerSku || pack.id
+            jumiaProd = await jumia.getProducts({ sellerSku })
+            product = jumiaProd?.products?.[0] || jumiaProd?.data?.[0] || jumiaProd?.[0]
+        }
+
         if (!product || !product.id) {
             return { success: false, message: "Impossible de trouver le pack sur Jumia." }
         }

@@ -11,6 +11,7 @@ import ScanRetourButton from '@/components/admin/ScanRetourButton'
 import BubbleToggle from '@/components/admin/BubbleToggle'
 import StatsGridController from '@/components/admin/StatsGridController'
 import { getJumiaStats as getJumiaRemoteStats } from './jumia-orders/actions'
+import CronLogsPopup from '@/components/admin/CronLogsPopup'
 
 async function getStats() {
     const today = new Date()
@@ -337,6 +338,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
 
     return (
         <div className="space-y-12">
+            <CronLogsPopup />
             {/* Header section style Riwaya */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
