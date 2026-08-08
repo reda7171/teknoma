@@ -280,12 +280,12 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
             </div>
 
             {/* Liste des assets */}
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
                 {filtered.length === 0 && (
-                    <p className="text-center text-gray-400 text-sm py-8">Aucune image trouvée.</p>
+                    <p className="text-center text-gray-400 text-sm py-8 col-span-full">Aucune image trouvée.</p>
                 )}
                 {filtered.map(asset => (
-                    <div key={asset.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors">
+                    <div key={asset.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors flex flex-col h-full">
                         <div className="flex gap-4 items-start">
                             {/* Image */}
                             <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
@@ -343,57 +343,57 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                                     />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Save individual */}
-                            <div className="shrink-0 flex flex-col gap-2 mt-8">
-                                <button
-                                    type="button"
-                                    onClick={() => saveAsset(asset.id)}
-                                    disabled={saving === asset.id}
-                                    className="flex items-center justify-center gap-1 px-4 py-2 bg-black text-white text-xs font-black rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
-                                >
-                                    {saving === asset.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : saved.has(asset.id) ? (
-                                        <CheckCircle2 className="w-3 h-3 text-green-400" />
-                                    ) : (
-                                        <CheckCircle2 className="w-3 h-3" />
-                                    )}
-                                    {saved.has(asset.id) ? 'Sauvé' : 'Sauver SEO'}
-                                </button>
-                                
-                                <button
-                                    type="button"
-                                    onClick={() => injectExif(asset.id)}
-                                    disabled={injectingExif === asset.id}
-                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${exifSuccess.has(asset.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'} disabled:opacity-50`}
-                                >
-                                    {injectingExif === asset.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : exifSuccess.has(asset.id) ? (
-                                        <CheckCircle2 className="w-3 h-3" />
-                                    ) : (
-                                        <Download className="w-3 h-3" />
-                                    )}
-                                    {exifSuccess.has(asset.id) ? 'Injecté !' : 'Injecter EXIF'}
-                                </button>
+                        {/* Save individual (Actions at the bottom) */}
+                        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-2 items-center justify-between">
+                            <button
+                                type="button"
+                                onClick={() => saveAsset(asset.id)}
+                                disabled={saving === asset.id}
+                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-black text-white text-[10px] font-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                            >
+                                {saving === asset.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : saved.has(asset.id) ? (
+                                    <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                ) : (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                )}
+                                {saved.has(asset.id) ? 'Sauvé' : 'Sauver SEO'}
+                            </button>
+                            
+                            <button
+                                type="button"
+                                onClick={() => injectExif(asset.id)}
+                                disabled={injectingExif === asset.id}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${exifSuccess.has(asset.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'} disabled:opacity-50`}
+                            >
+                                {injectingExif === asset.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : exifSuccess.has(asset.id) ? (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                    <Download className="w-3 h-3" />
+                                )}
+                                {exifSuccess.has(asset.id) ? 'Injecté !' : 'EXIF'}
+                            </button>
 
-                                <button
-                                    type="button"
-                                    onClick={() => renameImage(asset.id)}
-                                    disabled={renaming === asset.id}
-                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${renameSuccess.has(asset.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-pink-700 border-pink-200 hover:bg-pink-50'} disabled:opacity-50`}
-                                >
-                                    {renaming === asset.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : renameSuccess.has(asset.id) ? (
-                                        <CheckCircle2 className="w-3 h-3" />
-                                    ) : (
-                                        <ImageIcon className="w-3 h-3" />
-                                    )}
-                                    {renameSuccess.has(asset.id) ? 'Renommé !' : 'Renommer fichier'}
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => renameImage(asset.id)}
+                                disabled={renaming === asset.id}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${renameSuccess.has(asset.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-pink-700 border-pink-200 hover:bg-pink-50'} disabled:opacity-50`}
+                            >
+                                {renaming === asset.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : renameSuccess.has(asset.id) ? (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                    <ImageIcon className="w-3 h-3" />
+                                )}
+                                {renameSuccess.has(asset.id) ? 'Renommé !' : 'Renommer'}
+                            </button>
                         </div>
                     </div>
                 ))}

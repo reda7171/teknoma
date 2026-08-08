@@ -118,6 +118,16 @@ export async function POST(req: NextRequest) {
         const title = body.packName || body.title || (item ? (itemType === 'BOOK' ? item.title : item.name) : 'Riwaya');
         const price = body.price || item?.price || 0;
 
+        // Texte à publier avec lien intégré
+        let finalCaption = body.customCaption || (itemType === 'BOOK' ? (item?.description || title) : (item?.description ? `${title}\n\n${item.description}` : title));
+        
+        if (finalCaption === 'Riwaya' || !finalCaption) {
+            finalCaption = `📚 Découvrez notre sélection de livres sur Riwaya !\n\n🔗 ${baseUrl}`;
+        } else if (!finalCaption.includes('http')) {
+            const linkToAppend = item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl;
+            finalCaption += `\n\n🔗 Découvrez-le ici : ${linkToAppend}`;
+        }
+
         // Construire le payload envoyé à n8n
         const baseItem = {
             itemId: item?.id || 'marketing',
@@ -134,8 +144,7 @@ export async function POST(req: NextRequest) {
             bookUrl: itemType === 'BOOK' && item?.id ? `${baseUrl}/fr/books/${item.id}` : '',
             packUrl: itemType === 'PACK' ? `${baseUrl}/fr/packs` : '',
             itemUrl: item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
-            // Texte à publier avec lien intégré
-            caption: body.customCaption || (itemType === 'BOOK' ? (item?.description || title) : (item?.description ? `${title}\n\n${item.description}` : title)),
+            caption: finalCaption,
             description: body.customCaption || item?.description || '',
             longDescription: item?.longDescription || '',
             format,

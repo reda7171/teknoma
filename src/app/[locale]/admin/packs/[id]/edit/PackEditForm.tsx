@@ -376,9 +376,9 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {/* Left Column */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 xl:col-span-3 space-y-6">
                     {/* Pack Details */}
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -718,7 +718,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                                 {categoryBooks.every(b => selectedBooks.includes(b.id)) ? 'Tout désélectionner' : 'Tout sélectionner'}
                                             </button>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                                             {categoryBooks.map(book => (
                                                 <label
                                                     key={book.id}

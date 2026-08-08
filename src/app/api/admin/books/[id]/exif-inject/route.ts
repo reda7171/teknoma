@@ -27,7 +27,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         const filePath = path.join(process.cwd(), 'public', book.image)
 
         if (!fs.existsSync(filePath)) {
-            return NextResponse.json({ success: false, error: 'Fichier image introuvable sur le serveur' }, { status: 404 })
+            // Logique de secours : télécharger depuis le serveur de prod
+            try {
+                const remoteUrl = `https://riwaya.store${book.image}`;
+                const response = await fetch(remoteUrl);
+                if (!response.ok) throw new Error('Introuvable sur le serveur distant');
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                
+                const dir = path.join(process.cwd(), 'public', ...book.image.split('/').slice(0, -1).filter(Boolean));
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
+                }
+                
+                fs.writeFileSync(filePath, buffer);
+                console.log(`[Auto-Recovery] Image téléchargée pour EXIF depuis riwaya.store: ${book.image}`);
+            } catch (dlError) {
+                return NextResponse.json({ success: false, error: 'Fichier image introuvable sur le disque (local et prod)' }, { status: 404 })
+            }
         }
 
         // Prepare keywords array

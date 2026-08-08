@@ -96,7 +96,7 @@ export default async function SeoConfigPage({
             </div>
 
             <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-8 md:p-12 overflow-hidden">
-                <div className={activeTab === 'images' ? "w-full mx-auto" : "max-w-4xl mx-auto"}>
+                <div className="w-full mx-auto">
                     {activeTab === 'head' ? (
                         <div className="space-y-8 animate-in fade-in duration-500">
                             <div className="flex items-center gap-4 mb-4">

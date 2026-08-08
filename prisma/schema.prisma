@@ -85,8 +85,8 @@ model User {
   facebook         String?        @db.VarChar(100)
   twitter          String?        @db.VarChar(100)
   phone            String?        @db.VarChar(20)
-  expoPushToken    String?        @db.VarChar(255)
   managedLanguages String?        @db.VarChar(50)
+  expoPushToken    String?        @db.VarChar(255)
   sellerBooks      Book[]         @relation("SellerBooks")
   comments         Comment[]
   coupons          Coupon[]       @relation("AffiliateCoupons")
@@ -138,15 +138,10 @@ model Book {
   sellerId            String?
   status              String            @default("APPROVED")
   longDescription     String?           @db.LongText
-  longDescriptionFr   String?           @db.LongText
-  longDescriptionEn   String?           @db.LongText
-  jumiaProductSid     String?           @db.VarChar(100)
-  jumiaQcStatus       String?           @db.VarChar(50)
   isBestSeller        Boolean           @default(false)
   previewUrl          String?           @db.LongText
   imageAlt            String?           @db.VarChar(500)
   imageTitle          String?           @db.VarChar(500)
-  imageKeywords       String?           @db.Text
   displayOrder        Int               @default(0)
   isOriginal          Boolean           @default(true)
   bestChapters        String?           @db.Text
@@ -166,9 +161,14 @@ model Book {
   jumiaPriceMarkup    Int               @default(0)
   isSyncedWithJumia   Boolean           @default(false)
   jumiaStock          Int?
-  jumiaPackageContent String?           @db.VarChar(500)
-  jumiaHighlights     String?           @db.Text
+  longDescriptionEn   String?           @db.LongText
+  longDescriptionFr   String?           @db.LongText
   isPromoted          Boolean           @default(false)
+  imageKeywords       String?           @db.Text
+  jumiaHighlights     String?           @db.Text
+  jumiaPackageContent String?           @db.VarChar(500)
+  jumiaProductSid     String?           @db.VarChar(100)
+  jumiaQcStatus       String?           @db.VarChar(50)
   reservations        BookReservation[]
   seller              User?             @relation("SellerBooks", fields: [sellerId], references: [id])
   orderItems          OrderItem[]
@@ -223,12 +223,12 @@ model Pack {
   isSyncedWithJumia   Boolean     @default(false)
   jumiaPriceMarkup    Float?      @default(0)
   jumiaStock          Int?
-  jumiaProductSid     String?     @db.VarChar(100)
-  jumiaQcStatus       String?     @db.VarChar(50)
-  jumiaPackageContent String?     @db.VarChar(500)
-  jumiaHighlights     String?     @db.VarChar(2000)
   originalPrice       Float?
   isPromoted          Boolean     @default(false)
+  jumiaHighlights     String?     @db.VarChar(2000)
+  jumiaPackageContent String?     @db.VarChar(500)
+  jumiaProductSid     String?     @db.VarChar(100)
+  jumiaQcStatus       String?     @db.VarChar(50)
   orderItems          OrderItem[]
   books               PackBook[]
   wishlists           Wishlist[]
@@ -265,8 +265,6 @@ model Order {
   couponCode       String?              @db.VarChar(50)
   status           OrderStatus          @default(PENDING)
   paymentMethod    String               @default("COD") @db.VarChar(50)
-  isPaid           Boolean              @default(false)
-  invoiceNumber    String?              @db.VarChar(100)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   deliveryLabel    String?              @db.Text
@@ -279,14 +277,16 @@ model Order {
   shippingCompany  String?              @db.VarChar(100)
   followUpCount    Int                  @default(0)
   lastFollowUp     DateTime?
+  financeArchiveId String?
+  expenseId        String?
+  isPaid           Boolean              @default(false)
+  invoiceNumber    String?              @db.VarChar(100)
   items            OrderItem[]
   statusHistory    OrderStatusHistory[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
-  seller           User?                @relation("SellerOrders", fields: [sellerId], references: [id])
-  financeArchiveId String?
-  financeArchive   FinanceArchive?      @relation(fields: [financeArchiveId], references: [id])
-  expenseId        String?
   expense          Expense?             @relation(fields: [expenseId], references: [id])
+  financeArchive   FinanceArchive?      @relation(fields: [financeArchiveId], references: [id])
+  seller           User?                @relation("SellerOrders", fields: [sellerId], references: [id])
 
   @@index([status])
   @@index([createdAt])
@@ -314,9 +314,9 @@ model Customer {
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   password          String?        @db.VarChar(255)
-  expoPushToken     String?        @db.VarChar(255)
   credits           Int            @default(10)
   image             String?        @db.VarChar(500)
+  expoPushToken     String?        @db.VarChar(255)
   ownedBooks        ExchangeBook[] @relation("OwnedBooks")
   sentExchanges     Exchange[]     @relation("SentExchanges")
   receivedExchanges Exchange[]     @relation("ReceivedExchanges")
@@ -411,12 +411,13 @@ model Review {
   createdAt  DateTime  @default(now())
   city       String?   @db.VarChar(100)
   image      String?   @db.VarChar(500)
-  book       Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
   customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  book       Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  customer   Customer? @relation(fields: [customerId], references: [id])
 
   @@index([bookId])
   @@index([isApproved])
+  @@index([customerId], map: "reviews_customerId_fkey")
   @@map("reviews")
 }
 
@@ -671,8 +672,6 @@ model Post {
   excerpt       String?   @db.Text
   content       String    @db.LongText
   coverImage    String?   @db.LongText
-  imageAlt      String?   @db.VarChar(500)
-  imageTitle    String?   @db.VarChar(500)
   authorId      String
   published     Boolean   @default(false)
   publishedAt   DateTime?
@@ -684,6 +683,8 @@ model Post {
   language      String    @default("fr") @db.VarChar(10)
   authorName    String?   @db.VarChar(255)
   totalReadTime Int       @default(0)
+  imageAlt      String?   @db.VarChar(500)
+  imageTitle    String?   @db.VarChar(500)
   comments      Comment[]
   author        User      @relation(fields: [authorId], references: [id])
   books         Book[]    @relation("PostBooks")
@@ -723,9 +724,9 @@ model Expense {
   updatedAt        DateTime        @updatedAt
   userId           String?
   type             TransactionType @default(EXPENSE)
-  user             User?           @relation(fields: [userId], references: [id])
   financeArchiveId String?
   financeArchive   FinanceArchive? @relation(fields: [financeArchiveId], references: [id])
+  user             User?           @relation(fields: [userId], references: [id])
   orders           Order[]
 
   @@index([category])
@@ -736,20 +737,19 @@ model Expense {
 }
 
 model FinanceArchive {
-  id          String   @id @default(uuid())
-  periodName  String   @db.VarChar(255)
-  startDate   DateTime
-  endDate     DateTime @default(now())
-  ordersCount Int      @default(0)
-  revenue     Float    @default(0)
-  expenses    Float    @default(0)
-  netProfit   Float    @default(0)
-  shareReda   Float    @default(0)
-  shareAmine  Float    @default(0)
-  createdAt   DateTime @default(now())
-
-  orders       Order[]
+  id           String    @id @default(uuid())
+  periodName   String    @db.VarChar(255)
+  startDate    DateTime
+  endDate      DateTime  @default(now())
+  ordersCount  Int       @default(0)
+  revenue      Float     @default(0)
+  expenses     Float     @default(0)
+  netProfit    Float     @default(0)
+  shareReda    Float     @default(0)
+  shareAmine   Float     @default(0)
+  createdAt    DateTime  @default(now())
   expensesList Expense[]
+  orders       Order[]
 
   @@index([createdAt])
   @@map("finance_archives")
@@ -940,12 +940,12 @@ model ExtraProduct {
   weight              String?     @db.VarChar(255)
   images              Json?
   sellerSku           String?     @unique @db.VarChar(100)
-  jumiaPackageContent String?     @db.VarChar(500)
   jumiaHighlights     String?     @db.Text
+  jumiaPackageContent String?     @db.VarChar(500)
   isSyncedWithJumia   Boolean     @default(false)
   jumiaPriceMarkup    Float?      @default(0)
-  jumiaStock          Int?
   jumiaProductSid     String?     @db.VarChar(100)
+  jumiaStock          Int?
   orderItems          OrderItem[]
 
   @@index([category])
@@ -1020,6 +1020,76 @@ model ScheduledPost {
   status    String   @default("PENDING")
 
   @@map("scheduled_posts")
+}
+
+model InstantOffer {
+  id        String   @id @default(uuid())
+  sessionId String   @db.VarChar(255)
+  discount  Float
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([sessionId])
+  @@index([status])
+  @@map("instant_offers")
+}
+
+model JumiaConsignment {
+  id                  String   @id @default(uuid())
+  shopId              String
+  businessClientCode  String
+  shippingDate        DateTime
+  products            Json
+  status              String   @default("CREATED")
+  purchaseOrderNumber String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("jumia_consignments")
+}
+
+model SocialConversation {
+  id             String          @id @default(uuid())
+  platform       String
+  platformId     String          @unique
+  customerName   String?
+  customerAvatar String?
+  lastMessageAt  DateTime        @default(now())
+  unreadCount    Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  messages       SocialMessage[]
+
+  @@map("social_conversations")
+}
+
+model SocialMessage {
+  id             String             @id @default(uuid())
+  conversationId String
+  messageId      String?            @unique
+  content        String             @db.Text
+  direction      String
+  createdAt      DateTime           @default(now())
+  conversation   SocialConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("social_messages")
+}
+
+model CronLog {
+  id        String   @id @default(uuid())
+  jobName   String   @db.VarChar(100)
+  status    String   @db.VarChar(50)
+  message   String   @db.Text
+  details   Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([jobName])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("cron_logs")
 }
 
 enum UserRole {
@@ -1127,76 +1197,4 @@ enum AdPlacement {
   BOOK_PAGE
   CHECKOUT
   FOOTER
-}
-
-model InstantOffer {
-  id        String   @id @default(uuid())
-  sessionId String   @db.VarChar(255)
-  discount  Float
-  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-
-  @@index([sessionId])
-  @@index([status])
-  @@map("instant_offers")
-}
-
-model JumiaConsignment {
-  id                  String   @id @default(uuid())
-  shopId              String
-  businessClientCode  String
-  shippingDate        DateTime
-  products            Json
-  status              String   @default("CREATED")
-  purchaseOrderNumber String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  @@map("jumia_consignments")
-}
-
-model SocialConversation {
-  id             String   @id @default(uuid())
-  platform       String // 'INSTAGRAM', 'FACEBOOK', 'WHATSAPP'
-  platformId     String   @unique // ID of the user on the platform
-  customerName   String?
-  customerAvatar String?
-  lastMessageAt  DateTime @default(now())
-  unreadCount    Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  messages SocialMessage[]
-
-  @@map("social_conversations")
-}
-
-model SocialMessage {
-  id             String   @id @default(uuid())
-  conversationId String
-  messageId      String?  @unique // ID from Meta
-  content        String   @db.Text
-  direction      String // 'INBOUND', 'OUTBOUND'
-  createdAt      DateTime @default(now())
-
-  conversation SocialConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId])
-  @@map("social_messages")
-}
-
-model CronLog {
-  id        String   @id @default(uuid())
-  jobName   String   @db.VarChar(100)
-  status    String   @db.VarChar(50)
-  message   String   @db.Text
-  details   Json?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@index([jobName])
-  @@index([isRead])
-  @@index([createdAt])
-  @@map("cron_logs")
 }

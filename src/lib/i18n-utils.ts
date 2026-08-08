@@ -1,5 +1,12 @@
 export function getLocalizedTitle(book: any, locale: string): string {
     if (!book) return '';
+    
+    // Si le livre est physiquement en arabe ou en anglais, on affiche toujours 
+    // son titre original pour ne pas induire le client en erreur sur la langue du livre.
+    if (book.language === 'ar' || book.language === 'en') {
+        return book.title || '';
+    }
+
     if (locale === 'fr' && book.titleFr) return book.titleFr;
     if (locale === 'en' && book.titleEn) return book.titleEn;
     return book.title || '';
