@@ -93,12 +93,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const adminRole = cookieStore.get('admin-role')?.value
     const isAdmin = adminRole === 'ADMIN'
 
-    // Convertir markdown → HTML
+    const displayAuthor = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق رواية' : locale === 'en' ? 'Riwaya Team' : 'Équipe Riwaya');
+
+    // Convertir markdown → HTML et réparer quelques soucis de formattage
+    let rawContent = post.content || '';
+    // Si l'utilisateur a écrit des tirets directement sans saut de ligne correct
+    rawContent = rawContent.replace(/<br>\s*-/g, '\n-');
+    
     const processedContent = await remark()
         .use(remarkGfm)
         .use(remarkHtml, { sanitize: false })
-        .process(post.content)
+        .process(rawContent)
     let contentHtml = processedContent.toString()
+
+    // Mettre en gras le premier groupe de mots avant deux-points dans les listes
+    contentHtml = contentHtml.replace(/<li>([^<]{2,60}?)\s*:/g, '<li><strong>$1</strong> :');
+
 
     // Add unique IDs to h2 and h3 tags
     const usedIds = new Set<string>();
@@ -150,11 +160,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "headline": post.title,
                             "image": post.coverImage,
                             "url": `https://riwaya.store/${locale}/blog/${post.slug}`,
-                            "author": {
-                                "@type": "Person",
-                                "name": post.authorName || post.author?.fullName || "Riwaya",
-                                "url": `https://riwaya.store/${locale}/blog`
-                            },
+                                "author": {
+                                    "@type": "Person",
+                                    "name": displayAuthor,
+                                    "url": `https://riwaya.store/${locale}/blog`
+                                },
                             "publisher": {
                                 "@type": "Organization",
                                 "name": "Riwaya",
@@ -196,10 +206,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     "acceptedAnswer": {
                                         "@type": "Answer",
                                         "text": locale === 'ar'
-                                            ? `كتب هذا المقال ${post.authorName || post.author?.fullName || 'فريق رواية'}. يمكنك قراءة المزيد من مقالاتنا على مدونة رواية.`
+                                            ? `كتب هذا المقال ${displayAuthor}. يمكنك قراءة المزيد من مقالاتنا على مدونة رواية.`
                                             : locale === 'en'
-                                                ? `This article was written by ${post.authorName || post.author?.fullName || 'the Riwaya team'}. You can read more articles on the Riwaya blog.`
-                                                : `Cet article a été rédigé par ${post.authorName || post.author?.fullName || "l'équipe Riwaya"}. Vous pouvez lire plus d'articles sur le blog Riwaya.`
+                                                ? `This article was written by ${displayAuthor}. You can read more articles on the Riwaya blog.`
+                                                : `Cet article a été rédigé par ${displayAuthor}. Vous pouvez lire plus d'articles sur le blog Riwaya.`
                                     }
                                 },
                                 {
@@ -301,22 +311,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* Méta */}
                     <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[11px] rtl:text-[13px] font-bold uppercase tracking-[0.15em] rtl:tracking-normal text-slate-400 border-t border-slate-200 pt-6 md:pt-8">
                         {(post.authorName || post.author?.fullName) && (
-                            <span className="flex items-center gap-2 text-slate-700">
+                            <span className="flex items-center gap-2 text-slate-700 bg-slate-100/50 pr-4 rtl:pr-0 rtl:pl-4 rounded-full">
                                 {(!post.authorName && post.author?.image) ? (
                                     <Image
                                         src={post.author.image}
                                         alt={post.author.fullName || ''}
                                         width={48}
                                         height={48}
-                                        className="rounded-full object-cover ring-2 ring-slate-200 w-12 h-12"
+                                        className="rounded-full object-cover ring-2 ring-slate-200 w-8 h-8 md:w-12 md:h-12"
                                         unoptimized
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
-                                        <User className="w-6 h-6 text-slate-500" />
+                                    <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-slate-200 flex items-center justify-center">
+                                        <User className="w-4 h-4 md:w-6 md:h-6 text-slate-500" />
                                     </div>
                                 )}
-                                {post.authorName || post.author?.fullName}
+                                {displayAuthor}
                             </span>
                         )}
                         {post.publishedAt && (
@@ -354,7 +364,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <div className="absolute inset-0 bg-gray-200 rounded-3xl md:rounded-[3rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20" />
                         
                         {/* Main Container */}
-                        <div className="relative aspect-[4/3] md:aspect-[21/9] w-full overflow-hidden rounded-3xl md:rounded-[3rem] border-4 md:border-[8px] border-white bg-slate-50 shadow-2xl shadow-black/10 group-hover:-translate-y-2 transition-transform duration-700">
+                        <div className="relative h-[220px] md:h-auto md:aspect-[21/9] w-full overflow-hidden rounded-3xl md:rounded-[3rem] border-4 md:border-[8px] border-white bg-slate-50 shadow-2xl shadow-black/10 group-hover:-translate-y-2 transition-transform duration-700">
                             {/* Blurred Ambient Background */}
                             <div className="absolute inset-0 z-0">
                                 <Image
@@ -413,8 +423,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600 prose-code:break-all
                                 prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8 prose-pre:overflow-x-auto
                                 prose-img:rounded-xl md:prose-img:rounded-2xl prose-img:shadow-lg prose-img:mx-auto prose-img:my-8 md:prose-img:my-10 prose-img:w-full prose-img:object-cover
-                                prose-ul:space-y-2 prose-ol:space-y-2 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
-                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold"
+                                prose-ul:space-y-3 prose-ol:space-y-3 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
+                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold prose-li:mb-4 rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold"
                         >
                             <style>{`
                                 #article-content p { margin-bottom: 2rem !important; margin-top: 1rem !important; }
@@ -431,8 +441,47 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 [dir="rtl"] #article-content blockquote::before { left: auto; right: 1rem; content: "”"; }
                                 #article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
                                 #article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
-                            `}</style>
-                            <BlogDynamicContent html={contentHtml} />
+                            {(() => {
+                                if (post.books && post.books.length > 0) {
+                                    // Diviser par H2 pour injecter le CTA au milieu (avant le 2ème H2 s'il existe)
+                                    const h2Parts = contentHtml.split(/(<h2[^>]*>.*?<\/h2>)/gi);
+                                    if (h2Parts.length >= 5) { // Au moins 2 H2 (0: texte, 1: H2, 2: texte, 3: H2, 4: texte...)
+                                        const part1 = h2Parts.slice(0, 3).join('');
+                                        const part2 = h2Parts.slice(3).join('');
+                                        return (
+                                            <>
+                                                <BlogDynamicContent html={part1} />
+                                                
+                                                {/* === CTA Interne (Mobile & Desktop) === */}
+                                                <div className="not-prose my-10 p-6 md:p-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+                                                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors duration-700" />
+                                                    
+                                                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                                                        <div className="text-center md:text-start flex-1">
+                                                            <h4 className="text-xl md:text-2xl font-black text-white mb-2 leading-tight">
+                                                                {locale === 'ar' ? 'اكتشف تشكيلتنا من الكتب' : locale === 'en' ? 'Discover our book selection' : 'Découvrez notre sélection de livres'}
+                                                            </h4>
+                                                            <p className="text-slate-300 text-sm md:text-base font-medium">
+                                                                {locale === 'ar' ? 'كتب مختارة بعناية تناسب جميع الأذواق وبأفضل الأسعار.' : locale === 'en' ? 'Carefully selected books for all tastes at the best prices.' : 'Des livres soigneusement sélectionnés pour tous les goûts aux meilleurs prix.'}
+                                                            </p>
+                                                        </div>
+                                                        <a 
+                                                            href="#recommended-books" 
+                                                            className="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-slate-900 text-sm md:text-base font-black uppercase tracking-wider rounded-full hover:bg-slate-100 hover:scale-105 active:scale-95 transition-all shadow-lg flex-shrink-0"
+                                                        >
+                                                            <BookOpen className="w-5 h-5" />
+                                                            {t('Discover')}
+                                                        </a>
+                                                    </div>
+                                                </div>
+
+                                                <BlogDynamicContent html={part2} />
+                                            </>
+                                        );
+                                    }
+                                }
+                                return <BlogDynamicContent html={contentHtml} />;
+                            })()}
                         </article>
 
                         {/* AdSense bas */}
@@ -465,9 +514,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             </div>
                         </div>
 
-                        {/* === Bio Auteur === */}
+                        {/* === Bio Auteur (Caché sur mobile car affiché en haut) === */}
                         {(post.authorName || post.author) && (
-                            <div className="mt-10 md:mt-16 p-5 md:p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
+                            <div className="hidden sm:block mt-10 md:mt-16 p-5 md:p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
                                 <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-4 md:mb-6">{t('AboutAuthor')}</p>
                                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-4 md:gap-6">
                                     <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
@@ -501,7 +550,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Livres Mentionnés (Mobile/Desktop bas d'article) === */}
                         {post.books && post.books.length > 0 && (
-                            <div className="mt-10 md:mt-12 p-5 md:p-8 bg-slate-50/50 border border-slate-100 rounded-3xl">
+                            <div id="recommended-books" className="mt-10 md:mt-12 p-5 md:p-8 bg-slate-50/50 border border-slate-100 rounded-3xl scroll-mt-24">
                                 <h3 className="text-base md:text-lg font-black text-slate-900 mb-4 md:mb-6 flex items-center gap-2">
                                     <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-slate-600" />
                                     {t('InThisArticle')}
@@ -825,6 +874,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </section>
 
             <Footer />
+            
+            {/* === Mobile Sticky Share Bar === */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 flex justify-center items-center shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.2)]">
+                <div className="flex items-center justify-between w-full max-w-sm mx-auto">
+                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{t('Share')}</span>
+                    <ShareArticle title={post.title} />
+                </div>
+            </div>
+
         </div>
     )
 }
