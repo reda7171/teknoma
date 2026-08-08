@@ -40,7 +40,7 @@ export function Onboarding() {
   const setDone = useAppStore((s) => s.setOnboardingDone);
   const [currentIdx, setCurrentIdx] = useState(0);
   const flatListRef = useRef<FlatList>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const [scrollX] = useState(() => new Animated.Value(0));
 
   React.useEffect(() => {
     SplashScreen.hideAsync().catch(() => {});

@@ -7,18 +7,18 @@ const CARD_WIDTH = width / 2 - Spacing.four * 1.5;
 
 // Composant d'animation shimmer (pulse) réutilisable
 function ShimmerBox({ style }: { style: object }) {
-  const opacity = useRef(new Animated.Value(0.4)).current;
+  const opacity = useRef(new Animated.Value(0.4));
 
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.4, duration: 700, useNativeDriver: true }),
+        Animated.timing(opacity.current, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(opacity.current, { toValue: 0.4, duration: 700, useNativeDriver: true }),
       ])
     );
     anim.start();
     return () => anim.stop();
-  }, []);
+  }, [opacity]);
 
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];

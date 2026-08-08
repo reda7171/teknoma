@@ -16,13 +16,14 @@ function slugify(text: string) {
 
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         try { await verifyAdmin() } catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 
+        const { id } = await params;
         const book = await prisma.book.findUnique({
-            where: { id: params.id },
+            where: { id },
             select: { image: true, titleFr: true, title: true }
         })
 
@@ -73,7 +74,7 @@ export async function POST(
         const newUrl = `/uploads/${newFileName}`
         
         await prisma.book.update({
-            where: { id: params.id },
+            where: { id },
             data: { image: newUrl }
         })
 

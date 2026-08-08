@@ -154,6 +154,16 @@ const nextConfig: NextConfig = {
         destination: '/:locale/books/:path*',
         permanent: true,
       },
+      {
+        source: '/book/:path*',
+        destination: '/books/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:locale/book/:path*',
+        destination: '/:locale/books/:path*',
+        permanent: true,
+      },
     ]
   },
   experimental: {

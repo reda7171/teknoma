@@ -41,7 +41,7 @@ export default async function SeoConfigPage({
             books = await prisma.book.findMany({
                 where: { active: true },
                 orderBy: { title: 'asc' },
-                select: { id: true, title: true, author: true, image: true, category: true, imageAlt: true, imageTitle: true, language: true }
+                select: { id: true, title: true, author: true, image: true, category: true, imageAlt: true, imageTitle: true, imageKeywords: true, language: true }
             })
         } else if (sp?.sub === 'blog') {
             posts = await prisma.post.findMany({
@@ -133,7 +133,8 @@ export default async function SeoConfigPage({
                                 <ImageInjectorMetaForm books={books.map(b => ({
                                     ...b,
                                     altText: b.imageAlt,
-                                    imageTitle: b.imageTitle
+                                    imageTitle: b.imageTitle,
+                                    imageKeywords: b.imageKeywords
                                 }))} />
                             )}
 

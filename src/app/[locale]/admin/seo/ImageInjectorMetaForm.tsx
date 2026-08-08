@@ -31,6 +31,9 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     const [renaming, setRenaming] = useState<string | null>(null)
     const [renameSuccess, setRenameSuccess] = useState<Set<string>>(new Set())
 
+    // Progress bar
+    const [progress, setProgress] = useState<{ current: number; total: number; label: string } | null>(null)
+
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(books.map(b => [b.id, {
             alt: b.altText || `${b.title} - ${b.author} | Riwaya`,
@@ -67,10 +70,12 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     async function saveAll() {
         setSaving('all')
         setMessage('')
+        const entries = Object.entries(edits)
+        setProgress({ current: 0, total: entries.length, label: 'Sauvegarde des métadonnées...' })
         try {
-            const entries = Object.entries(edits)
             const chunkSize = 50
             let totalSaved = 0
+            let errorCount = 0
 
             for (let i = 0; i < entries.length; i += chunkSize) {
                 const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
@@ -82,21 +87,30 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                 
                 const contentType = res.headers.get('content-type')
                 if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error(`Erreur serveur (${res.status}): La réponse n'est pas au format JSON. (Charge utile trop volumineuse ?)`)
+                    errorCount += Object.keys(chunk).length
+                    console.error(`Erreur serveur chunk sauvegarde: La réponse n'est pas au format JSON`)
+                    continue
                 }
                 
                 const data = await res.json()
                 if (res.ok && data.success) {
                     totalSaved += data.count || Object.keys(chunk).length
                 } else {
-                    throw new Error(data.error || `Statut ${res.status}`)
+                    errorCount += Object.keys(chunk).length
+                    console.error(`Erreur chunk de sauvegarde:`, data.error || res.statusText)
                 }
+                setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Sauvegarde des métadonnées...' })
             }
-            setMessage(`${totalSaved} métadonnées d'images ont été enregistrées !`)
+            if (errorCount > 0) {
+                setMessage(`${totalSaved} métadonnées d'images ont été enregistrées ! (${errorCount} erreurs, voir console)`)
+            } else {
+                setMessage(`${totalSaved} métadonnées d'images ont été enregistrées !`)
+            }
         } catch (e: any) {
             setMessage('Erreur de requête: ' + e.message)
         } finally {
             setSaving(null)
+            setTimeout(() => setProgress(null), 2000)
         }
     }
 
@@ -147,8 +161,11 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
         setRenaming('all')
         setMessage('')
         let successCount = 0
+        let errorCount = 0
+        setProgress({ current: 0, total: filtered.length, label: 'Renommage des images...' })
         try {
-            for (const book of filtered) {
+            for (let i = 0; i < filtered.length; i++) {
+                const book = filtered[i]
                 const res = await fetch(`/api/admin/books/${book.id}/rename-image`, { method: 'POST' })
                 if (res.ok) {
                     const data = await res.json()
@@ -156,23 +173,35 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                         successCount++
                         setRenameSuccess(prev => new Set([...prev, book.id]))
                     }
+                } else {
+                    errorCount++
+                    const errorData = await res.json().catch(() => null)
+                    console.error(`Erreur pour le livre ${book.id}:`, errorData || res.statusText)
                 }
+                setProgress({ current: i + 1, total: filtered.length, label: 'Renommage des images...' })
             }
-            setMessage(`${successCount} images renommées avec succès !`)
+            if (errorCount > 0) {
+                setMessage(`${successCount} images renommées avec succès ! (${errorCount} erreurs, vérifiez la console F12)`)
+            } else {
+                setMessage(`${successCount} images renommées avec succès !`)
+            }
         } catch (e) {
             setMessage('Erreur réseau lors du renommage global.')
         } finally {
             setRenaming(null)
+            setTimeout(() => setProgress(null), 2000)
         }
     }
 
     async function injectExifAll() {
         setInjectingExif('all')
         setMessage('')
+        const entries = Object.entries(edits)
+        setProgress({ current: 0, total: entries.length, label: 'Injection des métadonnées EXIF...' })
         try {
-            const entries = Object.entries(edits)
             const chunkSize = 50
             let totalInjected = 0
+            let errorCount = 0
 
             for (let i = 0; i < entries.length; i += chunkSize) {
                 const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
@@ -191,14 +220,21 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                 if (res.ok && data.success) {
                     totalInjected += data.count || Object.keys(chunk).length
                 } else {
-                    throw new Error(data.error || `Statut ${res.status}`)
+                    errorCount += Object.keys(chunk).length
+                    console.error(`Erreur chunk d'injection:`, data.error || res.statusText)
                 }
+                setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Injection des métadonnées EXIF...' })
             }
-            setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
+            if (errorCount > 0) {
+                setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images ! (${errorCount} erreurs, vérifiez la console)`)
+            } else {
+                setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
+            }
         } catch (e: any) {
             setMessage('Erreur réseau lors de l\'injection EXIF globale: ' + e.message)
         } finally {
             setInjectingExif(null)
+            setTimeout(() => setProgress(null), 2000)
         }
     }
 
@@ -240,9 +276,29 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
             </div>
 
             {message && (
-                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm font-medium ${message.includes('effectuée') || message.includes('enregistrées') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    {message.includes('effectuée') || message.includes('enregistrées') ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm font-medium ${message.includes('effectuée') || message.includes('enregistrées') || message.includes('succès') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    {message.includes('effectuée') || message.includes('enregistrées') || message.includes('succès') ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     {message}
+                </div>
+            )}
+
+            {/* Barre de progression globale */}
+            {progress && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm animate-in slide-in-from-top-2 duration-300">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                            {progress.label}
+                        </span>
+                        <span className="text-xs font-black text-blue-600">{Math.round((progress.current / progress.total) * 100)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out" 
+                            style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                        ></div>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 mt-2 text-right">{progress.current} / {progress.total} traités</p>
                 </div>
             )}
 

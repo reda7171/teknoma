@@ -290,24 +290,24 @@ export default function ExchangeScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center' }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4, gap: 8 }}>
           <TouchableOpacity 
             style={[styles.tab, activeTab === 'all' && styles.activeTab]}
             onPress={() => setActiveTab('all')}
           >
-            <Text style={[styles.tabText, activeTab === 'all' && styles.activeTabText]}>{t('catalog')}</Text>
+            <Text style={[styles.tabText, activeTab === 'all' && styles.activeTabText]}>{t('catalog') || 'Catalogue'}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.tab, activeTab === 'my_requests' && styles.activeTab]}
             onPress={() => setActiveTab('my_requests')}
           >
-            <Text style={[styles.tabText, activeTab === 'my_requests' && styles.activeTabText]}>{t('your_requests')}</Text>
+            <Text style={[styles.tabText, activeTab === 'my_requests' && styles.activeTabText]}>{t('your_requests') || 'Vos demandes'}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.tab, activeTab === 'my_catalog' && styles.activeTab]}
             onPress={() => setActiveTab('my_catalog')}
           >
-            <Text style={[styles.tabText, activeTab === 'my_catalog' && styles.activeTabText]}>{t('my_catalog')}</Text>
+            <Text style={[styles.tabText, activeTab === 'my_catalog' && styles.activeTabText]}>{t('my_catalog') || 'Mon catalogue'}</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -378,11 +378,15 @@ export default function ExchangeScreen() {
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
               renderItem={({ item }) => (
                 <View style={[styles.bookCard, { backgroundColor: colors.backgroundElement }]}>
-                  {item.image && (
+                  {item.image ? (
                     <Image 
                       source={{ uri: getImageUrl(item.image.split(',')[0]) || item.image.split(',')[0] }} 
-                      style={{ width: 60, height: 80, borderRadius: 8, marginRight: 12, backgroundColor: '#E5E7EB' }} 
+                      style={{ width: 70, height: 100, borderRadius: 12, marginRight: 16, backgroundColor: '#E5E7EB' }} 
                     />
+                  ) : (
+                    <View style={{ width: 70, height: 100, borderRadius: 12, marginRight: 16, backgroundColor: '#F3F4F6', justifyContent: 'center', alignItems: 'center' }}>
+                      <Ionicons name="book-outline" size={24} color="#9CA3AF" />
+                    </View>
                   )}
                   <View style={styles.bookInfo}>
                     <Text style={[styles.bookTitle, { color: colors.text }]}>{item.title}</Text>
@@ -407,15 +411,17 @@ export default function ExchangeScreen() {
                     )}
                     <Text style={[styles.bookOwner, { marginTop: 4 }]}>Par {item.owner?.fullName} ({item.owner?.city || 'Maroc'})</Text>
                   </View>
-                  <TouchableOpacity 
-                    style={styles.requestBtn} 
-                    onPress={() => handleProtectedAction(() => {
-                      setSelectedBook(item);
-                      setShowRequestModal(true);
-                    })}
-                  >
-                    <Text style={styles.requestBtnText}>Demander</Text>
-                  </TouchableOpacity>
+                  <View style={{ justifyContent: 'center' }}>
+                    <TouchableOpacity 
+                      style={styles.requestBtn} 
+                      onPress={() => handleProtectedAction(() => {
+                        setSelectedBook(item);
+                        setShowRequestModal(true);
+                      })}
+                    >
+                      <Text style={styles.requestBtnText}>{t('ask') || 'Demander'}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
               ListEmptyComponent={
@@ -446,15 +452,18 @@ export default function ExchangeScreen() {
                   key={book.id}
                   coordinate={{ latitude: book.latitude, longitude: book.longitude }}
                 >
+                  <View style={styles.markerContainer}>
+                    <Ionicons name="book" size={16} color="#FFF" />
+                  </View>
                   <Callout onPress={() => handleProtectedAction(() => {
                     setSelectedBook(book);
                     setShowRequestModal(true);
                   })}>
                     <View style={styles.calloutContainer}>
-                      <Text style={styles.calloutTitle}>{book.title}</Text>
-                      <Text style={styles.calloutAuthor}>{book.author}</Text>
+                      <Text style={styles.calloutTitle} numberOfLines={1}>{book.title}</Text>
+                      <Text style={styles.calloutAuthor} numberOfLines={1}>{book.author}</Text>
                       <TouchableOpacity style={styles.calloutBtn}>
-                        <Text style={styles.calloutBtnText}>Demander</Text>
+                        <Text style={styles.calloutBtnText}>{t('ask') || 'Demander'}</Text>
                       </TouchableOpacity>
                     </View>
                   </Callout>
@@ -490,12 +499,12 @@ export default function ExchangeScreen() {
       {/* REQUESTS TAB */}
       {isLoggedIn && activeTab === 'my_requests' && (
         <ScrollView style={{ flex: 1, padding: 16 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('received_requests')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('received_requests') || 'Demandes reçues'}</Text>
           {requests.received.length === 0 && (
             <View style={[styles.emptyStateContainer, { borderColor: isDark ? '#374151' : '#E5E7EB', backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}>
               <Ionicons name="mail-unread-outline" size={48} color={colors.textSecondary} style={{ opacity: 0.5, marginBottom: 12 }} />
-              <Text style={[styles.emptyStateTitle, { color: colors.text }]}>Aucune demande reçue</Text>
-              <Text style={[styles.emptyStateSub, { color: colors.textSecondary }]}>Vous n'avez pas encore reçu de demande d'échange pour vos livres.</Text>
+              <Text style={[styles.emptyStateTitle, { color: colors.text }]}>{t('no_received_requests') || 'Aucune demande reçue'}</Text>
+              <Text style={[styles.emptyStateSub, { color: colors.textSecondary }]}>{t('no_received_requests_desc') || "Vous n'avez pas encore reçu de demande d'échange pour vos livres."}</Text>
             </View>
           )}
           {requests.received.map(req => (
@@ -535,12 +544,12 @@ export default function ExchangeScreen() {
             </View>
           ))}
 
-          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>{t('sent_requests')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>{t('sent_requests') || 'Demandes envoyées'}</Text>
           {requests.sent.length === 0 && (
             <View style={[styles.emptyStateContainer, { borderColor: isDark ? '#374151' : '#E5E7EB', backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}>
               <Ionicons name="send-outline" size={48} color={colors.textSecondary} style={{ opacity: 0.5, marginBottom: 12 }} />
-              <Text style={[styles.emptyStateTitle, { color: colors.text }]}>Aucune demande envoyée</Text>
-              <Text style={[styles.emptyStateSub, { color: colors.textSecondary }]}>Vous n'avez pas encore envoyé de demande d'échange.</Text>
+              <Text style={[styles.emptyStateTitle, { color: colors.text }]}>{t('no_sent_requests') || 'Aucune demande envoyée'}</Text>
+              <Text style={[styles.emptyStateSub, { color: colors.textSecondary }]}>{t('no_sent_requests_desc') || "Vous n'avez pas encore envoyé de demande d'échange."}</Text>
             </View>
           )}
           {requests.sent.map(req => (
@@ -725,10 +734,10 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   loginBtn: { backgroundColor: '#0274DF', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
   loginBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
-  tabContainer: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgba(150,150,150,0.1)' },
-  tab: { paddingHorizontal: 16, paddingVertical: 16, alignItems: 'center' },
-  activeTab: { borderBottomWidth: 2, borderBottomColor: '#0274DF' },
-  tabText: { fontSize: 15, fontWeight: '600', color: '#9CA3AF' },
+  tabContainer: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgba(150,150,150,0.1)', paddingVertical: 4 },
+  tab: { paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center', borderRadius: 20 },
+  activeTab: { backgroundColor: 'rgba(2,116,223,0.1)' },
+  tabText: { fontSize: 14, fontWeight: '700', color: '#9CA3AF' },
   activeTabText: { color: '#0274DF' },
   
   // Toggle
@@ -740,20 +749,21 @@ const styles = StyleSheet.create({
   distBtnText: { fontSize: 12, fontWeight: 'bold' },
   
   listContent: { padding: 16, paddingBottom: 100 },
-  bookCard: { padding: 16, borderRadius: 16, marginBottom: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  bookCard: { padding: 16, borderRadius: 20, marginBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 4 },
   bookInfo: { flex: 1, paddingRight: 12 },
-  bookTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  bookAuthor: { fontSize: 14, marginBottom: 8 },
-  bookOwner: { fontSize: 12, color: '#0274DF', fontWeight: '500' },
-  requestBtn: { backgroundColor: '#0274DF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
-  requestBtnText: { color: '#FFF', fontWeight: 'bold' },
+  bookTitle: { fontSize: 17, fontWeight: '800', marginBottom: 4 },
+  bookAuthor: { fontSize: 13, marginBottom: 8, fontWeight: '500' },
+  bookOwner: { fontSize: 12, color: '#0274DF', fontWeight: '600' },
+  requestBtn: { backgroundColor: '#0274DF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, shadowColor: '#0274DF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 4 },
+  requestBtnText: { color: '#FFF', fontWeight: '800', fontSize: 13 },
   
   // Callout Map
-  calloutContainer: { width: 150, alignItems: 'center', padding: 4 },
-  calloutTitle: { fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
-  calloutAuthor: { fontSize: 12, color: '#666', textAlign: 'center', marginBottom: 8 },
-  calloutBtn: { backgroundColor: '#0274DF', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
-  calloutBtnText: { color: '#FFF', fontSize: 12, fontWeight: 'bold' },
+  markerContainer: { backgroundColor: '#10B981', padding: 8, borderRadius: 24, borderWidth: 3, borderColor: '#FFF', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 8 },
+  calloutContainer: { width: 160, alignItems: 'center', padding: 8, borderRadius: 12 },
+  calloutTitle: { fontWeight: '800', textAlign: 'center', marginBottom: 2, fontSize: 14 },
+  calloutAuthor: { fontSize: 11, color: '#666', textAlign: 'center', marginBottom: 8, fontWeight: '500' },
+  calloutBtn: { backgroundColor: '#0274DF', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, width: '100%', alignItems: 'center' },
+  calloutBtnText: { color: '#FFF', fontSize: 12, fontWeight: '800' },
 
   fab: { position: 'absolute', right: 24, bottom: 24, width: 60, height: 60, borderRadius: 30, backgroundColor: '#0274DF', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
