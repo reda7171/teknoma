@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark } from 'lucide-react'
+import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark, Bot, Sparkles } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
@@ -173,6 +173,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "datePublished": post.publishedAt,
                             "dateModified": post.updatedAt,
                             "description": post.excerpt || post.title,
+                            "abstract": post.excerpt || post.title,
+                            "about": {
+                                "@type": "Thing",
+                                "name": post.category || "Littérature",
+                                "description": "Article publié par Riwaya, la 1ère plateforme de livres au Maroc."
+                            },
                             "inLanguage": locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-MA' : 'fr-MA',
                             "wordCount": post.content ? post.content.trim().split(/\s+/).length : 0,
                             ...(post.category ? { "articleSection": post.category } : {}),
@@ -442,6 +448,23 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 #article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
                                 #article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
                             `}</style>
+                            
+                            {/* === GEO: AI TL;DR Summary === */}
+                            {post.excerpt && (
+                                <section aria-label="Résumé de l'article pour l'IA" className="not-prose mb-10 p-6 bg-emerald-50/50 border border-emerald-100/50 rounded-3xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+                                        <Bot className="w-24 h-24 text-emerald-900" />
+                                    </div>
+                                    <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-emerald-800 mb-3 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-emerald-600" /> 
+                                        {locale === 'ar' ? 'نظرة سريعة (TL;DR)' : locale === 'en' ? 'Quick Summary (TL;DR)' : 'Résumé Rapide (TL;DR)'}
+                                    </h2>
+                                    <div className="text-emerald-950/80 font-medium leading-relaxed relative z-10 text-[15px] md:text-[17px]">
+                                        {post.excerpt}
+                                    </div>
+                                </section>
+                            )}
+
                             {(() => {
                                 if (post.books && post.books.length > 0) {
                                     // Diviser par H2 pour injecter le CTA au milieu (avant le 2ème H2 s'il existe)
