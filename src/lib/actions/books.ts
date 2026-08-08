@@ -35,6 +35,7 @@ const BookSchemaBase = z.object({
     sellerSku: z.string().optional(),
     jumiaPriceMarkup: z.number().int().min(0).max(100).optional().default(0),
     isSyncedWithJumia: z.boolean().optional(),
+    jumiaProductSid: z.string().optional(),
     jumiaPackageContent: z.string().optional(),
     jumiaHighlights: z.string().optional(),
 })
@@ -204,9 +205,8 @@ export async function updateBook(
 
         if (existingBook && existingBook.stock !== validatedData.stock && existingBook.sellerSku) {
             try {
-                const { JumiaAPI } = await import('@/lib/jumia-api')
-                const jumia = await JumiaAPI.getInstance()
-                await jumia.updateProductsStock([{ sellerSku: existingBook.sellerSku, stock: validatedData.stock }])
+                const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+                syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
                 
                 const { sendTelegramMessage } = await import('@/lib/telegram')
                 await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📖 Livre: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
@@ -270,9 +270,8 @@ export async function updateBookQuick(
 
         if (existingBook && existingBook.stock !== updated.stock && existingBook.sellerSku) {
             try {
-                const { JumiaAPI } = await import('@/lib/jumia-api')
-                const jumia = await JumiaAPI.getInstance()
-                await jumia.updateProductsStock([{ sellerSku: existingBook.sellerSku, stock: updated.stock }])
+                const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+                syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
                 
                 const { sendTelegramMessage } = await import('@/lib/telegram')
                 await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📖 Livre: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)

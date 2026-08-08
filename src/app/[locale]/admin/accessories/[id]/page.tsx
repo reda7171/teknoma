@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { publishAccessoriesToJumia } from '@/lib/actions/jumia'
+import { publishAccessoriesToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 export default function EditAccessoryPage({ 
     params 
@@ -20,6 +21,7 @@ export default function EditAccessoryPage({
     const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload')
     const [isUploading, setIsUploading] = useState(false)
     const [isPushingJumia, setIsPushingJumia] = useState(false)
+    const [isLinked, setIsLinked] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [formData, setFormData] = useState({
         name: '',
@@ -36,7 +38,11 @@ export default function EditAccessoryPage({
         sellerSku: '',
         active: true,
         jumiaHighlights: '',
-        jumiaPackageContent: ''
+        jumiaPackageContent: '',
+        jumiaProductSid: '',
+        isSyncedWithJumia: false,
+        jumiaPriceMarkup: '0',
+        jumiaStock: ''
     })
 
     useEffect(() => {
@@ -58,8 +64,21 @@ export default function EditAccessoryPage({
                     sellerSku: data.sellerSku || '',
                     active: data.active,
                     jumiaHighlights: data.jumiaHighlights || '',
-                    jumiaPackageContent: data.jumiaPackageContent || ''
+                    jumiaPackageContent: data.jumiaPackageContent || '',
+                    jumiaProductSid: data.jumiaProductSid || '',
+                    isSyncedWithJumia: data.isSyncedWithJumia || false,
+                    jumiaPriceMarkup: data.jumiaPriceMarkup?.toString() || '0',
+                    jumiaStock: data.jumiaStock?.toString() || ''
                 })
+                
+                if (data.sellerSku) {
+                    checkJumiaLinkBySkuExact(data.sellerSku, data.jumiaProductSid).then(linked => {
+                        setIsLinked(linked)
+                    }).catch(err => {
+                        setIsLinked(false)
+                    })
+                }
+                
                 setIsLoading(false)
             })
             .catch(() => {
@@ -158,7 +177,7 @@ export default function EditAccessoryPage({
     if (isLoading) return <div className="p-20 text-center font-bold text-slate-400">Chargement...</div>
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-20">
+        <div className="w-full mx-auto space-y-8 pb-20 px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -169,7 +188,24 @@ export default function EditAccessoryPage({
                         <ChevronLeft className="w-5 h-5" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Modifier Produit</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Modifier Produit</h1>
+                            {formData.sellerSku && (
+                                <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border flex items-center gap-1 ${isLinked ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                    {isLinked ? (
+                                        <>
+                                            <CheckCircle2 className="w-3 h-3" />
+                                            Lié à Jumia
+                                        </>
+                                    ) : (
+                                        <>
+                                            <AlertTriangle className="w-3 h-3" />
+                                            Non Linké
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <p className="text-sm font-medium text-slate-500">{formData.name}</p>
                     </div>
                 </div>
@@ -177,6 +213,14 @@ export default function EditAccessoryPage({
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-6">
+                    {formData.images.length > 0 && (
+                        <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex justify-center">
+                            <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-slate-200">
+                                <Image src={formData.images[0]} alt="Produit" fill className="object-cover" unoptimized />
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nom du produit</label>
@@ -299,49 +343,6 @@ export default function EditAccessoryPage({
                                 onChange={e => setFormData({ ...formData, stock: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
                             />
-                        </div>
-
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Seller SKU (Jumia)</label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={(formData as any).sellerSku || ''}
-                                    onChange={e => setFormData({ ...formData, sellerSku: e.target.value })}
-                                    className="flex-1 w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all font-bold"
-                                    placeholder="SKU vendeur pour synchronisation"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, sellerSku: `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}` })}
-                                    className="px-4 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
-                                >
-                                    Générer
-                                </button>
-                            </div>
-                            <div className="mt-4">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Highlights Jumia (HTML)</label>
-                                <textarea
-                                    rows={3}
-                                    value={(formData as any).jumiaHighlights || ''}
-                                    onChange={e => setFormData({ ...formData, jumiaHighlights: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
-                                    placeholder={`<ul><li>Produit: ${formData.name}</li></ul>`}
-                                />
-                                <p className="mt-1 text-xs text-slate-400">Laisser vide pour la valeur par défaut</p>
-                            </div>
-
-                            <div className="mt-4">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Contenu du colis Jumia</label>
-                                <input
-                                    type="text"
-                                    value={(formData as any).jumiaPackageContent || ''}
-                                    onChange={e => setFormData({ ...formData, jumiaPackageContent: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
-                                    placeholder={`1 x ${formData.name}`}
-                                />
-                                <p className="mt-1 text-xs text-slate-400">Laisser vide pour la valeur par défaut</p>
-                            </div>
                         </div>
 
                         <div>
@@ -495,6 +496,97 @@ export default function EditAccessoryPage({
                         >
                             {isSaving ? 'Enregistrement...' : <><Save className="w-5 h-5 mr-3" /> Mettre à jour</>}
                         </button>
+                    </div>
+
+                    {/* Jumia Configuration */}
+                    <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+                            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                Configuration Jumia
+                            </h3>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Synchronisé avec Jumia</label>
+                                <select
+                                    value={formData.isSyncedWithJumia ? 'true' : 'false'}
+                                    onChange={e => setFormData({ ...formData, isSyncedWithJumia: e.target.value === 'true' })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                >
+                                    <option value="false">❌ Non (Pas encore)</option>
+                                    <option value="true">✅ Oui (Synchronisé)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Seller SKU Jumia</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={formData.sellerSku}
+                                        onChange={e => setFormData({ ...formData, sellerSku: e.target.value })}
+                                        className="flex-1 w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                        placeholder="Ex: ACC-001"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, sellerSku: `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}` })}
+                                        className="px-4 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                    >
+                                        Générer
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Product SID (Requis pour maj)</label>
+                                <input
+                                    type="text"
+                                    value={formData.jumiaProductSid}
+                                    onChange={e => setFormData({ ...formData, jumiaProductSid: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder="Ex: 5b4e1234-..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Stock Virtuel Jumia (Optionnel)</label>
+                                <input
+                                    type="number"
+                                    value={formData.jumiaStock}
+                                    onChange={e => setFormData({ ...formData, jumiaStock: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder="Laisser vide pour sync auto"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Marge Jumia (DH)</label>
+                                <input
+                                    type="number"
+                                    value={formData.jumiaPriceMarkup}
+                                    onChange={e => setFormData({ ...formData, jumiaPriceMarkup: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Package Content Jumia</label>
+                                <input
+                                    type="text"
+                                    value={formData.jumiaPackageContent}
+                                    onChange={e => setFormData({ ...formData, jumiaPackageContent: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
+                                    placeholder={`1 x Accessoire`}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Highlights Jumia (HTML)</label>
+                                <textarea
+                                    value={formData.jumiaHighlights}
+                                    onChange={e => setFormData({ ...formData, jumiaHighlights: e.target.value })}
+                                    rows={3}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder={`<ul><li>Titre: Accessoire</li></ul>`}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>

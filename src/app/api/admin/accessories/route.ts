@@ -41,7 +41,11 @@ export async function POST(request: NextRequest) {
                 sellerSku: data.sellerSku,
                 active: data.active !== undefined ? data.active : true,
                 jumiaHighlights: data.jumiaHighlights,
-                jumiaPackageContent: data.jumiaPackageContent
+                jumiaPackageContent: data.jumiaPackageContent,
+                isSyncedWithJumia: data.isSyncedWithJumia || false,
+                jumiaPriceMarkup: data.jumiaPriceMarkup !== undefined ? parseFloat(data.jumiaPriceMarkup) : 0,
+                jumiaProductSid: data.jumiaProductSid,
+                jumiaStock: data.jumiaStock !== undefined ? parseInt(data.jumiaStock) : undefined
             }
         })
 

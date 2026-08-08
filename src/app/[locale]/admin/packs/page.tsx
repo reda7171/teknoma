@@ -30,20 +30,38 @@ export default async function PacksPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <p className="text-sm font-medium text-gray-600">Total Packs</p>
-                    <p className="mt-2 text-3xl font-bold text-gray-900">{packs.length}</p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900">{packs.length}</p>
                 </div>
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <p className="text-sm font-medium text-gray-600">Packs Actifs</p>
-                    <p className="mt-2 text-3xl font-bold text-green-600">
+                    <p className="mt-2 text-2xl font-bold text-green-600">
                         {packs.filter(p => p.active).length}
                     </p>
                 </div>
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <p className="text-sm font-medium text-gray-600">Livres Disponibles</p>
-                    <p className="mt-2 text-3xl font-bold text-blue-600">{books.length}</p>
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <p className="text-sm font-medium text-gray-600">En Rupture</p>
+                    <p className="mt-2 text-2xl font-bold text-red-600">
+                        {packs.filter(p => p.books.some(b => (b.book.stock || 0) <= 0)).length}
+                    </p>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <p className="text-sm font-medium text-gray-600">Sur Jumia</p>
+                    <p className="mt-2 text-2xl font-bold text-orange-500">
+                        {packs.filter(p => p.isSyncedWithJumia).length}
+                    </p>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <p className="text-sm font-medium text-gray-600">Sans Image</p>
+                    <p className="mt-2 text-2xl font-bold text-yellow-600">
+                        {packs.filter(p => !p.image).length}
+                    </p>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <p className="text-sm font-medium text-gray-600">Livres Dispos</p>
+                    <p className="mt-2 text-2xl font-bold text-blue-600">{books.length}</p>
                 </div>
             </div>
 

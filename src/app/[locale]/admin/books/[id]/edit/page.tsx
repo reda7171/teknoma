@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, Languages } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
-import { publishBooksToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
+import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { ImageIcon, Link2 } from 'lucide-react'
@@ -28,6 +28,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [loading, setLoading] = useState(false)
     const [isPushingJumia, setIsPushingJumia] = useState(false)
     const [loadingData, setLoadingData] = useState(true)
+    const [isSyncingQuantity, setIsSyncingQuantity] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [book, setBook] = useState<any>(null)
     const [lots, setLots] = useState<any[]>([])
@@ -45,6 +46,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [longDescriptionEn, setLongDescriptionEn] = useState<string>('')
     const [isGeneratingShort, setIsGeneratingShort] = useState(false)
     const [isGeneratingLong, setIsGeneratingLong] = useState(false)
+    const [isGeneratingHighlights, setIsGeneratingHighlights] = useState(false)
+    const [isGeneratingContent, setIsGeneratingContent] = useState(false)
     const [authors, setAuthors] = useState<string[]>([])
     const [isNewAuthor, setIsNewAuthor] = useState(false)
     const [selectedAuthor, setSelectedAuthor] = useState<string>('')
@@ -126,7 +129,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 
                 if (result.data.sellerSku) {
                     console.log('Checking Jumia link for SKU:', result.data.sellerSku);
-                    checkJumiaLinkBySkuExact(result.data.sellerSku).then(linked => {
+                    checkJumiaLinkBySkuExact(result.data.sellerSku, (result.data as any).jumiaProductSid).then(linked => {
                         console.log('Jumia link check result:', linked);
                         setIsLinked(linked)
                     }).catch(err => {
@@ -210,6 +213,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             isSyncedWithJumia: formData.get('isSyncedWithJumia') === 'true',
             jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
             jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
+            jumiaProductSid: formData.get('jumiaProductSid') as string || undefined,
         }
 
         const result = await updateBook(id, input)
@@ -248,47 +252,160 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         }
     }
 
-    const generateShortDescription = async () => {
-        // Use the current input values if available
-        const titleInput = (document.getElementById('title') as HTMLInputElement)?.value || book?.title;
-        const authorInput = (document.getElementById('author') as HTMLInputElement)?.value || book?.author;
+    async function handleSyncQuantity() {
+        if (!bookId) return
         
-        if (!titleInput) return;
-        setIsGeneratingShort(true);
+        setIsSyncingQuantity(true)
         try {
-            const authorText = authorInput ? ` écrit par ${authorInput}` : '';
-            const res = await fetch('/api/ai/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: `Rédige une courte description accrocheuse (2 à 3 phrases) pour le livre intitulé "${titleInput}"${authorText} en français. N'inclus pas d'introduction.` })
-            });
-            const data = await res.json();
-            if (data.text) setDescription(data.text.trim());
-        } catch (err) {
-            console.error(err);
+            const res = await syncBooksQuantityToJumia([bookId])
+            if (res.success) {
+                alert(res.message || 'Quantité synchronisée avec succès')
+                // Recharger les données
+                await loadBook(bookId)
+            } else {
+                alert(res.message || 'Erreur lors de la synchronisation')
+            }
+        } catch (err: any) {
+            alert(err.message || 'Erreur lors de la synchronisation')
+        } finally {
+            setIsSyncingQuantity(false)
         }
-        setIsGeneratingShort(false);
     }
 
-    const generateLongDescription = async () => {
-        const titleInput = (document.getElementById('title') as HTMLInputElement)?.value || book?.title;
-        const authorInput = (document.getElementById('author') as HTMLInputElement)?.value || book?.author;
-
-        if (!titleInput) return;
-        setIsGeneratingLong(true);
+    const improveShortDescription = async () => {
+        let textToImprove = '';
+        let targetLang = '';
+        if (currentLang === 'ar') { textToImprove = description; targetLang = 'AR'; }
+        else if (currentLang === 'fr') { textToImprove = descriptionFr; targetLang = 'FR'; }
+        else if (currentLang === 'en') { textToImprove = descriptionEn; targetLang = 'EN'; }
+        
+        if (!textToImprove) {
+            alert('Veuillez d\'abord écrire une description à améliorer.');
+            return;
+        }
+        setIsGeneratingShort(true);
         try {
-            const authorText = authorInput ? ` écrit par ${authorInput}` : '';
-            const res = await fetch('/api/ai/generate', {
+            const res = await fetch('/api/admin/translate/rephrase', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: `Rédige une description complète et détaillée pour le livre "${titleInput}"${authorText} en français. Inclus un résumé, les thèmes abordés et pourquoi le lire. Utilise des paragraphes. N'inclus pas d'introduction du style "Voici la description".` })
+                body: JSON.stringify({ text: textToImprove, targetLang })
             });
             const data = await res.json();
-            if (data.text) setLongDescription(data.text.trim());
+            if (data.success && data.rephrased && data.rephrased.length > 0) {
+                const improved = data.rephrased[0];
+                if (currentLang === 'ar') setDescription(improved);
+                else if (currentLang === 'fr') setDescriptionFr(improved);
+                else if (currentLang === 'en') setDescriptionEn(improved);
+            } else {
+                alert(data.error || 'Erreur lors de l\'amélioration.');
+            }
         } catch (err) {
             console.error(err);
+            alert('Erreur réseau lors de l\'amélioration.');
+        } finally {
+            setIsGeneratingShort(false);
         }
-        setIsGeneratingLong(false);
+    }
+
+    const improveLongDescription = async () => {
+        let textToImprove = '';
+        let targetLang = '';
+        if (currentLang === 'ar') { textToImprove = longDescription; targetLang = 'AR'; }
+        else if (currentLang === 'fr') { textToImprove = longDescriptionFr; targetLang = 'FR'; }
+        else if (currentLang === 'en') { textToImprove = longDescriptionEn; targetLang = 'EN'; }
+        
+        if (!textToImprove) {
+            alert('Veuillez d\'abord écrire une description longue à améliorer.');
+            return;
+        }
+        setIsGeneratingLong(true);
+        try {
+            const res = await fetch('/api/admin/translate/rephrase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: textToImprove, targetLang })
+            });
+            const data = await res.json();
+            if (data.success && data.rephrased && data.rephrased.length > 0) {
+                const improved = data.rephrased[0];
+                if (currentLang === 'ar') setLongDescription(improved);
+                else if (currentLang === 'fr') setLongDescriptionFr(improved);
+                else if (currentLang === 'en') setLongDescriptionEn(improved);
+            } else {
+                alert(data.error || 'Erreur lors de l\'amélioration.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur réseau lors de l\'amélioration.');
+        } finally {
+            setIsGeneratingLong(false);
+        }
+    }
+
+    const generateHighlightsAI = async () => {
+        const titleInput = (document.getElementById('title') as HTMLInputElement)?.value || book?.title;
+        if (!titleInput) return alert('Veuillez saisir un titre pour le livre');
+        
+        const el = document.getElementById('jumiaHighlights') as HTMLTextAreaElement;
+        let textToImprove = el?.value?.trim();
+        
+        if (!textToImprove) {
+            textToImprove = `<ul><li>Titre: ${titleInput}</li><li>Format: Livre papier</li></ul>`;
+            el.value = textToImprove;
+            return;
+        }
+        
+        setIsGeneratingHighlights(true);
+        try {
+            const res = await fetch('/api/admin/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: 'texts', texts: [textToImprove], targetLang: 'FR' })
+            });
+            const data = await res.json();
+            if (data.success && data.translations && data.translations[0]) {
+                if (el) el.value = data.translations[0];
+            } else if (data.error) {
+                alert('Erreur DeepL: ' + data.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur lors de la traduction');
+        } finally {
+            setIsGeneratingHighlights(false);
+        }
+    }
+
+    const generateContentAI = async () => {
+        const titleInput = (document.getElementById('title') as HTMLInputElement)?.value || book?.title;
+        if (!titleInput) return alert('Veuillez saisir un titre pour le livre');
+        
+        const el = document.getElementById('jumiaPackageContent') as HTMLInputElement;
+        let textToImprove = el?.value?.trim();
+        
+        if (!textToImprove) {
+            textToImprove = `1 x Livre : ${titleInput}`;
+        }
+        
+        setIsGeneratingContent(true);
+        try {
+            const res = await fetch('/api/admin/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: 'texts', texts: [textToImprove], targetLang: 'FR' })
+            });
+            const data = await res.json();
+            if (data.success && data.translations && data.translations[0]) {
+                if (el) el.value = data.translations[0];
+            } else if (data.error) {
+                alert('Erreur DeepL: ' + data.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur lors de la traduction');
+        } finally {
+            setIsGeneratingContent(false);
+        }
     }
 
     if (loadingData) {
@@ -417,6 +534,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         )}
                         <input
                             type="text"
+                            id="title"
                             name="title_ar"
                             required={bookLanguage === 'ar'}
                             defaultValue={book.title}
@@ -783,9 +901,14 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
                     {/* Jumia Highlights */}
                     <div className="md:col-span-2">
-                        <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700 mb-2">
-                            Highlights Jumia (Description courte HTML)
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700">
+                                Highlights Jumia (Description courte HTML)
+                            </label>
+                            <button type="button" onClick={generateHighlightsAI} disabled={isGeneratingHighlights} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
+                                {isGeneratingHighlights ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL'}
+                            </button>
+                        </div>
                         <textarea
                             id="jumiaHighlights"
                             name="jumiaHighlights"
@@ -801,9 +924,14 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
                     {/* Jumia Package Content */}
                     <div className="md:col-span-2">
-                        <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700 mb-2">
-                            Contenu du colis Jumia (What's in the box)
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700">
+                                Contenu du colis Jumia (What's in the box)
+                            </label>
+                            <button type="button" onClick={generateContentAI} disabled={isGeneratingContent} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
+                                {isGeneratingContent ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL'}
+                            </button>
+                        </div>
                         <input
                             type="text"
                             id="jumiaPackageContent"
@@ -835,6 +963,11 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             </div>
                         </div>
                         <ImageInput defaultValue={bookImage} bookTitle={book.title} />
+                        {bookImage && (
+                            <div className="mt-4 flex justify-center">
+                                <img src={bookImage} alt={book.title} className="w-full max-w-sm rounded-lg shadow-sm border border-gray-100 object-cover" />
+                            </div>
+                        )}
                     </div>
 
                     {/* Description courte */}
@@ -843,8 +976,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             <label className="block text-sm font-medium text-gray-700">
                                 Description courte {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
                             </label>
-                            <button type="button" onClick={generateShortDescription} disabled={isGeneratingShort} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
-                                {isGeneratingShort ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ GEMINI'}
+                            <button type="button" onClick={improveShortDescription} disabled={isGeneratingShort} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
+                                {isGeneratingShort ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL (Améliorer)'}
                             </button>
                         </div>
                         <textarea
@@ -886,8 +1019,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                                 Description longue
                                 <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du livre)</span>
                             </label>
-                            <button type="button" onClick={generateLongDescription} disabled={isGeneratingLong} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
-                                {isGeneratingLong ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ GEMINI'}
+                            <button type="button" onClick={improveLongDescription} disabled={isGeneratingLong} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
+                                {isGeneratingLong ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL (Améliorer)'}
                             </button>
                         </div>
                         <textarea
@@ -935,18 +1068,45 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     </div>
                 </div>
 
+                {/* SID JUMIA */}
+                <div className="mt-6">
+                    <label htmlFor="jumiaProductSid" className="block text-sm font-medium text-gray-700 mb-2">
+                        SID JUMIA
+                    </label>
+                    <input
+                        type="text"
+                        id="jumiaProductSid"
+                        name="jumiaProductSid"
+                        defaultValue={book.jumiaProductSid || ''}
+                        disabled
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none"
+                        placeholder="SID généré par Jumia"
+                    />
+                </div>
+
                 {/* Actions */}
                 <div className="mt-6 flex items-center justify-between gap-4">
-                    {/* Gauche : Push to Jumia */}
-                    <button
-                        type="button"
-                        onClick={handlePushToJumia}
-                        disabled={isPushingJumia || loading}
-                        className="inline-flex items-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                    >
-                        {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
-                        Push to Jumia
-                    </button>
+                    {/* Gauche : Push to Jumia et Synch */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={handlePushToJumia}
+                            disabled={isPushingJumia || loading || isSyncingQuantity}
+                            className="inline-flex items-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                        >
+                            {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                            Push to Jumia
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleSyncQuantity}
+                            disabled={isSyncingQuantity || loading || isPushingJumia}
+                            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                        >
+                            {isSyncingQuantity ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                            Synch quantity
+                        </button>
+                    </div>
                     
                     {/* Droite : Annuler / Enregistrer / Enregistrer et Fermer */}
                     <div className="flex items-center gap-3">
