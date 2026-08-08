@@ -91,5 +91,8 @@
   ],
   "optionalDependencies": {
     "exiftool-vendored.exe": "^13.59.0"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.1.0"
   }
 }
