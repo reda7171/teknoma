@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
                     image: imageUrl,
                     isVideo,
                     isPack: false,
-                    caption: post.content || '',
+                    caption: (!post.content || post.content === 'Riwaya') ? `📚 Découvrez notre sélection sur Riwaya !\n\n🔗 ${baseUrl}` : (post.content.includes('http') ? post.content : `${post.content}\n\n🔗 Découvrez-le ici : ${baseUrl}`),
                     description: post.content || '',
                     format: 'post',
                     platform,

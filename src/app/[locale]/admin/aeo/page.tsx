@@ -31,8 +31,8 @@ export default async function AeoConfigPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-12">
-                <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-12 overflow-hidden">
+                <div className="w-full mx-auto">
                     <div className="space-y-8 animate-in fade-in duration-500">
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white">

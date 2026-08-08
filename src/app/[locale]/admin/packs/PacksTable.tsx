@@ -253,9 +253,13 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                         <Link
                                             key={pb.book.id}
                                             href={`/admin/books/${pb.book.id}/edit`}
-                                            className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold text-gray-600 uppercase tracking-tighter hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer"
+                                            className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-gray-100 text-[10px] font-bold text-gray-700 uppercase tracking-tighter hover:bg-blue-50 hover:text-blue-700 transition-colors border border-gray-200"
+                                            title={pb.book.title}
                                         >
-                                            {pb.book.title}
+                                            <span className="truncate max-w-[120px]">{pb.book.title}</span>
+                                            <span className={`px-1.5 py-0.5 rounded-sm flex items-center ${pb.book.stock && pb.book.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                Qté: {pb.book.stock || 0}
+                                            </span>
                                         </Link>
                                     ))}
                                     {pack.books.length > 3 && (

@@ -42,21 +42,28 @@ export default function ImageInjectorForm({ initialInjectedTags }: { initialInje
                 </div>
             )}
 
-            <div>
-                <label htmlFor="injectedTags" className="block text-sm font-bold text-gray-900 mb-2">
-                    Balises personnalisées dans le &lt;head&gt;
-                </label>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                    <label htmlFor="injectedTags" className="block text-sm font-black text-gray-900 uppercase tracking-widest">
+                        Balises personnalisées dans le &lt;head&gt;
+                    </label>
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">HTML / Meta</span>
+                </div>
                 <textarea
                     id="injectedTags"
                     value={injectedTags}
-                    rows={10}
+                    rows={20}
                     onChange={(e) => setInjectedTags(e.target.value)}
-                    className="w-full px-4 py-3 font-mono text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-gray-50"
-                    placeholder={`<meta name="google-site-verification" content="..." />\n<meta property="og:image" content="https://..." />`}
+                    className="w-full px-5 py-4 font-mono text-sm leading-relaxed rounded-xl border border-gray-800 bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-inner"
+                    placeholder={`<!-- Exemple de balises à injecter -->\n<meta name="google-site-verification" content="..." />\n<meta property="og:image" content="https://..." />\n<script src="..."></script>`}
                 />
-                <p className="mt-2 text-xs text-gray-500 font-medium">
-                    Attention : ces balises seront injectées telles quelles sur toutes les pages du site.
-                </p>
+                <div className="mt-3 flex items-start gap-2 p-3 bg-orange-50 border border-orange-100 rounded-lg">
+                    <span className="text-orange-500 font-black">!</span>
+                    <p className="text-xs text-orange-800 font-medium leading-relaxed">
+                        Attention : Ces balises seront injectées <strong>telles quelles</strong> dans le <code>&lt;head&gt;</code> de <strong>toutes</strong> les pages du site. 
+                        Une erreur de syntaxe HTML ici pourrait "casser" l'affichage ou le SEO du site.
+                    </p>
+                </div>
             </div>
 
             <button

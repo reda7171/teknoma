@@ -289,12 +289,12 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
             </div>
 
             {/* Liste des posts */}
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
                 {filtered.length === 0 && (
-                    <p className="text-center text-gray-400 text-sm py-8">Aucun article trouvé.</p>
+                    <p className="text-center text-gray-400 text-sm py-8 col-span-full">Aucun article trouvé.</p>
                 )}
                 {filtered.map(post => (
-                    <div key={post.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors">
+                    <div key={post.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors flex flex-col h-full">
                         <div className="flex gap-4 items-start">
                             {/* Image */}
                             <div className="w-24 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
@@ -352,57 +352,57 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                     />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Save individual */}
-                            <div className="shrink-0 flex flex-col gap-2 mt-8">
-                                <button
-                                    type="button"
-                                    onClick={() => savePost(post.id)}
-                                    disabled={saving === post.id}
-                                    className="flex items-center justify-center gap-1 px-4 py-2 bg-black text-white text-xs font-black rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
-                                >
-                                    {saving === post.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : saved.has(post.id) ? (
-                                        <CheckCircle2 className="w-3 h-3 text-green-400" />
-                                    ) : (
-                                        <CheckCircle2 className="w-3 h-3" />
-                                    )}
-                                    {saved.has(post.id) ? 'Sauvé' : 'Sauver SEO'}
-                                </button>
-                                
-                                <button
-                                    type="button"
-                                    onClick={() => injectExif(post.id)}
-                                    disabled={injectingExif === post.id}
-                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${exifSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-orange-700 border-orange-200 hover:bg-orange-50'} disabled:opacity-50`}
-                                >
-                                    {injectingExif === post.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : exifSuccess.has(post.id) ? (
-                                        <CheckCircle2 className="w-3 h-3" />
-                                    ) : (
-                                        <Download className="w-3 h-3" />
-                                    )}
-                                    {exifSuccess.has(post.id) ? 'Injecté !' : 'Injecter EXIF'}
-                                </button>
-                                
-                                <button
-                                    type="button"
-                                    onClick={() => renameImage(post.id)}
-                                    disabled={renaming === post.id}
-                                    className={`flex items-center justify-center gap-1 px-4 py-2 text-xs font-black rounded-xl transition-colors border ${renameSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'} disabled:opacity-50`}
-                                >
-                                    {renaming === post.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                    ) : renameSuccess.has(post.id) ? (
-                                        <CheckCircle2 className="w-3 h-3" />
-                                    ) : (
-                                        <ImageIcon className="w-3 h-3" />
-                                    )}
-                                    {renameSuccess.has(post.id) ? 'Renommé !' : 'Renommer fichier'}
-                                </button>
-                            </div>
+                        {/* Save individual (Actions at the bottom) */}
+                        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-2 items-center justify-between">
+                            <button
+                                type="button"
+                                onClick={() => savePost(post.id)}
+                                disabled={saving === post.id}
+                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-black text-white text-[10px] font-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                            >
+                                {saving === post.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : saved.has(post.id) ? (
+                                    <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                ) : (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                )}
+                                {saved.has(post.id) ? 'Sauvé' : 'Sauver SEO'}
+                            </button>
+                            
+                            <button
+                                type="button"
+                                onClick={() => injectExif(post.id)}
+                                disabled={injectingExif === post.id}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${exifSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-orange-700 border-orange-200 hover:bg-orange-50'} disabled:opacity-50`}
+                            >
+                                {injectingExif === post.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : exifSuccess.has(post.id) ? (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                    <Download className="w-3 h-3" />
+                                )}
+                                {exifSuccess.has(post.id) ? 'Injecté !' : 'EXIF'}
+                            </button>
+                            
+                            <button
+                                type="button"
+                                onClick={() => renameImage(post.id)}
+                                disabled={renaming === post.id}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${renameSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'} disabled:opacity-50`}
+                            >
+                                {renaming === post.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : renameSuccess.has(post.id) ? (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                    <ImageIcon className="w-3 h-3" />
+                                )}
+                                {renameSuccess.has(post.id) ? 'Renommé !' : 'Renommer'}
+                            </button>
                         </div>
                     </div>
                 ))}

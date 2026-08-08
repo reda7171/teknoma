@@ -25,7 +25,12 @@ export class JumiaAPI {
         if (!email || !apiKey) return null
 
         const instance = new JumiaAPI(email, apiKey, env || 'sandbox')
-        await instance.refreshAccessToken()
+        try {
+            await instance.refreshAccessToken()
+        } catch (error) {
+            console.error('Failed to initialize Jumia API (network or auth error):', error)
+            return null
+        }
         return instance
     }
 
