@@ -6,22 +6,16 @@ import { Bell, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function DeliveryConfigForm({ 
-    initialApiUrl, 
-    initialApiKey,
     initialAnnouncementEnabled,
     initialAnnouncementMessage,
     initialAnnouncementBgColor,
     initialAnnouncementTextColor
 }: { 
-    initialApiUrl: string, 
-    initialApiKey: string,
     initialAnnouncementEnabled: boolean,
     initialAnnouncementMessage: string,
     initialAnnouncementBgColor: string,
     initialAnnouncementTextColor: string
 }) {
-    const [apiUrl, setApiUrl] = useState(initialApiUrl)
-    const [apiKey, setApiKey] = useState(initialApiKey)
     const [announcementEnabled, setAnnouncementEnabled] = useState(initialAnnouncementEnabled)
     const [announcementMessage, setAnnouncementMessage] = useState(initialAnnouncementMessage)
     const [announcementBgColor, setAnnouncementBgColor] = useState(initialAnnouncementBgColor)
@@ -37,8 +31,6 @@ export default function DeliveryConfigForm({
 
         try {
             await updateMultipleSettings([
-                { key: 'delivery_api_url', value: apiUrl, category: 'config', description: 'URL de l\'API Livraison (ex: WithYou)' },
-                { key: 'delivery_api_key', value: apiKey, category: 'config', description: 'Clé d\'authentification de l\'API Livraison' },
                 { key: 'announcement_bar_enabled', value: announcementEnabled ? 'true' : 'false', category: 'marketing', description: 'Activer la bande d\'annonce sur les produits' },
                 { key: 'announcement_bar_message', value: announcementMessage, category: 'marketing', description: 'Message de la bande d\'annonce' },
                 { key: 'announcement_bar_bg_color', value: announcementBgColor, category: 'marketing', description: 'Couleur de fond de la bande d\'annonce' },
@@ -61,40 +53,7 @@ export default function DeliveryConfigForm({
                 </div>
             )}
 
-            <div className="space-y-6">
-                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <Save className="w-4 h-4" /> API Intégration
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label htmlFor="apiUrl" className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-                            URL de l'API
-                        </label>
-                        <input
-                            type="url"
-                            id="apiUrl"
-                            value={apiUrl}
-                            onChange={(e) => setApiUrl(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all font-medium"
-                            placeholder="Ex: https://new.withyou.ma/api-rest"
-                        />
-                    </div>
 
-                    <div>
-                        <label htmlFor="apiKey" className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-                            Clé API
-                        </label>
-                        <input
-                            type="password"
-                            id="apiKey"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all font-medium"
-                            placeholder="Clé secrète"
-                        />
-                    </div>
-                </div>
-            </div>
 
             <div className="space-y-6">
                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 pb-2 border-b border-gray-100 flex items-center gap-2">
