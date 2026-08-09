@@ -17,6 +17,7 @@ interface Pack {
     description?: string | null
     active: boolean
     isSyncedWithJumia: boolean
+    createdAt?: Date | string
     books: Array<{
         book: {
             id: string
@@ -37,7 +38,7 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('ALL')
     const [stockFilter, setStockFilter] = useState('ALL')
-    const [sortFilter, setSortFilter] = useState('NAME_ASC')
+    const [sortFilter, setSortFilter] = useState('DATE_DESC')
 
     async function handleDelete(id: string, name: string) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${name}" ?`)) {
@@ -123,6 +124,16 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
         
         return matchesSearch && matchesStatus && matchesStock
     }).sort((a, b) => {
+        if (sortFilter === 'DATE_DESC') {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+        }
+        if (sortFilter === 'DATE_ASC') {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateA - dateB;
+        }
         if (sortFilter === 'NAME_ASC') return a.name.localeCompare(b.name)
         if (sortFilter === 'NAME_DESC') return b.name.localeCompare(a.name)
         if (sortFilter === 'PRICE_ASC') return a.price - b.price
@@ -165,6 +176,8 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                         value={sortFilter}
                         onChange={(e) => setSortFilter(e.target.value)}
                     >
+                        <option value="DATE_DESC">Plus récent</option>
+                        <option value="DATE_ASC">Plus ancien</option>
                         <option value="NAME_ASC">Nom (A-Z)</option>
                         <option value="NAME_DESC">Nom (Z-A)</option>
                         <option value="PRICE_ASC">Prix croissant</option>

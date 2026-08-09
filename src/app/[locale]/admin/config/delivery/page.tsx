@@ -1,11 +1,13 @@
 import { verifyAdmin } from '@/lib/actions/auth'
 import { getSetting } from '@/lib/actions/site-settings'
+import { getShippingCompanies } from '@/lib/actions/shipping-companies'
 import { redirect } from 'next/navigation'
 import DeliveryConfigForm from './DeliveryConfigForm'
-import { Truck } from 'lucide-react'
+import ShippingCompaniesClient from './ShippingCompaniesClient'
+import { Truck, Package } from 'lucide-react'
 
 export const metadata = {
-    title: 'Configuration API Livraison | Admin Riwaya',
+    title: 'Logistique & Livraison | Admin Riwaya',
 }
 
 export default async function DeliveryConfigPage() {
@@ -15,12 +17,13 @@ export default async function DeliveryConfigPage() {
         redirect('/login')
     }
 
-    const apiUrl = await getSetting('delivery_api_url') || ''
-    const apiKey = await getSetting('delivery_api_key') || ''
+
     const announcementEnabled = await getSetting('announcement_bar_enabled') || 'false'
     const announcementMessage = await getSetting('announcement_bar_message') || 'Livraison Gratuite partout au Maroc dès 300 MAD d\'achat !'
     const announcementBgColor = await getSetting('announcement_bar_bg_color') || '#000000'
     const announcementTextColor = await getSetting('announcement_bar_text_color') || '#FFFFFF'
+    const companies = await getShippingCompanies()
+    const defaultCompanyId = await getSetting('DEFAULT_SHIPPING_COMPANY_ID')
 
     return (
         <div className="space-y-12">
@@ -28,10 +31,10 @@ export default async function DeliveryConfigPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2 italic">
-                        Livraison<span className="text-blue-600">.</span>
+                        Logistique<span className="text-blue-600">.</span>
                     </h1>
                     <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                        Configuration des passerelles logistiques
+                        Configuration de la livraison et des transporteurs
                     </p>
                 </div>
             </div>
@@ -43,13 +46,11 @@ export default async function DeliveryConfigPage() {
                             <Truck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-black tracking-tight uppercase">API WithYou</h2>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Paramètres de connexion serveur à serveur</p>
+                            <h2 className="text-2xl font-black text-black tracking-tight uppercase">Marketing & Annonces</h2>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Personnalisation de la bande d'annonce de livraison</p>
                         </div>
                     </div>
                     <DeliveryConfigForm 
-                        initialApiUrl={apiUrl} 
-                        initialApiKey={apiKey} 
                         initialAnnouncementEnabled={announcementEnabled === 'true'}
                         initialAnnouncementMessage={announcementMessage}
                         initialAnnouncementBgColor={announcementBgColor}
@@ -57,6 +58,8 @@ export default async function DeliveryConfigPage() {
                     />
                 </div>
             </div>
+
+            <ShippingCompaniesClient initialCompanies={companies} initialDefaultId={defaultCompanyId} />
         </div>
     )
 }
