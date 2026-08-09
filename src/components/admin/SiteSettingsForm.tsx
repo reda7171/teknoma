@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { updateMultipleSettings } from '@/lib/actions/site-settings'
-import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link } from 'lucide-react'
+import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link, MessageSquare } from 'lucide-react'
 interface SettingsFormProps {
     initialSettings: Record<string, string>
 }
@@ -11,6 +11,11 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
     const [settings, setSettings] = useState(initialSettings)
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [origin, setOrigin] = useState('')
+
+    useEffect(() => {
+        setOrigin(window.location.origin)
+    }, [])
 
     const handleChange = (key: string, value: string) => {
         setSettings(prev => ({ ...prev, [key]: value }))
@@ -441,7 +446,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors font-mono text-sm"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Mot de passe secret à saisir dans Meta Developers pour valider l'URL : {typeof window !== 'undefined' ? `${window.location.origin}/api/webhooks/meta` : '/api/webhooks/meta'}
+                                    Mot de passe secret à saisir dans Meta Developers pour valider l'URL : {origin ? `${origin}/api/webhooks/meta` : '/api/webhooks/meta'}
                                 </p>
                             </div>
                             <div>

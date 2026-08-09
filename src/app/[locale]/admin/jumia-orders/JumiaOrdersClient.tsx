@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText } from 'lucide-react'
+import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText, ExternalLink } from 'lucide-react'
 import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull, restoreJumiaOrderStock } from './actions'
 import JumiaOrdersEvolutionChart from '@/components/admin/JumiaOrdersEvolutionChart'
 
@@ -680,7 +680,18 @@ export default function JumiaOrdersClient() {
                                                                                                 <Package className="w-5 h-5" />
                                                                                             </div>
                                                                                         )}
-                                                                                        <span className="font-medium text-slate-700 line-clamp-2 max-w-[250px]">{item.product?.name || item.Name || 'Produit inconnu'}</span>
+                                                                                        <span className="font-medium text-slate-700 line-clamp-2 max-w-[250px]">
+                                                                                            <a 
+                                                                                                href={item.ProductUrl || `https://www.jumia.ma/catalog/?q=${item.product?.sellerSku || item.Sku}`} 
+                                                                                                target="_blank" 
+                                                                                                rel="noreferrer"
+                                                                                                className="hover:text-orange-500 hover:underline inline-flex items-center gap-1 transition-colors"
+                                                                                                title="Voir sur Jumia"
+                                                                                            >
+                                                                                                {item.product?.name || item.Name || 'Produit inconnu'}
+                                                                                                <ExternalLink className="w-3 h-3 text-slate-400 inline-block shrink-0" />
+                                                                                            </a>
+                                                                                        </span>
                                                                                     </td>
                                                                                     <td className="p-3 font-mono text-slate-500">{item.product?.sellerSku || item.Sku}</td>
                                                                                     <td className="p-3">

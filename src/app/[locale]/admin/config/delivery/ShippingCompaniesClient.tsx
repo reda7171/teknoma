@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Plus, Edit2, Trash2, Check, X, Upload, Image as ImageIcon, Search, Phone } from 'lucide-react'
+import { Plus, Edit2, Trash2, Check, X, Upload, Image as ImageIcon, Search, Phone, Eye, EyeOff } from 'lucide-react'
 import { createShippingCompany, updateShippingCompany, deleteShippingCompany, setDefaultShippingCompany } from '@/lib/actions/shipping-companies'
 
 const EMPTY_FORM = { name: '', logo: '', apiKey: '', apiUrl: '', supportPhone: '', isActive: true }
@@ -16,6 +16,7 @@ export default function ShippingCompaniesClient({ initialCompanies, initialDefau
     const [formData, setFormData] = useState(EMPTY_FORM)
     const [logoPreview, setLogoPreview] = useState<string>('')
     const [uploading, setUploading] = useState(false)
+    const [showApiKey, setShowApiKey] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleEdit = (comp: any) => {
@@ -155,7 +156,22 @@ export default function ShippingCompaniesClient({ initialCompanies, initialDefau
                             </div>
                             <div>
                                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Clé API</label>
-                                <input type="password" value={formData.apiKey} onChange={e => setFormData({ ...formData, apiKey: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 outline-none placeholder-gray-300" placeholder="••••••••••••••••" />
+                                <div className="relative">
+                                    <input 
+                                        type={showApiKey ? "text" : "password"} 
+                                        value={formData.apiKey} 
+                                        onChange={e => setFormData({ ...formData, apiKey: e.target.value })} 
+                                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-100 bg-gray-50 outline-none placeholder-gray-300" 
+                                        placeholder="••••••••••••••••" 
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowApiKey(!showApiKey)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                                    >
+                                        {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
