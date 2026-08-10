@@ -169,13 +169,16 @@ export async function getJumiaStats() {
         
         const evolutionData = Object.values(evolutionMap).sort((a, b) => a.date.localeCompare(b.date))
         
+        const recentOrders = orders.slice(0, 3)
+
         return {
             total,
             pending,
             shipped,
             delivered,
             revenue,
-            evolutionData
+            evolutionData,
+            recentOrders
         }
     } catch (e) {
         return null

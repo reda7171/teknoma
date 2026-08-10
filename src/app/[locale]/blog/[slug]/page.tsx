@@ -902,7 +902,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {/* === Mobile Sticky Share Bar === */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 flex justify-center items-center shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.2)]">
                 <div className="flex items-center justify-between w-full max-w-sm mx-auto">
-                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{t('Share')}</span>
+                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{t('ShareTitle')}</span>
                     <ShareArticle title={post.title} />
                 </div>
             </div>

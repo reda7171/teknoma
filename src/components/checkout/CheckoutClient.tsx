@@ -6,7 +6,7 @@ import { useRouter } from '@/i18n/routing'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { createOrder } from '@/lib/actions/orders'
-import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import CouponInput from '@/components/CouponInput'
 import { useTranslations, useLocale } from 'next-intl'
@@ -394,13 +394,34 @@ export default function CheckoutClient({
                             <div className="space-y-3 mb-8">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('MobileNumber')}</label>
                                 <input
-                                    {...registerWithTracker('phone', {
-                                        required: t('Errors.PhoneRequired'),
-                                        pattern: {
-                                            value: /^\s*(?:(?:\+|00)212|0)\s*[5-7](?:\s*\d){8}\s*$/,
-                                            message: t('Errors.PhoneInvalid')
-                                        }
-                                    })}
+                                    {...(() => {
+                                        const reg = registerWithTracker('phone', {
+                                            required: t('Errors.PhoneRequired'),
+                                            pattern: {
+                                                value: /^\s*(?:(?:\+|00)212|0)\s*[5-7](?:\s*\d){8}\s*$/,
+                                                message: t('Errors.PhoneInvalid')
+                                            }
+                                        });
+                                        const originalOnChange = reg.onChange;
+                                        reg.onChange = (e: any) => {
+                                            let val = e.target.value.replace(/[^\d+]/g, '');
+                                            if (val.startsWith('0') && !val.includes('+')) {
+                                                val = val.replace(/(\d{2})(\d{2})?(\d{2})?(\d{2})?(\d{2})?/, (match: string, p1: string, p2?: string, p3?: string, p4?: string, p5?: string) => {
+                                                    let res = p1;
+                                                    if (p2) res += ' ' + p2;
+                                                    if (p3) res += ' ' + p3;
+                                                    if (p4) res += ' ' + p4;
+                                                    if (p5) res += ' ' + p5;
+                                                    return res;
+                                                });
+                                            }
+                                            e.target.value = val.substring(0, 14); // Max length for "06 12 34 56 78" is 14
+                                            return originalOnChange(e);
+                                        };
+                                        return reg;
+                                    })()}
+                                    placeholder="06 00 00 00 00"
+                                    dir="ltr"
                                     className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
                                 />
                                 {errors.phone && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.phone.message}</p>}
@@ -726,9 +747,28 @@ export default function CheckoutClient({
                             )}
                         </button>
 
-                        <div className="flex items-center gap-4 p-5 bg-pixio-cream/50 rounded-[1.5rem] border border-gray-50">
-                            <Truck className="w-5 h-5 text-black" />
-                            <p className="text-[9px] rtl:text-xs font-black text-black/40 uppercase tracking-widest rtl:tracking-normal leading-loose rtl:leading-relaxed" dangerouslySetInnerHTML={{ __html: t.raw('FastDelivery') }} />
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
+                                <Truck className="w-6 h-6 text-black shrink-0" />
+                                <div>
+                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">Expédition Rapide</p>
+                                    <p className="text-[9px] text-gray-500 mt-1">Livraison partout au Maroc</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
+                                <ShieldCheck className="w-6 h-6 text-black shrink-0" />
+                                <div>
+                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">Paiement Sécurisé</p>
+                                    <p className="text-[9px] text-gray-500 mt-1">Cash à la livraison ou par carte</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
+                                <Headset className="w-6 h-6 text-black shrink-0" />
+                                <div>
+                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">Service Client</p>
+                                    <p className="text-[9px] text-gray-500 mt-1">Assistance 7j/7 via WhatsApp</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

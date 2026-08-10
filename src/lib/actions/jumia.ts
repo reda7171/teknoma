@@ -936,9 +936,8 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
                         console.warn(`Skipping Jumia sync for ${book.sellerSku} - QC Status is ${qcStatus}`);
                         continue;
                     }
-                    
                     updates.push({
-                        productSid: sid,
+                        id: sid,
                         sellerSku: sellerSku,
                         stock: book.stock
                     })

@@ -135,6 +135,9 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                             <th className="px-8 py-6 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('status')}>
                                 Statut <SortIcon column="status" />
                             </th>
+                            <th className="px-8 py-6 text-center">
+                                Terminée
+                            </th>
                             <th className="px-8 py-6 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('views')}>
                                 Vues <SortIcon column="views" />
                             </th>
@@ -270,6 +273,32 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                         >
                                             <option value="published" className="bg-white text-emerald-600">Publié</option>
                                             <option value="draft" className="bg-white text-gray-500">Brouillon</option>
+                                        </select>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        <select
+                                            value={post.isCompleted ? 'true' : 'false'}
+                                            onChange={async (e) => {
+                                                const isCompleted = e.target.value === 'true';
+                                                try {
+                                                    const res = await updatePost(post.id, { isCompleted });
+                                                    if (res.success) {
+                                                        router.refresh();
+                                                    } else {
+                                                        alert(res.error || 'Erreur lors de la mise à jour');
+                                                    }
+                                                } catch (err) {
+                                                    alert('Erreur lors de la mise à jour');
+                                                }
+                                            }}
+                                            className={`outline-none text-[10px] font-black uppercase tracking-widest rounded-full px-4 py-1.5 border appearance-none cursor-pointer text-center ${
+                                                post.isCompleted 
+                                                ? 'bg-blue-50 text-blue-600 border-blue-100' 
+                                                : 'bg-gray-100 text-gray-500 border-gray-200'
+                                            }`}
+                                        >
+                                            <option value="true" className="bg-white text-blue-600">Oui</option>
+                                            <option value="false" className="bg-white text-gray-500">Non</option>
                                         </select>
                                     </td>
                                     <td className="px-8 py-6 text-gray-400 font-bold text-xs">
