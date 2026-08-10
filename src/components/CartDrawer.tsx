@@ -58,12 +58,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         }
     }
     
-    // Si tous les articles sont numériques, pas de frais de livraison
-    // Si un article (ex: pack) a les frais de livraison gratuits, tout le panier est gratuit
-    const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
-    const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
-    const shippingFee = (hasOnlyDigital || hasFreeShippingItem || totalPrice >= 500) ? 0 : 30
-    const finalTotal = totalPrice + shippingFee
+    const finalTotal = totalPrice
 
     // Swipe handlers
     const minSwipeDistance = 50 
@@ -94,7 +89,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             {/* Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] transition-opacity"
                     onClick={onClose}
                 />
             )}
@@ -106,7 +101,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 onTouchStart={onTouchStartEvent}
                 onTouchMove={onTouchMoveEvent}
                 onTouchEnd={onTouchEndEvent}
-                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-50 transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
+                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[110] transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                     }`}
             >
                 <div className="flex flex-col h-full">
@@ -272,6 +267,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                 <div className="flex justify-between items-center pt-2">
                                     <span className="text-[13px] font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
                                     <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} MAD</span>
+                                </div>
+                                <div className="text-center">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Livraison calculée à l'étape suivante</span>
                                 </div>
                             </div>
 

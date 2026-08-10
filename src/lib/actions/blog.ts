@@ -315,6 +315,7 @@ export async function updatePost(id: string, data: any) {
                 category: data.category,
                 tags: data.tags || null,
                 language: data.language || 'fr',
+                isCompleted: data.isCompleted !== undefined ? data.isCompleted : undefined,
                 books: {
                     set: data.bookIds ? data.bookIds.map((id: string) => ({ id })) : []
                 }

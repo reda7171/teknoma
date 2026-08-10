@@ -72,6 +72,34 @@ export async function GET(req: Request) {
                         const quantity = item.quantity || 1
                         const price = item.price?.value || item.price || item.unitPrice || '0'
                         itemsText += `- ${quantity}x ${productName} (<b>${price} MAD</b>)\n`
+
+                        const sellerSku = item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku
+                        if (sellerSku) {
+                            try {
+                                await prisma.book.updateMany({
+                                    where: { sellerSku: sellerSku },
+                                    data: { stock: { decrement: quantity } }
+                                })
+                                await prisma.pack.updateMany({
+                                    where: { sellerSku: sellerSku },
+                                    data: { stock: { decrement: quantity } }
+                                })
+                                await prisma.extraProduct.updateMany({
+                                    where: { sellerSku: sellerSku },
+                                    data: { stock: { decrement: quantity } }
+                                })
+                                await prisma.jumiaActionLog.create({
+                                    data: {
+                                        orderId: orderId.toString(),
+                                        action: "AUTO_DECREMENT_STOCK",
+                                        status: "SUCCESS",
+                                        detail: `Décrémentation de ${quantity} unité(s) pour le SKU ${sellerSku}`
+                                    }
+                                })
+                            } catch (e) {
+                                console.error("Failed to decrement local stock for Jumia order", e)
+                            }
+                        }
                     }
                 }
             } catch (err) {
@@ -85,6 +113,9 @@ export async function GET(req: Request) {
                     [
                         { text: '✅ Ready to Ship', callback_data: `jumia_rts:${orderId}` },
                         { text: '❌ Annuler', callback_data: `jumia_cancel:${orderId}` }
+                    ],
+                    [
+                        { text: '🔄 synch stock RIWAYA', callback_data: 'jumia:sync_stock' }
                     ]
                 ]
             }

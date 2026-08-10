@@ -271,8 +271,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     
     // Timeout-wrapped remote stats to prevent slow loading
     const jumiaRemoteStats = await Promise.race([
-        getJumiaRemoteStats().catch(() => ({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0 })),
-        new Promise<any>((resolve) => setTimeout(() => resolve({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0 }), 3000))
+        getJumiaRemoteStats().catch(() => ({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0, recentOrders: [] })),
+        new Promise<any>((resolve) => setTimeout(() => resolve({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0, recentOrders: [] }), 3000))
     ])
     
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
@@ -464,6 +464,47 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             <span className="text-[9px] text-gray-400 ml-auto">
                                 {new Date(jumiaStats.lastAction.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                             </span>
+                        </div>
+                    )}
+                    
+                    {/* 3 Dernières commandes Jumia */}
+                    {jumiaRemoteStats?.recentOrders && jumiaRemoteStats.recentOrders.length > 0 && (
+                        <div className="mt-6 overflow-hidden rounded-2xl border border-orange-100 bg-white">
+                            <div className="px-4 py-3 bg-orange-50/50 border-b border-orange-100 flex items-center justify-between">
+                                <h3 className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
+                                    <ShoppingBag className="w-3 h-3" />
+                                    3 Dernières Commandes Jumia
+                                </h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <tbody className="divide-y divide-gray-50">
+                                        {jumiaRemoteStats.recentOrders.map((order: any, idx: number) => (
+                                            <tr key={order.id || order.OrderId || idx} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-4 py-3 font-bold text-gray-900 text-[11px] uppercase tracking-tighter">
+                                                    {order.number || order.OrderId || order.OrderNumber}
+                                                </td>
+                                                <td className="px-4 py-3 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                                    {order.shippingAddress?.firstName || order.CustomerFirstName}
+                                                </td>
+                                                <td className="px-4 py-3 text-[11px] font-black text-orange-600 tracking-tighter">
+                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} MAD
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <span className={`inline-flex px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg ${
+                                                        (order.status || order.Statuses?.[0] || '').toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
+                                                        (order.status || order.Statuses?.[0] || '').toLowerCase() === 'canceled' ? 'bg-red-100 text-red-700' :
+                                                        (order.status || order.Statuses?.[0] || '').toLowerCase() === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-orange-100 text-orange-700'
+                                                    }`}>
+                                                        {order.status || order.Statuses?.[0] || 'PENDING'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
                 </div>

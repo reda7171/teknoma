@@ -60,72 +60,83 @@ export default function DeliveryConfigForm({
                     <Bell className="w-4 h-4" /> Marketing & Annonces
                 </h3>
                 
-                <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-3xl">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                            type="checkbox" 
-                            className="sr-only peer"
-                            checked={announcementEnabled}
-                            onChange={(e) => setAnnouncementEnabled(e.target.checked)}
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                    </label>
-                    <span className="text-xs font-black uppercase tracking-widest text-black">
-                        Activer la bande d'annonce défilante
-                    </span>
-                </div>
-
-                <div>
-                    <label htmlFor="announcementMessage" className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-                        Texte de l'annonce
-                    </label>
-                    <input
-                        type="text"
-                        id="announcementMessage"
-                        value={announcementMessage}
-                        onChange={(e) => setAnnouncementMessage(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all font-medium"
-                        placeholder="Ex: Livraison Gratuite dès 300 MAD !"
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <div>
+                <div className="flex flex-col lg:flex-row items-end gap-6">
+                    {/* Toggle */}
+                    <div className="w-full lg:w-48 flex-shrink-0">
                         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-                            Couleur de fond
+                            État
                         </label>
-                        <div className="flex gap-4 items-center">
-                            <input
-                                type="color"
-                                value={announcementBgColor}
-                                onChange={(e) => setAnnouncementBgColor(e.target.value)}
-                                className="w-12 h-12 rounded-xl border-none p-0 cursor-pointer overflow-hidden"
-                            />
-                            <input
-                                type="text"
-                                value={announcementBgColor}
-                                onChange={(e) => setAnnouncementBgColor(e.target.value)}
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-xs font-mono"
-                            />
+                        <div className="flex items-center justify-between gap-4 bg-gray-50 px-5 py-3 rounded-xl h-[52px] border border-gray-100">
+                            <span className="text-xs font-black uppercase tracking-widest text-black">
+                                Active
+                            </span>
+                            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input 
+                                    type="checkbox" 
+                                    className="sr-only peer"
+                                    checked={announcementEnabled}
+                                    onChange={(e) => setAnnouncementEnabled(e.target.checked)}
+                                />
+                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
+                            </label>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-                            Couleur du texte
+
+                    {/* Texte */}
+                    <div className="flex-1 w-full">
+                        <label htmlFor="announcementMessage" className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                            Texte de l'annonce
                         </label>
-                        <div className="flex gap-4 items-center">
-                            <input
-                                type="color"
-                                value={announcementTextColor}
-                                onChange={(e) => setAnnouncementTextColor(e.target.value)}
-                                className="w-12 h-12 rounded-xl border-none p-0 cursor-pointer overflow-hidden"
-                            />
-                            <input
-                                type="text"
-                                value={announcementTextColor}
-                                onChange={(e) => setAnnouncementTextColor(e.target.value)}
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-xs font-mono"
-                            />
+                        <input
+                            type="text"
+                            id="announcementMessage"
+                            value={announcementMessage}
+                            onChange={(e) => setAnnouncementMessage(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all font-medium h-[52px]"
+                            placeholder="Ex: Livraison Gratuite dès 300 MAD !"
+                        />
+                    </div>
+
+                    {/* Couleurs */}
+                    <div className="flex gap-4 w-full lg:w-auto">
+                        <div className="flex-1 lg:w-32">
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                                Fond
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="color"
+                                    value={announcementBgColor}
+                                    onChange={(e) => setAnnouncementBgColor(e.target.value)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                                <div 
+                                    className="w-full h-[52px] rounded-xl border border-gray-200 shadow-sm flex items-center justify-center font-mono text-xs font-bold uppercase transition-transform hover:scale-105"
+                                    style={{ backgroundColor: announcementBgColor, color: announcementTextColor }}
+                                >
+                                    {announcementBgColor}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 lg:w-32">
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                                Texte
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="color"
+                                    value={announcementTextColor}
+                                    onChange={(e) => setAnnouncementTextColor(e.target.value)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                                <div 
+                                    className="w-full h-[52px] rounded-xl border border-gray-200 shadow-sm flex items-center justify-center font-mono text-xs font-bold uppercase transition-transform hover:scale-105"
+                                    style={{ backgroundColor: announcementTextColor, color: announcementBgColor }}
+                                >
+                                    {announcementTextColor}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

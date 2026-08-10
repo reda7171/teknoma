@@ -685,6 +685,7 @@ model Post {
   totalReadTime Int       @default(0)
   imageAlt      String?   @db.VarChar(500)
   imageTitle    String?   @db.VarChar(500)
+  isCompleted   Boolean   @default(false)
   comments      Comment[]
   author        User      @relation(fields: [authorId], references: [id])
   books         Book[]    @relation("PostBooks")

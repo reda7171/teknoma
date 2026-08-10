@@ -273,6 +273,22 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             if (action === 'close') {
                 router.push('/admin/packs')
                 router.refresh()
+            } else if (action === 'push_to_jumia') {
+                setLoading(false)
+                setIsPushingJumia(true)
+                try {
+                    const res = await publishPacksToJumia([pack.id])
+                    if (res.success) {
+                        alert(res.message || 'Pack enregistré et publié avec succès sur Jumia')
+                    } else {
+                        alert('Erreur Jumia: ' + res.message)
+                    }
+                } catch {
+                    alert('Erreur technique lors de la publication')
+                } finally {
+                    setIsPushingJumia(false)
+                    router.refresh()
+                }
             } else {
                 setLoading(false)
                 alert('Pack enregistré avec succès !')
@@ -790,16 +806,25 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             <div className="space-y-3">
                                 <button
                                     type="submit"
-                                    value="close"
+                                    value="save"
                                     disabled={loading || selectedBooks.length === 0 || isPushingJumia}
                                     className="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                >
+                                    <Save className="w-4 h-4 mr-1.5" />
+                                    {loading ? '...' : 'Enregistrer'}
+                                </button>
+                                <button
+                                    type="submit"
+                                    value="close"
+                                    disabled={loading || selectedBooks.length === 0 || isPushingJumia}
+                                    className="w-full inline-flex items-center justify-center px-3 py-2 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                                 >
                                     <Save className="w-4 h-4 mr-1.5" />
                                     {loading ? '...' : 'Enregistrer et fermer'}
                                 </button>
                                 <button
-                                type="button"
-                                onClick={handlePushToJumia}
+                                type="submit"
+                                value="push_to_jumia"
                                 disabled={isPushingJumia || loading}
                                 className="w-full inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                             >

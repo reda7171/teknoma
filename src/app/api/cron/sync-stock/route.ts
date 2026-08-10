@@ -41,7 +41,7 @@ export async function GET(req: Request) {
                 updates.push({
                     id: book.jumiaProductSid,
                     sellerSku: book.sellerSku,
-                    stock: book.jumiaStock !== null ? book.jumiaStock : book.stock
+                    stock: book.stock
                 })
             }
         })
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
                 updates.push({
                     id: pack.jumiaProductSid,
                     sellerSku: pack.sellerSku,
-                    stock: pack.jumiaStock !== null ? pack.jumiaStock : pack.stock
+                    stock: pack.stock
                 })
             }
         })
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
                 updates.push({
                     id: accessory.jumiaProductSid,
                     sellerSku: accessory.sellerSku,
-                    stock: accessory.jumiaStock !== null ? accessory.jumiaStock : accessory.stock
+                    stock: accessory.stock
                 })
             }
         })

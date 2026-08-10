@@ -487,8 +487,37 @@ export async function POST(req: Request) {
                         const { sendTelegramPhoto } = await import('@/lib/telegram')
                         await sendTelegramPhoto(chartUrl, `📊 <b>Comparatif Jumia vs Boutique (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
                     } else if (action === 'returns_check') {
-                        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-returns-alert${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
-                        await answerCallbackQuery(callbackId, '🔄 Vérification retours...', token)
+                        await answerCallbackQuery(callbackId, '🔄 Vérification en cours, merci de patienter...', token)
+                        try {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-returns-alert${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
+                            const data = await res.json()
+                            
+                            if (data.success) {
+                                let resultMsg = `🔄 <b>Bilan de la vérification Jumia</b>\n\n`
+                                resultMsg += `↩️ Retours détectés : <b>${data.returned || 0}</b>\n`
+                                resultMsg += `❌ Annulations : <b>${data.canceled || 0}</b>\n`
+                                resultMsg += `📦 Stocks réintégrés (Nouveaux) : <b>${data.restored || 0}</b>`
+                                
+                                await sendTelegramMessage(resultMsg, message?.chat?.id.toString(), token)
+                            } else {
+                                await sendTelegramMessage(`❌ Erreur lors de la vérification: ${data.error}`, message?.chat?.id.toString(), token)
+                            }
+                        } catch (err: any) {
+                            await sendTelegramMessage(`❌ Impossible de contacter l'API: ${err.message}`, message?.chat?.id.toString(), token)
+                        }
+                    } else if (action === 'sync_stock') {
+                        await answerCallbackQuery(callbackId, '🔄 Synchronisation en cours, cela peut prendre un moment...', token)
+                        try {
+                            const { syncAllJumiaStock } = await import('@/app/[locale]/admin/jumia-orders/actions')
+                            const result = await syncAllJumiaStock()
+                            if (result && result.success) {
+                                await sendTelegramMessage(`✅ <b>Synchronisation réussie</b>\n\n${result.count} produit(s) mis à jour sur Jumia depuis le stock local.`, message?.chat?.id.toString(), token)
+                            } else {
+                                await sendTelegramMessage(`❌ Erreur de synchronisation: ${result?.error || 'Erreur inconnue'}`, message?.chat?.id.toString(), token)
+                            }
+                        } catch (err: any) {
+                            await sendTelegramMessage(`❌ Erreur: ${err.message}`, message?.chat?.id.toString(), token)
+                        }
                     }
                 } catch (err: any) {
                     await answerCallbackQuery(callbackId, `❌ Erreur: ${err.message}`, token)
