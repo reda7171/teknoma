@@ -60,7 +60,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                             </span>
                         )}
                     </div>
-                    <span className="text-[10px] font-medium">{t('Cart') || 'Panier'}</span>
+                    <span className="text-[10px] font-medium">{t('Cart')}</span>
                 </button>
 
                 <button
@@ -68,7 +68,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                     className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-black"
                 >
                     <Menu className="w-5 h-5 stroke-2" />
-                    <span className="text-[10px] font-medium">Menu</span>
+                    <span className="text-[10px] font-medium">{t('Menu')}</span>
                 </button>
             </div>
         </div>

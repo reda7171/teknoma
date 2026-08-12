@@ -2,6 +2,7 @@ import { getSupplierOrderRecommendations, getStockStats } from '@/lib/actions/su
 import { AlertTriangle, Package, TrendingUp, DollarSign, ShoppingCart, ArrowUp } from 'lucide-react'
 import SupplierOrderExport from '@/components/admin/SupplierOrderExport'
 import CopyTitlesButton from '@/components/admin/CopyTitlesButton'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Commande Fournisseur | Admin Riwaya',
@@ -9,12 +10,15 @@ export const metadata = {
 
 export default async function SupplierOrderPage({
   searchParams,
+  params,
 }: {
   searchParams: Promise<{ periode?: string; filtre?: string }>
+  params: Promise<{ locale: string }>
 }) {
-  const params = await searchParams
-  const periode = parseInt(params.periode || '30')
-  const filtre = params.filtre || 'TOUS'
+  const [sp, p] = await Promise.all([searchParams, params])
+  const lang = p.locale
+  const periode = parseInt(sp.periode || '30')
+  const filtre = sp.filtre || 'TOUS'
 
   const [recommendations, stats] = await Promise.all([
     getSupplierOrderRecommendations(periode),
@@ -158,8 +162,29 @@ export default async function SupplierOrderPage({
         ))}
       </div>
 
-      {/* Vue Mobile (Cartes) */}
-      <div className="md:hidden space-y-4">
+      {/* Vue Mobile (Cartes Premium) */}
+      <div className="md:hidden space-y-3">
+
+        {/* Bottom bar récapitulatif sticky mobile */}
+        {toOrder.length > 0 && (
+          <div className="sticky top-0 z-20 -mx-4 px-4 py-3 bg-white/95 backdrop-blur-sm border-b border-amber-100 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-amber-600">Commande</p>
+                <p className="text-base font-black text-black">{toOrder.length} titres · {totalQty} ex.</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Marge</p>
+                <p className="text-2xl font-black text-green-600">{marge}%</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Coût</p>
+                <p className="text-sm font-black text-red-600">{totalCost.toFixed(0)} MAD</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {filtered.length === 0 ? (
           <div className="bg-white rounded-[2rem] p-8 text-center border border-gray-100 shadow-sm">
             <Package className="w-12 h-12 text-gray-200 mx-auto mb-3" />
@@ -168,90 +193,109 @@ export default async function SupplierOrderPage({
         ) : filtered.map(book => {
           const sc = statusConfig[book.status]
           const isUrgent = book.status === 'URGENT'
+          const isWarning = book.status === 'WARNING'
           return (
-            <div key={book.id} className={`bg-white rounded-[2rem] p-5 border ${isUrgent ? 'border-red-200 bg-red-50/20' : 'border-gray-100'} shadow-sm relative overflow-hidden`}>
-              <div className="flex gap-4 items-start mb-4">
-                <div className="w-16 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm">
-                  {book.image && (
-                    <img
-                      src={book.image.startsWith('data:') || book.image.startsWith('http') ? book.image : `/uploads/${book.id}`}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-2 ${sc.bg} ${sc.text} border ${sc.border}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${sc.dot} ${isUrgent ? 'animate-pulse' : ''}`} />
-                    {sc.label}
-                  </span>
-                  <p className="font-black text-black text-sm leading-tight line-clamp-2">
-                    {book.isBestSeller && <span className="text-amber-500 mr-1">★</span>}
-                    {book.title}
-                  </p>
-                  <p className="text-[10px] text-gray-400 font-bold italic mt-0.5 truncate">{book.author}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-gray-50/50 rounded-2xl border border-gray-50">
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Stock</p>
-                  <p className={`text-lg font-black ${book.stock === 0 ? 'text-red-600' : book.stock <= 5 ? 'text-orange-500' : 'text-black'}`}>
-                    {book.stock}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Ventes 30j</p>
-                  <p className="text-lg font-black text-black">{book.soldLast30Days}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Ventes/jour</p>
-                  <p className="font-mono text-sm font-bold text-blue-600">{book.dailySales.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Jours de stock</p>
-                  <p className={`font-mono text-sm font-bold ${book.daysOfStock < 7 ? 'text-red-600' : book.daysOfStock < 20 ? 'text-orange-500' : 'text-green-600'}`}>
-                    {book.daysOfStock === 999 ? '∞' : `${book.daysOfStock}j`}
-                  </p>
-                </div>
-              </div>
+            <div
+              key={book.id}
+              className={`bg-white rounded-[1.5rem] border shadow-sm overflow-hidden ${
+                isUrgent ? 'border-red-200' : isWarning ? 'border-orange-100' : 'border-gray-100'
+              }`}
+            >
+              {/* Bande colorée urgence */}
+              {(isUrgent || isWarning) && (
+                <div className={`h-1 w-full ${isUrgent ? 'bg-red-500' : 'bg-orange-400'}`} />
+              )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Revenu estimé</p>
-                  {book.recommendedQty > 0 ? (
-                    <div>
-                      <p className="font-black text-green-600">{book.estimatedRevenue.toFixed(0)} MAD</p>
-                      <p className="text-[9px] text-gray-400 font-bold">coût: {(book.recommendedQty * book.costPrice).toFixed(0)} MAD</p>
+              <div className="p-4">
+                {/* Ligne principale : image + titre + badge */}
+                <div className="flex gap-3 items-start mb-3">
+                  <div className="w-12 h-16 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm">
+                    {book.image && (
+                      <img
+                        src={book.image.startsWith('data:') || book.image.startsWith('http') ? book.image : `/uploads/${book.id}`}
+                        alt={book.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <Link href={`/${lang}/admin/books/${book.id}/edit`} className="font-black text-black text-sm leading-tight line-clamp-2 flex-1 hover:text-blue-600 transition-colors">
+                        {book.isBestSeller && <span className="text-amber-500 mr-1">★</span>}
+                        {book.title}
+                      </Link>
+                      {/* Badge statut compact */}
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase shrink-0 ${sc.bg} ${sc.text} border ${sc.border}`}>
+                        <span className={`w-1 h-1 rounded-full ${sc.dot} ${isUrgent ? 'animate-pulse' : ''}`} />
+                        {sc.label}
+                      </span>
                     </div>
-                  ) : (
-                    <span className="text-gray-300">—</span>
-                  )}
+                    <p className="text-[10px] text-gray-400 font-bold italic truncate">{book.author}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">À commander</p>
-                  {book.recommendedQty > 0 ? (
-                    <span className={`inline-flex items-center justify-center w-10 h-10 rounded-2xl font-black text-sm shadow-lg ${isUrgent ? 'bg-red-600 text-white' : 'bg-black text-white'}`}>
-                      {book.recommendedQty}
-                    </span>
-                  ) : (
-                    <span className="text-gray-300 font-bold text-lg">—</span>
-                  )}
+
+                {/* Métriques en grille 4 colonnes compacte */}
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  <div className="bg-gray-50 rounded-xl p-2 text-center">
+                    <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Stock</p>
+                    <p className={`text-base font-black leading-none ${book.stock === 0 ? 'text-red-600' : book.stock <= 5 ? 'text-orange-500' : 'text-black'}`}>
+                      {book.stock}
+                    </p>
+                    <p className="text-[8px] text-amber-600 font-black mt-1 bg-amber-50 rounded-full px-1 py-0.5 inline-block border border-amber-100">Coût: {(book.stock * book.costPrice).toFixed(0)} MAD</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-2 text-center">
+                    <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Ventes</p>
+                    <p className="text-base font-black text-black leading-none">{book.soldLast30Days}</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-xl p-2 text-center">
+                    <p className="text-[7px] font-black text-blue-400 uppercase tracking-wider mb-0.5">j/vente</p>
+                    <p className="text-xs font-black text-blue-700 leading-none">{book.dailySales.toFixed(1)}</p>
+                  </div>
+                  <div className={`rounded-xl p-2 text-center ${
+                    book.daysOfStock < 7 ? 'bg-red-50' : book.daysOfStock < 20 ? 'bg-orange-50' : 'bg-green-50'
+                  }`}>
+                    <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Jours</p>
+                    <p className={`text-xs font-black leading-none ${
+                      book.daysOfStock < 7 ? 'text-red-600' : book.daysOfStock < 20 ? 'text-orange-600' : 'text-green-600'
+                    }`}>
+                      {book.daysOfStock === 999 ? '∞' : `${book.daysOfStock}j`}
+                    </p>
+                  </div>
                 </div>
+
+                {/* Footer : revenu + quantité à commander */}
+                {book.recommendedQty > 0 && (
+                  <div className={`flex items-center justify-between pt-3 border-t ${isUrgent ? 'border-red-100' : 'border-gray-100'}`}>
+                    <div>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Revenu estimé</p>
+                      <p className="font-black text-green-600 text-sm">{book.estimatedRevenue.toFixed(0)} MAD</p>
+                      <p className="text-[9px] text-gray-400">coût: {(book.recommendedQty * book.costPrice).toFixed(0)} MAD</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">À commander</p>
+                      <span className={`flex items-center justify-center w-12 h-12 rounded-2xl font-black text-lg shadow-lg ${
+                        isUrgent ? 'bg-red-600 text-white' : 'bg-black text-white'
+                      }`}>
+                        {book.recommendedQty}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )
         })}
       </div>
 
+
       {/* Tableau (Desktop) */}
       <div className="hidden md:block bg-white rounded-2xl md:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-sm text-left whitespace-nowrap md:whitespace-normal min-w-[800px]">
-            <thead className="bg-gray-50/50 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+        <div className="overflow-auto custom-scrollbar max-h-[75vh]">
+          <table className="w-full text-sm text-left whitespace-nowrap md:whitespace-normal min-w-[800px] relative">
+            <thead className="bg-white/95 backdrop-blur-sm text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 sticky top-0 z-20 shadow-sm">
               <tr>
                 <th className="px-6 py-5">Livre</th>
-                <th className="px-6 py-5 text-center">Stock</th>
+                <th className="px-6 py-5 text-center">Stock / Valeur</th>
                 <th className="px-6 py-5 text-center">Ventes 30j</th>
                 <th className="px-6 py-5 text-center">daily_sales</th>
                 <th className="px-6 py-5 text-center">days_of_stock</th>
@@ -287,10 +331,10 @@ export default async function SupplierOrderPage({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-black text-black text-xs leading-tight max-w-[180px] line-clamp-2">
+                          <Link href={`/${lang}/admin/books/${book.id}/edit`} className="font-black text-black text-xs leading-tight max-w-[180px] line-clamp-2 hover:text-blue-600 transition-colors block">
                             {book.isBestSeller && <span className="text-amber-500 mr-1">★</span>}
                             {book.title}
-                          </p>
+                          </Link>
                           <p className="text-[10px] text-gray-400 font-bold italic mt-0.5 truncate">{book.author}</p>
                         </div>
                       </div>
@@ -298,9 +342,12 @@ export default async function SupplierOrderPage({
 
                     {/* Stock */}
                     <td className="px-6 py-4 text-center">
-                      <span className={`text-lg font-black ${book.stock === 0 ? 'text-red-600' : book.stock <= 5 ? 'text-orange-500' : 'text-black'}`}>
-                        {book.stock}
-                      </span>
+                      <div className="flex flex-col items-center">
+                        <span className={`text-lg font-black ${book.stock === 0 ? 'text-red-600' : book.stock <= 5 ? 'text-orange-500' : 'text-black'}`}>
+                          {book.stock}
+                        </span>
+                        <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mt-1 border border-amber-100">Coût: {(book.stock * book.costPrice).toFixed(0)} MAD</span>
+                      </div>
                     </td>
 
                     {/* Ventes 30j */}

@@ -584,8 +584,8 @@ export default function CheckoutClient({
                                             <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                                         </div>
                                         <div className="ml-8">
-                                            <p className="font-black text-black text-xl tracking-tight">Virement Bancaire</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Transférez le montant sur notre compte bancaire</p>
+                                            <p className="font-black text-black text-xl tracking-tight">{t('BankTransfer')}</p>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{t('TransferAmountToBank')}</p>
                                         </div>
                                         <div className="ml-auto rtl:mr-auto rtl:ml-0">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
@@ -601,12 +601,12 @@ export default function CheckoutClient({
                                                 <div key={idx} className="p-5 bg-teal-50 border border-teal-100 rounded-2xl">
                                                     <p className="text-xs font-black uppercase tracking-widest text-teal-600 mb-3">{account.bankName}</p>
                                                     <div className="space-y-1">
-                                                        <p className="text-sm font-bold text-gray-700">Titulaire : <span className="font-black text-black">{account.accountName}</span></p>
-                                                        <p className="text-sm font-bold text-gray-700">RIB / IBAN : <span className="font-mono font-black text-black tracking-wider">{account.rib}</span></p>
+                                                        <p className="text-sm font-bold text-gray-700">{t('AccountHolder')} : <span className="font-black text-black">{account.accountName}</span></p>
+                                                        <p className="text-sm font-bold text-gray-700">{t('RibIban')} : <span className="font-mono font-black text-black tracking-wider">{account.rib}</span></p>
                                                     </div>
                                                 </div>
                                             ))}
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Votre commande sera traitée après confirmation du virement.</p>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">{t('OrderProcessedAfterTransfer')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -751,22 +751,22 @@ export default function CheckoutClient({
                             <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
                                 <Truck className="w-6 h-6 text-black shrink-0" />
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">Expédition Rapide</p>
-                                    <p className="text-[9px] text-gray-500 mt-1">Livraison partout au Maroc</p>
+                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('FastShippingTitle')}</p>
+                                    <p className="text-[9px] text-gray-500 mt-1">{t('DeliveryMorocco')}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
                                 <ShieldCheck className="w-6 h-6 text-black shrink-0" />
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">Paiement Sécurisé</p>
-                                    <p className="text-[9px] text-gray-500 mt-1">Cash à la livraison ou par carte</p>
+                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('SecurePaymentTitle')}</p>
+                                    <p className="text-[9px] text-gray-500 mt-1">{t('CashOrCard')}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
                                 <Headset className="w-6 h-6 text-black shrink-0" />
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">Service Client</p>
-                                    <p className="text-[9px] text-gray-500 mt-1">Assistance 7j/7 via WhatsApp</p>
+                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('CustomerServiceTitle')}</p>
+                                    <p className="text-[9px] text-gray-500 mt-1">{t('WhatsAppSupport')}</p>
                                 </div>
                             </div>
                         </div>

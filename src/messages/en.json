@@ -300,7 +300,8 @@
       "Favorites": "My Favorites",
       "AdminPanel": "Admin Panel",
       "InfluencerDashboard": "Dashboard"
-    }
+    },
+    "Menu": "Menu"
   },
   "Footer": {
     "About": "About",
@@ -491,7 +492,8 @@
     "FreeShippingAd": "Add {amount} MAD to unlock free shipping.",
     "OrderTotal": "Order Total",
     "ProceedToCheckout": "Proceed to Checkout",
-    "KeepExploring": "Keep Exploring"
+    "KeepExploring": "Keep Exploring",
+    "DeliveryCalculatedNextStep": "Delivery calculated at next step"
   },
   "Checkout": {
     "BackToSelection": "Back to selection",
@@ -539,7 +541,23 @@
       "AgentContact": "An agent will contact you within 24h for confirmation.",
       "PrepareAmount": "Please prepare the exact amount for delivery.",
       "BackHome": "Back Home"
-    }
+    },
+    "BankTransfer": "Bank Transfer",
+    "TransferAmountToBank": "Transfer the amount to our bank account",
+    "OrderProcessedAfterTransfer": "Your order will be processed after transfer confirmation.",
+    "DeliveryMorocco": "Delivery everywhere in Morocco",
+    "SecurePaymentTitle": "Secure Payment",
+    "CashOrCard": "Cash on delivery or by card",
+    "CustomerServiceTitle": "Customer Service",
+    "WhatsAppSupport": "7/7 support via WhatsApp",
+    "FastShippingTitle": "Fast Shipping",
+    "PromoCodePlaceholder": "PROMO CODE",
+    "Apply": "Apply",
+    "CouponApplied": "Discount of {discount} applied",
+    "UnknownError": "Unknown error",
+    "GenericError": "An error occurred",
+    "AccountHolder": "Account Holder",
+    "RibIban": "RIB / IBAN"
   },
   "Review": {
     "SuccessTitle": "Thank you for your review!",
@@ -1464,5 +1482,12 @@
         "desc": "Fast and reliable delivery to your doorstep."
       }
     }
+  },
+  "MobileNav": {
+    "Menu": "Menu",
+    "Home": "Home",
+    "Books": "Books",
+    "Packs": "Packs",
+    "Cart": "Cart"
   }
 }

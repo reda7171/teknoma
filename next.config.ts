@@ -171,6 +171,10 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // Force Turbopack à surveiller les fichiers de traduction
+  turbopack: {
+    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
+  },
 }
 
 export default withPWA(withNextIntl(nextConfig))

@@ -153,5 +153,8 @@
   "city_lbl": "City",
   "tracking_id": "Tracking ID",
   "articles": "Items :",
-  "items_count": "items"
+  "items_count": "items",
+  "BankTransfer": "Bank Transfer",
+  "TransferAmountToBank": "Transfer the amount to our bank account",
+  "OrderProcessedAfterTransfer": "Your order will be processed after payment confirmation."
 }

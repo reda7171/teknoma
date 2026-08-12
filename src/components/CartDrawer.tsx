@@ -269,7 +269,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                     <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} MAD</span>
                                 </div>
                                 <div className="text-center">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Livraison calculée à l'étape suivante</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>
                                 </div>
                             </div>
 
