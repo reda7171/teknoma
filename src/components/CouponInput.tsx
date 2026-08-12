@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { validateCoupon } from '@/lib/actions/coupons'
 import { Ticket, X, Check, Loader2 } from 'lucide-react'
 
@@ -11,6 +12,7 @@ interface CouponInputProps {
 }
 
 export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponInputProps) {
+    const t = useTranslations('Checkout')
     const [code, setCode] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
@@ -28,10 +30,10 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
                 onApplied(res.coupon)
                 setCode('')
             } else {
-                setError(res.error || 'Erreur inconnue')
+                setError(res.error || t('UnknownError'))
             }
         } catch (e) {
-            setError('Une erreur est survenue')
+            setError(t('GenericError'))
         } finally {
             setIsLoading(false)
         }
@@ -52,7 +54,8 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
                     <div>
                         <p className="text-sm font-black text-blue-900 uppercase">{appliedCoupon.code}</p>
                         <p className="text-xs text-blue-600 font-bold">
-                            Réduction de {appliedCoupon.type === 'PERCENTAGE' ? `${appliedCoupon.discount}%` : `${appliedCoupon.discount} MAD`} appliquée
+                            {/* Réduction appliquée */}
+                            {appliedCoupon.type === 'PERCENTAGE' ? `${appliedCoupon.discount}%` : `${appliedCoupon.discount} MAD`}
                         </p>
                     </div>
                 </div>
@@ -70,12 +73,12 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
         <div className="space-y-2">
             <div className="flex gap-2">
                 <div className="relative flex-1">
-                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Ticket className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         value={code}
                         onChange={(e) => setCode(e.target.value.toUpperCase())}
-                        placeholder="CODE PROMO"
-                        className="w-full pl-10 pr-4 py-3 bg-gray-100 border-2 border-transparent rounded-xl font-black focus:border-blue-500 focus:bg-white outline-none transition-all uppercase placeholder:font-bold placeholder:text-gray-400 text-sm"
+                        placeholder={t('PromoCodePlaceholder')}
+                        className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-3 bg-gray-100 border-2 border-transparent rounded-xl font-black focus:border-blue-500 focus:bg-white outline-none transition-all uppercase placeholder:font-bold placeholder:text-gray-400 text-sm"
                         disabled={isLoading}
                     />
                 </div>
@@ -85,7 +88,7 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
                     className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-sm uppercase hover:bg-blue-600 transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                    Appliquer
+                    {t('Apply')}
                 </button>
             </div>
             {error && <p className="text-xs text-red-600 font-bold italic ml-2">⚠️ {error}</p>}

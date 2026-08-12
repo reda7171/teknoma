@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2 } from 'lucide-react'
+import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2, Eye, EyeOff } from 'lucide-react'
 import { updateSetting } from '@/lib/actions/site-settings'
 import { useUIStore } from '@/store/ui'
 
@@ -38,6 +38,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
         }
     })
     const [isLoading, setIsLoading] = useState(false)
+    const [showPaypalSecret, setShowPaypalSecret] = useState(false)
+    const [showStripeSecret, setShowStripeSecret] = useState(false)
+    const [showCmiKey, setShowCmiKey] = useState(false)
     const showNotification = useUIStore(state => state.showNotification)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -163,13 +166,18 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Secret Key</label>
-                            <input
-                                type="password"
-                                value={settings.paypalClientSecret}
-                                onChange={(e) => setSettings({ ...settings, paypalClientSecret: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
-                                placeholder="Clé secrète PayPal"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPaypalSecret ? 'text' : 'password'}
+                                    value={settings.paypalClientSecret}
+                                    onChange={(e) => setSettings({ ...settings, paypalClientSecret: e.target.value })}
+                                    className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                    placeholder="Clé secrète PayPal"
+                                />
+                                <button type="button" onClick={() => setShowPaypalSecret(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                                    {showPaypalSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -216,13 +224,18 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Clé Secrète (Secret key)</label>
-                            <input
-                                type="password"
-                                value={settings.stripeSecretKey}
-                                onChange={(e) => setSettings({ ...settings, stripeSecretKey: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
-                                placeholder="sk_test_..."
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showStripeSecret ? 'text' : 'password'}
+                                    value={settings.stripeSecretKey}
+                                    onChange={(e) => setSettings({ ...settings, stripeSecretKey: e.target.value })}
+                                    className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
+                                    placeholder="sk_test_..."
+                                />
+                                <button type="button" onClick={() => setShowStripeSecret(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                                    {showStripeSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -280,13 +293,18 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-2">Store Key</label>
-                            <input
-                                type="password"
-                                value={settings.cmiStoreKey}
-                                onChange={(e) => setSettings({ ...settings, cmiStoreKey: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-50 outline-none transition-all"
-                                placeholder="Clé de la boutique CMI"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showCmiKey ? 'text' : 'password'}
+                                    value={settings.cmiStoreKey}
+                                    onChange={(e) => setSettings({ ...settings, cmiStoreKey: e.target.value })}
+                                    className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-50 outline-none transition-all"
+                                    placeholder="Clé de la boutique CMI"
+                                />
+                                <button type="button" onClick={() => setShowCmiKey(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                                    {showCmiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

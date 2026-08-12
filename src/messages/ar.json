@@ -300,7 +300,8 @@
       "Favorites": "مفضلاتي",
       "AdminPanel": "لوحة الإدارة",
       "InfluencerDashboard": "لوحة التحكم"
-    }
+    },
+    "Menu": "القائمة"
   },
   "Footer": {
     "About": "عن ريواية",
@@ -491,7 +492,8 @@
     "FreeShippingAd": "أضف {amount} درهم للحصول على توصيل مجاني.",
     "OrderTotal": "الإجمالي",
     "ProceedToCheckout": "إتمام الشراء",
-    "KeepExploring": "متابعة التسوق"
+    "KeepExploring": "متابعة التسوق",
+    "DeliveryCalculatedNextStep": "يتم حساب التوصيل في الخطوة التالية"
   },
   "Checkout": {
     "BackToSelection": "العودة للقائمة",
@@ -539,7 +541,23 @@
       "AgentContact": "سيتصل بك وكيلنا خلال 24 ساعة للتأكيد.",
       "PrepareAmount": "يرجى تجهيز المبلغ المحدد عند الاستلام.",
       "BackHome": "العودة للرئيسية"
-    }
+    },
+    "BankTransfer": "تحويل بنكي",
+    "TransferAmountToBank": "قم بتحويل المبلغ إلى حسابنا البنكي",
+    "OrderProcessedAfterTransfer": "سيتم معالجة طلبك بعد تأكيد التحويل.",
+    "DeliveryMorocco": "توصيل لجميع أنحاء المغرب",
+    "SecurePaymentTitle": "دفع آمن",
+    "CashOrCard": "نقداً عند الاستلام أو بالبطاقة",
+    "CustomerServiceTitle": "خدمة العملاء",
+    "WhatsAppSupport": "دعم 7/7 عبر الواتساب",
+    "FastShippingTitle": "شحن سريع",
+    "PromoCodePlaceholder": "كود الخصم",
+    "Apply": "تطبيق",
+    "CouponApplied": "تم تطبيق خصم {discount}",
+    "UnknownError": "خطأ غير معروف",
+    "GenericError": "حدث خطأ",
+    "AccountHolder": "المالك",
+    "RibIban": "رقم الحساب IBAN"
   },
   "Review": {
     "SuccessTitle": "شكراً لرأيك!",
@@ -1448,5 +1466,12 @@
         "desc": "توصيل سريع وموثوق مباشرة إلى باب منزلك."
       }
     }
+  },
+  "MobileNav": {
+    "Menu": "القائمة",
+    "Home": "الرئيسية",
+    "Books": "الكتب",
+    "Packs": "الحزم",
+    "Cart": "السلة"
   }
 }

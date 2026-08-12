@@ -300,7 +300,8 @@
       "Favorites": "Mes favoris",
       "AdminPanel": "Panneau Admin",
       "InfluencerDashboard": "Dashboard"
-    }
+    },
+    "Menu": "Menu"
   },
   "Footer": {
     "About": "À propos",
@@ -491,7 +492,8 @@
     "FreeShippingAd": "Ajoutez {amount} MAD pour la livraison gratuite.",
     "OrderTotal": "Total Commande",
     "ProceedToCheckout": "Passer la commande",
-    "KeepExploring": "Continuer vos achats"
+    "KeepExploring": "Continuer vos achats",
+    "DeliveryCalculatedNextStep": "Livraison calculée à l'étape suivante"
   },
   "Checkout": {
     "BackToSelection": "Retour à la sélection",
@@ -539,7 +541,23 @@
       "AgentContact": "Un agent vous contactera sous 24h pour confirmation.",
       "PrepareAmount": "Préparez le montant exact pour la livraison.",
       "BackHome": "Retour à l'accueil"
-    }
+    },
+    "BankTransfer": "Virement Bancaire",
+    "TransferAmountToBank": "Transférez le montant sur notre compte bancaire",
+    "OrderProcessedAfterTransfer": "Votre commande sera traitée après confirmation du virement.",
+    "DeliveryMorocco": "Livraison partout au Maroc",
+    "SecurePaymentTitle": "Paiement Sécurisé",
+    "CashOrCard": "Cash à la livraison ou par carte",
+    "CustomerServiceTitle": "Service Client",
+    "WhatsAppSupport": "Assistance 7j/7 via WhatsApp",
+    "FastShippingTitle": "Expédition Rapide",
+    "PromoCodePlaceholder": "CODE PROMO",
+    "Apply": "Appliquer",
+    "CouponApplied": "Réduction de {discount} appliquée",
+    "UnknownError": "Erreur inconnue",
+    "GenericError": "Une erreur est survenue",
+    "AccountHolder": "Titulaire",
+    "RibIban": "RIB / IBAN"
   },
   "Review": {
     "SuccessTitle": "Merci pour votre avis !",
@@ -1375,5 +1393,12 @@
         "desc": "Livraison rapide et fiable directement à votre porte."
       }
     }
+  },
+  "MobileNav": {
+    "Menu": "Menu",
+    "Home": "Accueil",
+    "Books": "Livres",
+    "Packs": "Packs",
+    "Cart": "Panier"
   }
 }

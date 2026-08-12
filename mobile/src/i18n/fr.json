@@ -153,5 +153,8 @@
   "city_lbl": "Ville",
   "tracking_id": "Suivi colis",
   "articles": "Articles :",
-  "items_count": "articles"
+  "items_count": "articles",
+  "BankTransfer": "Virement Bancaire",
+  "TransferAmountToBank": "Transférez le montant sur notre compte bancaire",
+  "OrderProcessedAfterTransfer": "Votre commande sera traitée après confirmation du virement."
 }

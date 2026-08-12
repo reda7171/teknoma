@@ -276,8 +276,8 @@ export default function CheckoutScreen() {
                 >
                   <View style={[styles.paymentRadio, paymentMethod === 'BANK_TRANSFER' && styles.paymentRadioTeal]} />
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.paymentLabel, { color: colors.text }]}>Virement Bancaire</Text>
-                    <Text style={[styles.paymentDesc, { color: colors.textSecondary }]}>Transférez sur notre compte bancaire</Text>
+                    <Text style={[styles.paymentLabel, { color: colors.text }]}>{t('BankTransfer')}</Text>
+                    <Text style={[styles.paymentDesc, { color: colors.textSecondary }]}>{t('TransferAmountToBank')}</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -290,7 +290,7 @@ export default function CheckoutScreen() {
                         <Text style={{ fontSize: 13, color: colors.text, marginTop: 2 }}>RIB : <Text style={{ fontWeight: '700', fontVariant: ['tabular-nums'] }}>{acc.rib}</Text></Text>
                       </View>
                     ))}
-                    <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 8 }}>Votre commande sera traitée après confirmation du virement.</Text>
+                    <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 8 }}>{t('OrderProcessedAfterTransfer')}</Text>
                   </View>
                 )}
               </>

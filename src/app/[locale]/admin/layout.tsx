@@ -48,7 +48,8 @@ import {
     PanelLeftOpen,
     Globe,
     Headset,
-    Calendar
+    Calendar,
+    Wallet
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -210,6 +211,7 @@ export default function AdminLayout({
             children: [
                 { name: 'Statistiques', href: `/${lang}/admin/analytics`, icon: BarChart3 },
                 { name: 'Revenus & Finances', href: `/${lang}/admin/finance`, icon: Banknote },
+                { name: 'Cashflow', href: `/${lang}/admin/cashflow`, icon: Wallet },
                 { name: 'Trafic & Acquisition', href: `/${lang}/admin/traffic`, icon: TrendingUp },
             ]
         },

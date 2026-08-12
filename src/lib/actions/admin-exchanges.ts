@@ -5,6 +5,99 @@ import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from './auth'
 
 /**
+ * Récupérer tous les livres listés pour l'échange (ExchangeBook)
+ */
+export async function getAllExchangeBooks() {
+    try {
+        await verifyAdmin()
+        const books = await prisma.exchangeBook.findMany({
+            include: {
+                owner: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        email: true,
+                        city: true,
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+        return books
+    } catch (error) {
+        console.error('Erreur getAllExchangeBooks:', error)
+        return []
+    }
+}
+
+/**
+ * Supprimer un livre listé (ExchangeBook)
+ */
+export async function deleteExchangeBook(id: string) {
+    try {
+        await verifyAdmin()
+        await prisma.exchangeBook.delete({ where: { id } })
+        revalidatePath('/admin/exchanges')
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur deleteExchangeBook:', error)
+        return { success: false, error: 'Erreur lors de la suppression' }
+    }
+}
+
+/**
+ * Suppression en masse de livres listés (ExchangeBook)
+ */
+export async function bulkDeleteExchangeBooks(ids: string[]) {
+    try {
+        await verifyAdmin()
+        await prisma.exchangeBook.deleteMany({ where: { id: { in: ids } } })
+        revalidatePath('/admin/exchanges')
+        return { success: true, count: ids.length }
+    } catch (error) {
+        console.error('Erreur bulkDeleteExchangeBooks:', error)
+        return { success: false, error: 'Erreur lors de la suppression en masse' }
+    }
+}
+
+/**
+ * Changer le statut d'un livre listé (ExchangeBook)
+ */
+export async function updateExchangeBookStatus(id: string, status: string) {
+    try {
+        await verifyAdmin()
+        await prisma.exchangeBook.update({
+            where: { id },
+            data: { status: status as any }
+        })
+        revalidatePath('/admin/exchanges')
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur updateExchangeBookStatus:', error)
+        return { success: false, error: 'Erreur lors de la mise à jour' }
+    }
+}
+
+/**
+ * Activer / Désactiver un livre listé (toggle)
+ */
+export async function toggleExchangeBookActive(id: string, currentStatus: string) {
+    const newStatus = currentStatus === 'SUSPENDED' ? 'AVAILABLE' : 'SUSPENDED'
+    try {
+        await verifyAdmin()
+        await prisma.exchangeBook.update({
+            where: { id },
+            data: { status: newStatus as any }
+        })
+        revalidatePath('/admin/exchanges')
+        return { success: true, newStatus }
+    } catch (error) {
+        console.error('Erreur toggleExchangeBookActive:', error)
+        return { success: false, error: 'Erreur lors du changement de visibilité' }
+    }
+}
+
+/**
  * Récupérer tous les échanges pour l'admin
  */
 export async function getAllExchanges() {
