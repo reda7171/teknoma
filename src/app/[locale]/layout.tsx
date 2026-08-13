@@ -236,7 +236,7 @@ export default async function LocaleLayout({
   const adsenseEnabled = await getSetting('adsense_enabled');
 
   return (
-    <html lang={lang} dir={dir} suppressHydrationWarning>
+    <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no">
       <head>
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         <Script
@@ -267,7 +267,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </head>
       <body
         className={`${outfit.className} font-sans antialiased bg-white`}
-        suppressHydrationWarning
+        suppressHydrationWarning={true}
       >
         {/* Google Tag Manager (noscript) */}
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSD75KHT"

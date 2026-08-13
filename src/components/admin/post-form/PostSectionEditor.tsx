@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2 } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2, Copy, ClipboardPaste } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import dynamic from 'next/dynamic'
 import 'react-quill-new/dist/quill.snow.css'
@@ -302,11 +302,15 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
             if (result.success && result.content) {
                 const parts = result.content.split(/^(?=#+ )/m)
                 const parsedSections: Section[] = parts.map((part, index) => {
-                    const match = part.match(/^(#+)\s+(.*)\n([\s\S]*)$/)
-                    if (match) return { id: String(Date.now() + index), title: match[2], content: match[3].trim(), blockType: 'text' as BlockType }
-                    return { id: String(Date.now() + index), title: '', content: part.trim(), blockType: 'text' as BlockType }
-                })
-                setSections(parsedSections)
+                    const match = part.match(/^(#+)\s+([^\r\n]*)(?:[\r\n]+([\s\S]*))?$/)
+                    if (match) {
+                        return { id: String(Date.now() + index), title: match[2].replace(/\*|_/g, '').trim(), content: (match[3] || '').trim(), blockType: 'text' as BlockType }
+                    }
+                    return { id: String(Date.now() + index), title: '', content: part.replace(/^(#+)\s*/, '').trim(), blockType: 'text' as BlockType }
+                }).filter(s => s.title || s.content)
+                if (parsedSections.length > 0) {
+                    setSections(parsedSections)
+                }
             } else alert(result.error || 'Erreur lors de la génération')
         } catch { alert('Erreur lors de la génération') }
         finally { setIsGenerating(false) }
@@ -322,10 +326,54 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
         setSections(newSections)
     }
 
+    const handleCopyPrompt = () => {
+        const currentMarkdown = sections.map(s => s.title ? `## ${s.title}\n\n${s.content}` : s.content).join('\n\n')
+        const prompt = `Voici le sujet de l'article : "${postTitle}".\n\nJe veux que tu m'écrives un article très long et détaillé qui respecte les conditions Google AdSense (haute valeur ajoutée, structuré, contenu original, pas de bourrage de mots-clés).\n\nTa réponse doit être formattée exactement de cette manière :\n1. Titres de section (utilise ## Titre)\n2. Paragraphes : plusieurs paragraphes détaillés sous chaque section.\n\nVoici le contenu actuel si tu veux t'en inspirer pour le développer :\n\n${currentMarkdown}`
+        navigator.clipboard.writeText(prompt)
+        alert('Prompt copié dans le presse-papier ! Vous pouvez le coller dans ChatGPT.')
+    }
+
+    const handlePasteChatGPT = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text || text.trim() === '') {
+                alert('Le presse-papier est vide.')
+                return
+            }
+            
+            const parts = text.split(/^(?=#+ )/m)
+            const parsedSections: Section[] = parts.map((part, index) => {
+                const match = part.match(/^(#+)\s+([^\r\n]*)(?:[\r\n]+([\s\S]*))?$/)
+                if (match) {
+                    return { id: String(Date.now() + index), title: match[2].replace(/\*|_/g, '').trim(), content: (match[3] || '').trim(), blockType: 'text' as BlockType }
+                }
+                return { id: String(Date.now() + index), title: '', content: part.replace(/^(#+)\s*/, '').trim(), blockType: 'text' as BlockType }
+            }).filter(s => s.title || s.content)
+            
+            if (parsedSections.length > 0) {
+                if (confirm('Voulez-vous remplacer le contenu actuel par le texte copié de ChatGPT ?')) {
+                    setSections(parsedSections)
+                }
+            } else {
+                alert("Aucune section valide trouvée dans le presse-papier.")
+            }
+        } catch (err) {
+            alert('Impossible de lire le presse-papier automatiquement. Assurez-vous d\'autoriser l\'accès.')
+        }
+    }
+
     const blockTypes: BlockType[] = ['text', 'image', 'video', 'table', 'quote', 'chart', 'ad', 'poll']
 
     return (
         <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-black/[0.03] space-y-8">
+            {/* Styles globaux de Quill et de la prévisualisation */}
+            <style jsx global>{`
+                .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #f3f4f6; padding: 12px; background: #faf9f8; }
+                .ql-container.ql-snow { border: none; font-size: 16px; }
+                .ql-editor { min-height: 150px; padding: 16px; text-align: justify; }
+                .ql-editor p { text-align: justify; }
+            `}</style>
+            
             {/* En-tête */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -337,6 +385,14 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                         <button type="button" onClick={handleApplyTemplate}
                             className="px-4 py-2 bg-gray-50 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors border border-gray-200 flex items-center gap-2">
                             <BookIcon className="w-4 h-4" /> Template Livre
+                        </button>
+                        <button type="button" onClick={handleCopyPrompt}
+                            className="px-4 py-2 bg-purple-50 text-purple-700 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-200 flex items-center gap-2" title="Copier le prompt pour ChatGPT">
+                            <Copy className="w-4 h-4" /> Prompt ChatGPT
+                        </button>
+                        <button type="button" onClick={handlePasteChatGPT}
+                            className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-200 flex items-center gap-2" title="Coller la réponse structurée de ChatGPT">
+                            <ClipboardPaste className="w-4 h-4" /> Coller Sections
                         </button>
                         <button type="button" onClick={() => handleGenerateContent('ar')} disabled={isGenerating}
                             className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold hover:bg-green-100 transition-colors disabled:opacity-50 border border-green-200 flex items-center gap-2">
@@ -404,7 +460,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         value={section.title}
                                         onChange={(e) => handleSectionChange(section.id, 'title', e.target.value)}
                                         placeholder="Titre de la section (ex: Introduction)"
-                                        className="flex-1 bg-transparent border-none text-lg font-bold text-gray-900 placeholder:text-gray-400 focus:ring-0 p-0"
+                                        className="flex-1 bg-transparent border-none text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 placeholder:text-gray-300 focus:ring-0 p-0"
                                     />
                                     {bType === 'text' && lang !== 'ar' && (
                                         <button type="button" onClick={() => handleRephrase(section.id, section.content)} disabled={isRephrasing === section.id}
@@ -440,26 +496,34 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         />
                                     </div>
                                 ) : (
-                                    // Bloc texte ou image : Quill
+                                    // Bloc texte ou image : Quill (Lazy render for performance)
                                     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden focus-within:ring-2 focus-within:ring-black focus-within:border-transparent transition-all">
-                                        <ReactQuill
-                                            theme="snow"
-                                            value={section.content}
-                                            onChange={(content, delta, source) => {
-                                                if (source === 'user' && content !== section.content) {
-                                                    handleSectionChange(section.id, 'content', content)
-                                                }
-                                            }}
-                                            modules={quillModules}
-                                            formats={quillFormats}
-                                            placeholder="Contenu de la section (Texte riche)..."
-                                            className="w-full text-gray-800"
-                                        />
-                                        <style jsx global>{`
-                                            .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #f3f4f6; padding: 12px; background: #faf9f8; }
-                                            .ql-container.ql-snow { border: none; font-size: 16px; }
-                                            .ql-editor { min-height: 150px; padding: 16px; }
-                                        `}</style>
+                                        {activeSectionId === section.id ? (
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={section.content}
+                                                onChange={(content, delta, source) => {
+                                                    if (source === 'user' && content !== section.content) {
+                                                        handleSectionChange(section.id, 'content', content)
+                                                    }
+                                                }}
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Contenu de la section (Texte riche)..."
+                                                className="w-full text-gray-800"
+                                            />
+                                        ) : (
+                                            <div 
+                                                className="w-full min-h-[150px] p-4 text-gray-800 cursor-pointer hover:bg-gray-50 transition-colors"
+                                                onClick={() => setActiveSectionId(section.id)}
+                                            >
+                                                {section.content ? (
+                                                    <div className="ql-editor" dangerouslySetInnerHTML={{ __html: section.content }} />
+                                                ) : (
+                                                    <span className="text-gray-400">Cliquez pour éditer le contenu de la section...</span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

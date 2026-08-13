@@ -318,7 +318,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[11px] rtl:text-[13px] font-bold uppercase tracking-[0.15em] rtl:tracking-normal text-slate-400 border-t border-slate-200 pt-6 md:pt-8">
                         {(post.authorName || post.author?.fullName) && (
                             <span className="flex items-center gap-2 text-slate-700 bg-slate-100/50 pr-4 rtl:pr-0 rtl:pl-4 rounded-full">
-                                {(!post.authorName && post.author?.image) ? (
+                                {(post.author?.image) ? (
                                     <Image
                                         src={post.author.image}
                                         alt={post.author.fullName || ''}
@@ -465,6 +465,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 </section>
                             )}
 
+                            {/* Sommaire / TOC (au milieu de la page) */}
+                            <div className="not-prose">
+                                <TableOfContents language={post.language} />
+                            </div>
+
                             {(() => {
                                 if (post.books && post.books.length > 0) {
                                     // Diviser par H2 pour injecter le CTA au milieu (avant le 2ème H2 s'il existe)
@@ -544,7 +549,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-4 md:mb-6">{t('AboutAuthor')}</p>
                                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-4 md:gap-6">
                                     <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                                        {(!post.authorName && post.author?.image) ? (
+                                        {(post.author?.image) ? (
                                             <Image
                                                 src={post.author.image}
                                                 alt={post.author.fullName || ''}
@@ -670,9 +675,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                     {/* === Sidebar sticky === */}
                     <aside className="hidden lg:block w-[280px] shrink-0 sticky top-24 space-y-8 h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain pb-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                            
-                            {/* Sommaire / TOC */}
-                            <TableOfContents language={post.language} />
 
                             {/* Partage */}
                             <div className="bg-gray-50 rounded-3xl p-6">

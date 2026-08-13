@@ -31,6 +31,9 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     const [renaming, setRenaming] = useState<string | null>(null)
     const [renameSuccess, setRenameSuccess] = useState<Set<string>>(new Set())
 
+    // New state for Downloading
+    const [isDownloading, setIsDownloading] = useState(false)
+
     // Progress bar
     const [progress, setProgress] = useState<{ current: number; total: number; label: string } | null>(null)
 
@@ -239,6 +242,53 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
         }
     }
 
+    async function downloadAll() {
+        if (!confirm(`Voulez-vous vraiment télécharger ${filtered.length} images ? Votre navigateur pourrait vous demander l'autorisation de télécharger plusieurs fichiers.`)) return;
+        
+        setIsDownloading(true);
+        setMessage('');
+        setProgress({ current: 0, total: filtered.length, label: 'Téléchargement en cours...' });
+        
+        let errorCount = 0;
+        
+        for (let i = 0; i < filtered.length; i++) {
+            const book = filtered[i];
+            try {
+                const res = await fetch(book.image);
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                let filename = book.image.split('/').pop() || `${book.id}.jpg`;
+                if (filename.includes('?')) filename = filename.split('?')[0];
+                a.download = filename;
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (e) {
+                errorCount++;
+                console.error(`Erreur téléchargement ${book.image}`, e);
+            }
+            setProgress({ current: i + 1, total: filtered.length, label: 'Téléchargement en cours...' });
+            
+            // Attendre 250ms pour ne pas bloquer le navigateur
+            await new Promise(r => setTimeout(r, 250));
+        }
+        
+        setTimeout(() => setProgress(null), 2000);
+        if (errorCount > 0) {
+            setMessage(`Téléchargement terminé : ${filtered.length - errorCount} succès, ${errorCount} erreurs.`);
+        } else {
+            setMessage(`Téléchargement terminé : ${filtered.length} images téléchargées !`);
+        }
+        setIsDownloading(false);
+    }
+
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
         
@@ -350,6 +400,15 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                     {renaming === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                     Renommer tout
                 </button>
+                <button
+                    type="button"
+                    onClick={downloadAll}
+                    disabled={isDownloading || filtered.length === 0}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                >
+                    {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    Télécharger tout
+                </button>
             </div>
 
             {/* Liste des livres */}
@@ -361,7 +420,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                     <div key={book.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors flex flex-col h-full">
                         <div className="flex gap-4 items-start">
                             {/* Image */}
-                            <div className="w-16 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
+                            <a href={`/fr/admin/books/${book.id}/edit`} target="_blank" title="Éditer ce produit" className="block w-16 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
                                 <img
                                     src={book.image}
                                     alt={edits[book.id]?.alt || book.title}
@@ -369,12 +428,12 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                     className="w-full h-full object-cover"
                                     onError={e => { (e.target as HTMLImageElement).src = '/placeholder.jpg' }}
                                 />
-                            </div>
+                            </a>
 
                             {/* Fields */}
                             <div className="flex-1 space-y-3">
                                 <div>
-                                    <p className="text-xs font-black text-gray-600 uppercase tracking-widest mb-0.5">{book.title}</p>
+                                    <a href={`/fr/admin/books/${book.id}/edit`} className="text-xs font-black text-blue-600 hover:text-blue-800 hover:underline uppercase tracking-widest mb-0.5 inline-block" title="Éditer ce produit" target="_blank">{book.title}</a>
                                     <p className="text-xs text-gray-400">{book.author}</p>
                                 </div>
 

@@ -28,15 +28,15 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
     const d = initialData
     const [form, setForm] = useState({
         // Identité
-        seo_default_title: d['seo_default_title'] || '',
-        seo_default_description: d['seo_default_description'] || '',
-        seo_default_keywords: d['seo_default_keywords'] || '',
+        seo_default_title: d['seo_default_title'] || 'Riwaya - Votre librairie en ligne au Maroc | Romans et Livres',
+        seo_default_description: d['seo_default_description'] || 'Découvrez Riwaya, la meilleure librairie en ligne au Maroc. Achetez vos livres, romans, et ouvrages de développement personnel avec livraison rapide partout au Maroc et paiement à la livraison (COD).',
+        seo_default_keywords: d['seo_default_keywords'] || 'librairie en ligne maroc, acheter livre maroc, romans maroc, livres de poche, développement personnel, riwaya, livres pas cher',
         seo_canonical_url: d['seo_canonical_url'] || 'https://riwaya.store',
         seo_site_name: d['seo_site_name'] || 'Riwaya',
         seo_author: d['seo_author'] || 'Riwaya Team',
         seo_language: d['seo_language'] || 'fr-MA',
         // Open Graph
-        seo_og_image: d['seo_og_image'] || '',
+        seo_og_image: d['seo_og_image'] || 'https://riwaya.store/og-image.jpg',
         seo_og_image_width: d['seo_og_image_width'] || '1200',
         seo_og_image_height: d['seo_og_image_height'] || '630',
         seo_og_image_alt: d['seo_og_image_alt'] || 'Riwaya - Librairie en ligne au Maroc',
@@ -44,7 +44,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_og_locale: d['seo_og_locale'] || 'fr_MA',
         seo_twitter_handle: d['seo_twitter_handle'] || '@riwaya_ma',
         seo_twitter_card: d['seo_twitter_card'] || 'summary_large_image',
-        seo_twitter_image: d['seo_twitter_image'] || '',
+        seo_twitter_image: d['seo_twitter_image'] || 'https://riwaya.store/twitter-image.jpg',
         // Vérifications
         seo_google_verification: d['seo_google_verification'] || '',
         seo_bing_verification: d['seo_bing_verification'] || '',
@@ -57,10 +57,10 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_viewport: d['seo_viewport'] || 'width=device-width, initial-scale=1',
         seo_theme_color: d['seo_theme_color'] || '#000000',
         // Réseaux sociaux
-        seo_facebook_page: d['seo_facebook_page'] || '',
-        seo_instagram_handle: d['seo_instagram_handle'] || '',
-        seo_youtube_channel: d['seo_youtube_channel'] || '',
-        seo_tiktok_handle: d['seo_tiktok_handle'] || '',
+        seo_facebook_page: d['seo_facebook_page'] || 'https://facebook.com/riwaya.store',
+        seo_instagram_handle: d['seo_instagram_handle'] || '@riwaya.store',
+        seo_youtube_channel: d['seo_youtube_channel'] || 'https://youtube.com/@riwaya_store',
+        seo_tiktok_handle: d['seo_tiktok_handle'] || '@riwaya.store',
         // Analytics
         seo_google_analytics_id: d['seo_google_analytics_id'] || '',
         seo_gtm_id: d['seo_gtm_id'] || '',
@@ -71,8 +71,8 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_price_range: d['seo_price_range'] || '50 MAD - 300 MAD',
         seo_address_city: d['seo_address_city'] || 'Casablanca',
         seo_address_country: d['seo_address_country'] || 'MA',
-        seo_contact_phone: d['seo_contact_phone'] || '',
-        seo_contact_email: d['seo_contact_email'] || '',
+        seo_contact_phone: d['seo_contact_phone'] || '+212 6 00 00 00 00',
+        seo_contact_email: d['seo_contact_email'] || 'contact@riwaya.store',
     })
 
     const [loading, setLoading] = useState(false)

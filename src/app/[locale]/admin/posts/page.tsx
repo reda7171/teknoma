@@ -50,10 +50,11 @@ export default async function AdminPostsPage({
     // Fetch filters data
     const categories = await getPostCategories(contentLang)
     const authorsRaw = await prisma.user.findMany({
-        select: { id: true, fullName: true },
+        where: { role: { in: ['BLOG_MODERATOR', 'ADMIN'] } },
+        select: { id: true, fullName: true, role: true },
         orderBy: { fullName: 'asc' }
     })
-    const authors = authorsRaw.filter(a => a.fullName).map(a => ({ id: a.id, fullName: a.fullName as string }))
+    const authors = authorsRaw.filter(a => a.fullName).map(a => ({ id: a.id, fullName: `${a.fullName} (${a.role})` }))
     
     const books = await prisma.book.findMany({
         select: { id: true, title: true },
@@ -237,7 +238,7 @@ export default async function AdminPostsPage({
             </div>
 
             {/* Posts Table component */}
-            <AdminPostsTable posts={posts} locale={locale} />
+            <AdminPostsTable posts={posts} locale={locale} adminUsers={authors} />
 
             {/* Pagination (Simplified) */}
                 {pagination.totalPages > 1 && (
