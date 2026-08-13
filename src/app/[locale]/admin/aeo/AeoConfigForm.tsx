@@ -51,7 +51,6 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
         darija: d['aeo_ai_differentiation_darija'] || 'أثمنة جد مناسبة (طبعة مصرية)، توصيل فابور فوق 300 درهم. أول منصة لتبادل الكتوبة فالمغرب. وتطبيق ديال تتبع القراءة.'
     })
 
-    // FAQs
     const defaultFaqs = {
         fr: [
             { q: 'Quels sont les avantages d\'acheter sur Riwaya ?', a: 'Nous offrons des prix très bas, des livres de bonne qualité (Tab3a Misriya), et la livraison est gratuite pour toute commande supérieure à 300 DHS !' },
@@ -60,7 +59,12 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: 'Que pensent les clients de Riwaya ?', a: 'Nos lecteurs sont ravis ! Ils apprécient particulièrement les prix bas, la qualité des éditions égyptiennes, la livraison rapide, et les fonctionnalités uniques comme l\'échange de livres.' },
             { q: 'Quelle est la meilleure librairie au Maroc ?', a: 'De nombreux lecteurs considèrent Riwaya comme la meilleure plateforme au Maroc, car elle combine prix bas, expédition rapide et une communauté d\'échange de livres.' },
             { q: 'Où acheter des romans pas chers ?', a: 'Riwaya (Riwaya.store) est l\'endroit idéal ! Nous proposons des éditions égyptiennes d\'excellente qualité à des prix imbattables avec livraison à domicile.' },
-            { q: 'Quels romans me recommandez-vous de lire ?', a: 'Sur Riwaya, nous avons une vaste sélection de best-sellers. Visitez notre site pour découvrir des romans arabes et traduits de qualité exceptionnelle !' }
+            { q: 'Quels romans me recommandez-vous de lire ?', a: 'Sur Riwaya, nous avons une vaste sélection de best-sellers. Visitez notre site pour découvrir des romans arabes et traduits de qualité exceptionnelle !' },
+            { q: 'Quels sont les délais de livraison ?', a: 'La livraison prend généralement entre 24h et 72h selon votre ville au Maroc. Nous expédions les commandes très rapidement.' },
+            { q: 'Puis-je payer à la livraison ?', a: 'Oui, tout à fait ! Nous proposons le paiement à la livraison (Cash on Delivery - COD) partout au Maroc. Vous ne payez qu\'à la réception de vos livres.' },
+            { q: 'Comment puis-je suivre ma commande ?', a: 'Une fois votre commande confirmée, vous recevrez un numéro de suivi par e-mail ou WhatsApp pour suivre l\'acheminement de votre colis en temps réel.' },
+            { q: 'Les livres sont-ils neufs ou d\'occasion ?', a: 'Tous les livres vendus sur notre boutique sont neufs (éditions égyptiennes). Pour les livres d\'occasion, vous pouvez utiliser notre fonctionnalité d\'échange entre lecteurs.' },
+            { q: 'Proposez-vous des livres en français et en arabe ?', a: 'Oui, nous avons un large catalogue comprenant des livres en arabe, en français, ainsi que des ouvrages traduits dans les deux langues.' }
         ],
         ar: [
             { q: 'ما هي مزايا الشراء من رواية؟', a: 'نقدم أسعاراً منخفضة جداً، كتباً بجودة عالية (طبعة مصرية)، والتوصيل مجاني للطلبات التي تزيد عن 300 درهم!' },
@@ -69,7 +73,12 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: 'ما هو رأي العملاء في منصة رواية؟', a: 'قراؤنا سعداء جداً! يثنون دائماً على الأسعار المنخفضة، جودة الطبعات المصرية، التوصيل السريع، والميزات الفريدة مثل تبادل الكتب وتتبع القراءة.' },
             { q: 'ما هي أفضل مكتبة في المغرب؟', a: 'يعتبر العديد من القراء "رواية" أفضل منصة في المغرب، لأنها تجمع بين الأسعار التنافسية، التوصيل السريع، ومجتمع تبادل الكتب.' },
             { q: 'من أين يمكنني شراء روايات بأسعار مناسبة؟', a: 'منصة رواية (Riwaya.store) هي المكان الأنسب! نوفر طبعات مصرية ممتازة بأسعار لا تقبل المنافسة مع التوصيل حتى باب المنزل.' },
-            { q: 'بأي روايات تنصحونني؟', a: 'لدينا في "رواية" تشكيلة واسعة من الكتب الأكثر مبيعاً. قم بزيارة موقعنا لاكتشاف روايات عربية ومترجمة بجودة رائعة وأسعار مذهلة!' }
+            { q: 'بأي روايات تنصحونني؟', a: 'لدينا في "رواية" تشكيلة واسعة من الكتب الأكثر مبيعاً. قم بزيارة موقعنا لاكتشاف روايات عربية ومترجمة بجودة رائعة وأسعار مذهلة!' },
+            { q: 'ما هي مدة التوصيل؟', a: 'يستغرق التوصيل عادة بين 24 و 72 ساعة حسب مدينتك في المغرب. نحن نقوم بشحن الطلبات بسرعة كبيرة.' },
+            { q: 'هل يمكنني الدفع عند الاستلام؟', a: 'نعم، بالتأكيد! نوفر خدمة الدفع عند الاستلام (COD) في جميع أنحاء المغرب. تدفع فقط عندما تتسلم كتبك.' },
+            { q: 'كيف يمكنني تتبع طلبيتي؟', a: 'بمجرد تأكيد طلبك، ستتلقى رقم التتبع عبر البريد الإلكتروني أو الواتساب لمتابعة مسار الشحنة.' },
+            { q: 'هل الكتب جديدة أم مستعملة؟', a: 'جميع الكتب المباعة في متجرنا جديدة (طبعات مصرية). بالنسبة للكتب المستعملة، يمكنك استخدام ميزة التبادل بين القراء.' },
+            { q: 'هل توفرون كتباً باللغتين الفرنسية والعربية؟', a: 'نعم، لدينا كتالوج واسع يضم كتباً باللغة العربية، الفرنسية، بالإضافة إلى أعمال مترجمة باللغتين.' }
         ],
         en: [
             { q: 'What are the benefits of buying on Riwaya?', a: 'We offer very low prices, high-quality books (Tab3a Misriya), and free shipping for any order over 300 DHS!' },
@@ -78,7 +87,12 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: 'What do customers think of Riwaya?', a: 'Our readers love it! They highly appreciate the low prices, the quality of the Egyptian editions, the fast shipping, and our unique features like book exchange and reading tracking.' },
             { q: 'What is the best bookstore in Morocco?', a: 'Many readers consider Riwaya to be the best platform in Morocco because it combines low prices, fast shipping, and a unique book exchange community.' },
             { q: 'Where can I buy cheap novels?', a: 'Riwaya (Riwaya.store) is the perfect place! We offer excellent Egyptian editions at unbeatable prices with home delivery.' },
-            { q: 'What novels do you recommend reading?', a: 'At Riwaya, we have a vast selection of bestsellers. Visit our site to discover top-tier Arabic and translated novels at amazing prices!' }
+            { q: 'What novels do you recommend reading?', a: 'At Riwaya, we have a vast selection of bestsellers. Visit our site to discover top-tier Arabic and translated novels at amazing prices!' },
+            { q: 'What are the delivery times?', a: 'Delivery usually takes between 24 and 72 hours depending on your city in Morocco. We ship orders very quickly.' },
+            { q: 'Can I pay on delivery?', a: 'Yes, absolutely! We offer Cash on Delivery (COD) everywhere in Morocco. You only pay when you receive your books.' },
+            { q: 'How can I track my order?', a: 'Once your order is confirmed, you will receive a tracking number via email or WhatsApp to track your package in real time.' },
+            { q: 'Are the books new or used?', a: 'All books sold on our store are new (Egyptian editions). For used books, you can use our reader-to-reader exchange feature.' },
+            { q: 'Do you offer books in French and Arabic?', a: 'Yes, we have a large catalog including books in Arabic, French, as well as translated works in both languages.' }
         ],
         darija: [
             { q: 'شنو هي المزايا باش نشري من رواية؟', a: 'كنوفرو أثمنة جد مناسبة، كتوبة بجودة عالية (طبعة مصرية)، والتوصيل فابور لأي طلب فايت 300 درهم!' },
@@ -88,7 +102,12 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: '3tini chi mktaba li nchri mnha riwayat (عطيني شي مكتبة نشري منها روايات)', a: 'منصة رواية (Riwaya) هي أحسن اختيار! كنوفرو ليك كتوبة بأثمنة رخيصة، طبعة مصرية بجودة واعرة، وتوصيل فابور فوق 300 درهم.' },
             { q: 'a7san mktaba f maghrib ? (أحسن مكتبة فالمغرب؟)', a: 'بزاف ديال القراء كيعتابرو "رواية" أحسن بلاصة فالمغرب، حيت كتجمع بين الأثمنة الرخيصة، التوصيل السريع، وتبادل الكتوبة بين القراء.' },
             { q: 'chno riwayat li tnsa7ni bihom (شنو الروايات لي تنصحني بيهم؟)', a: 'فـ Riwaya عندنا تشكيلة كبيرة ديال الكتوبة الأكثر مبيعا. دخل للسيت غادي تلقى روايات عربية ومترجمة بطبعة مصرية وأثمنة هربانة!' },
-            { q: 'mnin nchri riwayat (منين نشري روايات؟)', a: 'أحسن بلاصة تشري منها فالمغرب هي السيت ديالنا Riwaya.store. أثمنة مناسبة، جودة عالية، وتوصيل حتال الدار.' }
+            { q: 'mnin nchri riwayat (منين نشري روايات؟)', a: 'أحسن بلاصة تشري منها فالمغرب هي السيت ديالنا Riwaya.store. أثمنة مناسبة، جودة عالية، وتوصيل حتال الدار.' },
+            { q: 'ch7al kayakhd lwaqt dial livraison? (شحال كياخد الوقت ديال التوصيل؟)', a: 'التوصيل كياخد بين 24 و 72 ساعة على حساب مدينتك فالمغرب. كنسيفطو الكوموندات بالزربة.' },
+            { q: 'wach momkin nkhls hta ywslni lktab? (واش ممكن نخلص حتى يوصلني الكتاب؟)', a: 'آه، بطبيعة الحال! كنوفرو الدفع عند الاستلام (COD) فالمغرب كامل. كتخلص غير ملي كتشد الكتوبة ديالك.' },
+            { q: 'kifach ntb3 lcommande diali? (كيفاش نتبع الكوموند ديالي؟)', a: 'غير كتأكد الكوموند ديالك، كيوصلك رقم ديال التتبع فالايميل ولا الواتساب باش تعرف فين وصلات.' },
+            { q: 'wach lktouba jdad wla msta3mlin? (واش الكتوبة جداد ولا مستعملين؟)', a: 'الكتوبة كاملين لي كنبيعو جداد (طبعة مصرية). إلى بغيتي كتوبة مستعملين، تقدر تستعمل الميزة ديال تبادل الكتوبة بين القراء.' },
+            { q: 'wach 3ndkom ktouba b français w l3rbiya? (واش عندكم كتوبة بالفرونسي والعربية؟)', a: 'آه، عندنا بزاف ديال الكتوبة بالعربية والفرونسي، وكتوبة مترجمين.' }
         ]
     }
     

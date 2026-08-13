@@ -31,6 +31,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
     const [renaming, setRenaming] = useState<string | null>(null)
     const [renameSuccess, setRenameSuccess] = useState<Set<string>>(new Set())
 
+    const [isDownloading, setIsDownloading] = useState(false)
+    const [progress, setProgress] = useState<{ current: number; total: number; label: string } | null>(null)
+
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(posts.map(p => [p.id, {
             alt: p.altText || `${p.title} - ${p.authorName || 'Riwaya'} | Blog Riwaya`,
@@ -67,8 +70,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
     async function saveAll() {
         setSaving('all')
         setMessage('')
+        const entries = Object.entries(edits)
+        setProgress({ current: 0, total: entries.length, label: 'Sauvegarde des métadonnées...' })
         try {
-            const entries = Object.entries(edits)
             const chunkSize = 50
 
             for (let i = 0; i < entries.length; i += chunkSize) {
@@ -85,12 +89,14 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                 }
                 
                 if (!res.ok) throw new Error('Erreur API')
+                setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Sauvegarde des métadonnées...' })
             }
             setMessage('Toutes les métadonnées images du blog ont été enregistrées !')
         } catch (e: any) {
             setMessage('Erreur lors de la sauvegarde: ' + e.message)
         } finally {
             setSaving(null)
+            setTimeout(() => setProgress(null), 2000)
         }
     }
 
@@ -141,8 +147,10 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
         setRenaming('all')
         setMessage('')
         let successCount = 0
+        setProgress({ current: 0, total: filtered.length, label: 'Renommage des images...' })
         try {
-            for (const post of filtered) {
+            for (let i = 0; i < filtered.length; i++) {
+                const post = filtered[i]
                 const res = await fetch(`/api/admin/posts/${post.id}/rename-image`, { method: 'POST' })
                 if (res.ok) {
                     const data = await res.json()
@@ -151,20 +159,23 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                         setRenameSuccess(prev => new Set([...prev, post.id]))
                     }
                 }
+                setProgress({ current: i + 1, total: filtered.length, label: 'Renommage des images...' })
             }
             setMessage(`${successCount} images renommées avec succès !`)
         } catch (e) {
             setMessage('Erreur réseau lors du renommage global.')
         } finally {
             setRenaming(null)
+            setTimeout(() => setProgress(null), 2000)
         }
     }
 
     async function injectExifAll() {
         setInjectingExif('all')
         setMessage('')
+        const entries = Object.entries(edits)
+        setProgress({ current: 0, total: entries.length, label: 'Injection des métadonnées EXIF...' })
         try {
-            const entries = Object.entries(edits)
             const chunkSize = 50
             let totalInjected = 0
 
@@ -187,13 +198,63 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                 } else {
                     throw new Error(data.error || `Statut ${res.status}`)
                 }
+                setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Injection des métadonnées EXIF...' })
             }
             setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
         } catch (e: any) {
             setMessage('Erreur réseau lors de l\'injection EXIF globale: ' + e.message)
         } finally {
             setInjectingExif(null)
+            setTimeout(() => setProgress(null), 2000)
         }
+    }
+
+    async function downloadAll() {
+        if (!confirm(`Voulez-vous vraiment télécharger ${filtered.length} images ? Votre navigateur pourrait vous demander l'autorisation de télécharger plusieurs fichiers.`)) return;
+        
+        setIsDownloading(true);
+        setMessage('');
+        setProgress({ current: 0, total: filtered.length, label: 'Téléchargement en cours...' });
+        
+        let errorCount = 0;
+        
+        for (let i = 0; i < filtered.length; i++) {
+            const post = filtered[i];
+            if (!post.coverImage) continue;
+            try {
+                const res = await fetch(post.coverImage);
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                let filename = post.coverImage.split('/').pop() || `${post.id}.jpg`;
+                if (filename.includes('?')) filename = filename.split('?')[0];
+                a.download = filename;
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (e) {
+                errorCount++;
+                console.error(`Erreur téléchargement ${post.coverImage}`, e);
+            }
+            setProgress({ current: i + 1, total: filtered.length, label: 'Téléchargement en cours...' });
+            
+            // Attendre 250ms pour ne pas bloquer le navigateur
+            await new Promise(r => setTimeout(r, 250));
+        }
+        
+        setTimeout(() => setProgress(null), 2000);
+        if (errorCount > 0) {
+            setMessage(`Téléchargement terminé : ${filtered.length - errorCount} succès, ${errorCount} erreurs.`);
+        } else {
+            setMessage(`Téléchargement terminé : ${filtered.length} images téléchargées !`);
+        }
+        setIsDownloading(false);
     }
 
     function autoGenerateAll() {
@@ -233,9 +294,25 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
             </div>
 
             {message && (
-                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm font-medium ${message.includes('effectuée') || message.includes('enregistrées') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    {message.includes('effectuée') || message.includes('enregistrées') ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                <div className={`flex items-center gap-3 p-4 rounded-xl text-sm font-medium ${message.includes('effectuée') || message.includes('enregistrées') || message.includes('téléchargées') || message.includes('terminé') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    {message.includes('effectuée') || message.includes('enregistrées') || message.includes('téléchargées') || message.includes('terminé') ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     {message}
+                </div>
+            )}
+
+            {progress && (
+                <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-black uppercase tracking-widest text-gray-500">{progress.label}</span>
+                        <span className="text-xs font-bold text-gray-900">{Math.round((progress.current / progress.total) * 100)}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-black transition-all duration-300"
+                            style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                        ></div>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 mt-2 text-right">{progress.current} / {progress.total} traités</p>
                 </div>
             )}
 
@@ -285,6 +362,15 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                 >
                     {renaming === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                     Renommer tout
+                </button>
+                <button
+                    type="button"
+                    onClick={downloadAll}
+                    disabled={isDownloading || filtered.length === 0}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                >
+                    {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    Télécharger tout
                 </button>
             </div>
 

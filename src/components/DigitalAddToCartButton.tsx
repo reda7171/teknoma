@@ -40,8 +40,7 @@ export default function DigitalAddToCartButton({ product }: Props) {
     }
     notifyAddToCart(product.title, product.price, 'DIGITAL', currentSessionId).catch(console.error)
 
-    // Ouvrir le panier
-    openCart()
+    // Notification ui (optionnel, if any is added later)
   }
 
   return (

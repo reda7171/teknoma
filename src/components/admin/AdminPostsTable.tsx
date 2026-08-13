@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Edit, FileText, User, ExternalLink, Trash2, Copy, Check } from 'lucide-react'
+import { Edit, FileText, User, ExternalLink, Trash2, Copy, Check, X, Loader2 } from 'lucide-react'
 import DeletePostButton from '@/components/admin/DeletePostButton'
 import ShareToN8nButton from '@/components/admin/ShareToN8nButton'
 import { deletePostsBulk, updatePost } from '@/lib/actions/blog'
@@ -13,15 +13,39 @@ import { ArrowUp, ArrowDown } from 'lucide-react'
 interface AdminPostsTableProps {
     posts: any[]
     locale: string
+    adminUsers?: { id: string; fullName: string }[]
 }
 
-export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps) {
+export default function AdminPostsTable({ posts, locale, adminUsers = [] }: AdminPostsTableProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const pathname = usePathname()
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
+    const [editingAuthorId, setEditingAuthorId] = useState<string | null>(null)
+    const [selectedUserId, setSelectedUserId] = useState<string>('')
+    const [isUpdatingAuthor, setIsUpdatingAuthor] = useState(false)
+
+    const handleUpdateAuthor = async (id: string) => {
+        setIsUpdatingAuthor(true)
+        try {
+            const res = await updatePost(id, { 
+                authorId: selectedUserId || null,
+                authorName: ''
+            })
+            if (res.success) {
+                setEditingAuthorId(null)
+                router.refresh()
+            } else {
+                alert(res.error || 'Erreur')
+            }
+        } catch (error) {
+            alert('Erreur lors de la modification')
+        } finally {
+            setIsUpdatingAuthor(false)
+        }
+    }
 
     const currentSort = searchParams.get('sort') || 'newest'
 
@@ -192,12 +216,49 @@ export default function AdminPostsTable({ posts, locale }: AdminPostsTableProps)
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 uppercase">
-                                                {(post.authorName || post.author?.fullName)?.[0] || <User className="w-4 h-4" />}
+                                        {editingAuthorId === post.id ? (
+                                            <div className="flex items-center gap-2">
+                                                <select
+                                                    value={selectedUserId}
+                                                    onChange={(e) => setSelectedUserId(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') handleUpdateAuthor(post.id)
+                                                        if (e.key === 'Escape') setEditingAuthorId(null)
+                                                    }}
+                                                    className="w-40 text-xs px-2 py-1.5 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                    disabled={isUpdatingAuthor}
+                                                    autoFocus
+                                                >
+                                                    <option value="" disabled>Sélectionner...</option>
+                                                    {adminUsers.map(u => (
+                                                        <option key={u.id} value={u.id}>{u.fullName}</option>
+                                                    ))}
+                                                    <option value="">Sans Auteur</option>
+                                                </select>
+                                                <button onClick={() => handleUpdateAuthor(post.id)} disabled={isUpdatingAuthor} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors">
+                                                    {isUpdatingAuthor ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                                                </button>
+                                                <button onClick={() => setEditingAuthorId(null)} disabled={isUpdatingAuthor} className="text-gray-400 hover:bg-gray-100 p-1 rounded transition-colors">
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
                                             </div>
-                                            <span className="text-gray-600 font-bold text-xs">{post.authorName || post.author?.fullName}</span>
-                                        </div>
+                                        ) : (
+                                            <div 
+                                                className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 -ml-1.5 rounded-lg transition-colors group/author"
+                                                onClick={() => {
+                                                    setEditingAuthorId(post.id)
+                                                    setSelectedUserId(post.author?.id || '')
+                                                }}
+                                                title="Cliquez pour modifier l'auteur"
+                                            >
+                                                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 uppercase flex-shrink-0 group-hover/author:bg-blue-50 group-hover/author:text-blue-600 transition-colors">
+                                                    {(post.authorName || post.author?.fullName)?.[0] || <User className="w-4 h-4" />}
+                                                </div>
+                                                <span className="text-gray-600 font-bold text-xs border-b border-dashed border-gray-300 pb-0.5 group-hover/author:border-blue-400 group-hover/author:text-blue-600 transition-colors">
+                                                    {post.authorName || post.author?.fullName || 'Sans Auteur'}
+                                                </span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-8 py-6">
                                         {post._count?.books > 0 ? (

@@ -261,7 +261,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                     {/* Footer - Style Pixio Summary */}
                     {items.length > 0 && (
-                        <div className="p-4 sm:p-8 bg-white border-t border-gray-50 space-y-6 sm:space-y-8 pb-safe">
+                        <div className="p-4 md:p-8 bg-white border-t border-gray-50 space-y-6 md:space-y-8 pb-24 md:pb-safe">
                             {/* Summary - Total uniquement */}
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center pt-2">

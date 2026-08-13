@@ -22,6 +22,16 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
         setMounted(true)
     }, [])
 
+    const [isCartAnimating, setIsCartAnimating] = useState(false)
+
+    useEffect(() => {
+        if (totalItems > 0 && mounted) {
+            setIsCartAnimating(true)
+            const timer = setTimeout(() => setIsCartAnimating(false), 300)
+            return () => clearTimeout(timer)
+        }
+    }, [totalItems, mounted])
+
     const navItems = [
         { href: '/', icon: Home, label: t('Home') },
         { href: '/books', icon: BookOpen, label: t('Books') },
@@ -29,7 +39,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
     ]
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 pb-safe">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[120] pb-safe">
             <div className="flex items-center justify-around h-16 px-2">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
@@ -52,10 +62,10 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                     onClick={openCart}
                     className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-black relative"
                 >
-                    <div className="relative">
-                        <ShoppingCart className="w-5 h-5 stroke-2" />
+                    <div className={`relative transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12' : ''}`}>
+                        <ShoppingCart className={`w-5 h-5 stroke-2 transition-colors ${isCartAnimating ? 'text-blue-600' : ''}`} />
                         {mounted && totalItems > 0 && (
-                            <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
+                            <span className={`absolute -top-1.5 -right-2 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border-2 border-white transition-all duration-300 ${isCartAnimating ? 'scale-125 bg-blue-600' : 'bg-red-500'}`}>
                                 {totalItems}
                             </span>
                         )}

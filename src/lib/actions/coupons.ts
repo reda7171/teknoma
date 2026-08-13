@@ -1,109 +1,124 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
 import { verifyAdmin } from './auth'
-import { createAuditLog } from './audit'
-
-const CouponSchema = z.object({
-    code: z.string().min(3, 'Le code doit contenir au moins 3 caractères').toUpperCase(),
-    discount: z.number().positive('La remise doit être supérieure à 0'),
-    type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT']),
-    minAmount: z.number().optional().nullable(),
-    isActive: z.boolean().default(true),
-    expiresAt: z.string().optional().nullable(),
-})
+import { revalidatePath } from 'next/cache'
+import { CouponType } from '@prisma/client'
 
 export async function getCoupons() {
-    try {
-        await verifyAdmin()
-        return prisma.coupon.findMany({
-            orderBy: { createdAt: 'desc' }
-        })
-    } catch (error) {
-        return []
+  await verifyAdmin()
+  
+  try {
+    const coupons = await prisma.coupon.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    // Stats for dashboard
+    const total = coupons.length
+    const active = coupons.filter(c => c.isActive && (!c.expiresAt || new Date(c.expiresAt) > new Date())).length
+    const affiliate = coupons.filter(c => c.isAffiliate).length
+    
+    return {
+      success: true,
+      data: coupons,
+      stats: { total, active, affiliate }
     }
+  } catch (error) {
+    console.error('[COUPONS_GET_ERROR]', error)
+    return { success: false, error: 'Impossible de récupérer les coupons' }
+  }
 }
 
-export async function createCoupon(data: z.infer<typeof CouponSchema>) {
-    try {
-        await verifyAdmin()
-        const validated = CouponSchema.parse(data)
-
-        await prisma.coupon.create({
-            data: {
-                ...validated,
-                expiresAt: validated.expiresAt ? new Date(validated.expiresAt) : null,
-            }
-        })
-
-        revalidatePath('/admin/coupons')
-        return { success: true }
-    } catch (error: any) {
-        return { success: false, error: error.message || 'Erreur lors de la création' }
-    }
+export type CouponInput = {
+  code: string
+  discount: number
+  type: CouponType
+  minAmount?: number | null
+  expiresAt?: string | null
 }
 
-export async function updateCoupon(id: string, data: z.infer<typeof CouponSchema>) {
-    try {
-        await verifyAdmin()
-        const validated = CouponSchema.parse(data)
-
-        await prisma.coupon.update({
-            where: { id },
-            data: {
-                ...validated,
-                expiresAt: validated.expiresAt ? new Date(validated.expiresAt) : null,
-            }
-        })
-
-        revalidatePath('/admin/coupons')
-        return { success: true }
-    } catch (error: any) {
-        return { success: false, error: error.message || 'Erreur lors de la modification' }
+export async function createCoupon(data: CouponInput) {
+  await verifyAdmin()
+  
+  try {
+    // Check if code exists
+    const existing = await prisma.coupon.findUnique({ where: { code: data.code.toUpperCase() } })
+    if (existing) {
+      return { success: false, error: 'Ce code promo existe déjà' }
     }
+    
+    await prisma.coupon.create({
+      data: {
+        code: data.code.toUpperCase(),
+        discount: data.discount,
+        type: data.type,
+        minAmount: data.minAmount || null,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
+      }
+    })
+    
+    revalidatePath('/[locale]/admin/coupons', 'page')
+    return { success: true }
+  } catch (error) {
+    console.error('[COUPON_CREATE_ERROR]', error)
+    return { success: false, error: 'Erreur lors de la création du coupon' }
+  }
 }
 
 export async function deleteCoupon(id: string) {
-    try {
-        await verifyAdmin()
-        await prisma.coupon.delete({ where: { id } })
-        revalidatePath('/admin/coupons')
-        return { success: true }
-    } catch (error: any) {
-        return { success: false, error: error.message || 'Erreur lors de la suppression' }
-    }
+  await verifyAdmin()
+  
+  try {
+    await prisma.coupon.delete({ where: { id } })
+    revalidatePath('/[locale]/admin/coupons', 'page')
+    return { success: true }
+  } catch (error) {
+    console.error('[COUPON_DELETE_ERROR]', error)
+    return { success: false, error: 'Erreur lors de la suppression du coupon' }
+  }
+}
+
+export async function toggleCouponStatus(id: string, isActive: boolean) {
+  await verifyAdmin()
+  
+  try {
+    await prisma.coupon.update({
+      where: { id },
+      data: { isActive }
+    })
+    revalidatePath('/[locale]/admin/coupons', 'page')
+    return { success: true }
+  } catch (error) {
+    console.error('[COUPON_TOGGLE_ERROR]', error)
+    return { success: false, error: 'Erreur lors de la mise à jour du statut' }
+  }
 }
 
 export async function validateCoupon(code: string, cartTotal: number) {
-    try {
-        // Publicly accessible for checkout
-        const coupon = await prisma.coupon.findUnique({
-            where: { code: code.toUpperCase(), isActive: true }
-        })
+  try {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: code.toUpperCase() }
+    })
 
-        if (!coupon) {
-            return { success: false, error: 'Code promo invalide' }
-        }
-
-        if (coupon.expiresAt && new Date() > coupon.expiresAt) {
-            return { success: false, error: 'Code promo expiré' }
-        }
-
-        if (coupon.minAmount && cartTotal < coupon.minAmount) {
-            return { success: false, error: `Montant minimum requis: ${coupon.minAmount} MAD` }
-        }
-
-        return {
-            success: true,
-            coupon: {
-                code: coupon.code,
-                discount: coupon.discount,
-                type: coupon.type
-            }
-        }
-    } catch (error) {
-        return { success: false, error: 'Une erreur est survenue' }
+    if (!coupon) {
+      return { success: false, error: 'Code promo invalide' }
     }
+
+    if (!coupon.isActive) {
+      return { success: false, error: 'Ce code promo est inactif' }
+    }
+
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      return { success: false, error: 'Ce code promo a expiré' }
+    }
+
+    if (coupon.minAmount && cartTotal < coupon.minAmount) {
+      return { success: false, error: `Le montant minimum pour ce code est de ${coupon.minAmount} MAD` }
+    }
+
+    return { success: true, coupon }
+  } catch (error) {
+    console.error('[COUPON_VALIDATE_ERROR]', error)
+    return { success: false, error: 'Erreur lors de la validation du coupon' }
+  }
 }

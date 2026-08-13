@@ -142,7 +142,6 @@ export default function BookCard({
                                         price,
                                         image,
                                     })
-                                    openCart()
                                     showNotification(t('AddedToCartSuccess'), 'success')
                                 } catch (error) {
                                     console.error('Failed to add book to cart:', error)

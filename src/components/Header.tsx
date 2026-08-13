@@ -73,6 +73,17 @@ export default function Header({ user, notificationDropdown, navigation, feature
         setMounted(true)
     }, [])
 
+    const [isCartAnimating, setIsCartAnimating] = useState(false)
+
+    // Animation du panier lors de l'ajout
+    useEffect(() => {
+        if (totalItems > 0 && mounted) {
+            setIsCartAnimating(true)
+            const timer = setTimeout(() => setIsCartAnimating(false), 300)
+            return () => clearTimeout(timer)
+        }
+    }, [totalItems, mounted])
+
     // Synchronisation des données utilisateur (Favoris & Liste de lecture)
     useEffect(() => {
         const syncUserData = async () => {
@@ -290,10 +301,10 @@ export default function Header({ user, notificationDropdown, navigation, feature
                         <div className="hidden md:flex items-center gap-4">
                             {mounted && notificationDropdown}
                             <button onClick={openCart} className="relative group" aria-label="Ouvrir le panier">
-                                <div className="w-10 h-10 border-2 border-transparent group-hover:border-black rounded-full flex items-center justify-center transition-all">
-                                    <ShoppingCart className="w-6 h-6 text-gray-900" />
+                                <div className={`w-10 h-10 border-2 border-transparent group-hover:border-black rounded-full flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12 bg-blue-50' : ''}`}>
+                                    <ShoppingCart className={`w-6 h-6 transition-colors ${isCartAnimating ? 'text-blue-600' : 'text-gray-900'}`} />
                                     {mounted && totalItems > 0 && (
-                                        <span className="absolute -top-0.5 -right-0.5 bg-black text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                                        <span className={`absolute -top-0.5 -right-0.5 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-125 bg-blue-600' : 'bg-black'}`}>
                                             {totalItems}
                                         </span>
                                     )}

@@ -162,7 +162,6 @@ export default function PackCard({
                                     booksCount: books.length,
                                     shippingFees,
                                 })
-                                openCart()
                                 showNotification(tCommon('AddedToCartSuccess'), 'success')
                             } catch (error) {
                                 console.error('Failed to add pack to cart:', error)

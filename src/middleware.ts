@@ -26,11 +26,15 @@ export default function middleware(request: NextRequest) {
         const now = Date.now();
         const clientData = rateLimitMap.get(ip);
 
+        // Sécurité OWASP : Limite très stricte pour les mutations (POST/PUT/DELETE) pour éviter le spam/DDoS applicatif
+        const isMutation = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method);
+        const limit = isMutation ? 30 : MAX_REQUESTS_PER_WINDOW; // 30 req/min max pour les mutations
+
         if (!clientData || (now - clientData.lastReset > RATE_LIMIT_WINDOW)) {
             rateLimitMap.set(ip, { count: 1, lastReset: now });
         } else {
-            if (clientData.count >= MAX_REQUESTS_PER_WINDOW) {
-                return new NextResponse('Too Many Requests - Rate limit exceeded', { status: 429 });
+            if (clientData.count >= limit) {
+                return new NextResponse('Too Many Requests - Rate limit exceeded', { status: 429, headers: { 'Retry-After': '60' } });
             }
             clientData.count++;
         }

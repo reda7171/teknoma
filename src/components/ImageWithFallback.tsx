@@ -7,6 +7,7 @@ interface ImageWithFallbackProps {
     alt: string
     className?: string
     fallback?: string
+    priority?: boolean
 }
 
 /**
@@ -18,13 +19,15 @@ export default function ImageWithFallback({
     alt,
     className = 'w-full h-full object-cover',
     fallback = '/book-placeholder.png',
+    priority = false,
 }: ImageWithFallbackProps) {
     return (
         <img
             src={normalizeImage(src || '')}
             alt={alt}
             className={className}
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
+            {...(priority ? { fetchPriority: 'high' } : {})}
             onError={(e) => {
                 ;(e.target as HTMLImageElement).src = fallback
             }}

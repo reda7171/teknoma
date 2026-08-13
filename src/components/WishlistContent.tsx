@@ -43,7 +43,6 @@ export default function WishlistContent({ isAuthenticated = false }: WishlistCon
             type: item.type
         })
         showNotification(t('AddToCart'), 'success')
-        openCart()
     }
 
     const addAllToCart = () => {
@@ -57,7 +56,6 @@ export default function WishlistContent({ isAuthenticated = false }: WishlistCon
             })
         })
         showNotification(t('AddAllToCart'), 'success')
-        openCart()
     }
 
     if (items.length === 0) {

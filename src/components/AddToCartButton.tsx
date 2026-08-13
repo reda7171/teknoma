@@ -90,7 +90,6 @@ export default function AddToCartButton({
                     }
                     notifyAddToCart(product.title, product.price, product.type, currentSessionId).catch(console.error)
 
-                    openCart()
                     showNotification(t('AddedToCartSuccess'), 'success')
                 } catch (error) {
                     console.error('Failed to add to cart:', error)
