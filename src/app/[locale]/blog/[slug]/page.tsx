@@ -646,7 +646,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                                                 <div className="mt-auto pt-4 flex items-center justify-between sm:justify-start gap-4">
                                                     <div>
-                                                        <p className="text-base md:text-lg font-black text-slate-600">{book.price} MAD</p>
+                                                        <p className="text-base md:text-lg font-black text-slate-600">{book.price} درهم</p>
                                                         {book.stock > 0 ? (
                                                             <span className="text-[9px] md:text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{t('InStock')}</span>
                                                         ) : (
@@ -768,7 +768,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-slate-600 transition-colors leading-tight">{displayTitle}</h4>
                                                     <p className="text-[10px] text-slate-500 truncate mt-1">{book.author}</p>
-                                                    <p className="text-xs font-black text-slate-600 mt-1">{book.price} MAD</p>
+                                                    <p className="text-xs font-black text-slate-600 mt-1">{book.price} درهم</p>
                                                 </div>
                                             </Link>
                                             );

@@ -259,7 +259,7 @@ export default function PredictiveSearch() {
                                                     <h4 className="font-black text-gray-900 text-sm truncate group-hover/item:text-black transition-colors leading-none">{displayTitle}</h4>
                                                     <p className="text-[10px] font-bold text-gray-500 italic">{t('By', { author: book.author })}</p>
                                                     <div className="flex items-center justify-between mt-2">
-                                                        <span className="text-sm font-black text-gray-900">{book.price} MAD</span>
+                                                        <span className="text-sm font-black text-gray-900">{book.price} درهم</span>
                                                         <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0 rtl:translate-x-2 rtl:group-hover/item:translate-x-0">
                                                             <ArrowRight className="w-3 h-3 rtl:rotate-180" />
                                                         </div>

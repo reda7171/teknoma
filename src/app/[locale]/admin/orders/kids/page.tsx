@@ -150,7 +150,7 @@ export default async function KidsOrdersPage(props: {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 whitespace-nowrap text-sm font-black text-pink-700">
-                                        {order.total} MAD
+                                        {order.total} درهم
                                     </td>
                                     <td className="px-5 py-4 whitespace-nowrap">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}`}>

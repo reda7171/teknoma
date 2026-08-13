@@ -128,7 +128,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
                             </div>
                             <div>
                                 <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 ml-1">
-                                    <CreditCard className="w-3.5 h-3.5" /> Budget Quotidien (MAD)
+                                    <CreditCard className="w-3.5 h-3.5" /> Budget Quotidien (درهم)
                                 </label>
                                 <input
                                     type="number"

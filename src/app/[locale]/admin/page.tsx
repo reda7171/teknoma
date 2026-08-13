@@ -283,8 +283,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Packs Actifs',         value: stats.packsCount,                        iconName: 'Package',     color: 'amber'  },
         { name: 'Commandes',            value: stats.ordersCount,                       iconName: 'ShoppingCart',color: 'green'  },
         { name: 'En Attente',           value: stats.pendingOrders,                     iconName: 'Clock',       color: 'yellow' },
-        { name: "Chiffre d'affaires",   value: `${stats.totalRevenue.toFixed(0)} MAD`,  iconName: 'TrendingUp',  color: 'orange' },
-        { name: 'Panier Moyen',         value: `${stats.panierMoyen.toFixed(0)} MAD`,   iconName: 'ShoppingBag', color: 'rose'   },
+        { name: "Chiffre d'affaires",   value: `${stats.totalRevenue.toFixed(0)} درهم`,  iconName: 'TrendingUp',  color: 'orange' },
+        { name: 'Panier Moyen',         value: `${stats.panierMoyen.toFixed(0)} درهم`,   iconName: 'ShoppingBag', color: 'rose'   },
         { name: 'Utilisateurs',         value: stats.totalUsers,                        iconName: 'Users',       color: 'blue'   },
         { name: 'Ruptures Stock',       value: stats.outOfStockBooks,                   iconName: 'AlertTriangle',color: 'red'   },
         { name: 'Taux Conversion',      value: `${stats.tauxConversion.toFixed(1)}%`,   iconName: 'BarChart2',   color: 'teal'   },
@@ -292,7 +292,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: "Cmd Aujourd'hui",      value: stats.ordersToday,                       iconName: 'CalendarDays',color: 'teal'   },
         { name: 'En Livraison',         value: stats.shippedOrders,                     iconName: 'Truck',       color: 'cyan'   },
         { name: 'Confirmées',           value: stats.confirmedOrders,                   iconName: 'CheckCircle', color: 'green'  },
-        { name: 'CA du mois',           value: `${stats.revenueMois.toFixed(0)} MAD`,   iconName: 'TrendingUp',  color: 'orange' },
+        { name: 'CA du mois',           value: `${stats.revenueMois.toFixed(0)} درهم`,   iconName: 'TrendingUp',  color: 'orange' },
         { name: 'Retours',              value: stats.returnedCount,                     iconName: 'RefreshCw',   color: 'rose'   },
         { name: 'Stock Total',          value: stats.stockTotal,                        iconName: 'Archive',     color: 'amber'  },
         { name: 'Sans Image',           value: stats.booksNoImage,                      iconName: 'ImageOff',    color: 'red'    },
@@ -488,7 +488,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                                     {order.shippingAddress?.firstName || order.CustomerFirstName}
                                                 </td>
                                                 <td className="px-4 py-3 text-[11px] font-black text-orange-600 tracking-tighter">
-                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} MAD
+                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} درهم
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
                                                     <span className={`inline-flex px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg ${
@@ -565,7 +565,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{book.title}</p>
                                                 <div className="flex items-center gap-3 mt-1">
                                                     <span className="text-[10px] font-black text-blue-600">{book.totalQuantity} VENTES</span>
-                                                    <span className="text-[10px] font-black text-emerald-500">{book.totalRevenue.toFixed(0)} MAD</span>
+                                                    <span className="text-[10px] font-black text-emerald-500">{book.totalRevenue.toFixed(0)} درهم</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -592,7 +592,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{pack.name}</p>
                                                 <div className="flex items-center gap-3 mt-1">
                                                     <span className="text-[10px] font-black text-amber-600">{pack.totalQuantity} VENTES</span>
-                                                    <span className="text-[10px] font-black text-emerald-500">{pack.totalRevenue.toFixed(0)} MAD</span>
+                                                    <span className="text-[10px] font-black text-emerald-500">{pack.totalRevenue.toFixed(0)} درهم</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -618,7 +618,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                             <div className="flex-grow min-w-0">
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{item.title}</p>
                                                 <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-[10px] font-black text-emerald-500">{item.totalRevenue.toFixed(0)} MAD</span>
+                                                    <span className="text-[10px] font-black text-emerald-500">{item.totalRevenue.toFixed(0)} درهم</span>
                                                     <span className="text-[10px] font-black text-gray-500">{item.totalQuantity} VENTES</span>
                                                 </div>
                                             </div>
@@ -646,7 +646,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                             <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{order.city}</div>
                                         </td>
                                         <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap text-sm font-black text-blue-600 tracking-tighter">
-                                            {order.total.toLocaleString()} MAD
+                                            {order.total.toLocaleString()} درهم
                                         </td>
                                         <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap text-right">
                                             <span className={`px-4 py-1 inline-flex text-[9px] font-black rounded-full uppercase tracking-widest shadow-sm ${statusColors[order.status as keyof typeof statusColors]}`}>

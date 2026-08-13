@@ -51,7 +51,7 @@ export default function POSProductCard({ product, type, onAdd }: POSProductCardP
       <div className="flex-1 flex flex-col justify-between">
         <h3 className="font-black text-black text-[11px] line-clamp-2 uppercase tracking-tight mb-2 leading-tight h-[2.5em]">{name}</h3>
         <div className="flex items-center justify-between mt-auto">
-          <span className="text-blue-600 font-black text-xs tracking-tighter">{price.toFixed(0)} MAD</span>
+          <span className="text-blue-600 font-black text-xs tracking-tighter">{price.toFixed(0)} درهم</span>
           <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
             <Plus className="w-3 h-3" />
           </div>

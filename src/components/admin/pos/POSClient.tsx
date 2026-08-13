@@ -9,7 +9,8 @@ import BarcodeScanner from './BarcodeScanner';
 import { createPOSOrder, getCustomerByPhone } from '@/lib/actions/pos';
 import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
-import { printReceipt } from '@/lib/utils/printReceipt';
+import { printReceipt, printZReport } from '@/lib/utils/printReceipt';
+import { getCurrentPosSession, openPosSession, closePosSession } from '@/lib/actions/pos-sessions';
 
 const InlineNumpad = ({ value, onChange, onClose, title }: { value: number | '', onChange: (val: number | '') => void, onClose: () => void, title: string }) => {
   const [localVal, setLocalVal] = useState(value === 0 ? '' : value.toString());
@@ -113,6 +114,7 @@ interface POSClientProps {
   defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS';
   allowOutOfStock?: boolean;
   requireCustomer?: boolean;
+  enableSessions?: boolean;
   shippingCompanies?: { id: string, name: string }[];
 }
 
@@ -129,6 +131,7 @@ export default function POSClient({
   defaultTab = 'ALL',
   allowOutOfStock = false,
   requireCustomer = true,
+  enableSessions = false,
   shippingCompanies = []
 }: POSClientProps) {
   const params = useParams();
@@ -171,6 +174,14 @@ export default function POSClient({
   const [showCities, setShowCities] = useState(false);
   const [showCityPopup, setShowCityPopup] = useState(false);
   const [cityPopupResult, setCityPopupResult] = useState(false);
+
+  // POS Session States
+  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [showOpenSession, setShowOpenSession] = useState(false);
+  const [showCloseSession, setShowCloseSession] = useState(false);
+  const [startingFloat, setStartingFloat] = useState<number | ''>('');
+  const [actualCash, setActualCash] = useState<number | ''>('');
+  const [sessionLoading, setSessionLoading] = useState(true);
 
   const normalizeString = (str: string) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[\s-]/g, "");
@@ -256,12 +267,24 @@ export default function POSClient({
       if (cachedPacks) setLocalPacks(JSON.parse(cachedPacks));
       if (cachedAccessories) setLocalAccessories(JSON.parse(cachedAccessories));
     }
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [books, packs, accessories]);
+    
+    // POS Session check
+    if (enableSessions) {
+      getCurrentPosSession().then(session => {
+        if (session) {
+          setCurrentSession(session);
+        } else {
+          setShowOpenSession(true);
+        }
+        setSessionLoading(false);
+      }).catch(err => {
+        console.error("Failed to load session", err);
+        setSessionLoading(false);
+      });
+    } else {
+      setSessionLoading(false);
+    }
+  }, [books, packs, accessories, enableSessions]);
 
   // Autofill customer data when phone number reaches 10 digits
   useEffect(() => {
@@ -458,7 +481,8 @@ export default function POSClient({
       total: finalTotal,
       discount: Number(discount),
       shippingFees: Number(shippingFees),
-      shippingCompany: selectedShippingCompany
+      shippingCompany: selectedShippingCompany,
+      posSessionId: currentSession?.id
     };
 
     const fallbackOffline = (msg: string) => {
@@ -530,14 +554,137 @@ export default function POSClient({
     }
   };
 
+  const handleOpenSession = async () => {
+    if (startingFloat === '') {
+      showNotification('Veuillez entrer un fonds de tiroir', 'error');
+      return;
+    }
+    try {
+      const session = await openPosSession(Number(startingFloat));
+      setCurrentSession(session);
+      setShowOpenSession(false);
+      showNotification('Caisse ouverte avec succès', 'success');
+    } catch (err: any) {
+      showNotification(err.message || 'Erreur lors de l\'ouverture de caisse', 'error');
+    }
+  };
+
+  const handleCloseSession = async () => {
+    if (actualCash === '' || !currentSession) {
+      showNotification('Veuillez entrer le montant compté', 'error');
+      return;
+    }
+    try {
+      const closedSession = await closePosSession(currentSession.id, Number(actualCash));
+      
+      // Print Z-Report
+      printZReport({
+        sessionId: closedSession.id,
+        openedAt: closedSession.openedAt.toISOString(),
+        closedAt: closedSession.closedAt ? closedSession.closedAt.toISOString() : new Date().toISOString(),
+        startingFloat: closedSession.startingFloat,
+        expectedCash: closedSession.expectedCash || 0,
+        actualCash: closedSession.actualCash || 0,
+        difference: closedSession.difference || 0
+      });
+
+      setCurrentSession(null);
+      setShowCloseSession(false);
+      setShowOpenSession(true);
+      setStartingFloat('');
+      setActualCash('');
+      showNotification('Caisse clôturée avec succès', 'success');
+    } catch (err: any) {
+      showNotification(err.message || 'Erreur lors de la clôture', 'error');
+    }
+  };
+
   const [showMobileCart, setShowMobileCart] = useState(false);
 
+  if (enableSessions && !sessionLoading && !currentSession && showOpenSession) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-gray-100">
+          <h2 className="text-2xl font-black text-black mb-2">Ouverture de caisse</h2>
+          <p className="text-sm text-gray-500 mb-6">Veuillez indiquer le fonds de tiroir initial (espèces) pour commencer la journée.</p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Fonds de tiroir (درهم)</label>
+              <input
+                type="number"
+                min="0"
+                value={startingFloat}
+                onChange={(e) => setStartingFloat(e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl px-4 font-black text-xl text-black focus:border-black outline-none transition-all"
+                placeholder="Ex: 500"
+              />
+            </div>
+            
+            <button
+              onClick={handleOpenSession}
+              disabled={startingFloat === ''}
+              className="w-full h-14 bg-black text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-900 active:scale-95 transition-all shadow-xl shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Ouvrir la caisse
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div id="pos-container" className="flex flex-col lg:flex-row h-full gap-4 relative bg-gray-50/50 p-2 lg:p-4 overflow-hidden">
+    <div id="pos-container" className={`flex flex-col lg:flex-row h-screen bg-gray-50/50 relative overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
       {isOffline && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[100] bg-red-600 text-white px-6 py-3 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center gap-3 shadow-2xl shadow-red-600/30">
           <WifiOff className="w-4 h-4 animate-pulse" />
           Connexion perdue. Mode hors-ligne activé.
+        </div>
+      )}
+
+      {/* Close Session Modal */}
+      {showCloseSession && currentSession && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100">
+            <h2 className="text-2xl font-black text-black mb-2">Clôture de caisse</h2>
+            <p className="text-sm text-gray-500 mb-6">Comptez le tiroir et indiquez le montant réel en espèces.</p>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-2xl flex justify-between items-center">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Fonds initial</span>
+                <span className="font-black">{currentSession.startingFloat} درهم</span>
+              </div>
+              
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Espèces comptées (درهم)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={actualCash}
+                  onChange={(e) => setActualCash(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl px-4 font-black text-xl text-black focus:border-black outline-none transition-all"
+                  placeholder="Ex: 1500"
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-4 mt-4 border-t border-gray-100">
+                <button
+                  onClick={() => setShowCloseSession(false)}
+                  className="flex-1 h-14 bg-gray-100 text-gray-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleCloseSession}
+                  disabled={actualCash === ''}
+                  className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-900 active:scale-95 transition-all shadow-xl shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Valider
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -554,6 +701,16 @@ export default function POSClient({
             <div className="flex items-center justify-between gap-6 w-full md:w-auto">
 
               <div className="flex items-center gap-2 md:gap-3">
+                <button onClick={() => setShowScanner(true)} className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 font-bold text-[10px] sm:text-xs transition-colors">
+                  <Camera className="w-4 h-4" />
+                  <span className="hidden sm:inline">Scanner</span>
+                </button>
+                {enableSessions && currentSession && (
+                  <button onClick={() => setShowCloseSession(true)} className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-100 font-bold text-[10px] sm:text-xs transition-colors">
+                    <FileText className="w-4 h-4" />
+                    <span className="hidden sm:inline">Clôturer la caisse</span>
+                  </button>
+                )}
                 <Link href={`/${locale}/admin/orders`} className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-2xl border border-gray-100 hover:bg-gray-100 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm">
                   <ListOrdered className="w-4 h-4" />
                   Commandes

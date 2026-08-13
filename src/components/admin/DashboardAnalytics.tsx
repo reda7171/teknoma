@@ -51,7 +51,7 @@ export default function DashboardAnalytics() {
                             </h3>
                             {data.topProducts[0] && (
                                 <p className="text-[11px] font-black text-blue-600">
-                                    {data.topProducts[0].revenue.toLocaleString('fr-FR')} MAD
+                                    {data.topProducts[0].revenue.toLocaleString('fr-FR')} درهم
                                 </p>
                             )}
                         </div>
@@ -103,7 +103,7 @@ export default function DashboardAnalytics() {
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
                                 <Tooltip
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                                    formatter={(value: any) => [`${value} MAD`, 'Total']}
+                                    formatter={(value: any) => [`${value} درهم`, 'Total']}
                                 />
                                 <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
                             </LineChart>
@@ -135,7 +135,7 @@ export default function DashboardAnalytics() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                                    formatter={(value: any) => [`${value} MAD`, 'Revenu']}
+                                    formatter={(value: any) => [`${value} درهم`, 'Revenu']}
                                 />
                                 <Legend />
                             </PieChart>
@@ -157,7 +157,7 @@ export default function DashboardAnalytics() {
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
                                 <Tooltip
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                                    formatter={(value: any) => [`${value.toLocaleString('fr-FR')} MAD`, 'Revenu']}
+                                    formatter={(value: any) => [`${value.toLocaleString('fr-FR')} درهم`, 'Revenu']}
                                 />
                                 <Legend />
                                 {data.cities.map((city: string, index: number) => (
@@ -217,7 +217,7 @@ export default function DashboardAnalytics() {
                                     <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{city.orders} commandes</span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-blue-600">{city.average.toFixed(0)} MAD</p>
+                                    <p className="text-sm font-black text-blue-600">{city.average.toFixed(0)} درهم</p>
                                     <div className="w-16 h-1.5 bg-gray-200 rounded-full mt-1 overflow-hidden">
                                         <div
                                             className="h-full bg-blue-600 rounded-full"
@@ -288,7 +288,7 @@ export default function DashboardAnalytics() {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-black text-gray-900">{product.sales} ventes</p>
-                                    <p className="text-[11px] font-bold text-blue-600">{product.revenue.toLocaleString('fr-FR')} MAD</p>
+                                    <p className="text-[11px] font-bold text-blue-600">{product.revenue.toLocaleString('fr-FR')} درهم</p>
                                 </div>
                             </div>
                         ))}

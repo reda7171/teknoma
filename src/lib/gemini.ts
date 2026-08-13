@@ -56,7 +56,7 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
           select: { id: true, fullName: true, total: true, status: true, createdAt: true, city: true }
         });
         if (order) {
-          context = `CONTEXTE COMMANDE : L'utilisateur consulte la commande #${order.id}. Client: ${order.fullName}, Statut: ${order.status}, Ville: ${order.city}, Total: ${order.total} MAD. Date: ${order.createdAt.toLocaleDateString()}.`;
+          context = `CONTEXTE COMMANDE : L'utilisateur consulte la commande #${order.id}. Client: ${order.fullName}, Statut: ${order.status}, Ville: ${order.city}, Total: ${order.total} درهم. Date: ${order.createdAt.toLocaleDateString()}.`;
           dataType = 'order';
           data = order;
         } else {
@@ -78,7 +78,7 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
       });
 
       if (books.length > 0) {
-        context = `CONTEXTE LIVRES TROUVÉS :\n${books.map(b => `- ${b.title} par ${b.author} (${b.price} MAD). ID: ${b.id}`).join("\n")}`;
+        context = `CONTEXTE LIVRES TROUVÉS :\n${books.map(b => `- ${b.title} par ${b.author} (${b.price} درهم). ID: ${b.id}`).join("\n")}`;
         dataType = 'books';
         data = books;
       }

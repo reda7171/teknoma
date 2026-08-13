@@ -94,7 +94,7 @@ export default async function EditAuthorPage({
                                         </h3>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className="text-[10px] font-bold text-pixio-yellow uppercase tracking-widest">
-                                                {book.price.toFixed(2)} MAD
+                                                {book.price.toFixed(2)} درهم
                                             </span>
                                         </div>
                                     </div>

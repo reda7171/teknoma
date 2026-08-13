@@ -220,7 +220,7 @@ export default function WishlistContent({ isAuthenticated = false }: WishlistCon
                                     <div className="mt-auto pt-8 flex items-center justify-between">
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-3xl font-black text-black tracking-tighter">{item.price || 0}</span>
-                                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">MAD</span>
+                                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">درهم</span>
                                         </div>
 
                                         {(item.id && (item.type === 'BOOK' || item.type === 'PACK') && item.price > 0) && (

@@ -135,7 +135,7 @@ export default function NewSellerBookPage() {
                     <div className="absolute right-0 top-0 w-64 h-64 bg-pixio-yellow/10 blur-3xl rounded-full" />
                     <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Prix de vente (MAD) *</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-2">Prix de vente (درهم) *</label>
                             <div className="relative">
                                 <input 
                                     name="price" 
@@ -145,7 +145,7 @@ export default function NewSellerBookPage() {
                                     className="w-full px-8 py-6 bg-white/10 border-2 border-white/5 rounded-[2rem] text-3xl font-black text-white focus:bg-white/20 focus:border-pixio-yellow outline-none transition-all placeholder-white/10"
                                     placeholder="0.00"
                                 />
-                                <span className="absolute right-8 top-1/2 -translate-y-1/2 font-black text-pixio-yellow">MAD</span>
+                                <span className="absolute right-8 top-1/2 -translate-y-1/2 font-black text-pixio-yellow">درهم</span>
                             </div>
                         </div>
                         <div>

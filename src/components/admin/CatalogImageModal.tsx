@@ -409,7 +409,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                                 )}
                                                 <p dir="auto" className="font-black text-center mb-4 leading-tight" style={{ color: config.textColor, fontSize: config.format === 'post' ? '24px' : '30px' }}>{book.title}</p>
                                                 {config.showPrice && (
-                                                    <div className="px-8 py-2 rounded-full font-black text-white" style={{ backgroundColor: config.primaryColor, fontSize: config.format === 'post' ? '20px' : '24px' }}>{book.price} MAD</div>
+                                                    <div className="px-8 py-2 rounded-full font-black text-white" style={{ backgroundColor: config.primaryColor, fontSize: config.format === 'post' ? '20px' : '24px' }}>{book.price} درهم</div>
                                                 )}
                                             </div>
                                         )})}
@@ -537,7 +537,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                                         boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
                                                         whiteSpace: 'nowrap'
                                                     }}>
-                                                        {book.price} MAD
+                                                        {book.price} درهم
                                                     </div>
                                                 )}
                                             </div>

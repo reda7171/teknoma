@@ -88,7 +88,7 @@ export default function BookReplacementModal({ isOpen, onClose, originalBookId, 
                                         <h3 className="font-black text-sm text-black line-clamp-2 leading-tight mb-1">{book.title}</h3>
                                         <p className="text-xs text-gray-400 font-bold mb-3">{book.author}</p>
                                         <div className="mt-auto flex items-center justify-between">
-                                            <span className="text-xs font-black bg-gray-100 px-2 py-1 rounded-md">{book.price} MAD</span>
+                                            <span className="text-xs font-black bg-gray-100 px-2 py-1 rounded-md">{book.price} درهم</span>
                                         </div>
                                     </div>
                                     <div className="absolute top-6 right-6 w-8 h-8 bg-black rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all">

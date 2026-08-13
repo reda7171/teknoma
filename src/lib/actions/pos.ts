@@ -34,6 +34,7 @@ export async function createPOSOrder(data: {
   discount: number;
   shippingFees: number;
   shippingCompany?: string;
+  posSessionId?: string;
 }) {
   try {
 
@@ -73,6 +74,7 @@ export async function createPOSOrder(data: {
         discount: data.discount,
         shippingFees: data.shippingFees,
         shippingCompany: data.shippingCompany,
+        posSessionId: data.posSessionId,
         status: OrderStatus.CONFIRMED,
         paymentMethod: 'CASH',
         items: {

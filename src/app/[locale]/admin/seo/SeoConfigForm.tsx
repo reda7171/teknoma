@@ -68,7 +68,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_clarity_id: d['seo_clarity_id'] || '',
         // Avancé
         seo_schema_org_type: d['seo_schema_org_type'] || 'OnlineStore',
-        seo_price_range: d['seo_price_range'] || '50 MAD - 300 MAD',
+        seo_price_range: d['seo_price_range'] || '50 درهم - 300 درهم',
         seo_address_city: d['seo_address_city'] || 'Casablanca',
         seo_address_country: d['seo_address_country'] || 'MA',
         seo_contact_phone: d['seo_contact_phone'] || '+212 6 00 00 00 00',
@@ -526,7 +526,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                         <option value="LocalBusiness">LocalBusiness</option>
                                     </select>
                                 </div>
-                                {field('Fourchette prix', 'seo_price_range', '50 - 300 MAD')}
+                                {field('Fourchette prix', 'seo_price_range', '50 - 300 درهم')}
                                 {field('Ville', 'seo_address_city', 'Casablanca')}
                                 {field('Pays', 'seo_address_country', 'MA')}
                                 {field('Téléphone', 'seo_contact_phone', '+212...', 'tel')}

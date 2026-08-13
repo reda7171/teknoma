@@ -95,10 +95,10 @@ export function CouponsClient({ initialData, stats }: { initialData: any[], stat
                       {c.isAffiliate && <span className="text-[8px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase mt-1 inline-block">Affilié: {c.affiliateName}</span>}
                     </td>
                     <td className="px-6 py-4 text-center font-black text-emerald-600">
-                      {c.type === 'PERCENTAGE' ? `-${c.discount}%` : `-${c.discount} MAD`}
+                      {c.type === 'PERCENTAGE' ? `-${c.discount}%` : `-${c.discount} درهم`}
                     </td>
                     <td className="px-6 py-4 text-center text-gray-500 font-bold">
-                      {c.minAmount ? `${c.minAmount} MAD` : '-'}
+                      {c.minAmount ? `${c.minAmount} درهم` : '-'}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {c.expiresAt ? (
@@ -199,7 +199,7 @@ function CreateCouponModal({ onClose, onSuccess }: { onClose: () => void, onSucc
                 onChange={e => setForm({ ...form, type: e.target.value as any })}
               >
                 <option value="PERCENTAGE">Pourcentage (%)</option>
-                <option value="FIXED_AMOUNT">Montant fixe (MAD)</option>
+                <option value="FIXED_AMOUNT">Montant fixe (درهم)</option>
               </select>
             </div>
             <div>
@@ -219,7 +219,7 @@ function CreateCouponModal({ onClose, onSuccess }: { onClose: () => void, onSucc
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Minimum d'achat (Optionnel)</label>
             <input
               type="number"
-              placeholder="0 MAD"
+              placeholder="0 درهم"
               className="w-full mt-1 px-4 py-3 bg-gray-50 border-none rounded-2xl font-bold text-sm focus:ring-2 focus:ring-black transition-all"
               value={form.minAmount || ''}
               onChange={e => setForm({ ...form, minAmount: e.target.value ? parseFloat(e.target.value) : undefined })}

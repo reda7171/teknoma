@@ -261,7 +261,7 @@ export default function OrdersTableClient({
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
-                                        {order.total} MAD
+                                        {order.total} درهم
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {(() => {
@@ -269,7 +269,7 @@ export default function OrdersTableClient({
                                             const netProfit = order.total - itemCosts - 2.65;
                                             return (
                                                 <span className={`text-sm font-black px-2 py-1 rounded-lg ${netProfit >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                                    {netProfit > 0 ? '+' : ''}{netProfit.toFixed(2)} MAD
+                                                    {netProfit > 0 ? '+' : ''}{netProfit.toFixed(2)} درهم
                                                 </span>
                                             );
                                         })()}
@@ -401,7 +401,7 @@ export default function OrdersTableClient({
                                     <option value="">-- Ne pas lier à une facture --</option>
                                     {deliveryInvoices.map(inv => (
                                         <option key={inv.id} value={inv.id}>
-                                            {inv.title} {inv.description ? `- ${inv.description} ` : ''}- {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} MAD)
+                                            {inv.title} {inv.description ? `- ${inv.description} ` : ''}- {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} درهم)
                                         </option>
                                     ))}
                                 </select>

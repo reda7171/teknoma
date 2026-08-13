@@ -81,7 +81,7 @@ export async function generateMetadata({
         ]
     } else if (locale === 'en') {
         siteTitle = `${localizedTitle} - ${book.author} | Riwaya Library`
-        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Buy "${localizedTitle}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} MAD. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Buy "${localizedTitle}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} درهم. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
         keywords = [
             localizedTitle,
             book.author,
@@ -96,7 +96,7 @@ export async function generateMetadata({
         ]
     } else {
         siteTitle = `${localizedTitle} - ${book.author} | Librairie Riwaya`
-        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Achetez "${localizedTitle}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} MAD. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Achetez "${localizedTitle}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} درهم. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
         keywords = [
             localizedTitle,
             book.author,
@@ -548,7 +548,7 @@ export default async function BookDetailPage({
                                 <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-black/5">
                                     <div className="flex items-baseline gap-3 mb-3 md:mb-4">
                                         <span className="text-4xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
-                                        <span className="text-xl font-black text-gray-300 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                        <span className="text-xl font-black text-gray-300 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'درهم'}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 className="w-4 h-4 text-black" />
@@ -633,7 +633,7 @@ export default async function BookDetailPage({
                                                     <div className="flex-1 min-w-0">
                                                         <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{fbDisplayTitle}</span>
                                                         <p className="text-[9px] font-bold text-gray-400 mt-0.5 sm:mt-1 truncate">{fbBook.author}</p>
-                                                        <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} {locale === 'ar' ? 'درهم' : 'MAD'}</p>
+                                                        <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} {locale === 'ar' ? 'درهم' : 'درهم'}</p>
                                                     </div>
                                                 </Link>
                                                 <AddToCartButton

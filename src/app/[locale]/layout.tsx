@@ -313,7 +313,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               alternateName: ['Riwaya', 'رواية', 'مكتبة رواية'],
               image: `${siteUrl}/og-image.jpg`,
               telephone: whatsappPhone || '+212 702-220575',
-              priceRange: '50 MAD - 500 MAD',
+              priceRange: '50 درهم - 500 درهم',
               description: 'Riwaya est la meilleure librairie en ligne au Maroc (a7san librairie en ligne f maghrib). Nous offrons la plus grande sélection de romans, de livres de développement personnel, et d\'affaires avec livraison (COD) partout au Maroc comme Casablanca et Rabat. مكتبة رواية هي أحسن وأفضل مكتبة إلكترونية في المغرب.',
               url: siteUrl,
               logo: { '@type': 'ImageObject', url: `${siteUrl}/logo.png`, width: 200, height: 60 },
@@ -333,7 +333,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 ]
               },
               paymentAccepted: 'Cash',
-              currenciesAccepted: 'MAD',
+              currenciesAccepted: 'درهم',
               openingHours: 'Mo-Su 08:00-22:00',
               sameAs: [
                 facebook || 'https://facebook.com/riwaya.book',

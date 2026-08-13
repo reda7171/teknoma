@@ -7,7 +7,7 @@ import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
-import { notifyRemoveFromCart, notifyClearCart } from '@/lib/actions/cart-notify'
+import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
 
@@ -57,8 +57,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             console.error('Erreur notification', error)
         }
     }
-    
     const finalTotal = totalPrice
+
+    const handleCheckoutClick = () => {
+        const value = getTotalPrice()
+        const count = getTotalItems()
+        notifyCheckoutInitiated(value, count, sessionId || undefined).catch(console.error)
+        onClose()
+    }
 
     // Swipe handlers
     const minSwipeDistance = 50 
@@ -201,7 +207,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                 </div>
                                                 <div className="flex items-center gap-4 mt-3">
                                                     <p className="text-sm font-black text-black">
-                                                        {item.price} <span className="text-[10px] text-gray-500">MAD</span>
+                                                        {item.price} <span className="text-[10px] text-gray-500">درهم</span>
                                                     </p>
                                                     {item.booksCount && (
                                                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 py-0.5 bg-gray-50 rounded-full">
@@ -266,7 +272,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center pt-2">
                                     <span className="text-[13px] font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
-                                    <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} MAD</span>
+                                    <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} درهم</span>
                                 </div>
                                 <div className="text-center">
                                     <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>
@@ -277,7 +283,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <div className="space-y-4">
                                 <Link
                                     href="/checkout"
-                                    onClick={onClose}
+                                    onClick={handleCheckoutClick}
                                     className="flex items-center justify-center gap-3 w-full py-4 sm:py-6 min-h-[56px] bg-black text-white font-black text-xs uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20"
                                 >
                                     <span>{t('ProceedToCheckout')}</span>

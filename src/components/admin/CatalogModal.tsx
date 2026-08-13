@@ -337,7 +337,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                             <p className="text-[9px] text-gray-400 line-clamp-3 leading-relaxed italic">{book.description || "Sélectionné par nos soins."}</p>
                                         </div>
                                         <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-auto">
-                                            {config.showPrice && <span className="text-base font-black text-gray-900">{book.price} MAD</span>}
+                                            {config.showPrice && <span className="text-base font-black text-gray-900">{book.price} درهم</span>}
                                             {book.category && <span className="text-[8px] font-bold text-gray-400 uppercase border border-gray-200 px-2 py-0.5 rounded truncate">{book.category}</span>}
                                         </div>
                                     </div>

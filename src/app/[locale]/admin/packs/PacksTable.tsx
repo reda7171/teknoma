@@ -283,10 +283,10 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {pack.originalPrice ? <span className="line-through text-gray-400 mr-2">{pack.originalPrice} MAD</span> : '-'}
+                                {pack.originalPrice ? <span className="line-through text-gray-400 mr-2">{pack.originalPrice} درهم</span> : '-'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-blue-600">
-                                {pack.price} MAD
+                                {pack.price} درهم
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <button

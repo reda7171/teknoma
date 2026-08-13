@@ -87,7 +87,7 @@ export default function CouponsTable({ coupons }: { coupons: any[] }) {
                                                 className="px-4 py-2 border rounded-xl text-xs font-black outline-none focus:border-black"
                                             >
                                                 <option value="PERCENTAGE">%</option>
-                                                <option value="FIXED_AMOUNT">MAD</option>
+                                                <option value="FIXED_AMOUNT">درهم</option>
                                             </select>
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap">
@@ -129,12 +129,12 @@ export default function CouponsTable({ coupons }: { coupons: any[] }) {
                                         </td>
                                         <td className="px-8 py-7 whitespace-nowrap">
                                             <p className="text-lg font-black text-black tracking-tighter">
-                                                {coupon.type === 'PERCENTAGE' ? `${coupon.discount}%` : `${coupon.discount} MAD`}
+                                                {coupon.type === 'PERCENTAGE' ? `${coupon.discount}%` : `${coupon.discount} درهم`}
                                             </p>
                                         </td>
                                         <td className="px-8 py-7 whitespace-nowrap">
                                             <p className="text-xs font-bold text-gray-500 uppercase">
-                                                {coupon.minAmount ? `${coupon.minAmount} MAD` : 'Sans minimum'}
+                                                {coupon.minAmount ? `${coupon.minAmount} درهم` : 'Sans minimum'}
                                             </p>
                                         </td>
                                         <td className="px-8 py-7 whitespace-nowrap">

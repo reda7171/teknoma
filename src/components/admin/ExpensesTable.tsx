@@ -152,7 +152,7 @@ export default function ExpensesTable({ expenses }: { expenses: Expense[] }) {
                                     </td>
                                     <td className="px-10 py-6 text-right">
                                         <span className={`font-black text-sm tracking-tighter ${expense.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'}`}>
-                                            {expense.type === 'INCOME' ? '+' : '-'}{expense.amount.toFixed(0)} MAD
+                                            {expense.type === 'INCOME' ? '+' : '-'}{expense.amount.toFixed(0)} درهم
                                         </span>
                                     </td>
                                     <td className="px-10 py-6 text-right">

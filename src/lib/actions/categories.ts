@@ -152,7 +152,7 @@ export async function getPopularCategories() {
                 }
             }
 
-            // Calculer le prix moyen pour déterminer si Livraison Gratuite (Seuil > 200 MAD)
+            // Calculer le prix moyen pour déterminer si Livraison Gratuite (Seuil > 200 درهم)
             const avgPriceResult = await prisma.book.aggregate({
                 where: { category: name, active: true },
                 _avg: { price: true }

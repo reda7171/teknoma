@@ -406,7 +406,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 `🎁 ${pack.name}\n\n` +
                 `${description}\n\n` +
                 `Livres inclus :\n${titles}\n\n` +
-                `💰 ${pack.price} MAD\n\n` +
+                `💰 ${pack.price} درهم\n\n` +
                 `اطلب الآن 🛒 ${packUrl}\n\n` +
                 `#riwaya #livres #packs #maroc #lecture #livresaddict #casablanca #rabat #booktokmaroc #culturemaroc #bibliophile #offre_speciale`
             )
@@ -1313,7 +1313,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                             >
                                                 {editableTexts.oldPrice}
                                             </span>
-                                            <span className="text-lg">MAD</span>
+                                            <span className="text-lg">درهم</span>
                                         </div>
                                     )}
                                     <div className={`${currentTheme.accent} font-black text-5xl tracking-tighter flex items-center gap-2`}>
@@ -1326,7 +1326,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         >
                                             {editableTexts.price}
                                         </span>
-                                        <span className="text-xl">MAD</span>
+                                        <span className="text-xl">درهم</span>
                                     </div>
                                     {editingKey !== 'price' && editingKey !== 'oldPrice' && (
                                         <div

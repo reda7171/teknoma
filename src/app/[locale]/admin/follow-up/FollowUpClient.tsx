@@ -104,7 +104,7 @@ export default function FollowUpClient({ locale }: { locale: string }) {
                                         <p className="font-bold text-gray-900 text-sm">{order.fullName}</p>
                                         <p className="text-xs text-gray-500">{order.city}</p>
                                     </div>
-                                    <p className="font-black text-blue-600 text-sm">{order.total} MAD</p>
+                                    <p className="font-black text-blue-600 text-sm">{order.total} درهم</p>
                                 </div>
                                 <div className="flex items-center justify-between mt-2">
                                     <div className="flex flex-col gap-1">
@@ -149,7 +149,7 @@ export default function FollowUpClient({ locale }: { locale: string }) {
                                         <p className="font-bold text-gray-900 text-sm">{cart.fullName || 'Client inconnu'}</p>
                                         <p className="text-xs text-gray-500 flex items-center gap-1"><Phone className="w-3 h-3"/> {cart.phone}</p>
                                     </div>
-                                    <p className="font-black text-blue-600 text-sm">{cart.total} MAD</p>
+                                    <p className="font-black text-blue-600 text-sm">{cart.total} درهم</p>
                                 </div>
                                 <div className="flex items-center justify-between mt-2">
                                     <p className="text-[10px] text-gray-400 font-medium">{format(new Date(cart.createdAt), 'dd MMM yyyy', { locale: fr })}</p>

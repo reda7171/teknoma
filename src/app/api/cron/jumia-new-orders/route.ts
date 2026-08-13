@@ -71,7 +71,7 @@ export async function GET(req: Request) {
                         const productName = item.product?.name || item.name || item.productName || 'Article inconnu'
                         const quantity = item.quantity || 1
                         const price = item.price?.value || item.price || item.unitPrice || '0'
-                        itemsText += `- ${quantity}x ${productName} (<b>${price} MAD</b>)\n`
+                        itemsText += `- ${quantity}x ${productName} (<b>${price} درهم</b>)\n`
 
                         const sellerSku = item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku
                         if (sellerSku) {
@@ -106,7 +106,7 @@ export async function GET(req: Request) {
                 console.error("Erreur récupération image/items Jumia", err)
             }
 
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${orderId}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} MAD</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}${itemsText}`
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${orderId}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} درهم</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}${itemsText}`
             
             const replyMarkup = {
                 inline_keyboard: [

@@ -99,6 +99,7 @@ model User {
   posts            Post[]
   readingList      ReadingList[]
   wishlist         Wishlist[]
+  posSessions      PosSession[]
 
   @@index([email])
   @@index([role])
@@ -131,6 +132,7 @@ model Book {
   stock               Int               @default(0)
   image               String            @db.LongText
   category            String?           @db.VarChar(100)
+  subCategory         String?           @db.VarChar(100)
   language            String            @default("fr") @db.VarChar(10)
   active              Boolean           @default(true)
   createdAt           DateTime          @default(now())
@@ -179,6 +181,7 @@ model Book {
   posts               Post[]            @relation("PostBooks")
 
   @@index([category])
+  @@index([subCategory])
   @@index([active])
   @@index([active, stock])
   @@index([category, active])
@@ -281,12 +284,14 @@ model Order {
   expenseId        String?
   isPaid           Boolean              @default(false)
   invoiceNumber    String?              @db.VarChar(100)
+  posSessionId     String?
   items            OrderItem[]
   statusHistory    OrderStatusHistory[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
   expense          Expense?             @relation(fields: [expenseId], references: [id])
   financeArchive   FinanceArchive?      @relation(fields: [financeArchiveId], references: [id])
   seller           User?                @relation("SellerOrders", fields: [sellerId], references: [id])
+  posSession       PosSession?          @relation(fields: [posSessionId], references: [id])
 
   @@index([status])
   @@index([createdAt])
@@ -1198,4 +1203,23 @@ enum AdPlacement {
   BOOK_PAGE
   CHECKOUT
   FOOTER
+}
+
+model PosSession {
+  id            String    @id @default(uuid())
+  userId        String
+  startingFloat Float
+  expectedCash  Float?
+  actualCash    Float?
+  difference    Float?
+  status        String    @default("OPEN")
+  openedAt      DateTime  @default(now())
+  closedAt      DateTime?
+
+  user          User      @relation(fields: [userId], references: [id])
+  orders        Order[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("pos_sessions")
 }

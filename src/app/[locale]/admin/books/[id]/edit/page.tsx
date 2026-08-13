@@ -10,6 +10,8 @@ import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia
 import ImageInput from '@/components/admin/ImageInput'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { ImageIcon, Link2 } from 'lucide-react'
+import { getCategoryTree } from '@/lib/actions/category-tree'
+import type { CategoryTree } from '@/lib/constants/categories'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
     const router = useRouter()
@@ -57,12 +59,17 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [closeAfterSave, setCloseAfterSave] = useState(false)
     const [isTranslating, setIsTranslating] = useState(false)
     const [translateMsg, setTranslateMsg] = useState<string | null>(null)
+    const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
+    const [selectedSubCategory, setSelectedSubCategory] = useState<string>('')
+    const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
+    const mainCategories = Object.keys(categoryTree)
 
     useEffect(() => {
         getPurchaseLots().then(data => setLots(data)).catch(console.error)
         fetchAllAuthors().then(res => {
             if (res.success && res.data) setAuthors(res.data)
         }).catch(console.error)
+        getCategoryTree().then(tree => setCategoryTree(tree)).catch(console.error)
     }, [])
 
     // Traduction automatique via DeepL (titre + description arabe -> FR + EN)
@@ -126,6 +133,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setCurrentLang(result.data.language === 'en' ? 'en' : result.data.language === 'fr' ? 'fr' : 'ar')
                 setBookLanguage((result.data.language as 'ar' | 'fr' | 'en') || 'fr')
                 setBookImage(result.data.image || '')
+                setSelectedMainCategory(result.data.category || '')
+                setSelectedSubCategory(result.data.subCategory || '')
                 
                 if (result.data.sellerSku) {
                     console.log('Checking Jumia link for SKU:', result.data.sellerSku);
@@ -202,7 +211,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             stock: parseInt(formData.get('stock') as string),
             image: imageUrl || bookImage,
             category: formData.get('category') as string || undefined,
-            language: bookLanguage,
+            subCategory: formData.get('subCategory') as string || undefined,
+            language: formData.get('language') as string || 'fr',
             active: formData.get('active') === 'true',
             status: formData.get('status') as string || 'APPROVED',
             isBestSeller: formData.get('isBestSeller') === 'true',
@@ -661,7 +671,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     {/* Prix */}
                     <div>
                         <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                            Prix de Vente (MAD) <span className="text-red-500">*</span>
+                            Prix de Vente (درهم) <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
@@ -718,14 +728,14 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                                     <option value="0">-- Choisir un lot ou saisir manuellement --</option>
                                     {lots.map(lot => (
                                         <option key={lot.id} value={lot.unitCost || 0}>
-                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} MAD/livre` : ''}
+                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} درهم/livre` : ''}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                             <div>
                                 <label htmlFor="costPrice" className="block text-xs font-bold text-gray-600 mb-1">
-                                    Coût unitaire appliqué (MAD)
+                                    Coût unitaire appliqué (درهم)
                                 </label>
                                 <input
                                     type="number"
@@ -759,42 +769,46 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         />
                     </div>
 
-                    {/* Catégorie */}
-                    <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                            Catégorie
-                        </label>
-                        <select
-                            id="category"
-                            name="category"
-                            defaultValue={book.category || ''}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">Sélectionner une catégorie</option>
-                            <option value="Développement personnel">Développement personnel</option>
-                            <option value="Business">Business</option>
-                            <option value="Productivité">Productivité</option>
-                            <option value="Leadership">Leadership</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Psychologie">Psychologie</option>
-                            <option value="Histoire">Histoire</option>
-                            <option value="Stratégie">Stratégie</option>
-                            <option value="Roman">Roman</option>
-                            <option value="Science-Fiction">Science-Fiction</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="Thriller / Policier">Thriller / Policier</option>
-                            <option value="Manga">Manga</option>
-                            <option value="Bande dessinée">Bande dessinée</option>
-                            <option value="Biographie">Biographie</option>
-                            <option value="Santé & Bien-être">Santé & Bien-être</option>
-                            <option value="Cuisine">Cuisine</option>
-                            <option value="Informatique & Tech">Informatique & Tech</option>
-                            <option value="Religion & Spiritualité">Religion & Spiritualité</option>
-                            <option value="Philosophie">Philosophie</option>
-                            <option value="Art & Photographie">Art & Photographie</option>
-                            <option value="Enfant">Enfant</option>
-                            <option value="Enfants & Jeunesse">Enfants & Jeunesse</option>
-                        </select>
+                    {/* Catégorie et Sous-catégorie */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                                Catégorie Principale
+                            </label>
+                            <select
+                                id="category"
+                                name="category"
+                                value={selectedMainCategory}
+                                onChange={(e) => {
+                                    setSelectedMainCategory(e.target.value)
+                                    setSelectedSubCategory('')
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Sélectionner une catégorie</option>
+                                {mainCategories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 mb-2">
+                                Sous-catégorie
+                            </label>
+                            <select
+                                id="subCategory"
+                                name="subCategory"
+                                value={selectedSubCategory}
+                                onChange={(e) => setSelectedSubCategory(e.target.value)}
+                                disabled={!selectedMainCategory}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                            >
+                                <option value="">Sélectionner une sous-catégorie</option>
+                                {selectedMainCategory && categoryTree[selectedMainCategory]?.map(subCat => (
+                                    <option key={subCat} value={subCat}>{subCat}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     {/* Langue du Livre */}

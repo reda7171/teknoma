@@ -137,7 +137,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                 sellerSku: sku,
                 id: product.id,
                 price: {
-                    currency: "MAD",
+                    currency: "درهم",
                     value: newPrice,
                     salePrice: {} 
                 }
@@ -335,11 +335,11 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                                         <div className="flex flex-col">
                                             {p.variations?.[0]?.price?.salePrice?.value ? (
                                                 <>
-                                                    <span className="text-slate-900 font-medium">{p.variations[0].price.salePrice.value} MAD</span>
-                                                    <span className="text-xs text-slate-400 line-through">{p.variations[0].price.value} MAD</span>
+                                                    <span className="text-slate-900 font-medium">{p.variations[0].price.salePrice.value} درهم</span>
+                                                    <span className="text-xs text-slate-400 line-through">{p.variations[0].price.value} درهم</span>
                                                 </>
                                             ) : (
-                                                <span className="text-slate-900 font-medium">{p.variations?.[0]?.price?.value || p.variations?.[0]?.globalPrice?.value || 'N/A'} MAD</span>
+                                                <span className="text-slate-900 font-medium">{p.variations?.[0]?.price?.value || p.variations?.[0]?.globalPrice?.value || 'N/A'} درهم</span>
                                             )}
                                         </div>
                                     </td>

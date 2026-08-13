@@ -54,10 +54,10 @@ export default function AffiliatesTable({ affiliates }: { affiliates: any[] }) {
                                 <td className="px-10 py-6 whitespace-nowrap">
                                     <div className="flex flex-col gap-1">
                                         <span className="text-black font-black text-[10px] uppercase tracking-widest">
-                                            R: <span className="text-blue-600">{affiliate.type === 'PERCENTAGE' ? `${affiliate.discount}%` : `${affiliate.discount} MAD`}</span>
+                                            R: <span className="text-blue-600">{affiliate.type === 'PERCENTAGE' ? `${affiliate.discount}%` : `${affiliate.discount} درهم`}</span>
                                         </span>
                                         <span className="text-gray-400 font-bold text-[9px] uppercase tracking-widest">
-                                            C: <span className="text-black">{affiliate.type === 'PERCENTAGE' ? `${affiliate.commission}%` : `${affiliate.commission} MAD/L`}</span>
+                                            C: <span className="text-black">{affiliate.type === 'PERCENTAGE' ? `${affiliate.commission}%` : `${affiliate.commission} درهم/L`}</span>
                                         </span>
                                     </div>
                                 </td>
@@ -69,12 +69,12 @@ export default function AffiliatesTable({ affiliates }: { affiliates: any[] }) {
                                 </td>
                                 <td className="px-10 py-6 whitespace-nowrap text-center">
                                     <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 shadow-sm uppercase tracking-tighter italic">
-                                        {affiliate.generatedRevenue?.toFixed(0) || 0} MAD
+                                        {affiliate.generatedRevenue?.toFixed(0) || 0} درهم
                                     </span>
                                 </td>
                                 <td className="px-10 py-6 whitespace-nowrap text-center">
                                     <span className="text-[11px] font-black text-amber-600 bg-amber-50/50 px-4 py-1.5 rounded-full border border-amber-100 shadow-sm uppercase tracking-tighter italic">
-                                        {affiliate.totalCommission?.toFixed(0) || 0} MAD
+                                        {affiliate.totalCommission?.toFixed(0) || 0} درهم
                                     </span>
                                 </td>
                                 <td className="px-10 py-6 whitespace-nowrap">

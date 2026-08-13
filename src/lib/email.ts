@@ -16,7 +16,7 @@ export async function sendOrderConfirmation(order: any) {
     const itemsHtml = order.items.map((item: any) => `
         <div style="padding: 10px; border-bottom: 1px solid #eee;">
             <p><strong>${item.type === 'BOOK' ? (item.book?.title || 'Livre') : (item.pack?.name || 'Pack')}</strong></p>
-            <p>Qté: ${item.quantity} x ${item.price} MAD</p>
+            <p>Qté: ${item.quantity} x ${item.price} درهم</p>
         </div>
     `).join('')
 
@@ -29,7 +29,7 @@ export async function sendOrderConfirmation(order: any) {
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0;">
                 <h2>Détails de la commande</h2>
                 ${itemsHtml}
-                <p style="text-align: right; font-size: 18px;"><strong>Total : ${order.total} MAD</strong></p>
+                <p style="text-align: right; font-size: 18px;"><strong>Total : ${order.total} درهم</strong></p>
             </div>
 
             <p><strong>Mode de paiement :</strong> Paiement à la livraison</p>

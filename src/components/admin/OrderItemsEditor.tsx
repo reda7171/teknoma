@@ -177,10 +177,10 @@ export default function OrderItemsEditor({
                                     </Link>
                                     <div className="text-right">
                                         <span className="text-sm font-black text-gray-900 block">
-                                            {item.price} MAD
+                                            {item.price} درهم
                                         </span>
                                         <span className="text-xs text-gray-500 line-through">
-                                            {item.costPrice ? `${item.costPrice} MAD (Coût)` : ''}
+                                            {item.costPrice ? `${item.costPrice} درهم (Coût)` : ''}
                                         </span>
                                     </div>
                                 </div>
@@ -204,7 +204,7 @@ export default function OrderItemsEditor({
 
                                     <div className="flex items-center gap-4">
                                         <span className="text-sm font-bold text-blue-600">
-                                            Total: {item.price * item.quantity} MAD
+                                            Total: {item.price * item.quantity} درهم
                                         </span>
                                         <button 
                                             onClick={() => removeItem(index)}
@@ -254,7 +254,7 @@ export default function OrderItemsEditor({
                                             <span className="text-xs font-medium bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
                                                 {res.type === 'PACK' ? 'Pack' : 'Livre'}
                                             </span>
-                                            <span className="text-xs text-gray-500">{res.price} MAD</span>
+                                            <span className="text-xs text-gray-500">{res.price} درهم</span>
                                         </div>
                                     </div>
                                     <div className="shrink-0 text-xs font-bold text-gray-400">
@@ -271,30 +271,30 @@ export default function OrderItemsEditor({
             <div className="bg-gray-50 p-6 border-t border-gray-100 flex flex-col gap-3">
                 <div className="flex justify-between items-center text-sm text-gray-500">
                     <span>Sous-total articles</span>
-                    <span className="font-bold text-gray-900">{subtotal.toFixed(2)} MAD</span>
+                    <span className="font-bold text-gray-900">{subtotal.toFixed(2)} درهم</span>
                 </div>
                 <div className="flex justify-between items-center text-sm text-gray-500">
                     <span>Frais de livraison</span>
-                    <span>{shippingFees.toFixed(2)} MAD</span>
+                    <span>{shippingFees.toFixed(2)} درهم</span>
                 </div>
                 {discount > 0 && (
                     <div className="flex justify-between items-center text-sm text-green-600">
                         <span>Réduction</span>
-                        <span>-{discount.toFixed(2)} MAD</span>
+                        <span>-{discount.toFixed(2)} درهم</span>
                     </div>
                 )}
                 <div className="flex justify-between items-center text-sm text-gray-500">
                     <span>Frais fixes (Étiquette, Sachet, Ads)</span>
-                    <span>2.65 MAD</span>
+                    <span>2.65 درهم</span>
                 </div>
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">Chiffre d'Affaire</span>
-                    <span className="text-2xl font-black text-gray-900">{total.toFixed(2)} MAD</span>
+                    <span className="text-2xl font-black text-gray-900">{total.toFixed(2)} درهم</span>
                 </div>
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-center bg-green-50 -mx-6 px-6 py-4 mt-2">
                     <span className="text-lg font-bold text-green-800">Marge Nette (Estimée)</span>
                     <span className="text-2xl font-black text-green-600">
-                        {(total - costSubtotal - 2.65 - shippingFees).toFixed(2)} MAD
+                        {(total - costSubtotal - 2.65 - shippingFees).toFixed(2)} درهم
                     </span>
                 </div>
             </div>

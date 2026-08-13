@@ -55,7 +55,7 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
                         <p className="text-sm font-black text-blue-900 uppercase">{appliedCoupon.code}</p>
                         <p className="text-xs text-blue-600 font-bold">
                             {/* Réduction appliquée */}
-                            {appliedCoupon.type === 'PERCENTAGE' ? `${appliedCoupon.discount}%` : `${appliedCoupon.discount} MAD`}
+                            {appliedCoupon.type === 'PERCENTAGE' ? `${appliedCoupon.discount}%` : `${appliedCoupon.discount} درهم`}
                         </p>
                     </div>
                 </div>

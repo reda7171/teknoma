@@ -25,6 +25,7 @@ interface Book {
     stock: number
     image: string
     category: string | null
+    subCategory: string | null
     language: string
     description: string
     longDescription?: string | null
@@ -181,7 +182,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         const price = Number(bulkPrice)
         if (isNaN(price)) return alert('Prix invalide')
         
-        if (!confirm(`Êtes-vous sûr de vouloir changer le prix de ${selectedIds.length} livre(s) à ${price} MAD ?`)) return
+        if (!confirm(`Êtes-vous sûr de vouloir changer le prix de ${selectedIds.length} livre(s) à ${price} درهم ?`)) return
 
         setIsUpdatingPrice(true)
         const result = await bulkUpdateBookPrices(selectedIds, price)
@@ -714,8 +715,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                                 href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
                                                                                 locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
+                                                                                title={book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title}
                                                                             >
-                                                                                {book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title}
+                                                                                {(book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title).length > 12 
+                                                                                    ? (book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title).substring(0, 12) + '...'
+                                                                                    : (book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title)}
                                                                             </Link>
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
@@ -733,9 +737,16 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                 </div>
                                                             </td>
                                                             <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                                    {book.productType === 'PACK' ? 'Pack' : book.productType === 'EXTRA' ? `Accessoire: ${book.category || ''}` : book.category || 'N/A'}
-                                                                </span>
+                                                                <div className="flex flex-col gap-1">
+                                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 w-fit">
+                                                                        {book.productType === 'PACK' ? 'Pack' : book.productType === 'EXTRA' ? `Accessoire: ${book.category || ''}` : book.category || 'N/A'}
+                                                                    </span>
+                                                                    {book.subCategory && (
+                                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 w-fit">
+                                                                            {book.subCategory}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </td>
                                                             <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                                                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 uppercase">
@@ -751,7 +762,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                                     />
                                                                 ) : (
-                                                                    <>{book.price} MAD</>
+                                                                    <>{book.price} درهم</>
                                                                 )}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -1050,7 +1061,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                             {book.sellerSku && <span className="ml-2 font-mono text-[9px] px-1 bg-gray-100 rounded">SKU: {book.sellerSku}</span>}
                                         </p>
                                         <div className="mt-auto pt-3 flex items-center justify-between">
-                                            <span className="font-black text-sm text-gray-900">{book.price} <span className="text-[10px] text-gray-500">MAD</span></span>
+                                            <span className="font-black text-sm text-gray-900">{book.price} <span className="text-[10px] text-gray-500">درهم</span></span>
                                             <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${book.stock > 10 ? 'bg-green-100 text-green-700' : book.stock > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
                                                 {book.stock} en stock
                                             </span>

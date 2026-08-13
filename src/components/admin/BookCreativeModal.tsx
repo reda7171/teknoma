@@ -176,7 +176,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     const waPhone = whatsappPhone.replace(/[^0-9+]/g, '')
                     const waLink = `https://wa.me/${waPhone.startsWith('+') ? waPhone.slice(1) : waPhone}`
                     const hashtags = `#riwaya #lecture #livre #maroc #culture ${data.book.category ? `#${data.book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
-                    setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${data.book.price} MAD\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
+                    setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${data.book.price} درهم\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
                 }
             }).catch(console.error)
         }
@@ -190,7 +190,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             const waPhone = editableTexts.whatsapp.replace(/[^0-9+]/g, '')
             const waLink = `https://wa.me/${waPhone.startsWith('+') ? waPhone.slice(1) : waPhone}`
             const hashtags = `#riwaya #lecture #livre #maroc #culture ${fullBookData.category ? `#${fullBookData.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
-            setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${fullBookData.price} MAD\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
+            setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${fullBookData.price} درهم\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
         }
     }, [useDescription, fullBookData, editableTexts.whatsapp])
 
@@ -760,7 +760,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                             >
                                                 {editableTexts.oldPrice}
                                             </span>
-                                            <span className="text-sm">MAD</span>
+                                            <span className="text-sm">درهم</span>
                                         </div>
                                     )}
                                     <div className={`${currentTheme.accent} font-black text-4xl drop-shadow-lg flex items-baseline gap-1`}>
@@ -772,7 +772,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         >
                                             {editableTexts.price}
                                         </span>
-                                        <span className="text-xl">MAD</span>
+                                        <span className="text-xl">درهم</span>
                                     </div>
                                 </div>
                             </div>

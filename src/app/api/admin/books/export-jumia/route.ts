@@ -48,8 +48,8 @@ export async function POST(req: Request) {
 
         const columns = [
             'Name', 'Name_AR', 'Name_FR', 'Description', 'Description_AR', 'Description_FR', 
-            'SellerSKU', 'ParentSKU', 'Brand', 'PrimaryCategory', 'AdditionalCategory', 'GTIN_Barcode', 'Price_MAD', 
-            'Sale_Price_MAD', 'Sale_Price_Start_At', 'Sale_Price_End_At', 'Stock', 'isbn', 'pages', 
+            'SellerSKU', 'ParentSKU', 'Brand', 'PrimaryCategory', 'AdditionalCategory', 'GTIN_Barcode', 'Price_درهم', 
+            'Sale_Price_درهم', 'Sale_Price_Start_At', 'Sale_Price_End_At', 'Stock', 'isbn', 'pages', 
             'variation', 'age_range', 'author', 'book_type', 'certifications', 'color', 'color_AR', 
             'color_FR', 'color_family', 'genre', 'language', 'main_material', 'manufacturer_txt', 
             'material_family', 'model', 'note', 'package_content', 'package_content_AR', 
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
                     case 'isbn':
                         val = book.isbn || ''
                         break
-                    case 'Price_MAD':
+                    case 'Price_درهم':
                         val = book.price
                         break
                     case 'Stock':

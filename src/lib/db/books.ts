@@ -6,6 +6,7 @@ import { getCached, generateCacheKey } from '@/lib/cache'
 // Types pour les filtres
 export interface BookFilters {
     category?: string
+    subCategory?: string
     minPrice?: number
     maxPrice?: number
     search?: string
@@ -38,6 +39,11 @@ export async function getBooks(filters?: BookFilters) {
         // Filtre par catégorie
         if (filters?.category) {
             where.category = filters.category
+        }
+
+        // Filtre par sous-catégorie
+        if (filters?.subCategory) {
+            where.subCategory = filters.subCategory
         }
 
         // Filtre par langue
@@ -180,6 +186,10 @@ export async function getBooksCount(filters?: BookFilters) {
 
         if (filters?.category) {
             where.category = filters.category
+        }
+
+        if (filters?.subCategory) {
+            where.subCategory = filters.subCategory
         }
 
         if (filters?.language && filters.language !== 'all') {
@@ -480,4 +490,32 @@ export async function getBestAuthors(limit = 6) {
         },
         600 // Cache 10 minutes
     )
+}
+
+export type CategoryCounts = Record<string, { total: number, subs: Record<string, number> }>;
+
+export async function getCategoryCounts(): Promise<CategoryCounts> {
+    const rawCounts = await prisma.book.groupBy({
+        by: ['category', 'subCategory'],
+        where: { active: true },
+        _count: { id: true }
+    });
+
+    const counts: CategoryCounts = {};
+    for (const row of rawCounts) {
+        if (!row.category) continue;
+        const cat = row.category;
+        const sub = row.subCategory;
+        const count = row._count.id;
+        
+        if (!counts[cat]) {
+            counts[cat] = { total: 0, subs: {} };
+        }
+        
+        counts[cat].total += count;
+        if (sub) {
+            counts[cat].subs[sub] = count;
+        }
+    }
+    return counts;
 }

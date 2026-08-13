@@ -20,9 +20,9 @@ export default function AnnouncementBar({
 
     if (!isEnabled || !message) return null
 
-    const isDefaultMsg = message.trim() === "Livraison Gratuite partout au Maroc dès 300 MAD d'achat !" ||
+    const isDefaultMsg = message.trim() === "Livraison Gratuite partout au Maroc dès 300 درهم d'achat !" ||
                          message.trim() === "توصيل مجاني في جميع أنحاء المغرب ابتداءً من 300 درهم!" ||
-                         message.trim() === "Free delivery everywhere in Morocco for orders over 300 MAD!";
+                         message.trim() === "Free delivery everywhere in Morocco for orders over 300 درهم!";
 
     const displayMessage = isDefaultMsg ? t('FreeShippingPromo') : message;
 

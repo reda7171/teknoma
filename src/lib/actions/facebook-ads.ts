@@ -118,8 +118,8 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         adSetFormData.append('optimization_goal', optimizationGoal)
         
         adSetFormData.append('billing_event', 'IMPRESSIONS')
-        adSetFormData.append('bid_amount', '50') // 0.50 MAD par clic en auto (ou utiliser bid_strategy)
-        // Convert daily budget from MAD to cents (FB expects lowest denomination)
+        adSetFormData.append('bid_amount', '50') // 0.50 درهم par clic en auto (ou utiliser bid_strategy)
+        // Convert daily budget from درهم to cents (FB expects lowest denomination)
         adSetFormData.append('daily_budget', (params.dailyBudgetMad * 100).toString()) 
         adSetFormData.append('campaign_id', campaignId)
         adSetFormData.append('targeting', JSON.stringify(targetingObj))

@@ -238,7 +238,7 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
                             </div>
 
                             <div className="text-left md:text-right">
-                                <p className="text-2xl font-black text-emerald-500 mb-4">{order.total} MAD</p>
+                                <p className="text-2xl font-black text-emerald-500 mb-4">{order.total} درهم</p>
                                 <div className="flex flex-wrap items-center gap-2 relative wa-menu-container">
                                     <button
                                         onClick={() => setActiveMenuId(activeMenuId === order.id ? null : order.id)}

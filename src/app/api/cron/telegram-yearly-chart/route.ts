@@ -102,7 +102,7 @@ export async function GET(req: Request) {
                 labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
                 datasets: [
                     { type: 'line', label: 'Taux Annulation (%)', data: cancellationRate, borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 2, fill: false, yAxisID: 'y1' },
-                    { type: 'bar', label: 'CA Net (MAD)', data: monthlyRevenue.map(v => Math.round(v)), backgroundColor: 'rgba(255, 153, 0, 0.8)', borderRadius: 4, yAxisID: 'y' }
+                    { type: 'bar', label: 'CA Net (درهم)', data: monthlyRevenue.map(v => Math.round(v)), backgroundColor: 'rgba(255, 153, 0, 0.8)', borderRadius: 4, yAxisID: 'y' }
                 ]
             },
             options: {
@@ -121,8 +121,8 @@ export async function GET(req: Request) {
             data: {
                 labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
                 datasets: [
-                    { label: 'Boutique (MAD)', data: monthlyStoreRevenue.map(v => Math.round(v)), backgroundColor: 'rgba(54, 162, 235, 0.8)', borderRadius: 4 },
-                    { label: 'Jumia (MAD)', data: monthlyRevenue.map(v => Math.round(v)), backgroundColor: 'rgba(255, 153, 0, 0.8)', borderRadius: 4 }
+                    { label: 'Boutique (درهم)', data: monthlyStoreRevenue.map(v => Math.round(v)), backgroundColor: 'rgba(54, 162, 235, 0.8)', borderRadius: 4 },
+                    { label: 'Jumia (درهم)', data: monthlyRevenue.map(v => Math.round(v)), backgroundColor: 'rgba(255, 153, 0, 0.8)', borderRadius: 4 }
                 ]
             },
             options: { plugins: { title: { display: true, text: `Comparatif Jumia vs Boutique - ${now.getFullYear()}` } } }
@@ -152,8 +152,8 @@ export async function GET(req: Request) {
                 { text: 'KPIs Principaux (Mois en cours)', style: 'subheader' },
                 {
                     ul: [
-                        `Chiffre d'Affaires Net Jumia : ${jumiaRevenueCurrentMonth.toFixed(2)} MAD (${jumiaOrdersCurrentMonth} commandes)`,
-                        `Chiffre d'Affaires Net Boutique : ${storeRevenueCurrentMonth.toFixed(2)} MAD (${storeOrdersCurrentMonth} commandes)`,
+                        `Chiffre d'Affaires Net Jumia : ${jumiaRevenueCurrentMonth.toFixed(2)} درهم (${jumiaOrdersCurrentMonth} commandes)`,
+                        `Chiffre d'Affaires Net Boutique : ${storeRevenueCurrentMonth.toFixed(2)} درهم (${storeOrdersCurrentMonth} commandes)`,
                         `Taux d'annulation (Jumia) : ${cancelRateMonth}% (${jumiaCanceledCurrentMonth} annulations)`
                     ]
                 },

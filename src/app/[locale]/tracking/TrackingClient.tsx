@@ -158,7 +158,7 @@ export default function TrackingClient() {
                             </ul>
                             <div className="flex justify-between items-center pt-6 border-t border-gray-200 mt-6">
                                 <span className="text-xs font-black uppercase tracking-widest text-gray-400">{t('Total')}</span>
-                                <span className="text-xl font-black text-black">{result.order.total} MAD</span>
+                                <span className="text-xl font-black text-black">{result.order.total} درهم</span>
                             </div>
                         </div>
                     </div>

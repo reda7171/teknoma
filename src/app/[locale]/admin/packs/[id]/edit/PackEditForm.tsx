@@ -517,7 +517,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             {/* Prix barré */}
                             <div>
                                 <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Prix de vente (MAD) <span className="text-gray-400 text-xs">(Optionnel, affiché barré)</span>
+                                    Prix de vente (درهم) <span className="text-gray-400 text-xs">(Optionnel, affiché barré)</span>
                                 </label>
                                 <input
                                     type="number"
@@ -531,7 +531,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                 />
                                 {selectedBooks.length > 0 && (
                                     <p className="mt-2 text-sm text-gray-600">
-                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} MAD</span>
+                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} درهم</span>
                                     </p>
                                 )}
                             </div>
@@ -539,7 +539,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             {/* Prix promo */}
                             <div>
                                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Prix de promotion (MAD) <span className="text-red-500">*</span>
+                                    Prix de promotion (درهم) <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -636,7 +636,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm font-bold"
                                             >
                                                 {[20, 30, 35, 40, 45].map(fee => (
-                                                    <option key={fee} value={fee}>{fee} MAD</option>
+                                                    <option key={fee} value={fee}>{fee} درهم</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -756,7 +756,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                                             <span className={`ml-3 ${book.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>Stock: {book.stock}</span>
                                                         </p>
                                                     </div>
-                                                    <span className="text-sm font-black text-black ml-2">{Math.round(book.price)} MAD</span>
+                                                    <span className="text-sm font-black text-black ml-2">{Math.round(book.price)} درهم</span>
                                                 </label>
                                             ))}
                                         </div>
@@ -783,7 +783,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Prix total livres:</span>
-                                <span className="font-medium">{totalOriginalPrice} MAD</span>
+                                <span className="font-medium">{totalOriginalPrice} درهم</span>
                             </div>
                         </div>
 

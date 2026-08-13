@@ -120,7 +120,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
 
         // Notification Telegram si retour
         if (status === 'RETURNED') {
-            const msg = `📦 *Retour Commande*\n\n🆔 \`${orderId.slice(0, 8)}\`\n👤 ${order.fullName}\n📱 ${order.phone}\n💰 ${order.total} MAD\n📍 ${order.city}${stockNote}`
+            const msg = `📦 *Retour Commande*\n\n🆔 \`${orderId.slice(0, 8)}\`\n👤 ${order.fullName}\n📱 ${order.phone}\n💰 ${order.total} درهم\n📍 ${order.city}${stockNote}`
             sendTelegramMessage(msg).catch(console.error)
         }
 

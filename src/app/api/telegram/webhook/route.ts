@@ -79,7 +79,7 @@ export async function POST(req: Request) {
                             }
                         })
                         
-                        await sendTelegramMessage(`✅ Offre de ${discount} MAD envoyée au client (Session: ${sessionId})`)
+                        await sendTelegramMessage(`✅ Offre de ${discount} درهم envoyée au client (Session: ${sessionId})`)
                         return NextResponse.json({ success: true })
                     } else {
                         await sendTelegramMessage(`⚠️ Erreur: "${replyText}" n'est pas un montant valide. Envoyez juste un nombre.`)

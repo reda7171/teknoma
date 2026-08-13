@@ -26,6 +26,7 @@ const BookSchemaBase = z.object({
     stock: z.number().int().min(0, 'Le stock ne peut pas être négatif'),
     image: z.string().min(1, 'L\'image est requise'),
     category: z.string().optional(),
+    subCategory: z.string().optional(),
     language: z.string().optional().default('fr'),
     active: z.boolean().optional(),
     status: z.string().optional(),
@@ -566,7 +567,7 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
         await createAuditLog({
             action: 'BULK_UPDATE_PRICE',
             entity: 'BOOK',
-            details: `Prix mis à jour pour ${ids.length} livres: ${newPrice} MAD`,
+            details: `Prix mis à jour pour ${ids.length} livres: ${newPrice} درهم`,
         })
 
         return { success: true }

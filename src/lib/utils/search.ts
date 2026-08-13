@@ -1,6 +1,6 @@
 /**
  * Analyse une requête de recherche pour extraire des filtres de prix naturels.
- * Ex: "Livres à moins de 100 MAD" -> { maxPrice: 100, cleanQuery: "Livres MAD" }
+ * Ex: "Livres à moins de 100 درهم" -> { maxPrice: 100, cleanQuery: "Livres درهم" }
  */
 export function parsePriceFilter(query: string) {
     const terms = query.toLowerCase();

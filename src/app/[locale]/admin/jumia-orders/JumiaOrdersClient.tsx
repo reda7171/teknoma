@@ -298,7 +298,7 @@ export default function JumiaOrdersClient() {
                                 <tr>
                                     <td>${item.name || item.Name || 'Produit Jumia'}</td>
                                     <td>${item.sku || item.Sku || item.SellerSku || '-'}</td>
-                                    <td>${parseFloat(item.price || item.ItemPrice || '0').toLocaleString('fr-MA')} MAD</td>
+                                    <td>${parseFloat(item.price || item.ItemPrice || '0').toLocaleString('fr-MA')} درهم</td>
                                 </tr>
                             `).join('') : `
                                 <tr>
@@ -309,7 +309,7 @@ export default function JumiaOrdersClient() {
                         <tfoot>
                             <tr>
                                 <td colspan="2" style="text-align: right; padding-top: 20px;" class="total-row">Total TTC :</td>
-                                <td style="padding-top: 20px;" class="total-row">${(order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0')} MAD</td>
+                                <td style="padding-top: 20px;" class="total-row">${(order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0')} درهم</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -394,7 +394,7 @@ export default function JumiaOrdersClient() {
                             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl"><TrendingUp className="w-4 h-4" /></div>
                             CA Estimé
                         </div>
-                        <p className="text-3xl font-black text-slate-800">{stats.revenue.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD</p>
+                        <p className="text-3xl font-black text-slate-800">{stats.revenue.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} درهم</p>
                     </div>
                 </div>
             )}
@@ -512,7 +512,7 @@ export default function JumiaOrdersClient() {
                                                     </span>
                                                 </td>
                                                 <td className="p-4 font-bold text-slate-900 text-right">
-                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} MAD
+                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} درهم
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     {(() => {
@@ -704,7 +704,7 @@ export default function JumiaOrdersClient() {
                                                                                             {item.status || item.Status || 'N/A'}
                                                                                         </span>
                                                                                     </td>
-                                                                                    <td className="p-3 font-bold text-slate-900">{item.itemPriceLocal || item.Price} {item.country?.currencyCode || 'MAD'}</td>
+                                                                                    <td className="p-3 font-bold text-slate-900">{item.itemPriceLocal || item.Price} {item.country?.currencyCode || 'درهم'}</td>
                                                                                     <td className="p-3">
                                                                                         {item.trackingNumber || item.TrackingCode ? (
                                                                                             <a href={item.trackingUrl || '#'} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 hover:underline font-mono text-[10px] bg-blue-50 px-2 py-1 rounded-md">

@@ -53,7 +53,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 },
                 {
                     q: locale === 'ar' ? 'ما هي تكاليف التوصيل؟' : locale === 'en' ? 'What are the delivery costs?' : 'Quels sont les frais de livraison ?',
-                    a: locale === 'ar' ? 'التوصيل بـ 25 درهم للدار البيضاء و35 درهمًا لسائر المدن. مجاني لكل طلب يتجاوز 300 درهم.' : locale === 'en' ? 'Delivery costs 25 MAD for Casablanca and 35 MAD for other cities. Free for any order over 300 MAD.' : 'La livraison est de 25 MAD pour Casablanca et 35 MAD pour les autres villes. Elle est offerte pour toute commande supérieure à 300 MAD.'
+                    a: locale === 'ar' ? 'التوصيل بـ 25 درهم للدار البيضاء و35 درهمًا لسائر المدن. مجاني لكل طلب يتجاوز 300 درهم.' : locale === 'en' ? 'Delivery costs 25 درهم for Casablanca and 35 درهم for other cities. Free for any order over 300 درهم.' : 'La livraison est de 25 درهم pour Casablanca et 35 درهم pour les autres villes. Elle est offerte pour toute commande supérieure à 300 درهم.'
                 },
                 {
                     q: locale === 'ar' ? 'هل تقومون بالتوصيل إلى جميع مدن المغرب؟' : locale === 'en' ? 'Do you deliver to all cities in Morocco?' : 'Livrez-vous dans toutes les villes du Maroc ?',

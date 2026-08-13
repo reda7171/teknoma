@@ -103,7 +103,7 @@ export default function AnalyticsClient() {
             {/* KPIs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: "Chiffre d'Affaires", value: `${stats?.totalRevenue.toFixed(0)} MAD`, icon: DollarSign, color: "bg-black", iconColor: "text-white" },
+                    { label: "Chiffre d'Affaires", value: `${stats?.totalRevenue.toFixed(0)} درهم`, icon: DollarSign, color: "bg-black", iconColor: "text-white" },
                     { label: "Total Commandes", value: stats?.totalOrders, icon: ShoppingCart, color: "bg-yellow-400", iconColor: "text-black" },
                     { label: "Taux de Conversion", value: `${conversion?.rate}%`, icon: Target, color: "bg-pink-500", iconColor: "text-white" },
                     { label: "Produits Actifs", value: stats?.totalBooks + stats?.totalPacks, icon: Package, color: "bg-blue-600", iconColor: "text-white" }
@@ -207,7 +207,7 @@ export default function AnalyticsClient() {
                                             {product.quantity} ventes
                                         </span>
                                         <p className="text-xs text-black font-black">
-                                            {product.revenue.toFixed(0)} MAD
+                                            {product.revenue.toFixed(0)} درهم
                                         </p>
                                     </div>
                                 </div>
