@@ -39,7 +39,7 @@ export async function GET(req: Request) {
 
         const lines = staleOrders.map(o => {
             const age = Math.round((Date.now() - new Date(o.createdAt).getTime()) / 3600000)
-            return `⏳ <b>${o.fullName}</b> | ${o.city} | ${o.total.toFixed(2)} MAD\n📞 ${o.phone} | Il y a ${age}h`
+            return `⏳ <b>${o.fullName}</b> | ${o.city} | ${o.total.toFixed(2)} درهم\n📞 ${o.phone} | Il y a ${age}h`
         }).join('\n\n')
 
         const replyMarkup = {

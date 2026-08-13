@@ -153,9 +153,9 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
               {/* Prix et CTA */}
               <div className="bg-gray-50 p-8 rounded-3xl border border-gray-100 space-y-6">
                 <div className="flex items-end gap-4">
-                  <span className="text-4xl font-black text-gray-900">{product.price} MAD</span>
+                  <span className="text-4xl font-black text-gray-900">{product.price} درهم</span>
                   {product.originalPrice && (
-                    <span className="text-xl text-gray-400 line-through mb-1">{product.originalPrice} MAD</span>
+                    <span className="text-xl text-gray-400 line-through mb-1">{product.originalPrice} درهم</span>
                   )}
                 </div>
 

@@ -126,7 +126,7 @@ export async function POST(req: Request) {
                     const updatedText = `✅ <b>Commande #${shortId}</b>\n\n` +
                         `👤 ${escapeHtml(order.fullName)}\n` +
                         `📍 ${escapeHtml(order.city)}\n` +
-                        `💰 ${order.total.toFixed(2)} MAD\n\n` +
+                        `💰 ${order.total.toFixed(2)} درهم\n\n` +
                         `📌 <b>Statut :</b> ${label}`
 
                     if (message?.chat?.id && message?.message_id) {
@@ -153,7 +153,7 @@ export async function POST(req: Request) {
                             const updatedText = `✅ <b>Commande #${shortId} EXPÉDIÉE</b>\n\n` +
                                 `👤 ${escapeHtml(order.fullName)}\n` +
                                 `📍 ${escapeHtml(order.city)}\n` +
-                                `💰 ${order.total.toFixed(2)} MAD\n\n` +
+                                `💰 ${order.total.toFixed(2)} درهم\n\n` +
                                 `🚀 <b>WithYou Tracking :</b> <code>${order.trackingID}</code>\n` +
                                 `📌 <b>Statut :</b> Confirmée`
                             await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
@@ -212,7 +212,7 @@ export async function POST(req: Request) {
                                 const id = o.number || o.orderId || 'N/A'
                                 const amount = o.totalAmountLocal?.value || '?'
                                 const date = o.createdAt ? new Date(o.createdAt).toLocaleDateString('fr-FR') : ''
-                                return `📦 #${id} | ${amount} MAD | ${date}`
+                                return `📦 #${id} | ${amount} درهم | ${date}`
                             }).join('\n')
                             const keyboard = orders.slice(0, 5).map((o: any) => {
                                 const id = o.number || o.orderId
@@ -231,7 +231,7 @@ export async function POST(req: Request) {
                         } else {
                             const lines = statements.slice(0, 3).map((stmt: any) => {
                                 const amount = stmt.payout?.amount ?? stmt.closingBalance ?? stmt.amount ?? '0'
-                                const currency = stmt.payout?.currency ?? stmt.currency ?? 'MAD'
+                                const currency = stmt.payout?.currency ?? stmt.currency ?? 'درهم'
                                 const dateStr = stmt.createdAt ? new Date(stmt.createdAt).toLocaleDateString('fr-FR') : 'Inconnue'
                                 const status = stmt.paid || stmt.status === 'paid' ? '✅ Payé' : '⏳ En attente'
                                 const period = stmt.periodStart && stmt.periodEnd 
@@ -269,7 +269,7 @@ export async function POST(req: Request) {
                         const failed = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'FAILED').length
                         const shipped = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'SHIPPED').length
                         const readyToShip = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'READY_TO_SHIP').length
-                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} درهم</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                     } else if (action === 'yearly_stats') {
@@ -307,7 +307,7 @@ export async function POST(req: Request) {
                         const failed = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'FAILED').length
                         const shipped = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'SHIPPED').length
                         const readyToShip = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'READY_TO_SHIP').length
-                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} MAD</b>`
+                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} درهم</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia annuel chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                     } else if (action === 'yearly_chart') {
@@ -374,7 +374,7 @@ export async function POST(req: Request) {
                                     },
                                     {
                                         type: 'bar',
-                                        label: 'CA Net (MAD)',
+                                        label: 'CA Net (درهم)',
                                         data: monthlyRevenue.map(v => Math.round(v)),
                                         backgroundColor: 'rgba(255, 153, 0, 0.8)',
                                         borderRadius: 4,
@@ -462,13 +462,13 @@ export async function POST(req: Request) {
                                 labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
                                 datasets: [
                                     {
-                                        label: 'Boutique (MAD)',
+                                        label: 'Boutique (درهم)',
                                         data: monthlyStoreRevenue.map(v => Math.round(v)),
                                         backgroundColor: 'rgba(54, 162, 235, 0.8)',
                                         borderRadius: 4
                                     },
                                     {
-                                        label: 'Jumia (MAD)',
+                                        label: 'Jumia (درهم)',
                                         data: monthlyJumiaRevenue.map(v => Math.round(v)),
                                         backgroundColor: 'rgba(255, 153, 0, 0.8)',
                                         borderRadius: 4
@@ -537,12 +537,12 @@ export async function POST(req: Request) {
                         data: { price: newPrice }
                     })
 
-                    await answerCallbackQuery(callbackId, `🏷️ Promo appliquée : ${newPrice} MAD`, token)
+                    await answerCallbackQuery(callbackId, `🏷️ Promo appliquée : ${newPrice} درهم`, token)
                     if (message?.chat?.id && message?.message_id) {
                         const updatedText = `🏷️ <b>PROMO FLASH APPLIQUÉE (-10%)</b>\n\n` +
                                             `📖 <b>Livre:</b> ${escapeHtml(book.title)}\n` +
-                                            `💰 <b>Ancien prix:</b> ${book.price} MAD\n` +
-                                            `🔥 <b>Nouveau prix:</b> ${newPrice} MAD\n` +
+                                            `💰 <b>Ancien prix:</b> ${book.price} درهم\n` +
+                                            `🔥 <b>Nouveau prix:</b> ${newPrice} درهم\n` +
                                             `📦 <b>Stock:</b> ${book.stock}`
                         await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
                     }
@@ -1208,7 +1208,7 @@ export async function POST(req: Request) {
                     let text = `📊 <b>RAPPORT : ${label.toUpperCase()}</b>\n\n` +
                                `🔵 <b>SITE WEB :</b>\n` +
                                `📦 Commandes Total : <b>${siteStats.count}</b>\n` +
-                               `💰 CA Total : <b>${siteStats.revenue.toFixed(2)} MAD</b>\n` +
+                               `💰 CA Total : <b>${siteStats.revenue.toFixed(2)} درهم</b>\n` +
                                `⏳ En attente : ${siteStats.pending}\n` +
                                `🚚 En expédition : ${siteStats.shipped}\n` +
                                `✅ Livrées : ${siteStats.delivered}\n` +
@@ -1216,7 +1216,7 @@ export async function POST(req: Request) {
                     
                     text += `\n\n🟠 <b>JUMIA :</b>\n` +
                             `📦 Commandes Total : <b>${jumiaStats.count}</b>\n` +
-                            `💰 CA Total : <b>${jumiaStats.revenue.toFixed(2)} MAD</b>\n` +
+                            `💰 CA Total : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
                             `⏳ En attente : ${jumiaStats.pending}\n` +
                             `🚚 En expédition : ${jumiaStats.shipped}\n` +
                             `✅ Livrées : ${jumiaStats.delivered}\n` +
@@ -1272,7 +1272,7 @@ export async function POST(req: Request) {
                     const icon = statusIcons[o.status] || '📦'
                     const shortId = o.id.slice(0, 6).toUpperCase()
                     const date = new Date(o.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
-                    return `${icon} <b>#${shortId}</b> — ${escapeHtml(o.fullName)} — <b>${o.total.toFixed(0)} MAD</b> — ${date}`
+                    return `${icon} <b>#${shortId}</b> — ${escapeHtml(o.fullName)} — <b>${o.total.toFixed(0)} درهم</b> — ${date}`
                 }).join('\n')
 
                 const text = `🛒 <b>5 DERNIÈRES COMMANDES</b>\n\n${list}`
@@ -1314,10 +1314,10 @@ export async function POST(req: Request) {
 
                 const text = `📊 <b>CA MENSUEL COMPARÉ</b>\n\n` +
                     `📅 <b>${moisActuel} :</b>\n` +
-                    `   💰 CA : <b>${caMois.toFixed(2)} MAD</b>\n` +
+                    `   💰 CA : <b>${caMois.toFixed(2)} درهم</b>\n` +
                     `   📦 Commandes : <b>${current._count}</b>\n\n` +
                     `📅 <b>${moisPrec} :</b>\n` +
-                    `   💰 CA : <b>${caPrev.toFixed(2)} MAD</b>\n` +
+                    `   💰 CA : <b>${caPrev.toFixed(2)} درهم</b>\n` +
                     `   📦 Commandes : <b>${prev._count}</b>\n\n` +
                     `${trend} vs mois précédent`
 
@@ -1409,13 +1409,13 @@ export async function POST(req: Request) {
                 const text = `🗂️ <b>STATISTIQUES GLOBALES</b>\n\n` +
                     `📅 <b>Depuis :</b> ${since}\n` +
                     `📦 <b>Total commandes (Site + Jumia) :</b> ${totalCombined}\n` +
-                    `💰 <b>CA total (Site + Jumia) :</b> <b>${revenueCombined.toFixed(2)} MAD</b>\n\n` +
+                    `💰 <b>CA total (Site + Jumia) :</b> <b>${revenueCombined.toFixed(2)} درهم</b>\n\n` +
                     `🔵 <b>SITE WEB :</b>\n` +
                     `📦 Commandes Site : ${totalSite}\n` +
-                    `💰 CA Site : <b>${revenueSite.toFixed(2)} MAD</b>\n` +
+                    `💰 CA Site : <b>${revenueSite.toFixed(2)} درهم</b>\n` +
                     `\n🟠 <b>JUMIA :</b>\n` +
                     `📦 Commandes Jumia : ${jumiaStats.count}\n` +
-                    `💰 CA Jumia : <b>${jumiaStats.revenue.toFixed(2)} MAD</b>\n` +
+                    `💰 CA Jumia : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
                     `\n📊 <b>Détail Site par statut :</b>\n${statusLines}`
 
                 await answerCallbackQuery(callbackId, '🗂️ Stats globales chargées', token)
@@ -1460,7 +1460,7 @@ export async function POST(req: Request) {
                     chartText += `<code>${months[i].padEnd(4)} |</code> ${bar} <b>${val.toFixed(0)}</b>\n`
                 }
                 
-                chartText += `\n💰 <b>Total : ${totalYearCA.toFixed(2)} MAD</b>`
+                chartText += `\n💰 <b>Total : ${totalYearCA.toFixed(2)} درهم</b>`
                 
                 await answerCallbackQuery(callbackId, '📈 Graphique Annuel chargé', token)
                 await sendTelegramMessage(chartText, message?.chat?.id.toString(), token)
@@ -1773,7 +1773,7 @@ export async function POST(req: Request) {
                     if (books.length === 0) {
                         await sendTelegramMessage(`❌ Aucun livre trouvé pour "${query}"`, chatId.toString(), token)
                     } else {
-                        const list = books.map(b => `📖 <b>${b.title}</b>\n📦 Stock: <b>${b.stock}</b> | 💰 ${b.price} MAD`).join('\n\n')
+                        const list = books.map(b => `📖 <b>${b.title}</b>\n📦 Stock: <b>${b.stock}</b> | 💰 ${b.price} درهم`).join('\n\n')
                         await sendTelegramMessage(`🔍 <b>Résultats Stock</b> :\n\n${list}`, chatId.toString(), token)
                     }
                 }
@@ -1940,7 +1940,7 @@ export async function POST(req: Request) {
                         const book = books[0]
                         await prisma.book.update({ where: { id: book.id }, data: { price } })
                         const { escapeHtml } = await import('@/lib/telegram')
-                        await sendTelegramMessage(`✅ <b>Promo Appliquée !</b>\n\n📖 ${escapeHtml(book.title)}\n💰 Nouveau prix : <b>${price} MAD</b>`, chatId.toString(), token)
+                        await sendTelegramMessage(`✅ <b>Promo Appliquée !</b>\n\n📖 ${escapeHtml(book.title)}\n💰 Nouveau prix : <b>${price} درهم</b>`, chatId.toString(), token)
                     }
                 }
             }
@@ -1982,7 +1982,7 @@ export async function POST(req: Request) {
                     await sendTelegramMessage(`❌ Pas assez de données pour afficher le TOP.`, chatId.toString(), token)
                 } else {
                     const { escapeHtml } = await import('@/lib/telegram')
-                    const lines = topUsers.map((u, i) => `${i+1}. <b>${escapeHtml(u.fullName)}</b> (${u.phone})\n📦 ${u._count.id} cmd | 💰 ${(u._sum.total || 0).toFixed(0)} MAD`).join('\n\n')
+                    const lines = topUsers.map((u, i) => `${i+1}. <b>${escapeHtml(u.fullName)}</b> (${u.phone})\n📦 ${u._count.id} cmd | 💰 ${(u._sum.total || 0).toFixed(0)} درهم`).join('\n\n')
                     await sendTelegramMessage(`🏆 <b>TOP 5 CLIENTS (Livrées)</b>\n\n${lines}`, chatId.toString(), token)
                 }
             }

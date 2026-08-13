@@ -57,11 +57,11 @@ export async function generateMetadata({
 
     return {
         title: `${pack.name} - Pack de ${pack.books.length} Livres | Riwaya`,
-        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} MAD). ` : ''}Prix: ${displayPrice} MAD. Livraison rapide au Maroc.`,
+        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} درهم). ` : ''}Prix: ${displayPrice} درهم. Livraison rapide au Maroc.`,
         keywords,
         openGraph: {
             title: hasDiscount ? `${pack.name} - Économisez ${savingsPercent}%` : `${pack.name}`,
-            description: pack.description?.slice(0, 160) || `Pack de ${pack.books.length} livres sélectionnés.${hasDiscount ? ` ${savings} MAD d'économie.` : ''}`,
+            description: pack.description?.slice(0, 160) || `Pack de ${pack.books.length} livres sélectionnés.${hasDiscount ? ` ${savings} درهم d'économie.` : ''}`,
             images: imageUrl ? [imageUrl] : [],
             type: 'website',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
@@ -70,7 +70,7 @@ export async function generateMetadata({
         twitter: {
             card: 'summary_large_image',
             title: hasDiscount ? `${pack.name} - ${savingsPercent}% de réduction` : `${pack.name}`,
-            description: `Pack de ${pack.books.length} livres à ${displayPrice} MAD${hasDiscount ? ` au lieu de ${totalOriginalPrice} MAD` : ''}`,
+            description: `Pack de ${pack.books.length} livres à ${displayPrice} درهم${hasDiscount ? ` au lieu de ${totalOriginalPrice} درهم` : ''}`,
             images: imageUrl ? [imageUrl] : [],
         },
         alternates: {
@@ -127,7 +127,7 @@ export default async function PackDetailPage({
             },
             offers: {
                 '@type': 'AggregateOffer',
-                priceCurrency: 'MAD',
+                priceCurrency: 'درهم',
                 lowPrice: displayPrice,
                 highPrice: totalOriginalPrice,
                 offerCount: 1,
@@ -143,7 +143,7 @@ export default async function PackDetailPage({
                     returnShippingFeesAmount: {
                         '@type': 'MonetaryAmount',
                         value: 35,
-                        currency: 'MAD'
+                        currency: 'درهم'
                     }
                 },
                 shippingDetails: {
@@ -151,7 +151,7 @@ export default async function PackDetailPage({
                     shippingRate: {
                         '@type': 'MonetaryAmount',
                         value: 35,
-                        currency: 'MAD'
+                        currency: 'درهم'
                     },
                     shippingDestination: {
                         '@type': 'DefinedRegion',
@@ -240,8 +240,8 @@ export default async function PackDetailPage({
                     text: locale === 'ar'
                         ? `سعر باقة ${pack.name} هو ${displayPrice} درهم مغربي${hasDiscount ? `، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%.` : '.'} الدفع عند الاستلام.`
                         : locale === 'en'
-                            ? `The ${pack.name} pack costs ${displayPrice} MAD${hasDiscount ? ` instead of ${totalOriginalPrice} MAD for individual purchases. Save ${savingsPercent}%.` : '.'} Payment on delivery.`
-                            : `Le pack ${pack.name} est à ${displayPrice} MAD${hasDiscount ? ` au lieu de ${totalOriginalPrice} MAD à l'achat individuel. Économisez ${savingsPercent}%.` : '.'} Paiement à la livraison.`
+                            ? `The ${pack.name} pack costs ${displayPrice} درهم${hasDiscount ? ` instead of ${totalOriginalPrice} درهم for individual purchases. Save ${savingsPercent}%.` : '.'} Payment on delivery.`
+                            : `Le pack ${pack.name} est à ${displayPrice} درهم${hasDiscount ? ` au lieu de ${totalOriginalPrice} درهم à l'achat individuel. Économisez ${savingsPercent}%.` : '.'} Paiement à la livraison.`
                 }
             },
             {
@@ -256,8 +256,8 @@ export default async function PackDetailPage({
                     text: locale === 'ar'
                         ? `التوصيل مجاني للطلبات التي تتجاوز 300 درهم. الدفع عند الاستلام في جميع أنحاء المغرب، من 24 إلى 48 ساعة للدار البيضاء وبين يومين وأربعة أيام للمدن الأخرى.`
                         : locale === 'en'
-                            ? `Delivery is free for orders over 300 MAD. Cash on delivery across Morocco, 24-48h for Casablanca and 2-4 days for other cities.`
-                            : `La livraison est gratuite pour les commandes supérieures à 300 MAD. Paiement à la livraison partout au Maroc, 24-48h pour Casablanca et 2 à 4 jours pour les autres villes.`
+                            ? `Delivery is free for orders over 300 درهم. Cash on delivery across Morocco, 24-48h for Casablanca and 2-4 days for other cities.`
+                            : `La livraison est gratuite pour les commandes supérieures à 300 درهم. Paiement à la livraison partout au Maroc, 24-48h pour Casablanca et 2 à 4 jours pour les autres villes.`
                 }
             }
         ]
@@ -368,7 +368,7 @@ export default async function PackDetailPage({
                                     {hasDiscount && (
                                         <div className="flex items-center gap-6 mb-4">
                                             <span className="text-gray-300 text-xl line-through font-black tracking-tighter">
-                                                {totalOriginalPrice} MAD
+                                                {totalOriginalPrice} درهم
                                             </span>
                                             <span className="text-black font-black bg-pixio-yellow px-4 py-2 rounded-xl text-[10px] rtl:text-xs uppercase tracking-widest rtl:tracking-normal">
                                                 {t('SavingsOff', { amount: savings })}
@@ -377,7 +377,7 @@ export default async function PackDetailPage({
                                     )}
                                     <div className="flex items-baseline gap-3">
                                         <span className="text-7xl font-black text-black tracking-tighter leading-none">{displayPrice}</span>
-                                        <span className="text-2xl text-gray-300 font-black uppercase tracking-widest">MAD</span>
+                                        <span className="text-2xl text-gray-300 font-black uppercase tracking-widest">درهم</span>
                                     </div>
                                 </div>
 

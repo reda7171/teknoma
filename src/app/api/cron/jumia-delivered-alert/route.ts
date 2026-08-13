@@ -59,7 +59,7 @@ export async function GET(req: Request) {
                 const customerName = `${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}`.trim() || "Client Jumia"
                 const price = order.totalAmountLocal?.value || order.Price || order.GrandTotal || "0"
                 
-                const msg = `✅ <b>Commande Jumia Livrée !</b>\n\n📦 <b>Numéro :</b> <code>${orderId}</code>\n👤 <b>Client :</b> ${customerName}\n💰 <b>Total :</b> ${price} MAD\n\n🎉 Félicitations pour cette vente !`
+                const msg = `✅ <b>Commande Jumia Livrée !</b>\n\n📦 <b>Numéro :</b> <code>${orderId}</code>\n👤 <b>Client :</b> ${customerName}\n💰 <b>Total :</b> ${price} درهم\n\n🎉 Félicitations pour cette vente !`
                 
                 await sendTelegramMessage(msg)
 

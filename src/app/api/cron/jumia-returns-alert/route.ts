@@ -104,7 +104,7 @@ export async function GET(req: Request) {
             returnedOrders.slice(0, 3).forEach((o: any) => {
                 const id = o.number || o.orderId || 'N/A'
                 const amount = o.totalAmountLocal?.value || '?'
-                msg += `  • #${id} → ${amount} MAD\n`
+                msg += `  • #${id} → ${amount} درهم\n`
             })
         }
 
@@ -113,7 +113,7 @@ export async function GET(req: Request) {
             canceledOrders.slice(0, 3).forEach((o: any) => {
                 const id = o.number || o.orderId || 'N/A'
                 const amount = o.totalAmountLocal?.value || '?'
-                msg += `  • #${id} → ${amount} MAD\n`
+                msg += `  • #${id} → ${amount} درهم\n`
             })
         }
 

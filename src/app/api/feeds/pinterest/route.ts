@@ -59,7 +59,7 @@ export async function GET() {
             <g:brand>${brand}</g:brand>
             <g:condition>new</g:condition>
             <g:availability>${availability}</g:availability>
-            <g:price>${book.price} MAD</g:price>
+            <g:price>${book.price} درهم</g:price>
         </item>\n`
         })
 
@@ -77,7 +77,7 @@ export async function GET() {
             <g:brand>Riwaya Packs</g:brand>
             <g:condition>new</g:condition>
             <g:availability>in stock</g:availability>
-            <g:price>${pack.price} MAD</g:price>
+            <g:price>${pack.price} درهم</g:price>
         </item>\n`
         })
 

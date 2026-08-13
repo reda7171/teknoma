@@ -12,7 +12,7 @@ export default async function SellerDashboardPage() {
     const stats = [
         { label: 'Mes Livres', value: data.booksCount, icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
         { label: 'Commandes', value: data.ordersCount, icon: ShoppingBag, color: 'bg-purple-100 text-purple-600' },
-        { label: 'CA Total', value: `${data.totalRevenue.toFixed(2)} MAD`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
+        { label: 'CA Total', value: `${data.totalRevenue.toFixed(2)} درهم`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
     ]
 
     return (
@@ -72,7 +72,7 @@ export default async function SellerDashboardPage() {
                                             <p className="text-[10px] font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
                                         </div>
                                     </div>
-                                    <p className="text-sm font-black text-black">{order.total.toFixed(2)} MAD</p>
+                                    <p className="text-sm font-black text-black">{order.total.toFixed(2)} درهم</p>
                                 </div>
                             ))}
                         </div>

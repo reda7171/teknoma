@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { ArrowLeft, Save } from 'lucide-react'
 import { createBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
+import { getCategoryTree } from '@/lib/actions/category-tree'
+import type { CategoryTree } from '@/lib/constants/categories'
 import ImageInput from '@/components/admin/ImageInput'
 
 export default function BookForm() {
@@ -20,6 +22,9 @@ export default function BookForm() {
     const authorInputRef = useRef<HTMLDivElement>(null)
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
+    const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
+    const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
+    const mainCategories = Object.keys(categoryTree)
 
     useEffect(() => {
         getPurchaseLots().then(data => {
@@ -27,6 +32,9 @@ export default function BookForm() {
         }).catch(console.error)
         fetchAllAuthors().then(res => {
             if (res.success && res.data) setAuthors(res.data)
+        }).catch(console.error)
+        getCategoryTree().then(tree => {
+            setCategoryTree(tree)
         }).catch(console.error)
     }, [])
 
@@ -91,6 +99,7 @@ export default function BookForm() {
             stock: parseInt(formData.get('stock') as string),
             image: imageUrl,
             category: formData.get('category') as string || undefined,
+            subCategory: formData.get('subCategory') as string || undefined,
             language: formData.get('language') as string || 'fr',
             previewUrl: formData.get('previewUrl') as string || undefined,
             isOriginal: formData.get('isOriginal') !== 'false', // Par défaut true
@@ -297,7 +306,7 @@ export default function BookForm() {
                     {/* Prix */}
                     <div>
                         <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                            Prix de Vente (MAD) <span className="text-red-500">*</span>
+                            Prix de Vente (درهم) <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
@@ -353,14 +362,14 @@ export default function BookForm() {
                                     <option value="0">-- Choisir un lot ou saisir manuellement --</option>
                                     {lots.map(lot => (
                                         <option key={lot.id} value={lot.unitCost || 0}>
-                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} MAD/livre` : ''}
+                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} درهم/livre` : ''}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                             <div>
                                 <label htmlFor="costPrice" className="block text-xs font-bold text-gray-600 mb-1">
-                                    Coût unitaire appliqué (MAD)
+                                    Coût unitaire appliqué (درهم)
                                 </label>
                                 <input
                                     type="number"
@@ -393,41 +402,41 @@ export default function BookForm() {
                         />
                     </div>
 
-                    {/* Catégorie */}
-                    <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                            Catégorie
-                        </label>
-                        <select
-                            id="category"
-                            name="category"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">Sélectionner une catégorie</option>
-                            <option value="Développement personnel">Développement personnel</option>
-                            <option value="Business">Business</option>
-                            <option value="Productivité">Productivité</option>
-                            <option value="Leadership">Leadership</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Psychologie">Psychologie</option>
-                            <option value="Histoire">Histoire</option>
-                            <option value="Stratégie">Stratégie</option>
-                            <option value="Roman">Roman</option>
-                            <option value="Science-Fiction">Science-Fiction</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="Thriller / Policier">Thriller / Policier</option>
-                            <option value="Manga">Manga</option>
-                            <option value="Bande dessinée">Bande dessinée</option>
-                            <option value="Biographie">Biographie</option>
-                            <option value="Santé & Bien-être">Santé & Bien-être</option>
-                            <option value="Cuisine">Cuisine</option>
-                            <option value="Informatique & Tech">Informatique & Tech</option>
-                            <option value="Religion & Spiritualité">Religion & Spiritualité</option>
-                            <option value="Philosophie">Philosophie</option>
-                            <option value="Art & Photographie">Art & Photographie</option>
-                            <option value="Enfant">Enfant</option>
-                            <option value="Enfants & Jeunesse">Enfants & Jeunesse</option>
-                        </select>
+                    {/* Catégorie et Sous-catégorie */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                                Catégorie Principale
+                            </label>
+                            <select
+                                id="category"
+                                name="category"
+                                value={selectedMainCategory}
+                                onChange={(e) => setSelectedMainCategory(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Sélectionner une catégorie</option>
+                                {mainCategories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 mb-2">
+                                Sous-catégorie
+                            </label>
+                            <select
+                                id="subCategory"
+                                name="subCategory"
+                                disabled={!selectedMainCategory}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                            >
+                                <option value="">Sélectionner une sous-catégorie</option>
+                                {selectedMainCategory && categoryTree[selectedMainCategory]?.map(subCat => (
+                                    <option key={subCat} value={subCat}>{subCat}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     {/* Langue du Livre */}

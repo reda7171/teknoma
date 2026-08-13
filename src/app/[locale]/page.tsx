@@ -212,7 +212,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         image: 'https://riwaya.store/og-image.jpg',
         url: 'https://riwaya.store',
         telephone: '+212 702-220575',
-        priceRange: '50 MAD - 500 MAD',
+        priceRange: '50 درهم - 500 درهم',
         address: {
           '@type': 'PostalAddress',
           streetAddress: 'Rabat',
@@ -234,7 +234,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           closes: '22:00',
         },
         paymentAccepted: 'Cash on Delivery',
-        currenciesAccepted: 'MAD',
+        currenciesAccepted: 'درهم',
       },
       {
         '@type': 'WebSite',
@@ -275,7 +275,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             offers: {
               '@type': 'Offer',
               price: book.price,
-              priceCurrency: 'MAD',
+              priceCurrency: 'درهم',
               availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
               seller: {
                 '@id': 'https://riwaya.store/#organization',

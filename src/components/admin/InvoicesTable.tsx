@@ -76,7 +76,7 @@ export default function InvoicesTable({ invoices }: { invoices: Invoice[] }) {
                             <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-8">
                                 <div className="text-right">
                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Montant</p>
-                                    <p className="font-black text-xl text-black">{invoice.amount.toFixed(2)} MAD</p>
+                                    <p className="font-black text-xl text-black">{invoice.amount.toFixed(2)} درهم</p>
                                 </div>
                                 
                                 <div className="text-right">
@@ -101,7 +101,7 @@ export default function InvoicesTable({ invoices }: { invoices: Invoice[] }) {
                                         <div key={order.id} className="bg-white p-4 border border-gray-200 rounded-xl">
                                             <div className="flex justify-between items-start mb-2">
                                                 <span className="font-bold text-sm text-gray-900 truncate pr-2" title={order.fullName}>{order.fullName}</span>
-                                                <span className="font-black text-emerald-600 shrink-0">{order.total.toFixed(2)} MAD</span>
+                                                <span className="font-black text-emerald-600 shrink-0">{order.total.toFixed(2)} درهم</span>
                                             </div>
                                             <p className="text-xs text-gray-500">
                                                 {order.trackingID || 'Sans numéro'} • {order.shippingCompany || 'Standard'}

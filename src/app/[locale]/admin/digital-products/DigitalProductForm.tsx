@@ -224,7 +224,7 @@ export default function DigitalProductForm({ product }: { product?: Product } = 
         <h2 className="text-lg font-bold text-gray-900">Prix</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className={LABEL_CLASS}>Prix (MAD) *</label>
+            <label className={LABEL_CLASS}>Prix (درهم) *</label>
             <input
               required
               type="number"
@@ -236,7 +236,7 @@ export default function DigitalProductForm({ product }: { product?: Product } = 
             />
           </div>
           <div>
-            <label className={LABEL_CLASS}>Prix original (MAD) — pour afficher la réduction</label>
+            <label className={LABEL_CLASS}>Prix original (درهم) — pour afficher la réduction</label>
             <input
               type="number"
               step="0.01"

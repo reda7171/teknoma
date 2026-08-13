@@ -13,7 +13,7 @@ export async function getReplacementBooks(originalBookId: string, limit: number 
             return []
         }
 
-        // Trouver des livres en stock, avec prix <= prix d'origine + 20MAD (ou similaire), même langue
+        // Trouver des livres en stock, avec prix <= prix d'origine + 20درهم (ou similaire), même langue
         const books = await prisma.book.findMany({
             where: {
                 active: true,

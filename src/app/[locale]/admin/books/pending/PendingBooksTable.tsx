@@ -139,7 +139,7 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
                                     )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="font-medium text-gray-900">{book.price.toFixed(2)} MAD</div>
+                                    <div className="font-medium text-gray-900">{book.price.toFixed(2)} درهم</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="text-sm text-gray-600">

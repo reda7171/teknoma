@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
         const text = `📊 <b>Résumé Journalier - Riwaya</b>\n\n` +
             `📅 <b>Date:</b> ${startOfDay.toLocaleDateString('fr-FR')}\n` +
             `📦 <b>Commandes:</b> ${orders.length}\n` +
-            `💰 <b>Chiffre d'Affaires:</b> ${totalRevenue.toFixed(2)} MAD\n\n` +
+            `💰 <b>Chiffre d'Affaires:</b> ${totalRevenue.toFixed(2)} درهم\n\n` +
             (bestSeller ? `🔥 <b>Top Vente:</b> ${bestSeller.title} (${bestSeller.qty} expl.)\n` : '') +
             `🚀 <i>Continuez comme ça !</i>`
 

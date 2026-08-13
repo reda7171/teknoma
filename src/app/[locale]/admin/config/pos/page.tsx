@@ -22,7 +22,7 @@ export default async function POSConfigPage() {
     const posStorePhone = await getSetting('pos_store_phone') || ''
     const posReceiptMessage = await getSetting('pos_receipt_message') || 'Merci pour votre visite !'
     const posTaxRate = await getSetting('pos_tax_rate') || '0'
-    const posCurrency = await getSetting('pos_currency') || 'MAD'
+    const posCurrency = await getSetting('pos_currency') || 'درهم'
     const posEnablePrint = await getSetting('pos_enable_print') || 'true'
     const posPrinterType = await getSetting('pos_printer_type') || 'bluetooth'
     const posDefaultDiscount = await getSetting('pos_default_discount') || '0'
@@ -34,6 +34,7 @@ export default async function POSConfigPage() {
     const posDefaultTab = await getSetting('pos_default_tab') || 'ALL'
     const posAllowOutOfStock = await getSetting('pos_allow_out_of_stock') || 'false'
     const posRequireCustomer = await getSetting('pos_require_customer') || 'true'
+    const posEnableSessions = await getSetting('pos_enable_sessions') || 'false'
 
     return (
         <div className="space-y-12">
@@ -77,6 +78,7 @@ export default async function POSConfigPage() {
                         initialDefaultTab={posDefaultTab}
                         initialAllowOutOfStock={posAllowOutOfStock}
                         initialRequireCustomer={posRequireCustomer}
+                        initialEnableSessions={posEnableSessions}
                     />
                 </div>
             </div>

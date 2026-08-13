@@ -78,7 +78,7 @@ export default async function SellerOrdersPage() {
                                         <div className="mt-auto pt-6 border-t border-gray-50">
                                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-1">Montant Total</p>
                                             <div className="text-3xl font-black text-black tracking-tighter">
-                                                {order.total.toFixed(2)} <span className="text-sm">MAD</span>
+                                                {order.total.toFixed(2)} <span className="text-sm">درهم</span>
                                             </div>
                                         </div>
                                     </div>
@@ -94,7 +94,7 @@ export default async function SellerOrdersPage() {
                                                     </div>
                                                     <div className="flex flex-col justify-center min-w-0">
                                                         <h4 className="text-xs font-black text-black truncate group-hover/item:text-amber-600 transition-colors">{item.book?.title}</h4>
-                                                        <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-tight">{item.quantity} x {item.price.toFixed(2)} MAD</p>
+                                                        <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-tight">{item.quantity} x {item.price.toFixed(2)} درهم</p>
                                                     </div>
                                                 </div>
                                             ))}

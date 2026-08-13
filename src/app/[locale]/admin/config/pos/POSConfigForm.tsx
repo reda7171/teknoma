@@ -22,7 +22,8 @@ export default function POSConfigForm({
     initialDefaultGridCols,
     initialDefaultTab,
     initialAllowOutOfStock,
-    initialRequireCustomer
+    initialRequireCustomer,
+    initialEnableSessions
 }: { 
     initialStoreName: string, 
     initialStoreAddress: string, 
@@ -40,7 +41,8 @@ export default function POSConfigForm({
     initialDefaultGridCols: string,
     initialDefaultTab: string,
     initialAllowOutOfStock: string,
-    initialRequireCustomer: string
+    initialRequireCustomer: string,
+    initialEnableSessions: string
 }) {
     const [storeName, setStoreName] = useState(initialStoreName)
     const [storeAddress, setStoreAddress] = useState(initialStoreAddress)
@@ -59,6 +61,7 @@ export default function POSConfigForm({
     const [defaultTab, setDefaultTab] = useState(initialDefaultTab)
     const [allowOutOfStock, setAllowOutOfStock] = useState(initialAllowOutOfStock === 'true')
     const [requireCustomer, setRequireCustomer] = useState(initialRequireCustomer === 'true')
+    const [enableSessions, setEnableSessions] = useState(initialEnableSessions === 'true')
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState('')
     const router = useRouter()
@@ -86,6 +89,7 @@ export default function POSConfigForm({
             await updateSetting('pos_default_tab', defaultTab, 'config', 'Onglet par défaut')
             await updateSetting('pos_allow_out_of_stock', allowOutOfStock ? 'true' : 'false', 'config', 'Autoriser la vente hors stock')
             await updateSetting('pos_require_customer', requireCustomer ? 'true' : 'false', 'config', 'Exiger les informations client')
+            await updateSetting('pos_enable_sessions', enableSessions ? 'true' : 'false', 'config', 'Activer les Sessions de Caisse')
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
         } catch (error) {
@@ -193,7 +197,7 @@ export default function POSConfigForm({
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="MAD"
+                        placeholder="درهم"
                     />
                 </div>
 
@@ -249,6 +253,20 @@ export default function POSConfigForm({
                     <p className="mt-2 text-xs text-gray-500 font-medium">
                         Ces catégories s'afficheront en premier sur la page du point de vente.
                     </p>
+                    <div className="mt-4">
+                        <label className="flex items-center justify-between cursor-pointer p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
+                            <div className="space-y-1">
+                                <span className="block text-sm font-bold text-black">Sessions de Caisse</span>
+                                <span className="block text-xs text-gray-500 font-medium">Fonds de tiroir et calcul des écarts à la fermeture</span>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={enableSessions}
+                                onChange={(e) => setEnableSessions(e.target.checked)}
+                                className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
+                            />
+                        </label>
+                    </div>
                 </div>
 
                 <div className="md:col-span-1">

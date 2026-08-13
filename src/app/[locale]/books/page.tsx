@@ -2,6 +2,7 @@ import { getBooks, getBookCategories, getBooksCount, getAllAuthors } from '@/lib
 import { getPopularPacks } from '@/lib/db/packs'
 import { getCategoryConfigByName } from '@/lib/actions/categories'
 import { getSetting } from '@/lib/actions/site-settings'
+import { getCategoryTree } from '@/lib/actions/category-tree'
 import { parsePriceFilter } from '@/lib/utils/search'
 import { prisma } from '@/lib/prisma'
 import Header from '@/components/HeaderWithUser'
@@ -50,6 +51,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
 
 interface SearchParams {
     category?: string
+    subCategory?: string
     search?: string
     language?: string
     inStock?: string
@@ -113,6 +115,7 @@ export default async function BooksPage({
 
     const filterObj = {
         category: params.category,
+        subCategory: params.subCategory,
         search: priceFilter.cleanQuery,
         minPrice: priceFilter.minPrice,
         maxPrice: priceFilter.maxPrice,
@@ -122,16 +125,17 @@ export default async function BooksPage({
         author: params.author,
     };
 
-    const [books, totalCount, categories, categoryConfig, authors, adsenseEnabled, adsensePublisherId, adsenseSlotBetweenBooks, popularPacks] = await Promise.all([
+    const [books, totalCount, categoryTree, categoryConfig, authors, adsenseEnabled, adsensePublisherId, adsenseSlotBetweenBooks, popularPacks, categoryCounts] = await Promise.all([
         getBooks(filterObj),
         getBooksCount(filterObj),
-        getBookCategories(),
+        getCategoryTree(),
         params.category ? getCategoryConfigByName(params.category) : null,
         getAllAuthors(),
         getSetting('adsense_enabled'),
         getSetting('adsense_publisher_id'),
         getSetting('adsense_slot_between_books'),
-        getPopularPacks(5)
+        getPopularPacks(5),
+        import('@/lib/db/books').then(m => m.getCategoryCounts())
     ])
 
     const isEnfants = params.category?.toLowerCase() === 'enfants'
@@ -162,7 +166,8 @@ export default async function BooksPage({
                     {/* Sidebar / Mobile Sticky Filters */}
                     <BooksFilters 
                         params={params}
-                        categories={categories}
+                        categoryTree={categoryTree}
+                        categoryCounts={categoryCounts}
                         authors={authors}
                         languages={languages}
                         totalCount={totalCount}
@@ -213,6 +218,7 @@ export default async function BooksPage({
                                     initialBooks={books}
                                     initialFilters={{
                                         category: params.category,
+                                        subCategory: params.subCategory,
                                         search: priceFilter.cleanQuery,
                                         minPrice: priceFilter.minPrice,
                                         maxPrice: priceFilter.maxPrice,

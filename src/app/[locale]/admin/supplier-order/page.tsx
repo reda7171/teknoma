@@ -67,8 +67,8 @@ export default async function SupplierOrderPage({
           { label: 'Rupture stock', value: stats.outOfStock, icon: AlertTriangle, color: 'bg-red-100', alert: stats.outOfStock > 0 },
           { label: 'Stock ≤ 5', value: stats.lowStock, icon: ArrowUp, color: 'bg-orange-100', alert: stats.lowStock > 0 },
           { label: 'Best-sellers', value: stats.bestSellers, icon: TrendingUp, color: 'bg-amber-100', alert: false },
-          { label: 'Valeur (coût)', value: `${stats.totalStockValue.toFixed(0)} MAD`, icon: DollarSign, color: 'bg-blue-100', alert: false },
-          { label: 'Valeur (vente)', value: `${stats.totalRetailValue.toFixed(0)} MAD`, icon: ShoppingCart, color: 'bg-green-100', alert: false },
+          { label: 'Valeur (coût)', value: `${stats.totalStockValue.toFixed(0)} درهم`, icon: DollarSign, color: 'bg-blue-100', alert: false },
+          { label: 'Valeur (vente)', value: `${stats.totalRetailValue.toFixed(0)} درهم`, icon: ShoppingCart, color: 'bg-green-100', alert: false },
         ].map((s, i) => (
           <div key={i} className={`${s.color} rounded-2xl md:rounded-3xl p-4 md:p-5 border flex flex-col items-start ${s.alert ? 'border-red-300 ring-2 ring-red-200' : 'border-transparent'}`}>
             <s.icon className={`w-4 h-4 md:w-5 md:h-5 mb-2 ${s.alert ? 'text-red-600' : 'text-gray-600'}`} />
@@ -85,9 +85,9 @@ export default async function SupplierOrderPage({
             <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Commande recommandée</p>
             <p className="text-xl md:text-2xl font-black text-black">{toOrder.length} titres · {totalQty} exemplaires</p>
             <p className="text-xs md:text-sm text-gray-600 font-bold mt-1 flex flex-col sm:flex-row sm:gap-2">
-              <span>Coût estimé : <span className="text-red-600 font-black">{totalCost.toFixed(2)} MAD</span></span>
+              <span>Coût estimé : <span className="text-red-600 font-black">{totalCost.toFixed(2)} درهم</span></span>
               <span className="hidden sm:inline">{' · '}</span>
-              <span>Revenu potentiel : <span className="text-green-600 font-black">{totalRevenue.toFixed(2)} MAD</span></span>
+              <span>Revenu potentiel : <span className="text-green-600 font-black">{totalRevenue.toFixed(2)} درهم</span></span>
             </p>
           </div>
           <div className="text-left md:text-right w-full md:w-auto pt-4 md:pt-0 border-t border-amber-200/50 md:border-0">
@@ -179,7 +179,7 @@ export default async function SupplierOrderPage({
               </div>
               <div className="text-right">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Coût</p>
-                <p className="text-sm font-black text-red-600">{totalCost.toFixed(0)} MAD</p>
+                <p className="text-sm font-black text-red-600">{totalCost.toFixed(0)} درهم</p>
               </div>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default async function SupplierOrderPage({
                     <p className={`text-base font-black leading-none ${book.stock === 0 ? 'text-red-600' : book.stock <= 5 ? 'text-orange-500' : 'text-black'}`}>
                       {book.stock}
                     </p>
-                    <p className="text-[8px] text-amber-600 font-black mt-1 bg-amber-50 rounded-full px-1 py-0.5 inline-block border border-amber-100">Coût: {(book.stock * book.costPrice).toFixed(0)} MAD</p>
+                    <p className="text-[8px] text-amber-600 font-black mt-1 bg-amber-50 rounded-full px-1 py-0.5 inline-block border border-amber-100">Coût: {(book.stock * book.costPrice).toFixed(0)} درهم</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-2 text-center">
                     <p className="text-[7px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Ventes</p>
@@ -268,8 +268,8 @@ export default async function SupplierOrderPage({
                   <div className={`flex items-center justify-between pt-3 border-t ${isUrgent ? 'border-red-100' : 'border-gray-100'}`}>
                     <div>
                       <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Revenu estimé</p>
-                      <p className="font-black text-green-600 text-sm">{book.estimatedRevenue.toFixed(0)} MAD</p>
-                      <p className="text-[9px] text-gray-400">coût: {(book.recommendedQty * book.costPrice).toFixed(0)} MAD</p>
+                      <p className="font-black text-green-600 text-sm">{book.estimatedRevenue.toFixed(0)} درهم</p>
+                      <p className="text-[9px] text-gray-400">coût: {(book.recommendedQty * book.costPrice).toFixed(0)} درهم</p>
                     </div>
                     <div className="flex flex-col items-center">
                       <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">À commander</p>
@@ -346,7 +346,7 @@ export default async function SupplierOrderPage({
                         <span className={`text-lg font-black ${book.stock === 0 ? 'text-red-600' : book.stock <= 5 ? 'text-orange-500' : 'text-black'}`}>
                           {book.stock}
                         </span>
-                        <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mt-1 border border-amber-100">Coût: {(book.stock * book.costPrice).toFixed(0)} MAD</span>
+                        <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mt-1 border border-amber-100">Coût: {(book.stock * book.costPrice).toFixed(0)} درهم</span>
                       </div>
                     </td>
 
@@ -398,8 +398,8 @@ export default async function SupplierOrderPage({
                     <td className="px-6 py-4 text-right">
                       {book.recommendedQty > 0 ? (
                         <div>
-                          <p className="font-black text-green-600">{book.estimatedRevenue.toFixed(0)} MAD</p>
-                          <p className="text-[9px] text-gray-400 font-bold">coût: {(book.recommendedQty * book.costPrice).toFixed(0)} MAD</p>
+                          <p className="font-black text-green-600">{book.estimatedRevenue.toFixed(0)} درهم</p>
+                          <p className="text-[9px] text-gray-400 font-bold">coût: {(book.recommendedQty * book.costPrice).toFixed(0)} درهم</p>
                         </div>
                       ) : (
                         <span className="text-gray-300">—</span>

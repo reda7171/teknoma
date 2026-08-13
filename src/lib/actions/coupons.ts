@@ -113,7 +113,7 @@ export async function validateCoupon(code: string, cartTotal: number) {
     }
 
     if (coupon.minAmount && cartTotal < coupon.minAmount) {
-      return { success: false, error: `Le montant minimum pour ce code est de ${coupon.minAmount} MAD` }
+      return { success: false, error: `Le montant minimum pour ce code est de ${coupon.minAmount} درهم` }
     }
 
     return { success: true, coupon }

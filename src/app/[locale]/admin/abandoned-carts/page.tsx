@@ -86,7 +86,7 @@ export default async function AbandonedCartsPage() {
                             </p>
                             <div className="mt-6 pt-6 border-t border-red-100 flex justify-between items-center">
                                 <span className="text-[10px] font-black text-red-900/40 uppercase tracking-widest">Valeur Potentielle</span>
-                                <span className="text-2xl font-black text-red-600 tracking-tighter">{cart.total} MAD</span>
+                                <span className="text-2xl font-black text-red-600 tracking-tighter">{cart.total} درهم</span>
                             </div>
                             <ShoppingCart className="absolute top-8 right-8 w-12 h-12 text-red-600/5 rotate-12" />
                         </div>

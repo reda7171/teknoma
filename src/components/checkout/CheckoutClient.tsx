@@ -203,8 +203,8 @@ export default function CheckoutClient({
             const minAmountMsg = locale === 'ar' 
                 ? `الحد الأدنى للطلب هو ${minOrderAmount} درهم.` 
                 : locale === 'en' 
-                ? `The minimum order amount is ${minOrderAmount} MAD.` 
-                : `Le montant minimum du panier pour commander est de ${minOrderAmount} MAD.`
+                ? `The minimum order amount is ${minOrderAmount} درهم.` 
+                : `Le montant minimum du panier pour commander est de ${minOrderAmount} درهم.`
                 
             setError(minAmountMsg)
             showNotification(minAmountMsg, 'error')
@@ -642,7 +642,7 @@ export default function CheckoutClient({
                                         </div>
                                         <div className="flex-1 py-1">
                                             <p className="text-sm font-black text-black line-clamp-2 leading-tight tracking-tight">{item.title}</p>
-                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">{item.price} MAD</p>
+                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">{item.price} درهم</p>
                                         </div>
                                     </div>
                                 ))}
@@ -666,7 +666,7 @@ export default function CheckoutClient({
                                         </div>
                                         <div className="flex-1 py-1">
                                             <p className="text-sm font-black text-indigo-900 line-clamp-2 leading-tight tracking-tight">{eligibleGift.name}</p>
-                                            <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mt-2">{eligibleGift.minAmount > 0 ? `Palier: ${eligibleGift.minAmount} MAD` : 'Cadeau de bienvenue'}</p>
+                                            <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mt-2">{eligibleGift.minAmount > 0 ? `Palier: ${eligibleGift.minAmount} درهم` : 'Cadeau de bienvenue'}</p>
                                         </div>
                                     </div>
                                 )}
@@ -687,14 +687,14 @@ export default function CheckoutClient({
                         <div className="space-y-5 pt-10 border-t border-gray-50">
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
                                 <span>{t('SelectionSummary')}</span>
-                                <span className="text-black">{subtotal.toFixed(0)} MAD</span>
+                                <span className="text-black">{subtotal.toFixed(0)} درهم</span>
                             </div>
                             {discountAmount > 0 && (
                                 <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-pixio-pink bg-black px-4 py-3 rounded-2xl">
                                     <span className="flex items-center gap-2">
                                         <Ticket className="w-4 h-4" /> {t('CodeApplied')}
                                     </span>
-                                    <span>-{discountAmount.toFixed(0)} MAD</span>
+                                    <span>-{discountAmount.toFixed(0)} درهم</span>
                                 </div>
                             )}
                             {instantDiscount > 0 && (
@@ -702,7 +702,7 @@ export default function CheckoutClient({
                                     <span className="flex items-center gap-2">
                                         <Gift className="w-4 h-4" /> Offre Instantanée
                                     </span>
-                                    <span>-{instantDiscount.toFixed(0)} MAD</span>
+                                    <span>-{instantDiscount.toFixed(0)} درهم</span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
@@ -710,14 +710,14 @@ export default function CheckoutClient({
                                 {shippingFee === 0 ? (
                                     <span className="text-black bg-pixio-yellow px-2 py-1 rounded-md">{t('Free')}</span>
                                 ) : (
-                                    <span className="text-black">{shippingFee} MAD</span>
+                                    <span className="text-black">{shippingFee} درهم</span>
                                 )}
                             </div>
                             <div className="pt-6 border-t border-gray-50">
                                 <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-widest rtl:tracking-normal mb-1">{t('TotalAmount')}</p>
                                 <div className="flex items-baseline justify-between">
                                     <p className="text-4xl font-black text-black tracking-tighter leading-none">{finalTotal.toFixed(0)}</p>
-                                    <p className="text-[10px] rtl:text-sm font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">MAD</p>
+                                    <p className="text-[10px] rtl:text-sm font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">درهم</p>
                                 </div>
                             </div>
                         </div>

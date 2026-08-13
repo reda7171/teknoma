@@ -39,7 +39,7 @@ export async function GET(req: Request) {
         }
 
         // Générer CSV
-        const headers = ['Numéro', 'Date', 'Client', 'Statut', 'Montant (MAD)', 'Produits']
+        const headers = ['Numéro', 'Date', 'Client', 'Statut', 'Montant (درهم)', 'Produits']
         const rows = allOrders.map((o: any) => {
             const orderId = o.number || o.orderId || ''
             const date = o.createdAt ? new Date(o.createdAt).toLocaleDateString('fr-FR') : ''

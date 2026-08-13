@@ -51,13 +51,13 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "*/15 * * * *"
+              "expression": "*/2 * * * *"
             }
           ]
         }
       },
       "id": "trigger_new_orders",
-      "name": "Schedule Trigger (Toutes les 15m)",
+      "name": "Schedule Trigger (Toutes les 2m)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
       "position": [

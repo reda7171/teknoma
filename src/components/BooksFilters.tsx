@@ -112,23 +112,38 @@ import { useTranslations } from 'next-intl'
 interface BooksFiltersProps {
     params: {
         category?: string
+        subCategory?: string
         search?: string
         language?: string
         inStock?: string
         author?: string
     }
-    categories: string[]
+    categoryTree: Record<string, string[]>
+    categoryCounts: Record<string, { total: number, subs: Record<string, number> }>
     authors: string[]
     languages: { code: string; label: string }[]
     totalCount: number
 }
 
-export default function BooksFilters({ params, categories, authors, languages, totalCount }: BooksFiltersProps) {
+export default function BooksFilters({ params, categoryTree, categoryCounts, authors, languages, totalCount }: BooksFiltersProps) {
     const t = useTranslations('BooksPage')
     const tCats = useTranslations('Categories')
     const tCommon = useTranslations('Common')
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isAllCatsRevealed, setIsAllCatsRevealed] = useState(false)
+    const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
+        const initial: Record<string, boolean> = {};
+        if (params.category) {
+            initial[params.category] = true;
+        }
+        return initial;
+    });
+
+    const toggleCategory = (category: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
+    }
     const router = useRouter()
 
     const handleAuthorChange = (value: string) => {
@@ -298,7 +313,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
                     <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openSections.cats ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.cats && (
-                    <div className="flex flex-wrap gap-2 lg:flex-col lg:gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
                         <Link
                             href={`/books?${new URLSearchParams({
                                 ...(params.language ? { language: params.language } : {}),
@@ -315,27 +330,86 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         >
                             {tCats('All')}
                         </Link>
-                        {categories.slice(0, isAllCatsRevealed ? categories.length : 3).map((category) => (
-                            <Link
-                                key={category}
-                                href={`/books?${new URLSearchParams({
-                                    category: category,
-                                    ...(params.language ? { language: params.language } : {}),
-                                    ...(params.search ? { search: params.search } : {}),
-                                    ...(params.author ? { author: params.author } : {}),
-                                    ...(params.inStock ? { inStock: params.inStock } : {})
-                                }).toString()}`}
-                                scroll={false}
-                                className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${params.category === category
-                                    ? 'bg-black text-white shadow-lg'
-                                    : 'bg-[#F8F9FA] text-gray-400 hover:text-black lg:hover:bg-pixio-cream/50'
-                                    }`}
-                                onClick={() => isMobile && setIsMobileMenuOpen(false)}
-                            >
-                                {tCats.has(category as any) ? tCats(category as any) : category}
-                            </Link>
-                        ))}
-                        {categories.length > 3 && (
+                        {Object.entries(categoryTree).slice(0, isAllCatsRevealed ? Object.keys(categoryTree).length : 3).map(([category, subcategories]) => {
+                            const isExpanded = expandedCategories[category];
+                            const isSelected = params.category === category;
+                            const countInfo = categoryCounts?.[category];
+                            
+                            return (
+                                <div key={category} className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            href={`/books?${new URLSearchParams({
+                                                category: category,
+                                                ...(params.language ? { language: params.language } : {}),
+                                                ...(params.search ? { search: params.search } : {}),
+                                                ...(params.author ? { author: params.author } : {}),
+                                                ...(params.inStock ? { inStock: params.inStock } : {})
+                                            }).toString()}`}
+                                            scroll={false}
+                                            className={`flex-1 flex justify-between items-center px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${isSelected && !params.subCategory
+                                                ? 'bg-black text-white shadow-lg'
+                                                : 'bg-[#F8F9FA] text-gray-400 hover:text-black lg:hover:bg-pixio-cream/50'
+                                                }`}
+                                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                        >
+                                            <span>{tCats.has(category as any) ? tCats(category as any) : category}</span>
+                                            {countInfo && (
+                                                <span className={`text-[9px] px-2 py-0.5 rounded-full ${isSelected && !params.subCategory ? 'bg-white/20' : 'bg-gray-200'}`}>
+                                                    {countInfo.total}
+                                                </span>
+                                            )}
+                                        </Link>
+                                        
+                                        {subcategories && subcategories.length > 0 && (
+                                            <button
+                                                onClick={(e) => toggleCategory(category, e)}
+                                                className="p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                                            >
+                                                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {isExpanded && subcategories && subcategories.length > 0 && (
+                                        <div className="flex flex-col gap-1 pl-4 mt-1 border-l-2 border-gray-100 ml-4 mb-2">
+                                            {subcategories.map(sub => {
+                                                const isSubSelected = params.category === category && params.subCategory === sub;
+                                                const subCount = countInfo?.subs?.[sub];
+                                                
+                                                return (
+                                                    <Link
+                                                        key={sub}
+                                                        href={`/books?${new URLSearchParams({
+                                                            category: category,
+                                                            subCategory: sub,
+                                                            ...(params.language ? { language: params.language } : {}),
+                                                            ...(params.search ? { search: params.search } : {}),
+                                                            ...(params.author ? { author: params.author } : {}),
+                                                            ...(params.inStock ? { inStock: params.inStock } : {})
+                                                        }).toString()}`}
+                                                        scroll={false}
+                                                        className={`flex justify-between items-center px-4 py-2.5 rounded-xl text-[9px] rtl:text-xs rtl:tracking-normal font-bold uppercase tracking-widest transition-all ${isSubSelected
+                                                            ? 'bg-gray-800 text-white shadow-md'
+                                                            : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
+                                                            }`}
+                                                        onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                                    >
+                                                        <span>{sub}</span>
+                                                        {subCount !== undefined && (
+                                                            <span className={`text-[8px] px-2 py-0.5 rounded-full ${isSubSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                                                {subCount}
+                                                            </span>
+                                                        )}
+                                                    </Link>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                        {Object.keys(categoryTree).length > 3 && (
                             <button
                                 onClick={() => setIsAllCatsRevealed(!isAllCatsRevealed)}
                                 className="px-4 py-3 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
@@ -348,7 +422,7 @@ export default function BooksFilters({ params, categories, authors, languages, t
             </div>
 
             {/* Active Filters */}
-            {(params.category || params.search || params.language || params.inStock) && (
+            {(params.category || params.subCategory || params.search || params.language || params.inStock) && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
@@ -398,14 +472,14 @@ export default function BooksFilters({ params, categories, authors, languages, t
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             <span className="hidden sm:inline">{t('Filters')}</span>
-                            {(params.category || params.language || params.author || params.inStock) && (
+                            {(params.category || params.subCategory || params.language || params.author || params.inStock) && (
                                 <span className="w-2 h-2 rounded-full bg-red-500" />
                             )}
                         </button>
                     </div>
 
                     {/* Active Chips Horizontal Scroll */}
-                    {(params.category || params.language || params.search || params.author || params.inStock) && (
+                    {(params.category || params.subCategory || params.language || params.search || params.author || params.inStock) && (
                         <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
                             {params.category && (
                                 <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">

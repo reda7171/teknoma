@@ -85,13 +85,13 @@ export default function OrdersPageClient({
 
                 <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total (CA)</p>
-                    <p className="text-2xl font-black text-blue-600 mt-2">{stats.totalRevenue.toFixed(2)} MAD</p>
+                    <p className="text-2xl font-black text-blue-600 mt-2">{stats.totalRevenue.toFixed(2)} درهم</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Marge Nette (Est.)</p>
                     <p className={`text-2xl font-black mt-2 ${stats.totalNetProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {stats.totalNetProfit > 0 ? '+' : ''}{stats.totalNetProfit.toFixed(2)} MAD
+                        {stats.totalNetProfit > 0 ? '+' : ''}{stats.totalNetProfit.toFixed(2)} درهم
                     </p>
                 </div>
             </div>

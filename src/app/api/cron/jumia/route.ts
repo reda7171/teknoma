@@ -74,7 +74,7 @@ export async function GET(req: Request) {
                             const productName = item.product?.name || item.name || item.productName || 'Article inconnu'
                             const quantity = item.quantity || 1
                             const itemPrice = item.price?.value || item.price || item.unitPrice || '0'
-                            itemsList += `- ${quantity}x ${productName} (*${itemPrice} MAD*)\n`
+                            itemsList += `- ${quantity}x ${productName} (*${itemPrice} درهم*)\n`
                         }
                     }
                 } catch (err) {
@@ -84,7 +84,7 @@ export async function GET(req: Request) {
                 const message = `🛍️ *Nouvelle Commande Jumia !*\n\n` +
                                 `📦 *Numéro :* \`${orderId}\`\n` +
                                 `👤 *Client :* ${customerName}\n` +
-                                `💰 *Total :* ${price} MAD\n` +
+                                `💰 *Total :* ${price} درهم\n` +
                                 `📊 *Statut :* ${status}\n\n` +
                                 `🕒 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}` + itemsList
 

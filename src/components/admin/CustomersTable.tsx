@@ -194,7 +194,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                         </td>
                                         <td className="px-8 py-7 text-right">
                                             <p className="text-xl font-black text-black tracking-tighter">
-                                                {customer.totalSpent.toFixed(0)} <span className="text-[10px] text-gray-400 uppercase ml-1">MAD</span>
+                                                {customer.totalSpent.toFixed(0)} <span className="text-[10px] text-gray-400 uppercase ml-1">درهم</span>
                                             </p>
                                         </td>
                                         <td className="px-8 py-7 text-right">

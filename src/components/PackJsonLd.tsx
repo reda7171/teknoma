@@ -53,8 +53,8 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
         "text": locale === 'ar'
           ? `سعر باقة ${pack.name} هو ${pack.price} درهم مغربي. الدفع عند الاستلام.`
           : locale === 'en'
-            ? `The ${pack.name} pack costs ${pack.price} MAD. Payment on delivery.`
-            : `Le pack ${pack.name} est à ${pack.price} MAD. Paiement à la livraison.`
+            ? `The ${pack.name} pack costs ${pack.price} درهم. Payment on delivery.`
+            : `Le pack ${pack.name} est à ${pack.price} درهم. Paiement à la livraison.`
       }
     },
     {
@@ -92,7 +92,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
       "offers": {
         "@type": "Offer",
         "price": pack.price,
-        "priceCurrency": "MAD",
+        "priceCurrency": "درهم",
         "availability": "https://schema.org/InStock",
         "url": packUrl,
         "seller": {
@@ -115,7 +115,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
           "returnShippingFeesAmount": {
             "@type": "MonetaryAmount",
             "value": 35,
-            "currency": "MAD"
+            "currency": "درهم"
           }
         },
         "shippingDetails": {
@@ -123,7 +123,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
           "shippingRate": {
             "@type": "MonetaryAmount",
             "value": 35,
-            "currency": "MAD"
+            "currency": "درهم"
           },
           "shippingDestination": {
             "@type": "DefinedRegion",

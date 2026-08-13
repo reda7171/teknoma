@@ -58,12 +58,12 @@ export default function GiftsTable({ gifts }: { gifts: any[] }) {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg text-sm">
-                                        {gift.price} MAD
+                                        {gift.price} درهم
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="font-bold text-gray-500 text-sm">
-                                        {gift.minAmount > 0 ? `${gift.minAmount} MAD` : 'Sans minimum'}
+                                        {gift.minAmount > 0 ? `${gift.minAmount} درهم` : 'Sans minimum'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">

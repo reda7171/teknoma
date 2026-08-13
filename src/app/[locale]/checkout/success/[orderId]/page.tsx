@@ -106,29 +106,29 @@ export default async function OrderSuccessPage({
                                                     <p className="text-xs font-bold text-gray-400">Quantité : {item.quantity}</p>
                                                 </div>
                                             </div>
-                                            <p className="text-sm font-black text-black whitespace-nowrap ml-4">{item.price * item.quantity} MAD</p>
+                                            <p className="text-sm font-black text-black whitespace-nowrap ml-4">{item.price * item.quantity} درهم</p>
                                         </div>
                                     ))}
                                 </div>
                                 
                                 <div className="flex justify-between items-center mb-2">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sous-total</p>
-                                    <p className="text-sm font-bold text-black">{order.subtotal} MAD</p>
+                                    <p className="text-sm font-bold text-black">{order.subtotal} درهم</p>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Livraison</p>
-                                    <p className="text-sm font-bold text-black">{order.shippingFees === 0 ? 'Gratuite' : `${order.shippingFees} MAD`}</p>
+                                    <p className="text-sm font-bold text-black">{order.shippingFees === 0 ? 'Gratuite' : `${order.shippingFees} درهم`}</p>
                                 </div>
                                 {order.discount > 0 && (
                                     <div className="flex justify-between items-center mb-4">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-green-500">Réduction</p>
-                                        <p className="text-sm font-bold text-green-500">-{order.discount} MAD</p>
+                                        <p className="text-sm font-bold text-green-500">-{order.discount} درهم</p>
                                     </div>
                                 )}
                                 
                                 <div className="flex justify-between items-end pt-4 border-t border-gray-100 border-dashed">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('TotalPaid')}</p>
-                                    <p className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{order.total} <span className="text-[10px] uppercase font-black text-gray-400 ml-1">MAD</span></p>
+                                    <p className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{order.total} <span className="text-[10px] uppercase font-black text-gray-400 ml-1">درهم</span></p>
                                 </div>
                             </div>
 

@@ -115,7 +115,7 @@ export default function JumiaPayoutsClient() {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="font-bold text-gray-900 flex items-center justify-end gap-1">
-                                                {stmt.payout?.amount ?? stmt.closingBalance ?? stmt.amount ?? '0'} {stmt.payout?.currency ?? stmt.currency ?? 'MAD'}
+                                                {stmt.payout?.amount ?? stmt.closingBalance ?? stmt.amount ?? '0'} {stmt.payout?.currency ?? stmt.currency ?? 'درهم'}
                                             </div>
                                         </td>
                                     </tr>

@@ -67,8 +67,8 @@ export default function ArchivePeriodButton({
                             </div>
                             
                             <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                                <p className="text-emerald-800 text-sm font-medium">Bénéfice Net : <span className="font-black">{stats.netProfit.toFixed(2)} MAD</span></p>
-                                <p className="text-emerald-800 text-sm font-medium">Part chacun : <span className="font-black">{stats.shareReda.toFixed(2)} MAD</span></p>
+                                <p className="text-emerald-800 text-sm font-medium">Bénéfice Net : <span className="font-black">{stats.netProfit.toFixed(2)} درهم</span></p>
+                                <p className="text-emerald-800 text-sm font-medium">Part chacun : <span className="font-black">{stats.shareReda.toFixed(2)} درهم</span></p>
                             </div>
                         </div>
 

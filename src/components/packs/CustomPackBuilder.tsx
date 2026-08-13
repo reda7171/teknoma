@@ -172,7 +172,7 @@ export default function CustomPackBuilder({ availableBooks }: CustomPackBuilderP
                                                         <div className="p-3 text-center">
                                                             <p className="text-xs font-bold text-black line-clamp-2 leading-tight mb-1">{book.title}</p>
                                                             <p className="text-[10px] text-gray-500 truncate">{book.author}</p>
-                                                            <p className="text-xs font-black text-black mt-2">{book.price} MAD</p>
+                                                            <p className="text-xs font-black text-black mt-2">{book.price} درهم</p>
                                                         </div>
                                                     </div>
                                                 )
@@ -206,7 +206,7 @@ export default function CustomPackBuilder({ availableBooks }: CustomPackBuilderP
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-xs font-bold text-black truncate">{book.title}</p>
                                                     <p className="text-[10px] text-gray-500 truncate">{book.author}</p>
-                                                    <p className="text-sm font-black text-black mt-1">{book.price} MAD</p>
+                                                    <p className="text-sm font-black text-black mt-1">{book.price} درهم</p>
                                                 </div>
                                                 <button 
                                                     onClick={() => toggleBook(book)}
@@ -222,13 +222,13 @@ export default function CustomPackBuilder({ availableBooks }: CustomPackBuilderP
                                 <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
                                     <div className="flex justify-between items-center text-sm font-medium text-gray-500">
                                         <span>{t('RegularPrice')}</span>
-                                        <span>{subtotal.toFixed(2)} MAD</span>
+                                        <span>{subtotal.toFixed(2)} درهم</span>
                                     </div>
                                     
                                     {discountPercentage > 0 && (
                                         <div className="flex justify-between items-center text-sm font-bold text-green-500">
                                             <span>{discountPercentage === 15 ? t('CustomPack.Discount15') : t('CustomPack.Discount10')}</span>
-                                            <span>-{discountAmount.toFixed(2)} MAD</span>
+                                            <span>-{discountAmount.toFixed(2)} درهم</span>
                                         </div>
                                     )}
 
@@ -236,7 +236,7 @@ export default function CustomPackBuilder({ availableBooks }: CustomPackBuilderP
                                     
                                     <div className="flex justify-between items-center text-lg font-black text-black">
                                         <span>{t('PackPrice')}</span>
-                                        <span>{finalPrice.toFixed(2)} MAD</span>
+                                        <span>{finalPrice.toFixed(2)} درهم</span>
                                     </div>
 
                                     {/* Next tier hint */}

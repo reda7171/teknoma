@@ -133,9 +133,9 @@ export default function DigitalProductsTable({
                   </td>
                   <td className="px-6 py-4">
                     <div>
-                      <p className="text-sm font-bold text-gray-900">{p.price} MAD</p>
+                      <p className="text-sm font-bold text-gray-900">{p.price} درهم</p>
                       {p.originalPrice && (
-                        <p className="text-xs text-gray-400 line-through">{p.originalPrice} MAD</p>
+                        <p className="text-xs text-gray-400 line-through">{p.originalPrice} درهم</p>
                       )}
                     </div>
                   </td>

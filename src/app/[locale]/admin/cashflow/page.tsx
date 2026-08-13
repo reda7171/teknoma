@@ -85,7 +85,7 @@ export default async function CashflowPage({
                     <p className="text-4xl font-black tracking-tighter">
                         {isPositive ? '+' : ''}{data.netCashflow.toFixed(0)}
                     </p>
-                    <p className="text-xs font-bold opacity-70 mt-1">MAD · {periode} derniers jours</p>
+                    <p className="text-xs font-bold opacity-70 mt-1">درهم · {periode} derniers jours</p>
                     <p className="text-[10px] font-bold mt-3 opacity-80">
                         {isPositive ? '✅ Trésorerie positive' : '⚠️ Trésorerie négative'}
                     </p>
@@ -96,11 +96,11 @@ export default async function CashflowPage({
                     <ArrowUpRight className="absolute top-5 right-5 w-8 h-8 text-emerald-100" />
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Entrées</p>
                     <p className="text-3xl font-black text-emerald-600">{(data.totalRevenue + data.totalIncomeExtra).toFixed(0)}</p>
-                    <p className="text-xs text-gray-400 font-bold mt-1">MAD</p>
+                    <p className="text-xs text-gray-400 font-bold mt-1">درهم</p>
                     <div className="mt-3 space-y-0.5">
                         <p className="text-[10px] text-gray-400 font-bold">📦 {data.ordersCount} commandes livrées</p>
                         {data.totalIncomeExtra > 0 && (
-                            <p className="text-[10px] text-gray-400 font-bold">+ {data.totalIncomeExtra.toFixed(0)} MAD autres entrées</p>
+                            <p className="text-[10px] text-gray-400 font-bold">+ {data.totalIncomeExtra.toFixed(0)} درهم autres entrées</p>
                         )}
                     </div>
                 </div>
@@ -110,7 +110,7 @@ export default async function CashflowPage({
                     <ArrowDownRight className="absolute top-5 right-5 w-8 h-8 text-red-100" />
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Sorties</p>
                     <p className="text-3xl font-black text-red-500">{data.totalExpenses.toFixed(0)}</p>
-                    <p className="text-xs text-gray-400 font-bold mt-1">MAD</p>
+                    <p className="text-xs text-gray-400 font-bold mt-1">درهم</p>
                     <p className="mt-3 text-[10px] text-gray-400 font-bold">
                         {Object.keys(data.byCategory).length} catégories de dépenses
                     </p>
@@ -121,7 +121,7 @@ export default async function CashflowPage({
                     <Clock className="absolute top-5 right-5 w-8 h-8 text-amber-100" />
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">En attente</p>
                     <p className="text-3xl font-black text-amber-500">{data.pendingRevenue.toFixed(0)}</p>
-                    <p className="text-xs text-gray-400 font-bold mt-1">MAD · {data.pendingCount} commandes</p>
+                    <p className="text-xs text-gray-400 font-bold mt-1">درهم · {data.pendingCount} commandes</p>
                     <p className="mt-3 text-[10px] text-amber-600 font-bold">
                         💰 Revenu potentiel
                     </p>
@@ -134,7 +134,7 @@ export default async function CashflowPage({
                     <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
                     <div>
                         <p className="text-sm font-black text-red-700">
-                            {data.returnedLoss.toFixed(0)} MAD perdus sur {data.returnedCount} commandes retournées/échouées
+                            {data.returnedLoss.toFixed(0)} درهم perdus sur {data.returnedCount} commandes retournées/échouées
                         </p>
                         <p className="text-xs text-red-500 font-bold">Ces montants ne sont pas comptabilisés dans les entrées</p>
                     </div>
@@ -168,13 +168,13 @@ export default async function CashflowPage({
                                         <div
                                             className="w-4 bg-emerald-500 rounded-t-lg transition-all group-hover:bg-emerald-400 relative"
                                             style={{ height: `${Math.max((day.revenue / maxBar) * 160, 2)}px` }}
-                                            title={`${day.revenue.toFixed(0)} MAD entrées`}
+                                            title={`${day.revenue.toFixed(0)} درهم entrées`}
                                         />
                                         {/* Barre sorties */}
                                         <div
                                             className="w-4 bg-red-400 rounded-t-lg transition-all group-hover:bg-red-300 relative"
                                             style={{ height: `${Math.max((day.expenses / maxBar) * 160, 2)}px` }}
-                                            title={`${day.expenses.toFixed(0)} MAD sorties`}
+                                            title={`${day.expenses.toFixed(0)} درهم sorties`}
                                         />
                                     </div>
                                     <p className="text-[8px] font-bold text-gray-400 rotate-45 origin-left mt-2 w-8 truncate">
@@ -210,7 +210,7 @@ export default async function CashflowPage({
                                                     {config.label}
                                                 </span>
                                                 <div className="text-right">
-                                                    <span className="font-black text-black text-sm">{amount.toFixed(0)} MAD</span>
+                                                    <span className="font-black text-black text-sm">{amount.toFixed(0)} درهم</span>
                                                     <span className="text-gray-400 text-[10px] font-bold ml-1.5">{pct.toFixed(0)}%</span>
                                                 </div>
                                             </div>
@@ -253,7 +253,7 @@ export default async function CashflowPage({
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className={`font-black text-sm ${isIncome ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                {isIncome ? '+' : '-'}{exp.amount.toFixed(0)} MAD
+                                                {isIncome ? '+' : '-'}{exp.amount.toFixed(0)} درهم
                                             </span>
                                             <DeleteExpenseButton id={exp.id} />
                                         </div>
@@ -287,7 +287,7 @@ export default async function CashflowPage({
                                         {new Date(order.createdAt).toLocaleDateString('fr-FR')} · {order.paymentMethod}
                                     </p>
                                 </div>
-                                <span className="font-black text-emerald-600">+{order.total.toFixed(0)} MAD</span>
+                                <span className="font-black text-emerald-600">+{order.total.toFixed(0)} درهم</span>
                             </div>
                         ))}
                     </div>

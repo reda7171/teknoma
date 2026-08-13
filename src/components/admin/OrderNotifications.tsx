@@ -45,7 +45,7 @@ export default function OrderNotifications() {
         if (typeof window === 'undefined' || !('Notification' in window)) return
         if (Notification.permission === 'granted') {
             new Notification('🛒 Nouvelle commande !', {
-                body: `${order.fullName} — ${order.total} MAD — ${order.city}`,
+                body: `${order.fullName} — ${order.total} درهم — ${order.city}`,
                 icon: '/favicon.ico'
             })
         }
@@ -155,7 +155,7 @@ export default function OrderNotifications() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-black text-gray-900 truncate">{order.fullName}</p>
-                                        <p className="text-xs text-gray-500 font-medium">{order.city} — <span className="text-orange-600 font-black">{order.total} MAD</span></p>
+                                        <p className="text-xs text-gray-500 font-medium">{order.city} — <span className="text-orange-600 font-black">{order.total} درهم</span></p>
                                         <p className="text-[10px] text-gray-400 mt-0.5">
                                             {new Date(order.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                                         </p>

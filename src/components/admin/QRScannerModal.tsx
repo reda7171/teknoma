@@ -236,7 +236,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 <h4 className="font-black text-lg text-gray-900 mb-1">Commande #{order.id.slice(0, 8)}</h4>
                                 <p className="text-sm text-gray-600 font-medium">Client: <span className="font-bold text-gray-900">{order.customer?.fullName || order.fullName}</span></p>
                                 <p className="text-sm text-gray-600 font-medium">Téléphone: <span className="font-bold text-gray-900">{order.customer?.phone || order.phone}</span></p>
-                                <p className="text-sm text-gray-600 font-medium">Total: <span className="font-black text-blue-600">{order.total} MAD</span></p>
+                                <p className="text-sm text-gray-600 font-medium">Total: <span className="font-black text-blue-600">{order.total} درهم</span></p>
                             </div>
 
                             <div>

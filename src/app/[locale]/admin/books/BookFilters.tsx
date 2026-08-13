@@ -10,16 +10,23 @@ interface ActiveFilters {
     type: string;
     lang: string;
     sort: string;
+    jumia: string;
+    category?: string;
+    subCategory?: string;
 }
 
 interface BookFiltersProps {
     activeFilters: ActiveFilters;
-    totalCount: number
+    totalCount: number;
+    categories: string[];
+    categoryTree?: Record<string, string[]>;
 }
 
 export default function BookFilters({
     activeFilters,
-    totalCount
+    totalCount,
+    categories,
+    categoryTree
 }: BookFiltersProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [localSearch, setLocalSearch] = useState(activeFilters.search)
@@ -52,6 +59,9 @@ export default function BookFilters({
         if (newFilters.type) params.set('type', newFilters.type)
         if (newFilters.lang) params.set('lang', newFilters.lang)
         if (newFilters.sort) params.set('sort', newFilters.sort)
+        if (newFilters.jumia) params.set('jumia', newFilters.jumia)
+        if (newFilters.category) params.set('category', newFilters.category)
+        if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
         
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
@@ -221,6 +231,102 @@ export default function BookFilters({
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                             activeFilters.lang === f.id 
                                             ? 'bg-black text-white' 
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {f.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Category Filter */}
+                        <div className="space-y-3 lg:col-span-2 xl:col-span-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Search className="w-3 h-3" />
+                                Catégorie
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => handleApplyFilters({ category: '' })}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                        !activeFilters.category 
+                                        ? 'bg-black text-white' 
+                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    Toutes
+                                </button>
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => handleApplyFilters({ category: activeFilters.category === cat ? '' : cat, subCategory: '' })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            activeFilters.category === cat 
+                                            ? 'bg-black text-white' 
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* SubCategory Filter */}
+                        {activeFilters.category && categoryTree && categoryTree[activeFilters.category]?.length > 0 && (
+                            <div className="space-y-3 lg:col-span-2 xl:col-span-3">
+                                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                    <Search className="w-3 h-3" />
+                                    Sous-catégorie
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => handleApplyFilters({ subCategory: '' })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            !activeFilters.subCategory 
+                                            ? 'bg-black text-white' 
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        Toutes
+                                    </button>
+                                    {categoryTree[activeFilters.category].map((subCat) => (
+                                        <button
+                                            key={subCat}
+                                            onClick={() => handleApplyFilters({ subCategory: activeFilters.subCategory === subCat ? '' : subCat })}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                activeFilters.subCategory === subCat 
+                                                ? 'bg-black text-white' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {subCat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Jumia Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <span className="text-[#f68b1e] font-black mr-1 text-[12px] leading-none">J</span>
+                                Jumia
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: 'synced', label: 'Synchronisé' },
+                                    { id: 'not-synced', label: 'Non Synchronisé' },
+                                    { id: 'has-sku', label: 'Avec SKU' },
+                                    { id: 'no-sku', label: 'Sans SKU' }
+                                ].map((f) => (
+                                    <button
+                                        key={f.id}
+                                        onClick={() => handleApplyFilters({ jumia: activeFilters.jumia === f.id ? '' : f.id })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            activeFilters.jumia === f.id 
+                                            ? 'bg-[#f68b1e] text-white' 
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
                                     >

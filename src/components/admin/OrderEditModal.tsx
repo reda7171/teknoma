@@ -124,7 +124,7 @@ export default function OrderEditModal({ order, companies }: OrderEditModalProps
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Total (MAD)</label>
+                                    <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Total (درهم)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -148,7 +148,7 @@ export default function OrderEditModal({ order, companies }: OrderEditModalProps
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Frais de livraison (MAD)</label>
+                                    <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Frais de livraison (درهم)</label>
                                     <input
                                         type="number"
                                         step="0.01"

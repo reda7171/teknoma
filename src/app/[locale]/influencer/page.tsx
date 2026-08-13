@@ -54,7 +54,7 @@ export default async function InfluencerDashboard() {
                             <Share2 className="w-6 h-6 text-indigo-600" />
                         </div>
                         <p className="text-sm font-black text-gray-400 uppercase tracking-wider">Revenus Générés</p>
-                        <h3 className="text-3xl font-black text-gray-900 mt-1">{totalRevenue.toFixed(2)} <span className="text-lg">MAD</span></h3>
+                        <h3 className="text-3xl font-black text-gray-900 mt-1">{totalRevenue.toFixed(2)} <span className="text-lg">درهم</span></h3>
                     </div>
 
                     <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg shadow-amber-100 ring-2 ring-amber-500 ring-offset-4 ring-offset-white">
@@ -62,7 +62,7 @@ export default async function InfluencerDashboard() {
                             <Banknote className="w-6 h-6 text-amber-600" />
                         </div>
                         <p className="text-sm font-black text-indigo-600 uppercase tracking-wider">Ma Commission</p>
-                        <h3 className="text-3xl font-black text-gray-900 mt-1">{totalCommission.toFixed(2)} <span className="text-lg">MAD</span></h3>
+                        <h3 className="text-3xl font-black text-gray-900 mt-1">{totalCommission.toFixed(2)} <span className="text-lg">درهم</span></h3>
                     </div>
                 </div>
 
@@ -93,7 +93,7 @@ export default async function InfluencerDashboard() {
                                                 {s.ordersCount}
                                             </td>
                                             <td className="px-8 py-6 text-right font-black text-indigo-600 text-lg">
-                                                {s.commission.toFixed(2)} MAD
+                                                {s.commission.toFixed(2)} درهم
                                             </td>
                                         </tr>
                                     ))}
@@ -139,7 +139,7 @@ export default async function InfluencerDashboard() {
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6 text-right font-black text-gray-900">
-                                                {order.total.toFixed(2)} MAD
+                                                {order.total.toFixed(2)} درهم
                                             </td>
                                         </tr>
                                     ))}

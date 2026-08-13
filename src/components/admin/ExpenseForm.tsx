@@ -171,7 +171,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
         if (type === 'EXPENSE' && selectedCategory === 'BOOKS_PURCHASE' && isLot && bookCount && booksCost) {
             finalAmount = totalLotCost
-            const lotDetails = `Lot de ${bookCount} livres. Prix moyen de revient: ${averagePrice.toFixed(2)} MAD/livre. (Livres: ${booksCost || 0} MAD, Transport: ${transportCost || 0} MAD).`
+            const lotDetails = `Lot de ${bookCount} livres. Prix moyen de revient: ${averagePrice.toFixed(2)} درهم/livre. (Livres: ${booksCost || 0} درهم, Transport: ${transportCost || 0} درهم).`
             finalDescription = description ? `${lotDetails} | ${description}` : lotDetails
             finalDescription = description ? `${lotDetails} | ${description}` : lotDetails
         }
@@ -338,7 +338,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-blue-800 mb-1">Prix global des livres (MAD)</label>
+                                        <label className="block text-xs font-bold text-blue-800 mb-1">Prix global des livres (درهم)</label>
                                         <input 
                                             type="number" 
                                             step="0.01"
@@ -351,7 +351,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-blue-800 mb-1">Frais de transport (MAD)</label>
+                                        <label className="block text-xs font-bold text-blue-800 mb-1">Frais de transport (درهم)</label>
                                         <input 
                                             type="number" 
                                             step="0.01"
@@ -367,11 +367,11 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                     <div className="sm:col-span-3 bg-white p-3 rounded-lg border border-blue-100 flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
                                             <Calculator className="w-4 h-4" />
-                                            Coût Total: {totalLotCost.toFixed(2)} MAD
+                                            Coût Total: {totalLotCost.toFixed(2)} درهم
                                         </div>
                                         <div className="text-right">
                                             <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">Prix de revient unitaire</span>
-                                            <p className="text-lg font-black text-green-600">{averagePrice.toFixed(2)} MAD <span className="text-xs text-green-500 font-medium tracking-normal">/ livre</span></p>
+                                            <p className="text-lg font-black text-green-600">{averagePrice.toFixed(2)} درهم <span className="text-xs text-green-500 font-medium tracking-normal">/ livre</span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -412,7 +412,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                 />
                                 {parsedDeliveryFrais > 0 && (
                                     <p className="mt-2 text-xs font-bold text-emerald-600">
-                                        ✓ Détection réussie. Frais totaux déduits : {parsedDeliveryFrais} MAD
+                                        ✓ Détection réussie. Frais totaux déduits : {parsedDeliveryFrais} درهم
                                     </p>
                                 )}
                             </div>
@@ -469,7 +469,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                                 </div>
                                                 <div className="text-right mt-auto">
                                                     <p className={`font-black tracking-tight ${selectedOrderIds.includes(order.id) ? 'text-white' : 'text-emerald-700'}`}>
-                                                        {order.total.toFixed(2)} MAD
+                                                        {order.total.toFixed(2)} درهم
                                                     </p>
                                                 </div>
                                             </div>
@@ -480,14 +480,14 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
                             <div className="pt-2 flex justify-between items-center text-emerald-800 font-bold text-sm">
                                 <span>{selectedOrderIds.length} commande(s) sélectionnée(s)</span>
-                                <span>Total estimé: {(selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0) - parsedDeliveryFrais).toFixed(2)} MAD</span>
+                                <span>Total estimé: {(selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0) - parsedDeliveryFrais).toFixed(2)} درهم</span>
                             </div>
                         </div>
                     )}
 
                     {(!isLot || selectedCategory !== 'BOOKS_PURCHASE') && (
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">Montant Total (MAD)</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-1">Montant Total (درهم)</label>
                             <input 
                                 value={amount}
                                 onChange={e => setAmount(e.target.value)}

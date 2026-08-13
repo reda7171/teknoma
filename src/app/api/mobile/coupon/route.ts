@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (coupon.minAmount && cartTotal < coupon.minAmount) {
       return NextResponse.json({
         success: false,
-        error: `Montant minimum requis : ${coupon.minAmount} MAD`,
+        error: `Montant minimum requis : ${coupon.minAmount} درهم`,
       });
     }
 

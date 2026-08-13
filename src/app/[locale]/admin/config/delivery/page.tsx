@@ -19,7 +19,7 @@ export default async function DeliveryConfigPage() {
 
 
     const announcementEnabled = await getSetting('announcement_bar_enabled') || 'false'
-    const announcementMessage = await getSetting('announcement_bar_message') || 'Livraison Gratuite partout au Maroc dès 300 MAD d\'achat !'
+    const announcementMessage = await getSetting('announcement_bar_message') || 'Livraison Gratuite partout au Maroc dès 300 درهم d\'achat !'
     const announcementBgColor = await getSetting('announcement_bar_bg_color') || '#000000'
     const announcementTextColor = await getSetting('announcement_bar_text_color') || '#FFFFFF'
     const companies = await getShippingCompanies()

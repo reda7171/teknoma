@@ -19,6 +19,7 @@ export default async function POSPage() {
   const defaultTab = await getSetting('pos_default_tab') || 'ALL';
   const allowOutOfStock = await getSetting('pos_allow_out_of_stock') === 'true';
   const requireCustomer = await getSetting('pos_require_customer') !== 'false'; // Default to true if not set
+  const enableSessions = await getSetting('pos_enable_sessions') === 'true';
   
   const activeCompanies = await prisma.shippingCompany.findMany({ where: { isActive: true } });
   const shippingCompanies = activeCompanies.map(c => ({ id: c.id, name: c.name }));
@@ -80,6 +81,7 @@ export default async function POSPage() {
         defaultTab={defaultTab as any}
         allowOutOfStock={allowOutOfStock}
         requireCustomer={requireCustomer}
+        enableSessions={enableSessions}
         shippingCompanies={shippingCompanies}
       />
     </div>

@@ -64,7 +64,7 @@ export default async function SellerBooksPage() {
                             <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
                                 <div className="flex flex-col">
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-300">Prix</span>
-                                    <span className="text-xl font-black text-black tracking-tighter">{book.price.toFixed(2)} MAD</span>
+                                    <span className="text-xl font-black text-black tracking-tighter">{book.price.toFixed(2)} درهم</span>
                                 </div>
                                 <div className="bg-pixio-cream px-3 py-2 rounded-xl flex items-center gap-2">
                                     <span className="text-[10px] font-black text-black uppercase tracking-tighter">{book.stock} EN STOCK</span>

@@ -104,11 +104,11 @@ export default async function InfluencerOrdersPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-10 py-8 text-right">
-                                                    <div className="text-2xl font-black text-gray-900">{order.total.toFixed(2)} <span className="text-sm">MAD</span></div>
+                                                    <div className="text-2xl font-black text-gray-900">{order.total.toFixed(2)} <span className="text-sm">درهم</span></div>
                                                     <div className="text-xs text-gray-400 font-bold mt-1 tracking-widest uppercase">Coupon: {order.couponCode}</div>
                                                 </td>
                                                 <td className="px-10 py-8 text-right">
-                                                    <div className="text-3xl font-black text-indigo-600">+{orderCommission.toFixed(2)} <span className="text-lg">MAD</span></div>
+                                                    <div className="text-3xl font-black text-indigo-600">+{orderCommission.toFixed(2)} <span className="text-lg">درهم</span></div>
                                                     {isDelivered ? (
                                                         <div className="text-sm text-green-500 font-black mt-1 flex items-center justify-end gap-1">
                                                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Validé

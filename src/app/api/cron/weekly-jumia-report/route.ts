@@ -49,7 +49,7 @@ export async function GET(req: Request) {
         const weekStr = `${lastMonday.toLocaleDateString('fr-FR')} → ${now.toLocaleDateString('fr-FR')}`
         const msg = `📊 <b>Rapport Hebdomadaire Jumia</b>\n📅 Semaine du ${weekStr}\n\n` +
             `📦 <b>Total commandes :</b> ${orders.length}\n` +
-            `💰 <b>CA estimé :</b> <b>${revenue.toFixed(2)} MAD</b>\n\n` +
+            `💰 <b>CA estimé :</b> <b>${revenue.toFixed(2)} درهم</b>\n\n` +
             `<b>Répartition :</b>\n${lines}`
 
         await sendTelegramMessage(msg)

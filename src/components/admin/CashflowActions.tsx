@@ -84,7 +84,7 @@ export function AddTransactionModal({ onClose }: { onClose: () => void }) {
 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Montant (MAD)</label>
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Montant (درهم)</label>
                             <input
                                 type="number"
                                 step="0.01"

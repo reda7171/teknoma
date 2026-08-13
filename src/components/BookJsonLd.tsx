@@ -61,7 +61,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         "offers": {
           "@type": "Offer",
           "price": book.price,
-          "priceCurrency": "MAD",
+          "priceCurrency": "درهم",
           "availability": book.stock > 0
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",
@@ -86,7 +86,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "returnShippingFeesAmount": {
               "@type": "MonetaryAmount",
               "value": 35,
-              "currency": "MAD"
+              "currency": "درهم"
             }
           },
           "shippingDetails": {
@@ -94,7 +94,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "shippingRate": {
               "@type": "MonetaryAmount",
               "value": 35,
-              "currency": "MAD"
+              "currency": "درهم"
             },
             "shippingDestination": {
               "@type": "DefinedRegion",
@@ -121,7 +121,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "BuyAction",
           "target": bookUrl,
           "price": book.price,
-          "priceCurrency": "MAD"
+          "priceCurrency": "درهم"
         },
         ...(reviewCount > 0 ? {
           "aggregateRating": {

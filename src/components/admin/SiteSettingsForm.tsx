@@ -364,7 +364,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors pr-12"
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-gray-400">
-                                MAD
+                                درهم
                             </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-2">

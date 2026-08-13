@@ -78,7 +78,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                     <div className="flex items-center gap-3 bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100">
                         <Wallet className="w-5 h-5 text-emerald-600" />
                         <span className="text-emerald-600 text-[10px] font-black uppercase tracking-widest">
-                            Solde: {cashBalance.toFixed(0)} MAD
+                            Solde: {cashBalance.toFixed(0)} درهم
                         </span>
                     </div>
                 </div>
@@ -103,7 +103,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                             </div>
                         </div>
                         <p className={`text-3xl font-black tracking-tighter ${stat.value < 0 ? 'text-red-600' : 'text-black'}`}>
-                            {stat.value.toFixed(0)} <span className="text-xs font-bold">MAD</span>
+                            {stat.value.toFixed(0)} <span className="text-xs font-bold">درهم</span>
                         </p>
                     </div>
                 ))}
@@ -131,7 +131,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                                 <div>
                                     <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 italic">Part de {user.name}</p>
                                     <p className={`text-4xl font-black tracking-tighter ${user.part >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                        {user.part.toFixed(0)} <span className="text-sm">MAD</span>
+                                        {user.part.toFixed(0)} <span className="text-sm">درهم</span>
                                     </p>
                                 </div>
                                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-black font-black text-2xl shadow-xl transition-transform group-hover:rotate-12">
@@ -190,22 +190,22 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500 font-medium">Chiffre d'Affaire</span>
-                                        <span className="font-bold">{archive.revenue.toFixed(2)} MAD</span>
+                                        <span className="font-bold">{archive.revenue.toFixed(2)} درهم</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500 font-medium">Bénéfice Net</span>
-                                        <span className="font-black text-emerald-600">{archive.netProfit.toFixed(2)} MAD</span>
+                                        <span className="font-black text-emerald-600">{archive.netProfit.toFixed(2)} درهم</span>
                                     </div>
                                 </div>
 
                                 <div className="pt-4 border-t border-gray-200 flex justify-between text-xs">
                                     <div>
                                         <p className="text-gray-400 font-bold uppercase tracking-widest mb-1">Reda</p>
-                                        <p className="font-black">{archive.shareReda.toFixed(2)} MAD</p>
+                                        <p className="font-black">{archive.shareReda.toFixed(2)} درهم</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-gray-400 font-bold uppercase tracking-widest mb-1">Amine</p>
-                                        <p className="font-black">{archive.shareAmine.toFixed(2)} MAD</p>
+                                        <p className="font-black">{archive.shareAmine.toFixed(2)} درهم</p>
                                     </div>
                                 </div>
                             </div>

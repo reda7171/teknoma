@@ -11,7 +11,9 @@ import SyncJumiaStockButton from '@/components/admin/SyncJumiaStockButton'
 import { Prisma } from '@prisma/client'
 
 import BookFilters from './BookFilters'
-export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string }> }) {
+import { getCategoryTree } from '@/lib/actions/category-tree'
+
+export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, category?: string, subCategory?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
@@ -20,6 +22,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const typeParam = params.type || ''
     const langParam = params.lang || ''
     const sortParam = params.sort || ''
+    const jumiaParam = params.jumia || ''
+    const categoryParam = params.category || ''
+    const subCategoryParam = params.subCategory || ''
 
     const where: Prisma.BookWhereInput = {
         ...(searchQuery && {
@@ -49,6 +54,24 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }),
         ...(langParam && {
             language: langParam
+        }),
+        ...(jumiaParam === 'synced' && {
+            isSyncedWithJumia: true
+        }),
+        ...(jumiaParam === 'not-synced' && {
+            isSyncedWithJumia: false
+        }),
+        ...(jumiaParam === 'has-sku' && {
+            sellerSku: { not: null }
+        }),
+        ...(jumiaParam === 'no-sku' && {
+            sellerSku: null
+        }),
+        ...(categoryParam && {
+            category: categoryParam
+        }),
+        ...(subCategoryParam && {
+            subCategory: subCategoryParam
         })
     }
 
@@ -75,6 +98,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (statusParam === 'active') packWhere.active = true
         if (statusParam === 'inactive') packWhere.active = false
+        if (jumiaParam === 'synced') packWhere.isSyncedWithJumia = true
+        if (jumiaParam === 'not-synced') packWhere.isSyncedWithJumia = false
+        if (jumiaParam === 'has-sku') packWhere.sellerSku = { not: null }
+        if (jumiaParam === 'no-sku') packWhere.sellerSku = null
         
         const packs = await prisma.pack.findMany({
             where: packWhere,
@@ -114,6 +141,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (statusParam === 'active') extraWhere.active = true
         if (statusParam === 'inactive') extraWhere.active = false
+        if (jumiaParam === 'synced') extraWhere.isSyncedWithJumia = true
+        if (jumiaParam === 'not-synced') extraWhere.isSyncedWithJumia = false
+        if (jumiaParam === 'has-sku') extraWhere.sellerSku = { not: null }
+        if (jumiaParam === 'no-sku') extraWhere.sellerSku = null
         
         const extras = await prisma.extraProduct.findMany({
             where: extraWhere,
@@ -174,8 +205,14 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         status: statusParam,
         type: typeParam,
         lang: langParam,
-        sort: sortParam
+        sort: sortParam,
+        jumia: jumiaParam,
+        category: categoryParam,
+        subCategory: subCategoryParam
     }
+
+    const categoryTree = await getCategoryTree()
+    const mainCategories = Object.keys(categoryTree)
 
     return (
         <div className="space-y-8">
@@ -222,7 +259,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                     { label: 'Total Livres', value: totalBooks, color: 'text-gray-900' },
                     { label: 'Livres Actifs', value: activeBooks, color: 'text-green-600' },
                     { label: 'Stock Total', value: totalStock, color: 'text-blue-600' },
-                    { label: 'Valeur Stock', value: `${stockValue.toFixed(0)} MAD`, color: 'text-purple-600' }
+                    { label: 'Valeur Stock', value: `${stockValue.toFixed(0)} درهم`, color: 'text-purple-600' }
                 ].map((stat, i) => (
                     <div key={i} className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</p>
@@ -236,6 +273,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 <BookFilters 
                     activeFilters={activeFilters}
                     totalCount={totalBooks}
+                    categories={mainCategories}
+                    categoryTree={categoryTree}
                 />
 
                 {/* Table Content */}

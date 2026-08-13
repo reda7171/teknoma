@@ -54,7 +54,7 @@ export default function CartBookmarksUpsell() {
                 </div>
                 <div className="flex-1 min-w-0">
                     <h5 className="font-bold text-sm text-black truncate">{bookmark.title}</h5>
-                    <p className="text-xs text-amber-600 font-black">{bookmark.price} MAD</p>
+                    <p className="text-xs text-amber-600 font-black">{bookmark.price} درهم</p>
                 </div>
                 <button
                     onClick={handleAdd}

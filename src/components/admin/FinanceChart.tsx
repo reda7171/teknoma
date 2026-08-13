@@ -53,7 +53,7 @@ export default function FinanceChart({ data }: { data: any[] }) {
                             fontWeight: 'bold',
                             fontSize: '14px'
                         }}
-                        formatter={(value: number) => [`${Math.round(value)} MAD`]}
+                        formatter={(value: number) => [`${Math.round(value)} درهم`]}
                     />
                     <Legend 
                         iconType="circle" 

@@ -56,13 +56,13 @@ export async function GET(req: Request) {
                     return sum + parseFloat(o.totalAmountLocal?.value || o.Price || '0')
                 }, 0)
                 const jPending = jOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
-                jumiaSection = `\n\n🟠 <b>Jumia Hier</b>\n📦 Commandes: <b>${jOrders.length}</b>\n⏳ En attente: <b>${jPending}</b>\n💰 CA: <b>${jRevenue.toFixed(2)} MAD</b>`
+                jumiaSection = `\n\n🟠 <b>Jumia Hier</b>\n📦 Commandes: <b>${jOrders.length}</b>\n⏳ En attente: <b>${jPending}</b>\n💰 CA: <b>${jRevenue.toFixed(2)} درهم</b>`
             }
         } catch {}
 
         const dateStr = yesterday.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
         const msg = `☀️ <b>Rapport Quotidien Riwaya</b>\n📅 ${dateStr}\n\n` +
-            `🌐 <b>Site Web</b>\n📦 Commandes: <b>${totalYesterday}</b>\n💰 CA: <b>${(revenueYesterday._sum.total || 0).toFixed(2)} MAD</b>` +
+            `🌐 <b>Site Web</b>\n📦 Commandes: <b>${totalYesterday}</b>\n💰 CA: <b>${(revenueYesterday._sum.total || 0).toFixed(2)} درهم</b>` +
             (statusLines ? `\n\n📊 <b>Détail :</b>\n${statusLines}` : '') +
             jumiaSection
 

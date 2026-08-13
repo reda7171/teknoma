@@ -90,7 +90,7 @@ export default function InstantOfferPopup() {
                     
                     <h2 className="text-2xl font-black mb-2 uppercase">Offre Spéciale !</h2>
                     <p className="text-gray-600 mb-6 font-medium leading-relaxed">
-                        Coucou 👋 ! Je vois que vous êtes en train de passer commande. Je suis avec vous en ligne et je vous offre une réduction immédiate de <strong className="text-amber-500 font-black text-xl">{offer.discount} MAD</strong> sur votre panier !
+                        Coucou 👋 ! Je vois que vous êtes en train de passer commande. Je suis avec vous en ligne et je vous offre une réduction immédiate de <strong className="text-amber-500 font-black text-xl">{offer.discount} درهم</strong> sur votre panier !
                     </p>
                     
                     <a 

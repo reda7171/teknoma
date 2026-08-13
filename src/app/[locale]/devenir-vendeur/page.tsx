@@ -177,14 +177,14 @@ export default async function BecomeSellerPage() {
                                         <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">✅</div>
                                         <div>
                                             <div className="text-[10px] font-bold text-gray-400 uppercase">Nouvelle commande</div>
-                                            <div className="font-black text-sm">L'Alchimiste - 80 MAD</div>
+                                            <div className="font-black text-sm">L'Alchimiste - 80 درهم</div>
                                         </div>
                                     </div>
                                     <div className="absolute bottom-10 right-4 bg-black text-white shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-pulse" style={{ animationDuration: '4s' }}>
                                         <Wallet className="w-6 h-6 text-pixio-yellow" />
                                         <div>
                                             <div className="text-[10px] font-bold text-gray-400 uppercase">Solde disponible</div>
-                                            <div className="font-black text-sm text-pixio-yellow">+1 450 MAD</div>
+                                            <div className="font-black text-sm text-pixio-yellow">+1 450 درهم</div>
                                         </div>
                                     </div>
                                 </div>

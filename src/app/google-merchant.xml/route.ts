@@ -53,7 +53,7 @@ export async function GET() {
             xml += `      <g:image_link>${escapeXml(imageUrl)}</g:image_link>\n`
             xml += `      <g:condition>${condition}</g:condition>\n`
             xml += `      <g:availability>${availability}</g:availability>\n`
-            xml += `      <g:price>${book.price} MAD</g:price>\n`
+            xml += `      <g:price>${book.price} درهم</g:price>\n`
             xml += `      <g:brand>${escapeXml(book.author)}</g:brand>\n`
             
             if (book.isbn) {

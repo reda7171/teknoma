@@ -330,7 +330,7 @@ export default function CosmosBooks({
         {centerHovered && !dragging && (
           <div className="cosmos-book-tooltip">
             <p className="cosmos-tooltip-title">{centerBook.title}</p>
-            <p className="cosmos-tooltip-price">{centerBook.price} MAD</p>
+            <p className="cosmos-tooltip-price">{centerBook.price} درهم</p>
           </div>
         )}
         <div className="cosmos-center-pulse" style={{ pointerEvents: 'none' }} />
@@ -391,7 +391,7 @@ export default function CosmosBooks({
             {isHovered && !dragging && (
               <div className="cosmos-book-tooltip">
                 <p className="cosmos-tooltip-title">{book.title}</p>
-                <p className="cosmos-tooltip-price">{book.price} MAD</p>
+                <p className="cosmos-tooltip-price">{book.price} درهم</p>
               </div>
             )}
           </div>
