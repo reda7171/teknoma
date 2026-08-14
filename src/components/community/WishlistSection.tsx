@@ -2,8 +2,9 @@
 
 import { useState, useTransition, useOptimistic } from 'react'
 import { addToWishlist, removeFromWishlist } from '@/lib/actions/community-wishlist'
-import { Plus, Trash2, Loader2, BookMarked } from 'lucide-react'
+import { Plus, Trash2, Loader2, BookMarked, Search } from 'lucide-react'
 import { useRouter } from '@/i18n/routing'
+import BookSearchModal, { SelectedBookData } from '@/components/community/BookSearchModal'
 import { useTranslations } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import { useWishlistStore } from '@/store/wishlist'
@@ -16,6 +17,9 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
     const t = useTranslations('Community.Wishlist')
     const { showNotification } = useUIStore()
     const [showForm, setShowForm] = useState(false)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [title, setTitle] = useState('')
+    const [author, setAuthor] = useState('')
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
@@ -30,9 +34,9 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
 
     async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const title = formData.get('title') as string
-        const author = formData.get('author') as string
+        const formData = new FormData()
+        formData.append('title', title)
+        formData.append('author', author)
 
         startTransition(async () => {
             updateOptimisticWishlist({
@@ -40,10 +44,17 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
                 item: { id: Math.random().toString(), title, author, isOptimistic: true }
             })
             setShowForm(false)
+            setTitle('')
+            setAuthor('')
             await addToWishlist(formData)
             showNotification(t('Success'))
             router.refresh()
         })
+    }
+
+    const handleBookSelect = (data: SelectedBookData) => {
+        setTitle(data.title)
+        setAuthor(data.author)
     }
 
     const { removeItem } = useWishlistStore()
@@ -87,12 +98,24 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
 
             {showForm && (
                 <form onSubmit={handleAdd} className="mb-8 p-6 bg-gray-50 rounded-3xl border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="flex justify-end mb-4">
+                        <button
+                            type="button"
+                            onClick={() => setIsSearchOpen(true)}
+                            className="text-xs font-bold px-4 py-2 bg-[#f39c12]/10 text-[#f39c12] rounded-xl hover:bg-[#f39c12]/20 transition-colors flex items-center gap-2"
+                        >
+                            <Search className="w-4 h-4" />
+                            Rechercher un livre avec l'IA
+                        </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div className="space-y-1">
                             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('BookTitle')}</label>
                             <input
                                 name="title"
                                 required
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                                 placeholder="ex: L'Alchimiste"
                                 className="w-full px-5 py-3 bg-white border-2 border-transparent rounded-2xl focus:border-black outline-none transition-all font-bold text-sm"
                             />
@@ -101,6 +124,8 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
                             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Author')}</label>
                             <input
                                 name="author"
+                                value={author}
+                                onChange={(e) => setAuthor(e.target.value)}
                                 placeholder="ex: Paulo Coelho"
                                 className="w-full px-5 py-3 bg-white border-2 border-transparent rounded-2xl focus:border-black outline-none transition-all font-bold text-sm"
                             />
@@ -108,13 +133,19 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
                     </div>
                     <button
                         type="submit"
-                        disabled={isPending}
-                        className="w-full bg-black text-white font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
+                        disabled={isPending || !title.trim()}
+                        className="w-full bg-black text-white font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('AddBook')}
                     </button>
                 </form>
             )}
+
+            <BookSearchModal 
+                isOpen={isSearchOpen} 
+                onClose={() => setIsSearchOpen(false)} 
+                onSelect={handleBookSelect} 
+            />
 
             {currentWishlist.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
