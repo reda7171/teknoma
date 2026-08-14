@@ -66,7 +66,7 @@ export default async function TelegramConfigPage() {
             </div>
 
             <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-12">
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                     <div className="flex items-center gap-4 mb-10">
                         <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white">
                             <MessageCircle className="w-6 h-6" />

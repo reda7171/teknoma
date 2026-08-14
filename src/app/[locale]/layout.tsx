@@ -19,7 +19,7 @@ const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
 const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
-const UtmTracker = dynamic(() => import('@/components/UtmTracker'))
+import UtmTracker from '@/components/UtmTracker'
 import DelayedScripts from '@/components/DelayedScripts'
 
 
@@ -368,19 +368,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         ></script>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-          <Toaster />
-          <CookieConsent />
-          {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
-          <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
-          {isChatBotEnabled && <ChatBot />}
-          <DelayedScripts>
-            <Suspense fallback={null}>
-              <PixelTracker />
-              <FacebookPixel pixelId={fbPixelId} />
-              <GoogleAnalytics gaId={googleAnalyticsId || ''} />
-            </Suspense>
-          </DelayedScripts>
+            {children}
+            <Toaster />
+            <CookieConsent />
+            {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
+            <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
+            {isChatBotEnabled && <ChatBot />}
+            <DelayedScripts>
+              <Suspense fallback={null}>
+                <PixelTracker />
+                <FacebookPixel pixelId={fbPixelId} />
+                <GoogleAnalytics gaId={googleAnalyticsId || ''} />
+              </Suspense>
+            </DelayedScripts>
         </NextIntlClientProvider>
         
         {/* Google Customer Reviews Badge */}

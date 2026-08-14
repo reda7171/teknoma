@@ -65,12 +65,50 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
     // Si pas d'utilisateur connecté, afficher le lien de connexion
     if (!user) {
         return (
-            <Link
-                href="/community/login"
-                className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors group"
-            >
-                <User className="w-6 h-6 text-gray-900 group-hover:text-black" />
-            </Link>
+            <div className="relative group">
+                <Link
+                    href="/community/login"
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
+                >
+                    <User className="w-6 h-6 text-gray-900 group-hover:text-black" />
+                </Link>
+                
+                {/* Dropdown Menu on Hover */}
+                <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-4 px-4 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="text-center mb-4">
+                        <h3 className="font-black text-lg">Rejoignez la communauté !</h3>
+                        <p className="text-xs text-gray-500 mt-1">Connectez-vous pour profiter de :</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                            <div className="bg-pixio-yellow/20 p-2 rounded-lg text-yellow-600"><Sparkles className="w-4 h-4" /></div>
+                            <div>
+                                <p className="text-sm font-bold">Suivi de lecture</p>
+                                <p className="text-xs text-gray-500">Sauvegardez votre progression</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="bg-blue-50 p-2 rounded-lg text-blue-500"><BookOpen className="w-4 h-4" /></div>
+                            <div>
+                                <p className="text-sm font-bold">Échange de livres</p>
+                                <p className="text-xs text-gray-500">Troquez avec d'autres lecteurs</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="bg-red-50 p-2 rounded-lg text-red-500"><Heart className="w-4 h-4" /></div>
+                            <div>
+                                <p className="text-sm font-bold">Liste de souhaits</p>
+                                <p className="text-xs text-gray-500">Enregistrez vos coups de cœur</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        <Link href="/community/login" className="block w-full py-2 bg-black text-white text-center rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors">
+                            S'inscrire / Se connecter
+                        </Link>
+                    </div>
+                </div>
+            </div>
         )
     }
 

@@ -104,9 +104,9 @@ export default function DigitalProductCard({ product }: DigitalProductCardProps)
         {/* Prix + action */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="space-y-0.5">
-            <p className="text-xl font-black text-black">{product.price} درهم</p>
+            <p className="text-xl font-black text-black">{product.price} {locale === 'ar' ? 'درهم' : 'MAD'}</p>
             {product.originalPrice && (
-              <p className="text-xs text-gray-400 line-through">{product.originalPrice} درهم</p>
+              <p className="text-xs text-gray-400 line-through">{product.originalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</p>
             )}
           </div>
           <div className="w-10 h-10 bg-black group-hover:bg-amber-400 rounded-full flex items-center justify-center transition-colors">

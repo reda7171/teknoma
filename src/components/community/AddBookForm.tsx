@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 import { addExchangeBook } from '@/lib/actions/community-books'
 import { uploadBookImage } from '@/lib/actions/upload'
 import { Link } from '@/i18n/routing'
-import { ArrowLeft, BookOpen, User, Tag, FileText, Loader2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, User, Tag, FileText, Loader2, Search } from 'lucide-react'
 import MultiImageUpload from '@/components/community/MultiImageUpload'
 import AutocompleteInput from '@/components/community/AutocompleteInput'
+import BookSearchModal, { SelectedBookData } from '@/components/community/BookSearchModal'
 
 export default function AddBookForm({ isEligible = true }: { isEligible?: boolean }) {
     const t = useTranslations('Community.BookForm')
@@ -17,6 +18,22 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [selectedImages, setSelectedImages] = useState<File[]>([])
+    
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [title, setTitle] = useState('')
+    const [author, setAuthor] = useState('')
+    const [isbn, setIsbn] = useState('')
+    const [description, setDescription] = useState('')
+    const [coverUrl, setCoverUrl] = useState<string | null>(null)
+
+    const handleBookSelect = (data: SelectedBookData) => {
+        setTitle(data.title)
+        setAuthor(data.author)
+        if (data.isbn) setIsbn(data.isbn)
+        if (data.description) setDescription(data.description)
+        if (data.cover) setCoverUrl(data.cover)
+    }
+
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         setLoading(true)
@@ -44,6 +61,8 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                 }
 
                 imageUrls = results.map(r => r.imageUrl as string)
+            } else if (coverUrl) {
+                imageUrls = [coverUrl]
             }
 
             if (imageUrls.length > 0) {
@@ -73,6 +92,18 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
 
             <div className="text-center mb-10">
                 <h1 className="text-3xl font-black text-black tracking-tighter mb-2">{t('FormTitle')}</h1>
+                <p className="text-gray-500 font-medium mb-6">Gagnez du temps en recherchant votre livre :</p>
+                
+                <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(true)}
+                    disabled={!isEligible}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#f39c12]/10 text-[#f39c12] hover:bg-[#f39c12]/20 font-bold rounded-xl transition-colors"
+                >
+                    <Search className="w-5 h-5" />
+                    Rechercher via Google Books
+                </button>
+
                 {!isEligible && (
                     <p className="text-red-500 font-bold text-sm bg-red-50 p-4 rounded-xl border border-red-100 mt-4">
                         {t('EligibilityError')}
@@ -94,6 +125,8 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                         <AutocompleteInput
                             name="title"
                             suggestionType="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                             required
                             className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
                             placeholder={`${t('Title')}...`}
@@ -107,6 +140,8 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                         <AutocompleteInput
                             name="author"
                             suggestionType="author"
+                            value={author}
+                            onChange={(e) => setAuthor(e.target.value)}
                             required
                             className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
                             placeholder={`${t('Author')}...`}
@@ -139,6 +174,8 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-gray-300">#</span>
                                 <input
                                     name="isbn"
+                                    value={isbn}
+                                    onChange={(e) => setIsbn(e.target.value)}
                                     className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
                                     placeholder="978-..."
                                 />
@@ -153,6 +190,8 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                             <FileText className="absolute left-4 top-6 w-5 h-5 text-gray-300" />
                             <textarea
                                 name="description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
                                 rows={4}
                                 className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black resize-none"
                                 placeholder={`${t('Description')}...`}
@@ -175,6 +214,12 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('Submit')}
                 </button>
             </form>
+
+            <BookSearchModal 
+                isOpen={isSearchOpen} 
+                onClose={() => setIsSearchOpen(false)} 
+                onSelect={handleBookSelect} 
+            />
         </div>
     )
 }

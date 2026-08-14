@@ -166,6 +166,18 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        {
+          source: '/uploads/:path*',
+          destination: 'https://riwaya.store/uploads/:path*',
+        },
+      ],
+    }
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',

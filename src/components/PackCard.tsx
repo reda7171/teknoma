@@ -136,14 +136,14 @@ export default function PackCard({
                     {hasDiscount && (
                         <div className="flex items-center justify-between text-[11px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal">
                             <span className="text-gray-400">{t('RegularPrice')}</span>
-                            <span className="text-gray-300 line-through">{totalOriginalPrice} درهم</span>
+                            <span className="text-gray-300 line-through">{totalOriginalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                         </div>
                     )}
 
                     <div className="flex items-center justify-between">
                         <span className="text-[11px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-black">{t('PackPrice')}</span>
                         <span className="text-3xl font-black text-black tracking-tighter">
-                            {displayPrice} <span className="text-[10px] rtl:text-xs font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">درهم</span>
+                            {displayPrice} <span className="text-[10px] rtl:text-xs font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                         </span>
                     </div>
 

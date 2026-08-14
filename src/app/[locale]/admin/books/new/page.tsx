@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save } from 'lucide-react'
 import { createBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
@@ -10,18 +10,28 @@ import { getCategoryTree } from '@/lib/actions/category-tree'
 import type { CategoryTree } from '@/lib/constants/categories'
 import ImageInput from '@/components/admin/ImageInput'
 
-export default function BookForm() {
+function BookFormContent() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    
+    // Read prefill data from URL
+    const prefillTitle = searchParams.get('title') || ''
+    const prefillAuthor = searchParams.get('author') || ''
+    const prefillDescription = searchParams.get('description') || ''
+    const prefillIsbn = searchParams.get('isbn') || ''
+    const prefillLang = searchParams.get('lang') || 'fr'
+    const validLang = ['fr', 'ar', 'en'].includes(prefillLang) ? (prefillLang as 'fr' | 'ar' | 'en') : 'fr'
+
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [lots, setLots] = useState<any[]>([])
     const [selectedCost, setSelectedCost] = useState<string>('0')
     const [authors, setAuthors] = useState<string[]>([])
-    const [selectedAuthor, setSelectedAuthor] = useState<string>('')
+    const [selectedAuthor, setSelectedAuthor] = useState<string>(prefillAuthor)
     const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false)
     const authorInputRef = useRef<HTMLDivElement>(null)
-    const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
-    const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
+    const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>(validLang)
+    const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>(validLang)
     const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
     const mainCategories = Object.keys(categoryTree)
@@ -187,6 +197,7 @@ export default function BookForm() {
                             type="text"
                             name="title_ar"
                             required={bookLanguage === 'ar'}
+                            defaultValue={prefillLang === 'ar' ? prefillTitle : ''}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en arabe"
@@ -195,6 +206,7 @@ export default function BookForm() {
                             type="text"
                             name="title_fr"
                             required={bookLanguage === 'fr'}
+                            defaultValue={prefillLang === 'fr' ? prefillTitle : ''}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en français"
@@ -203,6 +215,7 @@ export default function BookForm() {
                             type="text"
                             name="title_en"
                             required={bookLanguage === 'en'}
+                            defaultValue={prefillLang === 'en' ? prefillTitle : ''}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en anglais"
@@ -272,6 +285,7 @@ export default function BookForm() {
                             type="text"
                             id="isbn"
                             name="isbn"
+                            defaultValue={prefillIsbn}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Ex: 9780735211292"
                         />
@@ -480,7 +494,7 @@ export default function BookForm() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Image <span className="text-red-500">*</span>
                         </label>
-                        <ImageInput />
+                        <ImageInput defaultValue={searchParams.get('cover') || undefined} />
                     </div>
 
                     {/* Description */}
@@ -491,6 +505,7 @@ export default function BookForm() {
                         <textarea
                             name="description_ar"
                             required={bookLanguage === 'ar'}
+                            defaultValue={prefillLang === 'ar' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -499,6 +514,7 @@ export default function BookForm() {
                         <textarea
                             name="description_fr"
                             required={bookLanguage === 'fr'}
+                            defaultValue={prefillLang === 'fr' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -507,6 +523,7 @@ export default function BookForm() {
                         <textarea
                             name="description_en"
                             required={bookLanguage === 'en'}
+                            defaultValue={prefillLang === 'en' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -548,5 +565,13 @@ export default function BookForm() {
                 </div>
             </form>
         </div>
+    )
+}
+
+export default function BookForm() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div></div>}>
+            <BookFormContent />
+        </Suspense>
     )
 }

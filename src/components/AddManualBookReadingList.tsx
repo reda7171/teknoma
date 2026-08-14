@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, X, Loader2, Book } from 'lucide-react'
+import { Plus, X, Loader2, Book, Search } from 'lucide-react'
 import { addToReadingList } from '@/lib/actions/reading-list'
 import { useUIStore } from '@/store/ui'
 import { ReadingStatus } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import BookSearchModal, { SelectedBookData } from '@/components/community/BookSearchModal'
 
 export default function AddManualBookReadingList() {
     const [isOpen, setIsOpen] = useState(false)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const { showNotification } = useUIStore()
     const router = useRouter()
@@ -19,8 +21,19 @@ export default function AddManualBookReadingList() {
         title: '',
         author: '',
         totalPages: 200,
-        status: ReadingStatus.TO_READ as ReadingStatus
+        status: ReadingStatus.TO_READ as ReadingStatus,
+        cover: ''
     })
+
+    const handleBookSelect = (data: SelectedBookData) => {
+        setFormData({
+            ...formData,
+            title: data.title,
+            author: data.author,
+            cover: data.cover || ''
+        })
+        setIsOpen(true)
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -32,13 +45,13 @@ export default function AddManualBookReadingList() {
                 author: formData.author,
                 totalPages: Number(formData.totalPages),
                 status: formData.status,
-                cover: '' // No cover for manual books for now or we could add a placeholder
+                cover: formData.cover
             })
 
             if (result.success) {
                 showNotification(result.message || 'Livre ajouté à votre liste !', 'success')
                 setIsOpen(false)
-                setFormData({ title: '', author: '', totalPages: 200, status: ReadingStatus.TO_READ })
+                setFormData({ title: '', author: '', totalPages: 200, status: ReadingStatus.TO_READ, cover: '' })
                 router.refresh()
             } else {
                 if (result.error === 'Vous devez être connecté') {
@@ -58,30 +71,56 @@ export default function AddManualBookReadingList() {
         <div className="mb-8">
             {!isOpen ? (
                 <>
-                    {/* Desktop Button */}
-                    <button
-                        onClick={() => setIsOpen(true)}
-                        className="hidden md:flex w-full md:w-auto items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
-                    >
-                        <Plus className="w-5 h-5" />
-                        {t('ReadingList.ManualBook.AddManual')}
-                    </button>
-                    {/* Mobile FAB */}
-                    <button
-                        onClick={() => setIsOpen(true)}
-                        className="md:hidden fixed bottom-6 right-4 z-50 flex items-center justify-center w-14 h-14 bg-black text-white rounded-full hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20"
-                    >
-                        <Plus className="w-6 h-6" />
-                    </button>
+                    {/* Desktop Buttons */}
+                    <div className="hidden md:flex items-center gap-3">
+                        <button
+                            onClick={() => setIsSearchOpen(true)}
+                            className="flex items-center justify-center gap-2 bg-[#f39c12]/10 text-[#f39c12] px-6 py-3 rounded-xl font-bold hover:bg-[#f39c12]/20 transition-all active:scale-95 shadow-lg shadow-[#f39c12]/5"
+                        >
+                            <Search className="w-5 h-5" />
+                            Rechercher un livre
+                        </button>
+                        <button
+                            onClick={() => setIsOpen(true)}
+                            className="flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Saisie manuelle
+                        </button>
+                    </div>
+
+                    {/* Mobile FABs */}
+                    <div className="md:hidden fixed bottom-6 right-4 z-50 flex flex-col gap-3">
+                        <button
+                            onClick={() => setIsSearchOpen(true)}
+                            className="flex items-center justify-center w-14 h-14 bg-[#f39c12] text-white rounded-full hover:bg-[#e67e22] transition-all active:scale-95 shadow-xl shadow-[#f39c12]/20"
+                        >
+                            <Search className="w-6 h-6" />
+                        </button>
+                        <button
+                            onClick={() => setIsOpen(true)}
+                            className="flex items-center justify-center w-14 h-14 bg-black text-white rounded-full hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20"
+                        >
+                            <Plus className="w-6 h-6" />
+                        </button>
+                    </div>
                 </>
             ) : (
                 <div className="fixed inset-0 z-50 md:relative md:z-auto bg-white/95 md:bg-white backdrop-blur-xl md:backdrop-blur-none p-6 md:p-6 md:rounded-2xl md:border md:border-gray-100 shadow-xl overflow-y-auto md:overflow-visible animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex justify-between items-center mb-6 pt-12 md:pt-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
                                 <Book className="w-5 h-5 text-emerald-600" />
                             </div>
                             <h3 className="font-black text-xl text-black">{t('ReadingList.ManualBook.NewBook')}</h3>
+                            
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className="ml-4 text-xs font-bold px-3 py-1.5 bg-[#f39c12]/10 text-[#f39c12] rounded-lg hover:bg-[#f39c12]/20 transition-colors flex items-center gap-1.5"
+                            >
+                                <Search className="w-3.5 h-3.5" />
+                                Chercher
+                            </button>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
@@ -136,6 +175,12 @@ export default function AddManualBookReadingList() {
                     </form>
                 </div>
             )}
+
+            <BookSearchModal 
+                isOpen={isSearchOpen} 
+                onClose={() => setIsSearchOpen(false)} 
+                onSelect={handleBookSelect} 
+            />
         </div>
     )
 }

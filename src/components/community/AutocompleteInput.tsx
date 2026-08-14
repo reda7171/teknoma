@@ -13,9 +13,15 @@ export default function AutocompleteInput({ suggestionType, icon, ...props }: Au
     const [suggestions, setSuggestions] = useState<string[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const [value, setValue] = useState(props.defaultValue?.toString() || '')
+    const [value, setValue] = useState(props.value?.toString() || props.defaultValue?.toString() || '')
     const wrapperRef = useRef<HTMLDivElement>(null)
     const timeoutRef = useRef<NodeJS.Timeout>(null)
+
+    useEffect(() => {
+        if (props.value !== undefined && props.value !== value) {
+            setValue(props.value.toString())
+        }
+    }, [props.value])
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {

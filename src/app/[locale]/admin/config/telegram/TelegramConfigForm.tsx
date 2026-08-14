@@ -140,9 +140,9 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                 </div>
             )}
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Colonne Gauche Principale */}
-                <div className="xl:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-8">
                     
                     {/* Paramètres de Connexion */}
                     <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
@@ -291,7 +291,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                 </div>
 
                 {/* Colonne Droite Actions Rapides & Guides */}
-                <div className="xl:col-span-1 space-y-6">
+                <div className="lg:col-span-1 space-y-6">
                     
                     {/* Actions collantes */}
                     <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm sticky top-6">

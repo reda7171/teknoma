@@ -143,6 +143,7 @@ export default function AdminLayout({
             icon: BookOpen,
             children: [
                 { name: 'Livres Physiques', href: `/${lang}/admin/books`, icon: BookOpen },
+                { name: 'Google Books API', href: `/${lang}/admin/google-books`, icon: Search },
                 { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
                 { name: 'Catalogue Jumia', href: `/${lang}/admin/jumia-products`, icon: ShoppingBag },
                 { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },

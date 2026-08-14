@@ -236,7 +236,6 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
         }
     }
 
-
     return (
         <form onSubmit={handleSubmit} className="space-y-8 w-full">
             <div className="flex items-center justify-between">
@@ -531,7 +530,20 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                         {coverImage ? (
                             <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 group">
-                                <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+                                <img 
+                                    src={
+                                        coverImage.startsWith('http') || coverImage.startsWith('/') || coverImage.startsWith('data:') 
+                                            ? coverImage 
+                                            : coverImage.startsWith('/9j/') ? `data:image/jpeg;base64,${coverImage}` 
+                                            : coverImage.startsWith('iVBOR') ? `data:image/png;base64,${coverImage}` 
+                                            : `data:image/jpeg;base64,${coverImage}`
+                                    }
+                                    alt="Cover" 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.src = 'https://placehold.co/600x400/f3f4f6/a1a1aa?text=Image+Introuvable'
+                                    }}
+                                />
                                 <button
                                     type="button"
                                     onClick={() => setCoverImage('')}

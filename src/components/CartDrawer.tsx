@@ -6,7 +6,7 @@ import { normalizeImage } from '@/lib/utils'
 import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
@@ -20,6 +20,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('Cart');
+    const locale = useLocale();
 
     // Swipe to close states
     const [touchStart, setTouchStart] = useState<number | null>(null)
@@ -207,7 +208,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                 </div>
                                                 <div className="flex items-center gap-4 mt-3">
                                                     <p className="text-sm font-black text-black">
-                                                        {item.price} <span className="text-[10px] text-gray-500">درهم</span>
+                                                        {item.price} <span className="text-[10px] text-gray-500">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                                     </p>
                                                     {item.booksCount && (
                                                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 py-0.5 bg-gray-50 rounded-full">
@@ -272,7 +273,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center pt-2">
                                     <span className="text-[13px] font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
-                                    <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} درهم</span>
+                                    <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <div className="text-center">
                                     <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>
