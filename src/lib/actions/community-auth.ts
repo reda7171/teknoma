@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import crypto from 'crypto'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
+import { OAuth2Client } from 'google-auth-library'
 
 const RegisterSchema = z.object({
     fullName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -176,6 +177,104 @@ export async function login(formData: FormData): Promise<AuthResult> {
 export async function logout() {
     const cookieStore = await cookies()
     cookieStore.delete('community-token')
+}
+
+/**
+ * Connexion ou Inscription via OAuth (Google / Facebook)
+ */
+export async function oauthLoginOrRegister({ email, fullName, provider }: { email: string, fullName: string, provider: 'google' | 'facebook' }): Promise<AuthResult> {
+    const ip = await getIpIdentifier()
+    const limiter = await rateLimit(`community_oauth_${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })
+
+    if (!limiter.success) {
+        return { success: false, error: 'Trop de tentatives. Veuillez réessayer plus tard.' }
+    }
+
+    try {
+        let user = await prisma.user.findUnique({
+            where: { email }
+        })
+
+        if (!user) {
+            // Générer un mot de passe aléatoire très complexe (64 chars) pour sécuriser le compte
+            const randomPassword = crypto.randomBytes(32).toString('hex')
+            const hashedPassword = await bcrypt.hash(randomPassword, 10)
+
+            user = await prisma.user.create({
+                data: {
+                    fullName,
+                    email,
+                    password: hashedPassword,
+                    role: 'USER' as any,
+                    credits: 10,
+                }
+            })
+
+            // Notification Telegram Optionnelle
+            try {
+                const { sendUserRegistrationNotification } = await import('@/lib/telegram')
+                await sendUserRegistrationNotification({
+                    fullName: user.fullName || '',
+                    email: user.email,
+                    phone: `OAuth (${provider})`,
+                    city: 'Inconnue',
+                    role: `LECTEUR (${provider})`
+                })
+            } catch (e) {
+                console.error('Telegram notification error:', e)
+            }
+        }
+
+        // Historique
+        try {
+            const headersList = await headers()
+            const userAgent = headersList.get('user-agent')
+            await prisma.loginHistory.create({
+                data: {
+                    userId: user.id,
+                    ip: ip,
+                    userAgent: `${userAgent} (${provider} OAuth)`
+                }
+            })
+        } catch (e) {
+            console.error('Error recording login history:', e)
+        }
+
+        await createSession(user.id)
+
+        return { success: true, redirect: '/community' }
+
+    } catch (error) {
+        console.error('OAuth Login Error:', error)
+        return { success: false, error: 'Une erreur est survenue lors de l\'authentification' }
+    }
+}
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+/**
+ * Connexion Google One Tap
+ */
+export async function googleOneTapLogin(credential: string): Promise<AuthResult> {
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        })
+        const payload = ticket.getPayload()
+        if (!payload || !payload.email) {
+            return { success: false, error: 'Token Google invalide' }
+        }
+
+        return await oauthLoginOrRegister({
+            email: payload.email,
+            fullName: payload.name || payload.email.split('@')[0],
+            provider: 'google'
+        })
+    } catch (error) {
+        console.error('Google One Tap Error:', error)
+        return { success: false, error: 'Une erreur est survenue avec Google One Tap' }
+    }
 }
 
 /**

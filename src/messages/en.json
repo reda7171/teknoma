@@ -778,8 +778,9 @@
       "MapNetwork": "Riwaya Network",
       "MapExchange": "Book Exchange",
       "UnlockMap": "Unlock the Map",
-      "UnlockDesc": "To see available books near you and start exchanging.",
+      "UnlockDesc": "To see books available near you and start exchanging.",
       "SignUpCTA": "Sign up and place an order to start exchanging",
+      "OrderCTA": "Place an order to start exchanging",
       "WhatsAppSupport": "WhatsApp Support"
     },
     "Exchange": {

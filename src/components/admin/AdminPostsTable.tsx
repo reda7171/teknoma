@@ -289,7 +289,11 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                                 hasLink = true;
                                             }
                                             
-                                            const plainText = contentStr.replace(/<[^>]*>?/gm, '').replace(/[#*`_]/g, '');
+                                            const plainText = contentStr
+                                                .replace(/<[^>]*>?/gm, ' ') // replace tags with space
+                                                .replace(/&nbsp;/g, ' ') // replace non-breaking spaces
+                                                .replace(/&[a-z]+;/g, ' ') // replace other html entities
+                                                .replace(/[#*`_]/g, ' '); // replace markdown formatting
                                             wordCount = plainText.split(/\s+/).filter(Boolean).length;
                                             
                                             score += Math.min(50, Math.floor(wordCount / 10)); // up to 50 pts for words (500 words = max)

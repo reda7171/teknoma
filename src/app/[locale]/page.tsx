@@ -23,6 +23,8 @@ import CosmosBooks from '@/components/CosmosBooks'
 import CatalogDownload from '@/components/home/CatalogDownload'
 import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import { getPrimaryImage } from '@/lib/utils/image'
+import { getCommunityUser } from '@/lib/actions/community-auth'
+import GoogleOneTap from '@/components/auth/GoogleOneTap'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -94,7 +96,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     featureExchange,
     recentPosts,
     homeSettings,
-    homepageContent
+    homepageContent,
+    user
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -111,7 +114,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     isFeatureEnabled('feature_exchange'),
     getRecentPosts(3, locale),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content'))
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
+    getCommunityUser()
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
@@ -859,7 +863,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <RoulettePopup />
+      {showSection('home_section_roulette') && <RoulettePopup />}
       <HeaderWithUser />
       <style dangerouslySetInnerHTML={{ __html: `
         body::-webkit-scrollbar { display: none !important; }
@@ -904,6 +908,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {!user && <GoogleOneTap />}
       </main>
     </>
   )

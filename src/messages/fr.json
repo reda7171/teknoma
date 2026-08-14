@@ -780,6 +780,7 @@
       "UnlockMap": "Débloquez la carte",
       "UnlockDesc": "Pour voir les livres disponibles près de chez vous et commencer à échanger.",
       "SignUpCTA": "S'inscrire et passer la commande pour pouvoir échanger",
+      "OrderCTA": "Passez une commande pour commencer à échanger",
       "WhatsAppSupport": "Support WhatsApp"
     },
     "Exchange": {

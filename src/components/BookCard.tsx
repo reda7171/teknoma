@@ -121,7 +121,7 @@ export default function BookCard({
                 {/* Price & Action */}
                 <div className="mt-auto flex flex-col items-center gap-4 w-full pt-4">
                     <p className={`font-black text-gray-900 leading-none ${isCompact ? 'text-base' : isFeatured ? 'text-2xl' : 'text-xl'}`}>
-                        {price} <span className="text-[10px] rtl:text-xs font-black text-gray-500 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'درهم'}</span>
+                        {price} <span className="text-[10px] rtl:text-xs font-black text-gray-500 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                     </p>
 
                     {stock > 0 && (

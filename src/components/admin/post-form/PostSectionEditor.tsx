@@ -250,8 +250,12 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     }
 
     const handleRemoveSection = (id: string) => {
-        if (sections.length <= 1) return
-        setSections(sections.filter(s => s.id !== id))
+        setSections(prev => {
+            if (prev.length <= 1) {
+                return [{ id: Date.now().toString(), title: '', content: '', blockType: 'text' }]
+            }
+            return prev.filter(s => s.id !== id)
+        })
     }
 
     const handleSectionChange = (id: string, field: keyof Section, value: string) => {
@@ -469,7 +473,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                             <span className="hidden sm:inline">Améliorer</span>
                                         </button>
                                     )}
-                                    <button type="button" onClick={() => handleRemoveSection(section.id)}
+                                    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveSection(section.id); }}
                                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
                                         <Trash2 className="w-5 h-5" />
                                     </button>

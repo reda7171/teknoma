@@ -38,7 +38,7 @@ export default async function MarketPage({
             <Header />
 
             <div className="w-full">
-                <MarketMap books={books} isBlurred={isBlurred} />
+                <MarketMap books={books} isBlurred={isBlurred} isLoggedIn={!!user} />
             </div>
 
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-32 w-full">

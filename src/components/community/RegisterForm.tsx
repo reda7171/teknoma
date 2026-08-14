@@ -7,6 +7,7 @@ import { Link, useRouter } from '@/i18n/routing'
 import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { MOROCCO_CITIES } from '@/lib/constants/cities'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
+import OAuthButtons from './OAuthButtons'
 
 export default function RegisterForm() {
     const t = useTranslations('Community')
@@ -112,6 +113,10 @@ export default function RegisterForm() {
                         {!loading && <ArrowRight className="w-4 h-4" />}
                     </button>
                 </form>
+
+                <div className="mt-8">
+                    <OAuthButtons />
+                </div>
 
                 <div className="mt-8 text-center">
                     <p className="text-xs font-bold text-gray-400">

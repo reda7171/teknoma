@@ -7,7 +7,7 @@ import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import { ArrowRight, Minus, Plus, Trash2, ShoppingCart, Shield, Truck, AlertCircle, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { normalizeImage } from '@/lib/utils'
 
 import AddToCartButton from '@/components/AddToCartButton'
@@ -23,6 +23,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
     const [mounted, setMounted] = useState(false)
     const [roulettePrize, setRoulettePrize] = useState<string | null>(null)
     const t = useTranslations('CartPage')
+    const locale = useLocale()
 
     const handleRemove = async (item: any) => {
         removeItem(item.id)
@@ -158,12 +159,12 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                                 {item.title}
                                             </h3>
                                             <p className="text-lg sm:text-xl font-black tracking-tighter whitespace-nowrap">
-                                                {item.price * item.quantity} درهم
+                                                {item.price * item.quantity} {locale === 'ar' ? 'درهم' : 'MAD'}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-4 mb-8">
                                             <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest bg-pixio-cream px-4 py-2 rounded-xl text-black">
-                                                {item.price} درهم / {t('ItemUnit')}
+                                                {item.price} {locale === 'ar' ? 'درهم' : 'MAD'} / {t('ItemUnit')}
                                             </span>
                                             {item.booksCount && (
                                                 <span className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">
@@ -242,7 +243,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                             <div className="space-y-6 mb-12">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Items')} ({totalItems})</span>
-                                    <span className="text-xs font-black uppercase tracking-widest">{totalPrice} درهم</span>
+                                    <span className="text-xs font-black uppercase tracking-widest">{totalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Shipping')}</span>
@@ -266,7 +267,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                             <div className="border-t border-gray-50 pt-6 sm:pt-8 mb-8 sm:mb-12">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-2 gap-2">
                                     <span className="text-xs font-black uppercase tracking-[0.3em]">{t('TotalValue')}</span>
-                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{totalPrice} درهم</span>
+                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{totalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-left sm:text-right">{t('TaxesNote')}</p>
                             </div>
@@ -358,7 +359,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                             {book.author}
                                         </p>
                                         <div className="mt-auto flex items-center justify-between gap-4 pt-6 border-t border-gray-50">
-                                            <span className="text-xl font-black text-black">{book.price} درهم</span>
+                                            <span className="text-xl font-black text-black">{book.price} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                             <AddToCartButton
                                                 product={{
                                                     id: book.id,
@@ -383,14 +384,14 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                     <div className="bg-red-50 border-t border-red-100 px-4 py-3 flex items-center gap-3 shadow-lg">
                         <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
                         <p className="text-[10px] rtl:text-xs font-bold text-red-700 leading-tight">
-                            Le montant minimum de commande est de {minOrderAmount} درهم. Veuillez ajouter plus d'articles pour continuer.
+                            Le montant minimum de commande est de {minOrderAmount} {locale === 'ar' ? 'درهم' : 'MAD'}. Veuillez ajouter plus d'articles pour continuer.
                         </p>
                     </div>
                 )}
                 <div className="bg-white border-t border-gray-100 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('TotalValue')}</span>
-                        <span className="text-xl font-black">{finalTotal} درهم</span>
+                        <span className="text-xl font-black">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                     </div>
                     <div className="flex-1">
                         {isMinAmountReached ? (
