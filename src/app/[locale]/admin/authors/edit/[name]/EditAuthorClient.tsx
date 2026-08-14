@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit2, Upload, Loader2, Sparkles, Check } from 'lucide-react'
+import { Edit2, Upload, Loader2, Sparkles, Check, Download } from 'lucide-react'
 import { upsertAuthorProfile } from '@/lib/actions/admin-authors'
 import { uploadAuthorImage } from '@/lib/actions/upload'
 import { useUIStore } from '@/store/ui'
@@ -20,6 +20,7 @@ export default function EditAuthorClient({ authorName, initialProfile }: { autho
     const [isUploading, setIsUploading] = useState(false)
     const [isGeneratingNationality, setIsGeneratingNationality] = useState(false)
     const [isGeneratingBio, setIsGeneratingBio] = useState(false)
+    const [isFetchingOpenLib, setIsFetchingOpenLib] = useState(false)
     const { showNotification } = useUIStore()
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,8 +101,87 @@ export default function EditAuthorClient({ authorName, initialProfile }: { autho
         setIsGeneratingBio(false);
     };
 
+    const fetchOpenLibraryData = async () => {
+        setIsFetchingOpenLib(true);
+        try {
+            // 1. Search author by name
+            const searchRes = await fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(editingAuthor.name)}`);
+            const searchData = await searchRes.json();
+            
+            if (!searchData.docs || searchData.docs.length === 0) {
+                showNotification("Auteur introuvable sur Open Library", "error");
+                setIsFetchingOpenLib(false);
+                return;
+            }
+            
+            const authorKey = searchData.docs[0].key;
+            
+            // 2. Fetch author details
+            const detailRes = await fetch(`https://openlibrary.org/authors/${authorKey}.json`);
+            const detailData = await detailRes.json();
+            
+            let bio = '';
+            if (detailData.bio) {
+                bio = typeof detailData.bio === 'string' ? detailData.bio : detailData.bio.value || '';
+            }
+            
+            let birthYear = editingAuthor.birthYear;
+            if (detailData.birth_date) {
+                const match = detailData.birth_date.match(/\d{4}/);
+                if (match) birthYear = match[0];
+            }
+            
+            // 3. Translate bio if it exists and is likely in English (very basic approach: just ask AI to translate)
+            if (bio && bio.length > 20) {
+                showNotification("Traduction de la bio en cours...", "info");
+                try {
+                    const transRes = await fetch('/api/ai/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: `Traduis cette biographie d'auteur en français (ne rajoute pas d'introduction, donne juste le texte traduit) : ${bio.substring(0, 800)}` })
+                    });
+                    const transData = await transRes.json();
+                    if (transData.text) {
+                        bio = transData.text.trim();
+                    }
+                } catch (e) {
+                    console.error("Translation failed", e);
+                }
+            }
+            
+            setEditingAuthor(prev => ({
+                ...prev,
+                bio: bio || prev.bio,
+                birthYear: birthYear || prev.birthYear,
+                image: prev.image || `https://covers.openlibrary.org/a/olid/${authorKey}-L.jpg`
+            }));
+            
+            showNotification("Données importées avec succès", "success");
+        } catch (err) {
+            console.error(err);
+            showNotification("Erreur lors de la récupération des données", "error");
+        }
+        setIsFetchingOpenLib(false);
+    };
+
     return (
         <form onSubmit={handleSave} className="p-8 md:p-12 space-y-8 md:space-y-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-50 p-6 rounded-[2rem] border border-gray-100 mb-8 shadow-inner">
+                <div>
+                    <h3 className="font-black text-sm text-black">Assistant Open Library</h3>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Récupérez photo, bio et dates automatiquement</p>
+                </div>
+                <button
+                    type="button"
+                    onClick={fetchOpenLibraryData}
+                    disabled={isFetchingOpenLib}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 shadow-md"
+                >
+                    {isFetchingOpenLib ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    Importer les données
+                </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
                 {/* Photo Upload Premium */}
                 <div className="space-y-4">
