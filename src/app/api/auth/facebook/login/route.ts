@@ -7,7 +7,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'FACEBOOK_CLIENT_ID is not configured' }, { status: 500 })
     }
 
-    const { origin } = new URL(request.url)
+    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
     const redirectUri = `${origin}/api/auth/facebook/callback`
 
     const params = new URLSearchParams({
