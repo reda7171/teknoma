@@ -162,9 +162,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     }
   } catch (e) {}
 
-  let aeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
-  let aeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
-  
+  let dbAeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
+  let dbAeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
+
   // Snippet par défaut selon la locale
   const aeoDefaults: Record<string, { q: string; a: string }> = {
     fr: {
@@ -180,8 +180,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       a: 'Riwaya is a Moroccan online bookstore that allows you to order books and novels with delivery throughout Morocco.'
     }
   }
-  if (!aeoSnippetQ) aeoSnippetQ = (aeoDefaults[locale] || aeoDefaults.fr).q
-  if (!aeoSnippetA) aeoSnippetA = (aeoDefaults[locale] || aeoDefaults.fr).a
+
+  let aeoSnippetQ = (aeoDefaults[locale] || aeoDefaults.fr).q
+  let aeoSnippetA = (aeoDefaults[locale] || aeoDefaults.fr).a
+
+  // Si l'admin a modifié le texte en BD (différent de notre fallback FR) et on est en FR,
+  // ou s'il a mis un texte générique, on peut l'utiliser, mais pour éviter de montrer
+  // du français sur la page arabe, on privilégie le texte de la base UNIQUEMENT pour la locale 'fr'
+  // OU si le texte ne correspond pas au défaut français.
+  if (dbAeoSnippetQ && dbAeoSnippetQ.trim() !== '' && dbAeoSnippetQ !== aeoDefaults.fr.q && locale === 'fr') {
+      aeoSnippetQ = dbAeoSnippetQ;
+  }
+  if (dbAeoSnippetA && dbAeoSnippetA.trim() !== '' && dbAeoSnippetA !== aeoDefaults.fr.a && locale === 'fr') {
+      aeoSnippetA = dbAeoSnippetA;
+  }
 
   // Choisir une citation de manière déterministe (fix hydration error by not relying on Date.now() in SSR)
   let randomQuote = null;
