@@ -882,17 +882,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                               <BookOpen className="w-12 h-12 text-gray-300" />
                             </div>
                           )}
-                          <div className="absolute top-6 left-6">
-                            <div className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
-                              {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR', { day: 'numeric', month: 'long' })}
-                            </div>
-                          </div>
                         </div>
+
                         <div className="p-8 flex-grow flex flex-col">
                           <div className="flex items-center gap-2 mb-4"><div className="w-1.5 h-1.5 rounded-full bg-black" /><span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{post.category?.name || 'Inspiration'}</span></div>
                           <h3 className="text-2xl font-black text-black leading-tight mb-4 group-hover:text-gray-600 transition-colors line-clamp-2">{post.title}</h3>
                           <p className="text-gray-500 text-sm font-medium line-clamp-3 mb-8">{post.excerpt}</p>
-                          <div className="mt-auto flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
+                          <div className="mt-auto flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
+                            <span className="text-[10px] font-semibold text-gray-400 rtl:text-xs">{new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR', { day: 'numeric', month: 'long' })}</span>
+                          </div>
                         </div>
                       </article>
                     </Link>
