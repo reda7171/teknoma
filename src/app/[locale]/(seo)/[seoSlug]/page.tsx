@@ -1,101 +1,17 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { getPopularBooks } from '@/lib/db/books'
+import { getPopularBooks, getBooks } from '@/lib/db/books'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import { CheckCircle2, Truck, Shield, Star, BookOpen } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 
-const seoPages: Record<string, any> = {
-  'livre-maroc': {
-    title: 'Livre Maroc | Acheter des livres en ligne au Maroc – Riwaya Store',
-    description: 'Achetez vos livres au Maroc avec Riwaya Store. Large choix de livres, livraison rapide à domicile et paiement à la livraison (COD) partout au Maroc.',
-    h1: 'Livre Maroc : Votre librairie en ligne de référence',
-    keyword: 'livre maroc',
-    intro: "Bienvenue sur Riwaya Store, votre destination numéro 1 pour l'achat de livres au Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou n'importe où dans le royaume, nous vous livrons vos ouvrages préférés directement à votre porte.",
-    categoryText: "Nous proposons une vaste sélection couvrant tous les genres : développement personnel, business, littérature classique, romans contemporains et bien plus.",
-    faq: [
-      { q: "Comment commander un livre au Maroc ?", a: "C'est simple ! Parcourez notre catalogue, ajoutez le livre à votre panier, renseignez votre adresse et choisissez le paiement à la livraison. Nous expédions votre commande sous 24h." },
-      { q: "Quels sont les frais de livraison ?", a: "Les frais de livraison sont standardisés pour toutes les villes du Maroc. De plus, nous offrons régulièrement la livraison gratuite pour les commandes dépassant un certain montant." }
-    ]
-  },
-  'book-maroc': {
-    title: 'Book Maroc | Buy Books Online in Morocco – Riwaya Store',
-    description: 'Looking for a book in Morocco? Riwaya Store offers a great selection of English, French and Arabic books with nationwide delivery and Cash on Delivery.',
-    h1: 'Book Maroc : The Best Place to Buy Books in Morocco',
-    keyword: 'book maroc',
-    intro: "Finding the right book in Morocco has never been easier. At Riwaya Store, we provide a premium selection of English, French, and Arabic books, delivered straight to your home anywhere in Morocco.",
-    categoryText: "Discover our curated collections including Self-Help, Business & Finance, Philosophy, and bestselling novels.",
-    faq: [
-      { q: "Do you deliver English books in Morocco?", a: "Yes, we have a dedicated selection of the best English books and deliver them across all Moroccan cities." },
-      { q: "Can I pay Cash on Delivery?", a: "Absolutely! We support Cash on Delivery (COD) for all orders to ensure a safe and trustworthy shopping experience." }
-    ]
-  },
-  'acheter-livre-au-maroc': {
-    title: 'Acheter Livre au Maroc | Livraison Rapide & Paiement à la Réception',
-    description: 'Où acheter un livre au Maroc ? Riwaya Store est la meilleure librairie en ligne pour commander vos livres en toute simplicité. Paiement à la livraison.',
-    h1: 'Acheter un Livre au Maroc : Simple, Rapide et Sécurisé',
-    keyword: 'acheter livre au maroc',
-    intro: "Si vous cherchez à acheter un livre au Maroc sans vous déplacer, vous êtes au bon endroit. Riwaya simplifie votre expérience de lecture en vous proposant un catalogue riche et varié accessible en quelques clics.",
-    categoryText: "Profitez de nos offres exclusives et de nos packs de livres à prix réduit pour enrichir votre bibliothèque.",
-    faq: [
-      { q: "Pourquoi acheter sur Riwaya.store ?", a: "Nous garantissons des livres de qualité, un service client réactif, et une livraison express partout au Maroc avec option de paiement à la réception." },
-      { q: "Puis-je retourner un livre ?", a: "Oui, nous avons une politique de retour flexible si le livre reçu est endommagé ou non conforme à votre commande." }
-    ]
-  },
-  'librairie-en-ligne-maroc': {
-    title: 'Librairie en Ligne Maroc | Riwaya Store',
-    description: 'La meilleure librairie en ligne au Maroc. Achat de livres, romans, et développement personnel avec livraison à domicile. Découvrez notre catalogue.',
-    h1: 'Riwaya : La Librairie en Ligne N°1 au Maroc',
-    keyword: 'librairie en ligne maroc',
-    intro: "Oubliez les déplacements et les files d'attente. Riwaya est votre librairie en ligne au Maroc ouverte 24h/24 et 7j/7. Nous mettons la culture et le savoir à portée de main.",
-    categoryText: "Notre librairie virtuelle propose des milliers de références constamment mises à jour avec les dernières nouveautés mondiales.",
-    faq: [
-      { q: "Livrez-vous dans toutes les villes ?", a: "Oui, notre librairie en ligne dessert Casablanca, Rabat, Fès, Tanger, Agadir, et toutes les autres villes marocaines." },
-      { q: "Proposez-vous des livres d'occasion ?", a: "En plus des livres neufs, nous disposons d'une plateforme communautaire (Market) permettant l'échange de livres d'occasion entre lecteurs." }
-    ]
-  },
-  'roman-maroc': {
-    title: 'Roman Maroc | Acheter les meilleurs romans au Maroc – Riwaya',
-    description: 'Passionné de lecture ? Découvrez notre collection de romans au Maroc. Romans policiers, romance, fantastique et littérature classique. Livraison rapide.',
-    h1: 'Roman Maroc : Plongez dans des histoires captivantes',
-    keyword: 'roman maroc',
-    intro: "Pour les passionnés d'évasion, notre sélection de romans au Maroc saura vous séduire. Des best-sellers internationaux aux chefs-d'œuvre de la littérature, trouvez votre prochaine grande aventure littéraire.",
-    categoryText: "Nous couvrons tous les genres : policier, thriller, romance, fantastique, et littérature contemporaine arabe et francophone.",
-    faq: [
-      { q: "Avez-vous les derniers romans à succès ?", a: "Oui, nous mettons régulièrement à jour notre catalogue avec les romans les plus populaires du moment." },
-      { q: "Comment trouver un roman spécifique ?", a: "Utilisez notre barre de recherche optimisée ou naviguez à travers nos catégories littéraires." }
-    ]
-  },
-  'livres-francais-maroc': {
-    title: 'Livres Français Maroc | Littérature & Développement Personnel',
-    description: 'Trouvez et achetez vos livres en français au Maroc sur Riwaya Store. Un grand choix de livres francophones avec paiement à la livraison.',
-    h1: 'Livres Français au Maroc : Votre sélection francophone',
-    keyword: 'livres français maroc',
-    intro: "La lecture en langue française est profondément ancrée dans la culture marocaine. Riwaya Store vous propose la meilleure sélection de livres en français au Maroc.",
-    categoryText: "Découvrez des auteurs français incontournables et des traductions des plus grands succès mondiaux en développement personnel et business.",
-    faq: [
-      { q: "Quelles catégories de livres français proposez-vous ?", a: "Nous avons des romans, des essais philosophiques, des livres de psychologie et de nombreuses œuvres de développement personnel en français." }
-    ]
-  },
-  'livres-anglais-maroc': {
-    title: 'English Books Morocco | Livres Anglais au Maroc – Riwaya',
-    description: 'Looking for English books in Morocco? Acheter des livres en anglais au Maroc facilement avec Riwaya Store. Best sellers, Self-help & Novels.',
-    h1: 'English Books Morocco : Livres Anglais au Maroc',
-    keyword: 'livres anglais maroc',
-    intro: "Avec l'essor de la langue de Shakespeare, la demande pour des livres en anglais au Maroc est grandissante. Riwaya Store est fier de proposer une sélection pointue d'ouvrages en version originale.",
-    categoryText: "Improve your English while reading the world's bestsellers in Self-improvement, Business, and Fiction.",
-    faq: [
-      { q: "Are these original English books?", a: "We offer high-quality editions of the most sought-after English books globally." },
-      { q: "Do you deliver to student campuses?", a: "Yes, we deliver anywhere in Morocco, including universities and student accommodations." }
-    ]
-  }
-}
+import { seoPages } from '@/lib/seo-pages'
 
-export async function generateMetadata({ params }: { params: Promise<{ seoSlug: string }> }): Promise<Metadata> {
-  const { seoSlug } = await params
-  const data = seoPages[seoSlug]
+export async function generateMetadata({ params }: { params: Promise<{ seoSlug: string, locale: string }> }): Promise<Metadata> {
+  const { seoSlug, locale } = await params
+  const data = seoPages[locale as string]?.[seoSlug] || seoPages['fr']?.[seoSlug] // Fallback to fr for old links
 
   if (!data) return {}
 
@@ -113,14 +29,19 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
 
 export default async function SeoLandingPage({ params }: { params: Promise<{ seoSlug: string, locale: string }> }) {
   const { seoSlug, locale } = await params
-  const data = seoPages[seoSlug]
+  const data = seoPages[locale as string]?.[seoSlug] || seoPages['fr']?.[seoSlug]
 
   if (!data) {
     notFound()
   }
 
-  // Fetch some popular books to show at the bottom
-  const popularBooks = await getPopularBooks(4)
+  // Fetch some books related to the search query or popular ones
+  let popularBooks = []
+  if (data.searchQuery) {
+    popularBooks = await getBooks({ search: data.searchQuery, limit: 8, active: true })
+  } else {
+    popularBooks = await getPopularBooks(8)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
