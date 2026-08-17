@@ -165,9 +165,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   let aeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
   let aeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
   
-  // Snippet par défaut
-  if (!aeoSnippetQ) aeoSnippetQ = 'Où acheter des livres en ligne au Maroc ?'
-  if (!aeoSnippetA) aeoSnippetA = 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
+  // Snippet par défaut selon la locale
+  const aeoDefaults: Record<string, { q: string; a: string }> = {
+    fr: {
+      q: 'Où acheter des livres en ligne au Maroc ?',
+      a: 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
+    },
+    ar: {
+      q: 'أين يمكن شراء الكتب أون لاين في المغرب؟',
+      a: 'رواية هي مكتبة إلكترونية مغربية تتيح طلب الكتب والروايات مع التوصيل في جميع أنحاء المغرب.'
+    },
+    en: {
+      q: 'Where to buy books online in Morocco?',
+      a: 'Riwaya is a Moroccan online bookstore that allows you to order books and novels with delivery throughout Morocco.'
+    }
+  }
+  if (!aeoSnippetQ) aeoSnippetQ = (aeoDefaults[locale] || aeoDefaults.fr).q
+  if (!aeoSnippetA) aeoSnippetA = (aeoDefaults[locale] || aeoDefaults.fr).a
 
   // Choisir une citation de manière déterministe (fix hydration error by not relying on Date.now() in SSR)
   let randomQuote = null;
