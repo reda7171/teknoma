@@ -404,25 +404,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8 prose-pre:overflow-x-auto
                                 prose-img:rounded-xl md:prose-img:rounded-2xl prose-img:shadow-lg prose-img:mx-auto prose-img:my-8 md:prose-img:my-10 prose-img:w-full prose-img:object-cover
                                 prose-ul:space-y-3 prose-ol:space-y-3 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
-                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold prose-li:mb-4 rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold"
+                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold prose-li:mb-4 rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold`}
                         >
-                            <style>{`
-                                #article-content p { margin-bottom: 2rem !important; margin-top: 1rem !important; }
-                                #article-content h2 { margin-top: 4rem !important; margin-bottom: 1.5rem !important; }
-                                #article-content h3 { margin-top: 3rem !important; margin-bottom: 1rem !important; }
-                                #article-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; border: 1px solid #e5e7eb; font-size: 0.95em; }
-                                #article-content th, #article-content td { border: 1px solid #e5e7eb; padding: 1rem; text-align: left; }
-                                #article-content th { background-color: #f9fafb; font-weight: 700; color: #111827; }
-                                [dir="rtl"] #article-content th, [dir="rtl"] #article-content td { text-align: right; }
-                                
-                                #article-content blockquote { position: relative; padding: 2.5rem 3rem; margin: 3rem 0; background: linear-gradient(to right, #f8fafc, #ffffff); border-left: 5px solid #0f172a; border-radius: 0 1.5rem 1.5rem 0; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); overflow: hidden; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; }
-                                #article-content blockquote::before { content: "“"; position: absolute; top: -1rem; left: 1rem; font-size: 8rem; color: #e2e8f0; font-family: Georgia, serif; line-height: 1; opacity: 0.4; pointer-events: none; }
-                                [dir="rtl"] #article-content blockquote { border-left: 1px solid #f1f5f9; border-right: 5px solid #0f172a; border-radius: 1.5rem 0 0 1.5rem; background: linear-gradient(to left, #f8fafc, #ffffff); }
-                                [dir="rtl"] #article-content blockquote::before { left: auto; right: 1rem; content: "”"; }
-                                #article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
-                                #article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
-                            `}</style>
-                            
                             {/* === GEO: AI TL;DR Summary === */}
                             {post.excerpt && (
                                 <section aria-label="Résumé de l'article pour l'IA" className="not-prose mb-10 p-6 bg-emerald-50/50 border border-emerald-100/50 rounded-3xl relative overflow-hidden">
