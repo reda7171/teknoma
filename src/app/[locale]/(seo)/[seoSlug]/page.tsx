@@ -7,11 +7,11 @@ import BookCard from '@/components/BookCard'
 import { CheckCircle2, Truck, Shield, Star, BookOpen } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 
-import { seoPages } from '@/lib/seo-pages'
+import { getSeoCategoryBySlug } from '@/lib/actions/seo-categories'
 
 export async function generateMetadata({ params }: { params: Promise<{ seoSlug: string, locale: string }> }): Promise<Metadata> {
-  const { seoSlug, locale } = await params
-  const data = seoPages[locale as string]?.[seoSlug] || seoPages['fr']?.[seoSlug] // Fallback to fr for old links
+  const { seoSlug } = await params
+  const data = await getSeoCategoryBySlug(seoSlug)
 
   if (!data) return {}
 
@@ -28,20 +28,37 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
 }
 
 export default async function SeoLandingPage({ params }: { params: Promise<{ seoSlug: string, locale: string }> }) {
-  const { seoSlug, locale } = await params
-  const data = seoPages[locale as string]?.[seoSlug] || seoPages['fr']?.[seoSlug]
+  const { seoSlug } = await params
+  const data = await getSeoCategoryBySlug(seoSlug)
 
-  if (!data) {
+  if (!data || !data.isActive) {
     notFound()
   }
 
-  // Fetch some books related to the search query or popular ones
-  let popularBooks = []
-  if (data.searchQuery) {
-    popularBooks = await getBooks({ search: data.searchQuery, limit: 8, active: true })
-  } else {
-    popularBooks = await getPopularBooks(8)
+  // Obtenir les livres assignés manuellement d'abord
+  let popularBooks = data.books?.map((b: any) => b.book) || []
+  
+  // Si pas assez de livres, on complète avec la recherche automatique
+  if (popularBooks.length < 8) {
+    let additionalBooks = []
+    if (data.searchQuery) {
+      additionalBooks = await getBooks({ search: data.searchQuery, limit: 8, active: true })
+    } else {
+      additionalBooks = await getPopularBooks(8)
+    }
+    // Ajouter ceux qui ne sont pas déjà dans la liste
+    additionalBooks.forEach((b: any) => {
+      if (!popularBooks.some((pb: any) => pb.id === b.id)) {
+        popularBooks.push(b)
+      }
+    })
+    popularBooks = popularBooks.slice(0, 8)
   }
+
+  let faqList = []
+  try {
+    if (data.faq) faqList = JSON.parse(data.faq)
+  } catch(e) {}
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -86,73 +103,52 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
       <main className="max-w-4xl mx-auto px-4 py-16">
         <article className="prose prose-lg max-w-none prose-headings:font-black prose-headings:text-black prose-p:text-gray-600 mb-16 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100">
           <h2>Pourquoi choisir Riwaya pour vos lectures ?</h2>
-          <p>{data.categoryText}</p>
-          <p>Notre mission est de démocratiser l'accès à la culture. En choisissant <strong>{data.keyword}</strong> via notre plateforme, vous bénéficiez d'une interface intuitive, d'un service client à l'écoute et de recommandations personnalisées.</p>
+          <div dangerouslySetInnerHTML={{ __html: data.categoryText?.replace(/\n/g, '<br />') || '' }}></div>
+          <p className="mt-4">Notre mission est de démocratiser l'accès à la culture. En choisissant <strong>{data.keyword}</strong> via notre plateforme, vous bénéficiez d'une interface intuitive, d'un service client à l'écoute et de recommandations personnalisées.</p>
           
-          <h3>Notre sélection de catégories :</h3>
-          <ul>
-            <li><strong>Développement Personnel :</strong> Devenez la meilleure version de vous-même.</li>
-            <li><strong>Business & Finance :</strong> Apprenez des plus grands entrepreneurs.</li>
-            <li><strong>Romans & Fictions :</strong> Évadez-vous à travers des histoires captivantes.</li>
-            <li><strong>Packs Économiques :</strong> Des sélections thématiques pour lire plus en dépensant moins.</li>
-          </ul>
-
           <div className="bg-pixio-cream p-6 rounded-2xl mt-10 border border-yellow-100">
-            <h3 className="mt-0 text-black">Moyens de paiement et Livraison</h3>
-            <p className="mb-0 text-gray-700">Acheter en ligne n'a jamais été aussi sûr. Nous avons choisi le <strong>Paiement à la Livraison (Cash on Delivery)</strong> pour vous garantir une tranquillité d'esprit absolue. Payez uniquement lorsque vous recevez votre commande entre vos mains. Nous couvrons l'ensemble des villes marocaines avec des prestataires de livraison fiables et rapides.</p>
+            <h3 className="flex items-center gap-2 mt-0">
+              <CheckCircle2 className="text-pixio-yellow w-6 h-6" />
+              <span>Garantie Riwaya</span>
+            </h3>
+            <p className="mb-0 text-gray-700">Satisfait ou remboursé sous 7 jours. Emballage soigné et expédition rapide en 24h ouvrées vers toutes les villes du Maroc (Casablanca, Rabat, Marrakech, Tanger, etc.).</p>
           </div>
         </article>
 
-        {/* FAQ Section */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-black text-black mb-8 text-center">Foire Aux Questions</h2>
-          <div className="space-y-4">
-            {data.faq.map((item: any, idx: number) => (
-              <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                <h3 className="text-lg font-bold text-black mb-2 flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-pixio-yellow shrink-0 mt-0.5" />
-                  {item.q}
-                </h3>
-                <p className="text-gray-600 pl-8">{item.a}</p>
-              </div>
+        {/* Featured Products */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-black text-center mb-8">Sélection de la semaine</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {popularBooks.map((book: any) => (
+              <BookCard key={book.id} book={book} />
             ))}
           </div>
-        </section>
-
-        {/* Related Products */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-black text-black">Nos Meilleures Ventes</h2>
-            <Link href="/books" className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors">
-              Voir tout le catalogue &rarr;
+          <div className="text-center mt-10">
+            <Link 
+              href="/catalog" 
+              className="inline-flex px-8 py-4 bg-black text-white font-bold rounded-full hover:bg-gray-800 transition-colors"
+            >
+              Voir tout le catalogue
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {popularBooks.map((book: any) => (
-              <BookCard key={book.id} {...book} />
-            ))}
-          </div>
-        </section>
+        </div>
+
+        {/* FAQ Schema */}
+        {faqList && faqList.length > 0 && (
+          <section className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100">
+            <h2 className="text-3xl font-black mb-8">Questions Fréquentes</h2>
+            <div className="space-y-6">
+              {faqList.map((faq: any, index: number) => (
+                <div key={index}>
+                  <h3 className="font-bold text-xl text-gray-900 mb-2">{faq.q}</h3>
+                  <p className="text-gray-600">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": data.faq.map((item: any) => ({
-              "@type": "Question",
-              "name": item.q,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": item.a
-              }
-            }))
-          })
-        }}
-      />
-
+      
       <Footer />
     </div>
   )

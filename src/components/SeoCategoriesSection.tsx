@@ -1,59 +1,33 @@
 import { getBooks } from '@/lib/db/books'
-import { seoPages } from '@/lib/seo-pages'
+import { getHomeSeoCategories } from '@/lib/actions/seo-categories'
 import Image from 'next/image'
 import { Link } from '@/i18n/routing'
 import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react'
 
-// Utilise des couleurs vives et premium qui rappellent le screenshot
-const gradients = [
-  'from-[#4A25E1] to-[#7A5AF8]', // Deep Purple
-  'from-[#0F766E] to-[#042F2E]', // Emerald Dark
-  'from-[#E11D48] to-[#881337]', // Rose/Red
-  'from-[#0369A1] to-[#0C4A6E]', // Ocean Blue
-  'from-[#B45309] to-[#78350F]', // Amber/Orange
-  'from-[#9333EA] to-[#581C87]', // Pink/Purple
-  'from-[#334155] to-[#0F172A]', // Slate Dark
-  'from-[#0284C7] to-[#0369A1]'  // Sky Blue
-]
-
 export default async function SeoCategoriesSection({ locale }: { locale: string }) {
-  const newCategoriesFr = [
-    'romans-arabes', 'romans-romantiques', 'romans-thriller-suspense', 
-    'livres-developpement-personnel', 'livres-business-investissement', 
-    'romans-marocains', 'idees-cadeaux-livres', 'livres-pas-chers'
-  ]
-  const newCategoriesAr = [
-    'riwayat-arabia', 'riwayat-romansiya', 'riwayat-tachwiq',
-    'kotob-tatwir-adat', 'kotob-mal-istithmar', 'riwayat-maghribia',
-    'kotob-hadaya', 'kotob-arabia-mounasiba'
-  ]
-  const newCategoriesEn = [
-    'arabic-novels', 'romantic-novels', 'thriller-suspense-novels',
-    'self-help-books', 'business-investing-books', 'moroccan-novels',
-    'book-gift-ideas', 'cheap-books'
-  ]
+  // Fetch dynamic categories configured to show on home
+  const categories = await getHomeSeoCategories(locale)
 
-  let keysToUse = newCategoriesFr
-  if (locale === 'ar') keysToUse = newCategoriesAr
-  if (locale === 'en') keysToUse = newCategoriesEn
+  if (!categories || categories.length === 0) return null
 
-  const pagesData = seoPages[locale] || seoPages['fr']
-
-  const categoriesWithBooks = await Promise.all(keysToUse.map(async (key, index) => {
-    const data = pagesData[key]
-    if (!data) return null
-    // On fetch jusqu'à 3 livres correspondant à la recherche de la catégorie
-    const books = await getBooks({ search: data.searchQuery || '', limit: 3, active: true })
+  const categoriesWithBooks = await Promise.all(categories.map(async (cat) => {
+    // If books are manually assigned, use them
+    let books = cat.books.map(b => b.book)
     
+    // If no books are manually assigned or less than 3, fallback to search query
+    if (books.length < 3 && cat.searchQuery) {
+      const searchBooks = await getBooks({ search: cat.searchQuery, limit: 3, active: true })
+      // Use search books, but try to avoid duplicates if some are manually assigned
+      books = [...books, ...searchBooks.filter(sb => !books.some(b => b.id === sb.id))].slice(0, 3)
+    }
+
     return {
-      key,
-      ...data,
-      books,
-      color: gradients[index % gradients.length]
+      ...cat,
+      resolvedBooks: books
     }
   }))
 
-  const validCategories = categoriesWithBooks.filter(Boolean)
+  const validCategories = categoriesWithBooks.filter(c => c.resolvedBooks.length > 0)
   const isRtl = locale === 'ar'
 
   // Textes traduits statiquement pour éviter les problèmes de clés manquantes
@@ -71,10 +45,10 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
         </h2>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          {validCategories.map((cat, i) => (
+          {validCategories.map((cat) => (
             <div 
-              key={cat.key} 
-              className={`relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br ${cat.color} p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 shadow-xl hover:shadow-2xl transition-all duration-300 group`}
+              key={cat.id} 
+              className={`relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br ${cat.colorGradient || 'from-[#4A25E1] to-[#7A5AF8]'} p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 shadow-xl hover:shadow-2xl transition-all duration-300 group`}
             >
               {/* Text Side */}
               <div className={`flex-1 text-white z-20 ${isRtl ? 'text-right' : 'text-left'}`}>
@@ -84,7 +58,7 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
                 </div>
                 
                 <h3 className="text-3xl font-black mb-3 leading-tight text-white drop-shadow-sm">
-                  {cat.h1.split(':')[0] || cat.title.split('|')[0]}
+                  {cat.h1?.split(':')[0] || cat.title?.split('|')[0]}
                 </h3>
                 
                 <p className="text-white/80 font-medium mb-8 line-clamp-2 text-sm sm:text-base leading-relaxed">
@@ -92,7 +66,7 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
                 </p>
 
                 <Link 
-                  href={`/${cat.key}` as any}
+                  href={`/${cat.slug}` as any}
                   className="inline-flex items-center gap-3 bg-white text-gray-900 px-6 py-3.5 rounded-full font-black text-sm hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all shadow-lg"
                 >
                   <span>{texts.button}</span>
@@ -100,50 +74,67 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
                 </Link>
               </div>
 
-              {/* Images Side */}
-              <div className="relative w-full sm:w-[220px] h-56 sm:h-72 flex-shrink-0 flex items-center justify-center mt-6 sm:mt-0 z-10 perspective-1000">
-                {cat.books && cat.books.length > 0 ? (
-                  cat.books.map((book: any, index: number) => {
-                    // Positionnement : l'index 0 est au premier plan
-                    const dir = isRtl ? -1 : 1
-                    // Sur mobile, on les espace un peu moins pour ne pas déborder
-                    const translateX = index * 2.5 * dir
-                    const rotate = index * 6 * dir
-                    const zIndex = 30 - index
-                    
-                    return (
-                      <div 
-                        key={book.id} 
-                        className="absolute shadow-2xl transition-all duration-500 group-hover:-translate-y-4"
-                        style={{
-                          transform: `translateX(${translateX}rem) rotate(${rotate}deg) translateY(${index * 0.5}rem)`,
-                          zIndex,
-                        }}
-                      >
-                        <div className="w-28 h-40 sm:w-36 sm:h-52 rounded-md overflow-hidden ring-4 ring-white/20 relative bg-gray-100">
-                           {book.image ? (
-                             <Image 
-                               src={book.image} 
-                               alt={book.title}
-                               fill
-                               className="object-cover"
-                               sizes="(max-width: 640px) 112px, 144px"
-                             />
-                           ) : (
-                             <div className="w-full h-full bg-gray-200 flex items-center justify-center p-2 text-center">
-                               <span className="text-gray-500 text-xs font-medium line-clamp-3">{book.title}</span>
-                             </div>
-                           )}
-                        </div>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <div className="w-28 h-40 sm:w-36 sm:h-52 rounded-md border-2 border-dashed border-white/30 flex items-center justify-center backdrop-blur-sm">
-                    <span className="text-white/70 text-sm font-medium text-center px-2">Bientôt disponible</span>
-                  </div>
-                )}
+              {/* Images Side (Overlapping 3D effect) */}
+              <div className="w-full sm:w-[220px] h-[260px] relative z-10 flex-shrink-0 mt-8 sm:mt-0 perspective-1000">
+                {cat.resolvedBooks.map((book, idx) => {
+                  if (!book) return null;
+                  
+                  // Positionnement 3D pour donner l'impression d'une pile
+                  const isTop = idx === 0;
+                  const isMiddle = idx === 1;
+                  const isBottom = idx === 2;
+                  
+                  let zIndex = 30 - idx * 10;
+                  
+                  // Styles différents selon RTL ou LTR pour empiler dans le bon sens
+                  let translateClass = '';
+                  let rotateClass = '';
+                  let scaleClass = '';
+
+                  if (isTop) {
+                    translateClass = isRtl ? 'translate-x-0' : 'translate-x-0';
+                    rotateClass = isRtl ? 'rotate-y-[-5deg] rotate-z-[-2deg]' : 'rotate-y-[5deg] rotate-z-[2deg]';
+                    scaleClass = 'scale-100';
+                  } else if (isMiddle) {
+                    translateClass = isRtl ? '-translate-x-8 translate-y-4' : 'translate-x-8 translate-y-4';
+                    rotateClass = isRtl ? 'rotate-y-[-10deg] rotate-z-[2deg]' : 'rotate-y-[10deg] rotate-z-[-2deg]';
+                    scaleClass = 'scale-95 opacity-90';
+                  } else if (isBottom) {
+                    translateClass = isRtl ? '-translate-x-16 translate-y-8' : 'translate-x-16 translate-y-8';
+                    rotateClass = isRtl ? 'rotate-y-[-15deg] rotate-z-[4deg]' : 'rotate-y-[15deg] rotate-z-[-4deg]';
+                    scaleClass = 'scale-90 opacity-70';
+                  }
+
+                  return (
+                    <div 
+                      key={book.id}
+                      className={`absolute top-0 ${isRtl ? 'right-4' : 'left-4'} w-[160px] aspect-[2/3] rounded-lg shadow-2xl transition-all duration-500 ease-out 
+                        ${translateClass} ${rotateClass} ${scaleClass} 
+                        group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]
+                        border border-white/10`}
+                      style={{ 
+                        zIndex,
+                        transformStyle: 'preserve-3d',
+                        transitionDelay: `${idx * 50}ms`
+                      }}
+                    >
+                      <Image
+                        src={book.image}
+                        alt={book.title}
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="160px"
+                      />
+                      {/* Reflet sur le livre */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                    </div>
+                  );
+                })}
               </div>
+
+              {/* Decorative Background Elements */}
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-black/10 blur-3xl pointer-events-none"></div>
             </div>
           ))}
         </div>
