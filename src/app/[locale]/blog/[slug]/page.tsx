@@ -1,7 +1,7 @@
 import { getPostBySlug, incrementPostViews, getRelatedPosts } from '@/lib/actions/blog'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import Header from '@/components/HeaderWithUser'
+import Header from '@/components/blog/BlogHeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark, Bot, Sparkles } from 'lucide-react'
 import { Link } from '@/i18n/routing'
@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic'
 const CommentsSection = dynamic(() => import('@/components/blog/CommentsSection'), { loading: () => <div className="h-32 bg-slate-50 animate-pulse rounded-2xl" /> })
 const ShareArticle = dynamic(() => import('@/components/blog/ShareArticle'))
 const TableOfContents = dynamic(() => import('@/components/blog/TableOfContents'))
+import ArticleMeta from '@/components/blog/ArticleMeta'
 import ReadingProgress from '@/components/blog/ReadingProgress'
 import PostTimeTracker from '@/components/blog/PostTimeTracker'
 import BlogDynamicContent from '@/components/blog/BlogDynamicContent'
@@ -266,8 +267,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24">
                     {/* Fil d'Ariane + btn admin */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-8 md:mb-10">
-                        <nav className="flex items-center gap-2 text-[10px] rtl:text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-slate-400">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
+                        <nav className="flex items-center gap-2 text-[10px] rtl:text-[11px] font-bold uppercase tracking-widest rtl:tracking-normal text-slate-400">
                             <Link href="/blog" className="hover:text-slate-900 transition-colors">{t('Blog')}</Link>
                             <span>/</span>
                             {post.category && (
@@ -276,13 +277,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     <span>/</span>
                                 </>
                             )}
-                            <span className="text-slate-500 truncate max-w-[200px]">{post.title}</span>
+                            <span className="text-slate-500 truncate max-w-[150px] md:max-w-[200px]">{post.title}</span>
                         </nav>
 
                         {isAdmin && (
                             <Link
                                 href={`/admin/posts/${post.id}`}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-900 text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:bg-slate-50 transition-all shadow-sm"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-900 text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal rounded-full hover:bg-slate-50 transition-all shadow-sm"
                             >
                                 <Pencil className="w-3 h-3 text-slate-600" />
                                 {t('Edit')}
@@ -292,10 +293,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                     {/* Catégorie badge */}
                     {post.category && (
-                        <div className="mb-6">
+                        <div className="mb-4 md:mb-6">
                             <Link
                                 href={`/blog?category=${post.category}`}
-                                className="inline-block px-4 py-1.5 bg-slate-50 text-slate-600 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal rounded-full hover:bg-slate-100 transition-colors"
+                                className="inline-block px-4 py-1.5 bg-slate-50 text-slate-600 text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal rounded-full hover:bg-slate-100 transition-colors"
                             >
                                 {post.category}
                             </Link>
@@ -303,74 +304,46 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     )}
 
                     {/* Titre principal */}
-                    <h1 dir={post.language === 'ar' ? 'rtl' : 'ltr'} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.2] md:leading-[1] tracking-tighter mb-6 md:mb-8 max-w-4xl break-words">
+                    <h1 dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.3] md:leading-[1.2] tracking-tighter mb-4 md:mb-6 max-w-4xl break-words ${post.language === 'ar' ? 'font-tajawal rtl:leading-[1.4]' : ''}`}>
                         {post.title}
                     </h1>
 
                     {/* Extrait */}
                     {post.excerpt && (
-                        <p dir={post.language === 'ar' ? 'rtl' : 'ltr'} className="text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed mb-8 md:mb-10 max-w-3xl font-medium">
+                        <p dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed mb-6 md:mb-8 max-w-3xl font-medium ${post.language === 'ar' ? 'font-tajawal rtl:leading-[1.8]' : ''}`}>
                             {post.excerpt}
                         </p>
                     )}
 
-                    {/* Méta */}
-                    <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[11px] rtl:text-[13px] font-bold uppercase tracking-[0.15em] rtl:tracking-normal text-slate-400 border-t border-slate-200 pt-6 md:pt-8">
-                        {(post.authorName || post.author?.fullName) && (
-                            <span className="flex items-center gap-2 text-slate-700 bg-slate-100/50 pr-4 rtl:pr-0 rtl:pl-4 rounded-full">
-                                {(post.author?.image) ? (
-                                    <Image
-                                        src={post.author.image}
-                                        alt={post.author.fullName || ''}
-                                        width={48}
-                                        height={48}
-                                        className="rounded-full object-cover ring-2 ring-slate-200 w-8 h-8 md:w-12 md:h-12"
-                                        unoptimized
-                                    />
-                                ) : (
-                                    <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-slate-200 flex items-center justify-center">
-                                        <User className="w-4 h-4 md:w-6 md:h-6 text-slate-500" />
-                                    </div>
-                                )}
-                                {displayAuthor}
-                            </span>
-                        )}
-                        {post.publishedAt && (
-                            <span className="flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                                {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : locale === 'fr' ? 'fr-FR' : 'en-US', {
-                                    day: 'numeric', month: 'long', year: 'numeric'
-                                })}
-                            </span>
-                        )}
-                        <span className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 text-slate-500" />
-                            {readingTime} {t('MinRead')}
-                        </span>
-                        <span className="flex items-center gap-2">
-                            <Eye className="w-3.5 h-3.5 text-slate-500" />
-                            {post.viewCount} {t('Views')}
-                        </span>
-                        {post._count?.comments > 0 && (
-                            <span className="flex items-center gap-2">
-                                <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
-                                {post._count.comments} {t('Comments')}
-                            </span>
-                        )}
-                    </div>
+                    {/* Méta avec nouveau composant ArticleMeta */}
+                    <ArticleMeta 
+                        author={post.author}
+                        authorName={post.authorName}
+                        displayAuthor={displayAuthor}
+                        publishedAt={post.publishedAt}
+                        locale={locale}
+                        readingTime={readingTime}
+                        viewCount={post.viewCount}
+                        commentsCount={post._count?.comments}
+                        translations={{
+                            MinRead: t('MinRead'),
+                            Views: t('Views'),
+                            Comments: t('Comments')
+                        }}
+                    />
                 </div>
             </section>
 
             {/* === IMAGE COVER grande === */}
             {post.coverImage && (
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 md:mt-16 mb-8 md:mb-20">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-8 mb-8 md:mb-16">
                     <div className="relative group">
                         {/* Decorative background blocks for editorial look */}
-                        <div className="absolute inset-0 bg-black rounded-3xl md:rounded-[3rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl" />
-                        <div className="absolute inset-0 bg-gray-200 rounded-3xl md:rounded-[3rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20" />
+                        <div className="absolute inset-0 bg-black rounded-3xl md:rounded-[2rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl hidden md:block" />
+                        <div className="absolute inset-0 bg-gray-200 rounded-3xl md:rounded-[2rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20 hidden md:block" />
                         
-                        {/* Main Container */}
-                        <div className="relative h-[220px] md:h-auto md:aspect-[21/9] w-full overflow-hidden rounded-3xl md:rounded-[3rem] border-4 md:border-[8px] border-white bg-slate-50 shadow-2xl shadow-black/10 group-hover:-translate-y-2 transition-transform duration-700">
+                        {/* Main Container - Full width edge-to-edge on mobile, rounded on desktop */}
+                        <div className="relative h-[250px] sm:h-[300px] md:h-auto md:aspect-[21/9] w-[calc(100%+2rem)] -ml-4 sm:w-full sm:ml-0 overflow-hidden sm:rounded-3xl md:rounded-[2rem] md:border-8 border-white bg-slate-50 shadow-sm md:shadow-2xl md:shadow-black/10 group-hover:-translate-y-1 transition-transform duration-700">
                             {/* Blurred Ambient Background */}
                             <div className="absolute inset-0 z-0">
                                 <Image
@@ -388,24 +361,25 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 src={post.coverImage}
                                 alt={post.title}
                                 fill
-                                className="object-contain z-10 drop-shadow-2xl group-hover:scale-105 transition-transform duration-700"
+                                className="object-cover md:object-contain z-10 md:drop-shadow-2xl group-hover:scale-105 transition-transform duration-700"
                                 priority
                                 unoptimized
                             />
                             
-                            {/* Inner highlight */}
-                            <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[2.5rem] pointer-events-none z-20" />
+                            {/* Inner highlight (Desktop only) */}
+                            <div className="hidden md:block absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[1.5rem] pointer-events-none z-20" />
                         </div>
                     </div>
                 </div>
             )}
 
             {/* === CONTENU PRINCIPAL === */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 lg:py-24 pb-32">
-                <div className="flex flex-col lg:flex-row gap-16 xl:gap-24 items-start">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-12 lg:py-16 pb-32">
+                {/* Desktop Layout : 12 colonnes */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
 
-                    {/* Colonne article */}
-                    <div className="flex-1 w-full min-w-0">
+                    {/* Colonne article (8 colonnes sur Desktop) */}
+                    <div className="lg:col-span-8 w-full min-w-0">
                         {/* AdSense haut */}
                         {adsenseEnabled === 'true' && (
                             <AdBanner
@@ -419,7 +393,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <article
                             id="article-content"
                             dir={post.language === 'ar' ? 'rtl' : 'ltr'}
-                            className="prose prose-base md:prose-lg max-w-none rtl:text-[18px] md:rtl:text-[22px] rtl:font-bold rtl:leading-[2] md:rtl:leading-[2.5]
+                            className={`prose prose-base md:prose-lg max-w-none ${post.language === 'ar' ? 'font-tajawal rtl:text-[18px] md:rtl:text-[20px] rtl:leading-[1.8] md:rtl:leading-[2.2] prose-h2:font-black prose-h3:font-black prose-p:font-medium prose-li:font-medium' : ''}
                                 prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900
                                 prose-h2:text-2xl md:prose-h2:text-3xl lg:prose-h2:text-4xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:text-[24px] md:rtl:prose-h2:text-[34px]
                                 prose-h3:text-xl md:prose-h3:text-2xl rtl:prose-h3:text-[20px] md:rtl:prose-h3:text-[30px]
@@ -674,7 +648,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
 
                     {/* === Sidebar sticky === */}
-                    <aside className="hidden lg:block w-[280px] shrink-0 sticky top-24 space-y-8 h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain pb-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                    <aside className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6 lg:space-y-8 h-max pb-8">
 
                             {/* Partage */}
                             <div className="bg-gray-50 rounded-3xl p-6">
@@ -815,9 +789,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <Link
                                     key={related.id}
                                     href={`/blog/${related.slug}`}
-                                    className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 flex flex-col"
+                                    className="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col"
                                 >
-                                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                                    <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
                                         {related.coverImage ? (
                                             <Image
                                                 src={related.coverImage}
@@ -902,9 +876,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <Footer />
             
             {/* === Mobile Sticky Share Bar === */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 flex justify-center items-center shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.2)]">
-                <div className="flex items-center justify-between w-full max-w-sm mx-auto">
-                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{t('ShareTitle')}</span>
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/50 p-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] pb-safe">
+                <div className="flex items-center justify-center w-full">
                     <ShareArticle title={post.title} />
                 </div>
             </div>
