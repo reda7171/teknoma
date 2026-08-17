@@ -236,6 +236,10 @@
       "Description": "L'échange de livres et la gestion de votre bibliothèque seront encore plus simples. Préparez-vous pour une toute nouvelle expérience sur iOS et Android !",
       "SoonOn": "Bientôt sur"
     },
+    "AEOSnippet": {
+      "Question": "Où acheter des livres en ligne au Maroc ?",
+      "Answer": "Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc."
+    },
     "CTA": {
       "TitlePart1": "Prêt pour votre",
       "TitlePart2": "prochaine lecture ?",

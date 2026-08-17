@@ -165,35 +165,27 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   let dbAeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
   let dbAeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
 
-  // Snippet par défaut selon la locale
-  const aeoDefaults: Record<string, { q: string; a: string }> = {
-    fr: {
-      q: 'Où acheter des livres en ligne au Maroc ?',
-      a: 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
-    },
-    ar: {
-      q: 'أين يمكن شراء الكتب أون لاين في المغرب؟',
-      a: 'رواية هي مكتبة إلكترونية مغربية تتيح طلب الكتب والروايات مع التوصيل في جميع أنحاء المغرب.'
-    },
-    en: {
-      q: 'Where to buy books online in Morocco?',
-      a: 'Riwaya is a Moroccan online bookstore that allows you to order books and novels with delivery throughout Morocco.'
-    }
-  }
+  const defaultQ = t('AEOSnippet.Question')
+  const defaultA = t('AEOSnippet.Answer')
 
-  let aeoSnippetQ = (aeoDefaults[locale] || aeoDefaults.fr).q
-  let aeoSnippetA = (aeoDefaults[locale] || aeoDefaults.fr).a
+  let aeoSnippetQ = defaultQ
+  let aeoSnippetA = defaultA
 
   // Si l'admin a modifié le texte en BD (différent de notre fallback FR) et on est en FR,
   // ou s'il a mis un texte générique, on peut l'utiliser, mais pour éviter de montrer
   // du français sur la page arabe, on privilégie le texte de la base UNIQUEMENT pour la locale 'fr'
   // OU si le texte ne correspond pas au défaut français.
-  if (dbAeoSnippetQ && dbAeoSnippetQ.trim() !== '' && dbAeoSnippetQ !== aeoDefaults.fr.q && locale === 'fr') {
+  // Note: On suppose ici que le texte par défaut FR est connu ou qu'on le vérifie
+  const frDefaultQ = 'Où acheter des livres en ligne au Maroc ?'
+  const frDefaultA = 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
+
+  if (dbAeoSnippetQ && dbAeoSnippetQ.trim() !== '' && dbAeoSnippetQ !== frDefaultQ && locale === 'fr') {
       aeoSnippetQ = dbAeoSnippetQ;
   }
-  if (dbAeoSnippetA && dbAeoSnippetA.trim() !== '' && dbAeoSnippetA !== aeoDefaults.fr.a && locale === 'fr') {
+  if (dbAeoSnippetA && dbAeoSnippetA.trim() !== '' && dbAeoSnippetA !== frDefaultA && locale === 'fr') {
       aeoSnippetA = dbAeoSnippetA;
   }
+
 
   // Choisir une citation de manière déterministe (fix hydration error by not relying on Date.now() in SSR)
   let randomQuote = null;
