@@ -322,6 +322,7 @@ model Customer {
   credits           Int            @default(10)
   image             String?        @db.VarChar(500)
   expoPushToken     String?        @db.VarChar(255)
+  aiRecommendations String?        @db.LongText
   ownedBooks        ExchangeBook[] @relation("OwnedBooks")
   sentExchanges     Exchange[]     @relation("SentExchanges")
   receivedExchanges Exchange[]     @relation("ReceivedExchanges")
@@ -438,6 +439,8 @@ model ExchangeBook {
   language     String        @default("fr")
   exchangeType ExchangeType  @default(DIRECT)
   status       String        @default("AVAILABLE")
+  seoDescription String?     @db.Text
+  seoKeywords  String?       @db.Text
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   latitude     Float?

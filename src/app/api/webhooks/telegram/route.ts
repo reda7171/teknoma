@@ -104,18 +104,55 @@ export async function POST(req: Request) {
                 }
 
                 try {
-                    const order = await prisma.order.update({
+                    const existingOrder = await prisma.order.findUnique({
                         where: { id: orderId },
-                        data: {
-                            status: newStatus as OrderStatus,
-                            statusHistory: {
-                                create: {
-                                    status: newStatus as OrderStatus,
-                                    comment: 'Statut mis à jour via Telegram Bot',
-                                    createdBy: 'TELEGRAM'
+                        include: { items: { include: { pack: { include: { books: true } } } } }
+                    })
+
+                    if (!existingOrder) throw new Error('Order not found')
+
+                    const prevStatus = existingOrder.status
+                    const isNowReturned = newStatus === 'RETURNED' || newStatus === 'CANCELLED'
+                    const wasAlreadyRestored = ['CANCELLED', 'RETURNED'].includes(prevStatus)
+
+                    const order = await prisma.$transaction(async (tx) => {
+                        // Restock if needed
+                        if (isNowReturned && !wasAlreadyRestored) {
+                            for (const item of existingOrder.items) {
+                                if (item.type === 'BOOK' && item.bookId) {
+                                    await tx.book.update({
+                                        where: { id: item.bookId },
+                                        data: { stock: { increment: item.quantity } }
+                                    })
+                                } else if (item.type === 'ACCESSORY' && item.extraProductId) {
+                                    await tx.extraProduct.update({
+                                        where: { id: item.extraProductId },
+                                        data: { stock: { increment: item.quantity } }
+                                    })
+                                } else if (item.type === 'PACK' && item.pack) {
+                                    for (const packBook of item.pack.books) {
+                                        await tx.book.update({
+                                            where: { id: packBook.bookId },
+                                            data: { stock: { increment: item.quantity } }
+                                        })
+                                    }
                                 }
                             }
                         }
+
+                        return await tx.order.update({
+                            where: { id: orderId },
+                            data: {
+                                status: newStatus as OrderStatus,
+                                statusHistory: {
+                                    create: {
+                                        status: newStatus as OrderStatus,
+                                        comment: 'Statut mis à jour via Telegram Bot',
+                                        createdBy: 'TELEGRAM'
+                                    }
+                                }
+                            }
+                        })
                     })
 
                     console.log(`[TELEGRAM] Order ${orderId} successfully updated to ${newStatus}`)

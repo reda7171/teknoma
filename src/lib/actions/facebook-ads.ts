@@ -28,6 +28,7 @@ async function getFbCredentials() {
     const accessToken = await getSetting('fb_marketing_access_token')
     let adAccountId = await getSetting('fb_ad_account_id')
     const pageId = await getSetting('fb_page_id')
+    const igUserId = await getSetting('ig_user_id')
 
     if (!accessToken || !adAccountId || !pageId) {
         throw new Error("Les identifiants API Facebook ne sont pas configurés.")
@@ -38,13 +39,13 @@ async function getFbCredentials() {
         adAccountId = `act_${adAccountId}`
     }
 
-    return { accessToken, adAccountId, pageId }
+    return { accessToken, adAccountId, pageId, igUserId }
 }
 
 export async function launchFacebookAd(params: LaunchAdParams) {
     try {
         await verifyAdmin()
-        const { accessToken, adAccountId, pageId } = await getFbCredentials()
+        const { accessToken, adAccountId, pageId, igUserId } = await getFbCredentials()
 
         // 1. Create Campaign
         const campaignObjective = params.objective || 'OUTCOME_TRAFFIC'
@@ -75,8 +76,15 @@ export async function launchFacebookAd(params: LaunchAdParams) {
             finalImageUrl = `https://riwaya.store${finalImageUrl}`
         }
         
-        const imageFormData = new URLSearchParams()
-        imageFormData.append('url', finalImageUrl)
+        // Télécharger l'image pour l'envoyer en tant que fichier (bytes)
+        const imgDownloadRes = await fetch(finalImageUrl)
+        if (!imgDownloadRes.ok) {
+            throw new Error("Impossible de télécharger l'image pour la publicité FB")
+        }
+        const imgBlob = await imgDownloadRes.blob()
+
+        const imageFormData = new FormData()
+        imageFormData.append('filename', imgBlob, 'ad_image.jpg')
         imageFormData.append('access_token', accessToken)
 
         const imageRes = await fetch(`${FB_API_BASE}/${adAccountId}/adimages`, {
@@ -95,7 +103,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
             },
             age_min: params.targeting.age_min || 18,
             age_max: params.targeting.age_max || 65,
-            publisher_platforms: ['facebook', 'instagram']
+            publisher_platforms: igUserId ? ['facebook', 'instagram'] : ['facebook']
         }
 
         // Si des villes sont spécifiées, on ajoute au ciblage
@@ -118,7 +126,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         adSetFormData.append('optimization_goal', optimizationGoal)
         
         adSetFormData.append('billing_event', 'IMPRESSIONS')
-        adSetFormData.append('bid_amount', '50') // 0.50 درهم par clic en auto (ou utiliser bid_strategy)
+        adSetFormData.append('bid_strategy', 'LOWEST_COST_WITHOUT_CAP')
         // Convert daily budget from درهم to cents (FB expects lowest denomination)
         adSetFormData.append('daily_budget', (params.dailyBudgetMad * 100).toString()) 
         adSetFormData.append('campaign_id', campaignId)
@@ -131,11 +139,14 @@ export async function launchFacebookAd(params: LaunchAdParams) {
             body: adSetFormData
         })
         const adSetData = await adSetRes.json()
-        if (adSetData.error) throw new Error(`Erreur Création AdSet: ${adSetData.error.message}`)
+        if (adSetData.error) {
+            console.error('AdSet Error details:', JSON.stringify(adSetData.error, null, 2))
+            throw new Error(`Erreur Création AdSet: ${adSetData.error.error_user_msg || adSetData.error.message}`)
+        }
         const adSetId = adSetData.id
 
         // 4. Create Ad Creative
-        const creativeObj = {
+        const creativeObj: any = {
             name: `Creative - ${params.name}`,
             object_story_spec: {
                 page_id: pageId,
@@ -146,6 +157,10 @@ export async function launchFacebookAd(params: LaunchAdParams) {
                     name: params.headline
                 }
             }
+        }
+        
+        if (igUserId) {
+            creativeObj.object_story_spec.instagram_actor_id = igUserId
         }
 
         const creativeFormData = new URLSearchParams()
@@ -158,7 +173,10 @@ export async function launchFacebookAd(params: LaunchAdParams) {
             body: creativeFormData
         })
         const creativeData = await creativeRes.json()
-        if (creativeData.error) throw new Error(`Erreur Création Creative: ${creativeData.error.message}`)
+        if (creativeData.error) {
+            console.error('Creative Error details:', JSON.stringify(creativeData.error, null, 2))
+            throw new Error(`Erreur Création Creative: ${creativeData.error.error_user_msg || creativeData.error.message}`)
+        }
         const creativeId = creativeData.id
 
         // 5. Create Ad
@@ -174,7 +192,10 @@ export async function launchFacebookAd(params: LaunchAdParams) {
             body: adFormData
         })
         const adData = await adRes.json()
-        if (adData.error) throw new Error(`Erreur Création Ad: ${adData.error.message}`)
+        if (adData.error) {
+            console.error('Ad Error details:', JSON.stringify(adData.error, null, 2))
+            throw new Error(`Erreur Création Ad: ${adData.error.error_user_msg || adData.error.message}`)
+        }
 
         return { 
             success: true, 

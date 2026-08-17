@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2, Eye, EyeOff, Upload, Loader2 } from 'lucide-react'
 import { updateSetting } from '@/lib/actions/site-settings'
 import { useUIStore } from '@/store/ui'
 
@@ -26,6 +26,7 @@ interface BankAccount {
     bankName: string;
     accountName: string;
     rib: string;
+    logo?: string;
 }
 
 export default function PaymentMethodsForm({ initialSettings }: { initialSettings: PaymentSettings }) {
@@ -38,6 +39,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
         }
     })
     const [isLoading, setIsLoading] = useState(false)
+    const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
     const [showPaypalSecret, setShowPaypalSecret] = useState(false)
     const [showStripeSecret, setShowStripeSecret] = useState(false)
     const [showCmiKey, setShowCmiKey] = useState(false)
@@ -90,6 +92,36 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
         const newAccounts = [...bankAccounts]
         newAccounts.splice(index, 1)
         setBankAccounts(newAccounts)
+    }
+
+    const handleLogoUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadingIndex(index)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            
+            const data = await res.json()
+            if (data.success && data.url) {
+                updateBankAccount(index, 'logo', data.url)
+                showNotification('Logo uploadé avec succès', 'success')
+            } else {
+                throw new Error(data.error || "Erreur lors de l'upload")
+            }
+        } catch (error) {
+            console.error('Erreur upload:', error)
+            showNotification("Erreur lors de l'upload du logo", 'error')
+        } finally {
+            setUploadingIndex(null)
+            if (e.target) e.target.value = ''
+        }
     }
 
     return (
@@ -357,46 +389,79 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                             </div>
                         ) : (
                             bankAccounts.map((account, index) => (
-                                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl relative">
-                                    <div className="md:col-span-3">
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">Nom de la banque</label>
-                                        <input
-                                            type="text"
-                                            value={account.bankName}
-                                            onChange={(e) => updateBankAccount(index, 'bankName', e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
-                                            placeholder="Ex: CIH Bank"
-                                        />
+                                <div key={index} className="flex flex-col gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl relative">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                        <div className="md:col-span-3">
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Nom de la banque</label>
+                                            <input
+                                                type="text"
+                                                value={account.bankName}
+                                                onChange={(e) => updateBankAccount(index, 'bankName', e.target.value)}
+                                                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
+                                                placeholder="Ex: CIH Bank"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-3">
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Nom du titulaire</label>
+                                            <input
+                                                type="text"
+                                                value={account.accountName}
+                                                onChange={(e) => updateBankAccount(index, 'accountName', e.target.value)}
+                                                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
+                                                placeholder="Ex: Entreprise SARL"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-5">
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">RIB / IBAN</label>
+                                            <input
+                                                type="text"
+                                                value={account.rib}
+                                                onChange={(e) => updateBankAccount(index, 'rib', e.target.value)}
+                                                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm font-mono"
+                                                placeholder="RIB à 24 chiffres ou IBAN"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-1 flex items-end justify-end">
+                                            <button
+                                                type="button"
+                                                onClick={() => removeBankAccount(index)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors w-full flex justify-center"
+                                                title="Supprimer"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="md:col-span-3">
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">Nom du titulaire</label>
-                                        <input
-                                            type="text"
-                                            value={account.accountName}
-                                            onChange={(e) => updateBankAccount(index, 'accountName', e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
-                                            placeholder="Ex: Entreprise SARL"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-5">
-                                        <label className="block text-xs font-bold text-slate-500 mb-1">RIB / IBAN</label>
-                                        <input
-                                            type="text"
-                                            value={account.rib}
-                                            onChange={(e) => updateBankAccount(index, 'rib', e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm font-mono"
-                                            placeholder="RIB à 24 chiffres ou IBAN"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-1 flex items-end justify-end">
-                                        <button
-                                            type="button"
-                                            onClick={() => removeBankAccount(index)}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors w-full flex justify-center"
-                                            title="Supprimer"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                        <div className="md:col-span-11">
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">URL du Logo (Optionnel)</label>
+                                            <div className="flex gap-4">
+                                                {account.logo && (
+                                                    <div className="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-lg p-1 flex items-center justify-center overflow-hidden">
+                                                        <img src={account.logo} alt="Logo" className="max-w-full max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={account.logo || ''}
+                                                        onChange={(e) => updateBankAccount(index, 'logo', e.target.value)}
+                                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
+                                                        placeholder="URL vers l'image du logo (https://... ou /uploads/...)"
+                                                    />
+                                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center" title="Parcourir les images">
+                                                        {uploadingIndex === index ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                                        <input 
+                                                            type="file" 
+                                                            className="hidden" 
+                                                            accept="image/*" 
+                                                            onChange={(e) => handleLogoUpload(index, e)} 
+                                                            disabled={uploadingIndex === index}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))

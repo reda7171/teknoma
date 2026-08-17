@@ -391,7 +391,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                 <div className="bg-white border-t border-gray-100 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('TotalValue')}</span>
-                        <span className="text-xl font-black">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                        <span className="text-xl font-black">{totalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                     </div>
                     <div className="flex-1">
                         {isMinAmountReached ? (

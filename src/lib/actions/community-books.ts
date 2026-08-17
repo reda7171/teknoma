@@ -54,6 +54,19 @@ export async function addExchangeBook(formData: FormData): Promise<BookResult> {
             return { success: false, error: "Vous avez déjà ce livre listé comme disponible." }
         }
 
+        let seoDescription = null;
+        let seoKeywords = null;
+        try {
+            const { generateSeoTagsForBook } = await import('@/lib/gemini');
+            const seo = await generateSeoTagsForBook(data.title, data.author, data.description);
+            if (seo) {
+                seoDescription = seo.seoDescription;
+                seoKeywords = seo.seoKeywords;
+            }
+        } catch (e) {
+            console.error("SEO generation failed", e);
+        }
+
         const book = await prisma.exchangeBook.create({
             data: {
                 ownerId: user.id,
@@ -61,6 +74,8 @@ export async function addExchangeBook(formData: FormData): Promise<BookResult> {
                 author: data.author,
                 condition: data.condition as any,
                 description: data.description || '',
+                seoDescription,
+                seoKeywords,
                 isbn: data.isbn || null,
                 image: data.image || null,
                 status: 'AVAILABLE',

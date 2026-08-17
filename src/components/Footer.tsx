@@ -16,6 +16,11 @@ export default async function Footer() {
         twitter,
         youtube,
         threads,
+        stripe,
+        paypal,
+        cmi,
+        cod,
+        bank
     ] = await Promise.all([
         isFeatureEnabled('feature_seller', false),
         isFeatureEnabled('feature_exchange'),
@@ -29,6 +34,11 @@ export default async function Footer() {
         getSetting('social_twitter'),
         getSetting('social_youtube'),
         getSetting('social_threads'),
+        getSetting('payment_stripe_enabled'),
+        getSetting('payment_paypal_enabled'),
+        getSetting('payment_cmi_enabled'),
+        getSetting('payment_cod_enabled'),
+        getSetting('payment_bank_transfer_enabled')
     ])
  
     const features = {
@@ -48,5 +58,13 @@ export default async function Footer() {
         threads,
     }
 
-    return <FooterClient features={features} siteLogo={siteLogo} socials={socials} />
+    const paymentSettings = {
+        stripe: stripe === 'true',
+        paypal: paypal === 'true',
+        cmi: cmi === 'true',
+        cod: cod === 'true' || cod === null, // Default to true if not set
+        bank: bank === 'true',
+    }
+
+    return <FooterClient features={features} siteLogo={siteLogo} socials={socials} paymentSettings={paymentSettings} />
 }

@@ -127,6 +127,8 @@ export async function getJumiaStats() {
         let pending = 0
         let shipped = 0
         let delivered = 0
+        let canceled = 0
+        let failed = 0
         let revenue = 0
         
         const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
@@ -134,8 +136,12 @@ export async function getJumiaStats() {
         orders.forEach((o: any) => {
             const st = (o.status || o.Status || o.Statuses?.[0] || '').toUpperCase()
             
-            // Ignorer complètement les commandes FAILED et CANCELED pour les stats
-            if (st === 'FAILED' || st === 'CANCELED' || st === 'CANCELLED') {
+            if (st === 'FAILED') {
+                failed++
+                return
+            }
+            if (st === 'CANCELED' || st === 'CANCELLED') {
+                canceled++
                 return
             }
             
@@ -176,6 +182,8 @@ export async function getJumiaStats() {
             pending,
             shipped,
             delivered,
+            canceled,
+            failed,
             revenue,
             evolutionData,
             recentOrders

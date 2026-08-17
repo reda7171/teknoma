@@ -104,7 +104,7 @@ export async function register(formData: FormData): Promise<AuthResult> {
         // Auto-login
         await createSession(user.id)
 
-        return { success: true, redirect: '/community' }
+        return { success: true, redirect: '/community?registered=true' }
 
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -223,6 +223,8 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
             } catch (e) {
                 console.error('Telegram notification error:', e)
             }
+            await createSession(user.id)
+            return { success: true, redirect: '/community?registered=true' }
         }
 
         // Historique

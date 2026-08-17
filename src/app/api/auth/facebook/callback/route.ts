@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         })
 
         if (authResult.success) {
-            return NextResponse.redirect(`${origin}/community`)
+            return NextResponse.redirect(`${origin}${authResult.redirect || '/community'}`)
         } else {
             return NextResponse.redirect(`${origin}/community/login?error=${encodeURIComponent(authResult.error || 'Erreur inconnue')}`)
         }
