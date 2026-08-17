@@ -721,14 +721,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <div className="relative z-10 flex-1">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-white/30 backdrop-blur-sm">
                       <Sparkles className="w-4 h-4 text-yellow-300" />
-                      <span>Bientôt disponible</span>
+                      <span>{t('MobileApp.ComingSoon')}</span>
                     </div>
                     <h3 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
-                      L'application mobile Riwaya <br className="hidden md:block" />
-                      <span className="text-emerald-200">is cooking... 🍳</span>
+                      {t('MobileApp.Title')} <br className="hidden md:block" />
+                      <span className="text-emerald-200">{t('MobileApp.Subtitle')}</span>
                     </h3>
                     <p className="text-emerald-50 text-lg max-w-xl font-medium">
-                      L'échange de livres et la gestion de votre bibliothèque seront encore plus simples. Préparez-vous pour une toute nouvelle expérience sur iOS et Android !
+                      {t('MobileApp.Description')}
                     </p>
                   </div>
                   
@@ -740,7 +740,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         </svg>
                       </div>
                       <div className="text-left">
-                        <div className="text-[10px] text-gray-300 uppercase font-semibold">Bientôt sur</div>
+                        <div className="text-[10px] text-gray-300 uppercase font-semibold">{t('MobileApp.SoonOn')}</div>
                         <div className="text-sm font-bold text-white leading-none">App Store</div>
                       </div>
                     </div>
@@ -751,7 +751,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         </svg>
                       </div>
                       <div className="text-left">
-                        <div className="text-[10px] text-gray-300 uppercase font-semibold">Bientôt sur</div>
+                        <div className="text-[10px] text-gray-300 uppercase font-semibold">{t('MobileApp.SoonOn')}</div>
                         <div className="text-sm font-bold text-white leading-none">Google Play</div>
                       </div>
                     </div>
