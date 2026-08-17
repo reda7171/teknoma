@@ -151,7 +151,7 @@ export default function OrderItemsEditor({
                     const product = item.book || item.pack
                     return (
                         <div key={item.id || `new-${index}`} className="p-6 flex gap-4 relative group">
-                            <div className="relative w-16 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100">
+                            <Link href={`/${locale}/admin/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}/edit`} target="_blank" className="relative w-16 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 hover:ring-2 hover:ring-blue-500 transition-all block">
                                 {product?.image ? (
                                     <ImageWithFallback
                                         src={product.image}
@@ -163,12 +163,12 @@ export default function OrderItemsEditor({
                                         <Package className="w-6 h-6 text-gray-300" />
                                     </div>
                                 )}
-                            </div>
+                            </Link>
                             
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start gap-4">
                                     <Link 
-                                        href={`/${locale}/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}`}
+                                        href={`/${locale}/admin/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}/edit`}
                                         className="font-bold text-gray-900 line-clamp-2 hover:text-blue-600"
                                         target="_blank"
                                     >

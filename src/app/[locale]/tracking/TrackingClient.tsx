@@ -129,13 +129,15 @@ export default function TrackingClient() {
                                     style={{ width: `${(getCurrentStepIndex(result.order.status) / (steps.length - 1)) * 100}%` }}
                                 />
                                 {steps.map((step, index) => {
-                                    const isActive = index <= getCurrentStepIndex(result.order.status)
+                                    const currentIndex = getCurrentStepIndex(result.order.status)
+                                    const isActive = index <= currentIndex
+                                    const isCurrent = index === currentIndex && result.order.status !== 'DELIVERED'
                                     return (
                                         <div key={step.id} className="flex flex-col items-center gap-2">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${isActive ? 'bg-black border-black text-white scale-110' : 'bg-white border-gray-200 text-gray-300'}`}>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${isActive ? 'bg-black border-black text-white scale-110' : 'bg-white border-gray-200 text-gray-300'} ${isCurrent ? 'animate-pulse shadow-[0_0_15px_rgba(0,0,0,0.3)]' : ''}`}>
                                                 <step.icon className="w-4 h-4" />
                                             </div>
-                                            <span className={`text-[9px] font-black uppercase tracking-widest hidden sm:block ${isActive ? 'text-black' : 'text-gray-300'}`}>
+                                            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center mt-1 w-16 sm:w-24 leading-tight ${isActive ? 'text-black' : 'text-gray-400'}`}>
                                                 {t(`Steps.${step.id}`)}
                                             </span>
                                         </div>

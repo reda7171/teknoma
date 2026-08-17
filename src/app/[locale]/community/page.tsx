@@ -11,6 +11,9 @@ import TopReadersList from '@/components/community/TopReadersList'
 import { getTopReaders, getUserExchangeCount } from '@/lib/actions/community'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getPrimaryImage } from '@/lib/utils/image'
+import { getUserRecommendations } from '@/lib/actions/community-recommendations'
+import RecommendationsSection from '@/components/community/RecommendationsSection'
+import RegistrationTracker from '@/components/community/RegistrationTracker'
 
 export default async function CommunityDashboard() {
     const user = await getCommunityUser()
@@ -19,13 +22,14 @@ export default async function CommunityDashboard() {
         redirect('/community/login')
     }
 
-    const [t, wishlist, isEligible, topReaders, exchangeCount, exchangeEnabled] = await Promise.all([
+    const [t, wishlist, isEligible, topReaders, exchangeCount, exchangeEnabled, recommendations] = await Promise.all([
         getTranslations('Community'),
         getWishlist(),
         checkExchangeEligibility(user),
         getTopReaders(5),
         getUserExchangeCount(user.id),
-        isFeatureEnabled('exchange')
+        isFeatureEnabled('exchange'),
+        getUserRecommendations()
     ])
 
 
@@ -34,6 +38,7 @@ export default async function CommunityDashboard() {
 
     return (
         <main className="min-h-screen bg-pixio-cream flex flex-col">
+            <RegistrationTracker />
             <HeaderWithUser />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32 flex-grow w-full">
@@ -121,6 +126,9 @@ export default async function CommunityDashboard() {
 
                 {/* Wishlist Section */}
                 <WishlistSection wishlist={wishlist} />
+
+                {/* Recommendations Section */}
+                <RecommendationsSection recommendations={recommendations} />
 
                 {/* Quick Actions - visible seulement si échange activé */}
                 {exchangeEnabled && (

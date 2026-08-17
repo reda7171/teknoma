@@ -33,7 +33,7 @@ export default function CheckoutClient({
 }: { 
     user?: { fullName?: string | null; email: string; image?: string | null } | null;
     minOrderAmount?: number;
-    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string }[] }
+    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string }[] }
 }) {
     const router = useRouter()
     const { items, getTotalPrice, clearCart, discount: instantOfferDiscount } = useCartStore()
@@ -487,6 +487,7 @@ export default function CheckoutClient({
                                 {t('PaymentMethod')}
                             </h2>
 
+                            <div className="space-y-4">
                             {paymentSettings?.stripeEnabled && (
                                 <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'STRIPE' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
                                     <input 
@@ -598,8 +599,15 @@ export default function CheckoutClient({
                                     {watch('paymentMethod') === 'BANK_TRANSFER' && paymentSettings?.bankTransferAccounts && paymentSettings.bankTransferAccounts.length > 0 && (
                                         <div className="mt-4 space-y-3">
                                             {paymentSettings.bankTransferAccounts.map((account, idx) => (
-                                                <div key={idx} className="p-5 bg-teal-50 border border-teal-100 rounded-2xl">
-                                                    <p className="text-xs font-black uppercase tracking-widest text-teal-600 mb-3">{account.bankName}</p>
+                                                <div key={idx} className="p-5 bg-teal-50 border border-teal-100 rounded-2xl flex flex-col gap-4">
+                                                    <div className="flex items-center gap-3">
+                                                        {account.logo && (
+                                                            <div className="w-10 h-10 bg-white rounded-lg border border-teal-100 p-1 flex items-center justify-center overflow-hidden shrink-0">
+                                                                <img src={account.logo} alt={account.bankName} className="max-w-full max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                                            </div>
+                                                        )}
+                                                        <p className="text-xs font-black uppercase tracking-widest text-teal-600">{account.bankName}</p>
+                                                    </div>
                                                     <div className="space-y-1">
                                                         <p className="text-sm font-bold text-gray-700">{t('AccountHolder')} : <span className="font-black text-black">{account.accountName}</span></p>
                                                         <p className="text-sm font-bold text-gray-700">{t('RibIban')} : <span className="font-mono font-black text-black tracking-wider">{account.rib}</span></p>
@@ -611,6 +619,7 @@ export default function CheckoutClient({
                                     )}
                                 </div>
                             )}
+                            </div>
                         </div>
                     </form>
                 </div>

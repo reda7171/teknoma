@@ -109,3 +109,56 @@ export async function generateText(prompt: string) {
     throw error;
   }
 }
+
+export async function generateSeoTagsForBook(title: string, author: string, description?: string) {
+  try {
+    const model = await getGeminiModel();
+    const prompt = `Génère des balises SEO pour le livre suivant:
+Titre: ${title}
+Auteur: ${author}
+Description: ${description || 'N/A'}
+
+Réponds UNIQUEMENT au format JSON strict avec la structure suivante, sans texte autour, sans balises markdown (comme \`\`\`json):
+{
+  "seoDescription": "Une meta-description SEO accrocheuse d'environ 150 caractères.",
+  "seoKeywords": "mot-clé 1, mot-clé 2, mot-clé 3, mot-clé 4"
+}`;
+    
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim().replace(/```json|```/gi, '');
+    const json = JSON.parse(text);
+    return {
+      seoDescription: json.seoDescription,
+      seoKeywords: json.seoKeywords
+    };
+  } catch (error) {
+    console.error("Error generating SEO tags:", error);
+    return null;
+  }
+}
+
+export async function generateRecommendations(authors: string[]) {
+  try {
+    if (!authors || authors.length === 0) return null;
+    const model = await getGeminiModel();
+    const authorsList = authors.join(', ');
+    const prompt = `Le lecteur s'intéresse à ces auteurs: ${authorsList}.
+Suggère-lui 4 livres passionnants qui pourraient lui plaire (soit des mêmes auteurs, soit d'auteurs similaires).
+
+Réponds UNIQUEMENT au format JSON strict (sans \`\`\`json) sous forme d'un tableau d'objets avec cette structure exacte :
+[
+  {
+    "title": "Titre du livre",
+    "author": "Auteur",
+    "reason": "Une courte phrase accrocheuse expliquant pourquoi ce livre est recommandé."
+  }
+]`;
+    
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim().replace(/```json|```/gi, '');
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error generating recommendations:", error);
+    return null;
+  }
+}

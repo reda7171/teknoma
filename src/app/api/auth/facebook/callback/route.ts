@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { oauthLoginOrRegister } from '@/lib/actions/community-auth'
 
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
+    const searchParams = new URL(request.url).searchParams
+    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
     const code = searchParams.get('code')
     const error = searchParams.get('error')
 
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
         })
 
         if (authResult.success) {
-            return NextResponse.redirect(`${origin}/community`)
+            return NextResponse.redirect(`${origin}${authResult.redirect || '/community'}`)
         } else {
             return NextResponse.redirect(`${origin}/community/login?error=${encodeURIComponent(authResult.error || 'Erreur inconnue')}`)
         }

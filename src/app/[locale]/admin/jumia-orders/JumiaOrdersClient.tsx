@@ -367,34 +367,48 @@ export default function JumiaOrdersClient() {
     return (
         <div className="space-y-6">
             {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
-                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><Package className="w-4 h-4" /></div>
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-xs lg:text-sm">
+                            <div className="p-1.5 lg:p-2 bg-blue-50 text-blue-600 rounded-xl"><Package className="w-4 h-4" /></div>
                             Total (3 mois)
                         </div>
-                        <p className="text-3xl font-black text-slate-800">{stats.total}</p>
+                        <p className="text-2xl lg:text-3xl font-black text-slate-800">{stats.total}</p>
                     </div>
                     <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
-                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
-                            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><AlertCircle className="w-4 h-4" /></div>
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-xs lg:text-sm">
+                            <div className="p-1.5 lg:p-2 bg-amber-50 text-amber-600 rounded-xl"><AlertCircle className="w-4 h-4" /></div>
                             Nouvelles
                         </div>
-                        <p className="text-3xl font-black text-slate-800">{stats.pending}</p>
+                        <p className="text-2xl lg:text-3xl font-black text-slate-800">{stats.pending}</p>
                     </div>
                     <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
-                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
-                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><Truck className="w-4 h-4" /></div>
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-xs lg:text-sm">
+                            <div className="p-1.5 lg:p-2 bg-indigo-50 text-indigo-600 rounded-xl"><Truck className="w-4 h-4" /></div>
                             En transit
                         </div>
-                        <p className="text-3xl font-black text-slate-800">{stats.shipped}</p>
+                        <p className="text-2xl lg:text-3xl font-black text-slate-800">{stats.shipped}</p>
                     </div>
                     <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
-                        <div className="flex items-center gap-3 text-slate-500 font-medium text-sm">
-                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl"><TrendingUp className="w-4 h-4" /></div>
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-xs lg:text-sm">
+                            <div className="p-1.5 lg:p-2 bg-rose-50 text-rose-600 rounded-xl"><XCircle className="w-4 h-4" /></div>
+                            Annulées
+                        </div>
+                        <p className="text-2xl lg:text-3xl font-black text-slate-800">{stats.canceled}</p>
+                    </div>
+                    <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-xs lg:text-sm">
+                            <div className="p-1.5 lg:p-2 bg-slate-100 text-slate-600 rounded-xl"><XCircle className="w-4 h-4" /></div>
+                            Échouées
+                        </div>
+                        <p className="text-2xl lg:text-3xl font-black text-slate-800">{stats.failed}</p>
+                    </div>
+                    <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-xs lg:text-sm">
+                            <div className="p-1.5 lg:p-2 bg-emerald-50 text-emerald-600 rounded-xl"><TrendingUp className="w-4 h-4" /></div>
                             CA Estimé
                         </div>
-                        <p className="text-3xl font-black text-slate-800">{stats.revenue.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} درهم</p>
+                        <p className="text-xl lg:text-2xl font-black text-slate-800">{stats.revenue.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MAD</p>
                     </div>
                 </div>
             )}

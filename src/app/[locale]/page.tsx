@@ -711,6 +711,53 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </div>
                 </Link>
               </ScrollReveal>
+
+              {/* Mobile App Teaser Banner */}
+              <ScrollReveal delay={200} className="mb-12">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 border border-white/20">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-900/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+                  
+                  <div className="relative z-10 flex-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-white/30 backdrop-blur-sm">
+                      <Sparkles className="w-4 h-4 text-yellow-300" />
+                      <span>Bientôt disponible</span>
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
+                      L'application mobile Riwaya <br className="hidden md:block" />
+                      <span className="text-emerald-200">is cooking... 🍳</span>
+                    </h3>
+                    <p className="text-emerald-50 text-lg max-w-xl font-medium">
+                      L'échange de livres et la gestion de votre bibliothèque seront encore plus simples. Préparez-vous pour une toute nouvelle expérience sur iOS et Android !
+                    </p>
+                  </div>
+                  
+                  <div className="relative z-10 flex flex-col gap-4 min-w-[200px]">
+                    <div className="flex items-center justify-center gap-3 px-6 py-4 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl cursor-not-allowed opacity-80">
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.05 20.28c-.98.95-2.05 1.8-3.08 1.8-1.09 0-1.46-.66-2.73-.66-1.28 0-1.7.64-2.71.66-1.05.02-2.22-.92-3.23-2.39-2.37-3.41-2.98-7.79-1.39-10.51.78-1.34 2.15-2.19 3.65-2.22 1.05-.03 2.05.68 2.71.68.68 0 1.9-.84 3.19-.71 1.34.05 2.56.63 3.31 1.69-2.78 1.58-2.33 5.43.34 6.64-.67 1.87-1.44 3.7-2.06 5.02zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.08 4.67-3.74 4.25z"/>
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-[10px] text-gray-300 uppercase font-semibold">Bientôt sur</div>
+                        <div className="text-sm font-bold text-white leading-none">App Store</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 px-6 py-4 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl cursor-not-allowed opacity-80">
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M3.609 1.814L13.792 12 3.61 22.186a1.98 1.98 0 0 1-.502-1.341V3.155c0-.505.18-.963.5-1.341zM20.274 11.23l-5.32-3.08L14.464 8.7a.5.5 0 0 0-.012.01L4.664 2.922l8.808 8.808L20.274 11.23zM20.274 12.77l-6.802-.501-8.808 8.808 9.788-5.787a.5.5 0 0 0 .012.01l.49-.55 5.32-3.08c.594-.344.594-.904 0-1.248zM14.636 12.433l-1.636-1.636-1.636 1.636 1.636 1.636 1.636-1.636z"/>
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-[10px] text-gray-300 uppercase font-semibold">Bientôt sur</div>
+                        <div className="text-sm font-bold text-white leading-none">Google Play</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
               {exchangeBooks.length === 0 ? (
                 <ScrollReveal delay={300} className="text-center py-16 bg-white/50 rounded-3xl border-2 border-dashed border-green-200">
                   <RefreshCw className="w-16 h-16 text-green-300 mx-auto mb-4" />

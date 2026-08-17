@@ -49,7 +49,8 @@ import {
     Globe,
     Headset,
     Calendar,
-    Wallet
+    Wallet,
+    Network
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -96,7 +97,9 @@ export default function AdminLayout({
                         setUnreadInboxCount(total)
                     }
                 })
-                .catch(console.error)
+                .catch(() => {
+                    // Fail silently to prevent Next.js dev overlay on server restart
+                })
         }
         fetchUnread()
         const inboxInterval = setInterval(fetchUnread, 10000)
@@ -224,6 +227,7 @@ export default function AdminLayout({
                 { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
                 { name: 'AEO', href: `/${lang}/admin/aeo`, icon: MessageCircle },
                 { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
+                { name: 'Maillage Interne', href: `/${lang}/admin/seo/internal-linking`, icon: Network },
             ]
         },
         {

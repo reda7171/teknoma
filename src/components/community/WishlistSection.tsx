@@ -8,6 +8,7 @@ import BookSearchModal, { SelectedBookData } from '@/components/community/BookSe
 import { useTranslations } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import { useWishlistStore } from '@/store/wishlist'
+import { fbPixelEvents } from '@/lib/facebook-pixel'
 
 interface WishlistSectionProps {
     wishlist: any[]
@@ -44,6 +45,19 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
                 item: { id: Math.random().toString(), title, author, isOptimistic: true }
             })
             setShowForm(false)
+            
+            // Track AddToCart event
+            try {
+                fbPixelEvents.addToCart({
+                    id: `wishlist_${Date.now()}`,
+                    title: title,
+                    price: 0,
+                    quantity: 1
+                })
+            } catch (err) {
+                console.error("Facebook pixel error:", err)
+            }
+
             setTitle('')
             setAuthor('')
             await addToWishlist(formData)

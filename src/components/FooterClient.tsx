@@ -23,6 +23,13 @@ interface FooterProps {
         youtube?: string | null
         threads?: string | null
     }
+    paymentSettings?: {
+        stripe?: boolean
+        paypal?: boolean
+        cmi?: boolean
+        cod?: boolean
+        bank?: boolean
+    }
 }
 
 // Formulaire newsletter fictif avec message de confirmation
@@ -68,7 +75,7 @@ function NewsletterForm({ t }: { t: any }) {
     )
 }
 
-export default function FooterClient({ features = {}, siteLogo = null, socials = {} }: FooterProps = {}) {
+export default function FooterClient({ features = {}, siteLogo = null, socials = {}, paymentSettings = {} }: FooterProps = {}) {
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
     const tTrack = useTranslations('Tracking');
@@ -192,6 +199,31 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                             <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{tNav('Journal')}</Link></li>
                         </ul>
                         <NewsletterForm t={t} />
+                        
+                        {/* Mobile Apps */}
+                        <div className="mt-8">
+                            <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4">Téléchargez l'App</h3>
+                            <div className="flex gap-3">
+                                <a href="#" className="flex-1 max-w-[140px] bg-black border border-white/20 rounded-xl p-2 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors opacity-70 cursor-not-allowed" title="Bientôt disponible">
+                                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.05 20.28c-.98.95-2.05 1.8-3.08 1.8-1.09 0-1.46-.66-2.73-.66-1.28 0-1.7.64-2.71.66-1.05.02-2.22-.92-3.23-2.39-2.37-3.41-2.98-7.79-1.39-10.51.78-1.34 2.15-2.19 3.65-2.22 1.05-.03 2.05.68 2.71.68.68 0 1.9-.84 3.19-.71 1.34.05 2.56.63 3.31 1.69-2.78 1.58-2.33 5.43.34 6.64-.67 1.87-1.44 3.7-2.06 5.02zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.08 4.67-3.74 4.25z"/>
+                                    </svg>
+                                    <div className="text-left leading-none">
+                                        <div className="text-[8px] text-gray-300">Bientôt sur</div>
+                                        <div className="text-xs font-bold text-white">App Store</div>
+                                    </div>
+                                </a>
+                                <a href="#" className="flex-1 max-w-[140px] bg-black border border-white/20 rounded-xl p-2 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors opacity-70 cursor-not-allowed" title="Bientôt disponible">
+                                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M3.609 1.814L13.792 12 3.61 22.186a1.98 1.98 0 0 1-.502-1.341V3.155c0-.505.18-.963.5-1.341zM20.274 11.23l-5.32-3.08L14.464 8.7a.5.5 0 0 0-.012.01L4.664 2.922l8.808 8.808L20.274 11.23zM20.274 12.77l-6.802-.501-8.808 8.808 9.788-5.787a.5.5 0 0 0 .012.01l.49-.55 5.32-3.08c.594-.344.594-.904 0-1.248zM14.636 12.433l-1.636-1.636-1.636 1.636 1.636 1.636 1.636-1.636z"/>
+                                    </svg>
+                                    <div className="text-left leading-none">
+                                        <div className="text-[8px] text-gray-300">Bientôt sur</div>
+                                        <div className="text-xs font-bold text-white">Google Play</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -225,10 +257,13 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </p>
                     </div>
 
-                    <div className="flex gap-8">
-                        <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors">{t('Privacy')}</Link>
-                        <Link href="/terms" className="text-gray-300 hover:text-white transition-colors">{t('Terms')}</Link>
-                        <Link href="/dmca" className="text-gray-300 hover:text-white transition-colors">DMCA</Link>
+                    <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-3 opacity-50 hover:opacity-100 transition-opacity mt-4 md:mt-0">
+                        {paymentSettings?.stripe && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Visa">VISA</div>}
+                        {paymentSettings?.stripe && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Mastercard">MASTERCARD</div>}
+                        {paymentSettings?.paypal && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="PayPal">PAYPAL</div>}
+                        {paymentSettings?.cmi && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="CMI">CMI</div>}
+                        {paymentSettings?.cod && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Cash on Delivery">COD</div>}
+                        {paymentSettings?.bank && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Virement Bancaire">BANK</div>}
                     </div>
                 </div>
             </div>

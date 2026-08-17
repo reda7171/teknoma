@@ -53,11 +53,14 @@ export async function GET() {
             xml += `      <g:image_link>${escapeXml(imageUrl)}</g:image_link>\n`
             xml += `      <g:condition>${condition}</g:condition>\n`
             xml += `      <g:availability>${availability}</g:availability>\n`
-            xml += `      <g:price>${book.price} درهم</g:price>\n`
-            xml += `      <g:brand>${escapeXml(book.author)}</g:brand>\n`
+            xml += `      <g:price>${Number(book.price).toFixed(2)} MAD</g:price>\n`
+            xml += `      <g:brand>${escapeXml(book.author || 'Riwaya')}</g:brand>\n`
             
-            if (book.isbn) {
-                xml += `      <g:gtin>${escapeXml(book.isbn)}</g:gtin>\n`
+            const cleanIsbn = book.isbn ? book.isbn.replace(/\D/g, '') : '';
+            if (cleanIsbn && [8, 12, 13, 14].includes(cleanIsbn.length)) {
+                xml += `      <g:gtin>${cleanIsbn}</g:gtin>\n`
+            } else {
+                xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             }
             
             if (book.category) {

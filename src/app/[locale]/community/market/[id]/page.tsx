@@ -9,7 +9,29 @@ import { BookOpen, MapPin, Star, Calendar, RefreshCw, ArrowLeft, ShieldCheck, Me
 import { Link } from '@/i18n/routing'
 import { parseImages } from '@/lib/utils/image'
 import BookGalleryClient from '@/components/community/BookGalleryClient'
+import { Metadata } from 'next'
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params
+    const book = await getExchangeBookDetails(id)
+    
+    if (!book) {
+        return {
+            title: 'Livre introuvable | Riwaya Community',
+        }
+    }
+
+    return {
+        title: `${book.title} par ${book.author} | Riwaya Community`,
+        description: book.seoDescription || book.description || `Échangez ${book.title} de ${book.author} sur Riwaya Community.`,
+        keywords: book.seoKeywords || `${book.title}, ${book.author}, échange livre, Riwaya`,
+        openGraph: {
+            title: `${book.title} | Échange de livres`,
+            description: book.seoDescription || book.description || `Découvrez et échangez ${book.title} sur la communauté Riwaya.`,
+            images: book.image ? [{ url: book.image.split(',')[0] }] : [],
+        }
+    }
+}
 export default async function CommunityBookDetailPage({
     params
 }: {
