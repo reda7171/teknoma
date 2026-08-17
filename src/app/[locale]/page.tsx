@@ -25,6 +25,7 @@ import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import { getPrimaryImage } from '@/lib/utils/image'
 import { getCommunityUser } from '@/lib/actions/community-auth'
 import GoogleOneTap from '@/components/auth/GoogleOneTap'
+import SeoCategoriesSection from '@/components/SeoCategoriesSection'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -965,6 +966,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </section>
         )}
+
+        <SeoCategoriesSection locale={locale} />
 
         <CatalogPublicWrapper />
         <Footer />
