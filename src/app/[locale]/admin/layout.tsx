@@ -224,6 +224,7 @@ export default function AdminLayout({
             href: `/${lang}/admin/seo`,
             icon: Search,
             children: [
+                { name: 'Catégories SEO (Packs)', href: `/${lang}/admin/seo-categories`, icon: Package },
                 { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
                 { name: 'AEO', href: `/${lang}/admin/aeo`, icon: MessageCircle },
                 { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },

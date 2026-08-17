@@ -179,6 +179,7 @@ model Book {
   reviews             Review[]
   wishlists           Wishlist[]
   posts               Post[]            @relation("PostBooks")
+  seoCategoryBooks    SeoCategoryBook[]
 
   @@index([category])
   @@index([subCategory])
@@ -1226,3 +1227,43 @@ model PosSession {
   @@index([status])
   @@map("pos_sessions")
 }
+
+model SeoCategory {
+  id            String            @id @default(uuid())
+  slug          String            @unique
+  locale        String            @default("fr")
+  title         String            @db.VarChar(255)
+  h1            String            @db.VarChar(255)
+  description   String            @db.Text
+  intro         String            @db.Text
+  categoryText  String            @db.Text
+  keyword       String            @db.VarChar(255)
+  faq           String            @db.Text
+  colorGradient String?           @db.VarChar(255)
+  searchQuery   String?           @db.VarChar(255)
+  displayOrder  Int               @default(0)
+  isActive      Boolean           @default(true)
+  showOnHome    Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  books         SeoCategoryBook[]
+
+  @@map("seo_categories")
+}
+
+model SeoCategoryBook {
+  id            String      @id @default(uuid())
+  seoCategoryId String
+  bookId        String
+  order         Int         @default(0)
+
+  seoCategory   SeoCategory @relation(fields: [seoCategoryId], references: [id], onDelete: Cascade)
+  book          Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([seoCategoryId, bookId])
+  @@index([seoCategoryId])
+  @@index([bookId])
+  @@map("seo_category_books")
+}
+

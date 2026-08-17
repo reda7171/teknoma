@@ -229,6 +229,17 @@
       "NoData": "No exchange books available yet",
       "JoinCommunity": "Join Community"
     },
+    "MobileApp": {
+      "ComingSoon": "Coming Soon",
+      "Title": "Riwaya Mobile App",
+      "Subtitle": "is cooking... 🍳",
+      "Description": "Book exchanges and library management will be even simpler. Get ready for a whole new experience on iOS and Android!",
+      "SoonOn": "Coming soon on"
+    },
+    "AEOSnippet": {
+      "Question": "Where to buy books online in Morocco?",
+      "Answer": "Riwaya is a Moroccan online bookstore that allows you to order books and novels with delivery throughout Morocco."
+    },
     "CTA": {
       "TitlePart1": "Ready for your",
       "TitlePart2": "next reading?",
@@ -318,7 +329,10 @@
     "Join": "Join",
     "Rights": "All rights reserved.",
     "BackToTop": "Back to Top",
-    "DevelopedBy": "Developed by <name>Reda</name>"
+    "DevelopedBy": "Developed by <name>Reda</name>",
+    "DownloadApp": "Download the App",
+    "SoonOn": "Coming soon on",
+    "AppComingSoon": "Coming Soon"
   },
   "Common": {
     "FreeShippingPromo": "Free delivery everywhere in Morocco for orders over 300 MAD!",

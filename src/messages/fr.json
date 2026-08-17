@@ -229,6 +229,17 @@
       "NoData": "Aucun livre d'échange disponible pour le moment",
       "JoinCommunity": "Rejoindre la Communauté"
     },
+    "MobileApp": {
+      "ComingSoon": "Bientôt disponible",
+      "Title": "L'application mobile Riwaya",
+      "Subtitle": "is cooking... 🍳",
+      "Description": "L'échange de livres et la gestion de votre bibliothèque seront encore plus simples. Préparez-vous pour une toute nouvelle expérience sur iOS et Android !",
+      "SoonOn": "Bientôt sur"
+    },
+    "AEOSnippet": {
+      "Question": "Où acheter des livres en ligne au Maroc ?",
+      "Answer": "Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc."
+    },
     "CTA": {
       "TitlePart1": "Prêt pour votre",
       "TitlePart2": "prochaine lecture ?",
@@ -318,7 +329,10 @@
     "Join": "Rejoindre",
     "Rights": "Tous droits réservés.",
     "BackToTop": "Revenir en haut",
-    "DevelopedBy": "Développé par <name>Reda</name>"
+    "DevelopedBy": "Développé par <name>Reda</name>",
+    "DownloadApp": "Téléchargez l'App",
+    "SoonOn": "Bientôt sur",
+    "AppComingSoon": "Bientôt disponible"
   },
   "Common": {
     "FreeShippingPromo": "Livraison Gratuite partout au Maroc dès 300 MAD d'achat !",

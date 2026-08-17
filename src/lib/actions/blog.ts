@@ -81,6 +81,7 @@ export async function getPostBySlug(slug: string, language?: string) {
         include: {
             author: {
                 select: {
+                    id: true,
                     fullName: true,
                     image: true,
                     bio: true

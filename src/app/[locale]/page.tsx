@@ -25,6 +25,7 @@ import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import { getPrimaryImage } from '@/lib/utils/image'
 import { getCommunityUser } from '@/lib/actions/community-auth'
 import GoogleOneTap from '@/components/auth/GoogleOneTap'
+import SeoCategoriesSection from '@/components/SeoCategoriesSection'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -162,12 +163,30 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     }
   } catch (e) {}
 
-  let aeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
-  let aeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
-  
-  // Snippet par défaut
-  if (!aeoSnippetQ) aeoSnippetQ = 'Où acheter des livres en ligne au Maroc ?'
-  if (!aeoSnippetA) aeoSnippetA = 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
+  let dbAeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
+  let dbAeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
+
+  const defaultQ = t('AEOSnippet.Question')
+  const defaultA = t('AEOSnippet.Answer')
+
+  let aeoSnippetQ = defaultQ
+  let aeoSnippetA = defaultA
+
+  // Si l'admin a modifié le texte en BD (différent de notre fallback FR) et on est en FR,
+  // ou s'il a mis un texte générique, on peut l'utiliser, mais pour éviter de montrer
+  // du français sur la page arabe, on privilégie le texte de la base UNIQUEMENT pour la locale 'fr'
+  // OU si le texte ne correspond pas au défaut français.
+  // Note: On suppose ici que le texte par défaut FR est connu ou qu'on le vérifie
+  const frDefaultQ = 'Où acheter des livres en ligne au Maroc ?'
+  const frDefaultA = 'Riwaya est une librairie en ligne marocaine permettant de commander des livres et romans avec livraison au Maroc.'
+
+  if (dbAeoSnippetQ && dbAeoSnippetQ.trim() !== '' && dbAeoSnippetQ !== frDefaultQ && locale === 'fr') {
+      aeoSnippetQ = dbAeoSnippetQ;
+  }
+  if (dbAeoSnippetA && dbAeoSnippetA.trim() !== '' && dbAeoSnippetA !== frDefaultA && locale === 'fr') {
+      aeoSnippetA = dbAeoSnippetA;
+  }
+
 
   // Choisir une citation de manière déterministe (fix hydration error by not relying on Date.now() in SSR)
   let randomQuote = null;
@@ -721,14 +740,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <div className="relative z-10 flex-1">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border border-white/30 backdrop-blur-sm">
                       <Sparkles className="w-4 h-4 text-yellow-300" />
-                      <span>Bientôt disponible</span>
+                      <span>{t('MobileApp.ComingSoon')}</span>
                     </div>
                     <h3 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
-                      L'application mobile Riwaya <br className="hidden md:block" />
-                      <span className="text-emerald-200">is cooking... 🍳</span>
+                      {t('MobileApp.Title')} <br className="hidden md:block" />
+                      <span className="text-emerald-200">{t('MobileApp.Subtitle')}</span>
                     </h3>
                     <p className="text-emerald-50 text-lg max-w-xl font-medium">
-                      L'échange de livres et la gestion de votre bibliothèque seront encore plus simples. Préparez-vous pour une toute nouvelle expérience sur iOS et Android !
+                      {t('MobileApp.Description')}
                     </p>
                   </div>
                   
@@ -740,7 +759,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         </svg>
                       </div>
                       <div className="text-left">
-                        <div className="text-[10px] text-gray-300 uppercase font-semibold">Bientôt sur</div>
+                        <div className="text-[10px] text-gray-300 uppercase font-semibold">{t('MobileApp.SoonOn')}</div>
                         <div className="text-sm font-bold text-white leading-none">App Store</div>
                       </div>
                     </div>
@@ -751,7 +770,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         </svg>
                       </div>
                       <div className="text-left">
-                        <div className="text-[10px] text-gray-300 uppercase font-semibold">Bientôt sur</div>
+                        <div className="text-[10px] text-gray-300 uppercase font-semibold">{t('MobileApp.SoonOn')}</div>
                         <div className="text-sm font-bold text-white leading-none">Google Play</div>
                       </div>
                     </div>
@@ -882,17 +901,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                               <BookOpen className="w-12 h-12 text-gray-300" />
                             </div>
                           )}
-                          <div className="absolute top-6 left-6">
-                            <div className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
-                              {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR', { day: 'numeric', month: 'long' })}
-                            </div>
-                          </div>
                         </div>
+
                         <div className="p-8 flex-grow flex flex-col">
                           <div className="flex items-center gap-2 mb-4"><div className="w-1.5 h-1.5 rounded-full bg-black" /><span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{post.category?.name || 'Inspiration'}</span></div>
                           <h3 className="text-2xl font-black text-black leading-tight mb-4 group-hover:text-gray-600 transition-colors line-clamp-2">{post.title}</h3>
                           <p className="text-gray-500 text-sm font-medium line-clamp-3 mb-8">{post.excerpt}</p>
-                          <div className="mt-auto flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
+                          <div className="mt-auto flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
+                            <span className="text-[10px] font-semibold text-gray-400 rtl:text-xs">{new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR', { day: 'numeric', month: 'long' })}</span>
+                          </div>
                         </div>
                       </article>
                     </Link>
@@ -948,6 +966,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </section>
         )}
+
+        <SeoCategoriesSection locale={locale} />
 
         <CatalogPublicWrapper />
         <Footer />

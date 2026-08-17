@@ -202,23 +202,23 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         
                         {/* Mobile Apps */}
                         <div className="mt-8">
-                            <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4">Téléchargez l'App</h3>
+                            <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4">{t('DownloadApp')}</h3>
                             <div className="flex gap-3">
-                                <a href="#" className="flex-1 max-w-[140px] bg-black border border-white/20 rounded-xl p-2 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors opacity-70 cursor-not-allowed" title="Bientôt disponible">
+                                <a href="#" className="flex-1 max-w-[140px] bg-black border border-white/20 rounded-xl p-2 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors opacity-70 cursor-not-allowed" title={t('AppComingSoon')}>
                                     <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M17.05 20.28c-.98.95-2.05 1.8-3.08 1.8-1.09 0-1.46-.66-2.73-.66-1.28 0-1.7.64-2.71.66-1.05.02-2.22-.92-3.23-2.39-2.37-3.41-2.98-7.79-1.39-10.51.78-1.34 2.15-2.19 3.65-2.22 1.05-.03 2.05.68 2.71.68.68 0 1.9-.84 3.19-.71 1.34.05 2.56.63 3.31 1.69-2.78 1.58-2.33 5.43.34 6.64-.67 1.87-1.44 3.7-2.06 5.02zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.08 4.67-3.74 4.25z"/>
                                     </svg>
                                     <div className="text-left leading-none">
-                                        <div className="text-[8px] text-gray-300">Bientôt sur</div>
+                                        <div className="text-[8px] text-gray-300">{t('SoonOn')}</div>
                                         <div className="text-xs font-bold text-white">App Store</div>
                                     </div>
                                 </a>
-                                <a href="#" className="flex-1 max-w-[140px] bg-black border border-white/20 rounded-xl p-2 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors opacity-70 cursor-not-allowed" title="Bientôt disponible">
+                                <a href="#" className="flex-1 max-w-[140px] bg-black border border-white/20 rounded-xl p-2 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors opacity-70 cursor-not-allowed" title={t('AppComingSoon')}>
                                     <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M3.609 1.814L13.792 12 3.61 22.186a1.98 1.98 0 0 1-.502-1.341V3.155c0-.505.18-.963.5-1.341zM20.274 11.23l-5.32-3.08L14.464 8.7a.5.5 0 0 0-.012.01L4.664 2.922l8.808 8.808L20.274 11.23zM20.274 12.77l-6.802-.501-8.808 8.808 9.788-5.787a.5.5 0 0 0 .012.01l.49-.55 5.32-3.08c.594-.344.594-.904 0-1.248zM14.636 12.433l-1.636-1.636-1.636 1.636 1.636 1.636 1.636-1.636z"/>
                                     </svg>
                                     <div className="text-left leading-none">
-                                        <div className="text-[8px] text-gray-300">Bientôt sur</div>
+                                        <div className="text-[8px] text-gray-300">{t('SoonOn')}</div>
                                         <div className="text-xs font-bold text-white">Google Play</div>
                                     </div>
                                 </a>
