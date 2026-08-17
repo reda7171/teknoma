@@ -92,15 +92,15 @@ export default function ShareArticle({ title, vertical = false }: Props) {
 
     // Mode horizontal (défaut)
     return (
-        <div className="flex items-center gap-3">
-            <span className="text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-400 mr-1">{t('ShareTitle')}</span>
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+            <span className="text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-400 mr-2 w-full sm:w-auto mb-1 sm:mb-0">{t('ShareTitle')}</span>
             {platforms.map((p) => (
                 <a
                     key={p.label}
                     href={p.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center hover:text-white transition-all text-gray-500 ${p.color}`}
+                    className={`w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center hover:text-white transition-all text-slate-500 ${p.color}`}
                     aria-label={p.label}
                 >
                     {p.icon}
@@ -108,14 +108,14 @@ export default function ShareArticle({ title, vertical = false }: Props) {
             ))}
             <button
                 onClick={handleCopy}
-                className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-all text-gray-500 relative"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all text-slate-500 relative"
                 aria-label={t('Share.CopyLink')}
             >
                 <Link2 className="w-4 h-4" />
                 {copied && (
-                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap">
-                        {t('Copied')}
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45" />
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap z-50">
+                        {t('Share.LinkCopied') || 'Copied!'}
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45" />
                     </span>
                 )}
             </button>

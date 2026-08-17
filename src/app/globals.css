@@ -35,6 +35,10 @@ body {
   overflow-x: hidden;
 }
 
+.font-tajawal {
+  font-family: var(--font-tajawal), system-ui, sans-serif;
+}
+
 /* Animation cloche notification */
 @keyframes wiggle {
   0%, 100% { transform: rotate(-10deg); }
@@ -267,4 +271,10 @@ body {
 
 .mt-20 {
     margin-top: calc(var(--spacing) * -8);
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
 }

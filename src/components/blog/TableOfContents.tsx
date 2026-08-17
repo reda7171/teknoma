@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { List } from 'lucide-react'
+import { List, ChevronDown } from 'lucide-react'
 
 interface Heading {
     id: string
@@ -14,6 +14,7 @@ export default function TableOfContents({ language = 'fr' }: { language?: string
     const t = useTranslations('BlogArticle')
     const [headings, setHeadings] = useState<Heading[]>([])
     const [activeId, setActiveId] = useState<string>('')
+    const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {
         // Find all headings inside the article content
@@ -96,12 +97,18 @@ export default function TableOfContents({ language = 'fr' }: { language?: string
     if (headings.length === 0) return null
 
     return (
-        <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 mb-8 text-slate-900">
-            <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5 flex items-center gap-2">
-                <List className="w-3.5 h-3.5" />
-                {t('TableOfContents')}
-            </p>
-            <nav dir={language === 'ar' ? 'rtl' : 'ltr'} className="flex flex-col gap-3">
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl p-5 md:p-6 mb-8 text-slate-900 shadow-sm md:shadow-none">
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between text-[11px] rtl:text-[13px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-slate-500 md:cursor-default md:pointer-events-none"
+            >
+                <div className="flex items-center gap-2">
+                    <List className="w-4 h-4" />
+                    {t('TableOfContents')}
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform md:hidden ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <nav dir={language === 'ar' ? 'rtl' : 'ltr'} className={`flex-col gap-3 mt-5 md:flex ${isOpen ? 'flex' : 'hidden'}`}>
                 {headings.map(heading => (
                     <a
                         key={heading.id}
@@ -115,6 +122,7 @@ export default function TableOfContents({ language = 'fr' }: { language?: string
                                 setActiveId(heading.id);
                                 document.querySelectorAll('#article-content h2, #article-content h3').forEach(e => e.classList.remove('active-heading'))
                                 elem.classList.add('active-heading')
+                                setIsOpen(false); // Close mobile menu on click
                             }
                         }}
                         className={`transition-all duration-300 block line-clamp-2 ${
