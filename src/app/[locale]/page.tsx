@@ -3,6 +3,9 @@ import { getPopularPacks } from '@/lib/db/packs'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getAllCategoryQuotes } from '@/lib/actions/categories'
 import { getRecentExchangeBooks } from '@/lib/actions/community-market'
+import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
+import AudioTestimonial from '@/components/AudioTestimonial'
+import SonicDeliveryBanner from '@/components/home/SonicDeliveryBanner'
 import { getRecentPosts } from '@/lib/actions/blog'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import BookCard from '@/components/BookCard'
@@ -12,7 +15,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import Footer from '@/components/Footer'
 import { Link, redirect } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
-import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download } from 'lucide-react'
+import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download , Headphones } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
@@ -98,7 +101,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     recentPosts,
     homeSettings,
     homepageContent,
-    user
+    user,
+    audioTestimonialsResult
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -116,10 +120,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getRecentPosts(3, locale),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
-    getCommunityUser()
+    getCommunityUser(),
+    getApprovedAudioTestimonials()
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
+  const audioTestimonials = audioTestimonialsResult?.success ? audioTestimonialsResult.testimonials : []
   const newBooks = popularBooks.slice(0, 6)
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
@@ -411,6 +417,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const defaultOrder = [
     'home_section_hero',
+    'home_section_sonic_delivery',
     'home_section_custom_html',
     'home_section_features',
     'home_section_best_sellers',
@@ -419,6 +426,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     'home_section_authors',
     'home_section_trust',
     'home_section_new_arrivals',
+    'home_section_audio_testimonials',
     'home_section_exchange',
     'home_section_digital',
     'home_section_blog'
@@ -502,6 +510,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </div>
             </div>
           </section>
+        )
+
+            case 'home_section_sonic_delivery':
+        return (
+          <SonicDeliveryBanner 
+            key={key} 
+            locale={locale} 
+            title={c('sonic_title', locale === 'ar' ? 'توصيل سونيك في الرباط، تمارة وسلا' : locale === 'en' ? 'Sonic Delivery in Rabat, Temara & Sale' : 'Livraison Sonic sur Rabat, Témara et Salé')}
+            subtitle={c('sonic_subtitle', locale === 'ar' ? 'في أقل من ساعة!' : locale === 'en' ? 'in under an hour!' : "en moins d'une heure !")}
+            description={c('sonic_description', locale === 'ar' ? 'اطلب الآن وتوصل بطلبك في الرباط، تمارة أو سلا بسرعة البرق. لا مزيد من الانتظار، نحن نضمن لك أسرع خدمة توصيل.' : locale === 'en' ? 'Order now and receive your package in Rabat, Temara, or Sale with lightning speed. No more waiting, we guarantee the fastest delivery service.' : "Commandez maintenant et recevez votre colis à Rabat, Témara ou Salé à la vitesse de l'éclair. Fini l'attente, nous garantissons la livraison la plus rapide.")}
+            badge1={c('sonic_badge1', '1 ' + (locale === 'ar' ? 'ساعة كحد أقصى' : locale === 'en' ? 'Hour Max' : 'Heure Max'))}
+            badge2={c('sonic_badge2', locale === 'ar' ? 'الرباط، تمارة وسلا' : locale === 'en' ? 'Rabat, Temara, Sale' : 'Rabat, Témara, Salé')}
+            buttonText={c('sonic_btn_text', locale === 'ar' ? 'تحدانا الآن!' : locale === 'en' ? 'Challenge us now!' : 'Mettez-nous au défi !')}
+          />
         )
 
       case 'home_section_custom_html':
@@ -827,6 +849,33 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </section>
         )
 
+            case 'home_section_audio_testimonials':
+        if (audioTestimonials.length === 0) return null
+        return (
+          <section key={key} {...getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream')} className={`py-16 overflow-hidden ${getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream').className || ''}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-12 space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full">
+                    <Headphones className="w-4 h-4 text-emerald-600" />
+                    <span className="text-[11px] font-black uppercase text-emerald-600 tracking-[0.3em]">
+                      {c('audio_testimonials_subtitle', locale === 'ar' ? 'تجارب عملائنا الصوتية' : locale === 'en' ? 'Voice Testimonials' : 'Témoignages Vocaux')}
+                    </span>
+                  </div>
+                <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
+                  {c('audio_testimonials_title', locale === 'ar' ? 'ماذا يقولون عنا' : locale === 'en' ? 'What They Say' : 'Ce qu\'ils disent de nous')}<span className="text-emerald-500">.</span>
+                </h2>
+              </ScrollReveal>
+              <div className="flex flex-wrap justify-center gap-8">
+                {audioTestimonials.map((testimonial: any, idx: number) => (
+                  <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up">
+                    <AudioTestimonial testimonial={testimonial} />
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+
       case 'home_section_digital':
         if (!featureDigitalBooks) return null
         return (
@@ -865,6 +914,193 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </div>
                 </ScrollReveal>
               </div>
+            </div>
+          </section>
+        )
+
+      case 'home_section_trust':
+        return (
+          <TrustSection
+            key={key}
+            stats={{
+              books: totalBooks + 500, // Ajout d'offset pour le décollage
+              readers: totalUsers + 1000,
+              exchanges: totalExchanges + 200
+            }}
+          />
+        )
+
+      case 'home_section_new_arrivals':
+        return (
+          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-24 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
+                <div className="space-y-4">
+                  <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
+                  <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
+                    {c('new_arrivals_title', t('NewArrivals.Title'))}
+                  </h2>
+                </div>
+                <Link
+                  href="/books"
+                  className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl"
+                >
+                  <span className="text-xs font-black uppercase tracking-widest text-black">{c('new_arrivals_view_all', t('NewArrivals.ViewAll'))}</span>
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </Link>
+              </ScrollReveal>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+                {newBooks.map((book: any, idx: number) => (
+                  <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
+                    <BookCard
+                      {...book}
+                      variant={idx === 0 ? 'featured' : 'default'}
+                    />
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+
+      case 'home_section_exchange':
+        if (!featureExchange) return null
+        return (
+          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-24 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <ScrollReveal className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
+                <div className="space-y-4 flex-1">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full">
+                    <RefreshCw className="w-4 h-4 text-green-600" />
+                    <span className="text-[11px] font-black uppercase text-green-600 tracking-[0.3em]">
+                      {c('exchange_subtitle', t('ExchangeBooks.Subtitle'))}
+                    </span>
+                  </div>
+                  <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
+                    {c('exchange_title', t('ExchangeBooks.Title'))}<span className="text-green-500">.</span>
+                  </h2>
+                  <p className="text-lg text-gray-500 font-medium max-w-2xl">
+                    {c('exchange_description', t('ExchangeBooks.Description'))}
+                  </p>
+                </div>
+                <Link
+                  href="/community/market"
+                  className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-green-100 hover:border-green-600 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-2xl"
+                >
+                  <span className="text-xs font-black uppercase tracking-widest text-green-600">{c('exchange_view_all', t('ExchangeBooks.ViewAll'))}</span>
+                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </Link>
+              </ScrollReveal>
+
+              {exchangeBooks.length === 0 ? (
+                <ScrollReveal delay={300} className="text-center py-16 bg-white/50 rounded-3xl border-2 border-dashed border-green-200">
+                  <RefreshCw className="w-16 h-16 text-green-300 mx-auto mb-4" />
+                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4">
+                    {c('exchange_no_data', t('ExchangeBooks.NoData'))}
+                  </p>
+                  <Link
+                    href="/community/login"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg"
+                  >
+                    <span>{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </ScrollReveal>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {exchangeBooks.map((book: any, idx: number) => (
+                      <ScrollReveal key={book.id} delay={idx * 150} animation="animate-reveal-up">
+                        <Link
+                          href={`/community/market/${book.id}`}
+                          className="group h-full relative bg-white rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-green-100 hover:border-green-500 flex flex-col"
+                        >
+                          <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+                            {book.image ? (
+                              <ImageWithFallback
+                                src={book.image}
+                                alt={book.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-100 to-teal-100">
+                                <BookOpen className="w-20 h-20 text-green-300" />
+                              </div>
+                            )}
+
+                            <div className="absolute top-4 right-4 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-[9px] font-black uppercase tracking-wider text-green-600 border border-green-200">
+                              {book.condition}
+                            </div>
+                          </div>
+
+                          <div className="p-6 flex-grow flex flex-col">
+                            <h3 className="text-lg font-black text-black mb-1 line-clamp-2 group-hover:text-green-600 transition-colors">
+                              {book.title}
+                            </h3>
+                            <p className="text-sm text-gray-400 font-bold italic mb-4">
+                              {book.author}
+                            </p>
+
+                            <div className="mt-auto flex items-center gap-3 pt-4 border-t border-gray-100">
+                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center overflow-hidden">
+                                {book.owner?.image ? (
+                                  <ImageWithFallback
+                                    src={book.owner.image}
+                                    alt={book.owner.fullName}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-green-600 font-black text-xs">
+                                    {book.owner?.fullName?.[0]}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex-grow">
+                                <p className="text-xs font-bold text-gray-600 truncate">
+                                  {book.owner?.fullName}
+                                </p>
+                                <p className="text-[10px] text-gray-400 font-bold">
+                                  {book.owner?.city}
+                                </p>
+                              </div>
+                              {book.owner?.rating > 0 && (
+                                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-full">
+                                  <Sparkles className="w-3 h-3 text-yellow-600 fill-yellow-600" />
+                                  <span className="text-xs font-black text-yellow-600">
+                                    {book.owner.rating.toFixed(1)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mt-4 flex items-center gap-2">
+                              <RefreshCw className="w-4 h-4 text-green-600" />
+                              <span className="text-xs font-black text-green-600 uppercase tracking-wider">
+                                {book.exchangeType}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      </ScrollReveal>
+                    ))}
+                  </div>
+
+                  <ScrollReveal delay={500} className="flex justify-center mt-12">
+                    <Link
+                      href="/community/market"
+                      className="group inline-flex items-center gap-4 px-12 py-6 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-2xl hover:scale-105 hover:-translate-y-1"
+                    >
+                      <span>{c('exchange_view_more', t('ExchangeBooks.ViewMore'))}</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </ScrollReveal>
+                </>
+              )}
             </div>
           </section>
         )

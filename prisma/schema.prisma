@@ -429,27 +429,27 @@ model Review {
 }
 
 model ExchangeBook {
-  id           String        @id @default(uuid())
-  ownerId      String
-  title        String
-  author       String
-  isbn         String?
-  condition    BookCondition @default(GOOD)
-  description  String?       @db.Text
-  image        String?       @db.LongText
-  language     String        @default("fr")
-  exchangeType ExchangeType  @default(DIRECT)
-  status       String        @default("AVAILABLE")
-  seoDescription String?     @db.Text
-  seoKeywords  String?       @db.Text
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  latitude     Float?
-  longitude    Float?
-  owner        Customer      @relation("OwnedBooks", fields: [ownerId], references: [id], onDelete: Cascade)
-  offeredIn    Exchange[]    @relation("BookOffered")
-  requestedIn  Exchange[]    @relation("BookRequested")
-  reports      Report[]
+  id             String        @id @default(uuid())
+  ownerId        String
+  title          String
+  author         String
+  isbn           String?
+  condition      BookCondition @default(GOOD)
+  description    String?       @db.Text
+  image          String?       @db.LongText
+  language       String        @default("fr")
+  exchangeType   ExchangeType  @default(DIRECT)
+  status         String        @default("AVAILABLE")
+  seoDescription String?       @db.Text
+  seoKeywords    String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  latitude       Float?
+  longitude      Float?
+  owner          Customer      @relation("OwnedBooks", fields: [ownerId], references: [id], onDelete: Cascade)
+  offeredIn      Exchange[]    @relation("BookOffered")
+  requestedIn    Exchange[]    @relation("BookRequested")
+  reports        Report[]
 
   @@index([ownerId])
   @@index([status])
@@ -1220,8 +1220,8 @@ model PosSession {
   openedAt      DateTime  @default(now())
   closedAt      DateTime?
 
-  user          User      @relation(fields: [userId], references: [id])
-  orders        Order[]
+  user   User    @relation(fields: [userId], references: [id])
+  orders Order[]
 
   @@index([userId])
   @@index([status])
@@ -1229,37 +1229,37 @@ model PosSession {
 }
 
 model SeoCategory {
-  id            String            @id @default(uuid())
-  slug          String            @unique
-  locale        String            @default("fr")
-  title         String            @db.VarChar(255)
-  h1            String            @db.VarChar(255)
-  description   String            @db.Text
-  intro         String            @db.Text
-  categoryText  String            @db.Text
-  keyword       String            @db.VarChar(255)
-  faq           String            @db.Text
-  colorGradient String?           @db.VarChar(255)
-  searchQuery   String?           @db.VarChar(255)
-  displayOrder  Int               @default(0)
-  isActive      Boolean           @default(true)
-  showOnHome    Boolean           @default(false)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  
-  books         SeoCategoryBook[]
+  id            String   @id @default(uuid())
+  slug          String   @unique
+  locale        String   @default("fr")
+  title         String   @db.VarChar(255)
+  h1            String   @db.VarChar(255)
+  description   String   @db.Text
+  intro         String   @db.Text
+  categoryText  String   @db.Text
+  keyword       String   @db.VarChar(255)
+  faq           String   @db.Text
+  colorGradient String?  @db.VarChar(255)
+  searchQuery   String?  @db.VarChar(255)
+  displayOrder  Int      @default(0)
+  isActive      Boolean  @default(true)
+  showOnHome    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  books SeoCategoryBook[]
 
   @@map("seo_categories")
 }
 
 model SeoCategoryBook {
-  id            String      @id @default(uuid())
+  id            String @id @default(uuid())
   seoCategoryId String
   bookId        String
-  order         Int         @default(0)
+  order         Int    @default(0)
 
-  seoCategory   SeoCategory @relation(fields: [seoCategoryId], references: [id], onDelete: Cascade)
-  book          Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  seoCategory SeoCategory @relation(fields: [seoCategoryId], references: [id], onDelete: Cascade)
+  book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([seoCategoryId, bookId])
   @@index([seoCategoryId])
@@ -1277,4 +1277,17 @@ model Giveaway {
   participantsCount Int      @default(0)
   status            String   @default("COMPLETED")
   createdAt         DateTime @default(now())
+}
+
+model AudioTestimonial {
+  id           String   @id @default(uuid())
+  customerName String   @db.VarChar(255)
+  audioUrl     String   @db.VarChar(500)
+  avatarUrl    String?  @db.VarChar(500)
+  duration     Int?     // in seconds
+  isApproved   Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("audio_testimonials")
 }
