@@ -277,12 +277,7 @@ export default async function PackDetailPage({
                     price={displayPrice}
                     category="Packs"
                 />
-                <AnnouncementBar
-                    message={announcementMessage || ""}
-                    isEnabled={announcementEnabled === 'true'}
-                    bgColor={announcementBgColor || "#000000"}
-                    textColor={announcementTextColor || "#FFFFFF"}
-                />
+
                 <Header />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-40 md:pb-32">

@@ -84,6 +84,10 @@ export async function createUserAdmin(data: any) {
                 role: data.role as UserRole,
                 managedLanguages: data.managedLanguages,
                 image: data.image,
+                bio: data.bio,
+                facebook: data.facebook,
+                instagram: data.instagram,
+                twitter: data.twitter,
             }
         })
         revalidatePath('/admin/users')
@@ -105,6 +109,10 @@ export async function updateUserAdmin(userId: string, data: any) {
             role: data.role as UserRole,
             managedLanguages: data.managedLanguages,
             image: data.image,
+            bio: data.bio,
+            facebook: data.facebook,
+            instagram: data.instagram,
+            twitter: data.twitter,
         }
 
         if (data.password && data.password.trim() !== '') {

@@ -193,6 +193,7 @@ export default function AdminLayout({
                 { name: 'Avis Clients', href: `/${lang}/admin/reviews`, icon: MessageSquare },
                 { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
                 { name: 'Demandes de Livres', href: `/${lang}/admin/requested-books`, icon: Search },
+                { name: 'Concours & Giveaways', href: `/${lang}/admin/giveaways`, icon: Gift },
                 { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
                 { name: 'Blog & Actualités', href: `/${lang}/admin/posts`, icon: FileText },
             ]

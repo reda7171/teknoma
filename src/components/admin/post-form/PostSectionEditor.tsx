@@ -179,6 +179,9 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     const [isRephrasing, setIsRephrasing] = useState<string | null>(null)
 
     useEffect(() => {
+        // Précharger l'éditeur en arrière-plan pour éviter le temps de chargement au clic
+        import('react-quill-new').catch(() => {})
+
         if (!initialContent) {
             setSections([{ id: Date.now().toString(), title: '', content: '', blockType: 'text' }])
             return

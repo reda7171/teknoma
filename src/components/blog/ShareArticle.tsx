@@ -8,12 +8,37 @@ interface Props {
     title: string
     // Mode vertical pour la sidebar
     vertical?: boolean
+    translations?: {
+        facebook: string
+        twitter: string
+        linkedin: string
+        whatsapp: string
+        copyLink: string
+        linkCopied: string
+        shareTitle: string
+    }
 }
 
-export default function ShareArticle({ title, vertical = false }: Props) {
+export default function ShareArticle({ title, vertical = false, translations }: Props) {
     const [url, setUrl] = useState('')
     const [copied, setCopied] = useState(false)
-    const t = useTranslations('BlogArticle')
+    const tDefault = useTranslations('BlogArticle')
+    
+    // Fonction helper pour obtenir la traduction (soit via les props soit via le hook)
+    const t = (key: string) => {
+        if (!translations) return tDefault(key)
+        
+        switch (key) {
+            case 'Share.Facebook': return translations.facebook
+            case 'Share.Twitter': return translations.twitter
+            case 'Share.LinkedIn': return translations.linkedin
+            case 'Share.WhatsApp': return translations.whatsapp
+            case 'Share.CopyLink': return translations.copyLink
+            case 'Share.LinkCopied': return translations.linkCopied
+            case 'ShareTitle': return translations.shareTitle
+            default: return tDefault(key)
+        }
+    }
 
     useEffect(() => {
         setUrl(window.location.href)

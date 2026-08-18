@@ -1510,5 +1510,19 @@
     "Books": "Books",
     "Packs": "Packs",
     "Cart": "Cart"
+  },
+  "SeoPage": {
+    "Delivery": "Delivery Anywhere in Morocco",
+    "PaymentOnDelivery": "Cash on Delivery",
+    "QualityGuaranteed": "Quality Guaranteed",
+    "WhyChooseUs": "Why choose Riwaya for your reading?",
+    "BrowseCollection": "Browse our collection to find captivating stories written by the greatest writers in the Arab world.",
+    "Mission1": "Our mission is to democratize access to culture. By choosing",
+    "Mission2": "via our platform, you benefit from an intuitive interface, responsive customer service, and personalized recommendations.",
+    "Guarantee": "Riwaya Guarantee",
+    "GuaranteeText": "Satisfied or refunded within 7 days. Careful packaging and fast shipping within 24 business hours to all cities in Morocco (Casablanca, Rabat, Marrakech, Tangier, etc.).",
+    "SelectionOfTheWeek": "Selection of the week",
+    "ViewCatalog": "View the entire catalog",
+    "FAQ": "Frequently Asked Questions"
   }
 }

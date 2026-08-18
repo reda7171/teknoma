@@ -1,9 +1,9 @@
 import { getPostBySlug, incrementPostViews, getRelatedPosts } from '@/lib/actions/blog'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import Header from '@/components/blog/BlogHeaderWithUser'
+import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark, Bot, Sparkles } from 'lucide-react'
+import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark, Bot, Sparkles, BadgeCheck } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
@@ -27,8 +27,9 @@ import { getOgImageUrl, getBaseUrl } from '@/lib/utils'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
+    const decodedSlug = decodeURIComponent(rawSlug)
     // Normaliser le slug : supprimer les accents pour matcher la DB (slugs ASCII)
-    const slug = rawSlug
+    const slug = decodedSlug
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
@@ -76,13 +77,15 @@ function estimateReadingTime(content: string): number {
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
     const { slug: rawSlug, locale } = await params
+    const decodedSlug = decodeURIComponent(rawSlug)
     // Normaliser le slug : supprimer les accents pour matcher la DB (slugs ASCII)
-    const slug = rawSlug
+    const slug = decodedSlug
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
     const post = await getPostBySlug(slug, locale)
     const t = await getTranslations('BlogArticle')
+    const tPost = await getTranslations({ locale: post?.language || 'fr', namespace: 'BlogArticle' })
 
     if (!post) notFound()
 
@@ -395,9 +398,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             dir={post.language === 'ar' ? 'rtl' : 'ltr'}
                             className={`prose prose-base md:prose-lg max-w-none ${post.language === 'ar' ? 'font-tajawal rtl:text-[18px] md:rtl:text-[20px] rtl:leading-[1.8] md:rtl:leading-[2.2] prose-h2:font-black prose-h3:font-black prose-p:font-medium prose-li:font-medium' : ''}
                                 prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900
-                                prose-h2:text-2xl md:prose-h2:text-3xl lg:prose-h2:text-4xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:text-[24px] md:rtl:prose-h2:text-[34px]
-                                prose-h3:text-xl md:prose-h3:text-2xl rtl:prose-h3:text-[20px] md:rtl:prose-h3:text-[30px]
-                                prose-p:text-slate-800 prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:text-[16px] md:prose-p:text-[18px] rtl:prose-p:text-[18px] md:rtl:prose-p:text-[22px] rtl:prose-p:leading-[2] md:rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
+                                prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:!text-[32px] md:rtl:prose-h2:!text-[42px]
+                                prose-h3:!text-2xl md:prose-h3:!text-3xl rtl:prose-h3:!text-[26px] md:rtl:prose-h3:!text-[34px]
+                                prose-p:text-slate-800 prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:!text-[16px] md:prose-p:!text-[18px] rtl:prose-p:!text-[18px] md:rtl:prose-p:!text-[22px] rtl:prose-p:leading-[2] md:rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
                                 prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors break-words
                                 prose-strong:text-slate-900 prose-strong:font-black
                                 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600 prose-code:break-all
@@ -635,23 +638,31 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                             {/* Partage */}
                             <div className="bg-gray-50 rounded-3xl p-6">
-                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-gray-400 mb-4">{t('ShareArticle')}</p>
+                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-gray-400 mb-4">{tPost('ShareArticle')}</p>
                                 <div className="flex flex-col gap-3">
-                                    <ShareArticle title={post.title} vertical />
+                                    <ShareArticle title={post.title} vertical translations={{
+                                        facebook: tPost('Share.Facebook'),
+                                        twitter: tPost('Share.Twitter'),
+                                        linkedin: tPost('Share.LinkedIn'),
+                                        whatsapp: tPost('Share.WhatsApp'),
+                                        copyLink: tPost('Share.CopyLink'),
+                                        linkCopied: tPost('Share.LinkCopied'),
+                                        shareTitle: tPost('ShareTitle')
+                                    }} />
                                 </div>
                             </div>
 
                             {/* Méta article */}
                             <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 text-slate-900">
-                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5">{t('ArticleInfo')}</p>
+                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5">{tPost('ArticleInfo')}</p>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 text-sm">
                                         <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
                                             <Clock className="w-3.5 h-3.5 text-slate-500" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('Reading')}</p>
-                                            <p className="font-bold">{readingTime} {t('Minutes')}</p>
+                                            <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{tPost('Reading')}</p>
+                                            <p className="font-bold">{readingTime} {tPost('Minutes')}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 text-sm">
@@ -659,7 +670,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                             <Eye className="w-3.5 h-3.5 text-slate-500" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('Views')}</p>
+                                            <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{tPost('Views')}</p>
                                             <p className="font-bold">{post.viewCount.toLocaleString()}</p>
                                         </div>
                                     </div>
@@ -669,7 +680,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('Comments')}</p>
+                                                <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{tPost('Comments')}</p>
                                                 <p className="font-bold">{post._count.comments}</p>
                                             </div>
                                         </div>
@@ -680,8 +691,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 <Calendar className="w-3.5 h-3.5 text-slate-500" />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{t('PublishedOn')}</p>
-                                                <p className="font-bold">{new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : locale === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                                <p className="text-[10px] rtl:text-xs text-slate-400 font-bold uppercase tracking-wider rtl:tracking-normal">{tPost('PublishedOn')}</p>
+                                                <p className="font-bold">{new Date(post.publishedAt).toLocaleDateString(post.language === 'ar' ? 'ar-MA' : post.language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                                             </div>
                                         </div>
                                     )}
@@ -691,7 +702,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             {/* Tags sidebar */}
                             {tags.length > 0 && (
                                 <div className="bg-gray-50 rounded-3xl p-6">
-                                    <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-gray-400 mb-4">{t('Tags')}</p>
+                                    <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-gray-400 mb-4">{tPost('Tags')}</p>
                                     <div className="flex flex-wrap gap-2">
                                         {tags.map(tag => (
                                             <Link
@@ -711,7 +722,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                                     <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5 flex items-center gap-2">
                                         <BookOpen className="w-3.5 h-3.5" />
-                                        {t('InThisArticle')}
+                                        {tPost('InThisArticle')}
                                     </p>
                                     <div className="space-y-4">
                                         {post.books.map(book => {
@@ -740,8 +751,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 className="group flex items-center justify-between p-5 bg-slate-50 border border-slate-100 rounded-3xl hover:bg-slate-100 transition-colors"
                             >
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal text-slate-400 mb-1">{t('Explore')}</p>
-                                    <p className="font-black text-slate-900 text-sm">{t('AllArticles')}</p>
+                                    <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal text-slate-400 mb-1">{tPost('Explore')}</p>
+                                    <p className="font-black text-slate-900 text-sm">{tPost('AllArticles')}</p>
                                 </div>
                                 <div className="w-9 h-9 bg-slate-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                                     <BookOpen className="w-4 h-4 text-white" />
@@ -814,9 +825,24 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                             </p>
                                         )}
                                         <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors">
-                                                {t('ReadArticle')}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                {related.author?.image ? (
+                                                    <Image src={related.author.image} alt={related.author.fullName || ''} width={36} height={36} className="rounded-full w-9 h-9 object-cover ring-2 ring-slate-50" unoptimized />
+                                                ) : (
+                                                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center ring-2 ring-slate-50">
+                                                        <User className="w-4 h-4 text-slate-400" />
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-xs font-bold text-slate-700">{related.authorName || related.author?.fullName || 'Riwaya Team'}</span>
+                                                        <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10 shrink-0" />
+                                                    </div>
+                                                    <span className="text-[10px] text-slate-400 capitalize font-medium leading-none mt-0.5">
+                                                        {locale === 'ar' ? 'مشرف المدونة' : locale === 'en' ? 'Blog Moderator' : 'Modérateur blog'}
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-600 transition-colors">
                                                 <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white -rotate-45 group-hover:rotate-0 transition-all" />
                                             </div>
