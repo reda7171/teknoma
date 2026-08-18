@@ -1082,7 +1082,9 @@
     "BundleContent": "محتوى الباقة",
     "GlobalShip": "شحن شامل للمغرب",
     "SecureCOD": "الدفع عند الاستلام",
-    "VolumesInCollection": "المجلدات في هذه المجموعة"
+    "VolumesInCollection": "المجلدات في هذه المجموعة",
+    "ReplaceBook": "استبدال الكتاب",
+    "ChooseReplacement": "اختر كتاباً معادلاً لاستبدال الكتاب غير المتوفر. سعر الباقة سيبقى دون تغيير."
   },
   "CartPage": {
     "Title": "السلة",

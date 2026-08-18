@@ -1009,7 +1009,9 @@
     "BundleContent": "Contenu du Pack",
     "GlobalShip": "Envoi partout au Maroc",
     "SecureCOD": "Paiement à la livraison",
-    "VolumesInCollection": "Volumes dans cette Collection"
+    "VolumesInCollection": "Volumes dans cette Collection",
+    "ReplaceBook": "Remplacer le livre",
+    "ChooseReplacement": "Choisissez un livre équivalent pour remplacer le livre en rupture de stock. Le prix du pack restera inchangé."
   },
   "CartPage": {
     "Title": "Votre Panier",

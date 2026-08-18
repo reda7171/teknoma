@@ -1009,7 +1009,9 @@
     "BundleContent": "Bundle Content",
     "GlobalShip": "Shipping Morocco wide",
     "SecureCOD": "Cash on Delivery",
-    "VolumesInCollection": "Volumes in this Collection"
+    "VolumesInCollection": "Volumes in this Collection",
+    "ReplaceBook": "Replace Book",
+    "ChooseReplacement": "Choose an equivalent book to replace the out of stock book. The bundle price will remain unchanged."
   },
   "CartPage": {
     "Title": "Your Cart",
