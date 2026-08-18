@@ -312,13 +312,6 @@ export default async function BookDetailPage({
                     category={book.category || undefined}
                 />
 
-                <AnnouncementBar
-                    message={announcementMessage || ""}
-                    isEnabled={announcementEnabled === 'true'}
-                    bgColor={announcementBgColor || "#000000"}
-                    textColor={announcementTextColor || "#FFFFFF"}
-                />
-
 
 
                 <Header />

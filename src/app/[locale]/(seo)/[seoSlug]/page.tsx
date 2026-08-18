@@ -8,6 +8,7 @@ import { CheckCircle2, Truck, Shield, Star, BookOpen } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 
 import { getSeoCategoryBySlug } from '@/lib/actions/seo-categories'
+import { getTranslations } from 'next-intl/server'
 
 export async function generateMetadata({ params }: { params: Promise<{ seoSlug: string, locale: string }> }): Promise<Metadata> {
   const { seoSlug } = await params
@@ -28,8 +29,9 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
 }
 
 export default async function SeoLandingPage({ params }: { params: Promise<{ seoSlug: string, locale: string }> }) {
-  const { seoSlug } = await params
+  const { seoSlug, locale } = await params
   const data = await getSeoCategoryBySlug(seoSlug)
+  const t = await getTranslations('SeoPage')
 
   if (!data || !data.isActive) {
     notFound()
@@ -86,15 +88,15 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-8 md:gap-16">
           <div className="flex items-center gap-3">
             <Truck className="w-6 h-6 text-black" />
-            <span className="font-bold text-sm uppercase tracking-wider">Livraison Partout au Maroc</span>
+            <span className="font-bold text-sm uppercase tracking-wider">{t('Delivery')}</span>
           </div>
           <div className="flex items-center gap-3">
             <Shield className="w-6 h-6 text-black" />
-            <span className="font-bold text-sm uppercase tracking-wider">Paiement à la Livraison</span>
+            <span className="font-bold text-sm uppercase tracking-wider">{t('PaymentOnDelivery')}</span>
           </div>
           <div className="flex items-center gap-3">
             <Star className="w-6 h-6 text-black" />
-            <span className="font-bold text-sm uppercase tracking-wider">Qualité Garantie</span>
+            <span className="font-bold text-sm uppercase tracking-wider">{t('QualityGuaranteed')}</span>
           </div>
         </div>
       </section>
@@ -102,25 +104,26 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-16">
         <article className="prose prose-lg max-w-none prose-headings:font-black prose-headings:text-black prose-p:text-gray-600 mb-16 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100">
-          <h2>Pourquoi choisir Riwaya pour vos lectures ?</h2>
+          <h2>{t('WhyChooseUs')}</h2>
           <div dangerouslySetInnerHTML={{ __html: data.categoryText?.replace(/\n/g, '<br />') || '' }}></div>
-          <p className="mt-4">Notre mission est de démocratiser l'accès à la culture. En choisissant <strong>{data.keyword}</strong> via notre plateforme, vous bénéficiez d'une interface intuitive, d'un service client à l'écoute et de recommandations personnalisées.</p>
+          <p className="mt-4">{t('BrowseCollection')}</p>
+          <p className="mt-4">{t('Mission1')} <strong>{data.keyword}</strong> {t('Mission2')}</p>
           
           <div className="bg-pixio-cream p-6 rounded-2xl mt-10 border border-yellow-100">
             <h3 className="flex items-center gap-2 mt-0">
               <CheckCircle2 className="text-pixio-yellow w-6 h-6" />
-              <span>Garantie Riwaya</span>
+              <span>{t('Guarantee')}</span>
             </h3>
-            <p className="mb-0 text-gray-700">Satisfait ou remboursé sous 7 jours. Emballage soigné et expédition rapide en 24h ouvrées vers toutes les villes du Maroc (Casablanca, Rabat, Marrakech, Tanger, etc.).</p>
+            <p className="mb-0 text-gray-700">{t('GuaranteeText')}</p>
           </div>
         </article>
 
         {/* Featured Products */}
         <div className="mb-16">
-          <h2 className="text-3xl font-black text-center mb-8">Sélection de la semaine</h2>
+          <h2 className="text-3xl font-black text-center mb-8">{t('SelectionOfTheWeek')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {popularBooks.map((book: any) => (
-              <BookCard key={book.id} book={book} />
+              <BookCard key={book.id} {...book} />
             ))}
           </div>
           <div className="text-center mt-10">
@@ -128,7 +131,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
               href="/catalog" 
               className="inline-flex px-8 py-4 bg-black text-white font-bold rounded-full hover:bg-gray-800 transition-colors"
             >
-              Voir tout le catalogue
+              {t('ViewCatalog')}
             </Link>
           </div>
         </div>
@@ -136,7 +139,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         {/* FAQ Schema */}
         {faqList && faqList.length > 0 && (
           <section className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100">
-            <h2 className="text-3xl font-black mb-8">Questions Fréquentes</h2>
+            <h2 className="text-3xl font-black mb-8">{t('FAQ')}</h2>
             <div className="space-y-6">
               {faqList.map((faq: any, index: number) => (
                 <div key={index}>

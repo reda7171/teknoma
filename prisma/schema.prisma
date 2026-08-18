@@ -1267,3 +1267,14 @@ model SeoCategoryBook {
   @@map("seo_category_books")
 }
 
+model Giveaway {
+  id                String   @id @default(uuid())
+  title             String
+  platform          String   @default("INSTAGRAM")
+  postUrl           String?
+  prizeDescription  String?
+  winnerUsername    String?
+  participantsCount Int      @default(0)
+  status            String   @default("COMPLETED")
+  createdAt         DateTime @default(now())
+}

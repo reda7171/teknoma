@@ -73,42 +73,47 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${replacement ? 'bg-black text-white' : isMissing ? 'bg-red-100 text-red-500' : 'bg-black text-white'}`}>
                                         {isMissing && !replacement ? <AlertCircle className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
                                     </div>
-                                    <div className="flex-1">
-                                        {replacement ? (
-                                            <>
-                                                <Link href={`/books/${replacement.id}`} className="text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-black hover:underline cursor-pointer block w-fit">{replacement.title}</Link>
-                                                <Link href={`/books/${pb.book.id}`} className="text-[10px] text-gray-400 mt-1 line-through hover:text-gray-600 block w-fit">{pb.book.title}</Link>
-                                            </>
-                                        ) : (
-                                            <Link href={`/books/${pb.book.id}`} className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal hover:underline cursor-pointer block w-fit ${isMissing ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-black'}`}>
+                                    <div className="flex-1 w-full">
+                                        <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+                                            {replacement ? (
+                                                <div className="flex flex-wrap items-center gap-3">
+                                                    <Link href={`/books/${replacement.id}`} className="text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-black hover:underline cursor-pointer block w-fit">
+                                                        {replacement.title}
+                                                    </Link>
+                                                    <button 
+                                                        onClick={() => handleReplace(pb.book.id)}
+                                                        className="text-[10px] text-gray-700 bg-gray-100 hover:bg-black hover:text-white hover:scale-105 font-black uppercase tracking-widest flex items-center gap-2 px-3 py-1.5 rounded-full transition-all shrink-0"
+                                                    >
+                                                        <RefreshCw className="w-3 h-3" />
+                                                        {t('Change') || 'Changer'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <Link href={`/books/${pb.book.id}`} className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal hover:underline cursor-pointer block w-fit ${isMissing ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-black'}`}>
+                                                    {pb.book.title}
+                                                </Link>
+                                            )}
+                                            
+                                            {isMissing && !replacement && (
+                                                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                                    <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-50 px-2 py-1 rounded-md">
+                                                        {t('OutOfStock') || 'En rupture'}
+                                                    </span>
+                                                    <button 
+                                                        onClick={() => handleReplace(pb.book.id)}
+                                                        className="text-[10px] text-white bg-black hover:bg-gray-700 hover:scale-105 font-black uppercase tracking-widest flex items-center gap-2 px-3 py-1.5 rounded-full transition-all shadow-sm shrink-0"
+                                                    >
+                                                        <RefreshCw className="w-3 h-3" />
+                                                        {t('Replace') || 'Remplacer'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {replacement && (
+                                            <Link href={`/books/${pb.book.id}`} className="text-[10px] text-gray-400 mt-1 line-through hover:text-gray-600 block w-fit">
                                                 {pb.book.title}
                                             </Link>
-                                        )}
-                                        
-                                        {isMissing && !replacement && (
-                                            <div className="mt-2 flex items-center gap-4">
-                                                <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-50 px-2 py-1 rounded-md">
-                                                    En rupture
-                                                </span>
-                                                <button 
-                                                    onClick={() => handleReplace(pb.book.id)}
-                                                    className="text-[10px] text-black font-black uppercase tracking-widest hover:underline flex items-center gap-2"
-                                                >
-                                                    <RefreshCw className="w-3 h-3" />
-                                                    Remplacer
-                                                </button>
-                                            </div>
-                                        )}
-                                        {replacement && (
-                                            <div className="mt-2">
-                                                <button 
-                                                    onClick={() => handleReplace(pb.book.id)}
-                                                    className="text-[10px] text-gray-400 hover:text-black font-black uppercase tracking-widest hover:underline flex items-center gap-2"
-                                                >
-                                                    <RefreshCw className="w-3 h-3" />
-                                                    Changer
-                                                </button>
-                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -123,7 +128,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                     <div className="p-4 bg-red-50 border border-red-100 rounded-2xl mb-4">
                         <p className="text-xs text-red-600 font-bold flex items-center gap-2">
                             <AlertCircle className="w-4 h-4" />
-                            Veuillez remplacer le(s) livre(s) en rupture de stock pour continuer.
+                            {t('PleaseReplaceOutOfStock') || 'Veuillez remplacer le(s) livre(s) en rupture de stock pour continuer.'}
                         </p>
                     </div>
                 )}

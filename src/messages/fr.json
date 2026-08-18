@@ -1009,7 +1009,13 @@
     "BundleContent": "Contenu du Pack",
     "GlobalShip": "Envoi partout au Maroc",
     "SecureCOD": "Paiement à la livraison",
-    "VolumesInCollection": "Volumes dans cette Collection"
+    "VolumesInCollection": "Volumes dans cette Collection",
+    "ReplaceBook": "Remplacer le livre",
+    "ChooseReplacement": "Choisissez un livre équivalent pour remplacer le livre en rupture de stock. Le prix du pack restera inchangé.",
+    "OutOfStock": "En rupture",
+    "Replace": "Remplacer",
+    "Change": "Changer",
+    "PleaseReplaceOutOfStock": "Veuillez remplacer le(s) livre(s) en rupture de stock pour continuer."
   },
   "CartPage": {
     "Title": "Votre Panier",
@@ -1415,5 +1421,19 @@
     "Books": "Livres",
     "Packs": "Packs",
     "Cart": "Panier"
+  },
+  "SeoPage": {
+    "Delivery": "Livraison Partout au Maroc",
+    "PaymentOnDelivery": "Paiement à la Livraison",
+    "QualityGuaranteed": "Qualité Garantie",
+    "WhyChooseUs": "Pourquoi choisir Riwaya pour vos lectures ?",
+    "BrowseCollection": "Parcourez notre collection pour trouver des histoires captivantes écrites par les plus grands écrivains du monde arabe.",
+    "Mission1": "Notre mission est de démocratiser l'accès à la culture. En choisissant",
+    "Mission2": "via notre plateforme, vous bénéficiez d'une interface intuitive, d'un service client à l'écoute et de recommandations personnalisées.",
+    "Guarantee": "Garantie Riwaya",
+    "GuaranteeText": "Satisfait ou remboursé sous 7 jours. Emballage soigné et expédition rapide en 24h ouvrées vers toutes les villes du Maroc (Casablanca, Rabat, Marrakech, Tanger, etc.).",
+    "SelectionOfTheWeek": "Sélection de la semaine",
+    "ViewCatalog": "Voir tout le catalogue",
+    "FAQ": "Questions Fréquentes"
   }
 }

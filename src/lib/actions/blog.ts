@@ -69,7 +69,8 @@ export async function getPostCategories(language: string = 'fr') {
  */
 export async function getPostBySlug(slug: string, language?: string) {
     // Normaliser : supprimer les accents (ex: î → i) pour robustesse URL → DB
-    const normalizedSlug = slug
+    const decodedSlug = decodeURIComponent(slug);
+    const normalizedSlug = decodedSlug
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
@@ -406,7 +407,8 @@ export async function getRelatedPosts(postId: string, category: string | null, l
             coverImage: true,
             publishedAt: true,
             category: true,
-            author: { select: { fullName: true } }
+            authorName: true,
+            author: { select: { id: true, fullName: true, image: true } }
         }
     })
 }

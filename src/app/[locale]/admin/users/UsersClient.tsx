@@ -17,6 +17,10 @@ interface User {
     phone: string | null
     managedLanguages?: string | null
     image?: string | null
+    bio?: string | null
+    facebook?: string | null
+    twitter?: string | null
+    instagram?: string | null
 }
 
 interface LoginRecord {
@@ -46,7 +50,11 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
         password: '',
         role: 'USER',
         managedLanguages: '',
-        image: ''
+        image: '',
+        bio: '',
+        facebook: '',
+        twitter: '',
+        instagram: ''
     })
 
     const [activeTab, setActiveTab] = useState<'USERS' | 'ROLES' | 'HISTORY'>('USERS')
@@ -191,14 +199,18 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
             password: '', // On ne remplit pas le mot de passe, l'utilisateur peut le laisser vide
             role: user.role,
             managedLanguages: user.managedLanguages || '',
-            image: user.image || ''
+            image: user.image || '',
+            bio: user.bio || '',
+            facebook: user.facebook || '',
+            twitter: user.twitter || '',
+            instagram: user.instagram || ''
         })
         setEditingUserId(user.id)
         setIsAddModalOpen(true)
     }
 
     const openAddModal = () => {
-        setFormData({ email: '', fullName: '', password: '', role: 'USER', managedLanguages: '', image: '' })
+        setFormData({ email: '', fullName: '', password: '', role: 'USER', managedLanguages: '', image: '', bio: '', facebook: '', twitter: '', instagram: '' })
         setEditingUserId(null)
         setIsAddModalOpen(true)
     }
@@ -569,7 +581,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
             {/* Modal Ajout Utilisateur */}
             {isAddModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md relative shadow-2xl">
+                    <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-4xl relative shadow-2xl overflow-y-auto max-h-[90vh]">
                         <button 
                             onClick={() => setIsAddModalOpen(false)}
                             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
@@ -584,98 +596,161 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                             <h2 className="text-xl font-bold">{editingUserId ? 'Modifier l\'Utilisateur' : 'Nouvel Utilisateur'}</h2>
                         </div>
 
-                        <form onSubmit={handleSubmitUser} className="space-y-4">
-                            <div className="flex justify-center mb-6">
-                                <div className="relative">
-                                    <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden relative group">
-                                        {formData.image ? (
-                                            <Image src={formData.image} alt="Profile" fill className="object-cover" />
-                                        ) : (
-                                            <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(formData.fullName || formData.email || 'User')}`} alt="Profile" className="w-full h-full object-cover" />
-                                        )}
-                                        <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                                            <Camera className="w-6 h-6 text-white mb-1" />
-                                            <span className="text-[10px] text-white font-bold">Modifier</span>
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
-                                                className="hidden" 
-                                                onChange={handleImageUpload}
-                                                disabled={uploadingImage}
-                                            />
-                                        </label>
+                        <form onSubmit={handleSubmitUser}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                                {/* Colonne Gauche : Informations Générales */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2">Informations Générales</h3>
+                                    
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={formData.email}
+                                            onChange={e => setFormData({...formData, email: e.target.value})}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                        />
                                     </div>
-                                    {uploadingImage && (
-                                        <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
-                                            <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom complet</label>
+                                        <input
+                                            type="text"
+                                            value={formData.fullName}
+                                            onChange={e => setFormData({...formData, fullName: e.target.value})}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                            Mot de passe {editingUserId && <span className="text-gray-400 normal-case">(Laisser vide)</span>}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            required={!editingUserId}
+                                            value={formData.password}
+                                            onChange={e => setFormData({...formData, password: e.target.value})}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Rôle</label>
+                                        <select
+                                            value={formData.role}
+                                            onChange={e => setFormData({...formData, role: e.target.value})}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold uppercase tracking-wider text-sm"
+                                        >
+                                            <option value="USER">Utilisateur</option>
+                                            <option value="SELLER">Vendeur</option>
+                                            <option value="INFLUENCER">Influenceur</option>
+                                            <option value="MANAGER">Manager</option>
+                                            <option value="ADMIN">Admin</option>
+                                            <option value="TEST">Test</option>
+                                            <option value="BLOG_MODERATOR">Modérateur blog</option>
+                                        </select>
+                                    </div>
+
+                                    {formData.role === 'BLOG_MODERATOR' && (
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Langues gérées</label>
+                                            <select
+                                                value={formData.managedLanguages}
+                                                onChange={e => setFormData({...formData, managedLanguages: e.target.value})}
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold text-sm"
+                                            >
+                                                <option value="">Toutes les langues (Par défaut)</option>
+                                                <option value="fr">Français uniquement</option>
+                                                <option value="ar">Arabe uniquement</option>
+                                                <option value="en">Anglais uniquement</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Colonne Droite : Profil & Réseaux */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2">Profil & Réseaux sociaux</h3>
+                                    
+                                    <div className="flex justify-center md:justify-start mb-6">
+                                        <div className="relative">
+                                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden relative group">
+                                                {formData.image ? (
+                                                    <Image src={formData.image} alt="Profile" fill className="object-cover" />
+                                                ) : (
+                                                    <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(formData.fullName || formData.email || 'User')}`} alt="Profile" className="w-full h-full object-cover" />
+                                                )}
+                                                <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                                    <Camera className="w-6 h-6 text-white mb-1" />
+                                                    <span className="text-[10px] text-white font-bold">Modifier</span>
+                                                    <input 
+                                                        type="file" 
+                                                        accept="image/*" 
+                                                        className="hidden" 
+                                                        onChange={handleImageUpload}
+                                                        disabled={uploadingImage}
+                                                    />
+                                                </label>
+                                            </div>
+                                            {uploadingImage && (
+                                                <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
+                                                    <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {['BLOG_MODERATOR', 'INFLUENCER', 'ADMIN', 'SELLER'].includes(formData.role) ? (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Biographie</label>
+                                                <textarea
+                                                    value={formData.bio}
+                                                    onChange={e => setFormData({...formData, bio: e.target.value})}
+                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium min-h-[100px] resize-none"
+                                                    placeholder="Quelques mots sur l'utilisateur..."
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Facebook</label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.facebook}
+                                                        onChange={e => setFormData({...formData, facebook: e.target.value})}
+                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                                        placeholder="Lien ou pseudo"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Instagram</label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.instagram}
+                                                        onChange={e => setFormData({...formData, instagram: e.target.value})}
+                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                                        placeholder="Lien ou pseudo"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Twitter / X</label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.twitter}
+                                                        onChange={e => setFormData({...formData, twitter: e.target.value})}
+                                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                                        placeholder="Lien ou pseudo"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-gray-400 italic bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                            Le rôle sélectionné n'a pas besoin de profil public.
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={e => setFormData({...formData, email: e.target.value})}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom complet</label>
-                                <input
-                                    type="text"
-                                    value={formData.fullName}
-                                    onChange={e => setFormData({...formData, fullName: e.target.value})}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                                    Mot de passe {editingUserId && <span className="text-gray-400 normal-case">(Laisser vide pour ne pas modifier)</span>}
-                                </label>
-                                <input
-                                    type="password"
-                                    required={!editingUserId}
-                                    value={formData.password}
-                                    onChange={e => setFormData({...formData, password: e.target.value})}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Rôle</label>
-                                <select
-                                    value={formData.role}
-                                    onChange={e => setFormData({...formData, role: e.target.value})}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold uppercase tracking-wider text-sm"
-                                >
-                                    <option value="USER">Utilisateur</option>
-                                    <option value="SELLER">Vendeur</option>
-                                    <option value="INFLUENCER">Influenceur</option>
-                                    <option value="MANAGER">Manager</option>
-                                    <option value="ADMIN">Admin</option>
-                                    <option value="TEST">Test</option>
-                                    <option value="BLOG_MODERATOR">Modérateur blog</option>
-                                </select>
-                            </div>
-
-                            {formData.role === 'BLOG_MODERATOR' && (
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Langues gérées</label>
-                                    <select
-                                        value={formData.managedLanguages}
-                                        onChange={e => setFormData({...formData, managedLanguages: e.target.value})}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold text-sm"
-                                    >
-                                        <option value="">Toutes les langues (Par défaut)</option>
-                                        <option value="fr">Français uniquement</option>
-                                        <option value="ar">Arabe uniquement</option>
-                                        <option value="en">Anglais uniquement</option>
-                                    </select>
-                                </div>
-                            )}
                             
                             <button
                                 type="submit"
