@@ -1011,7 +1011,11 @@
     "SecureCOD": "Cash on Delivery",
     "VolumesInCollection": "Volumes in this Collection",
     "ReplaceBook": "Replace Book",
-    "ChooseReplacement": "Choose an equivalent book to replace the out of stock book. The bundle price will remain unchanged."
+    "ChooseReplacement": "Choose an equivalent book to replace the out of stock book. The bundle price will remain unchanged.",
+    "OutOfStock": "Out of stock",
+    "Replace": "Replace",
+    "Change": "Change",
+    "PleaseReplaceOutOfStock": "Please replace the out of stock book(s) to continue."
   },
   "CartPage": {
     "Title": "Your Cart",

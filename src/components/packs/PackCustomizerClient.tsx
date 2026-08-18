@@ -88,14 +88,14 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                                         {isMissing && !replacement && (
                                             <div className="mt-2 flex items-center gap-4">
                                                 <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-50 px-2 py-1 rounded-md">
-                                                    En rupture
+                                                    {t('OutOfStock') || 'En rupture'}
                                                 </span>
                                                 <button 
                                                     onClick={() => handleReplace(pb.book.id)}
                                                     className="text-[10px] text-black font-black uppercase tracking-widest hover:underline flex items-center gap-2"
                                                 >
                                                     <RefreshCw className="w-3 h-3" />
-                                                    Remplacer
+                                                    {t('Replace') || 'Remplacer'}
                                                 </button>
                                             </div>
                                         )}
@@ -106,7 +106,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                                                     className="text-[10px] text-gray-400 hover:text-black font-black uppercase tracking-widest hover:underline flex items-center gap-2"
                                                 >
                                                     <RefreshCw className="w-3 h-3" />
-                                                    Changer
+                                                    {t('Change') || 'Changer'}
                                                 </button>
                                             </div>
                                         )}
@@ -123,7 +123,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone }: Props) {
                     <div className="p-4 bg-red-50 border border-red-100 rounded-2xl mb-4">
                         <p className="text-xs text-red-600 font-bold flex items-center gap-2">
                             <AlertCircle className="w-4 h-4" />
-                            Veuillez remplacer le(s) livre(s) en rupture de stock pour continuer.
+                            {t('PleaseReplaceOutOfStock') || 'Veuillez remplacer le(s) livre(s) en rupture de stock pour continuer.'}
                         </p>
                     </div>
                 )}
