@@ -1,10 +1,13 @@
 'use client'
 
 import { Link } from '@/i18n/routing'
-import { ShoppingCart, Star, ArrowRight } from 'lucide-react'
+import { useState } from 'react'
+import { ShoppingCart, Star, ArrowRight, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
+import { notifyAddToCart } from '@/lib/actions/cart-notify'
+import { fbPixelEvents } from '@/lib/facebook-pixel'
 import WishlistButton from '@/components/WishlistButton'
 import AddToReadingListButton from '@/components/AddToReadingListButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -22,6 +25,7 @@ interface BookCardProps {
     language?: string | null
     stock: number
     variant?: 'default' | 'compact' | 'featured'
+    priority?: boolean
 }
 
 export default function BookCard({
@@ -36,13 +40,17 @@ export default function BookCard({
     language,
     stock,
     variant = 'default',
+    priority = false,
 }: BookCardProps) {
     const t = useTranslations('Common');
     const locale = useLocale();
     const isCompact = variant === 'compact'
     const isFeatured = variant === 'featured'
     const addItem = useCartStore((state) => state.addItem)
+    const sessionId = useCartStore((state) => state.sessionId)
+    const setSessionId = useCartStore((state) => state.setSessionId)
     const { openCart, showNotification } = useUIStore()
+    const [isAdded, setIsAdded] = useState(false)
 
     const displayTitle = locale === 'fr' && titleFr ? titleFr : locale === 'en' && titleEn ? titleEn : title;
     // Générer l'URL avec le slug dynamique
@@ -57,6 +65,7 @@ export default function BookCard({
                         src={image}
                         alt={`${displayTitle} - Livre par ${author}`}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                        priority={priority}
                     />
 
                     {/* Action Buttons */}
@@ -126,14 +135,15 @@ export default function BookCard({
 
                     {stock > 0 && (
                         <button
-                            className={`w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 group/btn relative z-10 min-h-[52px] ${isCompact
-                                ? 'py-3'
-                                : isFeatured
-                                    ? 'py-4'
-                                    : 'py-4'
-                                }`}
+                            disabled={isAdded}
+                            className={`w-full flex items-center justify-center gap-2 font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal rounded-2xl transition-all duration-300 relative z-10 min-h-[52px] ${
+                                isAdded
+                                    ? 'bg-green-500 text-white scale-105 shadow-xl'
+                                    : 'bg-gray-900 text-white hover:bg-black shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 group/btn'
+                            } ${isCompact ? 'py-3' : 'py-4'}`}
                             onClick={(e) => {
                                 e.preventDefault()
+                                if (isAdded) return;
                                 try {
                                     addItem({
                                         type: 'BOOK',
@@ -142,15 +152,55 @@ export default function BookCard({
                                         price,
                                         image,
                                     })
+                                    
+                                    // Fire Confetti
+                                    import('canvas-confetti').then((confetti) => {
+                                        confetti.default({
+                                            particleCount: 50,
+                                            spread: 60,
+                                            origin: { y: 0.8 },
+                                            colors: ['#000000', '#10b981', '#3b82f6', '#f59e0b'],
+                                            zIndex: 9999
+                                        });
+                                    });
+
+                                    // Facebook Pixel Tracking
+                                    fbPixelEvents.addToCart({
+                                        id,
+                                        title: displayTitle,
+                                        price,
+                                        quantity: 1
+                                    })
+
+                                    // Telegram Notification
+                                    let currentSessionId = sessionId
+                                    if (!currentSessionId) {
+                                        currentSessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+                                        setSessionId(currentSessionId)
+                                    }
+                                    notifyAddToCart(displayTitle, price, 'BOOK', currentSessionId).catch(console.error)
+
                                     showNotification(t('AddedToCartSuccess'), 'success')
+                                    
+                                    setIsAdded(true)
+                                    setTimeout(() => setIsAdded(false), 2000)
                                 } catch (error) {
                                     console.error('Failed to add book to cart:', error)
                                     showNotification(t('AddedToCartError'), 'error')
                                 }
                             }}
                         >
-                            <span>{t('AddToCart')}</span>
-                            <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180" />
+                            {isAdded ? (
+                                <>
+                                    <span>Ajouté</span>
+                                    <Check className="w-4 h-4 animate-bounce" />
+                                </>
+                            ) : (
+                                <>
+                                    <span>{t('AddToCart')}</span>
+                                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180" />
+                                </>
+                            )}
                         </button>
                     )}
                 </div>

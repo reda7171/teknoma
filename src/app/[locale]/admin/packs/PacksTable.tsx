@@ -167,9 +167,9 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                         value={stockFilter}
                         onChange={(e) => setStockFilter(e.target.value)}
                     >
-                        <option value="ALL">Tous les stocks</option>
-                        <option value="IN_STOCK">En stock</option>
-                        <option value="OUT_OF_STOCK">En rupture (livres manquants)</option>
+                        <option value="ALL">Tous les packs</option>
+                        <option value="IN_STOCK">Complet</option>
+                        <option value="OUT_OF_STOCK">Incomplet (livres manquants)</option>
                     </select>
                     <select 
                         className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

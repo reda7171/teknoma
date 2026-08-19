@@ -2,7 +2,20 @@
 
 import { Network, Home, Library, BookOpen, FileText, ArrowDown, ArrowRight } from 'lucide-react'
 
-export default function InternalLinkingSchema() {
+export interface SiloData {
+    categoryName: string
+    books: string[]
+    postName: string
+}
+
+export default function InternalLinkingSchema({ silos = [] }: { silos?: SiloData[] }) {
+    // Fallback si pas de données dynamiques (bien que le serveur le gère aussi)
+    const displaySilos = silos.length > 0 ? silos : [
+        { categoryName: "Business", books: ["Père Riche Père Pauvre", "Sapiens"], postName: "Comment investir..." },
+        { categoryName: "Religion", books: ["Le Coran", "La Citadelle..."], postName: "L'importance de la prière" },
+        { categoryName: "Romans", books: ["L'Étranger", "1984"], postName: "Top 10 des Romans" },
+    ]
+
     return (
         <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-8 md:p-12 overflow-hidden">
             <div className="max-w-5xl mx-auto">
@@ -36,91 +49,44 @@ export default function InternalLinkingSchema() {
 
                     {/* Niveau 2 : Catégories Piliers */}
                     <div className="flex w-full max-w-4xl justify-between gap-4 px-4 pt-4">
-                        {/* Silo 1 */}
-                        <div className="flex flex-col items-center flex-1">
-                            <div className="bg-blue-50 border-2 border-blue-400 rounded-2xl p-5 shadow-md w-full text-center z-10 relative transition-transform hover:scale-105">
-                                <Library className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                                <h3 className="font-bold text-blue-900 text-sm">Catégorie: Business</h3>
-                                <p className="text-[10px] text-blue-700 mt-1">Page Pilier (Hub)</p>
-                            </div>
-                            <div className="h-8 w-px bg-blue-300"></div>
-                            
-                            {/* Niveau 3 : Produits */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
-                                <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                                <h4 className="font-semibold text-gray-800 text-xs">Père Riche Père Pauvre</h4>
-                            </div>
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
-                                <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                                <h4 className="font-semibold text-gray-800 text-xs">Sapiens</h4>
-                            </div>
-                            
-                            {/* Niveau 4 : Blog */}
-                            <div className="h-4 w-px border-l border-dashed border-gray-400"></div>
-                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 shadow-sm w-11/12 text-center mt-2">
-                                <FileText className="w-4 h-4 text-orange-600 mx-auto mb-1" />
-                                <h4 className="font-medium text-orange-900 text-[10px]">Article: Comment investir...</h4>
-                                <div className="text-[9px] text-orange-600 mt-1 flex items-center justify-center gap-1">
-                                    <ArrowRight className="w-3 h-3" /> Lien vers Produit
+                        {displaySilos.map((silo, index) => {
+                            // Assigner une couleur différente par silo
+                            const colors = [
+                                { bg: 'bg-blue-50', border: 'border-blue-400', text: 'text-blue-900', icon: 'text-blue-600', sub: 'text-blue-700', line: 'bg-blue-300' },
+                                { bg: 'bg-purple-50', border: 'border-purple-400', text: 'text-purple-900', icon: 'text-purple-600', sub: 'text-purple-700', line: 'bg-purple-300' },
+                                { bg: 'bg-rose-50', border: 'border-rose-400', text: 'text-rose-900', icon: 'text-rose-600', sub: 'text-rose-700', line: 'bg-rose-300' },
+                            ]
+                            const color = colors[index % colors.length]
+
+                            return (
+                                <div key={index} className="flex flex-col items-center flex-1">
+                                    <div className={`${color.bg} border-2 ${color.border} rounded-2xl p-5 shadow-md w-full text-center z-10 relative transition-transform hover:scale-105`}>
+                                        <Library className={`w-6 h-6 ${color.icon} mx-auto mb-2`} />
+                                        <h3 className={`font-bold ${color.text} text-sm line-clamp-1`}>Catégorie: {silo.categoryName}</h3>
+                                        <p className={`text-[10px] ${color.sub} mt-1`}>Page Pilier (Hub)</p>
+                                    </div>
+                                    <div className={`h-8 w-px ${color.line}`}></div>
+                                    
+                                    {/* Niveau 3 : Produits */}
+                                    {silo.books.map((bookTitle, i) => (
+                                        <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
+                                            <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
+                                            <h4 className="font-semibold text-gray-800 text-xs line-clamp-1">{bookTitle}</h4>
+                                        </div>
+                                    ))}
+
+                                    {/* Niveau 4 : Blog */}
+                                    <div className="h-4 w-px border-l border-dashed border-gray-400"></div>
+                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 shadow-sm w-11/12 text-center mt-2">
+                                        <FileText className="w-4 h-4 text-orange-600 mx-auto mb-1" />
+                                        <h4 className="font-medium text-orange-900 text-[10px] line-clamp-1">Article: {silo.postName}</h4>
+                                        <div className="text-[9px] text-orange-600 mt-1 flex items-center justify-center gap-1">
+                                            <ArrowRight className="w-3 h-3" /> Lien vers Produit
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Silo 2 */}
-                        <div className="flex flex-col items-center flex-1">
-                            <div className="bg-purple-50 border-2 border-purple-400 rounded-2xl p-5 shadow-md w-full text-center z-10 relative transition-transform hover:scale-105">
-                                <Library className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                                <h3 className="font-bold text-purple-900 text-sm">Catégorie: Religion</h3>
-                                <p className="text-[10px] text-purple-700 mt-1">Page Pilier (Hub)</p>
-                            </div>
-                            <div className="h-8 w-px bg-purple-300"></div>
-                            
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
-                                <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                                <h4 className="font-semibold text-gray-800 text-xs">Le Coran</h4>
-                            </div>
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
-                                <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                                <h4 className="font-semibold text-gray-800 text-xs">La Citadelle...</h4>
-                            </div>
-
-                            <div className="h-4 w-px border-l border-dashed border-gray-400"></div>
-                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 shadow-sm w-11/12 text-center mt-2">
-                                <FileText className="w-4 h-4 text-orange-600 mx-auto mb-1" />
-                                <h4 className="font-medium text-orange-900 text-[10px]">Article: L'importance de la prière</h4>
-                                <div className="text-[9px] text-orange-600 mt-1 flex items-center justify-center gap-1">
-                                    <ArrowRight className="w-3 h-3" /> Lien vers Produit
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Silo 3 */}
-                        <div className="flex flex-col items-center flex-1">
-                            <div className="bg-rose-50 border-2 border-rose-400 rounded-2xl p-5 shadow-md w-full text-center z-10 relative transition-transform hover:scale-105">
-                                <Library className="w-6 h-6 text-rose-600 mx-auto mb-2" />
-                                <h3 className="font-bold text-rose-900 text-sm">Catégorie: Romans</h3>
-                                <p className="text-[10px] text-rose-700 mt-1">Page Pilier (Hub)</p>
-                            </div>
-                            <div className="h-8 w-px bg-rose-300"></div>
-                            
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
-                                <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                                <h4 className="font-semibold text-gray-800 text-xs">L'Étranger</h4>
-                            </div>
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-full text-center mb-4 transition-transform hover:scale-105">
-                                <BookOpen className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                                <h4 className="font-semibold text-gray-800 text-xs">1984</h4>
-                            </div>
-
-                            <div className="h-4 w-px border-l border-dashed border-gray-400"></div>
-                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 shadow-sm w-11/12 text-center mt-2">
-                                <FileText className="w-4 h-4 text-orange-600 mx-auto mb-1" />
-                                <h4 className="font-medium text-orange-900 text-[10px]">Article: Top 10 des Romans</h4>
-                                <div className="text-[9px] text-orange-600 mt-1 flex items-center justify-center gap-1">
-                                    <ArrowRight className="w-3 h-3" /> Lien vers Produit
-                                </div>
-                            </div>
-                        </div>
+                            )
+                        })}
                     </div>
 
                 </div>

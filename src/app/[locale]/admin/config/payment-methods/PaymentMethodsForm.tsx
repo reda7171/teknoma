@@ -27,6 +27,7 @@ interface BankAccount {
     accountName: string;
     rib: string;
     logo?: string;
+    qrCode?: string;
 }
 
 export default function PaymentMethodsForm({ initialSettings }: { initialSettings: PaymentSettings }) {
@@ -40,6 +41,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
     })
     const [isLoading, setIsLoading] = useState(false)
     const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
+    const [uploadingQrIndex, setUploadingQrIndex] = useState<number | null>(null)
     const [showPaypalSecret, setShowPaypalSecret] = useState(false)
     const [showStripeSecret, setShowStripeSecret] = useState(false)
     const [showCmiKey, setShowCmiKey] = useState(false)
@@ -79,7 +81,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
     }
 
     const addBankAccount = () => {
-        setBankAccounts([...bankAccounts, { bankName: '', accountName: '', rib: '' }])
+        setBankAccounts([...bankAccounts, { bankName: '', accountName: '', rib: '', logo: '', qrCode: '' }])
     }
 
     const updateBankAccount = (index: number, field: keyof BankAccount, value: string) => {
@@ -120,6 +122,36 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
             showNotification("Erreur lors de l'upload du logo", 'error')
         } finally {
             setUploadingIndex(null)
+            if (e.target) e.target.value = ''
+        }
+    }
+
+    const handleQrUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadingQrIndex(index)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            
+            const data = await res.json()
+            if (data.success && data.url) {
+                updateBankAccount(index, 'qrCode', data.url)
+                showNotification('QR Code uploadé avec succès', 'success')
+            } else {
+                throw new Error(data.error || "Erreur lors de l'upload")
+            }
+        } catch (error) {
+            console.error('Erreur upload:', error)
+            showNotification("Erreur lors de l'upload du QR Code", 'error')
+        } finally {
+            setUploadingQrIndex(null)
             if (e.target) e.target.value = ''
         }
     }
@@ -432,8 +464,8 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                                        <div className="md:col-span-11">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
                                             <label className="block text-xs font-bold text-slate-500 mb-1">URL du Logo (Optionnel)</label>
                                             <div className="flex gap-4">
                                                 {account.logo && (
@@ -447,7 +479,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                                         value={account.logo || ''}
                                                         onChange={(e) => updateBankAccount(index, 'logo', e.target.value)}
                                                         className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
-                                                        placeholder="URL vers l'image du logo (https://... ou /uploads/...)"
+                                                        placeholder="URL vers l'image du logo"
                                                     />
                                                     <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center" title="Parcourir les images">
                                                         {uploadingIndex === index ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -457,6 +489,35 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                                             accept="image/*" 
                                                             onChange={(e) => handleLogoUpload(index, e)} 
                                                             disabled={uploadingIndex === index}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">QR Code de paiement (Optionnel)</label>
+                                            <div className="flex gap-4">
+                                                {account.qrCode && (
+                                                    <div className="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-lg p-1 flex items-center justify-center overflow-hidden">
+                                                        <img src={account.qrCode} alt="QR" className="max-w-full max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={account.qrCode || ''}
+                                                        onChange={(e) => updateBankAccount(index, 'qrCode', e.target.value)}
+                                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-50 outline-none transition-all text-sm"
+                                                        placeholder="URL vers le QR Code de paiement"
+                                                    />
+                                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center" title="Parcourir les images">
+                                                        {uploadingQrIndex === index ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                                        <input 
+                                                            type="file" 
+                                                            className="hidden" 
+                                                            accept="image/*" 
+                                                            onChange={(e) => handleQrUpload(index, e)} 
+                                                            disabled={uploadingQrIndex === index}
                                                         />
                                                     </label>
                                                 </div>

@@ -6,7 +6,7 @@ import { useRouter } from '@/i18n/routing'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { createOrder } from '@/lib/actions/orders'
-import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset, X, Building2, QrCode } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import CouponInput from '@/components/CouponInput'
 import { useTranslations, useLocale } from 'next-intl'
@@ -33,7 +33,7 @@ export default function CheckoutClient({
 }: { 
     user?: { fullName?: string | null; email: string; image?: string | null } | null;
     minOrderAmount?: number;
-    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string }[] }
+    paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] }
 }) {
     const router = useRouter()
     const { items, getTotalPrice, clearCart, discount: instantOfferDiscount } = useCartStore()
@@ -43,6 +43,7 @@ export default function CheckoutClient({
     const [error, setError] = useState<string | null>(null)
     const [coupon, setCoupon] = useState<any>(null)
     const [gifts, setGifts] = useState<any[]>([])
+    const [selectedBankIndex, setSelectedBankIndex] = useState<number | null>(null)
     const t = useTranslations('Checkout')
     const locale = useLocale()
 
@@ -80,6 +81,8 @@ export default function CheckoutClient({
                     phone: data.phone,
                     email: data.email,
                     fullName: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+                    paymentMethod: data.paymentMethod,
+                    selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
                     items,
                     total: finalTotal
                 })
@@ -493,7 +496,7 @@ export default function CheckoutClient({
                                     <input 
                                         type="radio" 
                                         value="STRIPE" 
-                                        {...register('paymentMethod')}
+                                        {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
                                     />
                                     <div className="ml-3 flex flex-col">
@@ -512,7 +515,7 @@ export default function CheckoutClient({
                                     <input 
                                         type="radio" 
                                         value="PAYPAL" 
-                                        {...register('paymentMethod')}
+                                        {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
                                     />
                                     <div className="ml-3 flex flex-col">
@@ -532,7 +535,7 @@ export default function CheckoutClient({
                                     <input 
                                         type="radio" 
                                         value="CMI" 
-                                        {...register('paymentMethod')}
+                                        {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
                                     />
                                     <div className="ml-3 flex flex-col">
@@ -550,7 +553,7 @@ export default function CheckoutClient({
                                     <input 
                                         type="radio" 
                                         value="COD" 
-                                        {...register('paymentMethod')}
+                                        {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="sr-only"
                                     />
                                     <div className="w-16 h-16 bg-white border border-gray-100 text-black rounded-2xl flex items-center justify-center shrink-0">
@@ -578,7 +581,7 @@ export default function CheckoutClient({
                                         <input 
                                             type="radio" 
                                             value="BANK_TRANSFER" 
-                                            {...register('paymentMethod')}
+                                            {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                             className="sr-only"
                                         />
                                         <div className="w-16 h-16 bg-teal-50 border border-teal-100 text-teal-600 rounded-2xl flex items-center justify-center shrink-0">
@@ -595,26 +598,37 @@ export default function CheckoutClient({
                                         </div>
                                     </label>
 
-                                    {/* Coordonnées bancaires affichées si sélectionné */}
+                                    {/* Liste des banques sous forme de boutons au lieu d'affichage direct */}
                                     {watch('paymentMethod') === 'BANK_TRANSFER' && paymentSettings?.bankTransferAccounts && paymentSettings.bankTransferAccounts.length > 0 && (
-                                        <div className="mt-4 space-y-3">
-                                            {paymentSettings.bankTransferAccounts.map((account, idx) => (
-                                                <div key={idx} className="p-5 bg-teal-50 border border-teal-100 rounded-2xl flex flex-col gap-4">
-                                                    <div className="flex items-center gap-3">
-                                                        {account.logo && (
-                                                            <div className="w-10 h-10 bg-white rounded-lg border border-teal-100 p-1 flex items-center justify-center overflow-hidden shrink-0">
-                                                                <img src={account.logo} alt={account.bankName} className="max-w-full max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                        <div className="mt-6 space-y-4">
+                                            <p className="text-sm font-bold text-gray-700">Veuillez choisir votre banque :</p>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {paymentSettings.bankTransferAccounts.map((account, index) => (
+                                                    <button
+                                                        key={index}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedBankIndex(index);
+                                                            setTimeout(saveAbandonedCart, 100);
+                                                        }}
+                                                        className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between group ${
+                                                            selectedBankIndex === index 
+                                                                ? 'border-teal-600 bg-teal-50/50' 
+                                                                : 'border-slate-200 hover:border-teal-200 hover:bg-slate-50'
+                                                        }`}
+                                                    >
+                                                        {account.logo ? (
+                                                            <div className="h-10 flex items-center justify-center">
+                                                                <img src={account.logo} alt={account.bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
                                                             </div>
+                                                        ) : (
+                                                            <Building2 className="w-8 h-8 text-teal-600" />
                                                         )}
-                                                        <p className="text-xs font-black uppercase tracking-widest text-teal-600">{account.bankName}</p>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <p className="text-sm font-bold text-gray-700">{t('AccountHolder')} : <span className="font-black text-black">{account.accountName}</span></p>
-                                                        <p className="text-sm font-bold text-gray-700">{t('RibIban')} : <span className="font-mono font-black text-black tracking-wider">{account.rib}</span></p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">{t('OrderProcessedAfterTransfer')}</p>
+                                                        <span className="text-sm font-black text-slate-800 text-center">{account.bankName}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1 mt-4">{t('OrderProcessedAfterTransfer')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -782,6 +796,70 @@ export default function CheckoutClient({
                     </div>
                 </div>
             </div>
+
+            {/* Modal Banque Sélectionnée */}
+            {selectedBankIndex !== null && paymentSettings?.bankTransferAccounts && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedBankIndex(null)}>
+                    <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                            onClick={() => setSelectedBankIndex(null)}
+                            className="absolute top-4 right-4 rtl:left-4 rtl:right-auto p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10"
+                        >
+                            <X className="w-5 h-5 text-slate-500" />
+                        </button>
+                        
+                        <div className="p-6 md:p-8">
+                            <h3 className="text-xl font-black text-slate-900 mb-6 text-center">
+                                Informations Bancaires
+                            </h3>
+                            
+                            <div className="space-y-6">
+                                <div className="flex flex-col items-center justify-center gap-3">
+                                    {paymentSettings.bankTransferAccounts[selectedBankIndex].logo ? (
+                                        <div className="h-16 flex items-center justify-center">
+                                            <img src={paymentSettings.bankTransferAccounts[selectedBankIndex].logo} alt={paymentSettings.bankTransferAccounts[selectedBankIndex].bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                        </div>
+                                    ) : (
+                                        <Building2 className="w-12 h-12 text-teal-600" />
+                                    )}
+                                    <span className="text-lg font-black text-slate-800">{paymentSettings.bankTransferAccounts[selectedBankIndex].bankName}</span>
+                                </div>
+                                
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('AccountHolder')}</p>
+                                        <p className="font-black text-slate-900">{paymentSettings.bankTransferAccounts[selectedBankIndex].accountName}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('RibIban')}</p>
+                                        <p className="font-mono font-black text-slate-900 tracking-wider text-sm md:text-base break-all select-all">{paymentSettings.bankTransferAccounts[selectedBankIndex].rib}</p>
+                                    </div>
+                                </div>
+                                
+                                {paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode && (
+                                    <div className="border-t border-slate-100 pt-6">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">Scanner pour payer</p>
+                                        <div className="flex justify-center">
+                                            <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                                                <img src={paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode} alt="QR Code" className="w-48 h-48 object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="mt-8">
+                                <button
+                                    onClick={() => setSelectedBankIndex(null)}
+                                    className="w-full py-4 bg-teal-600 text-white rounded-xl font-black tracking-widest text-sm uppercase hover:bg-teal-700 transition-colors"
+                                >
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

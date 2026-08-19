@@ -527,7 +527,8 @@ export default function MarketingPage() {
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.books.map(book => {
-                                    const imgUrl = book.image.startsWith('http') ? book.image : (book.image.startsWith('/') ? book.image : `/uploads/books/${book.image}`)
+                                    const basePath = book.image.startsWith('/') ? book.image : `/uploads/books/${book.image}`
+                                    const imgUrl = book.image.startsWith('http') ? book.image : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${basePath}` : basePath)
                                     return (
                                         <div key={book.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-[3/4] relative bg-slate-900">
@@ -553,7 +554,8 @@ export default function MarketingPage() {
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.authors.map(author => {
-                                    const imgUrl = author.image.startsWith('http') ? author.image : (author.image.startsWith('/') ? author.image : `/uploads/${author.image}`)
+                                    const basePath = author.image.startsWith('/') ? author.image : `/uploads/${author.image}`
+                                    const imgUrl = author.image.startsWith('http') ? author.image : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${basePath}` : basePath)
                                     return (
                                         <div key={author.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-square relative bg-slate-900">
@@ -579,7 +581,8 @@ export default function MarketingPage() {
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.blogPosts.map(post => {
-                                    const imgUrl = post.coverImage.startsWith('http') ? post.coverImage : (post.coverImage.startsWith('/') ? post.coverImage : `/uploads/${post.coverImage}`)
+                                    const basePath = post.coverImage.startsWith('/') ? post.coverImage : `/uploads/${post.coverImage}`
+                                    const imgUrl = post.coverImage.startsWith('http') ? post.coverImage : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${basePath}` : basePath)
                                     return (
                                         <div key={post.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-video relative bg-slate-900">
@@ -664,9 +667,11 @@ export default function MarketingPage() {
                                         if (!url) return '';
                                         if (url.startsWith('http')) return url;
                                         if (url.startsWith('data:image')) return url;
-                                        if (url.startsWith('/uploads')) return url;
-                                        if (url.startsWith('uploads')) return `/${url}`;
-                                        return `/uploads/books/${url}`;
+                                        let path = '';
+                                        if (url.startsWith('/uploads')) path = url;
+                                        else if (url.startsWith('uploads')) path = `/${url}`;
+                                        else path = `/uploads/books/${url}`;
+                                        return process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${path}` : path;
                                     })()}
                                     alt={asset.name}
                                     fill
@@ -680,9 +685,11 @@ export default function MarketingPage() {
                                             if (!url) return '';
                                             if (url.startsWith('http')) return url;
                                             if (url.startsWith('data:image')) return url;
-                                            if (url.startsWith('/uploads')) return url;
-                                            if (url.startsWith('uploads')) return `/${url}`;
-                                            return `/uploads/books/${url}`;
+                                            let path = '';
+                                            if (url.startsWith('/uploads')) path = url;
+                                            else if (url.startsWith('uploads')) path = `/${url}`;
+                                            else path = `/uploads/books/${url}`;
+                                            return process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${path}` : path;
                                         })()}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -971,7 +978,7 @@ export default function MarketingPage() {
                             <div className="relative flex-1 bg-slate-900 flex items-center justify-center min-h-[300px]">
                                 {current && (
                                     <Image
-                                        src={current.url.startsWith('http') ? current.url : current.url.startsWith('/') ? current.url : `/${current.url}`}
+                                        src={current.url.startsWith('http') ? current.url : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${current.url.startsWith('/') ? current.url : `/${current.url}`}` : (current.url.startsWith('/') ? current.url : `/${current.url}`))}
                                         alt={current.name}
                                         fill
                                         className="object-contain"
@@ -1022,7 +1029,7 @@ export default function MarketingPage() {
                                                 i === slideIndex ? 'border-indigo-500' : 'border-transparent'
                                             }`}
                                         >
-                                            <Image src={a.url.startsWith('http') ? a.url : a.url.startsWith('/') ? a.url : `/${a.url}`} alt={a.name} fill className="object-cover" />
+                                            <Image src={a.url.startsWith('http') ? a.url : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${a.url.startsWith('/') ? a.url : `/${a.url}`}` : (a.url.startsWith('/') ? a.url : `/${a.url}`))} alt={a.name} fill className="object-cover" />
                                             {s === 'ok' && <div className="absolute inset-0 bg-green-500/60 flex items-center justify-center"><span className="text-white text-xs font-black">✓</span></div>}
                                             {s === 'error' && <div className="absolute inset-0 bg-red-500/60 flex items-center justify-center"><span className="text-white text-xs font-black">✕</span></div>}
                                             {s === 'loading' && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="w-3 h-3 text-white animate-spin" /></div>}

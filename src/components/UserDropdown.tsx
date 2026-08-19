@@ -68,6 +68,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
             <div className="relative group">
                 <Link
                     href="/community/login"
+                    aria-label="Se connecter"
                     className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
                 >
                     <User className="w-6 h-6 text-gray-900 group-hover:text-black" />

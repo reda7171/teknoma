@@ -10,7 +10,7 @@ export async function POST(req: Request) {
         if (!limiter.success) return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 })
 
         const body = await req.json()
-        const { id, phone, email, fullName, items, total } = body
+        const { id, phone, email, fullName, items, total, paymentMethod, selectedBank } = body
 
         if (!items || items.length === 0) {
             return NextResponse.json({ success: true }) // Pas d'abandon si panier vide
@@ -33,15 +33,21 @@ export async function POST(req: Request) {
                 })
 
                 // Notification de mise à jour si de nouvelles informations de contact sont ajoutées
-                if ((safePhone && !existing.phone) || (safeEmail && !existing.email)) {
+                if ((safePhone && !existing.phone) || (safeEmail && !existing.email) || paymentMethod || selectedBank) {
                     try {
                         const { sendTelegramMessage } = await import('@/lib/telegram')
+                        let paymentInfo = paymentMethod === 'STRIPE' ? '💳 Carte Bancaire' : paymentMethod === 'TRANSFER' ? '🏦 Virement Bancaire' : '💵 Paiement à la livraison';
+                        if (paymentMethod === 'TRANSFER' && selectedBank) {
+                            paymentInfo += ` (${selectedBank})`;
+                        }
+
                         const message = `🛒 *Mise à jour Checkout (À Chaud)*\n\n` +
                             `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
                             `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
                             `📧 *Email:* ${safeEmail || 'Non renseigné'}\n` +
+                            `💳 *Paiement:* ${paymentInfo}\n` +
                             `💰 *Total:* ${total} DH\n` +
-                            `\n_Contact ajouté en temps réel._`;
+                            `\n_Contact ou mode de paiement mis à jour en temps réel._`;
                         
                         await sendTelegramMessage(message)
                     } catch (telegramError) {
@@ -68,9 +74,15 @@ export async function POST(req: Request) {
         // Envoi de la notification Telegram à chaud
         try {
             const { sendTelegramMessage } = await import('@/lib/telegram')
+            let paymentInfo = paymentMethod === 'STRIPE' ? '💳 Carte Bancaire' : paymentMethod === 'TRANSFER' ? '🏦 Virement Bancaire' : '💵 Paiement à la livraison';
+            if (paymentMethod === 'TRANSFER' && selectedBank) {
+                paymentInfo += ` (${selectedBank})`;
+            }
+
             const message = `🛒 *Début de Checkout (À Chaud)*\n\n` +
                 `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
                 `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
+                `💳 *Paiement:* ${paymentInfo}\n` +
                 `💰 *Total:* ${total} DH\n` +
                 `📦 *Articles:* ${items.length}\n` +
                 `\n_Saisi en temps réel, commande non finalisée._`;

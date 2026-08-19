@@ -152,6 +152,7 @@ export default function RoulettePopup() {
                 {!isSpinning && (
                     <button 
                         onClick={closePopup}
+                        aria-label="Fermer"
                         className="absolute top-5 right-5 z-20 p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all duration-300 text-gray-400 hover:text-white"
                     >
                         <X className="w-5 h-5" />

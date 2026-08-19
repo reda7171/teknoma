@@ -385,7 +385,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                             {/* Image */}
                             <div className="w-24 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                 <img
-                                    src={post.coverImage || '/placeholder.jpg'}
+                                    src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${post.coverImage}` : post.coverImage || '/placeholder.jpg'}
                                     alt={edits[post.id]?.alt || post.title}
                                     title={edits[post.id]?.title || post.title}
                                     className="w-full h-full object-cover"

@@ -38,7 +38,7 @@ const tajawal = Tajawal({
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
-  
+
   // Dynamic SEO configurations from database
   const seoTitle = await getSetting('seo_default_title');
   const seoDescription = await getSetting('seo_default_description');
@@ -61,8 +61,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   const t = await getTranslations({ locale, namespace: 'HomePage.seo' });
 
-  const title = seoTitle || t('Title') || "Riwaya: 1ère Librairie en ligne à Casablanca, Rabat & au Maroc";
-  const description = seoDescription || t('Description') || "Votre librairie en ligne n°1 au Maroc ! Livraison rapide à Casablanca, Rabat & partout au Maroc. Commandez vos livres au meilleur prix : romans, English books, mangas, scolaire et fournitures.";
+  // On injecte "Riwayat" dans le titre par défaut pour un max d'impact SEO
+  const title = seoTitle || t('Title') || "Riwaya (Riwayat): 1ère Librairie en ligne au Maroc";
+  const description = seoDescription || t('Description') || "Votre librairie en ligne n°1 au Maroc ! Livraison rapide à Casablanca, Rabat & partout au Maroc. Commandez vos livres et riwayat au meilleur prix : romans, mangas, scolaire et fournitures.";
 
   const keywordsFr = [
     "meilleure librairie en ligne au maroc", "meilleure librairie", "a7san librairie en ligne f maghrib", "a7san maktaba",
@@ -71,35 +72,183 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     "développement personnel maroc", "livres business maroc", "philosophie maroc",
     "romans maroc", "packs de livres", "échange de livres maroc", "livraison livres maroc",
     "paiement à la livraison", "COD maroc", "livraison gratuite livres",
-    "fournitures scolaires", "cartables", "beaux-arts", "english books in morocco", 
-    "booktok maroc", "mangaka", "bd maroc", "nouveautés livres maroc", 
+    "fournitures scolaires", "cartables", "beaux-arts", "english books in morocco",
+    "booktok maroc", "mangaka", "bd maroc", "nouveautés livres maroc",
     "rentrée scolaire maroc", "livres pour enfant",
     "trousses", "cahiers", "fournitures de bureau", "littérature française", "littérature arabe",
     "psychologie", "livres islamiques", "coran", "livres de cuisine", "thriller", "polar",
     "acheter des livres pas cher maroc", "meilleur site pour acheter des livres maroc", "librairie papeterie maroc",
     "promotion livres maroc", "livres originaux maroc", "livres en anglais casablanca",
     "riwaya", "books", "library", "libriry", "livre", "kotob", "ktoba", "ktoba darija", "chri ktoba maroc", "ktoba rkhas",
-    "riwaya.store", "riwaya store", "ktouba", "ktouba darija", "chri ktouba", "livres en darija", "koutoub", 
-    "mktaba", "mktaba online", "maktaba en ligne", "ktabi", "chri ktabi", "qra ktab", "qra ktoba", 
-    "book store maroc", "librairie en ligne darija", "livres occasion maroc", "echange ktoba"
+    "riwaya.store", "riwaya store", "ktouba", "ktouba darija", "chri ktouba", "livres en darija", "koutoub",
+    "mktaba", "mktaba online", "maktaba en ligne", "ktabi", "chri ktabi", "qra ktab", "qra ktoba",
+    "book store maroc", "librairie en ligne darija", "livres occasion maroc", "echange ktoba",
+    "Commandez vos livres en ligne parmi plus de 2 millions de références : romans, jeunesses, BDs, mangas, mangas casablanca, scolaires, fournitures",
+    "Réservez votre livre parmi plus de 3 millions de titres : romans, jeunesse, BD, manga, scolaire, bestseller, polars beaux-arts, sciences humaines",
+    " Chez mon libraire réunit une association professionnelle et un portail grand public au service des librairies indépendantes d'Auvergne-Rhône-Alpes",
+    "C'est un lieu où les parents trouvent les premières histoires pour leurs bambins ; où les enfants rencontrent leurs premières héroïnes/héros et coups de cœur",
+    "Réservez votre livre parmi plus d'1 million de titres : romans, jeunesse, BD, manga, scolaire, bestseller, polars beaux-arts, sciences humaines",
+    "riwayat", "tiwayat fantasia", "mktaba f rabat", "biblio rabat",
+    "maktaba f casablanca",
+    "livres casablanca",
+    "livres rabat",
+    "livres marrakech",
+    "livres tanger",
+    "livres agadir",
+    "livres fes",
+    "livres meknes",
+    "livres essaouira",
+    "livres tetouan",
+    "livres kenitra",
+    "livres casablanca",
+    "livres rabat",
+    "livres marrakech",
+    "livres tanger",
+    "livres agadir",
+    "livres fes",
+    "livres meknes",
+    "livres essaouira",
+    "livres tetouan",
+    "livres kenitra",
+    "livres casablanca",
+    "livres rabat",
+    "livres marrakech",
+    "livres tanger",
+    "livres agadir",
+    "livres fes",
+    "livres meknes",
+    "livres essaouira",
+    "livres tetouan",
+    "livres kenitra",
+    "livres casablanca",
+    "livres rabat",
+    "livres marrakech",
+    "livres tanger",
+    "livres agadir",
+    "livres fes",
+    "livres meknes",
+    "livres essaouira",
+    "livres tetouan",
+    "livres kenitra",
+    "atomic habits",
+    "the mountain is you",
+    "the power of now",
+    "rich dad poor dad",
+    "the 48 laws of power",
+    "think and grow rich",
+    "the intelligent investor",
+    "the psychology of money",
+    "the lean startup",
+    "zero to one",
+    "the 12 rules for life",
+    "the 7 habits of highly effective people",
+    "how to win friends and influence people",
+    "the subtle art of not giving a fuck",
+    "the alchemist",
+    "the midnight library",
+    "the silent patient",
+    "the girl with the dragon tattoo",
+    "the da vinci code",
+    "the hunger games",
+    "the fault in our stars",
+    "the chronicles of narnia",
+    "the lord of the rings",
+    "the hobbit",
+    "the great gatsby",
+    "the catcher in the rye",
+    "the odyssey",
+    "the iliad",
+    "the bible",
+    "the quran",
+    "the torah",
+    "the tao te ching",
+    "the art of war",
+    "the prince",
+    "the republic",
+    "the wealth of nations",
+    "the communist manifesto",
+    "the origin of species",
+    "the self-made billionaire",
+    "the self-made millionaire",
+    "the self-made trillionaire",
   ];
 
   const keywordsAr = [
-    "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "أحسن مكتبة في المغرب", "مكتبة رواية",
+    // A — Money Keywords : Librairie / Achat
+    "أحسن مكتبة إلكترونية في المغرب", "أفضل مكتبة أونلاين في المغرب", "مكتبة رواية",
     "a7san librairie en ligne f maghrib", "a7san maktaba", "meilleure librairie en ligne au maroc",
     "كتب المغرب", "مكتبة على الانترنت المغرب", "شراء كتب المغرب", "رواية",
     "مكتبة الدار البيضاء", "مكتبة الرباط", "مكتبة مراكش", "مكتبة طنجة", "مكتبة أكادير", "مكتبة فاس", "مكتبة مكناس",
+    "شراء كتب رخيصة في المغرب", "أفضل موقع لشراء الكتب في المغرب",
+    "تخفيضات الكتب المغرب", "كتب أصلية المغرب",
+    "riwaya", "books", "library", "livre", "kotob", "ktoba", "kotobarabia", "ktoba tn", "ktobati",
+    "كتب دارجة", "شري كتوبا", "رواية ستور",
+    "كتوبا", "كتوبا دارجة", "كتب بالدارجة", "مكتبة أونلاين",
+    "قرا كتاب", "قرا كتوبا", "تبادل الكتوبا", "كتب مستعملة المغرب", "كتوبا رخاص",
+    "a7san maktaba f marrakech",
+    "مكتبة في الدار البيضاء توصيل مجاني",
+    "أحسن روايات مغربية",
+    "مكتبة في فاس", "مكتبة في طنجة", "مكتبة في أكادير", "مكتبة في مكناس",
+    "مكتبة كتب فرنسية في المغرب", "مكتبة كتب إنجليزية في المغرب", "مكتبة كتب عربية في المغرب",
+    "أفضل مكتبة كتب في المغرب",
+    "مكتبة رواية كازا", "مكتبة رواية الرباط", "مكتبة رواية مراكش", "مكتبة رواية طنجة",
+    "مكتبة رواية أكادير", "مكتبة رواية فاس", "مكتبة رواية مكناس", "مكتبة رواية الدار البيضاء",
+    "مكتبة رواية المغرب", "مكتبة رواية أونلاين", "مكتبة رواية أونلاين المغرب",
+    "مكتبة رواية أونلاين الدار البيضاء", "مكتبة رواية أونلاين الرباط",
+    "مكتبة رواية أونلاين مراكش", "مكتبة رواية أونلاين طنجة",
+    "مكتبة رواية أونلاين أكادير", "مكتبة رواية أونلاين فاس", "مكتبة رواية أونلاين مكناس",
+
+    // B — Category Keywords : Traffic Pages
+    "كتب تطوير الذات", "كتب تطوير الذات والثقة بالنفس", "كتب علم النفس", "كتب الثقة بالنفس",
+    "كتب النجاح", "كتب المال والأعمال", "كتب الأعمال", "كتب الإنتاجية", "كتب القيادة",
+    "كتب العلاقات", "كتب الفلسفة", "كتب إسلامية", "كتب الروايات", "كتب الأدب",
+    "كتب التسويق", "كتب أطفال", "روايات عربية", "روايات بوليسية",
     "تطوير الذات", "كتب أعمال", "فلسفة", "روايات", "باقات كتب",
     "تبادل الكتب المغرب", "توصيل الكتب", "الدفع عند الاستلام", "توصيل مجاني",
-    "أدوات مدرسية", "كتب إنجليزية", "كتب أطفال", "مانغا", "أفضل الكتب العربية", 
-    "الدخول المدرسي", "محافظ مدرسية", "روايات عربية",
-    "مقلمات", "أقلام", "دفاتر", "أدوات مكتبية", "أدب عربي", "علم النفس",
-    "كتب إسلامية", "قرآن كريم", "كتب الطبخ", "روايات بوليسية",
-    "شراء كتب رخيصة في المغرب", "أفضل موقع لشراء الكتب في المغرب", "مكتبة قرطاسية المغرب",
-    "تخفيضات الكتب المغرب", "كتب أصلية المغرب", "كتب بالإنجليزية الدار البيضاء",
-    "riwaya", "books", "library", "libriry", "livre", "kotob", "ktoba", "ktoba darija", "كتب دارجة", "شري كتوبا", "رواية ستور",
-    "كتوبا", "كتوبا دارجة", "شري كتوبا", "كتب بالدارجة", "مكتبة أونلاين", "مكتبتي", "شري كتابي", 
-    "قرا كتاب", "قرا كتوبا", "تبادل الكتوبا", "كتب مستعملة المغرب", "كتوبا رخاص", "مكتبة دارجة"
+    "أدوات مدرسية", "كتب إنجليزية", "مانغا", "أفضل الكتب العربية",
+    "الدخول المدرسي", "محافظ مدرسية",
+    "مقلمات", "أقلام", "دفاتر", "أدوات مكتبية", "أدب عربي",
+    "قرآن كريم",
+
+    // C — Product Intent : Meilleurs livres
+    "كتاب العادات الذرية", "كتاب سيكولوجية المال", "كتاب فكر وازدد ثراء",
+    "كتاب فن اللامبالاة", "كتاب 48 قانون للقوة", "كتاب قوة عقلك الباطن",
+    "كتاب لماذا ننام", "كتاب كيف تكسب الأصدقاء وتؤثر في الناس",
+    "كتاب الأب الغني والأب الفقير", "كتاب نظرية الفستق",
+    "كتاب الإنسان يبحث عن المعنى", "كتاب مزرعة الحيوان", "كتاب 1984",
+    "كتاب الأمير", "كتاب قواعد العشق الأربعون", "كتاب جلسات نفسية",
+    "كتاب عقدك النفسية سجنك الأبدي", "كتاب رسائل من القرآن",
+    "كتاب زاد المعاد", "كتاب الداء والدواء", "كتاب رياض الصالحين",
+    "كتاب لا تحزن", "كتاب معجزة الصباح", "كتاب هكذا تكلم زرادشت",
+    "كتاب العادات السبع للناس الأكثر فعالية", "كتاب جسمك يتذكر كل شيء",
+    "كتاب شجاعة أن تكون غير محبوب", "كتاب سيكولوجية الجماهير",
+    "كتاب قوة الآن", "كتاب قوانين الطبيعة البشرية",
+    "كتاب ذكاء العاطفي", "كتاب دع القلق وابدأ الحياة",
+    "كتاب طوق الحمامة", "كتاب ثلاثية غرناطة",
+    "كتاب ثم لم يبق أحد", "كتاب ماجدولين",
+    "كتاب 12 قاعدة للحياة", "كتاب 21 درسا للقرن 21",
+    "كتاب نظرية التغافل", "كتاب ورط نفسك",
+    "كتاب ربما عليك أن تكلم أحدا", "كتاب لن تهزمني بعد اليوم",
+    "كتاب لغات الحب الخمس", "كتاب لا تكن لطيفا أكثر من اللازم",
+    "كتاب حصن المسلم", "كتاب صيد الخاطر",
+    "كتاب صحيح البخاري", "كتاب رياض الصالحين",
+
+    // D — Author Keywords : Authority Pages
+    "كتب ابن القيم", "كتب مصطفى محمود", "كتب فريد الأنصاري",
+    "كتب دوستويفسكي", "كتب ديل كارنيجي",
+    "كتب جورج أورويل", "كتب جوزيف ميرفي", "كتب نابليون هيل",
+    "كتب عن الزواج في الإسلام",
+
+    // E — PDF Keywords : Blog / Articles Only
+    "كتاب العادات الذرية pdf", "كتاب سيكولوجية المال pdf",
+    "كتاب فن اللامبالاة pdf", "كتاب 1984 pdf",
+    "كتاب نظرية الفستق pdf", "كتاب قوة عقلك الباطن pdf",
+    "كتاب زاد المعاد pdf", "كتاب لا تحزن pdf",
+    "كتاب كيف تكسب الأصدقاء pdf", "كتاب الأب الغني والأب الفقير pdf",
+    "كتاب الإنسان يبحث عن المعنى pdf",
+    "كتاب رياض الصالحين pdf", "كتاب زاد المعاد في هدي خير العباد pdf",
+    "كتاب داء ودواء pdf", "كتاب دع القلق وابدأ الحياة pdf",
+    "كتاب ثلاثة الأصول pdf", "كتاب نهج البلاغة",
   ];
 
   const keywordsEn = [
@@ -112,11 +261,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     "cash on delivery books morocco", "free delivery books morocco", "discount books morocco", "original books morocco",
     "islamic books english morocco", "quran english translation morocco", "islamic literature in english",
     "cookbooks", "thriller", "psychology books", "fantasy books morocco", "sci-fi books morocco", "classic literature morocco",
-    "stationery morocco", "office supplies morocco", "notebooks morocco", "calculators morocco", "pens and pencils morocco", 
+    "stationery morocco", "office supplies morocco", "notebooks morocco", "calculators morocco", "pens and pencils morocco",
     "back to school morocco", "bestselling books morocco",
     "riwaya", "books", "library", "libriry", "livre", "kotob", "ktoba", "ktoba darija",
-    "ktoba morocco", "moroccan bookstore", "buy ktoba online", "riwaya books", "darija books", 
-    "books in darija", "moroccan literature", "morocco library", "ktouba shop"
+    "ktoba morocco", "moroccan bookstore", "buy ktoba online", "riwaya books", "darija books",
+    "books in darija", "moroccan literature", "morocco library", "ktouba shop", "best productivity books", "best self improvement books",
+    "best productivity books morocco", "best self improvement books morocco", "best business books morocco", "buy books casablanca", "buy books rabat", "buy books marrakech", "buy books fes", "buy books meknes", "buy books tangier", "buy books agadir", "buy books fes", "buy books meknes",
+
+    "maktaba f rabat",
+    "maktaba online maghrib",
+    "riwayat", "riwayat morocco", "buy riwayat online", "riwayat in english"
   ];
 
   const baseKeywords = locale === 'ar' ? keywordsAr : (locale === 'en' ? keywordsEn : keywordsFr);
@@ -128,6 +282,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   return {
     metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: `${siteUrl}/${locale}`,
+      languages: {
+        'fr-MA': `${siteUrl}/fr`,
+        'ar-MA': `${siteUrl}/ar`,
+        'en-MA': `${siteUrl}/en`,
+        'x-default': `${siteUrl}/ar`, // L'Arabe est la langue par défaut comme défini dans le middleware
+      },
+    },
     title: {
       template: "%s | Riwaya",
       default: title,
@@ -189,6 +352,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       google: googleVerification || undefined,
       yandex: yandexVerification || undefined,
       yahoo: undefined,
+      other: {
+        ...(bingVerification ? { "msvalidate.01": bingVerification } : {}),
+        ...(pinterestVerification ? { "p:domain_verify": pinterestVerification } : {}),
+      },
     },
   };
 }
@@ -264,10 +431,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <meta name="google-site-verification" content={googleSearchConsoleId} />
         )}
         {injectedHeadTags && (
-          <Script 
+          <Script
             id="injected-head-tags"
             strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{ __html: injectedHeadTags }} 
+            dangerouslySetInnerHTML={{ __html: injectedHeadTags }}
           />
         )}
       </head>
@@ -374,21 +541,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         ></script>
         <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-            <Toaster />
-            <CookieConsent />
-            {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
-            <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
-            {isChatBotEnabled && <ChatBot />}
-            <DelayedScripts>
-              <Suspense fallback={null}>
-                <PixelTracker />
-                <FacebookPixel pixelId={fbPixelId} />
-                <GoogleAnalytics gaId={googleAnalyticsId || ''} />
-              </Suspense>
-            </DelayedScripts>
+          {children}
+          <Toaster />
+          <CookieConsent />
+          {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
+          <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
+          {isChatBotEnabled && <ChatBot />}
+          <DelayedScripts>
+            <Suspense fallback={null}>
+              <PixelTracker />
+              <FacebookPixel pixelId={fbPixelId} />
+              <GoogleAnalytics gaId={googleAnalyticsId || ''} />
+            </Suspense>
+          </DelayedScripts>
         </NextIntlClientProvider>
-        
+
         {/* Google Customer Reviews Badge */}
         <Script id="merchantWidgetScript" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" strategy="lazyOnload" />
         <Script id="merchantWidgetInit" strategy="lazyOnload" dangerouslySetInnerHTML={{
@@ -400,6 +567,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   position: 'BOTTOM_LEFT',
                   region: 'MA'
                 });
+                setTimeout(function() {
+                  var iframe = document.getElementById('merchantwidgetiframe');
+                  if (iframe && !iframe.hasAttribute('title')) {
+                    iframe.setAttribute('title', 'Avis clients Google');
+                  }
+                }, 2000);
               }
             });
           `

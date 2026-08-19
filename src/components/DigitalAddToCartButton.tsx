@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
-import { Download, ShoppingCart } from 'lucide-react'
+import React, { useState } from 'react'
+import { Download, ShoppingCart, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
 import { useTranslations } from 'next-intl'
@@ -22,8 +22,11 @@ export default function DigitalAddToCartButton({ product }: Props) {
   const sessionId = useCartStore(state => state.sessionId)
   const setSessionId = useCartStore(state => state.setSessionId)
   const openCart = useUIStore(state => state.openCart)
+  const [isAdded, setIsAdded] = useState(false)
 
   const handleAddToCart = () => {
+    if (isAdded) return;
+    
     addItem({
       type: 'DIGITAL',
       id: product.id,
@@ -41,15 +44,31 @@ export default function DigitalAddToCartButton({ product }: Props) {
     notifyAddToCart(product.title, product.price, 'DIGITAL', currentSessionId).catch(console.error)
 
     // Notification ui (optionnel, if any is added later)
+    setIsAdded(true)
+    setTimeout(() => setIsAdded(false), 2000)
   }
 
   return (
     <button 
+      disabled={isAdded}
       onClick={handleAddToCart}
-      className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-amber-400 text-black font-black uppercase tracking-widest text-sm rounded-xl hover:bg-amber-500 hover:shadow-xl hover:shadow-amber-400/20 transition-all active:scale-95"
+      className={`w-full flex items-center justify-center gap-3 px-8 py-5 font-black uppercase tracking-widest text-sm rounded-xl transition-all duration-300 ${
+        isAdded 
+          ? 'bg-green-500 text-white scale-105 shadow-xl'
+          : 'bg-amber-400 text-black hover:bg-amber-500 hover:shadow-xl hover:shadow-amber-400/20 active:scale-95'
+      }`}
     >
-      <ShoppingCart className="w-5 h-5" />
-      <span>{t('AddToCart')}</span>
+      {isAdded ? (
+        <>
+          <Check className="w-5 h-5 animate-bounce" />
+          <span>Ajouté</span>
+        </>
+      ) : (
+        <>
+          <ShoppingCart className="w-5 h-5" />
+          <span>{t('AddToCart')}</span>
+        </>
+      )}
     </button>
   )
 }

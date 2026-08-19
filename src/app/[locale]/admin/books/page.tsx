@@ -77,7 +77,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
     const productTypeFilter = typeParam || 'all'
 
-    let booksStats: any[] = []
     let allProducts: any[] = []
 
     // 1. Fetch Books
@@ -86,7 +85,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             where,
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } } }
         })
-        booksStats.push(...books.map(b => ({ stock: b.stock, active: b.active, price: b.price })))
         allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, jumiaStock: b.jumiaStock, hasArticle: (b._count?.posts || 0) > 0 })))
     }
 
@@ -107,7 +105,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             where: packWhere,
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
         })
-        booksStats.push(...packs.map(p => ({ stock: 999, active: p.active, price: p.price })))
         allProducts.push(...packs.map(p => ({
             id: p.id,
             title: p.name,
@@ -115,7 +112,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             titleEn: p.nameEn,
             author: 'Pack',
             price: p.price,
-            stock: 999, // Packs don't have stock
+            costPrice: p.costPrice || 0,
+            stock: 0, // Packs have 0 stock
             image: p.image || '/book-placeholder.png',
             category: 'PACK',
             language: 'fr',
@@ -150,7 +148,6 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             where: extraWhere,
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
         })
-        booksStats.push(...extras.map(e => ({ stock: e.stock, active: e.active, price: e.price })))
         allProducts.push(...extras.map(e => ({
             id: e.id,
             title: e.name,
@@ -158,6 +155,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             titleEn: null,
             author: 'Accessoire',
             price: e.price,
+            costPrice: e.costPrice || 0,
             stock: e.stock,
             image: e.image || '/book-placeholder.png',
             category: e.category,
@@ -174,9 +172,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     const totalBooks = allProducts.length
-    const activeBooks = booksStats.filter(b => b.active).length
-    const totalStock = booksStats.reduce((sum, b) => sum + (b.stock === 999 ? 0 : b.stock), 0)
-    const stockValue = booksStats.reduce((sum, b) => sum + (b.price * (b.stock === 999 ? 0 : b.stock)), 0)
+    const activeBooks = allProducts.filter(b => b.active).length
+    const stockProducts = productTypeFilter === 'all' ? allProducts.filter(p => p.productType === 'BOOK') : allProducts
+    const totalStock = stockProducts.reduce((sum, p) => sum + (p.stock || 0), 0)
+    const stockValue = stockProducts.reduce((sum, p) => sum + ((p.costPrice || 0) * (p.stock || 0)), 0)
 
     // Manual sorting
     if (sortParam === 'price-asc') allProducts.sort((a, b) => a.price - b.price)

@@ -1,6 +1,7 @@
 'use client'
 
 import { normalizeImage } from '@/lib/utils'
+import Image from 'next/image'
 
 interface ImageWithFallbackProps {
     src?: string | null
@@ -22,14 +23,17 @@ export default function ImageWithFallback({
     priority = false,
 }: ImageWithFallbackProps) {
     return (
-        <img
-            src={normalizeImage(src || '')}
-            alt={alt}
+        <Image
+            src={normalizeImage(src || '') || fallback}
+            alt={alt || "Image"}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className={className}
-            loading={priority ? 'eager' : 'lazy'}
-            {...(priority ? { fetchPriority: 'high' } : {})}
+            priority={priority}
             onError={(e) => {
-                ;(e.target as HTMLImageElement).src = fallback
+                const target = e.target as HTMLImageElement;
+                target.srcset = '';
+                target.src = fallback;
             }}
         />
     )

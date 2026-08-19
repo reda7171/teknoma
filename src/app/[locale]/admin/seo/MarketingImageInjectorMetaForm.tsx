@@ -376,7 +376,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                             {/* Image */}
                             <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                 <img
-                                    src={asset.url || '/placeholder.jpg'}
+                                    src={asset.url?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${asset.url}` : asset.url || '/placeholder.jpg'}
                                     alt={edits[asset.id]?.alt || asset.name}
                                     title={edits[asset.id]?.title || asset.name}
                                     className="w-full h-full object-cover"

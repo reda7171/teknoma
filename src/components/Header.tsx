@@ -355,6 +355,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
                     <span className="text-lg font-black tracking-tighter">riwaya<span className="text-[#10b981]">.</span></span>
                     <button 
                         onClick={() => setMobileMenuOpen(false)}
+                        aria-label="Fermer le menu"
                         className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
                     >
                         <X className="w-6 h-6 text-black" />

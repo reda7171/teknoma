@@ -1,6 +1,7 @@
 'use client'
 
-import { ShoppingCart } from 'lucide-react'
+import { useState } from 'react'
+import { ShoppingCart, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
 import { useTranslations } from 'next-intl'
@@ -36,21 +37,24 @@ export default function AddToCartButton({
     const sessionId = useCartStore((state) => state.sessionId)
     const setSessionId = useCartStore((state) => state.setSessionId)
     const t = useTranslations('Common');
+    const [isAdded, setIsAdded] = useState(false)
 
     return (
         <button
-            disabled={disabled}
-            className={`w-full flex items-center justify-center gap-3 font-bold rounded-2xl transition-all py-5 px-8 ${
+            disabled={disabled || isAdded}
+            className={`w-full flex items-center justify-center gap-3 font-bold rounded-2xl transition-all duration-300 py-5 px-8 ${
                 disabled 
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-none' 
-                    : `active:scale-95 shadow-lg hover:shadow-black/20 ${
-                        variant === 'primary'
-                            ? 'bg-black text-white hover:bg-gray-800'
-                            : 'bg-white text-black border-2 border-black hover:bg-gray-50'
-                    }`
+                    : isAdded
+                        ? 'bg-green-500 text-white scale-105 shadow-xl'
+                        : `active:scale-95 shadow-lg hover:shadow-black/20 ${
+                            variant === 'primary'
+                                ? 'bg-black text-white hover:bg-gray-800'
+                                : 'bg-white text-black border-2 border-black hover:bg-gray-50'
+                        }`
             } ${className}`}
             onClick={() => {
-                if (disabled) return;
+                if (disabled || isAdded) return;
                 try {
 
                     addItem({
@@ -91,14 +95,26 @@ export default function AddToCartButton({
                     notifyAddToCart(product.title, product.price, product.type, currentSessionId).catch(console.error)
 
                     showNotification(t('AddedToCartSuccess'), 'success')
+                    
+                    setIsAdded(true)
+                    setTimeout(() => setIsAdded(false), 2000)
                 } catch (error) {
                     console.error('Failed to add to cart:', error)
                     showNotification(t('AddedToCartError'), 'error')
                 }
             }}
         >
-            {showIcon && <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 rtl:flip" />}
-            <span className="uppercase tracking-widest text-sm font-black">{t('AddToCart')}</span>
+            {isAdded ? (
+                <>
+                    <Check className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce" />
+                    <span className="uppercase tracking-widest text-sm font-black">Ajouté</span>
+                </>
+            ) : (
+                <>
+                    {showIcon && <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 rtl:flip" />}
+                    <span className="uppercase tracking-widest text-sm font-black">{t('AddToCart')}</span>
+                </>
+            )}
         </button>
     )
 }
