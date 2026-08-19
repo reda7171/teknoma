@@ -17,7 +17,7 @@ export default async function AdminPostsPage({
     const searchParamsValues = await searchParams
     const page = typeof searchParamsValues.page === 'string' ? parseInt(searchParamsValues.page) : 1
     const search = typeof searchParamsValues.search === 'string' ? searchParamsValues.search : undefined
-    const contentLang = typeof searchParamsValues.lang === 'string' ? searchParamsValues.lang : locale;
+    const contentLang = typeof searchParamsValues.lang === 'string' ? searchParamsValues.lang : 'all';
     const published = typeof searchParamsValues.published === 'string' ? searchParamsValues.published === 'true' : undefined;
     const category = typeof searchParamsValues.category === 'string' ? searchParamsValues.category : undefined;
     const authorId = typeof searchParamsValues.authorId === 'string' ? searchParamsValues.authorId : undefined;
