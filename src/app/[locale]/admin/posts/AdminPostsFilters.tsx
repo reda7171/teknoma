@@ -120,9 +120,23 @@ export default function AdminPostsFilters({
                     )}
                 </div>
 
-                <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    {totalCount} Articles trouvés
+                <div className="flex items-center gap-3">
+                    {/* Filtre rapide "Livre lié" toujours visible */}
+                    <select
+                        value={activeFilters.bookId || 'all'}
+                        onChange={(e) => handleApplyFilters({ bookId: e.target.value })}
+                        className="hidden md:block px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all font-bold text-sm w-48 truncate"
+                    >
+                        <option value="all">Tous les livres</option>
+                        {books.map(book => (
+                            <option key={book.id} value={book.id}>{book.title}</option>
+                        ))}
+                    </select>
+
+                    <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        {totalCount} Articles
+                    </div>
                 </div>
             </div>
 
@@ -239,23 +253,6 @@ export default function AdminPostsFilters({
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-4 border-t border-gray-100">
-                        {/* Book Filter */}
-                        <div className="space-y-3">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                <Tag className="w-3 h-3" /> {/* Or Book icon if you prefer */}
-                                Livre lié
-                            </label>
-                            <select
-                                value={activeFilters.bookId || 'all'}
-                                onChange={(e) => handleApplyFilters({ bookId: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
-                            >
-                                <option value="all">Tous les livres</option>
-                                {books.map(book => (
-                                    <option key={book.id} value={book.id}>{book.title}</option>
-                                ))}
-                            </select>
-                        </div>
 
                         {/* Sort Filter */}
                         <div className="space-y-3">

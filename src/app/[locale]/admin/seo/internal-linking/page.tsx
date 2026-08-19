@@ -2,6 +2,8 @@ import { verifyAdmin } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import InternalLinkingSchema from '@/components/admin/seo/InternalLinkingSchema'
 import { Network } from 'lucide-react'
+import { prisma } from '@/lib/prisma'
+
 
 export const metadata = {
     title: 'Maillage Interne SEO | Admin Riwaya',
@@ -13,6 +15,34 @@ export default async function InternalLinkingPage() {
     } catch {
         redirect('/login')
     }
+
+    // Fetch dynamic data for the schema
+    const categories = await prisma.categoryConfig.findMany({
+        take: 3,
+        select: { name: true }
+    })
+
+    const silos = await Promise.all(categories.map(async (cat) => {
+        const books = await prisma.book.findMany({
+            where: { category: cat.name, active: true },
+            take: 2,
+            orderBy: { stock: 'desc' },
+            select: { title: true }
+        })
+
+        return {
+            categoryName: cat.name,
+            books: books.map(b => b.title),
+            postName: `L'importance de lire des livres en ${cat.name}`
+        }
+    }))
+
+    // Si pas de catégories dans config, on tombe sur un fallback
+    const finalSilos = silos.length === 3 ? silos : [
+        { categoryName: "Développement Personnel", books: ["Père Riche", "Sapiens"], postName: "Comment investir" },
+        { categoryName: "Religion", books: ["Le Coran", "La Citadelle"], postName: "L'importance de la prière" },
+        { categoryName: "Romans", books: ["L'Étranger", "1984"], postName: "Top 10 des Romans" },
+    ]
 
     return (
         <div className="space-y-12">
@@ -29,7 +59,7 @@ export default async function InternalLinkingPage() {
                 </div>
             </div>
 
-            <InternalLinkingSchema />
+            <InternalLinkingSchema silos={finalSilos} />
         </div>
     )
 }

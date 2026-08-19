@@ -93,7 +93,7 @@ function StatCard({ icon, number, label, bgColor, iconColor, idx }: StatCardProp
                     <AnimatedCounter value={number} />
                 </h3>
                 <div className="w-10 h-1 bg-gray-100 mx-auto rounded-full group-hover:w-16 group-hover:bg-pixio-yellow transition-all duration-500"></div>
-                <p className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase text-gray-400 tracking-[0.3em] font-outfit">
+                <p className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em] font-outfit">
                     {label}
                 </p>
             </div>
@@ -162,7 +162,7 @@ export default function TrustSection({ stats, className, style }: { stats?: { bo
                         {t('Title')}<span className="text-pixio-yellow">.</span>
                     </h2>
 
-                    <p className="text-2xl text-gray-400 font-medium tracking-tight max-w-2xl border-l-4 border-pixio-yellow pl-8 italic">
+                    <p className="text-2xl text-gray-500 font-medium tracking-tight max-w-2xl border-l-4 border-pixio-yellow pl-8 italic">
                         {t('Description')}
                     </p>
                 </div>

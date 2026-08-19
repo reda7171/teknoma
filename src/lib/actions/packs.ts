@@ -62,6 +62,7 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                 shippingFees: validatedData.shippingFees,
                 sellerSku: validatedData.sellerSku,
                 active: true,
+                jumiaStock: 0,
                 books: {
                     create: validatedData.bookIds.map((bookId) => ({
                         bookId,

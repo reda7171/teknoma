@@ -596,7 +596,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                   {bestSellerBooks.map((book: any, idx: number) => (
                     <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
-                      <BookCard {...book} />
+                      <BookCard {...book} priority={idx < 4} />
                     </ScrollReveal>
                   ))}
                 </div>
@@ -723,7 +723,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
                 {newBooks.map((book: any, idx: number) => (
                   <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
-                    <BookCard {...book} variant={idx === 0 ? 'featured' : 'default'} />
+                    <BookCard {...book} variant={idx === 0 ? 'featured' : 'default'} priority={idx < 4} />
                   </ScrollReveal>
                 ))}
               </div>

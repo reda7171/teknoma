@@ -110,7 +110,7 @@ export default function WishlistButton({ item, className, showText = false, vari
                 onClick={toggle}
                 disabled={syncing}
                 className={cn(
-                    "flex items-center justify-center gap-2 px-6 py-4 rounded-full font-bold transition-all border-2",
+                    "flex items-center justify-center gap-2 px-6 py-4 rounded-full font-bold transition border-2",
                     active
                         ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
                         : "bg-white border-gray-200 text-gray-900 hover:border-black",
@@ -128,7 +128,7 @@ export default function WishlistButton({ item, className, showText = false, vari
             onClick={toggle}
             disabled={syncing}
             className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm hover:shadow-md active:scale-95 group/wishlist",
+                "w-10 h-10 rounded-full flex items-center justify-center transition shadow-sm hover:shadow-md active:scale-95 group/wishlist",
                 active ? "bg-red-50 text-red-500" : "bg-white text-gray-400 hover:text-red-400",
                 className
             )}

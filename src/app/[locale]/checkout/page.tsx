@@ -15,7 +15,7 @@ export default async function CheckoutPage() {
     const codEnabled = codEnabledStr === 'true' || codEnabledStr === null // Default to true if not set
     const bankTransferEnabled = await getSetting('payment_bank_transfer_enabled') === 'true'
     const bankTransferAccountsRaw = await getSetting('payment_bank_transfer_accounts') || '[]'
-    let bankTransferAccounts: { bankName: string; accountName: string; rib: string }[] = []
+    let bankTransferAccounts: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] = []
     try { bankTransferAccounts = JSON.parse(bankTransferAccountsRaw) } catch {}
 
     const userProps = user ? {

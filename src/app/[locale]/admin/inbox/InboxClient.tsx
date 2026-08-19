@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Send, Instagram, Facebook, User, Clock, Loader2, CheckCheck } from 'lucide-react'
+import { Send, Instagram, Facebook, User, Clock, Loader2, CheckCheck, MessageCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 

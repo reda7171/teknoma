@@ -22,7 +22,7 @@ async function getStats() {
         booksCount, packsCount, ordersCount, totalRevenue, deliveredCount,
         pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount,
         shippedOrders, confirmedOrders, ordersToday, revenueMonth, returnedCount,
-        stockValueRaw, booksNoImage
+        stockValueRaw, booksNoImage, booksSoldTodayRaw
     ] = await Promise.all([
         prisma.book.count({ where: { active: true } }),
         prisma.pack.count({ where: { active: true } }),
@@ -42,6 +42,13 @@ async function getStats() {
         prisma.order.count({ where: { status: 'RETURNED' } }),
         prisma.book.aggregate({ where: { active: true }, _sum: { stock: true } }),
         prisma.book.count({ where: { active: true, image: '' } }),
+        prisma.orderItem.aggregate({
+            where: {
+                order: { createdAt: { gte: today }, status: { notIn: ['CANCELLED', 'RETURNED'] } },
+                type: 'BOOK'
+            },
+            _sum: { quantity: true }
+        })
     ])
 
     const totalRev = totalRevenue._sum.total || 0
@@ -50,6 +57,7 @@ async function getStats() {
     const tauxAnnulation = totalOrdersCount > 0 ? (cancelledCount / totalOrdersCount) * 100 : 0
     const revenueMois = revenueMonth._sum.total || 0
     const stockTotal = stockValueRaw._sum.stock || 0
+    const booksSoldToday = booksSoldTodayRaw._sum.quantity || 0
 
     return {
         booksCount,
@@ -69,6 +77,7 @@ async function getStats() {
         returnedCount,
         stockTotal,
         booksNoImage,
+        booksSoldToday,
     }
 }
 
@@ -290,6 +299,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Taux Conversion',      value: `${stats.tauxConversion.toFixed(1)}%`,   iconName: 'BarChart2',   color: 'teal'   },
         { name: 'Taux Annulation',      value: `${stats.tauxAnnulation.toFixed(1)}%`,   iconName: 'XOctagon',    color: 'gray'   },
         { name: "Cmd Aujourd'hui",      value: stats.ordersToday,                       iconName: 'CalendarDays',color: 'teal'   },
+        { name: "Livres Vendus (Auj)",  value: stats.booksSoldToday,                    iconName: 'BookOpen',    color: 'emerald'},
         { name: 'En Livraison',         value: stats.shippedOrders,                     iconName: 'Truck',       color: 'cyan'   },
         { name: 'Confirmées',           value: stats.confirmedOrders,                   iconName: 'CheckCircle', color: 'green'  },
         { name: 'CA du mois',           value: `${stats.revenueMois.toFixed(0)} درهم`,   iconName: 'TrendingUp',  color: 'orange' },
@@ -316,6 +326,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         red: 'bg-red-100 text-red-600',
         gray: 'bg-gray-100 text-gray-600',
         cyan: 'bg-cyan-100 text-cyan-600',
+        emerald: 'bg-emerald-100 text-emerald-600',
     }
 
     const statusColors = {

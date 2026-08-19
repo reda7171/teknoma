@@ -161,8 +161,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
         }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const submitForm = async (close: boolean) => {
         setIsPending(true)
         setError(null)
 
@@ -187,8 +186,12 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                 : await createPost(data)
 
             if (result.success) {
-                router.push('/admin/posts')
-                router.refresh()
+                if (close) {
+                    router.push('/admin/posts')
+                    router.refresh()
+                } else {
+                    showNotification(isEditing ? "Article mis à jour avec succès" : "Article créé avec succès", "success")
+                }
             } else {
                 setError(result.error as string)
             }
@@ -237,8 +240,8 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 w-full">
-            <div className="flex items-center justify-between">
+        <form onSubmit={(e) => { e.preventDefault(); submitForm(false); }} className="space-y-8 w-full">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <Link
                         href={`/${lang}/admin/posts`}
@@ -257,23 +260,26 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         Voir page article
                     </a>
                 </div>
-                <button
-                    type="submit"
-                    disabled={isPending}
-                    className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                    {isPending ? (
-                        <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Enregistrement...
-                        </>
-                    ) : (
-                        <>
-                            <Save className="w-4 h-4 mr-2" />
-                            {isEditing ? 'Mettre à jour' : 'Publier'}
-                        </>
-                    )}
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => submitForm(false)}
+                        disabled={isPending}
+                        className="inline-flex items-center px-4 py-2 bg-white text-black border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors disabled:opacity-50 shadow-sm"
+                    >
+                        {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                        {isEditing ? 'Mettre à jour' : 'Enregistrer'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => submitForm(true)}
+                        disabled={isPending}
+                        className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors disabled:opacity-50 shadow-sm"
+                    >
+                        {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                        {isEditing ? 'Mettre à jour et Fermer' : 'Publier et Fermer'}
+                    </button>
+                </div>
             </div>
 
             {error && (

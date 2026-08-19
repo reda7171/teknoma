@@ -422,7 +422,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                             {/* Image */}
                             <a href={`/fr/admin/books/${book.id}/edit`} target="_blank" title="Éditer ce produit" className="block w-16 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
                                 <img
-                                    src={book.image}
+                                    src={book.image?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${book.image}` : book.image}
                                     alt={edits[book.id]?.alt || book.title}
                                     title={edits[book.id]?.title || book.title}
                                     className="w-full h-full object-cover"

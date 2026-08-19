@@ -195,7 +195,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                             {post.coverImage ? (
                                                 <div className="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-100 shadow-sm">
                                                     <Image
-                                                        src={post.coverImage}
+                                                        src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${post.coverImage}` : post.coverImage}
                                                         alt={post.title}
                                                         fill
                                                         className="object-cover"

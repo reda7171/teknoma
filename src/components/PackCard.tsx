@@ -1,12 +1,16 @@
 'use client'
 
 import { Link } from '@/i18n/routing'
-import { Package, ShoppingCart, Sparkles, ArrowRight } from 'lucide-react'
+import { useState } from 'react'
+import { Package, ShoppingCart, Sparkles, ArrowRight, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import WishlistButton from '@/components/WishlistButton'
 import { normalizeImage } from '@/lib/utils'
+import ImageWithFallback from '@/components/ImageWithFallback'
+import { notifyAddToCart } from '@/lib/actions/cart-notify'
+import { fbPixelEvents } from '@/lib/facebook-pixel'
 
 interface PackCardProps {
     id: string
@@ -44,7 +48,10 @@ export default function PackCard({
     const tCommon = useTranslations('Common')
     const locale = useLocale()
     const addItem = useCartStore((state) => state.addItem)
+    const sessionId = useCartStore((state) => state.sessionId)
+    const setSessionId = useCartStore((state) => state.setSessionId)
     const { openCart, showNotification } = useUIStore()
+    const [isAdded, setIsAdded] = useState(false)
     const totalOriginalPrice = Math.round(originalPrice || books.reduce((sum: number, pb: any) => sum + pb.book.price, 0))
     const displayPrice = Math.round(price)
     const savings = totalOriginalPrice - displayPrice
@@ -91,22 +98,20 @@ export default function PackCard({
             <Link href={`/packs/${id}`} className="block">
                 <div className="relative h-64 bg-gray-50 overflow-hidden">
                     {image ? (
-                        <img
-                            src={normalizeImage(image)}
+                        <ImageWithFallback
+                            src={image}
                             alt={`Pack ${displayName} - Riwaya Selection`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-pixio-yellow/30 p-8">
                             <div className="grid grid-cols-2 gap-3 transform group-hover:scale-105 transition-transform">
                                 {books.slice(0, 4).map((pb: any, idx: number) => (
                                     <div key={pb.book.id} className={`relative w-20 h-28 rounded-xl overflow-hidden shadow-2xl border-2 border-white ${idx % 2 === 0 ? '-rotate-6' : 'rotate-6'}`}>
-                                        <img
-                                            src={normalizeImage(pb.book.image)}
+                                        <ImageWithFallback
+                                            src={pb.book.image}
                                             alt={`${pb.book.title} - Inclus dans le pack ${displayName}`}
                                             className="w-full h-full object-cover"
-                                            onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                                         />
                                     </div>
                                 ))}
@@ -149,9 +154,15 @@ export default function PackCard({
 
                     {/* Add to Cart Button */}
                     <button
-                        className="w-full flex items-center justify-center gap-3 bg-black text-white font-black text-xs rtl:text-sm uppercase tracking-[0.2em] rtl:tracking-normal py-5 px-6 rounded-full hover:bg-gray-800 active:scale-95 transition-all shadow-xl hover:shadow-black/20 group/btn"
+                        disabled={isAdded}
+                        className={`w-full flex items-center justify-center gap-3 font-black text-xs rtl:text-sm uppercase tracking-[0.2em] rtl:tracking-normal py-5 px-6 rounded-full transition-all duration-300 relative z-10 ${
+                            isAdded
+                                ? 'bg-green-500 text-white scale-105 shadow-xl'
+                                : 'bg-black text-white hover:bg-gray-800 shadow-xl hover:shadow-black/20 group/btn'
+                        }`}
                         onClick={(e) => {
                             e.preventDefault()
+                            if (isAdded) return;
                             try {
                                 addItem({
                                     type: 'PACK',
@@ -162,15 +173,55 @@ export default function PackCard({
                                     booksCount: books.length,
                                     shippingFees,
                                 })
+                                
+                                // Fire Confetti
+                                import('canvas-confetti').then((confetti) => {
+                                    confetti.default({
+                                        particleCount: 50,
+                                        spread: 60,
+                                        origin: { y: 0.8 },
+                                        colors: ['#000000', '#10b981', '#3b82f6', '#f59e0b'],
+                                        zIndex: 9999
+                                    });
+                                });
+
+                                // Facebook Pixel Tracking
+                                fbPixelEvents.addToCart({
+                                    id,
+                                    title: displayName,
+                                    price: displayPrice,
+                                    quantity: 1
+                                })
+
+                                // Telegram Notification
+                                let currentSessionId = sessionId
+                                if (!currentSessionId) {
+                                    currentSessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+                                    setSessionId(currentSessionId)
+                                }
+                                notifyAddToCart(displayName, displayPrice, 'PACK', currentSessionId).catch(console.error)
+
                                 showNotification(tCommon('AddedToCartSuccess'), 'success')
+                                
+                                setIsAdded(true)
+                                setTimeout(() => setIsAdded(false), 2000)
                             } catch (error) {
                                 console.error('Failed to add pack to cart:', error)
                                 showNotification(tCommon('AddedToCartError'), 'error')
                             }
                         }}
                     >
-                        <span>{t('AddSelection')}</span>
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180" />
+                        {isAdded ? (
+                            <>
+                                <span>Ajouté</span>
+                                <Check className="w-4 h-4 animate-bounce" />
+                            </>
+                        ) : (
+                            <>
+                                <span>{t('AddSelection')}</span>
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180" />
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

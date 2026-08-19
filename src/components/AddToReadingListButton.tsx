@@ -105,7 +105,7 @@ export default function AddToReadingListButton({ bookId, title, author, cover, t
             <button 
                 onClick={handleRemove}
                 disabled={loading} 
-                className={cn("p-2 text-emerald-600 bg-emerald-50 hover:bg-red-50 hover:text-red-500 rounded-full transition-all group", className)}
+                className={cn("p-2 text-emerald-600 bg-emerald-50 hover:bg-red-50 hover:text-red-500 rounded-full transition group", className)}
                 title={t('Common.RemovedFromReadingList') || "Retirer des lectures"}
             >
                 {loading ? <BookOpen className="w-5 h-5 animate-pulse" /> : (
@@ -122,7 +122,7 @@ export default function AddToReadingListButton({ bookId, title, author, cover, t
         <button
             onClick={handleAdd}
             disabled={loading}
-            className={cn("p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 bg-white shadow-sm rounded-full transition-all active:scale-95", className)}
+            className={cn("p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 bg-white shadow-sm rounded-full transition active:scale-95", className)}
             title={t('Common.AddToReadingListTitle')}
         >
             <BookOpen className={cn("w-5 h-5", loading && "animate-pulse")} />
