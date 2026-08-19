@@ -6,6 +6,7 @@ import { getRecentExchangeBooks } from '@/lib/actions/community-market'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import AudioTestimonial from '@/components/AudioTestimonial'
 import SonicDeliveryBanner from '@/components/home/SonicDeliveryBanner'
+import InstagramFeed from '@/components/home/InstagramFeed'
 import { getRecentPosts } from '@/lib/actions/blog'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import BookCard from '@/components/BookCard'
@@ -427,6 +428,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     'home_section_trust',
     'home_section_new_arrivals',
     'home_section_audio_testimonials',
+    'home_section_instagram',
     'home_section_exchange',
     'home_section_digital',
     'home_section_blog'
@@ -728,6 +730,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </section>
         )
+
+      case 'home_section_instagram':
+        return <InstagramFeed key={key} />
 
       case 'home_section_exchange':
         if (!featureExchange) return null
