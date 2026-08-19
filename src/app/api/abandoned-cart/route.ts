@@ -31,6 +31,24 @@ export async function POST(req: Request) {
                     where: { id },
                     data: { phone: safePhone, email: safeEmail, fullName: safeFullName, cartData, total, status: 'PENDING' }
                 })
+
+                // Notification de mise à jour si de nouvelles informations de contact sont ajoutées
+                if ((safePhone && !existing.phone) || (safeEmail && !existing.email)) {
+                    try {
+                        const { sendTelegramMessage } = await import('@/lib/telegram')
+                        const message = `🛒 *Mise à jour Checkout (À Chaud)*\n\n` +
+                            `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
+                            `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
+                            `📧 *Email:* ${safeEmail || 'Non renseigné'}\n` +
+                            `💰 *Total:* ${total} DH\n` +
+                            `\n_Contact ajouté en temps réel._`;
+                        
+                        await sendTelegramMessage(message)
+                    } catch (telegramError) {
+                        console.error('Erreur lors de l\'envoi de la notification Telegram:', telegramError)
+                    }
+                }
+
                 return NextResponse.json({ success: true, id: updated.id })
             }
         }
@@ -46,6 +64,21 @@ export async function POST(req: Request) {
                 status: 'PENDING'
             }
         })
+
+        // Envoi de la notification Telegram à chaud
+        try {
+            const { sendTelegramMessage } = await import('@/lib/telegram')
+            const message = `🛒 *Début de Checkout (À Chaud)*\n\n` +
+                `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
+                `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
+                `💰 *Total:* ${total} DH\n` +
+                `📦 *Articles:* ${items.length}\n` +
+                `\n_Saisi en temps réel, commande non finalisée._`;
+            
+            await sendTelegramMessage(message)
+        } catch (telegramError) {
+            console.error('Erreur lors de l\'envoi de la notification Telegram:', telegramError)
+        }
 
         return NextResponse.json({ success: true, id: newCart.id })
 
