@@ -45,7 +45,7 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
     try {
         const ip = await getIpIdentifier()
         
-        const cleanTitle = productTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const cleanTitle = (productTitle || 'Produit inconnu').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
