@@ -308,13 +308,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     )}
 
                     {/* Titre principal */}
-                    <h1 dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.3] md:leading-[1.2] tracking-tighter mb-4 md:mb-6 max-w-4xl break-words ${post.language === 'ar' ? 'font-tajawal rtl:leading-[1.4]' : ''}`}>
+                    <h1 dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-4 md:mb-6 max-w-4xl break-words ${post.language === 'ar' ? 'font-tajawal text-right leading-[1.4]' : 'text-left leading-[1.3] md:leading-[1.2] tracking-tighter'}`}>
                         {post.title}
                     </h1>
 
                     {/* Extrait */}
                     {post.excerpt && (
-                        <p dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed mb-6 md:mb-8 max-w-3xl font-medium ${post.language === 'ar' ? 'font-tajawal rtl:leading-[1.8]' : ''}`}>
+                        <p dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-base sm:text-lg md:text-xl text-slate-500 mb-6 md:mb-8 max-w-3xl font-medium ${post.language === 'ar' ? 'font-tajawal text-right leading-[1.8]' : 'text-left leading-relaxed'}`}>
                             {post.excerpt}
                         </p>
                     )}
@@ -397,19 +397,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <article
                             id="article-content"
                             dir={post.language === 'ar' ? 'rtl' : 'ltr'}
-                            className={`prose prose-base md:prose-lg max-w-none ${post.language === 'ar' ? 'font-tajawal rtl:text-[18px] md:rtl:text-[20px] rtl:leading-[1.8] md:rtl:leading-[2.2] prose-h2:font-black prose-h3:font-black prose-p:font-medium prose-li:font-medium' : ''}
-                                prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900
-                                prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100 rtl:prose-h2:!text-[32px] md:rtl:prose-h2:!text-[42px]
-                                prose-h3:!text-2xl md:prose-h3:!text-3xl rtl:prose-h3:!text-[26px] md:rtl:prose-h3:!text-[34px]
-                                prose-p:text-slate-800 prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:!text-[16px] md:prose-p:!text-[18px] rtl:prose-p:!text-[18px] md:rtl:prose-p:!text-[22px] rtl:prose-p:leading-[2] md:rtl:prose-p:leading-[2.5] rtl:prose-p:font-bold prose-p:font-medium
-                                prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors break-words
+                            className={`prose max-w-none break-words
+                                prose-headings:font-black prose-headings:text-slate-900
+                                prose-h2:pb-4 prose-h2:border-b prose-h2:border-gray-100
+                                prose-a:text-slate-600 prose-a:font-semibold prose-a:no-underline prose-a:border-b-2 prose-a:border-slate-600 hover:prose-a:bg-slate-50 prose-a:transition-colors
                                 prose-strong:text-slate-900 prose-strong:font-black
                                 prose-code:bg-gray-100 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm prose-code:text-rose-600 prose-code:break-all
                                 prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8 prose-pre:overflow-x-auto
                                 prose-img:rounded-xl md:prose-img:rounded-2xl prose-img:shadow-lg prose-img:mx-auto prose-img:my-8 md:prose-img:my-10 prose-img:w-full prose-img:object-cover
                                 prose-ul:space-y-3 prose-ol:space-y-3 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
-                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold prose-li:mb-4 rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold
-                                prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-slate-700 prose-blockquote:shadow-sm rtl:prose-blockquote:border-l-0 rtl:prose-blockquote:border-r-4 rtl:prose-blockquote:rounded-r-none rtl:prose-blockquote:rounded-l-2xl`}
+                                prose-li:text-slate-800 prose-li:mb-4
+                                prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-slate-700 prose-blockquote:shadow-sm
+                                ${post.language === 'ar' 
+                                    ? 'font-tajawal text-right text-[18px] md:text-[20px] leading-[1.8] md:leading-[2.2] prose-h2:font-black prose-h3:font-black prose-p:font-bold prose-li:font-bold prose-h2:!text-[32px] md:prose-h2:!text-[42px] prose-h3:!text-[26px] md:prose-h3:!text-[34px] prose-p:!text-[18px] md:prose-p:!text-[22px] prose-p:leading-[2] md:prose-p:leading-[2.5] prose-li:text-[18px] md:prose-li:text-[21px] prose-li:leading-[2] md:prose-li:leading-[2.5] prose-blockquote:border-r-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-l-2xl' 
+                                    : 'prose-base md:prose-lg text-left prose-headings:tracking-tight prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h3:!text-2xl md:prose-h3:!text-3xl prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:!text-[16px] md:prose-p:!text-[18px] prose-p:font-medium prose-li:leading-relaxed prose-li:font-semibold prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-r-2xl'}`}
                         >
                             {/* === GEO: AI TL;DR Summary === */}
                             {post.excerpt && (

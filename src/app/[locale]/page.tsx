@@ -305,7 +305,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             offers: {
               '@type': 'Offer',
               price: book.price,
-              priceCurrency: 'درهم',
+              priceCurrency: 'MAD',
               availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
               seller: {
                 '@id': 'https://riwaya.store/#organization',
