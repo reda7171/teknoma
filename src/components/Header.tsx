@@ -320,18 +320,25 @@ export default function Header({ user, notificationDropdown, navigation, feature
                             </button>
                         </div>
 
-                        {/* Mobile Menu Button -> Replaced by Search Icon on mobile */}
-                        <button
-                            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                            aria-label="Recherche mobile"
-                            className="md:hidden w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
-                        >
-                            {mobileSearchOpen ? (
-                                <X className="w-6 h-6 text-black" />
-                            ) : (
-                                <Search className="w-6 h-6 text-black" />
+                        {/* Mobile Actions: Login + Search */}
+                        <div className="flex md:hidden items-center gap-2">
+                            {mounted && (
+                                <div className="scale-90 origin-right rtl:origin-left">
+                                    <UserDropdown user={user} features={features} />
+                                </div>
                             )}
-                        </button>
+                            <button
+                                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                                aria-label="Recherche mobile"
+                                className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
+                            >
+                                {mobileSearchOpen ? (
+                                    <X className="w-6 h-6 text-black" />
+                                ) : (
+                                    <Search className="w-6 h-6 text-black" />
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -86,6 +86,7 @@ export async function getPostBySlug(slug: string, language?: string) {
                     fullName: true,
                     image: true,
                     bio: true,
+                    editorialRole: true,
                     _count: {
                         select: { posts: { where: { published: true } } }
                     }

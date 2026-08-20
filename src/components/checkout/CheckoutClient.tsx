@@ -16,8 +16,7 @@ import { getActiveGifts } from '@/lib/actions/gifts'
 import { getWithYouCities } from '@/lib/actions/delivery'
 
 interface CheckoutForm {
-    firstName: string
-    lastName: string
+    fullName: string
     email: string
     phone: string
     address: string
@@ -50,8 +49,7 @@ export default function CheckoutClient({
     // Pré-remplir le formulaire si l'utilisateur est connecté
     const defaultValues: Partial<CheckoutForm> = user ? {
         email: user.email,
-        firstName: user.fullName?.split(' ')[0] || '',
-        lastName: user.fullName?.split(' ').slice(1).join(' ') || '',
+        fullName: user.fullName || '',
         paymentMethod: paymentSettings?.codEnabled !== false ? 'COD' : 'STRIPE'
     } : {
         paymentMethod: paymentSettings?.codEnabled !== false ? 'COD' : 'STRIPE'
@@ -80,7 +78,7 @@ export default function CheckoutClient({
                     id: abandonedCartId,
                     phone: data.phone,
                     email: data.email,
-                    fullName: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+                    fullName: data.fullName,
                     paymentMethod: data.paymentMethod,
                     selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
                     items,
@@ -244,7 +242,7 @@ export default function CheckoutClient({
             }
 
             const result = await createOrder({
-                fullName: `${data.firstName} ${data.lastName}`,
+                fullName: data.fullName,
                 email: data.email,
                 phone: data.phone,
                 address: data.address,
@@ -368,23 +366,13 @@ export default function CheckoutClient({
                                 {t('ShippingInfo')}
                             </h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FirstName')}</label>
-                                    <input
-                                        {...registerWithTracker('firstName', { required: t('Errors.FirstNameRequired') })}
-                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
-                                    />
-                                    {errors.firstName && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.firstName.message}</p>}
-                                </div>
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('LastName')}</label>
-                                    <input
-                                        {...registerWithTracker('lastName', { required: t('Errors.LastNameRequired') })}
-                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
-                                    />
-                                    {errors.lastName && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.lastName.message}</p>}
-                                </div>
+                            <div className="space-y-3 mb-8">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullName')}</label>
+                                <input
+                                    {...registerWithTracker('fullName', { required: t('Errors.FullNameRequired') })}
+                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                />
+                                {errors.fullName && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.fullName.message}</p>}
                             </div>
 
                             <div className="hidden">
@@ -619,7 +607,7 @@ export default function CheckoutClient({
                                                     >
                                                         {account.logo ? (
                                                             <div className="h-10 flex items-center justify-center">
-                                                                <img src={account.logo} alt={account.bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                                                <img src={normalizeImage(account.logo)} alt={account.bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
                                                             </div>
                                                         ) : (
                                                             <Building2 className="w-8 h-8 text-teal-600" />
@@ -800,7 +788,7 @@ export default function CheckoutClient({
             {/* Modal Banque Sélectionnée */}
             {selectedBankIndex !== null && paymentSettings?.bankTransferAccounts && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedBankIndex(null)}>
-                    <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <button 
                             onClick={() => setSelectedBankIndex(null)}
                             className="absolute top-4 right-4 rtl:left-4 rtl:right-auto p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10"
@@ -817,7 +805,7 @@ export default function CheckoutClient({
                                 <div className="flex flex-col items-center justify-center gap-3">
                                     {paymentSettings.bankTransferAccounts[selectedBankIndex].logo ? (
                                         <div className="h-16 flex items-center justify-center">
-                                            <img src={paymentSettings.bankTransferAccounts[selectedBankIndex].logo} alt={paymentSettings.bankTransferAccounts[selectedBankIndex].bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                            <img src={normalizeImage(paymentSettings.bankTransferAccounts[selectedBankIndex].logo)} alt={paymentSettings.bankTransferAccounts[selectedBankIndex].bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
                                         </div>
                                     ) : (
                                         <Building2 className="w-12 h-12 text-teal-600" />
@@ -841,7 +829,7 @@ export default function CheckoutClient({
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">Scanner pour payer</p>
                                         <div className="flex justify-center">
                                             <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
-                                                <img src={paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode} alt="QR Code" className="w-48 h-48 object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
+                                                <img src={normalizeImage(paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode)} alt="QR Code" className="w-48 h-48 object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
                                             </div>
                                         </div>
                                     </div>

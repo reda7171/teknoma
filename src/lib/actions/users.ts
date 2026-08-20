@@ -21,6 +21,10 @@ export async function getUsers() {
                 phone: true,
                 managedLanguages: true,
                 image: true,
+                editorialRole: true,
+                editorialDomains: true,
+                editorialExperience: true,
+                editorialMethodology: true,
             }
         })
         return { success: true, data: users }
@@ -88,6 +92,10 @@ export async function createUserAdmin(data: any) {
                 facebook: data.facebook,
                 instagram: data.instagram,
                 twitter: data.twitter,
+                editorialRole: data.editorialRole,
+                editorialDomains: data.editorialDomains,
+                editorialExperience: data.editorialExperience,
+                editorialMethodology: data.editorialMethodology,
             }
         })
         revalidatePath('/admin/users')
@@ -113,6 +121,10 @@ export async function updateUserAdmin(userId: string, data: any) {
             facebook: data.facebook,
             instagram: data.instagram,
             twitter: data.twitter,
+            editorialRole: data.editorialRole,
+            editorialDomains: data.editorialDomains,
+            editorialExperience: data.editorialExperience,
+            editorialMethodology: data.editorialMethodology,
         }
 
         if (data.password && data.password.trim() !== '') {

@@ -335,6 +335,7 @@ export async function checkBookAvailability(bookId: string, quantity: number) {
  */
 export async function getBestSellerBooks(limit = 6) {
     // 1. Récupérer les livres les plus vendus via OrderItem
+    // On en prend plus pour compenser ceux qui pourraient être en rupture de stock
     const topBooks = await prisma.orderItem.groupBy({
         by: ['bookId'],
         where: {
@@ -349,8 +350,10 @@ export async function getBestSellerBooks(limit = 6) {
                 quantity: 'desc'
             }
         },
-        take: limit
+        take: limit * 3
     })
+
+    let resultBooks: any[] = []
 
     // 2. Si on a des ventes, on récupère ces livres
     if (topBooks.length > 0) {
@@ -362,30 +365,44 @@ export async function getBestSellerBooks(limit = 6) {
                 return book
             })
         )
-        return booksWithDetails.filter((book): book is NonNullable<typeof book> => book !== null && book.active)
+        resultBooks = booksWithDetails
+            .filter((book): book is NonNullable<typeof book> => book !== null && book.active && book.stock > 0)
+            .slice(0, limit)
     }
 
-    // 3. Fallback : On affiche les livres marqués manuellement comme "Meilleure Vente"
-    // S'il n'y en a pas assez, on complète avec les livres ayant le plus de stock
+    if (resultBooks.length >= limit) {
+        return resultBooks
+    }
+
+    // 3. Fallback : On complète avec les livres marqués manuellement comme "Meilleure Vente"
     const manuallySelected = await prisma.book.findMany({
-        where: { active: true, isBestSeller: true },
-        take: limit,
+        where: { 
+            active: true, 
+            isBestSeller: true,
+            stock: { gt: 0 },
+            ...(resultBooks.length > 0 ? { id: { notIn: resultBooks.map(b => b.id) } } : {})
+        },
+        take: limit - resultBooks.length,
     })
 
-    if (manuallySelected.length >= limit) {
-        return manuallySelected
+    resultBooks = [...resultBooks, ...manuallySelected]
+
+    if (resultBooks.length >= limit) {
+        return resultBooks
     }
 
+    // 4. On complète avec les livres ayant le plus de stock
     const others = await prisma.book.findMany({
         where: { 
             active: true, 
-            id: { notIn: manuallySelected.map(b => b.id) } 
+            stock: { gt: 0 },
+            ...(resultBooks.length > 0 ? { id: { notIn: resultBooks.map(b => b.id) } } : {})
         },
         orderBy: { stock: 'desc' },
-        take: limit - manuallySelected.length,
+        take: limit - resultBooks.length,
     })
 
-    return [...manuallySelected, ...others]
+    return [...resultBooks, ...others]
 }
 
 /**

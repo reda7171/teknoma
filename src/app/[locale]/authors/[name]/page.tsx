@@ -5,14 +5,13 @@ import Footer from '@/components/FooterWithFeatures'
 import BookCard from '@/components/BookCard'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { ArrowLeft, User, Edit } from 'lucide-react'
+import { ArrowLeft, User, Edit, Quote, BookOpen, Globe2, Calendar } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
+import { getBaseUrl } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import ShareArticle from '@/components/blog/ShareArticle'
 import { getSimilarAuthors } from '@/lib/db/authors'
-import { Quote } from 'lucide-react'
 import { isAuthenticated } from '@/lib/actions/auth'
 
 // Generate metadata for the author page
@@ -23,7 +22,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
     const { name, locale } = await params
     const authorName = decodeURIComponent(name)
-    const authorProfile = await getAuthorProfile(authorName)
 
     const baseUrl = getBaseUrl()
 
@@ -72,9 +70,6 @@ export async function generateMetadata({
         ]
     }
 
-    const fallbackApiUrl = `${baseUrl}/api/authors/${encodeURIComponent(name)}/image`
-    const imageUrl = authorProfile?.image ? getOgImageUrl(authorProfile.image, baseUrl, fallbackApiUrl) : fallbackApiUrl
-
     return {
         title: siteTitle,
         description: description,
@@ -85,20 +80,11 @@ export async function generateMetadata({
             type: 'profile',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
             url: `${baseUrl}/${locale}/authors/${encodeURIComponent(name)}`,
-            images: [
-                {
-                    url: imageUrl,
-                    width: 1200,
-                    height: 630,
-                    alt: authorName
-                }
-            ]
         },
         twitter: {
             card: 'summary_large_image',
             title: siteTitle,
             description: description,
-            images: [imageUrl]
         },
         alternates: {
             canonical: `${baseUrl}/${locale}/authors/${encodeURIComponent(name)}`,
@@ -129,18 +115,8 @@ export default async function AuthorPage({
         getSimilarAuthors(authorName)
     ])
 
-    // Mock data for Eckhart Tolle if no profile found (temporary for demo)
-    const profile = authorProfile || (authorName === 'Eckhart Tolle' ? {
-        bio: "Eckhart Tolle is a spiritual teacher and best-selling author. He is a German-born resident of Canada best known as the author of The Power of Now and A New Earth. In 2008, The New York Times called Tolle 'the most popular spiritual author in the United States'.",
-        image: "https://images.gr-assets.com/authors/1698205260p8/4298.jpg",
-        nationality: "German / Canadian",
-        birthYear: 1948
-    } : null)
-
-    if (!books || books.length === 0) {
-        // Optionnel : rediriger ou afficher 404 si on veut être strict
-        // notFound()
-    }
+    const profile = authorProfile
+    const displayImage = profile?.image || (books.length > 0 ? books[0].image : null);
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const shareTitle = `${authorName} - ${locale === 'ar' ? 'كتب ومؤلفات | مكتبة رواية' : locale === 'en' ? 'Books and Biography | Riwaya' : 'Livres et Biographie | Riwaya'}`
@@ -154,7 +130,7 @@ export default async function AuthorPage({
                 "@type": "Person",
                 "name": authorName,
                 "description": profile?.bio || `Author ${authorName}`,
-                "image": profile?.image || `${baseUrl}/logo.png`,
+                "image": displayImage || `${baseUrl}/logo.png`,
                 "sameAs": [
                     `https://ar.wikipedia.org/wiki/${encodeURIComponent(authorName)}`,
                     `https://fr.wikipedia.org/wiki/${encodeURIComponent(authorName)}`,
@@ -179,33 +155,11 @@ export default async function AuthorPage({
                     "url": `${baseUrl}/${locale}/books/${book.id}`
                 }
             }))
-        },
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                {
-                    "@type": "Question",
-                    "name": locale === 'ar' ? `من هو ${authorName}؟` : locale === 'en' ? `Who is ${authorName}?` : `Qui est ${authorName} ?`,
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": profile?.bio || (locale === 'ar' ? `مؤلف مشهور.` : locale === 'en' ? `A renowned author.` : `Un auteur renommé.`)
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": locale === 'ar' ? `ما هي أفضل كتب ${authorName}؟` : locale === 'en' ? `What are the best books by ${authorName}?` : `Quels sont les meilleurs livres de ${authorName} ?`,
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": locale === 'ar' ? `يمكنك العثور على أفضل كتب ${authorName} في مكتبة رواية.` : locale === 'en' ? `You can find the best books by ${authorName} at Riwaya Library.` : `Vous pouvez trouver les meilleurs livres de ${authorName} sur la Librairie Riwaya.`
-                    }
-                }
-            ]
         }
     ]
 
     return (
-        <div className="min-h-screen bg-pixio-cream flex flex-col">
+        <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-black selection:text-white">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
@@ -213,36 +167,56 @@ export default async function AuthorPage({
             <Header />
 
             <main className="flex-grow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
-                    {/* Back Button */}
-                    <Link
-                        href="/books"
-                        className="inline-flex items-center gap-4 text-sm md:text-base font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 group transition-colors rtl:flex-row-reverse"
-                    >
-                        <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:translate-x-1" />
-                        <span>{tBook('BackToSelection')}</span>
-                    </Link>
+                {/* Hero Section */}
+                <section className="relative pt-12 pb-20 overflow-hidden">
+                    {/* Decorative Background */}
+                    <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-slate-200/50 to-transparent -z-10" />
+                    <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -z-10" />
+                    <div className="absolute top-40 -left-40 w-96 h-96 bg-amber-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -z-10" />
 
-                    {/* Author Header */}
-                    <div className="bg-white rounded-[3rem] p-10 md:p-16 mb-20 shadow-xl shadow-black/5 border border-gray-100 relative overflow-hidden group">
-                        {/* Background Effect */}
-                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                            {!profile?.image && <User className="w-64 h-64 rtl:rotate-180" />}
-                        </div>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <Link
+                            href="/books"
+                            className="inline-flex items-center gap-3 text-xs md:text-sm font-bold uppercase tracking-widest text-slate-500 hover:text-black mb-10 group transition-colors rtl:flex-row-reverse"
+                        >
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:translate-x-1" />
+                            <span>{tBook('BackToSelection')}</span>
+                        </Link>
 
-                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-                            {/* Author Info */}
-                            <div className="lg:col-span-2">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-black text-white rounded-full text-[9px] font-black uppercase tracking-[0.3em]">
+                        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+
+                            {/* Left: Author Image (Magazine Style) */}
+                            <div className="w-full lg:w-[400px] flex-shrink-0 group">
+                                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl bg-white border border-white/40">
+                                    {displayImage ? (
+                                        <ImageWithFallback
+                                            src={displayImage}
+                                            alt={authorName}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                                            <User className="w-32 h-32 text-slate-300 mb-4" />
+                                            <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">{authorName}</span>
+                                        </div>
+                                    )}
+                                    {/* Overlay Gradient */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                </div>
+                            </div>
+
+                            {/* Right: Author Details */}
+                            <div className="flex-1 w-full pt-4">
+                                <div className="flex flex-wrap items-center gap-4 mb-6">
+                                    <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-md">
                                         <User className="w-3 h-3" />
-                                        <span>{tAuthor('AuthorLabel')}</span>
-                                    </div>
-                                    
+                                        {tAuthor('AuthorLabel')}
+                                    </span>
+
                                     {isAuth && (
-                                        <Link 
-                                            href={`/admin/authors?search=${encodeURIComponent(authorName)}`} 
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-200 transition-colors"
+                                        <Link
+                                            href={`/admin/authors?search=${encodeURIComponent(authorName)}`}
+                                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors border border-indigo-100"
                                         >
                                             <Edit className="w-3 h-3" />
                                             Modifier
@@ -250,152 +224,129 @@ export default async function AuthorPage({
                                     )}
                                 </div>
 
-                                <h1 className="text-5xl md:text-8xl font-black text-black leading-none tracking-tighter mb-8">
-                                    {authorName}<span className="text-gray-200">.</span>
+                                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-8">
+                                    {authorName}<span className="text-amber-500">.</span>
                                 </h1>
 
-                                {/* Genres Badges */}
+                                {/* Quick Stats Bar */}
+                                <div className="flex flex-wrap items-center gap-x-8 gap-y-4 mb-10 pb-10 border-b border-slate-200">
+                                    <div className="flex items-center gap-3 text-slate-600">
+                                        <BookOpen className="w-5 h-5 text-slate-400" />
+                                        <span className="font-bold">{tAuthor('BooksCount', { count: books.length })}</span>
+                                    </div>
+                                    {profile?.nationality && (
+                                        <div className="flex items-center gap-3 text-slate-600">
+                                            <Globe2 className="w-5 h-5 text-slate-400" />
+                                            <span className="font-bold">{profile.nationality}</span>
+                                        </div>
+                                    )}
+                                    {profile?.birthYear && (
+                                        <div className="flex items-center gap-3 text-slate-600">
+                                            <Calendar className="w-5 h-5 text-slate-400" />
+                                            <span className="font-bold">{profile.birthYear}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Genres / Tags */}
                                 {profile?.genres && (
-                                    <div className="flex flex-wrap gap-2 mb-8">
+                                    <div className="flex flex-wrap gap-2 mb-10">
                                         {profile.genres.split(',').map((genre, idx) => (
-                                            <span key={idx} className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                                            <span key={idx} className="px-4 py-2 bg-white text-slate-700 rounded-lg text-xs font-bold uppercase tracking-wider border border-slate-200 shadow-sm hover:border-slate-400 hover:shadow-md transition-all cursor-default">
                                                 {genre.trim()}
                                             </span>
                                         ))}
                                     </div>
                                 )}
 
-                                {profile?.nationality && (
-                                    <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6">
-                                        {profile.nationality} {profile.birthYear ? `• ${profile.birthYear}` : ''}
-                                    </p>
-                                )}
-
+                                {/* Biography */}
                                 {profile?.bio && (
-                                    <div className="prose prose-lg prose-headings:font-black prose-p:font-bold prose-p:text-gray-500 max-w-none mb-10">
-                                        <p className="leading-relaxed">
+                                    <div className="prose prose-lg md:prose-xl prose-slate max-w-3xl mb-12">
+                                        <p 
+                                            className="leading-relaxed text-slate-600 font-medium text-justify"
+                                            dir="auto"
+                                        >
                                             {profile.bio}
                                         </p>
                                     </div>
                                 )}
 
-                                {/* Quote */}
+                                {/* Highlight Quote */}
                                 {profile?.quote && (
-                                    <div className="mb-10 relative">
-                                        <Quote className="absolute -top-4 -left-4 w-12 h-12 text-gray-100 -z-10 rtl:-right-4 rtl:left-auto" />
-                                        <blockquote className="text-2xl md:text-3xl font-serif italic text-gray-800 leading-snug pl-6 border-l-4 border-black rtl:pr-6 rtl:pl-0 rtl:border-r-4 rtl:border-l-0">
+                                    <div className="relative bg-white p-8 md:p-12 rounded-3xl shadow-lg border border-slate-100 max-w-4xl mt-8">
+                                        <Quote className="absolute top-6 left-6 md:top-8 md:left-8 w-12 h-12 text-amber-100 rtl:-right-8 rtl:left-auto" />
+                                        <blockquote className="relative z-10 text-2xl md:text-3xl font-serif italic text-slate-800 leading-snug pl-12 md:pl-16 rtl:pr-16 rtl:pl-0">
                                             "{profile.quote}"
                                         </blockquote>
                                     </div>
                                 )}
-
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-gray-100 pt-8 mt-10 gap-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-px bg-gray-100 w-20 hidden md:block"></div>
-                                        <p className="text-lg font-black text-gray-400 uppercase tracking-widest">
-                                            {tAuthor('BooksCount', { count: books.length })}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                        <ShareArticle title={shareTitle} />
-                                    </div>
-                                </div>
                             </div>
+                        </div>
 
-                            {/* Author Image if available */}
-                            {profile?.image && (
-                                <div className="lg:col-span-1 flex justify-center lg:justify-end">
-                                    <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-gray-100 shadow-2xl">
-                                        <ImageWithFallback
-                                            src={profile.image}
-                                            alt={authorName}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                        <div className="mt-16 flex justify-end">
+                            <ShareArticle title={shareTitle} />
                         </div>
                     </div>
+                </section>
 
-                    {/* Similar Authors */}
-                    {similarAuthors.length > 0 && (
-                        <section className="mb-20">
-                            <div className="flex items-center justify-between mb-10">
-                                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-                                    {locale === 'ar' ? 'القراء يحبون أيضا' : locale === 'en' ? 'Readers also like' : 'Les lecteurs aiment aussi'}
-                                </h2>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                {similarAuthors.map((simAuthor) => (
-                                    <Link
-                                        key={simAuthor.id}
-                                        href={`/authors/${encodeURIComponent(simAuthor.name)}`}
-                                        className="group bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-black transition-all flex flex-col items-center text-center"
-                                    >
-                                        <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gray-50 border-2 border-gray-100 group-hover:border-black transition-colors">
-                                            {simAuthor.image ? (
-                                                <ImageWithFallback src={simAuthor.image} alt={simAuthor.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <User className="w-12 h-12 text-gray-300 mx-auto mt-6" />
-                                            )}
-                                        </div>
-                                        <h3 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                            {simAuthor.name}
-                                        </h3>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">
-                                            {tAuthor('AuthorLabel')}
-                                        </p>
-                                    </Link>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                    {/* Books Library Section */}
+                    <div className="mb-16 flex items-end justify-between border-b-2 border-slate-900 pb-4">
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                            {locale === 'ar' ? 'المؤلفات' : locale === 'en' ? 'Library' : 'Œuvres'}
+                        </h2>
+                        <span className="text-lg font-bold text-slate-500 uppercase tracking-widest hidden sm:block">
+                            {books.length} {locale === 'ar' ? 'كتاب' : 'Titles'}
+                        </span>
+                    </div>
 
-                    {/* Books Grid */}
                     {books.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-12">
                             {books.map((book) => (
                                 <BookCard key={book.id} {...book} />
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20">
-                            <p className="text-xl font-bold text-gray-300 uppercase tracking-widest">
+                        <div className="bg-white rounded-3xl p-20 text-center border border-slate-100 shadow-sm">
+                            <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-6" />
+                            <p className="text-xl font-bold text-slate-400 uppercase tracking-widest">
                                 {tCommon('NoResultsDesc')}
                             </p>
                         </div>
                     )}
-                    
-                    {/* The Similar Authors section was moved from here */}
-                </div>
 
-                {/* FAQ Section */}
-                <section className="bg-white py-20 border-t border-gray-100 mt-20">
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-10 text-center">
-                            {locale === 'ar' ? 'الأسئلة الشائعة حول الكاتب' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}
-                        </h2>
-                        <div className="space-y-6">
-                            <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-100">
-                                <h3 className="text-lg font-black text-slate-900 mb-3">
-                                    {locale === 'ar' ? `من هو ${authorName}؟` : locale === 'en' ? `Who is ${authorName}?` : `Qui est ${authorName} ?`}
-                                </h3>
-                                <p className="text-slate-600 leading-relaxed font-medium">
-                                    {profile?.bio || (locale === 'ar' ? `${authorName} هو كاتب ومؤلف تتوفر أعماله في مكتبة رواية.` : locale === 'en' ? `${authorName} is an author whose works are available at Riwaya.` : `${authorName} est un auteur dont les œuvres sont disponibles sur Riwaya.`)}
-                                </p>
+                    {/* Similar Authors Section */}
+                    {similarAuthors.length > 0 && (
+                        <div className="mt-32">
+                            <div className="mb-12 flex items-center justify-between">
+                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                                    {locale === 'ar' ? 'اكتشف كتاباً آخرين' : locale === 'en' ? 'Discover Similar Authors' : 'Découvrez d\'autres auteurs'}
+                                </h2>
                             </div>
-                            <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-100">
-                                <h3 className="text-lg font-black text-slate-900 mb-3">
-                                    {locale === 'ar' ? `أين يمكنني شراء كتب ${authorName} في المغرب؟` : locale === 'en' ? `Where can I buy books by ${authorName} in Morocco?` : `Où puis-je acheter les livres de ${authorName} au Maroc ?`}
-                                </h3>
-                                <p className="text-slate-600 leading-relaxed font-medium">
-                                    {locale === 'ar' ? `يمكنك شراء جميع كتب ${authorName} من مكتبة رواية مع خدمة التوصيل السريع إلى جميع مدن المغرب بما في ذلك الرباط والدار البيضاء.` : locale === 'en' ? `You can buy all books by ${authorName} from Riwaya Library with fast delivery to all Moroccan cities including Rabat and Casablanca.` : `Vous pouvez acheter tous les livres de ${authorName} sur la Librairie Riwaya avec une livraison rapide vers toutes les villes marocaines, y compris Rabat et Casablanca.`}
-                                </p>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                {similarAuthors.map((simAuthor) => (
+                                    <Link
+                                        key={simAuthor.id}
+                                        href={`/authors/${encodeURIComponent(simAuthor.name)}`}
+                                        className="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center"
+                                    >
+                                        <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden mb-6 bg-slate-50 border-4 border-slate-50 group-hover:border-amber-100 transition-colors">
+                                            {(simAuthor.image || simAuthor.sampleBookImage) ? (
+                                                <ImageWithFallback src={simAuthor.image || simAuthor.sampleBookImage} alt={simAuthor.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User className="w-12 h-12 text-slate-300 mx-auto mt-8 md:mt-10" />
+                                            )}
+                                        </div>
+                                        <h3 className="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-1">
+                                            {simAuthor.name}
+                                        </h3>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
-                    </div>
-                </section>
+                    )}
+                </div>
             </main>
 
             <Footer />

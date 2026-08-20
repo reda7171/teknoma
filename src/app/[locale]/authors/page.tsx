@@ -7,6 +7,7 @@ import AuthorsListClient from '@/components/authors/AuthorsListClient'
 import { Users, Sparkles } from 'lucide-react'
 import ScrollReveal from '@/components/ScrollReveal'
 import { Link } from '@/i18n/routing'
+import ImageWithFallback from '@/components/ImageWithFallback'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params
@@ -94,13 +95,12 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                             <div className="flex flex-col items-center text-center">
                                                 <Link 
                                                     href={`/authors/${encodeURIComponent(author.name)}`}
-                                                    className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 mb-6 border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-500 block cursor-pointer"
+                                                    className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 mb-6 border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-500 block cursor-pointer"
                                                 >
                                                     {(author.image || author.sampleBookImage) ? (
-                                                        <img 
-                                                            src={author.image || author.sampleBookImage!} 
+                                                        <ImageWithFallback 
+                                                            src={author.image || author.sampleBookImage} 
                                                             alt={author.name}
-                                                            className="w-full h-full object-cover"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">

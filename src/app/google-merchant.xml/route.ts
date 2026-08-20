@@ -41,7 +41,7 @@ export async function GET() {
         for (const book of books) {
             const locale = book.language === 'en' || book.language === 'fr' ? book.language : 'ar'
             const productUrl = `${baseUrl}/${locale}${generateBookUrl(book, locale)}`
-            const imageUrl = book.image?.startsWith('http') ? book.image : `${baseUrl}${book.image}`
+            const imageUrl = `${baseUrl}/api/merchant-image/${book.id}`
             const availability = book.stock > 0 ? 'in_stock' : 'out_of_stock'
             const condition = book.isOriginal ? 'new' : 'used'
             
