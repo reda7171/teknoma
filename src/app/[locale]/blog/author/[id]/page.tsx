@@ -1,3 +1,4 @@
+import { normalizeImage } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { prisma } from '@/lib/prisma'
@@ -193,7 +194,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                                     <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
                                         {post.coverImage ? (
                                             <Image
-                                                src={post.coverImage}
+                                                src={normalizeImage(post.coverImage)}
                                                 alt={post.title}
                                                 fill
                                                 className="object-contain group-hover:scale-105 transition-transform duration-700 p-2"

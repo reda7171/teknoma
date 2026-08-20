@@ -127,7 +127,7 @@ export default async function PackDetailPage({
             },
             offers: {
                 '@type': 'AggregateOffer',
-                priceCurrency: 'درهم',
+                priceCurrency: 'MAD',
                 lowPrice: displayPrice,
                 highPrice: totalOriginalPrice,
                 offerCount: 1,
@@ -143,7 +143,7 @@ export default async function PackDetailPage({
                     returnShippingFeesAmount: {
                         '@type': 'MonetaryAmount',
                         value: 35,
-                        currency: 'درهم'
+                        currency: 'MAD'
                     }
                 },
                 shippingDetails: {
@@ -151,7 +151,7 @@ export default async function PackDetailPage({
                     shippingRate: {
                         '@type': 'MonetaryAmount',
                         value: 35,
-                        currency: 'درهم'
+                        currency: 'MAD'
                     },
                     shippingDestination: {
                         '@type': 'DefinedRegion',

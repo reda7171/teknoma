@@ -92,7 +92,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
       "offers": {
         "@type": "Offer",
         "price": pack.price,
-        "priceCurrency": "درهم",
+        "priceCurrency": "MAD",
         "availability": "https://schema.org/InStock",
         "url": packUrl,
         "seller": {
@@ -115,7 +115,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
           "returnShippingFeesAmount": {
             "@type": "MonetaryAmount",
             "value": 35,
-            "currency": "درهم"
+            "currency": "MAD"
           }
         },
         "shippingDetails": {
@@ -123,7 +123,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
           "shippingRate": {
             "@type": "MonetaryAmount",
             "value": 35,
-            "currency": "درهم"
+            "currency": "MAD"
           },
           "shippingDestination": {
             "@type": "DefinedRegion",

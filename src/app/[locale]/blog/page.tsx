@@ -1,3 +1,4 @@
+import { normalizeImage } from '@/lib/utils'
 import { getPublishedPosts, getPostCategories } from '@/lib/actions/blog'
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
@@ -147,7 +148,7 @@ export default async function BlogPage({
                                 <div className={`relative overflow-hidden bg-gray-100 ${idx === 0 ? 'w-full lg:w-1/2 h-48 md:h-64 lg:h-full' : 'aspect-[4/3]'}`}>
                                     {post.coverImage ? (
                                         <Image
-                                            src={post.coverImage}
+                                            src={normalizeImage(post.coverImage)}
                                             alt={post.title}
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-700 bg-gray-50"

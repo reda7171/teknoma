@@ -25,19 +25,25 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store';
   const bookUrl = `${baseUrl}/${locale}/books/${book.id}`;
 
+  const validIsbn = book.isbn ? book.isbn.replace(/[^0-9X]/gi, '') : null;
+  const showIsbn = validIsbn && (validIsbn.length === 10 || validIsbn.length === 13);
+  const finalDescription = (displayDescription && displayDescription.trim().length > 15) 
+    ? displayDescription 
+    : `Découvrez ${displayTitle || book.title} sur Riwaya. Achetez en ligne avec livraison rapide au Maroc (Paiement à la livraison).`;
+
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": ["Book", "Product"],
         "@id": bookUrl,
-        "name": displayTitle,
+        "name": displayTitle || book.title || "Livre",
         "author": {
           "@type": "Person",
           "name": book.author
         },
         "sku": book.id,
-        ...(book.isbn ? { "isbn": book.isbn } : {}),
+        ...(showIsbn ? { "isbn": validIsbn } : {}),
         "inLanguage": locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
         "publisher": {
           "@type": "Organization",
@@ -48,7 +54,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         "url": bookUrl,
         ...(book.category ? { "genre": book.category } : {}),
         ...(book.numberOfPages ? { "numberOfPages": book.numberOfPages } : {}),
-        "description": displayDescription,
+        "description": finalDescription,
         "speakable": {
           "@type": "SpeakableSpecification",
           "cssSelector": ["h1", ".book-description", ".book-price"]
@@ -61,7 +67,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         "offers": {
           "@type": "Offer",
           "price": book.price,
-          "priceCurrency": "درهم",
+          "priceCurrency": "MAD",
           "availability": book.stock > 0
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",
@@ -86,7 +92,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "returnShippingFeesAmount": {
               "@type": "MonetaryAmount",
               "value": 35,
-              "currency": "درهم"
+              "currency": "MAD"
             }
           },
           "shippingDetails": {
@@ -94,7 +100,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "shippingRate": {
               "@type": "MonetaryAmount",
               "value": 35,
-              "currency": "درهم"
+              "currency": "MAD"
             },
             "shippingDestination": {
               "@type": "DefinedRegion",
@@ -121,7 +127,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "BuyAction",
           "target": bookUrl,
           "price": book.price,
-          "priceCurrency": "درهم"
+          "priceCurrency": "MAD"
         },
         ...(reviewCount > 0 ? {
           "aggregateRating": {

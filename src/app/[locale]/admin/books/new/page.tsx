@@ -14,13 +14,15 @@ function BookFormContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     
-    // Read prefill data from URL
     const prefillTitle = searchParams.get('title') || ''
     const prefillAuthor = searchParams.get('author') || ''
     const prefillDescription = searchParams.get('description') || ''
     const prefillIsbn = searchParams.get('isbn') || ''
-    const prefillLang = searchParams.get('lang') || 'fr'
-    const validLang = ['fr', 'ar', 'en'].includes(prefillLang) ? (prefillLang as 'fr' | 'ar' | 'en') : 'fr'
+    const rawLang = (searchParams.get('lang') || 'fr').toLowerCase()
+    let validLang: 'fr' | 'ar' | 'en' = 'fr'
+    if (rawLang.startsWith('ar')) validLang = 'ar'
+    else if (rawLang.startsWith('en')) validLang = 'en'
+    else if (rawLang.startsWith('fr')) validLang = 'fr'
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -197,7 +199,7 @@ function BookFormContent() {
                             type="text"
                             name="title_ar"
                             required={bookLanguage === 'ar'}
-                            defaultValue={prefillLang === 'ar' ? prefillTitle : ''}
+                            defaultValue={validLang === 'ar' ? prefillTitle : ''}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en arabe"
@@ -206,7 +208,7 @@ function BookFormContent() {
                             type="text"
                             name="title_fr"
                             required={bookLanguage === 'fr'}
-                            defaultValue={prefillLang === 'fr' ? prefillTitle : ''}
+                            defaultValue={validLang === 'fr' ? prefillTitle : ''}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en français"
@@ -215,7 +217,7 @@ function BookFormContent() {
                             type="text"
                             name="title_en"
                             required={bookLanguage === 'en'}
-                            defaultValue={prefillLang === 'en' ? prefillTitle : ''}
+                            defaultValue={validLang === 'en' ? prefillTitle : ''}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Titre en anglais"
@@ -505,7 +507,7 @@ function BookFormContent() {
                         <textarea
                             name="description_ar"
                             required={bookLanguage === 'ar'}
-                            defaultValue={prefillLang === 'ar' ? prefillDescription : ''}
+                            defaultValue={validLang === 'ar' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -514,7 +516,7 @@ function BookFormContent() {
                         <textarea
                             name="description_fr"
                             required={bookLanguage === 'fr'}
-                            defaultValue={prefillLang === 'fr' ? prefillDescription : ''}
+                            defaultValue={validLang === 'fr' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -523,7 +525,7 @@ function BookFormContent() {
                         <textarea
                             name="description_en"
                             required={bookLanguage === 'en'}
-                            defaultValue={prefillLang === 'en' ? prefillDescription : ''}
+                            defaultValue={validLang === 'en' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

@@ -75,7 +75,7 @@ body {
   color: var(--foreground);
   font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   letter-spacing: -0.01em;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .font-tajawal {
@@ -112,7 +112,7 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   /* Prevent font scaling in landscape on iOS */
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Touch optimizations */

@@ -4,7 +4,7 @@ import { Link, usePathname } from '@/i18n/routing'
 import { 
     BookOpen, ShoppingCart, Search, Menu, X, User,
     Home, Book, Users, Package, FileText, Newspaper, 
-    Monitor, Baby, Usb, UsersRound
+    Monitor, Baby, Usb, UsersRound, ChevronDown, ChevronRight, LayoutGrid
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import CartDrawer from './CartDrawer'
@@ -19,6 +19,7 @@ import { getWishlist } from '@/lib/actions/community-wishlist'
 import { getReadingList } from '@/lib/actions/reading-list'
 import { useWishlistStore } from '@/store/wishlist'
 import { useReadingListStore } from '@/store/reading-list'
+import { CATEGORIES } from '@/lib/constants/categories'
 
 interface HeaderProps {
     user?: {
@@ -62,6 +63,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
 
     const pathname = usePathname()
     const t = useTranslations('Navigation')
+    const tCat = useTranslations('Categories')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
     const { isCartOpen, openCart, closeCart } = useUIStore()
@@ -209,6 +211,14 @@ export default function Header({ user, notificationDropdown, navigation, feature
         finalNavItems = [...finalNavItems, { href: '/blog', label: t('Journal'), isJournal: true }]
     }
 
+    // Inject Categories menu after Livres
+    const livresIndex = finalNavItems.findIndex((i: any) => i.href.includes('/books'));
+    if (livresIndex !== -1 && !finalNavItems.some((i: any) => i.isCategoryMenu)) {
+        finalNavItems.splice(livresIndex + 1, 0, { href: '#categories', label: t('Categories'), isCategoryMenu: true });
+    } else if (livresIndex === -1 && !finalNavItems.some((i: any) => i.isCategoryMenu)) {
+        finalNavItems.splice(1, 0, { href: '#categories', label: t('Categories'), isCategoryMenu: true });
+    }
+
     return (
         <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
@@ -237,9 +247,82 @@ export default function Header({ user, notificationDropdown, navigation, feature
                     {/* Desktop Navigation - Elegant & Clean */}
                     <nav className="hidden lg:flex items-center gap-6 xl:gap-10 min-w-max h-8">
                         {/* Navigation Items - Only render client side after mounting */}
-                        {mounted && finalNavItems.slice(0, 6).map((item: any) => {
-                            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+                        {mounted && finalNavItems.slice(0, 8).map((item: any) => {
+                            const isActive = pathname === item.href || (item.href !== '/' && item.href !== '#categories' && pathname.startsWith(item.href))
                             const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.href.includes('/livres-numeriques') || item.isJournal || item.href.includes('/deposer-liste')
+
+                            if (item.isCategoryMenu) {
+                                return (
+                                    <div key="categories" className="relative group/category">
+                                        <button className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative flex items-center gap-1.5 ${isActive ? 'text-black' : 'text-gray-900 hover:text-black'}`}>
+                                            <LayoutGrid className="w-4 h-4" />
+                                            <span>{item.label}</span>
+                                            <ChevronDown className="w-4 h-4 transition-transform group-hover/category:rotate-180" />
+                                        </button>
+                                        <div className="absolute top-full left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 mt-4 w-[850px] bg-white shadow-2xl shadow-black/10 rounded-2xl border border-gray-100 opacity-0 invisible group-hover/category:opacity-100 group-hover/category:visible group-hover/category:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex min-h-[450px]">
+                                            {/* Left Column - Main Categories */}
+                                            <div className="w-1/3 bg-gray-50/50 p-3 border-r border-gray-100 rtl:border-l rtl:border-r-0 relative z-20 rounded-l-2xl rtl:rounded-r-2xl rtl:rounded-l-none">
+                                                <ul className="space-y-1">
+                                                    {Object.entries(CATEGORIES).map(([mainCat, subCats], index) => {
+                                                        const colors = [
+                                                            { bg: 'hover:bg-blue-50', text: 'group-hover/mega-item:text-blue-600', border: 'hover:border-blue-500', dot: 'group-hover/link:bg-blue-500', rightBg: 'bg-gradient-to-br from-white to-blue-50/30' },
+                                                            { bg: 'hover:bg-indigo-50', text: 'group-hover/mega-item:text-indigo-600', border: 'hover:border-indigo-500', dot: 'group-hover/link:bg-indigo-500', rightBg: 'bg-gradient-to-br from-white to-indigo-50/30' },
+                                                            { bg: 'hover:bg-purple-50', text: 'group-hover/mega-item:text-purple-600', border: 'hover:border-purple-500', dot: 'group-hover/link:bg-purple-500', rightBg: 'bg-gradient-to-br from-white to-purple-50/30' },
+                                                            { bg: 'hover:bg-pink-50', text: 'group-hover/mega-item:text-pink-600', border: 'hover:border-pink-500', dot: 'group-hover/link:bg-pink-500', rightBg: 'bg-gradient-to-br from-white to-pink-50/30' },
+                                                            { bg: 'hover:bg-amber-50', text: 'group-hover/mega-item:text-amber-600', border: 'hover:border-amber-500', dot: 'group-hover/link:bg-amber-500', rightBg: 'bg-gradient-to-br from-white to-amber-50/30' },
+                                                            { bg: 'hover:bg-teal-50', text: 'group-hover/mega-item:text-teal-600', border: 'hover:border-teal-500', dot: 'group-hover/link:bg-teal-500', rightBg: 'bg-gradient-to-br from-white to-teal-50/30' },
+                                                            { bg: 'hover:bg-emerald-50', text: 'group-hover/mega-item:text-emerald-600', border: 'hover:border-emerald-500', dot: 'group-hover/link:bg-emerald-500', rightBg: 'bg-gradient-to-br from-white to-emerald-50/30' },
+                                                            { bg: 'hover:bg-sky-50', text: 'group-hover/mega-item:text-sky-600', border: 'hover:border-sky-500', dot: 'group-hover/link:bg-sky-500', rightBg: 'bg-gradient-to-br from-white to-sky-50/30' },
+                                                            { bg: 'hover:bg-rose-50', text: 'group-hover/mega-item:text-rose-600', border: 'hover:border-rose-500', dot: 'group-hover/link:bg-rose-500', rightBg: 'bg-gradient-to-br from-white to-rose-50/30' }
+                                                        ];
+                                                        const c = colors[index % colors.length];
+                                                        
+                                                        return (
+                                                        <li key={mainCat} className="group/mega-item">
+                                                            <Link href={`/books?category=${encodeURIComponent(mainCat)}`} className={`w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-gray-600 ${c.bg} ${c.text} hover:shadow-sm rounded-xl transition-all border-l-4 border-transparent rtl:border-l-0 rtl:border-r-4 ${c.border}`}>
+                                                                {tCat(mainCat as any) || mainCat}
+                                                                {subCats.length > 0 && <ChevronRight className="w-4 h-4 rtl:rotate-180 opacity-0 group-hover/mega-item:opacity-100 group-hover/mega-item:translate-x-1 rtl:group-hover/mega-item:-translate-x-1 transition-all" />}
+                                                            </Link>
+                                                            
+                                                            {/* Right Column - Subcategories (Shows on hover of this li) */}
+                                                            {subCats.length > 0 && (
+                                                                <div className={`absolute top-0 left-full rtl:left-auto rtl:right-full w-[200%] h-full opacity-0 invisible group-hover/mega-item:opacity-100 group-hover/mega-item:visible group-hover/mega-item:z-10 z-0 p-8 transition-all duration-300 cursor-default rounded-r-2xl rtl:rounded-l-2xl rtl:rounded-r-none ${c.rightBg}`}>
+                                                                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200/50">
+                                                                        <h3 className={`text-xl font-black ${c.text.replace('group-hover/mega-item:', '')}`}>{tCat(mainCat as any) || mainCat}</h3>
+                                                                        <Link href={`/books?category=${encodeURIComponent(mainCat)}`} className="text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+                                                                            Voir tout
+                                                                        </Link>
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                                                                        {subCats.map(subCat => (
+                                                                            <Link key={subCat} href={`/books?category=${encodeURIComponent(mainCat)}&subCategory=${encodeURIComponent(subCat)}`} className="text-sm font-medium text-gray-600 hover:text-black hover:translate-x-1 rtl:hover:-translate-x-1 transition-transform flex items-center gap-2 group/link">
+                                                                                <div className={`w-1.5 h-1.5 rounded-full bg-gray-200 ${c.dot} transition-colors shrink-0`} />
+                                                                                {tCat(subCat as any) || subCat}
+                                                                            </Link>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </li>
+                                                    );
+                                                })}
+                                                </ul>
+                                            </div>
+                                            
+                                            {/* Default State (When not hovering any specific category) */}
+                                            <div className="absolute top-0 right-0 rtl:left-0 rtl:right-auto bottom-0 w-2/3 bg-white p-8 flex flex-col items-center justify-center text-center z-0 rounded-r-2xl rtl:rounded-l-2xl rtl:rounded-r-none pointer-events-none">
+                                                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
+                                                    <LayoutGrid className="w-8 h-8 text-gray-300" />
+                                                </div>
+                                                <h3 className="text-lg font-black text-gray-900 mb-2">Explorez nos catégories</h3>
+                                                <p className="text-sm text-gray-400 max-w-sm">
+                                                    Survolez une catégorie pour découvrir toutes nos sous-catégories et trouver votre prochaine lecture.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
                             if (isSpecial) {
                                 const isKids = item.href.includes('/mon-enfant')
@@ -386,6 +469,39 @@ export default function Header({ user, notificationDropdown, navigation, feature
 
                         {/* Navigation Links */}
                         {finalNavItems.map((item: any) => {
+                            if (item.isCategoryMenu) {
+                                return (
+                                    <details key="categories-mobile" className="group/mobile-cat">
+                                        <summary className="flex items-center justify-between px-5 py-4 rounded-[1.5rem] bg-gray-50 text-gray-900 font-bold text-sm cursor-pointer list-none hover:bg-gray-100 transition-colors">
+                                            <div className="flex items-center gap-2">
+                                                <LayoutGrid className="w-5 h-5" />
+                                                <span className="uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black">{item.label}</span>
+                                            </div>
+                                            <ChevronDown className="w-5 h-5 transition-transform group-open/mobile-cat:rotate-180" />
+                                        </summary>
+                                        <div className="mt-2 pl-4 pr-2 space-y-2">
+                                            {Object.entries(CATEGORIES).map(([mainCat, subCats]) => (
+                                                <details key={mainCat} className="group/mobile-sub">
+                                                    <summary className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 cursor-pointer list-none">
+                                                        {tCat(mainCat as any) || mainCat}
+                                                        {subCats.length > 0 && <ChevronDown className="w-4 h-4 transition-transform group-open/mobile-sub:rotate-180" />}
+                                                    </summary>
+                                                    {subCats.length > 0 && (
+                                                        <div className="mt-1 pl-4 rtl:pl-0 rtl:pr-4 space-y-1">
+                                                            {subCats.map(subCat => (
+                                                                <Link key={subCat} href={`/books?category=${encodeURIComponent(mainCat)}&subCategory=${encodeURIComponent(subCat)}`} className="block px-4 py-2.5 text-sm text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                                                                    {tCat(subCat as any) || subCat}
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </details>
+                                            ))}
+                                        </div>
+                                    </details>
+                                )
+                            }
+
                             const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.isJournal || item.href.includes('/deposer-liste')
                             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                             
