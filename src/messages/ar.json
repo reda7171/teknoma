@@ -1306,7 +1306,9 @@
       "LinkCopied": "تم النسخ !"
     },
     "TableOfContents": "محتويات المقال",
-    "Blog": "المدونة"
+    "Blog": "المدونة",
+    "PublishedArticles": "مقالات منشورة",
+    "ViewAllArticles": "عرض جميع مقالاته"
   },
   "BlogComments": {
     "CommentsTitle": "التعليقات",

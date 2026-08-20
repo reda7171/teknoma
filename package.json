@@ -68,7 +68,7 @@
     "sharp": "^0.35.3",
     "stripe": "^22.3.0",
     "tailwind-merge": "^3.4.0",
-    "uuid": "^14.0.1",
+    "uuid": "^14.0.2",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },
@@ -99,6 +99,9 @@
     "exiftool-vendored.exe": "^13.59.0"
   },
   "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    },
     "serialize-javascript": "^7.1.0",
     "deepmerge-ts": "^8.0.1"
   }

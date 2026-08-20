@@ -1233,7 +1233,9 @@
       "LinkCopied": "Lien copié !"
     },
     "TableOfContents": "Sommaire",
-    "Blog": "Blog"
+    "Blog": "Blog",
+    "PublishedArticles": "Articles publiés",
+    "ViewAllArticles": "Voir tous ses articles"
   },
   "BlogComments": {
     "CommentsTitle": "Commentaires",

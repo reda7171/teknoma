@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 export async function GET(req: Request) {
     try {
@@ -48,6 +49,19 @@ export async function POST(req: Request) {
             where: { id: offerId },
             data: { status } // 'ACCEPTED' ou 'REJECTED'
         })
+
+        // Notifier sur Telegram de l'action du client
+        try {
+            const emoji = status === 'ACCEPTED' ? '✅' : '❌'
+            const action = status === 'ACCEPTED' ? 'ACCEPTEE' : 'REFUSEE'
+            const actionText = status === 'ACCEPTED' ? 'accepté' : 'refusé'
+            
+            await sendTelegramMessage(
+                `${emoji} <b>Offre ${action}</b>\n\nLe client a <b>${actionText}</b> l'offre de réduction de <b>${offer.discountAmount} Dhs</b>.\n🔑 <b>Session:</b> <code>${offer.sessionId}</code>`
+            )
+        } catch (tgError) {
+            console.error('Erreur notification telegram offre:', tgError)
+        }
 
         return NextResponse.json({ offer })
     } catch (error) {
