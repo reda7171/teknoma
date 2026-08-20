@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface Props {
     title: string
@@ -12,6 +12,7 @@ interface Props {
 
 export default function WhatsAppOrderButton({ title, price, phone, type = 'book', replacedBooks }: Props) {
     const tCommon = useTranslations('Common')
+    const locale = useLocale()
     const phoneNumber = (phone || '212600000000').replace(/[\s+\-()]/g, '')
 
     let replacedInfo = ''
@@ -19,12 +20,28 @@ export default function WhatsAppOrderButton({ title, price, phone, type = 'book'
         replacedInfo = '\n(Pack personnalisé: ' + Object.values(replacedBooks).map(b => b.title).join(', ') + ')'
     }
 
-    // Message en Darija
-    const message = type === 'pack'
-        ? `Salam, bghit nchri had lpack: "${title}" b ${price} ${tCommon('Currency')}.${replacedInfo} Wach kayn?`
-        : type === 'accessory'
-        ? `Salam, bghit nchri had l'accessoire: "${title}" b ${price} ${tCommon('Currency')}. Wach kayn?`
-        : `Salam, bghit had lktab: "${title}" b ${price} ${tCommon('Currency')}. Wach kayn?`
+    // Message dynamique par locale
+    const messages = {
+        fr: {
+            pack: `Bonjour, je veux ce pack : "${title}"${replacedInfo} ... combien le prix avec la livraison ?`,
+            accessory: `Bonjour, je veux cet accessoire : "${title}" ... combien le prix avec la livraison ?`,
+            book: `Bonjour, je veux ce livre : "${title}" ... combien le prix avec la livraison ?`
+        },
+        ar: { // Darija
+            pack: `Salam, brit had lpack : "${title}"${replacedInfo} ... chhal taman m3a tawssil ?`,
+            accessory: `Salam, brit had l'accessoire : "${title}" ... chhal taman m3a tawssil ?`,
+            book: `Salam, brit had lktab : "${title}" ... chhal taman m3a tawssil ?`
+        },
+        en: {
+            pack: `Hello, I want this pack: "${title}"${replacedInfo} ... how much is the price with delivery?`,
+            accessory: `Hello, I want this accessory: "${title}" ... how much is the price with delivery?`,
+            book: `Hello, I want this book: "${title}" ... how much is the price with delivery?`
+        }
+    }
+
+    const currentMessages = messages[locale as keyof typeof messages] || messages.fr
+    const message = currentMessages[type]
+
 
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
 

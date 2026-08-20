@@ -1,4 +1,4 @@
-import { getPostBySlug, incrementPostViews, getRelatedPosts } from '@/lib/actions/blog'
+import { getPostBySlug, incrementPostViews, getRelatedPosts, getPrevNextPosts } from '@/lib/actions/blog'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Header from '@/components/HeaderWithUser'
@@ -136,12 +136,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const readingTime = estimateReadingTime(post.content)
 
     // Articles similaires + config AdSense
-    const [relatedPosts, adsenseEnabled, adsensePublisherId, slotTop, slotBottom] = await Promise.all([
-        getRelatedPosts(post.id, post.category, locale),
+    const [relatedPosts, adsenseEnabled, adsensePublisherId, slotTop, slotBottom, { prev: prevPost, next: nextPost }] = await Promise.all([
+        getRelatedPosts(post.id, post.category, locale, 4),
         getSetting('adsense_enabled').then(v => v === 'true'),
         getSetting('adsense_publisher_id').then(v => v || ''),
         getSetting('adsense_slot_article_top').then(v => v || ''),
         getSetting('adsense_slot_article_bottom').then(v => v || ''),
+        getPrevNextPosts(post.id, post.publishedAt || new Date(), locale)
     ])
 
     return (
@@ -407,7 +408,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-pre:bg-slate-900 prose-pre:rounded-2xl prose-pre:shadow-xl prose-pre:my-8 prose-pre:overflow-x-auto
                                 prose-img:rounded-xl md:prose-img:rounded-2xl prose-img:shadow-lg prose-img:mx-auto prose-img:my-8 md:prose-img:my-10 prose-img:w-full prose-img:object-cover
                                 prose-ul:space-y-3 prose-ol:space-y-3 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
-                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold prose-li:mb-4 rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold`}
+                                prose-li:text-slate-800 prose-li:leading-relaxed prose-li:font-semibold prose-li:mb-4 rtl:prose-li:text-[18px] md:rtl:prose-li:text-[21px] rtl:prose-li:leading-[2] md:rtl:prose-li:leading-[2.5] rtl:prose-li:font-bold
+                                prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-slate-700 prose-blockquote:shadow-sm rtl:prose-blockquote:border-l-0 rtl:prose-blockquote:border-r-4 rtl:prose-blockquote:rounded-r-none rtl:prose-blockquote:rounded-l-2xl`}
                         >
                             {/* === GEO: AI TL;DR Summary === */}
                             {post.excerpt && (
@@ -425,8 +427,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 </section>
                             )}
 
-                            {/* Sommaire / TOC (au milieu de la page) */}
-                            <div className="not-prose">
+                            {/* Sommaire / TOC (Mobile Uniquement) */}
+                            <div className="not-prose lg:hidden">
                                 <TableOfContents language={post.language} />
                             </div>
 
@@ -442,24 +444,31 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 <BlogDynamicContent html={part1} />
                                                 
                                                 {/* === CTA Interne (Mobile & Desktop) === */}
-                                                <div className="not-prose my-10 p-6 md:p-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2rem] shadow-2xl relative overflow-hidden group">
-                                                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors duration-700" />
+                                                <div className="not-prose my-12 p-8 md:p-10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] relative overflow-hidden group transform hover:-translate-y-1 transition-all duration-500 border border-slate-700/50">
+                                                    {/* Background decorative elements */}
+                                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] group-hover:bg-emerald-500/20 transition-colors duration-700" />
+                                                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] group-hover:bg-blue-500/20 transition-colors duration-700" />
                                                     
-                                                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                                                        <div className="text-center md:text-start flex-1">
-                                                            <h4 className="text-xl md:text-2xl font-black text-white mb-2 leading-tight">
+                                                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                                                        <div className="text-center md:text-start flex-1 space-y-3">
+                                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-[10px] uppercase tracking-widest font-black backdrop-blur-sm border border-white/10 mb-2">
+                                                                <Sparkles className="w-3 h-3 text-emerald-400" />
+                                                                Sélection Spéciale
+                                                            </div>
+                                                            <h4 className="text-2xl md:text-3xl font-black text-white leading-tight">
                                                                 {locale === 'ar' ? 'اكتشف تشكيلتنا من الكتب' : locale === 'en' ? 'Discover our book selection' : 'Découvrez notre sélection de livres'}
                                                             </h4>
-                                                            <p className="text-slate-300 text-sm md:text-base font-medium">
+                                                            <p className="text-slate-300/90 text-sm md:text-base font-medium max-w-lg">
                                                                 {locale === 'ar' ? 'كتب مختارة بعناية تناسب جميع الأذواق وبأفضل الأسعار.' : locale === 'en' ? 'Carefully selected books for all tastes at the best prices.' : 'Des livres soigneusement sélectionnés pour tous les goûts aux meilleurs prix.'}
                                                             </p>
                                                         </div>
                                                         <a 
                                                             href="#recommended-books" 
-                                                            className="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-slate-900 text-sm md:text-base font-black uppercase tracking-wider rounded-full hover:bg-slate-100 hover:scale-105 active:scale-95 transition-all shadow-lg flex-shrink-0"
+                                                            className="relative overflow-hidden inline-flex items-center gap-3 px-8 py-4 bg-white text-slate-900 text-sm md:text-base font-black uppercase tracking-wider rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] flex-shrink-0 group/btn"
                                                         >
-                                                            <BookOpen className="w-5 h-5" />
-                                                            {t('Discover')}
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite]" />
+                                                            <BookOpen className="w-5 h-5 transition-transform group-hover/btn:-rotate-12" />
+                                                            <span className="relative z-10">{t('Discover')}</span>
                                                         </a>
                                                     </div>
                                                 </div>
@@ -503,38 +512,50 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             </div>
                         </div>
 
-                        {/* === Bio Auteur (Caché sur mobile car affiché en haut) === */}
+                        {/* === Bio Auteur (Mobile Uniquement) === */}
                         {(post.authorName || post.author) && (
-                            <div className="hidden sm:block mt-10 md:mt-16 p-5 md:p-8 bg-slate-50 border border-slate-100 rounded-3xl text-slate-900">
-                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-4 md:mb-6">{t('AboutAuthor')}</p>
-                                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-4 md:gap-6">
-                                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            <Link href={`/blog`} className="lg:hidden mt-10 md:mt-16 p-5 md:p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
+                                
+                                <div className="relative z-10 flex items-start gap-4">
+                                    {/* Photo */}
+                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-[1.2rem] bg-white border border-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
                                         {(post.author?.image) ? (
                                             <Image
                                                 src={post.author.image}
-                                                alt={post.author.fullName || ''}
-                                                width={64}
-                                                height={64}
+                                                alt={post.author?.fullName || ''}
+                                                width={80}
+                                                height={80}
                                                 className="object-cover w-full h-full"
                                                 unoptimized
                                             />
                                         ) : (
-                                            <User className="w-6 h-6 md:w-7 md:h-7 text-slate-400" />
+                                            <User className="w-7 h-7 md:w-8 md:h-8 text-slate-300" />
                                         )}
                                     </div>
-                                    <div>
-                                        <h3 className="text-base md:text-lg font-black mb-1">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
-                                        {(!post.authorName && post.author?.bio) ? (
-                                            <p className="text-sm text-slate-500 leading-relaxed">{post.author.bio}</p>
-                                        ) : (
-                                            <>
-                                                <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-2">{t('ModeratorRole')}</p>
-                                                <p className="text-xs md:text-sm text-slate-500 leading-relaxed">{t('ModeratorDescription')}</p>
-                                            </>
-                                        )}
+
+                                    {/* Infos */}
+                                    <div className="flex-1 min-w-0 pt-1">
+                                        <h3 className="text-lg md:text-xl font-black mb-1 text-slate-800 truncate">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
+                                        <p className="text-xs md:text-sm text-slate-500 font-medium truncate mb-4">
+                                            {(!post.authorName && post.author?.bio) ? post.author.bio : t('ModeratorRole')}
+                                        </p>
+
+                                        {/* Statistiques et Lien */}
+                                        <div className="flex flex-col gap-2 mt-auto">
+                                            {(post.author && post.author._count && 'posts' in post.author._count) && (
+                                                <div className="flex items-center gap-2 text-slate-500">
+                                                    <Pencil className="w-3.5 h-3.5 text-rose-400" />
+                                                    <span className="text-[11px] md:text-xs font-black uppercase tracking-wider">{post.author._count.posts} {t('PublishedArticles')}</span>
+                                                </div>
+                                            )}
+                                            <div className="inline-flex items-center gap-1.5 text-[11px] md:text-xs font-black text-rose-600 uppercase tracking-wider group-hover:text-rose-700 transition-colors">
+                                                {t('ViewAllArticles')} <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         )}
 
                         {/* === Livres Mentionnés (Mobile/Desktop bas d'article) === */}
@@ -613,8 +634,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                             <span className="text-[9px] md:text-[10px] font-bold text-rose-500 uppercase tracking-widest">{t('OutOfStock')}</span>
                                                         )}
                                                     </div>
-                                                    <div className="px-4 py-2 bg-slate-900 text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full group-hover:bg-slate-600 transition-colors whitespace-nowrap sm:ml-auto">
-                                                        {t('Discover')}
+                                                    <div className="relative overflow-hidden px-5 py-2.5 bg-slate-900 text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full transition-all group-hover:bg-rose-600 group-hover:shadow-[0_0_20px_rgba(225,29,72,0.3)] whitespace-nowrap sm:ml-auto flex items-center justify-center">
+                                                        <span className="relative z-10">{t('Discover')}</span>
+                                                        {/* Shimmer effect */}
+                                                        <div className="absolute inset-0 -translate-x-[100%] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -628,6 +651,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {/* === Commentaires === */}
                         <CommentsSection
                             postId={post.id}
+                            postTitle={post.title}
+                            postCategory={post.category || ''}
                             comments={post.comments || []}
                             totalCount={post._count?.comments || 0}
                         />
@@ -635,10 +660,63 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                     {/* === Sidebar sticky === */}
                     <aside className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6 lg:space-y-8 h-max pb-8">
+                            
+                            {/* TOC Desktop */}
+                            <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+                                <TableOfContents language={post.language} />
+                            </div>
+
+                            {/* Bio Auteur (Desktop) */}
+                            {(post.authorName || post.author) && (
+                                <Link href={`/blog`} className="p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
+                                    <p className="relative z-10 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5">{t('AboutAuthor')}</p>
+                                    
+                                    <div className="relative z-10 flex items-start gap-4">
+                                        {/* Photo */}
+                                        <div className="w-16 h-16 rounded-[1.2rem] bg-white border border-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
+                                            {(post.author?.image) ? (
+                                                <Image
+                                                    src={post.author.image}
+                                                    alt={post.author?.fullName || ''}
+                                                    width={80}
+                                                    height={80}
+                                                    className="object-cover w-full h-full"
+                                                    unoptimized
+                                                />
+                                            ) : (
+                                                <User className="w-7 h-7 text-slate-300" />
+                                            )}
+                                        </div>
+
+                                        {/* Infos */}
+                                        <div className="flex-1 min-w-0 pt-1">
+                                            <h3 className="text-lg font-black mb-1 text-slate-800 truncate">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
+                                            <p className="text-xs text-slate-500 font-medium truncate mb-4">
+                                                {(!post.authorName && post.author?.bio) ? post.author.bio : t('ModeratorRole')}
+                                            </p>
+
+                                            {/* Statistiques et Lien */}
+                                            <div className="flex flex-col gap-2 mt-auto">
+                                                {(post.author && post.author._count && 'posts' in post.author._count) && (
+                                                    <div className="flex items-center gap-2 text-slate-500">
+                                                        <Pencil className="w-3.5 h-3.5 text-rose-400" />
+                                                        <span className="text-[11px] font-black uppercase tracking-wider">{post.author._count.posts} {t('PublishedArticles')}</span>
+                                                    </div>
+                                                )}
+                                                <div className="inline-flex items-center gap-1.5 text-[11px] font-black text-rose-600 uppercase tracking-wider group-hover:text-rose-700 transition-colors">
+                                                    {t('ViewAllArticles')} <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )}
 
                             {/* Partage */}
-                            <div className="bg-gray-50 rounded-3xl p-6">
-                                <p className="text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-gray-400 mb-4">{tPost('ShareArticle')}</p>
+                            <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors duration-500" />
+                                <p className="relative z-10 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-4">{tPost('ShareArticle')}</p>
                                 <div className="flex flex-col gap-3">
                                     <ShareArticle title={post.title} vertical translations={{
                                         facebook: tPost('Share.Facebook'),
@@ -883,6 +961,61 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </section>
 
             <Footer />
+            
+            {/* === Navigation Article Précédent / Suivant === */}
+            {(prevPost || nextPost) && (
+                <nav className="bg-white border-t border-slate-100" aria-label={locale === 'ar' ? 'تصفح المقالات' : locale === 'en' ? 'Article navigation' : 'Navigation articles'}>
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-0">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+
+                            {/* Article précédent */}
+                            {prevPost ? (
+                                <Link
+                                    href={`/blog/${prevPost.slug}`}
+                                    className="group flex items-center gap-4 p-6 sm:p-8 hover:bg-slate-50 transition-colors"
+                                >
+                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-900 transition-colors">
+                                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-white rotate-180 rtl:rotate-0 transition-colors" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
+                                            {locale === 'ar' ? 'المقال السابق' : locale === 'en' ? 'Previous article' : 'Article précédent'}
+                                        </p>
+                                        <p className="font-black text-slate-900 text-sm leading-snug line-clamp-2 group-hover:text-slate-600 transition-colors">
+                                            {prevPost.title}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <div />
+                            )}
+
+                            {/* Article suivant */}
+                            {nextPost ? (
+                                <Link
+                                    href={`/blog/${nextPost.slug}`}
+                                    className="group flex items-center gap-4 p-6 sm:p-8 hover:bg-slate-50 transition-colors sm:flex-row-reverse sm:text-right rtl:sm:flex-row rtl:sm:text-left"
+                                >
+                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-900 transition-colors">
+                                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-white rtl:rotate-180 transition-colors" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
+                                            {locale === 'ar' ? 'المقال التالي' : locale === 'en' ? 'Next article' : 'Article suivant'}
+                                        </p>
+                                        <p className="font-black text-slate-900 text-sm leading-snug line-clamp-2 group-hover:text-slate-600 transition-colors">
+                                            {nextPost.title}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <div />
+                            )}
+
+                        </div>
+                    </div>
+                </nav>
+            )}
             
             {/* === Mobile Sticky Share Bar === */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/50 p-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] pb-safe">

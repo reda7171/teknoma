@@ -1322,7 +1322,9 @@
       "LinkCopied": "Link copied!"
     },
     "TableOfContents": "Table of Contents",
-    "Blog": "Blog"
+    "Blog": "Blog",
+    "PublishedArticles": "Published articles",
+    "ViewAllArticles": "View all their articles"
   },
   "BlogComments": {
     "CommentsTitle": "Comments",

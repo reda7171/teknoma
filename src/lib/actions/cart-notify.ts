@@ -51,7 +51,24 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
-            await sendTelegramMessage(`🗑️ <b>Panier Supprimé</b>\n\nUn client vient de retirer un produit de son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم${cartTotal !== undefined ? `\n🛒 <b>Total Restant:</b> ${cartTotal.toFixed(2)} درهم` : ''}\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
+            let replyMarkup
+            if (sessionId) {
+                replyMarkup = {
+                    inline_keyboard: [
+                        [
+                            { text: '🎁 -10 Dhs', callback_data: `offer_10:${sessionId}` },
+                            { text: '🎁 -20 Dhs', callback_data: `offer_20:${sessionId}` },
+                            { text: '🎁 -30 Dhs', callback_data: `offer_30:${sessionId}` }
+                        ]
+                    ]
+                }
+            }
+            await sendTelegramMessage(
+                `🗑️ <b>Panier Supprimé</b>\n\nUn client vient de retirer un produit de son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم${cartTotal !== undefined ? `\n🛒 <b>Total Restant:</b> ${cartTotal.toFixed(2)} درهم` : ''}\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                undefined,
+                undefined,
+                replyMarkup
+            )
         }
         
         return { success: true }
@@ -69,7 +86,24 @@ export async function notifyClearCart(totalValue: number, totalItems: number, se
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
-            await sendTelegramMessage(`🗑️ <b>Panier Vidé Complètement</b>\n\nUn client vient de vider entièrement son panier :\n📦 <b>Articles retirés:</b> ${totalItems}\n💰 <b>Valeur perdue:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
+            let replyMarkup
+            if (sessionId) {
+                replyMarkup = {
+                    inline_keyboard: [
+                        [
+                            { text: '🎁 -10 Dhs', callback_data: `offer_10:${sessionId}` },
+                            { text: '🎁 -20 Dhs', callback_data: `offer_20:${sessionId}` },
+                            { text: '🎁 -30 Dhs', callback_data: `offer_30:${sessionId}` }
+                        ]
+                    ]
+                }
+            }
+            await sendTelegramMessage(
+                `🗑️ <b>Panier Vidé Complètement</b>\n\nUn client vient de vider entièrement son panier :\n📦 <b>Articles retirés:</b> ${totalItems}\n💰 <b>Valeur perdue:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                undefined,
+                undefined,
+                replyMarkup
+            )
         }
         
         return { success: true }

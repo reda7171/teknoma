@@ -85,7 +85,10 @@ export async function getPostBySlug(slug: string, language?: string) {
                     id: true,
                     fullName: true,
                     image: true,
-                    bio: true
+                    bio: true,
+                    _count: {
+                        select: { posts: { where: { published: true } } }
+                    }
                 }
             },
             comments: {
@@ -411,6 +414,27 @@ export async function getRelatedPosts(postId: string, category: string | null, l
             author: { select: { id: true, fullName: true, image: true } }
         }
     })
+}
+
+/**
+ * Récupère l'article précédent et le suivant (par date de publication)
+ */
+export async function getPrevNextPosts(postId: string, publishedAt: Date, language: string = 'fr') {
+    const [prev, next] = await Promise.all([
+        // Article précédent = le plus récent publié AVANT cet article
+        prisma.post.findFirst({
+            where: { published: true, language, id: { not: postId }, publishedAt: { lt: publishedAt } },
+            orderBy: { publishedAt: 'desc' },
+            select: { id: true, title: true, slug: true, coverImage: true }
+        }),
+        // Article suivant = le plus ancien publié APRÈS cet article
+        prisma.post.findFirst({
+            where: { published: true, language, id: { not: postId }, publishedAt: { gt: publishedAt } },
+            orderBy: { publishedAt: 'asc' },
+            select: { id: true, title: true, slug: true, coverImage: true }
+        })
+    ])
+    return { prev, next }
 }
 
 /**
