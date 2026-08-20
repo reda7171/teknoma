@@ -120,11 +120,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
-        destination: '/books',
-        permanent: false,
-      },
-      {
         source: '/shop/cart',
         destination: '/cart',
         permanent: true,

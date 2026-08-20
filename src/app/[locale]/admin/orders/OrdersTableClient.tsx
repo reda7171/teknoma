@@ -67,6 +67,7 @@ export default function OrdersTableClient({
     const [showInvoiceModal, setShowInvoiceModal] = useState(false)
     const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<string | null>(null)
     const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('')
+    const [invoiceSearch, setInvoiceSearch] = useState<string>('')
 
     const handleSyncDelivery = async (id: string) => {
         setSyncingId(id)
@@ -393,13 +394,23 @@ export default function OrdersTableClient({
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Facture Société de Livraison (Optionnel)</label>
+                                <input
+                                    type="text"
+                                    placeholder="Chercher une facture (ex: titre, description)..."
+                                    className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white outline-none mb-2"
+                                    value={invoiceSearch}
+                                    onChange={e => setInvoiceSearch(e.target.value)}
+                                />
                                 <select 
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white outline-none"
                                     value={selectedInvoiceId}
                                     onChange={e => setSelectedInvoiceId(e.target.value)}
                                 >
                                     <option value="">-- Ne pas lier à une facture --</option>
-                                    {deliveryInvoices.map(inv => (
+                                    {deliveryInvoices.filter(inv => 
+                                        inv.title.toLowerCase().includes(invoiceSearch.toLowerCase()) || 
+                                        (inv.description && inv.description.toLowerCase().includes(invoiceSearch.toLowerCase()))
+                                    ).map(inv => (
                                         <option key={inv.id} value={inv.id}>
                                             {inv.title} {inv.description ? `- ${inv.description} ` : ''}- {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} درهم)
                                         </option>
