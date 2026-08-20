@@ -81,6 +81,10 @@ model User {
   rating           Float          @default(5)
   image            String?        @db.VarChar(500)
   bio              String?        @db.Text
+  editorialRole    String?        @db.VarChar(255)
+  editorialDomains String?        @db.Text
+  editorialExperience String?     @db.Text
+  editorialMethodology String?    @db.Text
   instagram        String?        @db.VarChar(100)
   facebook         String?        @db.VarChar(100)
   twitter          String?        @db.VarChar(100)

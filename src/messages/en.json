@@ -543,7 +543,8 @@
       "EmailInvalid": "Invalid email format",
       "CityRequired": "City is required",
       "AddressRequired": "Address is required",
-      "UnexpectedError": "An unexpected error occurred"
+      "UnexpectedError": "An unexpected error occurred",
+      "FullNameRequired": "Full name is required"
     },
     "Success": {
       "OrderConfirmed": "Order Confirmed",
@@ -571,7 +572,8 @@
     "UnknownError": "Unknown error",
     "GenericError": "An error occurred",
     "AccountHolder": "Account Holder",
-    "RibIban": "RIB / IBAN"
+    "RibIban": "RIB / IBAN",
+    "FullName": "Full Name"
   },
   "Review": {
     "SuccessTitle": "Thank you for your review!",

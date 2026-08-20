@@ -24,14 +24,22 @@ interface AuthorsCarouselProps {
 export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
     const t = useTranslations('HomePage.BestAuthors')
     const scrollRef = useRef<HTMLDivElement>(null)
-    const [canScrollLeft, setCanScrollLeft] = useState(false)
-    const [canScrollRight, setCanScrollRight] = useState(true)
+    const [canScrollPrev, setCanScrollPrev] = useState(false)
+    const [canScrollNext, setCanScrollNext] = useState(true)
 
     const checkScroll = () => {
         if (scrollRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
-            setCanScrollLeft(scrollLeft > 10)
-            setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
+            const isRTL = window.getComputedStyle(scrollRef.current).direction === 'rtl'
+            const scrollPos = Math.abs(scrollLeft)
+            
+            if (isRTL) {
+                setCanScrollPrev(scrollPos > 10)
+                setCanScrollNext(scrollPos < scrollWidth - clientWidth - 10)
+            } else {
+                setCanScrollPrev(scrollLeft > 10)
+                setCanScrollNext(scrollLeft < scrollWidth - clientWidth - 10)
+            }
         }
     }
 
@@ -46,12 +54,19 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
         return () => current?.removeEventListener('scroll', checkScroll)
     }, [authors])
 
-    const scroll = (direction: 'left' | 'right') => {
+    const scroll = (direction: 'prev' | 'next') => {
         if (scrollRef.current) {
             const { clientWidth } = scrollRef.current
             const scrollAmount = clientWidth * 0.8
+            const isRTL = window.getComputedStyle(scrollRef.current).direction === 'rtl'
+            
+            let move = direction === 'next' ? scrollAmount : -scrollAmount;
+            if (isRTL) {
+                move = direction === 'next' ? -scrollAmount : scrollAmount;
+            }
+            
             scrollRef.current.scrollBy({
-                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                left: move,
                 behavior: 'smooth'
             })
         }
@@ -154,26 +169,26 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
             {/* Scroll Buttons - Desktop */}
             <div className="hidden md:flex justify-center items-center gap-6 mt-8">
                 <button
-                    onClick={() => scroll('left')}
-                    disabled={!canScrollLeft}
+                    onClick={() => scroll('prev')}
+                    disabled={!canScrollPrev}
                     className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 ${
-                        canScrollLeft 
+                        canScrollPrev 
                         ? 'border-black bg-black text-white hover:bg-gray-800 shadow-xl' 
                         : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
                     }`}
                 >
-                    <ArrowLeft className="w-6 h-6" />
+                    <ArrowLeft className="w-6 h-6 rtl:rotate-180" />
                 </button>
                 <button
-                    onClick={() => scroll('right')}
-                    disabled={!canScrollRight}
+                    onClick={() => scroll('next')}
+                    disabled={!canScrollNext}
                     className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 ${
-                        canScrollRight 
+                        canScrollNext 
                         ? 'border-black bg-black text-white hover:bg-gray-800 shadow-xl' 
                         : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
                     }`}
                 >
-                    <ArrowRight className="w-6 h-6" />
+                    <ArrowRight className="w-6 h-6 rtl:rotate-180" />
                 </button>
             </div>
 

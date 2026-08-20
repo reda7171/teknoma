@@ -543,7 +543,8 @@
       "EmailInvalid": "صيغة البريد الإلكتروني غير صحيحة",
       "CityRequired": "المدينة مطلوبة",
       "AddressRequired": "العنوان مطلوب",
-      "UnexpectedError": "حدث خطأ غير متوقع"
+      "UnexpectedError": "حدث خطأ غير متوقع",
+      "FullNameRequired": "الاسم الكامل مطلوب"
     },
     "Success": {
       "OrderConfirmed": "تم تأكيد الطلب",
@@ -571,7 +572,8 @@
     "UnknownError": "خطأ غير معروف",
     "GenericError": "حدث خطأ",
     "AccountHolder": "المالك",
-    "RibIban": "رقم الحساب IBAN"
+    "RibIban": "رقم الحساب IBAN",
+    "FullName": "الاسم الكامل"
   },
   "Review": {
     "SuccessTitle": "شكراً لرأيك!",

@@ -90,22 +90,25 @@ export async function getAuthorProfile(name: string) {
  * Récupère des auteurs similaires
  */
 export async function getSimilarAuthors(currentAuthorName: string, limit: number = 4) {
-    const authors = await prisma.authorProfile.findMany({
-        where: {
-            name: {
-                not: currentAuthorName
-            }
-        },
-        take: limit,
-        // Since we don't have complex similarity, just order by book count or randomly. 
-        // Ordering by createdAt desc for now.
-        orderBy: {
-            createdAt: 'desc'
-        }
-    })
+    const allAuthors = await getAuthorsData()
+    const similar = allAuthors.filter(a => a.name !== currentAuthorName)
     
-    // Si on n'a pas trouvé assez de profils complets, on pourrait chercher dans les livres
-    // Mais pour l'instant, on retourne ce qu'on trouve dans les profils
-    return authors;
+    // Sort by book count to get interesting authors
+    similar.sort((a, b) => b.bookCount - a.bookCount)
+    
+    // Return objects that mimic the AuthorProfile but include fallback images
+    return similar.slice(0, limit).map(a => ({
+        id: a.name,
+        name: a.name,
+        bio: a.bio || null,
+        image: a.image || null,
+        sampleBookImage: a.sampleBookImage || null,
+        nationality: null,
+        birthYear: null,
+        deathYear: null,
+        influences: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    }))
 }
 

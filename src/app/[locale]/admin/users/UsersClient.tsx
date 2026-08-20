@@ -18,6 +18,10 @@ interface User {
     managedLanguages?: string | null
     image?: string | null
     bio?: string | null
+    editorialRole?: string | null
+    editorialDomains?: string | null
+    editorialExperience?: string | null
+    editorialMethodology?: string | null
     facebook?: string | null
     twitter?: string | null
     instagram?: string | null
@@ -52,6 +56,10 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
         managedLanguages: '',
         image: '',
         bio: '',
+        editorialRole: '',
+        editorialDomains: '',
+        editorialExperience: '',
+        editorialMethodology: '',
         facebook: '',
         twitter: '',
         instagram: ''
@@ -201,6 +209,10 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
             managedLanguages: user.managedLanguages || '',
             image: user.image || '',
             bio: user.bio || '',
+            editorialRole: user.editorialRole || '',
+            editorialDomains: user.editorialDomains || '',
+            editorialExperience: user.editorialExperience || '',
+            editorialMethodology: user.editorialMethodology || '',
             facebook: user.facebook || '',
             twitter: user.twitter || '',
             instagram: user.instagram || ''
@@ -210,7 +222,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
     }
 
     const openAddModal = () => {
-        setFormData({ email: '', fullName: '', password: '', role: 'USER', managedLanguages: '', image: '', bio: '', facebook: '', twitter: '', instagram: '' })
+        setFormData({ email: '', fullName: '', password: '', role: 'USER', managedLanguages: '', image: '', bio: '', editorialRole: '', editorialDomains: '', editorialExperience: '', editorialMethodology: '', facebook: '', twitter: '', instagram: '' })
         setEditingUserId(null)
         setIsAddModalOpen(true)
     }
@@ -710,6 +722,47 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                                     placeholder="Quelques mots sur l'utilisateur..."
                                                 />
                                             </div>
+                                            {['BLOG_MODERATOR', 'ADMIN'].includes(formData.role) && (
+                                                <>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Titre Éditorial</label>
+                                                        <input
+                                                            type="text"
+                                                            value={formData.editorialRole}
+                                                            onChange={e => setFormData({...formData, editorialRole: e.target.value})}
+                                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium"
+                                                            placeholder="ex: Rédactrice littérature"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Domaines de prédilection</label>
+                                                        <textarea
+                                                            value={formData.editorialDomains}
+                                                            onChange={e => setFormData({...formData, editorialDomains: e.target.value})}
+                                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium min-h-[80px] resize-none"
+                                                            placeholder="ex: Romans contemporains, Psychologie..."
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Expérience</label>
+                                                        <textarea
+                                                            value={formData.editorialExperience}
+                                                            onChange={e => setFormData({...formData, editorialExperience: e.target.value})}
+                                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium min-h-[80px] resize-none"
+                                                            placeholder="ex: 5 ans d'expérience littéraire..."
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Méthodologie d'analyse</label>
+                                                        <textarea
+                                                            value={formData.editorialMethodology}
+                                                            onChange={e => setFormData({...formData, editorialMethodology: e.target.value})}
+                                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-medium min-h-[80px] resize-none"
+                                                            placeholder="ex: Analyse du style, du rythme..."
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Facebook</label>

@@ -7,6 +7,7 @@ interface ArticleMetaProps {
         id?: string | null
         fullName?: string | null
         image?: string | null
+        editorialRole?: string | null
     } | null
     authorName?: string | null
     displayAuthor: string
@@ -71,7 +72,7 @@ export default function ArticleMeta({
                                     </div>
                                 </div>
                                 <span className="text-[11px] text-slate-400 font-medium capitalize mt-0.5 leading-none rtl:leading-normal text-left rtl:text-right">
-                                    {locale === 'ar' ? 'مشرف المدونة' : locale === 'en' ? 'Blog Moderator' : 'Modérateur blog'}
+                                    {author?.editorialRole || (locale === 'ar' ? 'مشرف المدونة' : locale === 'en' ? 'Blog Moderator' : 'Modérateur blog')}
                                 </span>
                             </div>
                         </Link>
@@ -90,7 +91,7 @@ export default function ArticleMeta({
                                     </div>
                                 </div>
                                 <span className="text-[11px] text-slate-400 font-medium capitalize mt-0.5 leading-none rtl:leading-normal text-left rtl:text-right">
-                                    {locale === 'ar' ? 'مشرف المدونة' : locale === 'en' ? 'Blog Moderator' : 'Modérateur blog'}
+                                    {author?.editorialRole || (locale === 'ar' ? 'مشرف المدونة' : locale === 'en' ? 'Blog Moderator' : 'Modérateur blog')}
                                 </span>
                             </div>
                         </span>

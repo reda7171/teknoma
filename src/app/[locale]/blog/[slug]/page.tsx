@@ -514,7 +514,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Bio Auteur (Mobile Uniquement) === */}
                         {(post.authorName || post.author) && (
-                            <Link href={`/blog`} className="lg:hidden mt-10 md:mt-16 p-5 md:p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <Link href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="lg:hidden mt-10 md:mt-16 p-5 md:p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
                                 
                                 <div className="relative z-10 flex items-start gap-4">
@@ -538,7 +538,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     <div className="flex-1 min-w-0 pt-1">
                                         <h3 className="text-lg md:text-xl font-black mb-1 text-slate-800 truncate">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
                                         <p className="text-xs md:text-sm text-slate-500 font-medium truncate mb-4">
-                                            {(!post.authorName && post.author?.bio) ? post.author.bio : t('ModeratorRole')}
+                                            {(!post.authorName && post.author?.bio) ? post.author.bio : (post.author?.editorialRole || t('ModeratorRole'))}
                                         </p>
 
                                         {/* Statistiques et Lien */}
@@ -668,7 +668,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                             {/* Bio Auteur (Desktop) */}
                             {(post.authorName || post.author) && (
-                                <Link href={`/blog`} className="p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                                <Link href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
                                     <p className="relative z-10 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5">{t('AboutAuthor')}</p>
                                     
@@ -693,7 +693,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         <div className="flex-1 min-w-0 pt-1">
                                             <h3 className="text-lg font-black mb-1 text-slate-800 truncate">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
                                             <p className="text-xs text-slate-500 font-medium truncate mb-4">
-                                                {(!post.authorName && post.author?.bio) ? post.author.bio : t('ModeratorRole')}
+                                                {(!post.authorName && post.author?.bio) ? post.author.bio : (post.author?.editorialRole || t('ModeratorRole'))}
                                             </p>
 
                                             {/* Statistiques et Lien */}

@@ -5,6 +5,7 @@ import { Search, User, ArrowRight, ChevronRight } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import ScrollReveal from '@/components/ScrollReveal'
 import { useTranslations } from 'next-intl'
+import ImageWithFallback from '@/components/ImageWithFallback'
 
 interface AuthorData {
     name: string
@@ -124,16 +125,15 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {list.map((author, idx) => (
                                         <ScrollReveal key={author.name} delay={idx * 50} animation="animate-reveal-up">
-                                                <Link 
+                                            <Link 
                                                 href={`/authors/${encodeURIComponent(author.name)}`}
                                                 className="group flex items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-3xl border border-transparent hover:border-black transition-all duration-300 shadow-sm sm:shadow-none hover:shadow-xl"
                                             >
-                                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100 shadow-sm group-hover:scale-105 transition-transform">
+                                                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100 shadow-sm group-hover:scale-105 transition-transform">
                                                     {(author.image || author.sampleBookImage) ? (
-                                                        <img 
-                                                            src={author.image || author.sampleBookImage!} 
+                                                        <ImageWithFallback 
+                                                            src={author.image || author.sampleBookImage} 
                                                             alt={author.name}
-                                                            className="w-full h-full object-cover"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">

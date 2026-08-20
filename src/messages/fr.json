@@ -543,7 +543,8 @@
       "EmailInvalid": "Format d'email invalide",
       "CityRequired": "La ville est requise",
       "AddressRequired": "L'adresse est requise",
-      "UnexpectedError": "Une erreur inattendue est survenue"
+      "UnexpectedError": "Une erreur inattendue est survenue",
+      "FullNameRequired": "Le nom complet est requis"
     },
     "Success": {
       "OrderConfirmed": "Commande Confirmée",
@@ -571,7 +572,8 @@
     "UnknownError": "Erreur inconnue",
     "GenericError": "Une erreur est survenue",
     "AccountHolder": "Titulaire",
-    "RibIban": "RIB / IBAN"
+    "RibIban": "RIB / IBAN",
+    "FullName": "Nom complet"
   },
   "Review": {
     "SuccessTitle": "Merci pour votre avis !",

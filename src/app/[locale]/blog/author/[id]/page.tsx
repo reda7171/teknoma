@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { Facebook, Instagram, Twitter, User, BookOpen, Calendar, ArrowRight } from 'lucide-react'
+import { Facebook, Instagram, Twitter, User, BookOpen, Calendar, ArrowRight, Compass, Briefcase, Search } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, locale: string }> }) {
@@ -67,16 +67,19 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                                 <User className="w-12 h-12 md:w-16 md:h-16 text-slate-400" />
                             </div>
                         )}
-                        <div className="absolute -bottom-3 -right-3 bg-indigo-600 text-white p-2.5 rounded-full shadow-lg border-4 border-white" title="Rédacteur">
+                        <div className="absolute -bottom-3 -right-3 bg-indigo-600 text-white p-2.5 rounded-full shadow-lg border-4 border-white" title={user.editorialRole || 'Rédacteur'}>
                             <BookOpen className="w-5 h-5" />
                         </div>
                     </div>
 
                     {/* Infos de l'auteur */}
                     <div className="flex-1 text-center md:text-start pt-4 md:pt-0">
-                        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+                        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-2">
                             {user.fullName || user.email?.split('@')[0]}
                         </h1>
+                        <p className="text-indigo-600 font-bold uppercase tracking-widest text-sm mb-6">
+                            {user.editorialRole || 'Auteur & Rédacteur'}
+                        </p>
                         
                         {user.bio ? (
                             <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-2xl mx-auto md:mx-0 mb-8 font-medium">
@@ -110,6 +113,62 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                         )}
                     </div>
                 </div>
+
+                {/* Section Éditoriale */}
+                {(user.editorialDomains || user.editorialExperience || user.editorialMethodology) && (
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {user.editorialDomains && (
+                            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+                                <div className="absolute -right-6 -top-6 text-slate-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                                    <Compass className="w-32 h-32" />
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                                        <Compass className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-lg font-black text-slate-900 mb-3">Domaines de prédilection</h3>
+                                    <p className="text-slate-600 leading-relaxed font-medium">
+                                        {user.editorialDomains}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {user.editorialExperience && (
+                            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+                                <div className="absolute -right-6 -top-6 text-slate-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                                    <Briefcase className="w-32 h-32" />
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                                        <Briefcase className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-lg font-black text-slate-900 mb-3">Parcours & Expérience</h3>
+                                    <p className="text-slate-600 leading-relaxed font-medium">
+                                        {user.editorialExperience}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {user.editorialMethodology && (
+                            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+                                <div className="absolute -right-6 -top-6 text-slate-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                                    <Search className="w-32 h-32" />
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6">
+                                        <Search className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-lg font-black text-slate-900 mb-3">Méthode de sélection</h3>
+                                    <p className="text-slate-600 leading-relaxed font-medium">
+                                        {user.editorialMethodology}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Articles de l'auteur */}
                 <div className="mt-16 md:mt-24">
