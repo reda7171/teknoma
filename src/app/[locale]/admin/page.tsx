@@ -22,7 +22,7 @@ async function getStats() {
         booksCount, packsCount, ordersCount, totalRevenue, deliveredCount,
         pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount,
         shippedOrders, confirmedOrders, ordersToday, revenueMonth, returnedCount,
-        stockValueRaw, booksNoImage, booksSoldTodayRaw
+        stockValueRaw, booksNoImage, booksSoldTodayRaw, paidOrdersCount, uniqueCustomersResult
     ] = await Promise.all([
         prisma.book.count({ where: { active: true } }),
         prisma.pack.count({ where: { active: true } }),
@@ -48,7 +48,9 @@ async function getStats() {
                 type: 'BOOK'
             },
             _sum: { quantity: true }
-        })
+        }),
+        prisma.order.count({ where: { isPaid: true } }),
+        prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' } })
     ])
 
     const totalRev = totalRevenue._sum.total || 0
@@ -58,6 +60,8 @@ async function getStats() {
     const revenueMois = revenueMonth._sum.total || 0
     const stockTotal = stockValueRaw._sum.stock || 0
     const booksSoldToday = booksSoldTodayRaw._sum.quantity || 0
+    const uniqueCustomersCount = uniqueCustomersResult.length || 0
+    const ltv = uniqueCustomersCount > 0 ? totalRev / uniqueCustomersCount : 0
 
     return {
         booksCount,
@@ -78,6 +82,8 @@ async function getStats() {
         stockTotal,
         booksNoImage,
         booksSoldToday,
+        paidOrdersCount,
+        ltv,
     }
 }
 
@@ -291,6 +297,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Livres Actifs',        value: stats.booksCount,                        iconName: 'BookOpen',    color: 'blue'   },
         { name: 'Packs Actifs',         value: stats.packsCount,                        iconName: 'Package',     color: 'amber'  },
         { name: 'Commandes',            value: stats.ordersCount,                       iconName: 'ShoppingCart',color: 'green'  },
+        { name: 'Commandes Payées',     value: stats.paidOrdersCount,                   iconName: 'DollarSign',  color: 'emerald'},
+        { name: 'LTV (Client)',         value: `${stats.ltv.toFixed(0)} درهم`,          iconName: 'Users',       color: 'blue'   },
         { name: 'En Attente',           value: stats.pendingOrders,                     iconName: 'Clock',       color: 'yellow' },
         { name: "Chiffre d'affaires",   value: `${stats.totalRevenue.toFixed(0)} درهم`,  iconName: 'TrendingUp',  color: 'orange' },
         { name: 'Panier Moyen',         value: `${stats.panierMoyen.toFixed(0)} درهم`,   iconName: 'ShoppingBag', color: 'rose'   },

@@ -89,7 +89,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const tDigital = await getTranslations('DigitalBooks');
 
   // Optimisation: Regrouper les queries similaires et utiliser le cache
-  const [
+    const [
     popularBooks,
     popularPacks,
     bestSellerBooks,
@@ -111,11 +111,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getBestAuthors(8),
     getRecentExchangeBooks(6),
     getAllCategoryQuotes(),
-    prisma.$transaction([
-      prisma.book.count({ where: { active: true } }),
-      prisma.user.count({ where: { role: 'USER' } }),
-      prisma.exchange.count({ where: { status: 'COMPLETED' } }),
-    ]),
+    import('@/lib/db/books').then(m => m.getHomepageStats()),
     isFeatureEnabled('feature_digital_books'),
     isFeatureEnabled('feature_exchange'),
     getRecentPosts(3, locale),

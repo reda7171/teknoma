@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { getCached } from '@/lib/cache'
 
 export async function getPopularCategories() {
     try {
@@ -192,13 +193,19 @@ export async function getCategoryConfigByName(name: string) {
 }
 
 export async function getAllCategoryQuotes() {
-    try {
-        return await (prisma as any).categoryConfig.findMany({
-            where: {
-                quote: { not: null }
+    return getCached(
+        'categories:all-quotes',
+        async () => {
+            try {
+                return await (prisma as any).categoryConfig.findMany({
+                    where: {
+                        quote: { not: null }
+                    }
+                });
+            } catch (error) {
+                return [];
             }
-        });
-    } catch (error) {
-        return [];
-    }
+        },
+        300
+    )
 }

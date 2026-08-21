@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { getCached } from '@/lib/cache'
 import { getCommunityUser } from './community-auth'
 
 export type MarketFilters = {
@@ -81,29 +82,35 @@ export async function getExchangeBookDetails(bookId: string) {
 
 // Fonction pour récupérer les livres d'échange récents pour la page d'accueil
 export async function getRecentExchangeBooks(limit = 6) {
-    try {
-        const books = await (prisma as any).exchangeBook.findMany({
-            where: {
-                status: 'AVAILABLE',
-            },
-            include: {
-                owner: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        city: true,
-                        image: true,
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-            take: limit,
-        })
+    return getCached(
+        `community:recent-books:${limit}`,
+        async () => {
+            try {
+                const books = await (prisma as any).exchangeBook.findMany({
+                    where: {
+                        status: 'AVAILABLE',
+                    },
+                    include: {
+                        owner: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                city: true,
+                                image: true,
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    take: limit,
+                })
 
-        return books
-    } catch (error) {
-        return []
-    }
+                return books
+            } catch (error) {
+                return []
+            }
+        },
+        300
+    )
 }
 // Smart matching logic: Find users who have what I want AND want what I have
 export async function getSmartMatches() {
