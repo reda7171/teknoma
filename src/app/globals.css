@@ -48,6 +48,26 @@
   }
 }
 
+/* Amélioration de la lisibilité FR/EN sur mobile */
+.prose p,
+.prose li,
+.prose a,
+.prose blockquote,
+.prose strong {
+  font-size: 1.05rem !important;
+  line-height: 1.75 !important;
+}
+
+@media (min-width: 768px) {
+  .prose p,
+  .prose li,
+  .prose a,
+  .prose blockquote,
+  .prose strong {
+    font-size: 1.125rem !important;
+  }
+}
+
 /* Agrandissement spécifique du texte arabe (RTL) pour une meilleure lisibilité */
 [dir="rtl"] .prose p,
 [dir="rtl"] .prose li,

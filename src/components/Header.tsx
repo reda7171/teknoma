@@ -435,12 +435,12 @@ export default function Header({ user, notificationDropdown, navigation, feature
             {/* Global Menu Drawer (Mobile & Desktop) */}
             {mobileMenuOpen && (
                 <div 
-                    className="fixed inset-0 bg-black/50 z-[55] transition-opacity"
+                    className="fixed inset-0 bg-black/50 z-[140] transition-opacity"
                     onClick={() => setMobileMenuOpen(false)}
                 />
             )}
             <div 
-                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full md:w-96 bg-white z-[60] transform transition-transform duration-300 ease-in-out shadow-2xl ${
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full md:w-96 bg-white z-[150] transform transition-transform duration-300 ease-in-out shadow-2xl ${
                     mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                 }`}
                 suppressHydrationWarning
