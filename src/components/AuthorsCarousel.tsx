@@ -171,6 +171,7 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
                 <button
                     onClick={() => scroll('prev')}
                     disabled={!canScrollPrev}
+                    aria-label="Précédent"
                     className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 ${
                         canScrollPrev 
                         ? 'border-black bg-black text-white hover:bg-gray-800 shadow-xl' 
@@ -182,6 +183,7 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
                 <button
                     onClick={() => scroll('next')}
                     disabled={!canScrollNext}
+                    aria-label="Suivant"
                     className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 ${
                         canScrollNext 
                         ? 'border-black bg-black text-white hover:bg-gray-800 shadow-xl' 

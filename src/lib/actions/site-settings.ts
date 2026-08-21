@@ -3,41 +3,54 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { revalidatePath } from 'next/cache'
+import { getCached } from '@/lib/cache'
 
 // Récupérer tous les paramètres
 export async function getAllSettings() {
-    try {
-        const settings = await prisma.siteSettings.findMany({
-            orderBy: [
-                { category: 'asc' },
-                { key: 'asc' }
-            ]
-        })
+    return getCached(
+        'settings:all',
+        async () => {
+            try {
+                const settings = await prisma.siteSettings.findMany({
+                    orderBy: [
+                        { category: 'asc' },
+                        { key: 'asc' }
+                    ]
+                })
 
-        // Convertir en objet clé-valeur pour faciliter l'utilisation
-        const settingsMap: Record<string, string> = {}
-        settings.forEach(setting => {
-            settingsMap[setting.key] = setting.value || ''
-        })
+                // Convertir en objet clé-valeur pour faciliter l'utilisation
+                const settingsMap: Record<string, string> = {}
+                settings.forEach(setting => {
+                    settingsMap[setting.key] = setting.value || ''
+                })
 
-        return settingsMap
-    } catch (error) {
-        console.error('Error fetching settings:', error)
-        return {}
-    }
+                return settingsMap
+            } catch (error) {
+                console.error('Error fetching settings:', error)
+                return {}
+            }
+        },
+        300
+    )
 }
 
 // Récupérer un paramètre spécifique
 export async function getSetting(key: string, defaultValue: string | null = null) {
-    try {
-        const setting = await prisma.siteSettings.findUnique({
-            where: { key }
-        })
-        return setting?.value ?? defaultValue
-    } catch (error) {
-        console.error(`Error fetching setting ${key}:`, error)
-        return defaultValue
-    }
+    return getCached(
+        `setting:${key}`,
+        async () => {
+            try {
+                const setting = await prisma.siteSettings.findUnique({
+                    where: { key }
+                })
+                return setting?.value ?? defaultValue
+            } catch (error) {
+                console.error(`Error fetching setting ${key}:`, error)
+                return defaultValue
+            }
+        },
+        300
+    )
 }
 
 // Mettre à jour ou créer un paramètre
@@ -104,22 +117,28 @@ export async function deleteSetting(key: string) {
 
 // Récupérer les paramètres par catégorie
 export async function getSettingsByCategory(category: string) {
-    try {
-        const settings = await prisma.siteSettings.findMany({
-            where: { category },
-            orderBy: { key: 'asc' }
-        })
+    return getCached(
+        `settings:category:${category}`,
+        async () => {
+            try {
+                const settings = await prisma.siteSettings.findMany({
+                    where: { category },
+                    orderBy: { key: 'asc' }
+                })
 
-        const settingsMap: Record<string, string> = {}
-        settings.forEach(setting => {
-            settingsMap[setting.key] = setting.value || ''
-        })
+                const settingsMap: Record<string, string> = {}
+                settings.forEach(setting => {
+                    settingsMap[setting.key] = setting.value || ''
+                })
 
-        return settingsMap
-    } catch (error) {
-        console.error(`Error fetching settings for category ${category}:`, error)
-        return {}
-    }
+                return settingsMap
+            } catch (error) {
+                console.error(`Error fetching settings for category ${category}:`, error)
+                return {}
+            }
+        },
+        300
+    )
 }
 
 // Vérifie si une fonctionnalité est activée (défaut: true si pas défini)

@@ -216,7 +216,7 @@ export default async function DigitalBooksPage({ params }: { params: Promise<{ l
                   <div className={`w-20 h-20 ${f.color} rounded-[2rem] flex items-center justify-center hover:rotate-6 transition-transform shadow-sm hover:shadow-xl`}>
                     <f.icon className={`w-8 h-8 ${f.iconColor}`} />
                   </div>
-                  <h3 className="text-lg font-black text-black tracking-tight">{f.title}</h3>
+                  <h2 className="text-lg font-black text-black tracking-tight">{f.title}</h2>
                   <p className="text-sm text-gray-500 font-medium">{f.desc}</p>
                 </ScrollReveal>
               ))}

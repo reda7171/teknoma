@@ -4,8 +4,9 @@ import { Link, usePathname } from '@/i18n/routing'
 import { 
     BookOpen, ShoppingCart, Search, Menu, X, User,
     Home, Book, Users, Package, FileText, Newspaper, 
-    Monitor, Baby, Usb, UsersRound, ChevronDown, ChevronRight, LayoutGrid
+    Monitor, Baby, Usb, UsersRound, ChevronDown, ChevronRight, LayoutGrid, Heart, Check
 } from 'lucide-react'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import CartDrawer from './CartDrawer'
 import { useCartStore } from '@/store/cart'
@@ -227,10 +228,13 @@ export default function Header({ user, notificationDropdown, navigation, feature
                     {/* Logo - Dynamique ou Style Pixio */}
                     <Link href="/" className="flex items-center gap-2 group shrink-0 lg:ltr:mr-32 lg:rtl:ml-32 xl:ltr:mr-48 xl:rtl:ml-48" dir="ltr">
                         {siteLogo ? (
-                            <img 
+                            <Image 
                                 src={siteLogo} 
-                                alt="Riwaya Logo" 
+                                alt="Riwaya Logo"
+                                width={200}
+                                height={64}
                                 className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
+                                priority
                             />
                         ) : (
                             <>

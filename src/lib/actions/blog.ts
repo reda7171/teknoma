@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { getCached } from '@/lib/cache'
 import { revalidatePath } from 'next/cache'
 import { verifyAdmin, getAdminUser } from '@/lib/actions/auth'
 
@@ -129,24 +130,30 @@ export async function getPostBySlug(slug: string, language?: string) {
  * Récupère les derniers articles pour la page d'accueil (optionnel)
  */
 export async function getRecentPosts(limit = 3, language: string = 'fr') {
-    return prisma.post.findMany({
-        where: { published: true, language },
-        orderBy: { publishedAt: 'desc' },
-        take: limit,
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            coverImage: true,
-            publishedAt: true,
-            author: {
+    return getCached(
+        `blog:recent-posts:${language}:${limit}`,
+        async () => {
+            return prisma.post.findMany({
+                where: { published: true, language },
+                orderBy: { publishedAt: 'desc' },
+                take: limit,
                 select: {
-                    fullName: true
+                    id: true,
+                    title: true,
+                    slug: true,
+                    excerpt: true,
+                    coverImage: true,
+                    publishedAt: true,
+                    author: {
+                        select: {
+                            fullName: true
+                        }
+                    }
                 }
-            }
-        }
-    })
+            })
+        },
+        300
+    )
 }
 
 // ============================================

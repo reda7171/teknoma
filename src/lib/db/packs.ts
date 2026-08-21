@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { getCached } from '@/lib/cache'
 
 /**
  * Récupère tous les packs actifs avec leurs livres
@@ -57,28 +58,34 @@ export async function getPackById(id: string) {
  * Récupère les packs populaires
  */
 export async function getPopularPacks(limit = 3) {
-    return prisma.pack.findMany({
-        where: { active: true },
-        include: {
-            books: {
+    return getCached(
+        `pack:popular:${limit}`,
+        async () => {
+            return prisma.pack.findMany({
+                where: { active: true },
                 include: {
-                    book: {
-                        select: {
-                            id: true,
-                            title: true,
-                            author: true,
-                            price: true,
-                            image: true,
+                    books: {
+                        include: {
+                            book: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    author: true,
+                                    price: true,
+                                    image: true,
+                                },
+                            },
                         },
                     },
                 },
-            },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                take: limit,
+            })
         },
-        orderBy: {
-            createdAt: 'desc',
-        },
-        take: limit,
-    })
+        300
+    )
 }
 
 /**

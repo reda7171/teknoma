@@ -89,7 +89,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const tDigital = await getTranslations('DigitalBooks');
 
   // Optimisation: Regrouper les queries similaires et utiliser le cache
-  const [
+    const [
     popularBooks,
     popularPacks,
     bestSellerBooks,
@@ -111,11 +111,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getBestAuthors(8),
     getRecentExchangeBooks(6),
     getAllCategoryQuotes(),
-    prisma.$transaction([
-      prisma.book.count({ where: { active: true } }),
-      prisma.user.count({ where: { role: 'USER' } }),
-      prisma.exchange.count({ where: { status: 'COMPLETED' } }),
-    ]),
+    import('@/lib/db/books').then(m => m.getHomepageStats()),
     isFeatureEnabled('feature_digital_books'),
     isFeatureEnabled('feature_exchange'),
     getRecentPosts(3, locale),
@@ -552,7 +548,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     <div className={`w-20 h-20 ${feature.color} rounded-[2rem] flex items-center justify-center group hover:rotate-6 transition-transform shadow-sm hover:shadow-xl`}>
                       <feature.icon className="w-8 h-8 text-black" />
                     </div>
-                    <h3 className="text-lg font-black text-black tracking-tight">{feature.title}</h3>
+                    <h2 className="text-lg font-black text-black tracking-tight">{feature.title}</h2>
                     <p className="text-sm text-gray-500 font-medium">{feature.desc}</p>
                   </ScrollReveal>
                 ))}

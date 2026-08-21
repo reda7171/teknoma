@@ -75,7 +75,10 @@ export default function CookieConsent() {
                     >
                         {t('LearnMore')}
                     </button>
-                    <button className="hidden sm:flex text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors items-center gap-2 px-2">
+                    <button 
+                        className="hidden sm:flex text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors items-center gap-2 px-2"
+                        aria-label="Paramètres des cookies"
+                    >
                         <Settings2 className="w-3 h-3" />
                     </button>
                 </div>

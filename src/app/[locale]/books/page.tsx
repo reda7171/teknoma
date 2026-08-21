@@ -16,6 +16,7 @@ import { Link } from '@/i18n/routing'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { sendTelegramMessage } from '@/lib/telegram'
+import { headers } from 'next/headers'
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<SearchParams> }): Promise<Metadata> {
     const { locale } = await params
@@ -79,9 +80,14 @@ export default async function BooksPage({
         const shouldNotify = await getSetting('telegram_notify_search') === 'true'
 
         if (shouldNotify) {
-            // Identifier l'utilisateur
-            const communityUser = await getCommunityUser()
-            const adminUserId = await getAdminUser()
+            const reqHeaders = await headers()
+            const userAgent = reqHeaders.get('user-agent')?.toLowerCase() || ''
+            const isBot = /bot|crawler|spider|crawling|google|bing|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|pinterestbot|slackbot|vkshare|w3c_validator|whatsapp/i.test(userAgent)
+
+            if (!isBot) {
+                // Identifier l'utilisateur
+                const communityUser = await getCommunityUser()
+                const adminUserId = await getAdminUser()
             
             let visitorName = 'Client'
             if (adminUserId) {
@@ -103,7 +109,8 @@ export default async function BooksPage({
                 
                 sendTelegramMessage(msg).catch(console.error);
             } else {
-                sendTelegramMessage(`👀 <b>Visite Catalogue</b> - ${visitorName}\n\nUn visiteur parcourt tous les livres.`).catch(console.error);
+                    sendTelegramMessage(`👀 <b>Visite Catalogue</b> - ${visitorName}\n\nUn visiteur parcourt tous les livres.`).catch(console.error);
+                }
             }
         }
     } catch (e) {
