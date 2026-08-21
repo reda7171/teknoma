@@ -548,7 +548,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     <div className={`w-20 h-20 ${feature.color} rounded-[2rem] flex items-center justify-center group hover:rotate-6 transition-transform shadow-sm hover:shadow-xl`}>
                       <feature.icon className="w-8 h-8 text-black" />
                     </div>
-                    <h3 className="text-lg font-black text-black tracking-tight">{feature.title}</h3>
+                    <h2 className="text-lg font-black text-black tracking-tight">{feature.title}</h2>
                     <p className="text-sm text-gray-500 font-medium">{feature.desc}</p>
                   </ScrollReveal>
                 ))}

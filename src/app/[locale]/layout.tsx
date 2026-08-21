@@ -496,15 +496,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 'Philosophie', 'Livraison au Maroc', 'Cash on Delivery', 'Échange de livres',
                 'كتب', 'مكتبة إلكترونية', 'تطوير الذات', 'روايات', 'المغرب'
               ],
-              // Catalogue de produits
-              hasOfferCatalog: {
-                '@type': 'OfferCatalog',
-                name: 'Catalogue Riwaya',
-                itemListElement: [
-                  { '@type': 'Offer', itemOffered: { '@type': 'Book', name: 'Livres individuels' } },
-                  { '@type': 'Offer', itemOffered: { '@type': 'Product', name: 'Packs de livres' } }
-                ]
-              },
               paymentAccepted: 'Cash',
               currenciesAccepted: 'درهم',
               openingHours: 'Mo-Su 08:00-22:00',

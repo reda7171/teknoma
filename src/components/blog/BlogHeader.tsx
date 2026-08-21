@@ -5,6 +5,7 @@ import {
     BookOpen, Search, Menu, X, Home, Book, Users, Package, FileText, Newspaper, 
     Monitor, Baby, Usb, UsersRound
 } from 'lucide-react'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import PredictiveSearch from '@/components/PredictiveSearch'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
@@ -106,10 +107,13 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                     <div className="flex justify-center md:justify-start w-1/3 md:w-auto shrink-0 md:ltr:mr-12 md:rtl:ml-12">
                         <Link href="/" className="flex items-center gap-2 group" dir="ltr">
                             {siteLogo ? (
-                                <img 
+                                <Image 
                                     src={siteLogo} 
-                                    alt="Riwaya Logo" 
+                                    alt="Riwaya Logo"
+                                    width={200}
+                                    height={64}
                                     className="h-7 md:h-8 w-auto object-contain transition-transform group-hover:scale-105"
+                                    priority
                                 />
                             ) : (
                                 <>

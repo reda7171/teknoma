@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { normalizeImage } from '@/lib/utils'
 
 interface OrbitBook {
@@ -315,14 +316,14 @@ export default function CosmosBooks({
                 <span className="text-sm font-black text-gray-400">{centerBook.title}</span>
               </div>
             ) : (
-              <img 
+              <Image 
                 src={normalizeImage(centerBook.image)} 
                 alt={centerBook.title} 
-                className="w-full h-full object-cover" 
+                fill
+                sizes="200px"
+                className="object-cover" 
                 onError={() => handleImageError(centerBook.id)} 
-                fetchPriority="high"
-                decoding="sync"
-                loading="eager"
+                priority
               />
             )}
           </div>
@@ -377,12 +378,14 @@ export default function CosmosBooks({
             }}
           >
             <div style={{ width: size, height: size * 1.35, position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
-              <img 
+              <Image 
                 src={normalizeImage(book.image)} 
                 alt={book.title} 
-                className="w-full h-full object-cover" 
+                fill
+                sizes="150px"
+                className="object-cover" 
                 onError={() => handleImageError(book.id)} 
-                loading="eager"
+                priority={orbitIdx === 0}
               />
             </div>
             {/* Flash swap */}
@@ -421,10 +424,12 @@ export default function CosmosBooks({
                <span className="text-[10px] font-black text-gray-400 line-clamp-3">{dragging.book.title}</span>
              </div>
           ) : (
-            <img 
+            <Image 
               src={normalizeImage(dragging.book.image)} 
               alt={dragging.book.title} 
-              className="w-full h-full object-cover" 
+              fill
+              sizes="150px"
+              className="object-cover" 
             />
           )}
         </div>

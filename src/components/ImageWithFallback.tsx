@@ -9,6 +9,7 @@ interface ImageWithFallbackProps {
     className?: string
     fallback?: string
     priority?: boolean
+    sizes?: string
 }
 
 /**
@@ -21,13 +22,14 @@ export default function ImageWithFallback({
     className = 'w-full h-full object-cover',
     fallback = '/book-placeholder.png',
     priority = false,
+    sizes = '(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw',
 }: ImageWithFallbackProps) {
     return (
         <Image
             src={normalizeImage(src || '') || fallback}
             alt={alt || "Image"}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes={sizes}
             className={className}
             priority={priority}
             onError={(e) => {

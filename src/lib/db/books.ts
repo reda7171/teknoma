@@ -542,3 +542,13 @@ export async function getCategoryCounts(): Promise<CategoryCounts> {
     }
     return counts;
 }
+
+export async function getHomepageStats() {
+    return getCached('homepage:stats', async () => {
+        return await prisma.$transaction([
+            prisma.book.count({ where: { active: true } }),
+            prisma.user.count({ where: { role: 'USER' } }),
+            prisma.exchange.count({ where: { status: 'COMPLETED' } })
+        ])
+    }, 300)
+}
