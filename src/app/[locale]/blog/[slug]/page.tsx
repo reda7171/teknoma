@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark, Bot, Sparkles, BadgeCheck } from 'lucide-react'
+import { Calendar, User, Eye, Tag, MessageSquare, Clock, Pencil, ArrowRight, BookOpen, Quote, Lightbulb, Target, Bookmark, Bot, Sparkles, BadgeCheck, ChevronRight, Home } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
@@ -19,6 +19,7 @@ import ArticleMeta from '@/components/blog/ArticleMeta'
 import ReadingProgress from '@/components/blog/ReadingProgress'
 import PostTimeTracker from '@/components/blog/PostTimeTracker'
 import BlogDynamicContent from '@/components/blog/BlogDynamicContent'
+const MobileSectionNavigation = dynamic(() => import('@/components/blog/MobileSectionNavigation'))
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
@@ -147,11 +148,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     return (
         <div className="min-h-screen bg-white" id="article-page">
-
-            {/* Barre de progression lecture */}
             <ReadingProgress />
             <PostTimeTracker postId={post.id} />
-
+            <MobileSectionNavigation language={locale} />
             <Header />
 
             {/* Données Structurées Schema.org — AEO enrichi */}
@@ -272,16 +271,25 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24">
                     {/* Fil d'Ariane + btn admin */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
-                        <nav className="flex items-center gap-2 text-[10px] rtl:text-[11px] font-bold uppercase tracking-widest rtl:tracking-normal text-slate-400">
-                            <Link href="/blog" className="hover:text-slate-900 transition-colors">{t('Blog')}</Link>
-                            <span>/</span>
+                        <nav className="flex items-center gap-2 sm:gap-3 text-[10px] rtl:text-[11px] font-bold uppercase tracking-widest rtl:tracking-normal text-slate-500 overflow-x-auto no-scrollbar py-1">
+                            <Link href="/blog" className="flex items-center gap-1.5 hover:text-slate-900 transition-colors bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-200/50 shadow-sm whitespace-nowrap">
+                                <Home className="w-3 h-3" />
+                                {t('Blog')}
+                            </Link>
+                            
+                            <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0 rtl:rotate-180" />
+                            
                             {post.category && (
                                 <>
-                                    <Link href={`/blog?category=${post.category}`} className="hover:text-slate-900 transition-colors">{post.category}</Link>
-                                    <span>/</span>
+                                    <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="hover:text-slate-900 transition-colors bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-200/50 shadow-sm whitespace-nowrap">
+                                        {post.category}
+                                    </Link>
+                                    <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0 rtl:rotate-180" />
                                 </>
                             )}
-                            <span className="text-slate-500 truncate max-w-[150px] md:max-w-[200px]">{post.title}</span>
+                            <span className="text-slate-900 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200 shadow-sm truncate max-w-[150px] md:max-w-[250px] lg:max-w-[350px]">
+                                {post.title}
+                            </span>
                         </nav>
 
                         {isAdmin && (
@@ -409,7 +417,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-li:text-slate-800 prose-li:mb-4
                                 prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-slate-700 prose-blockquote:shadow-sm
                                 ${post.language === 'ar' 
-                                    ? 'font-tajawal text-right text-[18px] md:text-[20px] leading-[1.8] md:leading-[2.2] prose-h2:font-black prose-h3:font-black prose-p:font-bold prose-li:font-bold prose-h2:!text-[32px] md:prose-h2:!text-[42px] prose-h3:!text-[26px] md:prose-h3:!text-[34px] prose-p:!text-[18px] md:prose-p:!text-[22px] prose-p:leading-[2] md:prose-p:leading-[2.5] prose-li:text-[18px] md:prose-li:text-[21px] prose-li:leading-[2] md:prose-li:leading-[2.5] prose-blockquote:border-r-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-l-2xl' 
+                                    ? 'font-tajawal text-right text-[20px] md:text-[24px] leading-[1.9] md:leading-[2.3] prose-h2:font-black prose-h3:font-black prose-p:font-bold prose-li:font-bold prose-h2:!text-[36px] md:prose-h2:!text-[48px] prose-h3:!text-[30px] md:prose-h3:!text-[38px] prose-p:!text-[22px] md:prose-p:!text-[28px] prose-p:leading-[2.1] md:prose-p:leading-[2.4] prose-li:text-[22px] md:prose-li:text-[26px] prose-li:leading-[2.1] md:prose-li:leading-[2.4] prose-blockquote:border-r-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-l-2xl' 
                                     : 'prose-base md:prose-lg text-left prose-headings:tracking-tight prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h3:!text-2xl md:prose-h3:!text-3xl prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:!text-[16px] md:prose-p:!text-[18px] prose-p:font-medium prose-li:leading-relaxed prose-li:font-semibold prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-r-2xl'}`}
                         >
                             {/* === GEO: AI TL;DR Summary === */}

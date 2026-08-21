@@ -65,45 +65,45 @@ model SiteSettings {
 }
 
 model User {
-  id               String         @id @default(uuid())
-  email            String         @unique
-  password         String
-  role             UserRole       @default(ADMIN)
-  isBanned         Boolean        @default(false)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  fullName         String?        @db.VarChar(255)
-  locale           String         @default("fr") @db.VarChar(5)
-  city             String?        @db.VarChar(100)
-  address          String?        @db.VarChar(500)
-  neighborhood     String?        @db.VarChar(100)
-  credits          Int            @default(10)
-  rating           Float          @default(5)
-  image            String?        @db.VarChar(500)
-  bio              String?        @db.Text
-  editorialRole    String?        @db.VarChar(255)
-  editorialDomains String?        @db.Text
-  editorialExperience String?     @db.Text
-  editorialMethodology String?    @db.Text
-  instagram        String?        @db.VarChar(100)
-  facebook         String?        @db.VarChar(100)
-  twitter          String?        @db.VarChar(100)
-  phone            String?        @db.VarChar(20)
-  managedLanguages String?        @db.VarChar(50)
-  expoPushToken    String?        @db.VarChar(255)
-  sellerBooks      Book[]         @relation("SellerBooks")
-  comments         Comment[]
-  coupons          Coupon[]       @relation("AffiliateCoupons")
-  expenses         Expense[]
-  loginHistory     LoginHistory[]
-  notifications    Notification[]
-  sellerOrderItems OrderItem[]    @relation("SellerOrderItems")
-  sellerOrders     Order[]        @relation("SellerOrders")
-  pageViews        PageView[]
-  posts            Post[]
-  readingList      ReadingList[]
-  wishlist         Wishlist[]
-  posSessions      PosSession[]
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  password             String
+  role                 UserRole       @default(ADMIN)
+  isBanned             Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  fullName             String?        @db.VarChar(255)
+  locale               String         @default("fr") @db.VarChar(5)
+  city                 String?        @db.VarChar(100)
+  address              String?        @db.VarChar(500)
+  neighborhood         String?        @db.VarChar(100)
+  credits              Int            @default(10)
+  rating               Float          @default(5)
+  image                String?        @db.VarChar(500)
+  bio                  String?        @db.Text
+  editorialRole        String?        @db.VarChar(255)
+  editorialDomains     String?        @db.Text
+  editorialExperience  String?        @db.Text
+  editorialMethodology String?        @db.Text
+  instagram            String?        @db.VarChar(100)
+  facebook             String?        @db.VarChar(100)
+  twitter              String?        @db.VarChar(100)
+  phone                String?        @db.VarChar(20)
+  managedLanguages     String?        @db.VarChar(50)
+  expoPushToken        String?        @db.VarChar(255)
+  sellerBooks          Book[]         @relation("SellerBooks")
+  comments             Comment[]
+  coupons              Coupon[]       @relation("AffiliateCoupons")
+  expenses             Expense[]
+  loginHistory         LoginHistory[]
+  notifications        Notification[]
+  sellerOrderItems     OrderItem[]    @relation("SellerOrderItems")
+  sellerOrders         Order[]        @relation("SellerOrders")
+  pageViews            PageView[]
+  posts                Post[]
+  readingList          ReadingList[]
+  wishlist             Wishlist[]
+  posSessions          PosSession[]
 
   @@index([email])
   @@index([role])
@@ -175,6 +175,7 @@ model Book {
   jumiaPackageContent String?           @db.VarChar(500)
   jumiaProductSid     String?           @db.VarChar(100)
   jumiaQcStatus       String?           @db.VarChar(50)
+  views               Int               @default(0)
   reservations        BookReservation[]
   seller              User?             @relation("SellerBooks", fields: [sellerId], references: [id])
   orderItems          OrderItem[]
@@ -1288,7 +1289,7 @@ model AudioTestimonial {
   customerName String   @db.VarChar(255)
   audioUrl     String   @db.VarChar(500)
   avatarUrl    String?  @db.VarChar(500)
-  duration     Int?     // in seconds
+  duration     Int? // in seconds
   isApproved   Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

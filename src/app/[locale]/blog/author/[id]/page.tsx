@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { Facebook, Instagram, Twitter, User, BookOpen, Calendar, ArrowRight, Compass, Briefcase, Search } from 'lucide-react'
+import { Facebook, Instagram, Twitter, User, BookOpen, Calendar, ArrowRight, Compass, Briefcase, Search, Edit2 } from 'lucide-react'
 import { Link } from '@/i18n/routing'
+import { getCommunityUser } from '@/lib/actions/community-auth'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, locale: string }> }) {
     const { id, locale } = await params
@@ -22,6 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function BlogAuthorPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
     const { id, locale } = await params
     const t = await getTranslations('BlogList') // Utiliser BlogList ou similaire
+    const currentUser = await getCommunityUser()
+    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'admin@riwaya.store'
 
     const user = await prisma.user.findUnique({
         where: { id },
@@ -45,7 +48,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
         <main className="min-h-screen bg-slate-50 flex flex-col">
             <Header />
 
-            <div className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+            <div className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" dir="ltr">
                 {/* En-tête de l'auteur */}
                 <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12 relative overflow-hidden">
                     
@@ -92,9 +95,9 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                             </p>
                         )}
 
-                        {/* Réseaux sociaux */}
-                        {(user.facebook || user.instagram || user.twitter) && (
-                            <div className="flex items-center justify-center md:justify-start gap-4">
+                        {/* Réseaux sociaux et actions Admin */}
+                        {(user.facebook || user.instagram || user.twitter || isAdmin) && (
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                 {user.facebook && (
                                     <a href={user.facebook.includes('http') ? user.facebook : `https://facebook.com/${user.facebook}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all shadow-sm">
                                         <Facebook className="w-5 h-5" />
@@ -108,6 +111,16 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                                 {user.twitter && (
                                     <a href={user.twitter.includes('http') ? user.twitter : `https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-100 text-slate-700 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">
                                         <Twitter className="w-5 h-5" />
+                                    </a>
+                                )}
+                                
+                                {isAdmin && (
+                                    <a 
+                                        href="/fr/admin/users" 
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-xs font-black rounded-full uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 md:ml-auto"
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                        Éditer (Admin)
                                     </a>
                                 )}
                             </div>
