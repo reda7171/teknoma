@@ -48,6 +48,16 @@
   }
 }
 
+/* Agrandissement spécifique du texte arabe (RTL) pour une meilleure lisibilité */
+[dir="rtl"] .prose p,
+[dir="rtl"] .prose li,
+[dir="rtl"] .prose a,
+[dir="rtl"] .prose blockquote,
+[dir="rtl"] .prose strong {
+  font-size: 1.15rem !important;
+  line-height: 1.8 !important;
+}
+
 @keyframes whatsapp-bounce {
   0%, 100% { transform: translateY(0) scale(1); }
   30% { transform: translateY(-12px) scale(1.05); }

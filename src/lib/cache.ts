@@ -70,24 +70,25 @@ if (typeof setInterval !== 'undefined') {
     setInterval(() => cache.cleanup(), 5 * 60 * 1000)
 }
 
+import { unstable_cache } from 'next/cache'
+
 /**
- * Helper pour cache avec fonction
+ * Helper pour cache avec fonction (utilisant Next.js Data Cache)
  */
 export async function getCached<T>(
     key: string,
     fetchFn: () => Promise<T>,
     ttlSeconds: number = 300
 ): Promise<T> {
-    // Vérifier cache
-    const cached = cache.get<T>(key)
-    if (cached !== null) {
-        return cached
-    }
-
-    // Fetch et mettre en cache
-    const data = await fetchFn()
-    cache.set(key, data, ttlSeconds)
-    return data
+    const cachedFn = unstable_cache(
+        fetchFn,
+        [key],
+        {
+            revalidate: ttlSeconds,
+            tags: [key.split(':')[0]], // ex: 'setting' pour 'setting:site_url'
+        }
+    )
+    return cachedFn()
 }
 
 /**

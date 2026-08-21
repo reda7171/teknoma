@@ -87,11 +87,17 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
 
     return (
         <footer id="main-footer" className="bg-black text-white relative">
-            <Script src="https://apis.google.com/js/platform.js?onload=renderBadge" strategy="afterInteractive" />
-            <Script id="google-customer-reviews-badge" strategy="afterInteractive" dangerouslySetInnerHTML={{
+            <Script src="https://apis.google.com/js/platform.js?onload=renderBadge" strategy="lazyOnload" />
+            <Script id="google-customer-reviews-badge" strategy="lazyOnload" dangerouslySetInnerHTML={{
                 __html: `
                     window.renderBadge = function() {
                         var ratingBadgeContainer = document.createElement("div");
+                        ratingBadgeContainer.style.minHeight = "60px";
+                        ratingBadgeContainer.style.minWidth = "120px";
+                        ratingBadgeContainer.style.position = "fixed";
+                        ratingBadgeContainer.style.bottom = "0";
+                        ratingBadgeContainer.style.left = "0";
+                        ratingBadgeContainer.style.zIndex = "2147483647";
                         document.body.appendChild(ratingBadgeContainer);
                         window.gapi.load('ratingbadge', function() {
                             window.gapi.ratingbadge.render(ratingBadgeContainer, {

@@ -16,6 +16,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import Footer from '@/components/Footer'
 import { Link, redirect } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
+import { Suspense } from 'react'
 import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download , Headphones } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
@@ -102,7 +103,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     recentPosts,
     homeSettings,
     homepageContent,
-    user,
     audioTestimonialsResult
   ] = await Promise.all([
     getPopularBooks(8),
@@ -117,7 +117,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getRecentPosts(3, locale),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
-    getCommunityUser(),
     getApprovedAudioTestimonials()
   ])
 
@@ -1166,7 +1165,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       {showSection('home_section_roulette') && <RoulettePopup />}
-      <HeaderWithUser />
+      
+      <Suspense fallback={<div className="h-[72px] bg-white border-b border-gray-100" />}>
+        <HeaderWithUser />
+      </Suspense>
+
       <style dangerouslySetInnerHTML={{ __html: `
         body::-webkit-scrollbar { display: none !important; }
         body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
@@ -1212,8 +1215,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {!user && <GoogleOneTap />}
+        <Suspense fallback={null}>
+          <GoogleOneTapWrapper />
+        </Suspense>
       </main>
     </>
   )
+}
+
+// Wrapper to keep GoogleOneTap out of static generation
+async function GoogleOneTapWrapper() {
+  const { getCommunityUser } = await import('@/lib/actions/community-auth');
+  const user = await getCommunityUser();
+  if (user) return null;
+  return <GoogleOneTap />;
 }

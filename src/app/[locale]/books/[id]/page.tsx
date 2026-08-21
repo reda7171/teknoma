@@ -5,12 +5,13 @@ import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import WishlistButton from '@/components/WishlistButton'
 import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
-import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2 } from 'lucide-react'
+import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2, Eye } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
 import ReviewList from '@/components/ReviewList'
 import { getBookReviews, getBookAverageRating } from '@/lib/actions/reviews'
+import { incrementBookViews } from '@/lib/actions/books'
 import { getCategoryConfigByName } from '@/lib/actions/categories'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
@@ -164,6 +165,9 @@ export default async function BookDetailPage({
     if (!book) {
         notFound()
     }
+
+    // Incrémentation asynchrone des vues
+    incrementBookViews(book.id).catch(console.error)
 
     // Extraction des titres et descriptions dynamiques selon la langue
     const displayTitle = getLocalizedTitle(book, locale);
@@ -499,13 +503,20 @@ export default async function BookDetailPage({
                                         </Link>
                                     )}
                                     {isAdmin && (
-                                        <a
-                                            href={`/fr/admin/books/${book.id}/edit`}
-                                            className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-[9px] font-black rounded-full uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 ring-2 ring-white"
-                                        >
-                                            <Edit2 className="w-3.5 h-3.5" />
-                                            Modifier ce livre
-                                        </a>
+                                        <>
+                                            <a
+                                                href={`/fr/admin/books/${book.id}/edit`}
+                                                className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-[9px] font-black rounded-full uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 ring-2 ring-white"
+                                            >
+                                                <Edit2 className="w-3.5 h-3.5" />
+                                                Modifier
+                                            </a>
+                                            <div className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full border border-slate-200">
+                                                <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                                {/* @ts-ignore */}
+                                                <span>{(book as any).views || 0} vues</span>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
 
@@ -566,7 +577,7 @@ export default async function BookDetailPage({
                                     </div>
                                 )}
 
-                                <StickyBottomActions>
+                                <StickyBottomActions productId={book.id}>
                                     {book.stock > 0 && (
                                         <WhatsAppOrderButton
                                             title={displayTitle}

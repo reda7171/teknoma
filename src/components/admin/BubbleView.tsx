@@ -57,7 +57,10 @@ export default function BubbleView({ stats, onClose }: BubbleViewProps) {
 
         // Créer les bulles
         bubblesRef.current = stats.map((s, i) => {
-            const radius = 70 + Math.random() * 60
+            const isMobile = W < 768;
+            const baseRadius = isMobile ? 35 : 70;
+            const randomRadius = isMobile ? 30 : 60;
+            const radius = baseRadius + Math.random() * randomRadius;
             return {
                 id: i,
                 x: radius + Math.random() * (W - radius * 2),
@@ -192,16 +195,16 @@ export default function BubbleView({ stats, onClose }: BubbleViewProps) {
                 ctx.textAlign = 'center'
                 ctx.textBaseline = 'middle'
                 ctx.fillStyle = '#ffffff'
-                ctx.font = `bold ${Math.max(16, pulseR * 0.32)}px "Inter", sans-serif`
+                ctx.font = `bold ${Math.max(12, pulseR * 0.32)}px "Inter", sans-serif`
                 ctx.shadowColor = 'rgba(0,0,0,0.5)'
                 ctx.shadowBlur = 6
-                ctx.fillText(b.value, b.x, b.y - 8)
+                ctx.fillText(b.value, b.x, b.y - (pulseR * 0.15))
 
                 // Texte label
-                ctx.font = `bold ${Math.max(9, pulseR * 0.13)}px "Inter", sans-serif`
+                ctx.font = `bold ${Math.max(8, pulseR * 0.15)}px "Inter", sans-serif`
                 ctx.fillStyle = 'rgba(255,255,255,0.75)'
                 ctx.shadowBlur = 3
-                ctx.fillText(b.label.toUpperCase(), b.x, b.y + pulseR * 0.3)
+                ctx.fillText(b.label.toUpperCase(), b.x, b.y + pulseR * 0.35)
 
                 ctx.shadowBlur = 0
                 ctx.globalAlpha = 1

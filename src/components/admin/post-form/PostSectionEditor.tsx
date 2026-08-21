@@ -177,6 +177,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     const [deeplStyle, setDeeplStyle] = useState('default')
     const [deeplTone, setDeeplTone] = useState('default')
     const [isRephrasing, setIsRephrasing] = useState<string | null>(null)
+    const [isRephrasingTitle, setIsRephrasingTitle] = useState<string | null>(null)
 
     useEffect(() => {
         // Précharger l'éditeur en arrière-plan pour éviter le temps de chargement au clic
@@ -298,6 +299,37 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
             alert('Erreur de connexion avec DeepL')
         } finally {
             setIsRephrasing(null)
+        }
+    }
+
+    const handleRephraseSectionTitle = async (sectionId: string, titleStr: string) => {
+        if (!titleStr || titleStr.trim() === '') return
+        if (lang === 'ar') {
+            alert("DeepL Write ne supporte pas l'arabe actuellement.")
+            return
+        }
+        setIsRephrasingTitle(sectionId)
+        try {
+            const res = await fetch('/api/admin/translate/rephrase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: titleStr,
+                    targetLang: lang === 'en' ? 'EN-US' : 'FR',
+                })
+            })
+            const data = await res.json()
+            if (data.success && data.rephrased && data.rephrased.length > 0) {
+                // Remove trailing punctuation that DeepL might add to short titles
+                const cleanedTitle = data.rephrased[0].replace(/(\.)$/, '')
+                handleSectionChange(sectionId, 'title', cleanedTitle)
+            } else {
+                alert('Erreur DeepL: ' + (data.error || 'Erreur inconnue'))
+            }
+        } catch (err) {
+            alert('Erreur de connexion avec DeepL')
+        } finally {
+            setIsRephrasingTitle(null)
         }
     }
 
@@ -469,11 +501,18 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         placeholder="Titre de la section (ex: Introduction)"
                                         className="flex-1 bg-transparent border-none text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 placeholder:text-gray-300 focus:ring-0 p-0"
                                     />
-                                    {bType === 'text' && lang !== 'ar' && (
+                                    {lang !== 'ar' && (
+                                        <button type="button" onClick={() => handleRephraseSectionTitle(section.id, section.title)} disabled={isRephrasingTitle === section.id || !section.title}
+                                            className="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold" title="Améliorer le titre avec DeepL Write">
+                                            {isRephrasingTitle === section.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                            <span className="hidden sm:inline">Titre</span>
+                                        </button>
+                                    )}
+                                    {(bType === 'text' || bType === 'quote') && lang !== 'ar' && (
                                         <button type="button" onClick={() => handleRephrase(section.id, section.content)} disabled={isRephrasing === section.id}
-                                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold" title="Améliorer avec DeepL Write">
+                                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold" title="Améliorer le contenu avec DeepL Write">
                                             {isRephrasing === section.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-                                            <span className="hidden sm:inline">Améliorer</span>
+                                            <span className="hidden sm:inline">Texte</span>
                                         </button>
                                     )}
                                     <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveSection(section.id); }}

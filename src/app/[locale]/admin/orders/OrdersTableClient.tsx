@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle } from 'lucide-react'
+import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus } from 'lucide-react'
 import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
@@ -416,6 +416,11 @@ export default function OrdersTableClient({
                                         </option>
                                     ))}
                                 </select>
+                                <div className="mt-2 text-right">
+                                    <Link href="/fr/admin/finance" target="_blank" className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg">
+                                        <Plus className="w-3 h-3" /> Nouvelle facture de livraison
+                                    </Link>
+                                </div>
                             </div>
                             
                             <div className="flex gap-3 justify-end pt-4">

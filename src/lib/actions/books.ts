@@ -576,3 +576,19 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
         return { success: false, error: 'Impossible de mettre à jour les prix' }
     }
 }
+
+
+export async function incrementBookViews(id: string) {
+    try {
+        // @ts-ignore - views column is recently added
+        await prisma.book.update({
+            where: { id },
+            data: { views: { increment: 1 } },
+            select: { id: true }
+        })
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur lors de l\'incrémentation des vues du livre:', error)
+        return { success: false, error: 'Failed to increment views' }
+    }
+}
