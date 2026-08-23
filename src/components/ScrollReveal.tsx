@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-interface ScrollRevealProps {
+interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode
     className?: string
     animation?: 'animate-reveal-up' | 'animate-reveal-right'
@@ -13,7 +13,8 @@ export default function ScrollReveal({
     children,
     className = "",
     animation = "animate-reveal-up",
-    delay = 0
+    delay = 0,
+    ...props
 }: ScrollRevealProps) {
     const [isVisible, setIsVisible] = useState(false)
     const elementRef = useRef<HTMLDivElement>(null)
@@ -44,8 +45,10 @@ export default function ScrollReveal({
             className={`${className} ${!isVisible ? 'reveal-hidden' : animation}`}
             style={{
                 animationDelay: `${delay}ms`,
-                animationFillMode: 'forwards'
+                animationFillMode: 'forwards',
+                ...props.style
             }}
+            {...props}
         >
             {children}
         </div>

@@ -1,8 +1,10 @@
 'use client'
 
 import { BookOpen } from 'lucide-react'
+import { useLocale } from 'next-intl'
 
 export default function Loading() {
+    const locale = useLocale()
     return (
         <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-pixio-cream">
             <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center relative">
@@ -14,8 +16,13 @@ export default function Loading() {
                         </div>
                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-12 h-2 bg-black/10 blur-xl rounded-[100%]" />
                     </div>
-                    <span className="text-3xl font-black text-black tracking-tighter">
-                        riwaya<span className="text-pixio-yellow">.</span>
+                    <span className={`text-3xl font-black text-black tracking-tighter flex items-center justify-center ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                        {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
+                            <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
+                                {char}
+                            </span>
+                        ))}
+                        <span className="text-[#10b981] inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 4 : 6) * 100}ms` }}>.</span>
                     </span>
                 </div>
             </div>

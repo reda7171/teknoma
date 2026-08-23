@@ -230,6 +230,7 @@ export default function AdminLayout({
                 { name: 'AEO', href: `/${lang}/admin/aeo`, icon: MessageCircle },
                 { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
                 { name: 'Maillage Interne', href: `/${lang}/admin/seo/internal-linking`, icon: Network },
+                { name: 'Bot Facebook', href: `/${lang}/admin/seo/facebook-bot`, icon: Sparkles },
             ]
         },
         {

@@ -205,7 +205,7 @@ export default async function BlogPage({
                                     )}
 
                                     <div className="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-black group-hover:tracking-[0.3em] rtl:group-hover:tracking-normal transition-all">
+                                        <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-black group-hover:tracking-[0.3em] rtl:group-hover:tracking-normal transition-all">
                                             {t('ReadArticle')}
                                         </span>
                                         <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center group-hover:bg-pixio-pink transition-colors">

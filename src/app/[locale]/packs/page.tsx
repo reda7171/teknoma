@@ -59,7 +59,7 @@ export default async function PacksPage() {
             <div className="bg-pixio-beige pt-20 pb-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-black">
                     {/* Breadcrumbs */}
-                    <div className="flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-8">
+                    <div className="flex items-center justify-center gap-4 text-xs md:text-sm font-black uppercase tracking-[0.2em] text-gray-400 mb-8">
                         <Link href="/" className="hover:text-black transition-colors">{tNav('Home')}</Link>
                         <span className="text-gray-200">/</span>
                         <span className="text-black">{t('Title')}</span>
@@ -67,7 +67,7 @@ export default async function PacksPage() {
                     <h1 className="text-6xl font-black mb-6 tracking-tighter">
                         {t('Title')}<span className="text-gray-300">.</span>
                     </h1>
-                    <p className="text-gray-400 font-bold uppercase tracking-[0.25em] text-[10px] max-w-xl mx-auto leading-loose">
+                    <p className="text-gray-500 font-bold uppercase tracking-[0.25em] text-sm md:text-base max-w-xl mx-auto leading-loose">
                         {t('Subtitle')}
                     </p>
                 </div>

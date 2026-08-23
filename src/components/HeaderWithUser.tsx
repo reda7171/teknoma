@@ -5,9 +5,10 @@ import { getActiveMenuBySlug } from '@/lib/actions/menus'
 import { getSettingsByCategory } from '@/lib/actions/site-settings'
 
 export default async function HeaderWithUser() {
-    const [user, menu, featureSettings, generalSettings] = await Promise.all([
+    const [user, menu, megaMenu, featureSettings, generalSettings] = await Promise.all([
         getCommunityUser(),
         getActiveMenuBySlug('header'),
+        getActiveMenuBySlug('mega-menu'),
         getSettingsByCategory('features'),
         getSettingsByCategory('general')
     ])
@@ -36,6 +37,7 @@ export default async function HeaderWithUser() {
             user={userProps}
             notificationDropdown={user ? <NotificationDropdownWrapper /> : null}
             navigation={menu?.items}
+            megaMenu={megaMenu?.items}
             features={features}
             siteLogo={generalSettings['site_logo'] || null}
         />

@@ -35,6 +35,13 @@ const tajawal = Tajawal({
   variable: "--font-tajawal",
 });
 
+import { Cairo } from "next/font/google";
+const cairo = Cairo({
+  subsets: ["arabic"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-cairo",
+});
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
@@ -439,9 +446,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
       </head>
       <body
-        className={`${outfit.className} ${tajawal.variable} font-sans antialiased bg-white`}
+        className={`${outfit.className} ${tajawal.variable} ${cairo.variable} font-sans antialiased bg-white`}
         suppressHydrationWarning={true}
       >
+        <noscript>
+          <style>{`.reveal-hidden { opacity: 1 !important; transform: none !important; }`}</style>
+        </noscript>
         {/* Google Tag Manager (noscript) */}
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSD75KHT"
           height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe></noscript>

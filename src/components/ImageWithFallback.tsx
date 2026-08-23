@@ -24,19 +24,32 @@ export default function ImageWithFallback({
     priority = false,
     sizes = '(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw',
 }: ImageWithFallbackProps) {
+    const finalSrc = normalizeImage(src || '') || fallback;
     return (
-        <Image
-            src={normalizeImage(src || '') || fallback}
-            alt={alt || "Image"}
-            fill
-            sizes={sizes}
-            className={className}
-            priority={priority}
-            onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.srcset = '';
-                target.src = fallback;
-            }}
-        />
+        <>
+            <Image
+                src={finalSrc}
+                alt={alt || "Image"}
+                fill
+                sizes={sizes}
+                className={className}
+                priority={priority}
+                onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.srcset = '';
+                    target.src = fallback;
+                }}
+            />
+            <noscript>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                    src={finalSrc} 
+                    alt={alt || "Image"} 
+                    className={className} 
+                    loading="lazy" 
+                    style={{ position: 'absolute', height: '100%', width: '100%', inset: '0px', color: 'transparent' }} 
+                />
+            </noscript>
+        </>
     )
 }

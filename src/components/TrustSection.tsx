@@ -6,14 +6,12 @@ import { useState, useEffect, useRef } from 'react'
 import { useResponsiveAnimation } from '@/hooks/useResponsiveAnimation'
 
 function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?: number }) {
-    // Extraire le nombre et le suffixe (ex: "1500+" -> 1500, "+")
     const numericValue = parseInt(value.replace(/[^0-9]/g, '')) || 0
     const suffix = value.replace(/[0-9]/g, '')
 
-    const [count, setCount] = useState(numericValue)
     const [isVisible, setIsVisible] = useState(false)
     const [hasAnimated, setHasAnimated] = useState(false)
-    const elementRef = useRef<HTMLDivElement>(null)
+    const elementRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -33,33 +31,34 @@ function AnimatedCounter({ value, duration = 2000 }: { value: string, duration?:
     }, [])
 
     useEffect(() => {
-        if (!isVisible || hasAnimated) return
+        if (!isVisible || hasAnimated || !elementRef.current) return
 
         let start = 0
         const end = numericValue
         const range = end - start
         let current = start
-        const increment = end > start ? 1 : -1
-        const stepTime = Math.abs(Math.floor(duration / range))
+        const stepTime = 16
 
         // Assurer un stepTime minimum pour la fluidité
         const timer = setInterval(() => {
-            current += Math.ceil(range / (duration / 16)) // ~60fps
+            current += Math.ceil(range / (duration / stepTime)) // ~60fps
             if (current >= end) {
-                setCount(end)
+                current = end
                 setHasAnimated(true)
                 clearInterval(timer)
-            } else {
-                setCount(current)
             }
-        }, 16)
+            if (elementRef.current) {
+                elementRef.current.innerText = current.toLocaleString('fr-FR') + suffix
+            }
+        }, stepTime)
 
         return () => clearInterval(timer)
-    }, [isVisible, numericValue, duration, hasAnimated])
+    }, [isVisible, numericValue, duration, hasAnimated, suffix])
 
+    // SSR et valeur par défaut : on affiche la valeur finale pour le SEO et si le JS crash
     return (
         <span ref={elementRef} className="tabular-nums">
-            {count.toLocaleString('fr-FR')}{suffix}
+            {numericValue.toLocaleString('fr-FR')}{suffix}
         </span>
     )
 }
@@ -93,7 +92,7 @@ function StatCard({ icon, number, label, bgColor, iconColor, idx }: StatCardProp
                     <AnimatedCounter value={number} />
                 </h3>
                 <div className="w-10 h-1 bg-gray-100 mx-auto rounded-full group-hover:w-16 group-hover:bg-pixio-yellow transition-all duration-500"></div>
-                <p className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em] font-outfit">
+                <p className="text-[10px] md:text-xs rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em] font-outfit">
                     {label}
                 </p>
             </div>
@@ -150,19 +149,19 @@ export default function TrustSection({ stats, className, style }: { stats?: { bo
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header with High-End Typography */}
-                <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-32 space-y-8">
+                <div className="flex flex-col items-start text-left max-w-4xl mb-32 space-y-8" dir="ltr">
                     <div className="inline-flex items-center gap-3 px-8 py-3 bg-black text-white rounded-full hover:scale-105 transition-transform cursor-default">
                         <div className={`w-2 h-2 bg-pixio-yellow rounded-full ${pingClass}`}></div>
-                        <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.5em]">
+                        <span className="text-xs md:text-sm font-black uppercase tracking-[0.3em]">
                             {t('Badge')}
                         </span>
                     </div>
 
-                    <h2 className="text-6xl md:text-9xl rtl:tracking-normal font-black text-black tracking-[-0.07em] leading-[0.85] uppercase">
+                    <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-tight uppercase">
                         {t('Title')}<span className="text-pixio-yellow">.</span>
                     </h2>
 
-                    <p className="text-2xl text-gray-500 font-medium tracking-tight max-w-2xl border-l-4 border-pixio-yellow pl-8 italic">
+                    <p className="text-lg md:text-xl text-gray-500 font-medium tracking-tight max-w-2xl border-l-4 border-pixio-yellow pl-8 italic">
                         {t('Description')}
                     </p>
                 </div>

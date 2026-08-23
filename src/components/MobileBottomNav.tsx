@@ -62,7 +62,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                     onClick={openCart}
                     className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-black relative"
                 >
-                    <div className={`relative transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12' : ''}`}>
+                    <div className={`relative transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12' : 'animate-cart-vibrate'}`}>
                         <ShoppingCart className={`w-5 h-5 stroke-2 transition-colors ${isCartAnimating ? 'text-blue-600' : ''}`} />
                         {mounted && totalItems > 0 && (
                             <span className={`absolute -top-1.5 -right-2 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border-2 border-white transition-all duration-300 ${isCartAnimating ? 'scale-125 bg-blue-600' : 'bg-red-500'}`}>

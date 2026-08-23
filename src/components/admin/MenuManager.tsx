@@ -83,6 +83,21 @@ export default function MenuManager({ initialMenus }: { initialMenus: Menu[] }) 
         }
     }
 
+    const handleUpdateItem = async () => {
+        if (!editingItem) return
+
+        const result = await updateMenuItem(editingItem.id, {
+            label: editingItem.label,
+            url: editingItem.url,
+            parentId: editingItem.parentId || null
+        })
+
+        if (result.success) {
+            setEditingItem(null)
+            router.refresh()
+        }
+    }
+
     const handleDeleteItem = async (id: string) => {
         if (!confirm('Supprimer cet élément ?')) return
         await deleteMenuItem(id)
@@ -408,6 +423,59 @@ export default function MenuManager({ initialMenus }: { initialMenus: Menu[] }) 
                                     <button
                                         onClick={() => setShowNewItemForm(false)}
                                         className="px-8 py-3 bg-gray-200 text-gray-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-300 transition-all"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {editingItem && (
+                            <div className="mb-6 p-6 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-4">
+                                <h3 className="font-black text-xs uppercase tracking-widest text-blue-900">Modifier l'élément</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Label</label>
+                                        <input
+                                            type="text"
+                                            value={editingItem.label}
+                                            onChange={(e) => setEditingItem({ ...editingItem, label: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">URL</label>
+                                        <input
+                                            type="text"
+                                            value={editingItem.url}
+                                            onChange={(e) => setEditingItem({ ...editingItem, url: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Élément Parent</label>
+                                    <select
+                                        value={editingItem.parentId || ""}
+                                        onChange={(e) => setEditingItem({ ...editingItem, parentId: e.target.value || null })}
+                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
+                                    >
+                                        <option value="">(Aucun - Élément racine)</option>
+                                        {selectedMenu.items.filter(item => !item.parentId && item.id !== editingItem.id).map(item => (
+                                            <option key={item.id} value={item.id}>{item.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={handleUpdateItem}
+                                        className="px-8 py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all"
+                                    >
+                                        Enregistrer
+                                    </button>
+                                    <button
+                                        onClick={() => setEditingItem(null)}
+                                        className="px-8 py-3 bg-white text-blue-600 border border-blue-100 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all"
                                     >
                                         Annuler
                                     </button>

@@ -150,12 +150,14 @@
   },
   "HomePage": {
     "hero": {
-      "Badge": "Curated Selections 2026",
-      "TitlePart1": "Beautiful",
-      "TitlePart2": "Knowledge.",
-      "Description": "Discover a premium selection of volumes that transform your view of the world. Knowledge, with style.",
+      "Badge": "Free shipping over 300 MAD + Cash on delivery anywhere in Morocco",
+      "TitlePart1": "Morocco's #1 Online Bookstore",
+      "TitlePart2": "Book bundles from 100 DH",
+      "Description": "Discover a premium selection of books and save with our exclusive bundles. Knowledge, with style.",
       "ShopLibrary": "Shop Library",
-      "OurBundles": "Our Bundles",
+      "OurBundles": "View best-selling bundles",
+      "CustomBundle": "Create my Custom Bundle (-30%)",
+      "SocialProof": "⭐ 4.8/5 by over 1000 satisfied readers",
       "EditorsChoice": "Editor's Choice",
       "Select": "SELECT"
     },
@@ -195,7 +197,7 @@
     },
     "Collections": {
       "Subtitle": "Curated Selections",
-      "Title": "Our Collections"
+      "Title": "Our Bundles"
     },
     "NewArrivals": {
       "Subtitle": "New Season",
@@ -287,7 +289,9 @@
     "Home": "Home",
     "Authors": "Authors",
     "Books": "Books",
-    "Categories": "Categories",
+    "Categories": "Collections",
+    "BLOG": "Blog",
+    "Collections": "Collections",
     "Packs": "Packs",
     "Kids": "Kids",
     "UsbKey": "USB Key",
@@ -1588,5 +1592,9 @@
     "SelectionOfTheWeek": "Selection of the week",
     "ViewCatalog": "View the entire catalog",
     "FAQ": "Frequently Asked Questions"
+  },
+  "InstagramFeed": {
+    "Badge": "Instagram",
+    "Title": "Follow us on Instagram"
   }
 }
