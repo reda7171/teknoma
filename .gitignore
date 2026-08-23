@@ -68,3 +68,5 @@ scratch/
 # Standalone build artifacts
 server.js
 /scripts/bundle-standalone.js
+
+scripts/fb_session_data/
