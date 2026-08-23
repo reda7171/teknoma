@@ -150,12 +150,14 @@
   },
   "HomePage": {
     "hero": {
-      "Badge": "Sélections 2026",
-      "TitlePart1": "Beau",
-      "TitlePart2": "Savoir.",
-      "Description": "Découvrez une sélection premium de volumes qui transforment votre vision du monde. Le savoir, avec style.",
+      "Badge": "Livraison gratuite dès 300 MAD + Paiement à la livraison partout au Maroc",
+      "TitlePart1": "Librairie en ligne N°1 au Maroc",
+      "TitlePart2": "Packs de livres à partir de 100 DH",
+      "Description": "Découvrez une sélection premium de livres et économisez avec nos packs exclusifs. Le savoir, avec style.",
       "ShopLibrary": "La Librairie",
-      "OurBundles": "Nos Packs",
+      "OurBundles": "Voir les Packs les plus vendus",
+      "CustomBundle": "Créer mon Pack Perso (-30%)",
+      "SocialProof": "⭐ 4.8/5 par plus de 1000 lecteurs satisfaits",
       "EditorsChoice": "Choix de l'éditeur",
       "Select": "SÉLECTIONNER"
     },
@@ -195,7 +197,7 @@
     },
     "Collections": {
       "Subtitle": "Sélections Soignées",
-      "Title": "Nos Collections"
+      "Title": "Nos Packs"
     },
     "NewArrivals": {
       "Subtitle": "Nouvelle Saison",
@@ -287,7 +289,9 @@
     "Home": "Accueil",
     "Authors": "Auteurs",
     "Books": "Livres",
-    "Categories": "Catégories",
+    "Categories": "Collections",
+    "BLOG": "Le Journal",
+    "Collections": "Collections",
     "Packs": "Packs",
     "Kids": "Mon enfant",
     "UsbKey": "Clé USB",
@@ -1499,5 +1503,9 @@
     "SelectionOfTheWeek": "Sélection de la semaine",
     "ViewCatalog": "Voir tout le catalogue",
     "FAQ": "Questions Fréquentes"
+  },
+  "InstagramFeed": {
+    "Badge": "Instagram",
+    "Title": "Suivez-nous sur Instagram"
   }
 }

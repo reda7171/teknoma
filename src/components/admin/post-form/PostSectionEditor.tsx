@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2, Copy, ClipboardPaste } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2, Copy, ClipboardPaste, X } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import dynamic from 'next/dynamic'
 import 'react-quill-new/dist/quill.snow.css'
@@ -178,6 +178,11 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     const [deeplTone, setDeeplTone] = useState('default')
     const [isRephrasing, setIsRephrasing] = useState<string | null>(null)
     const [isRephrasingTitle, setIsRephrasingTitle] = useState<string | null>(null)
+    // Modal génération de prompts images
+    const [showImagePromptModal, setShowImagePromptModal] = useState(false)
+    const [imagePromptCount, setImagePromptCount] = useState(2)
+    const [generatedImagePrompts, setGeneratedImagePrompts] = useState<string[]>([])
+    const [isGeneratingPrompts, setIsGeneratingPrompts] = useState(false)
 
     useEffect(() => {
         // Précharger l'éditeur en arrière-plan pour éviter le temps de chargement au clic
@@ -401,6 +406,29 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
         }
     }
 
+    const handleGenerateImagePrompts = async () => {
+        if (sections.length === 0) return
+        setIsGeneratingPrompts(true)
+        setGeneratedImagePrompts([])
+        // Prendre les sections les plus longues/pertinentes
+        const sortedSections = [...sections]
+            .filter(s => s.title || s.content)
+            .slice(0, imagePromptCount * 2) // prendre plus pour choisir
+        const selected = sortedSections.slice(0, imagePromptCount)
+        const prompts = selected.map((s, i) => {
+            const title = s.title || `Section ${i + 1}`
+            // Nettoyer le contenu HTML pour extraire le texte brut
+            const rawContent = s.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+            return `Image ${i + 1} — Section : "${title}"\nPrompt : A high-quality editorial illustration for an article section titled "${title}". Context: ${rawContent || postTitle}. Style: flat design, modern, warm tones, bookstore atmosphere, Moroccan aesthetic. No text in image.`
+        })
+        setGeneratedImagePrompts(prompts)
+        setIsGeneratingPrompts(false)
+    }
+
+    const handleCopyImagePrompt = (prompt: string) => {
+        navigator.clipboard.writeText(prompt)
+    }
+
     const blockTypes: BlockType[] = ['text', 'image', 'video', 'table', 'quote', 'chart', 'ad', 'poll']
 
     return (
@@ -428,6 +456,10 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                         <button type="button" onClick={handleCopyPrompt}
                             className="px-4 py-2 bg-purple-50 text-purple-700 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-200 flex items-center gap-2" title="Copier le prompt pour ChatGPT">
                             <Copy className="w-4 h-4" /> Prompt ChatGPT
+                        </button>
+                        <button type="button" onClick={() => setShowImagePromptModal(true)}
+                            className="px-4 py-2 bg-orange-50 text-orange-700 rounded-xl text-xs font-bold hover:bg-orange-100 transition-colors border border-orange-200 flex items-center gap-2" title="Générer des prompts d'images pour vos sections">
+                            <ImageIcon className="w-4 h-4" /> Générer images
                         </button>
                         <button type="button" onClick={handlePasteChatGPT}
                             className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-200 flex items-center gap-2" title="Coller la réponse structurée de ChatGPT">
@@ -499,7 +531,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         value={section.title}
                                         onChange={(e) => handleSectionChange(section.id, 'title', e.target.value)}
                                         placeholder="Titre de la section (ex: Introduction)"
-                                        className="flex-1 bg-transparent border-none text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 placeholder:text-gray-300 focus:ring-0 p-0"
+                                        className="flex-1 min-w-0 bg-transparent border-none text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 placeholder:text-gray-300 focus:ring-0 p-0"
                                     />
                                     {lang !== 'ar' && (
                                         <button type="button" onClick={() => handleRephraseSectionTitle(section.id, section.title)} disabled={isRephrasingTitle === section.id || !section.title}
@@ -516,8 +548,9 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                                         </button>
                                     )}
                                     <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveSection(section.id); }}
-                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
-                                        <Trash2 className="w-5 h-5" />
+                                        className="shrink-0 px-4 py-2 text-red-600 hover:text-white hover:bg-red-600 bg-red-100 rounded-xl transition-colors flex items-center gap-2 text-xs font-black uppercase tracking-widest border border-red-200 shadow-sm">
+                                        <Trash2 className="w-4 h-4" />
+                                        <span>Supprimer</span>
                                     </button>
                                 </div>
 
@@ -611,6 +644,70 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                     </div>
                 )}
             </div>
+
+            {/* Modal : Générer des prompts d'images */}
+            {showImagePromptModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-8 flex flex-col gap-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900">Générer des prompts images</h3>
+                                <p className="text-sm text-gray-500 mt-1">Combien d'images souhaitez-vous générer ?</p>
+                            </div>
+                            <button type="button" onClick={() => { setShowImagePromptModal(false); setGeneratedImagePrompts([]) }}
+                                className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
+                        </div>
+
+                        {/* Choix du nombre */}
+                        {generatedImagePrompts.length === 0 && (
+                            <div className="flex flex-col gap-4">
+                                <p className="text-sm font-bold text-gray-700">Nombre de prompts :</p>
+                                <div className="flex gap-3 flex-wrap">
+                                    {[1, 2, 3, 4, 5].map(n => (
+                                        <button key={n} type="button" onClick={() => setImagePromptCount(n)}
+                                            className={`w-14 h-14 rounded-2xl text-xl font-black border-2 transition-all ${
+                                                imagePromptCount === n
+                                                    ? 'bg-orange-500 border-orange-500 text-white shadow-lg scale-105'
+                                                    : 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100'
+                                            }`}>
+                                            {n}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button type="button" onClick={handleGenerateImagePrompts} disabled={isGeneratingPrompts}
+                                    className="mt-2 w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+                                    {isGeneratingPrompts ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+                                    Générer {imagePromptCount} prompt{imagePromptCount > 1 ? 's' : ''}
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Résultats */}
+                        {generatedImagePrompts.length > 0 && (
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-bold text-green-700">{generatedImagePrompts.length} prompt{generatedImagePrompts.length > 1 ? 's' : ''} généré{generatedImagePrompts.length > 1 ? 's' : ''} !</p>
+                                    <button type="button" onClick={() => setGeneratedImagePrompts([])}
+                                        className="text-xs text-gray-500 hover:text-gray-700 underline">Recommencer</button>
+                                </div>
+                                <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-1">
+                                    {generatedImagePrompts.map((prompt, i) => (
+                                        <div key={i} className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex flex-col gap-3">
+                                            <pre className="text-xs text-gray-800 whitespace-pre-wrap font-sans leading-relaxed">{prompt}</pre>
+                                            <button type="button" onClick={() => handleCopyImagePrompt(prompt)}
+                                                className="self-end px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black flex items-center gap-2 transition-colors">
+                                                <Copy className="w-3.5 h-3.5" /> Copier
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

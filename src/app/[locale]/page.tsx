@@ -14,6 +14,7 @@ import PackCard from '@/components/PackCard'
 import TrustSection from '@/components/TrustSection'
 import ScrollReveal from '@/components/ScrollReveal'
 import Footer from '@/components/Footer'
+import TypewriterText from '@/components/TypewriterText'
 import { Link, redirect } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
 import { Suspense } from 'react'
@@ -122,7 +123,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const [totalBooks, totalUsers, totalExchanges] = stats
   const audioTestimonials = audioTestimonialsResult?.success ? audioTestimonialsResult.testimonials : []
-  const newBooks = popularBooks.slice(0, 6)
+  const newBooks = popularBooks.slice(0, 8)
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
   // Lire le contenu depuis DB avec fallback sur la valeur i18n
@@ -460,16 +461,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="flex flex-col-reverse lg:flex-row items-center gap-8">
                 <div className="flex-1">
                   <ScrollReveal animation="animate-reveal-up" delay={200} className="space-y-8 text-center lg:text-start">
-                    <div className="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0">
-                      <Sparkles className="w-4 h-4 text-yellow-500" />
-                      <span>{c('hero_badge', t('hero.Badge'))}</span>
+                    <div className={`inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                      <Truck className="w-4 h-4 text-green-500" />
+                      {locale === 'ar' ? (
+                        <TypewriterText text={c('hero_badge', t('hero.Badge'))} speed={60} delay={300} loop={true} />
+                      ) : (
+                        <span>{c('hero_badge', t('hero.Badge'))}</span>
+                      )}
                     </div>
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-black leading-[0.9] tracking-tighter">
-                      {c('hero_title_part1', t('hero.TitlePart1'))} <br />
-                      <span className="text-gray-400">{c('hero_title_part2', t('hero.TitlePart2'))}</span>
+                    <h1 className={`text-4xl md:text-6xl lg:text-7xl font-black text-black leading-[1.1] tracking-tighter ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                      <TypewriterText text={c('hero_title_part1', t('hero.TitlePart1'))} speed={50} delay={600} />
+                      <br />
+                      <span className={`text-gray-400 text-3xl md:text-5xl lg:text-6xl ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                        {locale === 'ar' ? (
+                          <TypewriterText text={c('hero_title_part2', t('hero.TitlePart2'))} speed={50} delay={2000} />
+                        ) : (
+                          c('hero_title_part2', t('hero.TitlePart2'))
+                        )}
+                      </span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0">
-                      {c('hero_description', t('hero.Description'))}
+                    <p className={`text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                      {locale === 'ar' ? (
+                        <TypewriterText text={c('hero_description', t('hero.Description'))} speed={25} delay={3500} />
+                      ) : (
+                        c('hero_description', t('hero.Description'))
+                      )}
                     </p>
 
                   </ScrollReveal>
@@ -495,13 +511,21 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   })()}
                   {/* Boutons sous le cosmos — toutes tailles d'écran */}
                   <div className="flex flex-col sm:flex-row gap-4 justify-center w-full z-10 px-4">
-                    <Link href="/books" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-black text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
-                      <span>{c('hero_btn_shop', t('hero.ShopLibrary'))}</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
-                    </Link>
-                    <Link href="/packs" className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black font-black text-xs uppercase tracking-widest rounded-full border-2 border-gray-100 hover:border-black transition-all hover:-translate-y-1">
+                    <Link href="/packs" className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-black text-sm md:text-base uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
                       <span>{c('hero_btn_packs', t('hero.OurBundles'))}</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                     </Link>
+                    <Link href="/packs/create" className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black font-black text-sm md:text-base uppercase tracking-widest rounded-full border-2 border-gray-100 hover:border-black transition-all hover:-translate-y-1">
+                      <span>{c('hero_btn_custom_pack', t('hero.CustomBundle'))}</span>
+                    </Link>
+                  </div>
+                  
+                  {/* PREUVE SOCIALE */}
+                  <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-gray-500 font-bold z-10">
+                    <div className="flex items-center gap-1">
+                      {[1,2,3,4,5].map((i) => <svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>)}
+                    </div>
+                    <p>{c('hero_social_proof', t('hero.SocialProof'))}</p>
                   </div>
                 </div>
               </div>
@@ -560,18 +584,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         return (
           <section key={key} {...getSectionProps('home_section_best_sellers', 'bg-white')} className={`py-12 ${getSectionProps('home_section_best_sellers', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-6">
+              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-6" dir="ltr">
                 <div className="space-y-4">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
                     <TrendingUp className="w-4 h-4 text-orange-600" />
-                    <span className="text-[11px] font-black uppercase text-orange-600 tracking-[0.3em]">
+                    <span className="text-xs md:text-sm font-black uppercase text-orange-600 tracking-[0.3em]">
                       {c('bestsellers_subtitle', t('BestSellers.Subtitle'))}
                     </span>
                   </div>
                   <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
                     {c('bestsellers_title', t('BestSellers.Title'))}<span className="text-orange-500">.</span>
                   </h2>
-                  <p className="text-lg text-gray-500 font-medium max-w-2xl mx-auto">
+                  <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto">
                     {c('bestsellers_description', t('BestSellers.Description'))}
                   </p>
                 </div>
@@ -631,8 +655,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         return (
           <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-4">
-                <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
+              <ScrollReveal delay={100} className="flex flex-col items-start text-left mb-16 space-y-4" dir="ltr">
+                <span className="text-xs md:text-sm font-black uppercase text-gray-400 tracking-[0.3em]">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
                 <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
                   {c('collections_title', t('Collections.Title'))}<span className="text-pixio-pink">.</span>
                 </h2>
@@ -655,7 +679,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-amber-100/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 -z-10 animate-float-slow"></div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between mb-24 gap-12">
-                <ScrollReveal className="space-y-6 text-center lg:text-left max-w-2xl">
+                <ScrollReveal className="space-y-6 text-center lg:text-left rtl:lg:text-right max-w-2xl">
                   <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full">
                     <Users className="w-4 h-4 text-pixio-yellow" />
                     <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.4em]">{c('authors_subtitle', t('BestAuthors.Subtitle'))}</span>
@@ -705,8 +729,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
                 <div className="space-y-4">
-                  <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
-                  <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">{c('new_arrivals_title', t('NewArrivals.Title'))}</h2>
+                  <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-400 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
+                  <h2 className="text-4xl md:text-6xl rtl:tracking-normal font-black text-black tracking-tight">{c('new_arrivals_title', t('NewArrivals.Title'))}</h2>
                 </div>
                 <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">{c('new_arrivals_view_all', t('NewArrivals.ViewAll'))}</span>
@@ -738,7 +762,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="space-y-4 flex-1">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full">
                     <RefreshCw className="w-4 h-4 text-green-600" />
-                    <span className="text-[11px] font-black uppercase text-green-600 tracking-[0.3em]">{c('exchange_subtitle', t('ExchangeBooks.Subtitle'))}</span>
+                    <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-green-600 tracking-[0.3em]">{c('exchange_subtitle', t('ExchangeBooks.Subtitle'))}</span>
                   </div>
                   <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
                     {c('exchange_title', t('ExchangeBooks.Title'))}<span className="text-green-500">.</span>
@@ -756,8 +780,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {exchangeBooks.length === 0 ? (
                 <ScrollReveal delay={300} className="text-center py-16 bg-white/50 rounded-3xl border-2 border-dashed border-green-200">
                   <RefreshCw className="w-16 h-16 text-green-300 mx-auto mb-4" />
-                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4">{c('exchange_no_data', t('ExchangeBooks.NoData'))}</p>
-                  <Link href="/community/login" className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg">
+                  <p className="text-gray-500 font-black text-lg md:text-2xl uppercase tracking-wider mb-8">{c('exchange_no_data', t('ExchangeBooks.NoData'))}</p>
+                  <Link href="/community/login" className="inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-black text-sm md:text-base uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg hover:shadow-green-600/30 hover:-translate-y-1">
                     <span>{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -811,7 +835,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-12 space-y-4">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full">
                     <Headphones className="w-4 h-4 text-emerald-600" />
-                    <span className="text-[11px] font-black uppercase text-emerald-600 tracking-[0.3em]">
+                    <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-emerald-600 tracking-[0.3em]">
                       {c('audio_testimonials_subtitle', locale === 'ar' ? 'تجارب عملائنا الصوتية' : locale === 'en' ? 'Voice Testimonials' : 'Témoignages Vocaux')}
                     </span>
                   </div>
@@ -840,7 +864,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="flex flex-col lg:flex-row items-center gap-16">
                 <div className="flex-1 space-y-8">
-                  <ScrollReveal animation="animate-reveal-up" delay={100}><div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400/10 border border-amber-400/20 rounded-full"><Zap className="w-3 h-3 text-amber-400" /><span className="text-[11px] font-black uppercase text-amber-400 tracking-[0.3em]">{c('digital_badge', tDigital('HomeSection.Badge'))}</span></div></ScrollReveal>
+                  <ScrollReveal animation="animate-reveal-up" delay={100}><div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400/10 border border-amber-400/20 rounded-full"><Zap className="w-3 h-3 text-amber-400" /><span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-amber-400 tracking-[0.3em]">{c('digital_badge', tDigital('HomeSection.Badge'))}</span></div></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={200}><h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">{c('digital_title', tDigital('HomeSection.Title'))}<span className="text-amber-400">.</span></h2></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={300}><p className="text-lg text-gray-400 font-medium max-w-lg leading-relaxed">{c('digital_description', tDigital('HomeSection.Description'))}</p></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={400} className="space-y-4">
@@ -890,7 +914,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
                 <div className="space-y-4">
-                  <span className="text-[11px] font-black uppercase text-gray-400 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
+                  <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-400 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
                   <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
                     {c('new_arrivals_title', t('NewArrivals.Title'))}
                   </h2>
@@ -929,7 +953,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="space-y-4 flex-1">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full">
                     <RefreshCw className="w-4 h-4 text-green-600" />
-                    <span className="text-[11px] font-black uppercase text-green-600 tracking-[0.3em]">
+                    <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-green-600 tracking-[0.3em]">
                       {c('exchange_subtitle', t('ExchangeBooks.Subtitle'))}
                     </span>
                   </div>
@@ -954,12 +978,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {exchangeBooks.length === 0 ? (
                 <ScrollReveal delay={300} className="text-center py-16 bg-white/50 rounded-3xl border-2 border-dashed border-green-200">
                   <RefreshCw className="w-16 h-16 text-green-300 mx-auto mb-4" />
-                  <p className="text-gray-400 font-bold text-sm uppercase tracking-wider mb-4">
+                  <p className="text-gray-500 font-black text-lg md:text-2xl uppercase tracking-wider mb-8">
                     {c('exchange_no_data', t('ExchangeBooks.NoData'))}
                   </p>
                   <Link
                     href="/community/login"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg"
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-black text-sm md:text-base uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg hover:shadow-green-600/30 hover:-translate-y-1"
                   >
                     <span>{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -1067,7 +1091,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
                 <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-[11px] rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{c('journal_subtitle', t('Journal.Subtitle') || 'Notre Journal')}</span></div>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{c('journal_subtitle', t('Journal.Subtitle') || 'Notre Journal')}</span></div>
                   <h2 className="text-5xl md:text-7xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.9]">{c('journal_title_part1', t('Journal.TitlePart1') || 'Derniers Articles')}<br /><span className="text-gray-400 italic">{c('journal_title_part2', t('Journal.TitlePart2') || 'à Découvrir')}</span></h2>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right">
@@ -1098,7 +1122,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                           <h3 className="text-2xl font-black text-black leading-tight mb-4 group-hover:text-gray-600 transition-colors line-clamp-2">{post.title}</h3>
                           <p className="text-gray-500 text-sm font-medium line-clamp-3 mb-8">{post.excerpt}</p>
                           <div className="mt-auto flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-black font-black text-[10px] rtl:text-xs rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
+                            <div className="flex items-center gap-2 text-black font-black text-xs md:text-sm rtl:tracking-normal uppercase tracking-widest group-hover:gap-4 transition-all"><span>{c('journal_read_more', t('Journal.ReadMore') || 'Lire la suite')}</span><ArrowRight className="w-4 h-4 rtl:rotate-180" /></div>
                             <span className="text-[10px] font-semibold text-gray-400 rtl:text-xs">{new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR', { day: 'numeric', month: 'long' })}</span>
                           </div>
                         </div>
@@ -1131,35 +1155,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <main className="min-h-screen bg-white overflow-x-hidden">
         {finalOrder.map(key => renderSection(key))}
 
-        {/* Newsletter / CTA - Style Pixio Banner */}
-        <section className="py-12 bg-black overflow-hidden relative">
+        {/* CTA + AEO fusionnés */}
+        <section className="py-16 bg-black overflow-hidden relative">
           <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-beige/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
-          <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">
-              {c('cta_title_part1', t('CTA.TitlePart1'))} <br />
-              <span className="text-gray-400 italic">{c('cta_title_part2', t('CTA.TitlePart2'))}</span>
-            </h2>
-            <Link
-              href="/books"
-              className="group inline-flex items-center gap-4 px-12 py-6 bg-white text-black font-black text-xs uppercase tracking-widest rounded-full hover:bg-pixio-cream transition-all shadow-2xl hover:scale-105 hover:-translate-y-1 pulse-yellow-glow"
-            >
-              <span>{c('cta_button', t('CTA.Button'))}</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 flex flex-col items-center gap-10" dir="ltr">
+            <div>
+              <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">
+                {c('cta_title_part1', t('CTA.TitlePart1'))} <br />
+                <span className="text-gray-400 italic">{c('cta_title_part2', t('CTA.TitlePart2'))}</span>
+              </h2>
+              <Link
+                href="/books"
+                className="group inline-flex items-center gap-4 px-12 py-6 bg-white text-black font-black text-xs uppercase tracking-widest rounded-full hover:bg-pixio-cream transition-all shadow-2xl hover:scale-105 hover:-translate-y-1 pulse-yellow-glow"
+              >
+                <span>{c('cta_button', t('CTA.Button'))}</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            {aeoSnippetQ && aeoSnippetA && (
+              <div className="border-t border-white/10 pt-8 max-w-2xl">
+                <p className="text-white/50 text-sm font-bold mb-2">{aeoSnippetQ}</p>
+                <p className="text-white/30 text-sm leading-relaxed">{aeoSnippetA}</p>
+              </div>
+            )}
           </ScrollReveal>
         </section>
-
-        {/* AEO Snippet Section */}
-        {aeoSnippetQ && aeoSnippetA && (
-          <section className="bg-gray-50 border-t border-gray-100 py-16">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-6">{aeoSnippetQ}</h2>
-              <p className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-medium">
-                {aeoSnippetA}
-              </p>
-            </div>
-          </section>
-        )}
 
         <SeoCategoriesSection locale={locale} />
 

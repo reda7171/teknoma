@@ -358,25 +358,17 @@ export default async function PackDetailPage({
                                     {pack.name}<span className="text-gray-200">.</span>
                                 </h1>
 
-                                {/* Price Block */}
-                                <div className="bg-pixio-cream/50 rounded-[2.5rem] p-10 mb-12 border border-gray-50">
-                                    {hasDiscount && (
-                                        <div className="flex items-center gap-6 mb-4">
-                                            <span className="text-gray-300 text-xl line-through font-black tracking-tighter">
-                                                {totalOriginalPrice} درهم
-                                            </span>
-                                            <span className="text-black font-black bg-pixio-yellow px-4 py-2 rounded-xl text-[10px] rtl:text-xs uppercase tracking-widest rtl:tracking-normal">
-                                                {t('SavingsOff', { amount: savings })}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-baseline gap-3">
-                                        <span className="text-7xl font-black text-black tracking-tighter leading-none">{displayPrice}</span>
-                                        <span className="text-2xl text-gray-300 font-black uppercase tracking-widest">درهم</span>
-                                    </div>
-                                </div>
-
-                                <PackCustomizerClient pack={pack as any} whatsappPhone={whatsappPhone || undefined} />
+                                <PackCustomizerClient 
+                                    pack={pack as any} 
+                                    whatsappPhone={whatsappPhone || undefined} 
+                                    priceData={{
+                                        totalOriginalPrice,
+                                        hasDiscount,
+                                        savings,
+                                        savingsPercent,
+                                        displayPrice
+                                    }}
+                                />
 
                                 <div className="flex items-center justify-center gap-10 mt-10">
                                     <div className="flex items-center gap-3 text-[9px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-black">

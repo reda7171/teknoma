@@ -86,17 +86,17 @@ export default function CustomPackBuilder({ availableBooks }: CustomPackBuilderP
                 </div>
                 
                 <div className="relative z-10 text-center md:text-left rtl:md:text-right space-y-4 max-w-xl">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/90 text-sm font-bold uppercase tracking-widest backdrop-blur-sm">
                         <SparklesIcon className="w-4 h-4 text-yellow-400" />
                         {t('Exclusive')}
                     </div>
                     <h2 className="text-3xl md:text-4xl font-black text-white">{t('CustomPack.BannerTitle')}</h2>
-                    <p className="text-gray-300 font-medium">{t('CustomPack.BannerDesc')}</p>
+                    <p className="text-gray-200 font-medium text-base md:text-lg">{t('CustomPack.BannerDesc')}</p>
                 </div>
                 
                 <button 
                     onClick={() => setIsOpen(true)}
-                    className="relative z-10 bg-white text-black px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] flex items-center gap-3 shrink-0"
+                    className="relative z-10 bg-white text-black px-8 py-4 rounded-full font-black uppercase tracking-widest text-base hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] flex items-center gap-3 shrink-0"
                 >
                     <Plus className="w-5 h-5" />
                     {t('CustomPack.BannerBtn')}

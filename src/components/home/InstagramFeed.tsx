@@ -3,8 +3,11 @@
 import React from 'react'
 import Script from 'next/script'
 import { Instagram } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function InstagramFeed() {
+  const t = useTranslations('InstagramFeed')
+
   return (
     <section className="py-16 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,11 +15,11 @@ export default function InstagramFeed() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-100 to-rose-100 rounded-full">
             <Instagram className="w-4 h-4 text-pink-600" />
             <span className="text-[11px] font-black uppercase text-pink-600 tracking-[0.3em]">
-              Instagram
+              {t('Badge')}
             </span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
-            Suivez-nous sur Instagram<span className="text-pink-500">.</span>
+            {t('Title')}<span className="text-pink-500">.</span>
           </h2>
         </div>
         

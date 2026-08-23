@@ -78,7 +78,11 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                 
                 return true
             })
-            .map(item => ({ href: item.url, label: t(item.label as any), isJournal: item.url.includes('/blog') }))
+            .map(item => ({ 
+                href: item.url, 
+                label: t.has(item.label as any) ? t(item.label as any) : item.label, 
+                isJournal: item.url.includes('/blog') 
+            }))
         : defaultNavItems
 
     let finalNavItems = navItems

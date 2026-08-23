@@ -53,7 +53,7 @@ export default function UsbStickyMenu({ items }: { items?: any[] }) {
                                     item.url.includes('videos') ? <Play className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" /> : <HelpCircle className="w-4 h-4 text-teal-400 group-hover:scale-110 transition-transform" />
                                 )}
                                 <span className={`text-[10px] font-black uppercase tracking-[0.15em] text-gray-500 transition-colors ${item.hoverText || 'group-hover:text-black'}`}>
-                                    {t(item.label as any).split('—')[0]}
+                                    {(t.has(item.label as any) ? t(item.label as any) : item.label).split('—')[0]}
                                 </span>
                             </button>
                         </div>
@@ -74,7 +74,7 @@ export default function UsbStickyMenu({ items }: { items?: any[] }) {
                 >
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]" />
                     <Usb className="w-4 h-4 md:w-5 h-5" />
-                    <span className="relative z-10">{t(ctaItem.label as any).split('—')[0]}</span>
+                    <span className="relative z-10">{(t.has(ctaItem.label as any) ? t(ctaItem.label as any) : ctaItem.label).split('—')[0]}</span>
                 </Link>
             </div>
         </div>

@@ -320,6 +320,7 @@ export default function CosmosBooks({
                 src={normalizeImage(centerBook.image)} 
                 alt={centerBook.title} 
                 fill
+                unoptimized
                 sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 20vw"
                 className="object-cover" 
                 onError={() => handleImageError(centerBook.id)} 
@@ -382,6 +383,7 @@ export default function CosmosBooks({
                 src={normalizeImage(book.image)} 
                 alt={book.title} 
                 fill
+                unoptimized
                 sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
                 className="object-cover" 
                 onError={() => handleImageError(book.id)} 
@@ -428,6 +430,7 @@ export default function CosmosBooks({
               src={normalizeImage(dragging.book.image)} 
               alt={dragging.book.title} 
               fill
+              unoptimized
               sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
               className="object-cover" 
             />

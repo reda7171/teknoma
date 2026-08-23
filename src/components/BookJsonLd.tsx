@@ -129,25 +129,27 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "price": book.price,
           "priceCurrency": "MAD"
         },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": averageRating > 0 ? averageRating : 5,
-          "reviewCount": reviewCount > 0 ? reviewCount : 1,
-          "bestRating": 5,
-          "worstRating": 1
-        },
-        "review": {
-          "@type": "Review",
-          "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": averageRating > 0 ? averageRating : 5,
-            "bestRating": "5"
+        ...(reviewCount > 0 ? {
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": averageRating,
+            "reviewCount": reviewCount,
+            "bestRating": 5,
+            "worstRating": 1
           },
-          "author": {
-            "@type": "Person",
-            "name": "Client Riwaya"
+          "review": {
+            "@type": "Review",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": averageRating,
+              "bestRating": "5"
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Client vérifié"
+            }
           }
-        }
+        } : {})
       }
     ]
   };

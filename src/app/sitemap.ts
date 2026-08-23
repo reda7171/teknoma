@@ -109,5 +109,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('⚠️ Sitemaps: Could not fetch authors during build')
     }
 
-    return [...staticUrls, ...bookUrls, ...postUrls, ...packUrls, ...authorUrls]
+    // 6. Catégories SEO dynamiques
+    let seoUrls: any[] = []
+    try {
+        const seoPages = await prisma.seoCategory.findMany({
+            where: { isActive: true },
+            select: { slug: true, updatedAt: true }
+        })
+        seoUrls = locales.flatMap((locale) =>
+            seoPages.map((page) => ({
+                url: `${baseUrl}/${locale}/collection/${page.slug}`,
+                lastModified: page.updatedAt,
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+            }))
+        )
+    } catch (e) {
+        console.warn('⚠️ Sitemaps: Could not fetch seo categories during build')
+    }
+
+    return [...staticUrls, ...bookUrls, ...postUrls, ...packUrls, ...authorUrls, ...seoUrls]
 }

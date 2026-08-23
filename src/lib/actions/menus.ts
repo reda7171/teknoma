@@ -30,9 +30,15 @@ export async function getActiveMenuBySlug(slug: string) {
         // Structure hiérarchique simple (1 niveau pour le header)
         const rootItems = items.filter(item => !item.parentId)
 
+        // Attacher les enfants
+        const rootItemsWithChildren = rootItems.map(root => ({
+            ...root,
+            children: items.filter(child => child.parentId === root.id)
+        }))
+
         return {
             ...menu,
-            items: rootItems
+            items: rootItemsWithChildren
         }
     } catch (error) {
         console.error('Error in getActiveMenuBySlug:', error)
@@ -131,6 +137,7 @@ export async function updateMenuItem(id: string, data: {
     url?: string
     isActive?: boolean
     order?: number
+    parentId?: string | null
 }) {
     try {
         await verifyAdmin()

@@ -324,6 +324,20 @@ body {
 .pulse-cta { animation: pulse-ring 2s infinite; }
 .back-top-btn { animation: fadeInBtn 0.3s ease forwards; }
 
+@keyframes cart-vibrate-periodic {
+  0%, 92% { transform: rotate(0deg) scale(1); }
+  93% { transform: rotate(-10deg) scale(1.1); }
+  95% { transform: rotate(10deg) scale(1.1); }
+  97% { transform: rotate(-10deg) scale(1.1); }
+  99% { transform: rotate(10deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.animate-cart-vibrate {
+  animation: cart-vibrate-periodic 6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  transform-origin: center;
+}
+
 /* Modal Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -370,3 +384,10 @@ body {
 [dir="rtl"] #article-content blockquote::before { left: auto; right: 1rem; content: "\201D"; }
 #article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
 #article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Empêcher le zoom automatique d'iOS sur les champs de texte */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}

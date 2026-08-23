@@ -12,7 +12,7 @@ import CartDrawer from './CartDrawer'
 import { useCartStore } from '@/store/cart'
 import PredictiveSearch from './PredictiveSearch'
 import LanguageSwitcher from './LanguageSwitcher'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import UserDropdown from './UserDropdown'
 import MobileBottomNav from './MobileBottomNav'
@@ -20,7 +20,6 @@ import { getWishlist } from '@/lib/actions/community-wishlist'
 import { getReadingList } from '@/lib/actions/reading-list'
 import { useWishlistStore } from '@/store/wishlist'
 import { useReadingListStore } from '@/store/reading-list'
-import { CATEGORIES } from '@/lib/constants/categories'
 
 interface HeaderProps {
     user?: {
@@ -44,10 +43,11 @@ interface HeaderProps {
         packs?: boolean
         deposerListe?: boolean
     }
+    megaMenu?: any[]
     siteLogo?: string | null
 }
 
-export default function Header({ user, notificationDropdown, navigation, features = {}, siteLogo = null }: HeaderProps = { user: null }) {
+export default function Header({ user, notificationDropdown, navigation, megaMenu = [], features = {}, siteLogo = null }: HeaderProps = { user: null }) {
     const getIconForUrl = (url: string, className = "w-4 h-4") => {
         if (url === '/') return <Home className={className} />
         if (url.includes('/books')) return <Book className={className} />
@@ -63,6 +63,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
     }
 
     const pathname = usePathname()
+    const locale = useLocale()
     const t = useTranslations('Navigation')
     const tCat = useTranslations('Categories')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -196,7 +197,12 @@ export default function Header({ user, notificationDropdown, navigation, feature
                 
                 return true
             })
-            .map(item => ({ href: item.url, label: t(item.label as any), isJournal: item.url.includes('/blog') }))
+            .map(item => ({ 
+                href: item.url, 
+                label: t.has(item.label as any) ? t(item.label as any) : item.label, 
+                isJournal: item.url.includes('/blog'),
+                isCategoryMenu: item.url === '#categories' || item.url === '#collections' || item.url === '#*collections'
+            }))
         : defaultNavItems
 
     let finalNavItems = navigation && navigation.length > 0 && !navItems.some(i => i.href.includes('authors'))
@@ -212,14 +218,6 @@ export default function Header({ user, notificationDropdown, navigation, feature
         finalNavItems = [...finalNavItems, { href: '/blog', label: t('Journal'), isJournal: true }]
     }
 
-    // Inject Categories menu after Livres
-    const livresIndex = finalNavItems.findIndex((i: any) => i.href.includes('/books'));
-    if (livresIndex !== -1 && !finalNavItems.some((i: any) => i.isCategoryMenu)) {
-        finalNavItems.splice(livresIndex + 1, 0, { href: '#categories', label: t('Categories'), isCategoryMenu: true });
-    } else if (livresIndex === -1 && !finalNavItems.some((i: any) => i.isCategoryMenu)) {
-        finalNavItems.splice(1, 0, { href: '#categories', label: t('Categories'), isCategoryMenu: true });
-    }
-
     return (
         <>
         <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
@@ -228,21 +226,48 @@ export default function Header({ user, notificationDropdown, navigation, feature
                     {/* Logo - Dynamique ou Style Pixio */}
                     <Link href="/" className="flex items-center gap-2 group shrink-0 lg:ltr:mr-32 lg:rtl:ml-32 xl:ltr:mr-48 xl:rtl:ml-48" dir="ltr">
                         {siteLogo ? (
-                            <Image 
-                                src={siteLogo} 
-                                alt="Riwaya Logo"
-                                width={200}
-                                height={64}
-                                className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
-                                priority
-                            />
+                            <div className="relative group-hover:scale-105 transition-transform duration-300">
+                                <Image 
+                                    src={siteLogo} 
+                                    alt="Riwaya Logo"
+                                    width={200}
+                                    height={64}
+                                    className="h-8 w-auto object-contain"
+                                    priority
+                                />
+                                {/* Effet premium : reflet luxury diagonal */}
+                                <span aria-hidden="true" style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: 'linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.08) 35%, rgba(255,220,80,0.5) 45%, rgba(255,255,255,0.9) 50%, rgba(255,220,80,0.5) 55%, rgba(255,255,255,0.08) 65%, transparent 80%)',
+                                    backgroundSize: '300% 100%',
+                                    backgroundPosition: '-300% center',
+                                    animation: 'logo-premium-shine 4s cubic-bezier(0.4,0,0.2,1) infinite',
+                                    mixBlendMode: 'screen',
+                                    borderRadius: '2px',
+                                    pointerEvents: 'none',
+                                }} />
+                                <style>{`
+                                    @keyframes logo-premium-shine {
+                                        0%   { background-position: -300% center; opacity: 0; }
+                                        10%  { opacity: 1; }
+                                        35%  { background-position: 300% center; opacity: 0; }
+                                        100% { background-position: 300% center; opacity: 0; }
+                                    }
+                                `}</style>
+                            </div>
                         ) : (
                             <>
                                 <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform">
                                     <BookOpen className="w-5 h-5 text-white" />
                                 </div>
-                                <span className="text-2xl font-black text-black tracking-tighter">
-                                    riwaya<span className="text-[#10b981]">.</span>
+                                <span className={`text-2xl lg:text-3xl font-black tracking-tighter text-black flex items-center ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                                    {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
+                                        <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
+                                            {char}
+                                        </span>
+                                    ))}
+                                    <span className="text-[#10b981] inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 4 : 6) * 100}ms` }}>.</span>
                                 </span>
                             </>
                         )}
@@ -267,7 +292,9 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                             {/* Left Column - Main Categories */}
                                             <div className="w-1/3 bg-gray-50/50 p-3 border-r border-gray-100 rtl:border-l rtl:border-r-0 relative z-20 rounded-l-2xl rtl:rounded-r-2xl rtl:rounded-l-none">
                                                 <ul className="space-y-1">
-                                                    {Object.entries(CATEGORIES).map(([mainCat, subCats], index) => {
+                                                    {megaMenu.map((mainCatItem: any, index: number) => {
+                                                        const mainCat = mainCatItem.label;
+                                                        const subCats = mainCatItem.children || [];
                                                         const colors = [
                                                             { bg: 'hover:bg-blue-50', text: 'group-hover/mega-item:text-blue-600', border: 'hover:border-blue-500', dot: 'group-hover/link:bg-blue-500', rightBg: 'bg-gradient-to-br from-white to-blue-50/30' },
                                                             { bg: 'hover:bg-indigo-50', text: 'group-hover/mega-item:text-indigo-600', border: 'hover:border-indigo-500', dot: 'group-hover/link:bg-indigo-500', rightBg: 'bg-gradient-to-br from-white to-indigo-50/30' },
@@ -282,9 +309,9 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                                         const c = colors[index % colors.length];
                                                         
                                                         return (
-                                                        <li key={mainCat} className="group/mega-item">
-                                                            <Link href={`/books?category=${encodeURIComponent(mainCat)}`} className={`w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-gray-600 ${c.bg} ${c.text} hover:shadow-sm rounded-xl transition-all border-l-4 border-transparent rtl:border-l-0 rtl:border-r-4 ${c.border}`}>
-                                                                {tCat(mainCat as any) || mainCat}
+                                                        <li key={mainCatItem.id} className="group/mega-item">
+                                                            <Link href={mainCatItem.url} className={`w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-gray-600 ${c.bg} ${c.text} hover:shadow-sm rounded-xl transition-all border-l-4 border-transparent rtl:border-l-0 rtl:border-r-4 ${c.border}`}>
+                                                                {tCat.has(mainCat as any) ? tCat(mainCat as any) : mainCat}
                                                                 {subCats.length > 0 && <ChevronRight className="w-4 h-4 rtl:rotate-180 opacity-0 group-hover/mega-item:opacity-100 group-hover/mega-item:translate-x-1 rtl:group-hover/mega-item:-translate-x-1 transition-all" />}
                                                             </Link>
                                                             
@@ -292,16 +319,20 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                                             {subCats.length > 0 && (
                                                                 <div className={`absolute top-0 left-full rtl:left-auto rtl:right-full w-[200%] h-full opacity-0 invisible group-hover/mega-item:opacity-100 group-hover/mega-item:visible group-hover/mega-item:z-10 z-0 p-8 transition-all duration-300 cursor-default rounded-r-2xl rtl:rounded-l-2xl rtl:rounded-r-none ${c.rightBg}`}>
                                                                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200/50">
-                                                                        <h3 className={`text-xl font-black ${c.text.replace('group-hover/mega-item:', '')}`}>{tCat(mainCat as any) || mainCat}</h3>
-                                                                        <Link href={`/books?category=${encodeURIComponent(mainCat)}`} className="text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+                                                                        <h3 className={`text-xl font-black ${c.text.replace('group-hover/mega-item:', '')}`}>{tCat.has(mainCat as any) ? tCat(mainCat as any) : mainCat}</h3>
+                                                                        <Link href={mainCatItem.url} className="text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
                                                                             Voir tout
                                                                         </Link>
                                                                     </div>
                                                                     <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                                                                        {subCats.map(subCat => (
-                                                                            <Link key={subCat} href={`/books?category=${encodeURIComponent(mainCat)}&subCategory=${encodeURIComponent(subCat)}`} className="text-sm font-medium text-gray-600 hover:text-black hover:translate-x-1 rtl:hover:-translate-x-1 transition-transform flex items-center gap-2 group/link">
-                                                                                <div className={`w-1.5 h-1.5 rounded-full bg-gray-200 ${c.dot} transition-colors shrink-0`} />
-                                                                                {tCat(subCat as any) || subCat}
+                                                                        {subCats.map((sub: any) => (
+                                                                            <Link 
+                                                                                key={sub.id} 
+                                                                                href={sub.url}
+                                                                                className="group/link flex items-center gap-3 text-[13px] font-bold text-gray-700 hover:text-black transition-colors"
+                                                                            >
+                                                                                <span className={`w-1.5 h-1.5 rounded-full bg-gray-300 transition-colors ${c.dot}`} />
+                                                                                {tCat.has(sub.label as any) ? tCat(sub.label as any) : sub.label}
                                                                             </Link>
                                                                         ))}
                                                                     </div>
@@ -388,7 +419,7 @@ export default function Header({ user, notificationDropdown, navigation, feature
                         <div className="hidden md:flex items-center gap-4">
                             {mounted && notificationDropdown}
                             <button onClick={openCart} className="relative group" aria-label="Ouvrir le panier">
-                                <div className={`w-10 h-10 border-2 border-transparent group-hover:border-black rounded-full flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12 bg-blue-50' : ''}`}>
+                                <div className={`w-10 h-10 border-2 border-transparent group-hover:border-black rounded-full flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12 bg-blue-50' : 'animate-cart-vibrate'}`}>
                                     <ShoppingCart className={`w-6 h-6 transition-colors ${isCartAnimating ? 'text-blue-600' : 'text-gray-900'}`} />
                                     {mounted && totalItems > 0 && (
                                         <span className={`absolute -top-0.5 -right-0.5 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-125 bg-blue-600' : 'bg-black'}`}>
@@ -446,7 +477,14 @@ export default function Header({ user, notificationDropdown, navigation, feature
                 suppressHydrationWarning
             >
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                    <span className="text-lg font-black tracking-tighter">riwaya<span className="text-[#10b981]">.</span></span>
+                    <span className={`text-2xl font-black tracking-tighter flex items-center cursor-pointer group ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                        {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
+                            <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
+                                {char}
+                            </span>
+                        ))}
+                        <span className="text-[#10b981] inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 4 : 6) * 100}ms` }}>.</span>
+                    </span>
                     <button 
                         onClick={() => setMobileMenuOpen(false)}
                         aria-label="Fermer le menu"
@@ -484,23 +522,27 @@ export default function Header({ user, notificationDropdown, navigation, feature
                                             <ChevronDown className="w-5 h-5 transition-transform group-open/mobile-cat:rotate-180" />
                                         </summary>
                                         <div className="mt-2 pl-4 pr-2 space-y-2">
-                                            {Object.entries(CATEGORIES).map(([mainCat, subCats]) => (
-                                                <details key={mainCat} className="group/mobile-sub">
+                                            {megaMenu.map((mainCatItem: any) => {
+                                                const mainCat = mainCatItem.label;
+                                                const subCats = mainCatItem.children || [];
+                                                return (
+                                                <details key={mainCatItem.id} className="group/mobile-sub">
                                                     <summary className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 cursor-pointer list-none">
-                                                        {tCat(mainCat as any) || mainCat}
+                                                        {tCat.has(mainCat as any) ? tCat(mainCat as any) : mainCat}
                                                         {subCats.length > 0 && <ChevronDown className="w-4 h-4 transition-transform group-open/mobile-sub:rotate-180" />}
                                                     </summary>
                                                     {subCats.length > 0 && (
                                                         <div className="mt-1 pl-4 rtl:pl-0 rtl:pr-4 space-y-1">
-                                                            {subCats.map(subCat => (
-                                                                <Link key={subCat} href={`/books?category=${encodeURIComponent(mainCat)}&subCategory=${encodeURIComponent(subCat)}`} className="block px-4 py-2.5 text-sm text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                                                    {tCat(subCat as any) || subCat}
+                                                            {subCats.map((sub: any) => (
+                                                                <Link key={sub.id} href={sub.url} className="block px-4 py-2.5 text-sm text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                                                                    {tCat.has(sub.label as any) ? tCat(sub.label as any) : sub.label}
                                                                 </Link>
                                                             ))}
                                                         </div>
                                                     )}
                                                 </details>
-                                            ))}
+                                                )
+                                            })}
                                         </div>
                                     </details>
                                 )

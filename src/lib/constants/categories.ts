@@ -71,19 +71,7 @@ export const CATEGORIES: CategoryTree = {
     "Méthodes de langue"
   ],
   "Ecole Charcot": [
-    "GS Charcot",
-    "CP Charcot",
-    "CE1 Charcot",
-    "CE2 Charcot",
-    "CM1 Charcot",
-    "CM2 Charcot",
-    "6ème Charcot",
-    "5ème Charcot",
-    "4ème Charcot",
-    "3ème Charcot",
-    "2nde Charcot",
-    "1ère Charcot",
-    "Tale Charcot",
+
     "Livres en stock",
     "Papeterie"
   ]
