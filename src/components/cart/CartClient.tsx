@@ -21,7 +21,6 @@ interface CartClientProps {
 export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }: CartClientProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const [mounted, setMounted] = useState(false)
-    const [roulettePrize, setRoulettePrize] = useState<string | null>(null)
     const t = useTranslations('CartPage')
     const locale = useLocale()
 
@@ -56,10 +55,6 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
     useEffect(() => {
         setMounted(true)
-        const prize = localStorage.getItem('roulette_prize')
-        if (prize) {
-            setRoulettePrize(prize)
-        }
     }, [])
 
     if (!mounted) return null
@@ -107,26 +102,6 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
                     {/* Cart Items */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Roulette Banner */}
-                        {roulettePrize && (
-                            <div className={`p-4 sm:p-6 rounded-3xl border-2 mb-8 ${totalItems >= 4 ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
-                                <div className="flex items-start gap-4">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${totalItems >= 4 ? 'bg-green-100' : 'bg-blue-100'}`}>
-                                        <Gift className={`w-5 h-5 ${totalItems >= 4 ? 'text-green-600' : 'text-blue-600'}`} />
-                                    </div>
-                                    <div>
-                                        <h3 className={`font-black text-lg ${totalItems >= 4 ? 'text-green-800' : 'text-blue-800'}`}>
-                                            {totalItems >= 4 ? 'Cadeau Débloqué ! 🎉' : 'Cadeau en attente 🎁'}
-                                        </h3>
-                                        <p className={`text-sm mt-1 font-medium ${totalItems >= 4 ? 'text-green-700' : 'text-blue-700'}`}>
-                                            {totalItems >= 4 
-                                                ? `Félicitations ! Votre cadeau "${roulettePrize}" sera inclus dans votre colis.` 
-                                                : `Vous avez gagné un "${roulettePrize}" à la roulette ! Ajoutez encore ${4 - totalItems} livre(s) pour le débloquer.`}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                         {items.map((item) => (
                             <div

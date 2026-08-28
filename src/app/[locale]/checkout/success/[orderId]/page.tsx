@@ -5,7 +5,8 @@ import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowR
 import { notFound } from 'next/navigation'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
-import Script from 'next/script'
+import GoogleReviewsOptIn from '@/components/GoogleReviewsOptIn'
+
 export default async function OrderSuccessPage({
     params,
 }: {
@@ -30,23 +31,12 @@ export default async function OrderSuccessPage({
 
     return (
         <div className="min-h-screen bg-pixio-cream">
-            <Script id="google-optin-config" strategy="afterInteractive" dangerouslySetInnerHTML={{
-                __html: `
-                    window.renderOptIn = function() {
-                        window.gapi.load('surveyoptin', function() {
-                            window.gapi.surveyoptin.render({
-                                "merchant_id": 5826844744,
-                                "order_id": "${order.id}",
-                                ${order.email ? `"email": "${order.email}",` : ''}
-                                "delivery_country": "MA",
-                                "estimated_delivery_date": "${estimatedDeliveryDateStr}",
-                                "products": ${JSON.stringify(products)}
-                            });
-                        });
-                    }
-                `
-            }} />
-            <Script id="google-optin-platform" src="https://apis.google.com/js/platform.js?onload=renderOptIn" strategy="afterInteractive" />
+            <GoogleReviewsOptIn 
+                orderId={order.id} 
+                email={order.email} 
+                estimatedDeliveryDate={estimatedDeliveryDateStr} 
+                products={products} 
+            />
             <Header />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">

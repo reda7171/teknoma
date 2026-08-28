@@ -22,7 +22,6 @@ import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, Trending
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
-import RoulettePopup from '@/components/RoulettePopup'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import AuthorsCarousel from '@/components/AuthorsCarousel'
 import CosmosBooks from '@/components/CosmosBooks'
@@ -1152,7 +1151,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      {showSection('home_section_roulette') && <RoulettePopup />}
+      {/* RoulettePopup removed */}
       
       <Suspense fallback={<div className="h-[72px] bg-white border-b border-gray-100" />}>
         <HeaderWithUser />
