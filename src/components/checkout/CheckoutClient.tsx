@@ -234,12 +234,6 @@ export default function CheckoutClient({
 
             const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
             let finalComment = data.comment || ''
-            const roulettePrize = localStorage.getItem('roulette_prize')
-            if (roulettePrize && totalItems >= 4) {
-                finalComment = finalComment 
-                    ? `${finalComment}\n\n[Cadeau Roulette : ${roulettePrize}]` 
-                    : `[Cadeau Roulette : ${roulettePrize}]`
-            }
 
             const result = await createOrder({
                 fullName: data.fullName,
@@ -279,9 +273,6 @@ export default function CheckoutClient({
                         body: JSON.stringify({ id: abandonedCartId })
                     }).catch(() => {})
                 }
-
-                localStorage.removeItem('roulette_prize')
-                localStorage.removeItem('roulette_closed')
 
                 setIsSuccess(true)
                 if (data.paymentMethod === 'STRIPE' || data.paymentMethod === 'PAYPAL' || data.paymentMethod === 'CMI') {

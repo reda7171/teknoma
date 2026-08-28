@@ -55,7 +55,6 @@ const HOME_SECTIONS = [
     { key: 'home_section_digital', label: 'Livres Numériques', icon: FileText, defaultBg: 'bg-black' },
     { key: 'home_section_blog', label: 'Journal / Blog', icon: FileText, defaultBg: 'bg-white' },
     { key: 'home_section_instagram', label: 'Feed Instagram', icon: Instagram, defaultBg: 'bg-white' },
-    { key: 'home_section_roulette', label: 'Roulette de la chance', icon: Sparkles, defaultBg: 'bg-white' },
     { key: 'home_section_custom_html', label: 'Section HTML Custom (Défaut)', icon: Code, defaultBg: 'bg-white' },
 ]
 
