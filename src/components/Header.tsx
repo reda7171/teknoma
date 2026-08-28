@@ -274,7 +274,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                         </Link>
 
                         {/* Desktop Navigation - Elegant & Clean */}
-                        <nav className="hidden lg:flex flex-1 justify-center items-center gap-4 xl:gap-8 h-8 overflow-hidden">
+                        <nav className="hidden lg:flex flex-1 justify-center items-center gap-4 xl:gap-8">
                             {/* Navigation Items - Only render client side after mounting */}
                             {mounted && finalNavItems.slice(0, 8).map((item: any) => {
                                 const isActive = pathname === item.href || (item.href !== '/' && item.href !== '#categories' && pathname.startsWith(item.href))
