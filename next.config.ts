@@ -118,6 +118,13 @@ const nextConfig: NextConfig = {
           { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
         ],
       },
+      // Headers pour les assets statiques (images, polices)
+      {
+        source: '/(.*)\\.(png|jpg|jpeg|svg|gif|webp|ico|avif|woff2|woff|ttf)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
     ]
   },
   async redirects() {

@@ -2,10 +2,13 @@
 
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getIpIdentifier } from '@/lib/rate-limit'
+import { isAuthenticated } from '@/lib/actions/auth'
 
 export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
+        const isAdmin = await isAuthenticated()
+        const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
         
         const cleanTitle = productTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -27,7 +30,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
             }
             // On envoie une notification asynchrone
             await sendTelegramMessage(
-                `🛒 <b>Nouveau Panier</b>\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                `🛒 <b>Nouveau Panier</b>${adminTag}\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
                 undefined,
                 undefined,
                 replyMarkup
@@ -44,6 +47,8 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
 export async function notifyRemoveFromCart(productTitle: string, price: number, type: string, cartTotal?: number, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
+        const isAdmin = await isAuthenticated()
+        const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
         
         const cleanTitle = (productTitle || 'Produit inconnu').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -64,7 +69,7 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
                 }
             }
             await sendTelegramMessage(
-                `🗑️ <b>Panier Supprimé</b>\n\nUn client vient de retirer un produit de son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم${cartTotal !== undefined ? `\n🛒 <b>Total Restant:</b> ${cartTotal.toFixed(2)} درهم` : ''}\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                `🗑️ <b>Panier Supprimé</b>${adminTag}\n\nUn client vient de retirer un produit de son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم${cartTotal !== undefined ? `\n🛒 <b>Total Restant:</b> ${cartTotal.toFixed(2)} درهم` : ''}\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
                 undefined,
                 undefined,
                 replyMarkup
@@ -81,6 +86,8 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
 export async function notifyClearCart(totalValue: number, totalItems: number, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
+        const isAdmin = await isAuthenticated()
+        const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
 
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
@@ -99,7 +106,7 @@ export async function notifyClearCart(totalValue: number, totalItems: number, se
                 }
             }
             await sendTelegramMessage(
-                `🗑️ <b>Panier Vidé Complètement</b>\n\nUn client vient de vider entièrement son panier :\n📦 <b>Articles retirés:</b> ${totalItems}\n💰 <b>Valeur perdue:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                `🗑️ <b>Panier Vidé Complètement</b>${adminTag}\n\nUn client vient de vider entièrement son panier :\n📦 <b>Articles retirés:</b> ${totalItems}\n💰 <b>Valeur perdue:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
                 undefined,
                 undefined,
                 replyMarkup
@@ -116,12 +123,14 @@ export async function notifyClearCart(totalValue: number, totalItems: number, se
 export async function notifyCheckoutInitiated(totalValue: number, totalItems: number, sessionId?: string) {
     try {
         const ip = await getIpIdentifier()
+        const isAdmin = await isAuthenticated()
+        const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
 
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
-            await sendTelegramMessage(`🚀 <b>Passage en Caisse Initié</b>\n\nUn client se dirige vers la page de paiement :\n📦 <b>Articles:</b> ${totalItems}\n💰 <b>Valeur:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
+            await sendTelegramMessage(`🚀 <b>Passage en Caisse Initié</b>${adminTag}\n\nUn client se dirige vers la page de paiement :\n📦 <b>Articles:</b> ${totalItems}\n💰 <b>Valeur:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
         }
         
         return { success: true }

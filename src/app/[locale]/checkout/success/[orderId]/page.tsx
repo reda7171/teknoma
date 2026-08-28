@@ -30,7 +30,7 @@ export default async function OrderSuccessPage({
 
     return (
         <div className="min-h-screen bg-pixio-cream">
-            <script dangerouslySetInnerHTML={{
+            <Script id="google-optin-config" strategy="afterInteractive" dangerouslySetInnerHTML={{
                 __html: `
                     window.renderOptIn = function() {
                         window.gapi.load('surveyoptin', function() {
@@ -46,7 +46,7 @@ export default async function OrderSuccessPage({
                     }
                 `
             }} />
-            <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
+            <Script id="google-optin-platform" src="https://apis.google.com/js/platform.js?onload=renderOptIn" strategy="afterInteractive" />
             <Header />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">

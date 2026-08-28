@@ -21,6 +21,7 @@ const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 import UtmTracker from '@/components/UtmTracker'
 import DelayedScripts from '@/components/DelayedScripts'
+import GoogleReviewsBadge from '@/components/GoogleReviewsBadge'
 
 
 const outfit = localFont({
@@ -565,26 +566,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </NextIntlClientProvider>
 
         {/* Google Customer Reviews Badge */}
-        <Script id="merchantWidgetScript" src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" strategy="lazyOnload" />
-        <Script id="merchantWidgetInit" strategy="lazyOnload" dangerouslySetInnerHTML={{
-          __html: `
-            document.getElementById('merchantWidgetScript').addEventListener('load', function () {
-              if (typeof merchantwidget !== 'undefined') {
-                merchantwidget.start({
-                  merchant_id: 5826844744,
-                  position: 'BOTTOM_LEFT',
-                  region: 'MA'
-                });
-                setTimeout(function() {
-                  var iframe = document.getElementById('merchantwidgetiframe');
-                  if (iframe && !iframe.hasAttribute('title')) {
-                    iframe.setAttribute('title', 'Avis clients Google');
-                  }
-                }, 2000);
-              }
-            });
-          `
-        }} />
+        <DelayedScripts>
+          <GoogleReviewsBadge />
+        </DelayedScripts>
       </body>
     </html>
   );

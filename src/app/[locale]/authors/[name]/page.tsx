@@ -145,15 +145,7 @@ export default async function AuthorPage({
             "itemListElement": books.map((book, index) => ({
                 "@type": "ListItem",
                 "position": index + 1,
-                "item": {
-                    "@type": "Book",
-                    "name": book.title,
-                    "author": {
-                        "@type": "Person",
-                        "name": authorName
-                    },
-                    "url": `${baseUrl}/${locale}/books/${book.id}`
-                }
+                "item": `${baseUrl}/${locale}/books/${book.id}`
             }))
         }
     ]

@@ -4,6 +4,7 @@ import React from 'react'
 import Script from 'next/script'
 import { Instagram } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import DelayedScripts from '@/components/DelayedScripts'
 
 export default function InstagramFeed() {
   const t = useTranslations('InstagramFeed')
@@ -25,8 +26,10 @@ export default function InstagramFeed() {
         
         <div className="mt-8 w-full min-h-[400px]">
           {/* Elfsight Instagram Feed | Untitled Instagram Feed */}
-          <Script src="https://elfsightcdn.com/platform.js" strategy="lazyOnload" />
-          <div className="elfsight-app-05b16c20-cef7-4121-bcb8-2483d502a22c" data-elfsight-app-lazy></div>
+          <DelayedScripts>
+            <Script src="https://elfsightcdn.com/platform.js" strategy="lazyOnload" />
+            <div className="elfsight-app-05b16c20-cef7-4121-bcb8-2483d502a22c" data-elfsight-app-lazy></div>
+          </DelayedScripts>
         </div>
       </div>
     </section>

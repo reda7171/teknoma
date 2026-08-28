@@ -22,6 +22,11 @@ export async function GET() {
             where: { active: true }
         })
         
+        const packs = await prisma.pack.findMany({
+            where: { active: true },
+            include: { books: { include: { book: true } } }
+        })
+        
         const now = new Date()
         const allCoupons = await prisma.coupon.findMany({
             where: { isActive: true }
@@ -40,8 +45,8 @@ export async function GET() {
 
         for (const book of books) {
             const locale = book.language === 'en' || book.language === 'fr' ? book.language : 'ar'
-            const productUrl = `${baseUrl}/${locale}${generateBookUrl(book, locale)}`
-            const imageUrl = `${baseUrl}/api/merchant-image/${book.id}`
+            const productUrl = encodeURI(`${baseUrl}/${locale}${generateBookUrl(book, locale)}`)
+            const imageUrl = encodeURI(`${baseUrl}/api/merchant-image/${book.id}`)
             const availability = book.stock > 0 ? 'in_stock' : 'out_of_stock'
             const condition = book.isOriginal ? 'new' : 'used'
             
@@ -68,6 +73,38 @@ export async function GET() {
             }
 
             // Map all active promotions to every product
+            if (coupons && coupons.length > 0) {
+                for (const coupon of coupons) {
+                    xml += `      <g:promotion_id>${escapeXml(coupon.code)}</g:promotion_id>\n`
+                }
+            }
+
+            xml += `    </item>\n`
+        }
+        
+        // Ajouter les packs au catalogue Google Merchant
+        for (const pack of packs) {
+            const locale = 'fr' // Par défaut on utilise la version fr pour les packs
+            const productUrl = `${baseUrl}/${locale}/packs/${pack.id}`
+            const imageUrl = pack.image || pack.books[0]?.book.image || `${baseUrl}/logo.png`
+            const availability = 'in_stock'
+            const condition = 'new'
+            const title = `Pack: ${pack.name}`
+            const description = pack.description || `Pack de livres contenant ${pack.books.length} livres: ${pack.books.map(b => b.book.title).join(', ')}`
+            
+            xml += `    <item>\n`
+            xml += `      <g:id>PACK-${escapeXml(pack.id)}</g:id>\n`
+            xml += `      <g:title>${escapeXml(title)}</g:title>\n`
+            xml += `      <g:description>${escapeXml(description.slice(0, 5000))}</g:description>\n`
+            xml += `      <g:link>${escapeXml(productUrl)}</g:link>\n`
+            xml += `      <g:image_link>${escapeXml(imageUrl)}</g:image_link>\n`
+            xml += `      <g:condition>${condition}</g:condition>\n`
+            xml += `      <g:availability>${availability}</g:availability>\n`
+            xml += `      <g:price>${Number(pack.price).toFixed(2)} MAD</g:price>\n`
+            xml += `      <g:brand>Riwaya</g:brand>\n`
+            xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
+            xml += `      <g:product_type>Packs de livres</g:product_type>\n`
+
             if (coupons && coupons.length > 0) {
                 for (const coupon of coupons) {
                     xml += `      <g:promotion_id>${escapeXml(coupon.code)}</g:promotion_id>\n`

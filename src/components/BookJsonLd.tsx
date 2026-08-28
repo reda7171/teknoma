@@ -125,9 +125,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         },
         "potentialAction": {
           "@type": "BuyAction",
-          "target": bookUrl,
-          "price": book.price,
-          "priceCurrency": "MAD"
+          "target": bookUrl
         },
         ...(reviewCount > 0 ? {
           "aggregateRating": {

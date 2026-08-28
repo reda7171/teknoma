@@ -32,7 +32,7 @@ export function getLocalizedLongDescription(book: any, locale: string): string {
 export function slugify(text: string): string {
     if (!text) return '';
     // Gestion basique de l'arabe en conservant les caractères arabes mais en remplaçant les espaces
-    return text
+    const slug = text
         .toString()
         .toLowerCase()
         .trim()
@@ -41,6 +41,12 @@ export function slugify(text: string): string {
         .replace(/\-\-+/g, '-')            // Replace multiple - with single -
         .replace(/^-+/, '')                // Trim - from start of text
         .replace(/-+$/, '');               // Trim - from end of text
+        
+    // Limit slug length to ~60 characters to avoid huge URLs causing 502 Bad Gateway in Nginx
+    if (slug.length > 60) {
+        return slug.substring(0, 60).replace(/-[^-]*$/, '');
+    }
+    return slug;
 }
 
 /**

@@ -228,8 +228,9 @@ export default async function BookDetailPage({
             '@context': 'https://schema.org',
             '@type': 'Review',
             itemReviewed: {
-                '@type': 'Book',
-                name: displayTitle
+                '@type': 'Thing',
+                name: displayTitle,
+                url: `${baseUrl}/${locale}/books/${book.id}`
             },
             reviewRating: {
                 '@type': 'Rating',

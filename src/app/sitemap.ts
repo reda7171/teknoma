@@ -81,8 +81,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             packs.map((pack) => ({
                 url: `${baseUrl}/${locale}/packs/${pack.id}`,
                 lastModified: new Date(),
-                changeFrequency: 'weekly' as const,
-                priority: 0.7,
+                changeFrequency: 'daily' as const,
+                priority: 0.9,
             }))
         )
     } catch (e) {
@@ -120,8 +120,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             seoPages.map((page) => ({
                 url: `${baseUrl}/${locale}/collection/${page.slug}`,
                 lastModified: page.updatedAt,
-                changeFrequency: 'weekly' as const,
-                priority: 0.8,
+                changeFrequency: 'daily' as const,
+                priority: 0.9,
             }))
         )
     } catch (e) {

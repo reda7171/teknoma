@@ -22,7 +22,7 @@ export default function ImageWithFallback({
     className = 'w-full h-full object-cover',
     fallback = '/book-placeholder.png',
     priority = false,
-    sizes = '(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw',
+    sizes = '(max-width: 768px) 33vw, (max-width: 1200px) 20vw, 15vw',
 }: ImageWithFallbackProps) {
     const finalSrc = normalizeImage(src || '') || fallback;
     return (
