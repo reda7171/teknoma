@@ -22,6 +22,7 @@ interface FooterProps {
         twitter?: string | null
         youtube?: string | null
         threads?: string | null
+        pinterest?: string | null
     }
     paymentSettings?: {
         stripe?: boolean
@@ -31,6 +32,12 @@ interface FooterProps {
         bank?: boolean
     }
 }
+
+const PinterestIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.63 7.85 6.35 9.31-.09-.79-.17-2.01.03-2.87.19-.83 1.22-5.18 1.22-5.18s-.31-.62-.31-1.54c0-1.44.84-2.52 1.88-2.52.88 0 1.3.66 1.3 1.45 0 .89-.57 2.22-.86 3.45-.25 1.04.52 1.88 1.54 1.88 1.85 0 3.27-1.95 3.27-4.77 0-2.49-1.79-4.23-4.35-4.23-2.98 0-4.73 2.24-4.73 4.54 0 .89.34 1.85.77 2.37.08.1.1.19.07.31l-.25 1.05c-.04.16-.14.2-.31.12-1.16-.54-1.89-2.25-1.89-3.62 0-2.95 2.14-5.66 6.18-5.66 3.25 0 5.77 2.32 5.77 5.42 0 3.23-2.03 5.83-4.85 5.83-1.07 0-2.08-.56-2.43-1.22l-.66 2.52c-.24.93-.89 2.09-1.33 2.8C10.75 21.93 11.37 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+    </svg>
+)
 
 // Formulaire newsletter fictif avec message de confirmation
 function NewsletterForm({ t }: { t: any }) {
@@ -130,6 +137,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Twitter" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Twitter className="w-5 h-5" /></a>}
                         {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur YouTube" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Youtube className="w-5 h-5" /></a>}
                         {socials.threads && <a href={socials.threads} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Threads" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><AtSign className="w-5 h-5" /></a>}
+                        {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Pinterest" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><PinterestIcon className="w-5 h-5" /></a>}
                     </div>
                 </div>
 
@@ -216,6 +224,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Twitter" className="text-gray-400 hover:text-white transition-colors"><Twitter className="w-5 h-5" /></a>}
                     {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur YouTube" className="text-gray-400 hover:text-white transition-colors"><Youtube className="w-5 h-5" /></a>}
                     {socials.threads && <a href={socials.threads} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Threads" className="text-gray-400 hover:text-white transition-colors"><AtSign className="w-5 h-5" /></a>}
+                    {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Pinterest" className="text-gray-400 hover:text-white transition-colors"><PinterestIcon className="w-5 h-5" /></a>}
                 </div>
 
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">

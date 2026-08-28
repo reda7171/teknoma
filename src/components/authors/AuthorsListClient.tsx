@@ -59,9 +59,9 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
     return (
-        <section className="py-20 bg-gray-50/50">
+        <section className="py-8 md:py-16 bg-gray-50/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-16">
+                <div className="mb-8 md:mb-16">
                     <div className="relative max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4">
                         <div className="relative flex-grow w-full">
                             <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400" />

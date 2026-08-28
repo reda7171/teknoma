@@ -80,7 +80,7 @@ export default function MobileSectionNavigation({ language = 'fr' }: { language?
     const isRtl = language === 'ar'
 
     return (
-        <div className={`md:hidden fixed bottom-24 ${isRtl ? 'left-4' : 'right-4'} z-40 flex flex-col gap-2 pointer-events-auto`}>
+        <div className={`md:hidden fixed bottom-36 ${isRtl ? 'left-4' : 'right-4'} z-40 flex flex-col gap-2 pointer-events-auto`}>
             <button
                 onClick={handlePrev}
                 disabled={currentIndex === -1}
