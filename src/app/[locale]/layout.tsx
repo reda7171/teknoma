@@ -376,7 +376,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
+  maximumScale: 1,
+  userScalable: false,
   themeColor: '#000000',
 };
 

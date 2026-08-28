@@ -16,6 +16,7 @@ export default async function Footer() {
         twitter,
         youtube,
         threads,
+        pinterest,
         stripe,
         paypal,
         cmi,
@@ -34,6 +35,7 @@ export default async function Footer() {
         getSetting('social_twitter'),
         getSetting('social_youtube'),
         getSetting('social_threads'),
+        getSetting('social_pinterest'),
         getSetting('payment_stripe_enabled'),
         getSetting('payment_paypal_enabled'),
         getSetting('payment_cmi_enabled'),
@@ -56,6 +58,7 @@ export default async function Footer() {
         twitter,
         youtube,
         threads,
+        pinterest,
     }
 
     const paymentSettings = {

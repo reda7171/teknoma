@@ -462,6 +462,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             </div>
 
 
+        </header>
 
             {/* Global Menu Drawer (Mobile & Desktop) */}
             {mobileMenuOpen && (
@@ -599,7 +600,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
 
             {/* Mobile Bottom Navigation */}
             <MobileBottomNav onMenuClick={() => setMobileMenuOpen(true)} />
-        </header>
+
         {/* Spacer pour compenser le header fixe (h-20 = 80px) */}
         <div className="h-20" />
         {/* Barre de recherche - hors du header fixe, défile avec la page */}

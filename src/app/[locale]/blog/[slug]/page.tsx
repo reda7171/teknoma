@@ -268,7 +268,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
                 )}
 
-                <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24">
+                <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 md:pt-6 md:pb-6">
                     {/* Fil d'Ariane + btn admin */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
                         <nav className="flex items-center gap-2 sm:gap-3 text-[10px] rtl:text-[11px] font-bold uppercase tracking-widest rtl:tracking-normal text-slate-500 overflow-x-auto no-scrollbar py-1">
