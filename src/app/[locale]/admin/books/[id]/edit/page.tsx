@@ -224,6 +224,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
             jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
             jumiaProductSid: formData.get('jumiaProductSid') as string || undefined,
+            isAffiliate: formData.get('isAffiliate') === 'true',
+            affiliateLink: formData.get('affiliateLink') as string || undefined,
         }
 
         const result = await updateBook(id, input)
@@ -911,6 +913,34 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             <option value="true" className="text-green-600 font-medium">✅ Oui (Synchronisé)</option>
                             <option value="false" className="text-gray-500 font-medium">❌ Non (Pas encore)</option>
                         </select>
+                    </div>
+
+                    {/* Affiliation Amazon */}
+                    <div className="md:col-span-2 bg-orange-50 border border-orange-200 p-4 rounded-xl space-y-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="isAffiliate"
+                                value="true"
+                                defaultChecked={book.isAffiliate}
+                                className="w-5 h-5 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
+                            />
+                            <span className="font-bold text-orange-900">Ce livre est un produit d'affiliation (ex: Amazon)</span>
+                        </label>
+                        
+                        <div>
+                            <label htmlFor="affiliateLink" className="block text-sm font-medium text-gray-700 mb-2">
+                                Lien d'affiliation (URL complète)
+                            </label>
+                            <input
+                                type="url"
+                                id="affiliateLink"
+                                name="affiliateLink"
+                                defaultValue={book.affiliateLink || ''}
+                                className="w-full px-4 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                placeholder="https://amzn.to/..."
+                            />
+                        </div>
                     </div>
 
                     {/* Jumia Highlights */}

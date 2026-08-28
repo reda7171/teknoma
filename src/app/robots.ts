@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
 
     return {
         rules: [
-            // Règle générale
+            // Règle générale pour TOUS les bots (y compris Google, Bing, etc.)
             {
                 userAgent: '*',
                 allow: '/',
@@ -24,36 +24,21 @@ export default function robots(): MetadataRoute.Robots {
                     '/*/orders',
                 ],
             },
-            // GPTBot (OpenAI / ChatGPT) — autoriser les pages publiques
+            // Autorisation explicite pour Google AdSense
             {
-                userAgent: 'GPTBot',
-                allow: ['/fr/', '/ar/', '/en/', '/fr/blog/', '/ar/blog/', '/en/blog/', '/fr/books/', '/ar/books/', '/en/books/', '/fr/faq', '/ar/faq', '/en/faq'],
-                disallow: ['/admin', '/api', '/checkout', '/cart'],
-            },
-            // PerplexityBot
-            {
-                userAgent: 'PerplexityBot',
-                allow: ['/fr/', '/ar/', '/en/', '/fr/blog/', '/ar/blog/', '/en/blog/'],
-                disallow: ['/admin', '/api', '/checkout', '/cart'],
-            },
-            // ClaudeBot (Anthropic)
-            {
-                userAgent: 'ClaudeBot',
-                allow: ['/fr/', '/ar/', '/en/', '/fr/blog/', '/ar/blog/', '/en/blog/'],
-                disallow: ['/admin', '/api', '/checkout', '/cart'],
-            },
-            // Amazonbot
-            {
-                userAgent: 'Amazonbot',
-                allow: ['/fr/', '/ar/', '/en/'],
-                disallow: ['/admin', '/api', '/checkout', '/cart'],
-            },
-            // Bytespider (TikTok AI)
-            {
-                userAgent: 'Bytespider',
-                allow: ['/fr/', '/ar/', '/en/'],
-                disallow: ['/admin', '/api'],
-            },
+                userAgent: ['Mediapartners-Google', 'Googlebot', 'AdsBot-Google'],
+                allow: '/',
+                disallow: [
+                    '/admin',
+                    '/*/admin',
+                    '/api',
+                    '/checkout',
+                    '/*/checkout',
+                    '/cart',
+                    '/*/cart',
+                    '/orders',
+                ],
+            }
         ],
         sitemap: `${baseUrl}/sitemap.xml`,
     }

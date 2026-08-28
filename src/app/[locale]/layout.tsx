@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Tajawal } from "next/font/google";
+import localFont from "next/font/local";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
@@ -23,15 +23,21 @@ import UtmTracker from '@/components/UtmTracker'
 import DelayedScripts from '@/components/DelayedScripts'
 
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+const outfit = localFont({
+  src: "../../fonts/Outfit-VariableFont_wght.ttf",
   variable: "--font-outfit",
 });
 
-const tajawal = Tajawal({
-  subsets: ["arabic"],
-  weight: ["200", "300", "400", "500", "700", "800", "900"],
+const tajawal = localFont({
+  src: [
+    { path: "../../fonts/Tajawal-ExtraLight.ttf", weight: "200" },
+    { path: "../../fonts/Tajawal-Light.ttf", weight: "300" },
+    { path: "../../fonts/Tajawal-Regular.ttf", weight: "400" },
+    { path: "../../fonts/Tajawal-Medium.ttf", weight: "500" },
+    { path: "../../fonts/Tajawal-Bold.ttf", weight: "700" },
+    { path: "../../fonts/Tajawal-ExtraBold.ttf", weight: "800" },
+    { path: "../../fonts/Tajawal-Black.ttf", weight: "900" },
+  ],
   variable: "--font-tajawal",
 });
 

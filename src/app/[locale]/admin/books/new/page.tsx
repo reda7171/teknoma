@@ -117,6 +117,8 @@ function BookFormContent() {
             isOriginal: formData.get('isOriginal') !== 'false', // Par défaut true
             sellerSku: formData.get('sellerSku') as string || undefined,
             jumiaPriceMarkup: parseInt(formData.get('jumiaPriceMarkup') as string) || 0,
+            isAffiliate: formData.get('isAffiliate') === 'true',
+            affiliateLink: formData.get('affiliateLink') as string || undefined,
         }
 
         const result = await createBook(input)
@@ -489,6 +491,31 @@ function BookFormContent() {
                             <option value="true" className="text-green-600 font-medium">✅ Livre Original</option>
                             <option value="false" className="text-red-600 font-medium">❌ Copie / Reproduction</option>
                         </select>
+                    </div>
+                    {/* Affiliation Amazon */}
+                    <div className="md:col-span-2 bg-orange-50 border border-orange-200 p-4 rounded-xl space-y-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="isAffiliate"
+                                value="true"
+                                className="w-5 h-5 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
+                            />
+                            <span className="font-bold text-orange-900">Ce livre est un produit d'affiliation (ex: Amazon)</span>
+                        </label>
+                        
+                        <div>
+                            <label htmlFor="affiliateLink" className="block text-sm font-medium text-gray-700 mb-2">
+                                Lien d'affiliation (URL complète)
+                            </label>
+                            <input
+                                type="url"
+                                id="affiliateLink"
+                                name="affiliateLink"
+                                className="w-full px-4 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                placeholder="https://amzn.to/..."
+                            />
+                        </div>
                     </div>
 
                     {/* Image */}

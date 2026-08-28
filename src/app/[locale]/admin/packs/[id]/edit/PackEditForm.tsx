@@ -39,6 +39,8 @@ interface PackEditFormProps {
         sellerSku?: string
         jumiaProductSid?: string
         selectedBookIds: string[]
+        isAffiliate?: boolean
+        affiliateLink?: string | null
     }
     books: Book[]
     whatsappPhone?: string
@@ -56,6 +58,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [selectedBooks, setSelectedBooks] = useState<string[]>(pack.selectedBookIds)
     const [isFreeDelivery, setIsFreeDelivery] = useState(pack.isFreeDelivery)
     const [shippingFees, setShippingFees] = useState(pack.shippingFees || 30)
+    const [isAffiliate, setIsAffiliate] = useState(pack.isAffiliate || false)
+    const [affiliateLink, setAffiliateLink] = useState(pack.affiliateLink || '')
     const [searchQuery, setSearchQuery] = useState('')
     const [onlyAvailable, setOnlyAvailable] = useState(true)
     const [isCatalogOpen, setIsCatalogOpen] = useState(false)
@@ -259,6 +263,8 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
             bookIds: selectedBooks,
+            isAffiliate,
+            affiliateLink: affiliateLink || undefined,
             sellerSku: formData.get('sellerSku') as string || undefined,
             jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
             jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
@@ -644,6 +650,40 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
                                 </div>
                             </div>
 
+                            {/* Amazon Affiliate */}
+                            <div className="pt-4 border-t border-gray-100">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="isAffiliate"
+                                            checked={isAffiliate}
+                                            onChange={e => setIsAffiliate(e.target.checked)}
+                                            className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                                        />
+                                        <label htmlFor="isAffiliate" className="text-sm font-bold text-gray-700 cursor-pointer flex items-center gap-2">
+                                            Lien d'affiliation Amazon
+                                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Affiliation</span>
+                                        </label>
+                                    </div>
+                                    
+                                    {isAffiliate && (
+                                        <div className="pl-7 space-y-2">
+                                            <label htmlFor="affiliateLink" className="block text-xs font-bold text-gray-600 uppercase">
+                                                URL du produit Amazon (Associate Link)
+                                            </label>
+                                            <input
+                                                type="url"
+                                                id="affiliateLink"
+                                                value={affiliateLink}
+                                                onChange={e => setAffiliateLink(e.target.value)}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                                                placeholder="https://amzn.to/..."
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                             {/* Jumia Highlights */}
                             <div className="mt-4">
                                 <div className="flex items-center justify-between mb-2">

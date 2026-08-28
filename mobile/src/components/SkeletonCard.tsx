@@ -25,7 +25,7 @@ function ShimmerBox({ style }: { style: object }) {
 
   return (
     <Animated.View
-      style={[{ backgroundColor: colors.backgroundSelected, borderRadius: 8, opacity }, style]}
+      style={[{ backgroundColor: colors.backgroundSelected, borderRadius: 8, opacity: opacity.current }, style]}
     />
   );
 }

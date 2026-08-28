@@ -1507,5 +1507,23 @@
   "InstagramFeed": {
     "Badge": "Instagram",
     "Title": "Suivez-nous sur Instagram"
+  },
+  "Livraison1hRabatPage": {
+    "Title": "Livraison de livres en 1h à Rabat, Salé, Témara | Riwaya Sonic",
+    "Description": "Profitez de la livraison ultra-rapide Sonic ! Recevez vos livres préférés en moins d'une heure à Rabat, Salé et Témara. Découvrez notre sélection disponible immédiatement.",
+    "Badge": "Service Sonic Exclusif",
+    "H1": "Livraison de livres en 1h à Rabat, Salé, Témara",
+    "P1": "Vous avez une envie soudaine de lecture ? Vous cherchez le cadeau parfait à la dernière minute ? Riwaya présente <strong>Sonic</strong>, le premier service de livraison de livres ultra-rapide au Maroc. Désormais, recevez vos romans, essais et ouvrages scolaires préférés en <strong>moins d'une heure</strong>.",
+    "P2": "Notre service exclusif couvre actuellement <strong>Rabat, Salé et Témara</strong>. Fini l'attente de plusieurs jours : grâce à notre réseau optimisé de coursiers partenaires et notre hub logistique situé au cœur de la capitale, la culture vient à vous à la vitesse de l'éclair.",
+    "P3": "Comment ça marche ? C'est simple ! Parcourez notre catalogue complet de livres éligibles au service Sonic ci-dessous. Tous ces titres sont en stock et prêts à être expédiés instantanément. Validez votre commande avec l'option de livraison Sonic, et détendez-vous. Votre prochain livre est déjà en route.",
+    "Feature1Title": "Moins d'1 heure",
+    "Feature1Desc": "Temps record",
+    "Feature2Title": "Rabat, Salé, Témara",
+    "Feature2Desc": "Couverture exclusive",
+    "Feature3Title": "Suivi en direct",
+    "Feature3Desc": "Jusqu'à votre porte",
+    "CatalogTitle": "Tout notre catalogue en livraison immédiate",
+    "CatalogDesc": "Des milliers de livres en stock. Commandez maintenant, lisez dans 1 heure.",
+    "Empty": "Aucun livre disponible pour la livraison Sonic pour le moment."
   }
 }

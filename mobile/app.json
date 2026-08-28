@@ -45,7 +45,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Permettre à Riwaya d'utiliser votre position pour trouver des livres autour de vous."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

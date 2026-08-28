@@ -176,6 +176,8 @@ model Book {
   jumiaProductSid     String?           @db.VarChar(100)
   jumiaQcStatus       String?           @db.VarChar(50)
   views               Int               @default(0)
+  isAffiliate         Boolean           @default(false)
+  affiliateLink       String?           @db.VarChar(1000)
   reservations        BookReservation[]
   seller              User?             @relation("SellerBooks", fields: [sellerId], references: [id])
   orderItems          OrderItem[]
@@ -238,6 +240,8 @@ model Pack {
   jumiaPackageContent String?     @db.VarChar(500)
   jumiaProductSid     String?     @db.VarChar(100)
   jumiaQcStatus       String?     @db.VarChar(50)
+  isAffiliate         Boolean     @default(false)
+  affiliateLink       String?     @db.VarChar(1000)
   orderItems          OrderItem[]
   books               PackBook[]
   wishlists           Wishlist[]

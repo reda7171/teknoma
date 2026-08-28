@@ -23,7 +23,7 @@ async function getStats() {
         pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount,
         shippedOrders, confirmedOrders, ordersToday, revenueMonth, returnedCount,
         stockValueRaw, booksNoImage, booksSoldTodayRaw, paidOrdersCount, uniqueCustomersResult
-    ] = await Promise.all([
+    ] = await prisma.$transaction([
         prisma.book.count({ where: { active: true } }),
         prisma.pack.count({ where: { active: true } }),
         prisma.order.count({ where: { status: { notIn: ['CANCELLED', 'RETURNED'] } } }),

@@ -24,7 +24,7 @@ import StickyBottomActions from '@/components/StickyBottomActions'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/actions/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
-import { getPostsByBookId } from '@/lib/actions/blog'
+import { getPostsByBookId, getPublishedPosts } from '@/lib/actions/blog'
 import Image from 'next/image'
 import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react'
 import BookSubNav from '@/components/BookSubNav'
@@ -175,7 +175,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
-    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPosts, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, latestPostsData] = await Promise.all([
         getBookReviews(bookId),
         getBookAverageRating(bookId),
         book.category ? getCategoryConfigByName(book.category) : Promise.resolve(null),
@@ -185,12 +185,22 @@ export default async function BookDetailPage({
         getSetting('announcement_bar_message'),
         getSetting('announcement_bar_bg_color'),
         getSetting('announcement_bar_text_color'),
-        getPostsByBookId(bookId),
+        getPostsByBookId(bookId, locale),
         getSetting('adsense_enabled').then(v => v === 'true'),
         getSetting('adsense_publisher_id').then(v => v || ''),
         getSetting('adsense_slot_sidebar').then(v => v || ''),
-        getAuthorProfile(book.author)
+        getAuthorProfile(book.author),
+        getPublishedPosts(1, 3, undefined, locale)
     ])
+
+    const relatedPosts = [...relatedPostsRaw];
+    const relatedPostIds = new Set(relatedPosts.map((p: any) => p.id));
+    
+    for (const post of latestPostsData.posts) {
+        if (!relatedPostIds.has(post.id) && relatedPosts.length < 3) {
+            relatedPosts.push(post);
+        }
+    }
 
     const { average: averageRating, count: reviewCount } = ratingData
 
@@ -578,25 +588,46 @@ export default async function BookDetailPage({
                                 )}
 
                                 <StickyBottomActions productId={book.id}>
-                                    {book.stock > 0 && (
-                                        <WhatsAppOrderButton
-                                            title={displayTitle}
-                                            price={book.price}
-                                            phone={whatsappPhone || undefined}
-                                            type="book"
-                                        />
+                                    {book.isAffiliate && book.affiliateLink ? (
+                                        <a
+                                            href={book.affiliateLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center justify-center gap-3 font-bold rounded-full transition-all duration-300 py-4 md:py-6 px-8 bg-orange-500 text-white hover:bg-orange-600 text-xs md:text-sm uppercase tracking-widest shadow-2xl shadow-orange-500/20"
+                                        >
+                                            <Image 
+                                                src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" 
+                                                alt="Amazon" 
+                                                width={75} 
+                                                height={22} 
+                                                className="brightness-0 invert object-contain" 
+                                                unoptimized 
+                                            />
+                                            {locale === 'ar' ? 'اطلب من أمازون' : 'Commander sur Amazon'}
+                                        </a>
+                                    ) : (
+                                        <>
+                                            {book.stock > 0 && (
+                                                <WhatsAppOrderButton
+                                                    title={displayTitle}
+                                                    price={book.price}
+                                                    phone={whatsappPhone || undefined}
+                                                    type="book"
+                                                />
+                                            )}
+                                            <AddToCartButton
+                                                product={{
+                                                    id: book.id,
+                                                    title: displayTitle,
+                                                    price: book.price,
+                                                    image: book.image,
+                                                    type: 'BOOK'
+                                                }}
+                                                disabled={book.stock <= 0}
+                                                className="!py-4 md:!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
+                                            />
+                                        </>
                                     )}
-                                    <AddToCartButton
-                                        product={{
-                                            id: book.id,
-                                            title: displayTitle,
-                                            price: book.price,
-                                            image: book.image,
-                                            type: 'BOOK'
-                                        }}
-                                        disabled={book.stock <= 0}
-                                        className="!py-4 md:!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
-                                    />
                                     {(book as any).previewUrl && (
                                         <a
                                             href={(book as any).previewUrl}
@@ -715,9 +746,8 @@ export default async function BookDetailPage({
                     </div>
 
 
-
                     {/* Reviews Section */}
-                    <section className="py-10 md:py-32 border-t border-gray-100">
+                    <section className="py-10 md:py-16 border-t border-gray-100">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24">
                             <div className="lg:col-span-1 space-y-10">
                                 <div className="space-y-4">
@@ -742,7 +772,7 @@ export default async function BookDetailPage({
 
                     {/* Similar Books */}
                     {filteredSimilarBooks.length > 0 && (
-                        <section className="py-8 md:py-32 border-t border-gray-100">
+                        <section className="py-8 md:py-16 border-t border-gray-100">
                             <div className="flex items-center justify-between mb-8 md:mb-20 px-2">
                                 <h2 className="text-4xl font-black text-black tracking-tighter">{tBook('RecommendedReads')}<span className="text-gray-200">.</span></h2>
                                 <Link href="/books" className="text-[10px] rtl:text-xs rtl:tracking-normal font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all">
@@ -757,9 +787,63 @@ export default async function BookDetailPage({
                         </section>
                     )}
 
+                    {/* Related Articles */}
+                    {relatedPosts && relatedPosts.length > 0 && (
+                        <section className="py-8 md:py-16 border-t border-gray-100">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 md:mb-16 px-2">
+                                <div>
+                                    <h2 className="text-4xl font-black text-black tracking-tighter">
+                                        {locale === 'ar' ? 'مقالات ذات صلة' : locale === 'en' ? 'Related Articles' : 'Articles Liés'}
+                                        <span className="text-gray-200">.</span>
+                                    </h2>
+                                </div>
+                                <Link href="/blog" className="text-[10px] rtl:text-xs rtl:tracking-normal font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all whitespace-nowrap">
+                                    {locale === 'ar' ? 'عرض المدونة' : locale === 'en' ? 'Read the blog' : 'Lire le blog'}
+                                </Link>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {relatedPosts.map((post: any) => (
+                                    <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+                                        <div className="relative aspect-[4/3] w-full overflow-hidden">
+                                            {post.coverImage ? (
+                                                <Image 
+                                                    src={normalizeImage(post.coverImage)} 
+                                                    alt={post.title} 
+                                                    fill 
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-700" 
+                                                    unoptimized 
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                                                    <span className="text-gray-200 font-black text-xl">Riwaya</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-6 flex flex-col flex-1">
+                                            {post.category && (
+                                                <div className="mb-3">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-gray-50 rounded-full text-gray-500">{post.category}</span>
+                                                </div>
+                                            )}
+                                            <h3 className="text-xl font-black text-black leading-tight mb-3 group-hover:text-orange-500 transition-colors line-clamp-2">
+                                                {post.title}
+                                            </h3>
+                                            <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                    {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR') : ''}
+                                                </span>
+                                                <ArrowUpRight className="w-4 h-4 text-black group-hover:text-orange-500 transition-colors rtl:-scale-x-100" />
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
                     {/* FAQ Section */}
                     {faqQuestions.length > 0 && (
-                        <section className="py-8 md:py-32 border-t border-gray-100">
+                        <section className="py-8 md:py-16 border-t border-gray-100">
                             <div className="flex flex-col md:flex-row gap-16">
                                 <div className="md:w-1/3">
                                     <h2 className="text-4xl font-black text-black tracking-tighter mb-4">

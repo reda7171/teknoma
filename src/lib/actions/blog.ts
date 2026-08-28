@@ -390,6 +390,7 @@ export async function getPostsByBookId(bookId: string, language?: string) {
             id: true,
             title: true,
             slug: true,
+            category: true,
             excerpt: true,
             coverImage: true,
             publishedAt: true

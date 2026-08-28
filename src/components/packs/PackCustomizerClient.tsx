@@ -108,10 +108,10 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
             if (addUpsell) {
                 addItem({
                     type: 'BOOK',
-                    id: 'upsell_awel_marra',
-                    title: 'أول مرة أصلي',
+                    id: '88a0b2df-d1a9-4592-897d-a99ad4fb1576',
+                    title: 'فاتتني صلاة',
                     price: 25,
-                    image: '/images/placeholders/book.png', // Un placeholder car on n'a pas l'image exacte
+                    image: '/uploads/books/فاتتني-صلاة.jpg',
                     shippingFees: 0,
                 });
             }
@@ -157,7 +157,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
         let text = `Bonjour, je souhaite commander le pack : ${pack.name}\n`
         text += `Prix : ${pack.price + (addUpsell ? 25 : 0)} MAD\n`
         if (addUpsell) {
-            text += `+ Inclus : أول مرة أصلي (25 MAD)\n`
+            text += `+ Inclus : فاتتني صلاة (25 MAD)\n`
         }
         if (Object.keys(replacedBooks).length > 0) {
             text += `\nLivres modifiés :\n`
@@ -315,7 +315,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                             </span>
                         </div>
                         <h4 className="text-lg font-black text-black mb-1 rtl:tracking-normal">
-                            {locale === 'ar' ? "إضافة 'أول مرة أصلي' بـ 25 درهم فقط" : "Ajouter 'أول مرة أصلي' pour 25 MAD"}
+                            {locale === 'ar' ? "إضافة 'فاتتني صلاة' بـ 25 درهم فقط" : "Ajouter 'فاتتني صلاة' pour 25 MAD"}
                         </h4>
                         <p className="text-sm text-gray-500 rtl:leading-relaxed">
                             {locale === 'ar' ? 'الكتاب المثالي للمبتدئين في الصلاة. يضيف قيمة كبيرة لباقتك ولن تجده بهذا السعر بمفرده.' : 'Le livre idéal pour débuter la prière. Complète parfaitement ce pack !'}
