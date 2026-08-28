@@ -29,12 +29,7 @@ import { getOgImageUrl, getBaseUrl } from '@/lib/utils'
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
     const decodedSlug = decodeURIComponent(rawSlug)
-    // Normaliser le slug : supprimer les accents pour matcher la DB (slugs ASCII)
-    const slug = decodedSlug
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-    const post = await getPostBySlug(slug, locale)
+    const post = await getPostBySlug(decodedSlug, locale)
 
     if (!post) return {}
 
@@ -79,12 +74,7 @@ function estimateReadingTime(content: string): number {
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
     const { slug: rawSlug, locale } = await params
     const decodedSlug = decodeURIComponent(rawSlug)
-    // Normaliser le slug : supprimer les accents pour matcher la DB (slugs ASCII)
-    const slug = decodedSlug
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-    const post = await getPostBySlug(slug, locale)
+    const post = await getPostBySlug(decodedSlug, locale)
     const t = await getTranslations('BlogArticle')
     const tPost = await getTranslations({ locale: post?.language || 'fr', namespace: 'BlogArticle' })
 

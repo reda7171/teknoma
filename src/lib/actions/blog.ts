@@ -69,17 +69,11 @@ export async function getPostCategories(language: string = 'fr') {
  * Récupère un article par son slug
  */
 export async function getPostBySlug(slug: string, language?: string) {
-    // Normaliser : supprimer les accents (ex: î → i) pour robustesse URL → DB
     const decodedSlug = decodeURIComponent(slug);
-    const normalizedSlug = decodedSlug
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
 
-    const where: any = { slug: normalizedSlug, published: true }
-
-    return prisma.post.findFirst({
-        where,
+    // Try exact match first (important for Arabic and non-Latin slugs)
+    let post = await prisma.post.findFirst({
+        where: { slug: decodedSlug, published: true },
         include: {
             author: {
                 select: {
@@ -121,7 +115,61 @@ export async function getPostBySlug(slug: string, language?: string) {
                 }
             }
         }
-    })
+    });
+
+    if (!post) {
+        const normalizedSlug = decodedSlug
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+
+        post = await prisma.post.findFirst({
+            where: { slug: normalizedSlug, published: true },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        image: true,
+                        bio: true,
+                        editorialRole: true,
+                        _count: {
+                            select: { posts: { where: { published: true } } }
+                        }
+                    }
+                },
+                comments: {
+                    where: { isApproved: true },
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        user: {
+                            select: { fullName: true, image: true }
+                        }
+                    }
+                },
+                _count: {
+                    select: { comments: { where: { isApproved: true } } }
+                },
+                books: {
+                    select: {
+                        id: true,
+                        title: true,
+                        author: true,
+                        description: true,
+                        bestQuote: true,
+                        bestLessons: true,
+                        bestFor: true,
+                        bestChapters: true,
+                        price: true,
+                        image: true,
+                        stock: true
+                    }
+                }
+            }
+        });
+    }
+
+    return post;
 }
 
 // Admin / Internal Actions (Simplified for now)
