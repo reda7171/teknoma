@@ -16,9 +16,9 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
     useEffect(() => {
         setIsClient(true);
         
-        window.renderOptIn = function() {
-            if (window.gapi) {
-                window.gapi.load('surveyoptin', function() {
+        (window as any).renderOptIn = function() {
+            if ((window as any).gapi) {
+                (window as any).gapi.load('surveyoptin', function() {
                     const config: any = {
                         "merchant_id": 5826844744,
                         "order_id": orderId,
@@ -32,14 +32,14 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
                         config.email = email;
                     }
 
-                    window.gapi.surveyoptin.render(config);
+                    (window as any).gapi.surveyoptin.render(config);
                 });
             }
         };
 
         // If gapi is already loaded and surveyoptin is available, run it immediately
-        if (window.gapi && window.gapi.surveyoptin) {
-            window.renderOptIn();
+        if ((window as any).gapi && (window as any).gapi.surveyoptin) {
+            (window as any).renderOptIn();
         }
     }, [orderId, email, estimatedDeliveryDate, products]);
 
