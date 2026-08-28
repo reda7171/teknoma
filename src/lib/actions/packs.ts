@@ -23,6 +23,8 @@ const PackSchema = z.object({
     sellerSku: z.string().optional(),
     jumiaPackageContent: z.string().optional(),
     jumiaHighlights: z.string().optional(),
+    isAffiliate: z.boolean().default(false).optional(),
+    affiliateLink: z.string().optional(),
 })
 
 export type PackInput = z.infer<typeof PackSchema>
@@ -61,6 +63,10 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                 isFreeDelivery: validatedData.isFreeDelivery,
                 shippingFees: validatedData.shippingFees,
                 sellerSku: validatedData.sellerSku,
+                jumiaPackageContent: validatedData.jumiaPackageContent,
+                jumiaHighlights: validatedData.jumiaHighlights,
+                isAffiliate: validatedData.isAffiliate,
+                affiliateLink: validatedData.affiliateLink,
                 active: true,
                 jumiaStock: 0,
                 books: {
@@ -175,6 +181,10 @@ export async function updatePack(
                     isFreeDelivery: validatedData.isFreeDelivery,
                     shippingFees: validatedData.shippingFees,
                     sellerSku: validatedData.sellerSku,
+                    jumiaPackageContent: validatedData.jumiaPackageContent,
+                    jumiaHighlights: validatedData.jumiaHighlights,
+                    isAffiliate: validatedData.isAffiliate,
+                    affiliateLink: validatedData.affiliateLink,
                     books: {
                         create: validatedData.bookIds.map((bookId) => ({
                             bookId,

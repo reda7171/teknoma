@@ -282,6 +282,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         inLanguage: ['fr-MA', 'ar-MA', 'en-MA'],
       },
       {
+        '@type': 'SiteNavigationElement',
+        '@id': 'https://riwaya.store/#navigation',
+        name: [
+          'Boutique',
+          'Packs Spéciaux',
+          'Meilleures Ventes',
+          'Blog',
+          'Contact',
+          'Connexion',
+          'Inscription'
+        ],
+        url: [
+          'https://riwaya.store/books',
+          'https://riwaya.store/packs',
+          'https://riwaya.store/books?sort=popular',
+          'https://riwaya.store/blog',
+          'https://riwaya.store/contact',
+          'https://riwaya.store/login',
+          'https://riwaya.store/register'
+        ]
+      },
+      {
         '@type': 'ItemList',
         '@id': 'https://riwaya.store/#products',
         name: 'Livres disponibles',
@@ -463,29 +485,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <ScrollReveal animation="animate-reveal-up" delay={200} className="space-y-8 text-center lg:text-start">
                     <div className={`inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
                       <Truck className="w-4 h-4 text-green-500" />
-                      {locale === 'ar' ? (
-                        <TypewriterText text={c('hero_badge', t('hero.Badge'))} speed={60} delay={300} loop={true} />
-                      ) : (
-                        <span>{c('hero_badge', t('hero.Badge'))}</span>
-                      )}
+                      <span>{c('hero_badge', t('hero.Badge'))}</span>
                     </div>
                     <h1 className={`text-4xl md:text-6xl lg:text-7xl font-black text-black leading-[1.1] tracking-tighter ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                      <TypewriterText text={c('hero_title_part1', t('hero.TitlePart1'))} speed={50} delay={600} />
+                      {c('hero_title_part1', t('hero.TitlePart1'))}
                       <br />
                       <span className={`text-gray-400 text-3xl md:text-5xl lg:text-6xl ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                        {locale === 'ar' ? (
-                          <TypewriterText text={c('hero_title_part2', t('hero.TitlePart2'))} speed={50} delay={2000} />
-                        ) : (
-                          c('hero_title_part2', t('hero.TitlePart2'))
-                        )}
+                        {c('hero_title_part2', t('hero.TitlePart2'))}
                       </span>
                     </h1>
                     <p className={`text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                      {locale === 'ar' ? (
-                        <TypewriterText text={c('hero_description', t('hero.Description'))} speed={25} delay={3500} />
-                      ) : (
-                        c('hero_description', t('hero.Description'))
-                      )}
+                      {c('hero_description', t('hero.Description'))}
                     </p>
 
                   </ScrollReveal>
@@ -655,9 +665,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         return (
           <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-start text-left mb-16 space-y-4" dir="ltr">
-                <span className="text-xs md:text-sm font-black uppercase text-gray-400 tracking-[0.3em]">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
-                <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
+              <ScrollReveal delay={100} className="flex flex-col items-start text-left rtl:items-end rtl:text-right mb-16 space-y-4">
+                <span className="text-xs md:text-sm font-black uppercase text-gray-400 tracking-[0.3em] rtl:tracking-normal">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
+                <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight rtl:tracking-normal">
                   {c('collections_title', t('Collections.Title'))}<span className="text-pixio-pink">.</span>
                 </h2>
               </ScrollReveal>
@@ -674,11 +684,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_authors':
         return (
-          <section key={key} {...getSectionProps('home_section_authors', 'bg-white')} className={`py-32 relative overflow-hidden ${getSectionProps('home_section_authors', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_authors', 'bg-white')} className={`py-8 relative overflow-hidden ${getSectionProps('home_section_authors', 'bg-white').className || ''}`}>
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-pixio-yellow/30 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 -z-10 animate-float"></div>
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-amber-100/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 -z-10 animate-float-slow"></div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between mb-24 gap-12">
+              <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between mb-0 gap-4">
                 <ScrollReveal className="space-y-6 text-center lg:text-left rtl:lg:text-right max-w-2xl">
                   <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full">
                     <Users className="w-4 h-4 text-pixio-yellow" />

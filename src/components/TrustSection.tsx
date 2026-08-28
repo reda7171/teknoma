@@ -142,26 +142,26 @@ export default function TrustSection({ stats, className, style }: { stats?: { bo
     ]
 
     return (
-        <section className={`py-40 relative overflow-hidden ${className || 'bg-white'}`} style={style}>
+        <section className={`py-8 relative overflow-hidden ${className || 'bg-white'}`} style={style}>
             {/* Master Background Elements */}
             <div className={`absolute top-0 right-0 w-[800px] h-[800px] bg-pixio-yellow/10 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2 -z-10 ${pulseClass}`}></div>
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-sky-50/20 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 -z-10"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header with High-End Typography */}
-                <div className="flex flex-col items-start text-left max-w-4xl mb-32 space-y-8" dir="ltr">
+                <div className="flex flex-col items-start text-left rtl:text-right rtl:items-end max-w-4xl mb-12 space-y-8">
                     <div className="inline-flex items-center gap-3 px-8 py-3 bg-black text-white rounded-full hover:scale-105 transition-transform cursor-default">
                         <div className={`w-2 h-2 bg-pixio-yellow rounded-full ${pingClass}`}></div>
-                        <span className="text-xs md:text-sm font-black uppercase tracking-[0.3em]">
+                        <span className="text-xs md:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal">
                             {t('Badge')}
                         </span>
                     </div>
 
-                    <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-tight uppercase">
+                    <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight rtl:tracking-normal leading-tight uppercase">
                         {t('Title')}<span className="text-pixio-yellow">.</span>
                     </h2>
 
-                    <p className="text-lg md:text-xl text-gray-500 font-medium tracking-tight max-w-2xl border-l-4 border-pixio-yellow pl-8 italic">
+                    <p className="text-lg md:text-xl text-gray-500 font-medium tracking-tight rtl:tracking-normal max-w-2xl italic">
                         {t('Description')}
                     </p>
                 </div>

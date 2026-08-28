@@ -1596,5 +1596,23 @@
   "InstagramFeed": {
     "Badge": "Instagram",
     "Title": "Follow us on Instagram"
+  },
+  "Livraison1hRabatPage": {
+    "Title": "1-Hour Book Delivery in Rabat, Sale, Temara | Riwaya Sonic",
+    "Description": "Enjoy ultra-fast Sonic delivery! Receive your favorite books in under an hour in Rabat, Sale, and Temara. Discover our immediately available selection.",
+    "Badge": "Exclusive Sonic Service",
+    "H1": "1-Hour Book Delivery in Rabat, Sale, Temara",
+    "P1": "Got a sudden urge to read? Looking for the perfect last-minute gift? Riwaya introduces <strong>Sonic</strong>, Morocco's first ultra-fast book delivery service. Now, receive your favorite novels, essays, and textbooks in <strong>under an hour</strong>.",
+    "P2": "Our exclusive service currently covers <strong>Rabat, Sale, and Temara</strong>. No more waiting days: thanks to our optimized network of delivery partners and our logistics hub located in the heart of the capital, culture comes to you at lightning speed.",
+    "P3": "How does it work? It's simple! Browse our complete catalog of Sonic-eligible books below. All these titles are in stock and ready to ship instantly. Confirm your order with the Sonic delivery option, and relax. Your next book is already on its way.",
+    "Feature1Title": "Under 1 hour",
+    "Feature1Desc": "Record time",
+    "Feature2Title": "Rabat, Sale, Temara",
+    "Feature2Desc": "Exclusive coverage",
+    "Feature3Title": "Live tracking",
+    "Feature3Desc": "Right to your door",
+    "CatalogTitle": "Our entire catalog in immediate delivery",
+    "CatalogDesc": "Thousands of books in stock. Order now, read in 1 hour.",
+    "Empty": "No books available for Sonic delivery at the moment."
   }
 }
