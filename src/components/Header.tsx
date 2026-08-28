@@ -485,6 +485,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                             </span>
                         ))}
                         <span className="text-[#10b981] inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 4 : 6) * 100}ms` }}>.</span>
+                        <span className="ml-1 rtl:ml-0 rtl:mr-1 inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 5 : 7) * 100}ms` }}>🇲🇦</span>
                     </span>
                     <button 
                         onClick={() => setMobileMenuOpen(false)}
