@@ -149,9 +149,8 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
       // Contenu du pack comme ItemList
       ...(pack.books && pack.books.length > 0 ? {
         "isRelatedTo": pack.books.map(b => ({
-          "@type": "Book",
-          "name": b.title,
-          "author": { "@type": "Person", "name": b.author }
+          "@type": "Thing",
+          "name": b.title
         }))
       } : {})
     },

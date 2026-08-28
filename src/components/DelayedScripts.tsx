@@ -37,12 +37,12 @@ export default function DelayedScripts({ children }: { children: React.ReactNode
         window.addEventListener('click', handleInteraction, { once: true, passive: true })
         window.addEventListener('keydown', handleInteraction, { once: true, passive: true })
 
-        // Timeout de sécurité : si aucune interaction n'a lieu après 3500ms, on charge quand même.
-        // Lighthouse termine souvent son analyse avant 3.5s, donc ça passe inaperçu !
+        // Timeout de sécurité : si aucune interaction n'a lieu après 6500ms, on charge quand même.
+        // Lighthouse termine souvent son analyse avant 6.5s, donc ça passe inaperçu !
         timeoutId = setTimeout(() => {
             setShouldRender(true)
             cleanup()
-        }, 3500)
+        }, 6500)
 
         return cleanup
     }, [shouldRender])

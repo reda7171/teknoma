@@ -175,14 +175,10 @@ export default async function PackDetailPage({
                 }
             },
             isRelatedTo: pack.books.map((pb) => ({
-                '@type': 'Book',
+                '@type': 'Thing',
                 name: pb.book.title,
-                author: {
-                    '@type': 'Person',
-                    name: pb.book.author,
-                },
                 image: pb.book.image,
-                isbn: pb.book.isbn,
+                url: pb.book.id ? `${baseUrl}/${locale}/books/${pb.book.id}` : undefined
             })),
         },
         {
