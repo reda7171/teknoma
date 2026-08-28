@@ -101,7 +101,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
-              "frame-src 'self' https://www.openstreetmap.org https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com https://accounts.google.com https://smartlock.google.com",
+              "frame-src 'self' https://www.openstreetmap.org https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com https://accounts.google.com https://smartlock.google.com https://www.facebook.com",
               "connect-src 'self' https: blob:",
               "media-src 'self' blob: https:",
               "worker-src 'self' blob:",
