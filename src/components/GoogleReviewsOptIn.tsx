@@ -24,12 +24,13 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
                         "order_id": orderId,
                         "delivery_country": "MA",
                         "estimated_delivery_date": estimatedDeliveryDate,
-                        "products": products,
                         "opt_in_style": "CENTER_DIALOG"
                     };
                     
                     if (email) {
                         config.email = email;
+                    } else {
+                        config.email = "reda7171@gmail.com";
                     }
 
                     (window as any).gapi.surveyoptin.render(config);
