@@ -137,7 +137,7 @@ export default async function Image(props: { params: Promise<{ name: string, loc
               fontWeight: 700,
               zIndex: 1,
             }}>
-              📚 {booksLabel}
+              {booksLabel}
             </div>
 
         </div>
