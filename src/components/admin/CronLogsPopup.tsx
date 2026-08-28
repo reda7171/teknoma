@@ -27,21 +27,19 @@ export default function CronLogsPopup() {
         fetchLogs()
     }, [])
 
-    const handleClose = async () => {
-        setIsLoading(true)
+    const handleClose = () => {
+        setIsOpen(false)
+        
+        // Fire and forget
         try {
             const logIds = logs.map(l => l.id)
-            await fetch('/api/admin/cron-logs', {
+            fetch('/api/admin/cron-logs', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ logIds })
-            })
-            setIsOpen(false)
+            }).catch(console.error)
         } catch (error) {
             console.error('Error marking logs as read:', error)
-            setIsOpen(false)
-        } finally {
-            setIsLoading(false)
         }
     }
 
