@@ -15,34 +15,41 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
 
     useEffect(() => {
         setIsClient(true);
-    }, []);
+        
+        window.renderOptIn = function() {
+            if (window.gapi) {
+                window.gapi.load('surveyoptin', function() {
+                    const config: any = {
+                        "merchant_id": 5826844744,
+                        "order_id": orderId,
+                        "delivery_country": "MA",
+                        "estimated_delivery_date": estimatedDeliveryDate,
+                        "products": products,
+                        "opt_in_style": "CENTER_DIALOG"
+                    };
+                    
+                    if (email) {
+                        config.email = email;
+                    }
+
+                    window.gapi.surveyoptin.render(config);
+                });
+            }
+        };
+
+        // If gapi is already loaded and surveyoptin is available, run it immediately
+        if (window.gapi && window.gapi.surveyoptin) {
+            window.renderOptIn();
+        }
+    }, [orderId, email, estimatedDeliveryDate, products]);
 
     if (!isClient) return null;
 
     return (
         <Script
             id="google-reviews-optin"
-            src="https://apis.google.com/js/platform.js"
-            strategy="lazyOnload"
-            onLoad={() => {
-                if (window.gapi) {
-                    window.gapi.load('surveyoptin', function() {
-                        const config: any = {
-                            "merchant_id": 5826844744,
-                            "order_id": orderId,
-                            "delivery_country": "MA",
-                            "estimated_delivery_date": estimatedDeliveryDate,
-                            "products": products
-                        };
-                        
-                        if (email) {
-                            config.email = email;
-                        }
-
-                        window.gapi.surveyoptin.render(config);
-                    });
-                }
-            }}
+            src="https://apis.google.com/js/platform.js?onload=renderOptIn"
+            strategy="afterInteractive"
         />
     )
 }
