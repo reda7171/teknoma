@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, Check, AlertCircle, RefreshCw, Clock, TrendingUp, CheckCircle2, ShoppingCart, MessageCircle } from 'lucide-react'
+import { Sparkles, Check, AlertCircle, RefreshCw, Clock, TrendingUp, CheckCircle2, ShoppingCart, MessageCircle, Package } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
@@ -195,7 +195,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
-                                {tCommon('TaxesIncluded') || 'Taxes incluses'}
+                                {locale === 'ar' ? 'شامل للضرائب' : locale === 'en' ? 'Taxes Included' : 'Taxes incluses'}
                             </p>
                         </div>
                         <span className="hidden sm:inline text-gray-300">•</span>
