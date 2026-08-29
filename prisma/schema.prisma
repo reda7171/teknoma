@@ -1300,3 +1300,14 @@ model AudioTestimonial {
 
   @@map("audio_testimonials")
 }
+
+model ImageTestimonial {
+  id           String   @id @default(uuid())
+  customerName String   @db.VarChar(255)
+  imageUrl     String   @db.VarChar(500)
+  isApproved   Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("image_testimonials")
+}

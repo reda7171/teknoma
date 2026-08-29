@@ -193,15 +193,21 @@ export async function getBookAverageRating(bookId: string) {
 export async function getReviewsStats() {
     try {
         await verifyAdmin()
-        const [total, approved, pending] = await Promise.all([
+        const [total, approved, pending, avgRes] = await Promise.all([
             prisma.review.count(),
             prisma.review.count({ where: { isApproved: true } }),
             prisma.review.count({ where: { isApproved: false } }),
+            prisma.review.aggregate({
+                _avg: { rating: true },
+                where: { isApproved: true }
+            })
         ])
 
-        return { total, approved, pending }
+        const averageRating = avgRes._avg.rating || 0
+
+        return { total, approved, pending, averageRating }
     } catch (error) {
         console.error('Erreur stats avis:', error)
-        return { total: 0, approved: 0, pending: 0 }
+        return { total: 0, approved: 0, pending: 0, averageRating: 0 }
     }
 }

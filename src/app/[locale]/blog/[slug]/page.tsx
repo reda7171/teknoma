@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!post) return {}
 
     const siteUrl = getBaseUrl()
-    const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`
+    const canonicalUrl = `${siteUrl}/${locale}/blog/${decodedSlug}`
     const fallbackApiUrl = `${siteUrl}/api/blog/${post.id}/image`
     const imageUrl = post.coverImage ? getOgImageUrl(post.coverImage, siteUrl, fallbackApiUrl) : null
 
@@ -408,7 +408,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-slate-700 prose-blockquote:shadow-sm
                                 ${post.language === 'ar' 
                                     ? 'font-tajawal text-right text-[20px] md:text-[24px] leading-[1.9] md:leading-[2.3] prose-h2:font-black prose-h3:font-black prose-p:font-bold prose-li:font-bold prose-h2:!text-[36px] md:prose-h2:!text-[48px] prose-h3:!text-[30px] md:prose-h3:!text-[38px] prose-p:!text-[22px] md:prose-p:!text-[28px] prose-p:leading-[2.1] md:prose-p:leading-[2.4] prose-li:text-[22px] md:prose-li:text-[26px] prose-li:leading-[2.1] md:prose-li:leading-[2.4] prose-blockquote:border-r-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-l-2xl' 
-                                    : 'prose-base md:prose-lg text-left prose-headings:tracking-tight prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h3:!text-2xl md:prose-h3:!text-3xl prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:!text-[16px] md:prose-p:!text-[18px] prose-p:font-medium prose-li:leading-relaxed prose-li:font-semibold prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-r-2xl'}`}
+                                    : 'prose-lg md:prose-xl text-left prose-headings:tracking-tight prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h3:!text-2xl md:prose-h3:!text-3xl prose-p:leading-[1.8] md:prose-p:leading-[2] prose-p:!text-[18px] md:prose-p:!text-[21px] prose-p:font-medium prose-li:leading-relaxed prose-li:font-medium prose-li:!text-[18px] md:prose-li:!text-[21px] prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-r-2xl'}`}
                         >
                             {/* === GEO: AI TL;DR Summary === */}
                             {post.excerpt && (

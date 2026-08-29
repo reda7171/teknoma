@@ -4,7 +4,9 @@ import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getAllCategoryQuotes } from '@/lib/actions/categories'
 import { getRecentExchangeBooks } from '@/lib/actions/community-market'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
+import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 import AudioTestimonial from '@/components/AudioTestimonial'
+import TestimonialsTabs from '@/components/home/TestimonialsTabs'
 import SonicDeliveryBanner from '@/components/home/SonicDeliveryBanner'
 import InstagramFeed from '@/components/home/InstagramFeed'
 import { getRecentPosts } from '@/lib/actions/blog'
@@ -103,7 +105,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     recentPosts,
     homeSettings,
     homepageContent,
-    audioTestimonialsResult
+    audioTestimonialsResult,
+    imageTestimonialsResult
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -117,11 +120,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getRecentPosts(3, locale),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
-    getApprovedAudioTestimonials()
+    getApprovedAudioTestimonials(),
+    getApprovedImageTestimonials()
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
   const audioTestimonials = audioTestimonialsResult?.success ? audioTestimonialsResult.testimonials : []
+  const imageTestimonials = imageTestimonialsResult?.success ? imageTestimonialsResult.testimonials : []
   const newBooks = popularBooks.slice(0, 8)
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
@@ -837,7 +842,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         )
 
             case 'home_section_audio_testimonials':
-        if (audioTestimonials.length === 0) return null
+        if (audioTestimonials.length === 0 && imageTestimonials.length === 0) return null
         return (
           <section key={key} {...getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream')} className={`py-16 overflow-hidden ${getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -845,20 +850,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full">
                     <Headphones className="w-4 h-4 text-emerald-600" />
                     <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-emerald-600 tracking-[0.3em]">
-                      {c('audio_testimonials_subtitle', locale === 'ar' ? 'تجارب عملائنا الصوتية' : locale === 'en' ? 'Voice Testimonials' : 'Témoignages Vocaux')}
+                      {c('audio_testimonials_subtitle', locale === 'ar' ? 'تجارب عملائنا' : locale === 'en' ? 'Testimonials' : 'Témoignages')}
                     </span>
                   </div>
                 <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
                   {c('audio_testimonials_title', locale === 'ar' ? 'ماذا يقولون عنا' : locale === 'en' ? 'What They Say' : 'Ce qu\'ils disent de nous')}<span className="text-emerald-500">.</span>
                 </h2>
               </ScrollReveal>
-              <div className="flex flex-wrap justify-center gap-8">
-                {audioTestimonials.map((testimonial: any, idx: number) => (
-                  <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up">
-                    <AudioTestimonial testimonial={testimonial} />
-                  </ScrollReveal>
-                ))}
-              </div>
+              <TestimonialsTabs audioTestimonials={audioTestimonials} imageTestimonials={imageTestimonials} locale={locale} />
             </div>
           </section>
         )

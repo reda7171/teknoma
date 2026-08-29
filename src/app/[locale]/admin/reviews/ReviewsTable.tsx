@@ -13,6 +13,7 @@ interface Review {
     comment: string
     isApproved: boolean
     createdAt: Date
+    image: string | null
     book: {
         id: string
         title: string
@@ -151,6 +152,17 @@ export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
                                             <p className="text-gray-600 font-bold italic line-clamp-2 max-w-md leading-relaxed text-xs">
                                                 "{review.comment}"
                                             </p>
+                                            {review.image && (
+                                                <div className="mt-2 relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 shadow-sm cursor-pointer hover:scale-110 transition-transform">
+                                                    <Image
+                                                        src={review.image}
+                                                        alt="Avis Image"
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized
+                                                    />
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-10 py-6">
                                             {review.isApproved ? (

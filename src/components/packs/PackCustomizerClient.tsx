@@ -191,6 +191,21 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                             {locale === 'ar' ? 'درهم' : 'MAD'}
                         </span>
                     </div>
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4">
+                        <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                                {tCommon('TaxesIncluded') || 'Taxes incluses'}
+                            </p>
+                        </div>
+                        <span className="hidden sm:inline text-gray-300">•</span>
+                        <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4 text-blue-500" />
+                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                                {locale === 'ar' ? 'الدفع عند الاستلام' : locale === 'en' ? 'Cash on Delivery' : 'Paiement à la livraison'}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -36,17 +36,8 @@ const tajawal = localFont({
     { path: "../../fonts/Tajawal-Regular.ttf", weight: "400" },
     { path: "../../fonts/Tajawal-Medium.ttf", weight: "500" },
     { path: "../../fonts/Tajawal-Bold.ttf", weight: "700" },
-    { path: "../../fonts/Tajawal-ExtraBold.ttf", weight: "800" },
-    { path: "../../fonts/Tajawal-Black.ttf", weight: "900" },
   ],
   variable: "--font-tajawal",
-});
-
-import { Cairo } from "next/font/google";
-const cairo = Cairo({
-  subsets: ["arabic"],
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-cairo",
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -426,6 +417,9 @@ export default async function LocaleLayout({
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet" />
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         <Script
           id="gtm-script"
@@ -454,7 +448,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
       </head>
       <body
-        className={`${outfit.className} ${tajawal.variable} ${cairo.variable} font-sans antialiased bg-white`}
+        className={`${outfit.className} ${tajawal.variable} font-cairo-var font-sans antialiased bg-white`}
         suppressHydrationWarning={true}
       >
         <noscript>

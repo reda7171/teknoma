@@ -2,107 +2,51 @@
 
 import { useState, useEffect, useRef } from 'react'
 
-function AuthorCombobox({ 
-    authors, 
-    currentAuthor, 
+function SearchInput({ 
+    currentSearch, 
     onChange, 
     isCondensed = false, 
-    allAuthorsText 
+    placeholder 
 }: { 
-    authors: string[], 
-    currentAuthor: string, 
-    onChange: (author: string) => void, 
+    currentSearch: string, 
+    onChange: (search: string) => void, 
     isCondensed?: boolean, 
-    allAuthorsText: string 
+    placeholder: string 
 }) {
-    const [isOpen, setIsOpen] = useState(false)
-    const [search, setSearch] = useState('')
-    const selectRef = useRef<HTMLDivElement>(null)
+    const [value, setValue] = useState(currentSearch)
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-                setIsOpen(false)
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside)
-        return () => document.removeEventListener("mousedown", handleClickOutside)
-    }, [])
+        setValue(currentSearch)
+    }, [currentSearch])
 
-    const filteredAuthors = authors.filter(a => a.toLowerCase().includes(search.toLowerCase()))
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        onChange(value)
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            onChange(value)
+        }
+    }
 
     return (
-        <div className={`relative ${isCondensed ? 'flex-1' : ''}`} ref={selectRef}>
-            <div 
-                className="relative cursor-pointer"
-                onClick={() => {
-                    if (!isOpen) {
-                        setIsOpen(true);
-                        setSearch('');
-                    } else {
-                        setIsOpen(false);
-                    }
-                }}
-            >
-                {isCondensed && <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />}
-                
-                {isOpen ? (
-                    <input
-                        type="text"
-                        autoFocus
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        className={isCondensed 
-                            ? "w-full pl-10 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-xs font-bold text-gray-900 focus:ring-0 outline-none" 
-                            : "w-full px-6 py-4 bg-white border-2 border-black rounded-2xl outline-none font-bold text-sm text-gray-800"
-                        }
-                        placeholder="Rechercher..."
-                    />
-                ) : (
-                    <div className={isCondensed
-                        ? "w-full pl-10 pr-8 py-2.5 bg-gray-50 border-none rounded-xl text-xs font-bold text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap"
-                        : "w-full px-6 pr-10 py-4 bg-[#F8F9FA] border-2 border-transparent rounded-2xl font-bold text-sm text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap"
-                    }>
-                        {currentAuthor || allAuthorsText}
-                    </div>
-                )}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                    <ChevronDown className="w-4 h-4" />
-                </div>
-            </div>
-
-            {isOpen && (
-                <div className="absolute z-[60] left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-2xl max-h-60 overflow-auto">
-                    <ul className="py-1">
-                        <li
-                            className={`px-4 py-3 hover:bg-gray-50 cursor-pointer text-xs font-bold ${!currentAuthor ? 'text-black' : 'text-gray-500'}`}
-                            onClick={() => {
-                                setIsOpen(false);
-                                onChange('');
-                            }}
-                        >
-                            {allAuthorsText}
-                        </li>
-                        {filteredAuthors.map((author) => (
-                            <li
-                                key={author}
-                                className={`px-4 py-3 hover:bg-gray-50 cursor-pointer text-xs font-bold ${currentAuthor === author ? 'text-black' : 'text-gray-500'}`}
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    onChange(author);
-                                }}
-                            >
-                                {author}
-                            </li>
-                        ))}
-                        {filteredAuthors.length === 0 && (
-                            <li className="px-4 py-3 text-xs text-gray-400 italic">Aucun auteur trouvé</li>
-                        )}
-                    </ul>
-                </div>
-            )}
-        </div>
+        <form onSubmit={handleSubmit} className={`relative ${isCondensed ? 'flex-1' : ''}`}>
+            <Search className={`absolute ${isCondensed ? 'left-3' : 'left-4 rtl:right-4 rtl:left-auto'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10`} />
+            <input
+                type="text"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={() => onChange(value)}
+                placeholder={placeholder}
+                className={isCondensed 
+                    ? "w-full pl-10 rtl:pr-10 rtl:pl-4 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-xs font-bold text-gray-900 focus:ring-0 outline-none" 
+                    : "w-full pl-12 rtl:pr-12 rtl:pl-6 pr-6 py-4 bg-[#F8F9FA] focus:bg-white border-2 border-transparent focus:border-black rounded-2xl outline-none font-bold text-sm text-gray-800 transition-all"
+                }
+            />
+        </form>
     )
 }
 import { Filter, SlidersHorizontal, Globe, User, X, ChevronDown, Search } from 'lucide-react'
@@ -146,10 +90,9 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
     }
     const router = useRouter()
 
-    const handleAuthorChange = (value: string) => {
+    const handleSearchChange = (value: string) => {
         const newParams = new URLSearchParams()
-        if (value) newParams.set('author', value)
-        if (params.search) newParams.set('search', params.search)
+        if (value) newParams.set('search', value)
         if (params.category) newParams.set('category', params.category)
         if (params.language) newParams.set('language', params.language)
         if (params.inStock) newParams.set('inStock', params.inStock)
@@ -160,7 +103,6 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
         const value = e.target.checked
         const newParams = new URLSearchParams()
         if (params.search) newParams.set('search', params.search)
-        if (params.author) newParams.set('author', params.author)
         if (params.category) newParams.set('category', params.category)
         if (params.language) newParams.set('language', params.language)
         newParams.set('inStock', value ? 'true' : 'false')
@@ -222,7 +164,6 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                             href={`/books?${new URLSearchParams({
                                 ...(params.category ? { category: params.category } : {}),
                                 ...(params.search ? { search: params.search } : {}),
-                                ...(params.author ? { author: params.author } : {}),
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
                             }).toString()}`}
                             scroll={false}
@@ -241,7 +182,6 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 href={`/books?${new URLSearchParams({
                                     ...(params.category ? { category: params.category } : {}),
                                     ...(params.search ? { search: params.search } : {}),
-                                    ...(params.author ? { author: params.author } : {}),
                                     ...(params.inStock ? { inStock: params.inStock } : {}),
                                     language: lang.code
                                 }).toString()}`}
@@ -267,17 +207,16 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                 )}
             </div>
 
-            {/* Author Search */}
+            {/* General Search */}
             <div>
                 <label className="flex items-center gap-2 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 mb-4 ml-1">
-                    <User className="w-3 h-3" />
-                    {t('SearchItems')}
+                    <Search className="w-3 h-3" />
+                    {tCommon('Search') || 'Rechercher'}
                 </label>
-                <AuthorCombobox 
-                    authors={authors}
-                    currentAuthor={params.author || ''}
-                    onChange={handleAuthorChange}
-                    allAuthorsText={t('AllAuthors') || 'Tous les auteurs'}
+                <SearchInput 
+                    currentSearch={params.search || ''}
+                    onChange={handleSearchChange}
+                    placeholder="Titre, auteur, description..."
                 />
             </div>
 
@@ -448,15 +387,14 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             </aside>
 
             {/* Mobile Sticky Top Bar */}
-            <div className="lg:hidden sticky top-20 z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-2 -mt-4 mb-4">
+            <div className="lg:hidden sticky top-[64px] z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-0 mb-4">
                 <div className="bg-white border border-gray-100 shadow-lg shadow-black/5 rounded-2xl px-4 py-3">
                     <div className="max-w-7xl mx-auto flex items-center gap-2">
-                        {/* Search Author Select (Condensed) */}
-                        <AuthorCombobox 
-                            authors={authors}
-                            currentAuthor={params.author || ''}
-                            onChange={handleAuthorChange}
-                            allAuthorsText={t('AllAuthors') || 'Tous les auteurs'}
+                        {/* General Search (Condensed) */}
+                        <SearchInput 
+                            currentSearch={params.search || ''}
+                            onChange={handleSearchChange}
+                            placeholder="Rechercher..."
                             isCondensed={true}
                         />
 

@@ -180,7 +180,7 @@ export default function ChatBot() {
             {/* Launcher Button */}
             <button 
                 onClick={() => setOpen(true)}
-                className={`fixed bottom-6 left-6 w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl z-50 group border border-white/20 touch-none active:scale-90 ${open ? 'scale-0' : 'scale-100'}`}
+                className={`fixed bottom-20 md:bottom-6 ltr:left-6 rtl:right-6 w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl z-[110] group border border-white/20 active:scale-90 ${open ? 'scale-0' : 'scale-100'}`}
                 style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #3e3e5e 100%)' }}
                 aria-label="Ouvrir l'assistant"
             >
@@ -192,7 +192,7 @@ export default function ChatBot() {
             {/* Chat Window */}
             {open && (
                 <div 
-                    className="fixed bottom-6 left-6 w-[380px] max-w-[90vw] h-[600px] max-h-[80vh] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col z-[100] border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500"
+                    className="fixed bottom-20 md:bottom-6 ltr:left-6 rtl:right-6 w-[380px] max-w-[90vw] h-[600px] max-h-[80vh] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col z-[115] border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500"
                 >
                     {/* Premium Header */}
                     <div 
