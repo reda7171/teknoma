@@ -16,6 +16,9 @@ import AnnouncementBar from '@/components/AnnouncementBar'
 import PackCustomizerClient from '@/components/packs/PackCustomizerClient'
 import { getCommunityUser } from '@/lib/actions/community-auth'
 import { Edit } from 'lucide-react'
+import TestimonialsTabs from '@/components/home/TestimonialsTabs'
+import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
+import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 
 export async function generateMetadata({
     params,
@@ -94,13 +97,15 @@ export default async function PackDetailPage({
     const t = await getTranslations('PackDetail')
     const tPacks = await getTranslations('Packs')
     const tNav = await getTranslations('Navigation')
-    const [whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, user] = await Promise.all([
+    const [whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, user, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
         getSetting('contact_whatsapp'),
         getSetting('announcement_bar_enabled'),
         getSetting('announcement_bar_message'),
         getSetting('announcement_bar_bg_color'),
         getSetting('announcement_bar_text_color'),
-        getCommunityUser()
+        getCommunityUser(),
+        getApprovedAudioTestimonials(),
+        getApprovedImageTestimonials()
     ])
 
     if (!pack) {
@@ -260,6 +265,9 @@ export default async function PackDetailPage({
     }
     jsonLd.push(faqSchema)
 
+    const audioTestimonials = audioTestimonialsResult?.success ? (audioTestimonialsResult.testimonials || []) : []
+    const imageTestimonials = imageTestimonialsResult?.success ? (imageTestimonialsResult.testimonials || []) : []
+
     return (
         <>
             <script
@@ -397,6 +405,42 @@ export default async function PackDetailPage({
                             ))}
                         </div>
                     </section>
+
+                    {/* Testimonials Section (Audio & Images) */}
+                    {(audioTestimonials.length > 0 || imageTestimonials.length > 0) && (
+                        <section className="py-8 md:py-16 border-t border-gray-100 mt-20">
+                            <div className="flex flex-col items-center text-center mb-12 space-y-4">
+                                <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
+                                    {locale === 'ar' ? 'تجارب عملائنا' : locale === 'en' ? 'Testimonials' : 'Témoignages'}<span className="text-emerald-500">.</span>
+                                </h2>
+                            </div>
+                            <TestimonialsTabs audioTestimonials={audioTestimonials} imageTestimonials={imageTestimonials} locale={locale} />
+                        </section>
+                    )}
+
+                    {/* FAQ Section */}
+                    {faqSchema.mainEntity.length > 0 && (
+                        <section className="py-8 md:py-16 border-t border-gray-100 mt-20">
+                            <div className="flex flex-col md:flex-row gap-16">
+                                <div className="md:w-1/3">
+                                    <h2 className="text-4xl font-black text-black tracking-tighter mb-4">
+                                        {locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}<span className="text-blue-500">.</span>
+                                    </h2>
+                                    <p className="text-sm font-bold text-gray-400">
+                                        {locale === 'ar' ? 'كل ما تحتاج معرفته عن هذه الباقة.' : locale === 'en' ? 'Everything you need to know about this pack.' : 'Tout ce que vous devez savoir sur ce pack.'}
+                                    </p>
+                                </div>
+                                <div className="md:w-2/3 space-y-6">
+                                    {faqSchema.mainEntity.map((faq, index) => (
+                                        <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 hover:shadow-md transition-shadow">
+                                            <h3 className="text-xl font-black text-black mb-4">{faq.name}</h3>
+                                            <p className="text-sm font-medium text-gray-500 leading-relaxed">{faq.acceptedAnswer.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </div>
                 <Footer />
             </div>

@@ -10,6 +10,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
+import { usePathname } from 'next/navigation'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -21,6 +22,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('Cart');
     const locale = useLocale();
+    const pathname = usePathname()
+
+    // Fermer le panier à chaque changement de page
+    useEffect(() => {
+        if (isOpen) onClose()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname])
 
     // Swipe to close states
     const [touchStart, setTouchStart] = useState<number | null>(null)

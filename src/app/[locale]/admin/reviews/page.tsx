@@ -1,9 +1,11 @@
 import { getAllReviews, getReviewsStats } from '@/lib/actions/reviews'
 import { getAudioTestimonials } from '@/lib/actions/audio-testimonials'
-import { Star, CheckCircle, Clock, MessageSquareText, Mic } from 'lucide-react'
+import { getImageTestimonials } from '@/lib/actions/image-testimonials'
+import { Star, CheckCircle, Clock, MessageSquareText, Mic, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import ReviewsTable from './ReviewsTable'
 import AudioTestimonialsTable from './AudioTestimonialsTable'
+import ImageTestimonialsTable from './ImageTestimonialsTable'
 
 export default async function AdminReviewsPage({
     params,
@@ -17,15 +19,15 @@ export default async function AdminReviewsPage({
     const filter = (searchParamsValues.filter || 'all') as 'all' | 'approved' | 'pending'
     const tab = searchParamsValues.tab || 'text'
 
-    const [reviews, stats, audioRes] = await Promise.all([
+    const [reviews, stats, audioRes, imageRes] = await Promise.all([
         getAllReviews(filter),
         getReviewsStats(),
-        getAudioTestimonials()
+        getAudioTestimonials(),
+        getImageTestimonials()
     ])
 
     const audioTestimonials = audioRes?.testimonials || []
-
-
+    const imageTestimonials = imageRes?.testimonials || []
 
     return (
         <div className="space-y-12">
@@ -48,6 +50,13 @@ export default async function AdminReviewsPage({
                     >
                         <MessageSquareText className="w-4 h-4" />
                         Livres
+                    </Link>
+                    <Link
+                        href={`/${locale}/admin/reviews?tab=image`}
+                        className={`px-6 py-2.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${tab === 'image' ? 'bg-white text-black shadow-md' : 'text-gray-500 hover:text-black'}`}
+                    >
+                        <ImageIcon className="w-4 h-4" />
+                        Avis Images
                     </Link>
                     <Link
                         href={`/${locale}/admin/reviews?tab=audio`}
@@ -83,21 +92,17 @@ export default async function AdminReviewsPage({
                         </div>
                     </div>
 
-                    {/* Statistiques en Cartes Premium */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
-                            { label: "Note Moyenne", value: "4.8", icon: Star, color: "bg-black text-white", sub: "/ 5.0" },
-                            { label: "Approbation", value: `${stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0}%`, icon: CheckCircle, color: "bg-emerald-50 text-emerald-600", sub: "Taux de validation" },
-                            { label: "En Attente", value: stats.pending, icon: Clock, color: "bg-orange-50 text-orange-600", sub: "À modérer" }
+                            { label: 'Total Avis', value: stats.total, icon: MessageSquareText, color: 'bg-black text-white' },
+                            { label: 'En attente', value: stats.pending, icon: Clock, color: 'bg-orange-50 text-orange-600' },
+                            { label: 'Note Moyenne', value: stats.averageRating.toFixed(1), icon: Star, color: 'bg-yellow-50 text-yellow-600' }
                         ].map((stat, i) => (
-                            <div key={i} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 relative overflow-hidden group hover:-translate-y-1 transition-all">
-                                <div className="flex justify-between items-start">
+                            <div key={i} className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-xl shadow-black/5 group hover:scale-[1.02] transition-transform">
+                                <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{stat.label}</p>
-                                        <div className="flex items-baseline gap-2">
-                                            <p className="text-4xl font-black text-black tracking-tighter">{stat.value}</p>
-                                            <span className="text-[10px] font-bold text-gray-300 uppercase">{stat.sub}</span>
-                                        </div>
+                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-1">{stat.label}</p>
+                                        <p className="text-4xl font-black tracking-tighter text-black italic">{stat.value}</p>
                                     </div>
                                     <div className={`w-14 h-14 rounded-2xl ${stat.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
                                         <stat.icon className={`w-6 h-6 ${stat.icon === Star ? 'fill-current' : ''}`} />
@@ -110,6 +115,8 @@ export default async function AdminReviewsPage({
                     {/* Liste des Avis Premium */}
                     <ReviewsTable reviews={reviews} />
                 </>
+            ) : tab === 'image' ? (
+                <ImageTestimonialsTable testimonials={imageTestimonials} />
             ) : (
                 <AudioTestimonialsTable testimonials={audioTestimonials} />
             )}

@@ -8,6 +8,11 @@
   --pixio-cream: #FDFBF7;
   --pixio-pink: #FDE2E4;
   --pixio-yellow: #FEF9E7;
+  --font-cairo: "Cairo", sans-serif;
+}
+
+.font-cairo-var {
+  --font-cairo: "Cairo", sans-serif;
 }
 
 /* Force explicit sizes for blog headings */

@@ -31,6 +31,9 @@ import BookSubNav from '@/components/BookSubNav'
 import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
 import AdBanner from '@/components/AdBanner'
+import TestimonialsTabs from '@/components/home/TestimonialsTabs'
+import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
+import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 
@@ -175,7 +178,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
-    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, latestPostsData] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, latestPostsData, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
         getBookReviews(bookId),
         getBookAverageRating(bookId),
         book.category ? getCategoryConfigByName(book.category) : Promise.resolve(null),
@@ -190,7 +193,9 @@ export default async function BookDetailPage({
         getSetting('adsense_publisher_id').then(v => v || ''),
         getSetting('adsense_slot_sidebar').then(v => v || ''),
         getAuthorProfile(book.author),
-        getPublishedPosts(1, 3, undefined, locale)
+        getPublishedPosts(1, 3, undefined, locale),
+        getApprovedAudioTestimonials(),
+        getApprovedImageTestimonials()
     ])
 
     const relatedPosts = [...relatedPostsRaw];
@@ -302,6 +307,9 @@ export default async function BookDetailPage({
     
     jsonLd.push(faqSchema as any)
 
+    const audioTestimonials = audioTestimonialsResult?.success ? (audioTestimonialsResult.testimonials || []) : []
+    const imageTestimonials = imageTestimonialsResult?.success ? (imageTestimonialsResult.testimonials || []) : []
+
     return (
         <>
             <BookJsonLd 
@@ -390,33 +398,43 @@ export default async function BookDetailPage({
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Trust Badges */}
-                                <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-8 md:pt-10 border-t border-gray-50">
-                                    <div className="text-center group cursor-pointer">
-                                        <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                            <Truck className="w-6 h-6 text-black" />
+                            </div>
+                            {/* Author Profile Card (Desktop Only) */}
+                            <div className="mt-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 hidden lg:flex flex-col sm:flex-row items-center sm:items-start gap-5 group hover:shadow-md transition-shadow">
+                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-full overflow-hidden border-4 border-gray-50 shadow-inner group-hover:border-gray-100 transition-colors mx-auto sm:mx-0">
+                                    {authorProfile?.image ? (
+                                        <ImageWithFallback
+                                            src={authorProfile.image}
+                                            alt={book.author}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                            <UserIcon className="w-8 h-8 text-gray-300" />
                                         </div>
-                                        <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('FastMove')}</p>
-                                    </div>
-                                    <div className="text-center group cursor-pointer">
-                                        <div className="w-14 h-14 bg-pixio-pink rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                            <Shield className="w-6 h-6 text-black" />
-                                        </div>
-                                        <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Secured')}</p>
-                                    </div>
-                                    <div className="text-center group cursor-pointer">
-                                        <div className="w-14 h-14 bg-pixio-yellow rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                            <Package className="w-6 h-6 text-black" />
-                                        </div>
-                                        <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Original')}</p>
-                                    </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
+                                    <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
+                                        {book.author}
+                                    </Link>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
+                                        {authorProfile?.bio || (locale === 'ar' ? `كاتب متميز قدم العديد من الأعمال الرائعة التي أثرت المكتبة العربية.` : locale === 'en' ? `An outstanding author who has contributed many remarkable works.` : `Un auteur exceptionnel qui a contribué à de nombreuses œuvres remarquables.`)}
+                                    </p>
+                                    <Link 
+                                        href={`/authors/${encodeURIComponent(book.author)}`}
+                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
+                                    >
+                                        {tBook('DiscoverMore') || 'Découvrir plus'}
+                                        <ArrowUpRight className="w-3 h-3" />
+                                    </Link>
                                 </div>
                             </div>
 
-                            {/* Related Blog Posts - Articles parlant de ce produit */}
+                            {/* Related Blog Posts - Articles parlant de ce produit (Desktop Only) */}
                             {relatedPosts && relatedPosts.length > 0 && (
-                                <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                                <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden hidden lg:block">
                                     <div className="flex items-center gap-2 mb-6">
                                         <FileText className="w-4 h-4 text-blue-600" />
                                         <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black">
@@ -466,39 +484,6 @@ export default async function BookDetailPage({
                                     </div>
                                 </div>
                             )}
-
-                            {/* Author Profile Card */}
-                            <div className="mt-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5 group hover:shadow-md transition-shadow">
-                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-full overflow-hidden border-4 border-gray-50 shadow-inner group-hover:border-gray-100 transition-colors mx-auto sm:mx-0">
-                                    {authorProfile?.image ? (
-                                        <ImageWithFallback
-                                            src={authorProfile.image}
-                                            alt={book.author}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                            <UserIcon className="w-8 h-8 text-gray-300" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
-                                    <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
-                                        {book.author}
-                                    </Link>
-                                    <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
-                                        {authorProfile?.bio || (locale === 'ar' ? `كاتب متميز قدم العديد من الأعمال الرائعة التي أثرت المكتبة العربية.` : locale === 'en' ? `An outstanding author who has contributed many remarkable works.` : `Un auteur exceptionnel qui a contribué à de nombreuses œuvres remarquables.`)}
-                                    </p>
-                                    <Link 
-                                        href={`/authors/${encodeURIComponent(book.author)}`}
-                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
-                                    >
-                                        {tBook('DiscoverMore') || 'Découvrir plus'}
-                                        <ArrowUpRight className="w-3 h-3" />
-                                    </Link>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Info */}
@@ -565,12 +550,43 @@ export default async function BookDetailPage({
                                         <span className="text-4xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
                                         <span className="text-xl font-black text-gray-300 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'درهم'}</span>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <CheckCircle2 className="w-4 h-4 text-black" />
-                                        <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-400 uppercase tracking-widest">
-                                            {tBook('TaxesIncluded')}
-                                        </p>
+                                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                                                {tBook('TaxesIncluded')}
+                                            </p>
+                                        </div>
+                                        <span className="hidden sm:inline text-gray-300">•</span>
+                                        <div className="flex items-center gap-2">
+                                            <Package className="w-4 h-4 text-blue-500" />
+                                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                                                {locale === 'ar' ? 'الدفع عند الاستلام' : locale === 'en' ? 'Cash on Delivery' : 'Paiement à la livraison'}
+                                            </p>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Trust Badges */}
+                            <div className="grid grid-cols-3 gap-2 sm:gap-6 py-6 border-y border-gray-50">
+                                <div className="text-center group cursor-pointer">
+                                    <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                        <Truck className="w-6 h-6 text-black" />
+                                    </div>
+                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('FastMove')}</p>
+                                </div>
+                                <div className="text-center group cursor-pointer">
+                                    <div className="w-14 h-14 bg-pixio-pink rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                        <Shield className="w-6 h-6 text-black" />
+                                    </div>
+                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Secured')}</p>
+                                </div>
+                                <div className="text-center group cursor-pointer">
+                                    <div className="w-14 h-14 bg-pixio-yellow rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                        <Package className="w-6 h-6 text-black" />
+                                    </div>
+                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Original')}</p>
                                 </div>
                             </div>
 
@@ -743,6 +759,92 @@ export default async function BookDetailPage({
                                     </div>
                                 </div>
                             )}
+
+                            {/* Author Profile Card (Mobile Only) */}
+                            <div className="mt-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex lg:hidden flex-col sm:flex-row items-center sm:items-start gap-5 group hover:shadow-md transition-shadow">
+                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-full overflow-hidden border-4 border-gray-50 shadow-inner group-hover:border-gray-100 transition-colors mx-auto sm:mx-0">
+                                    {authorProfile?.image ? (
+                                        <ImageWithFallback
+                                            src={authorProfile.image}
+                                            alt={book.author}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                            <UserIcon className="w-8 h-8 text-gray-300" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
+                                    <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
+                                        {book.author}
+                                    </Link>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
+                                        {authorProfile?.bio || (locale === 'ar' ? `كاتب متميز قدم العديد من الأعمال الرائعة التي أثرت المكتبة العربية.` : locale === 'en' ? `An outstanding author who has contributed many remarkable works.` : `Un auteur exceptionnel qui a contribué à de nombreuses œuvres remarquables.`)}
+                                    </p>
+                                    <Link 
+                                        href={`/authors/${encodeURIComponent(book.author)}`}
+                                        className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
+                                    >
+                                        {tBook('DiscoverMore') || 'Découvrir plus'}
+                                        <ArrowUpRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Related Blog Posts - Articles parlant de ce produit (Mobile Only) */}
+                            {relatedPosts && relatedPosts.length > 0 && (
+                                <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden block lg:hidden">
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <FileText className="w-4 h-4 text-blue-600" />
+                                        <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black">
+                                            {tBook('ArticleMentions')}
+                                        </h3>
+                                    </div>
+
+                                    <div className="flex flex-col gap-4">
+                                        {relatedPosts.map((post: any) => (
+                                            <Link
+                                                key={post.id}
+                                                href={`/blog/${post.slug}`}
+                                                className="group flex gap-4 bg-white p-3 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow items-center"
+                                            >
+                                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                                                    {post.coverImage ? (
+                                                        <Image
+                                                            src={post.coverImage}
+                                                            alt={post.title}
+                                                            fill
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            unoptimized
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <span className="text-gray-300 font-black text-xs opacity-50">Blog</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0 py-1">
+                                                    {post.publishedAt && (
+                                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                                                            <Calendar className="w-2.5 h-2.5" />
+                                                            {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
+                                                        </p>
+                                                    )}
+                                                    <h4 className="text-xs sm:text-sm font-black text-black leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 mb-1">
+                                                        {post.title}
+                                                    </h4>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-blue-500 inline-flex items-center gap-1 mt-1">
+                                                        Lire l'article
+                                                        <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -839,6 +941,18 @@ export default async function BookDetailPage({
                                     </Link>
                                 ))}
                             </div>
+                        </section>
+                    )}
+
+                    {/* Testimonials Section (Audio & Images) */}
+                    {(audioTestimonials.length > 0 || imageTestimonials.length > 0) && (
+                        <section className="py-8 md:py-16 border-t border-gray-100">
+                            <div className="flex flex-col items-center text-center mb-12 space-y-4">
+                                <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
+                                    {locale === 'ar' ? 'تجارب عملائنا' : locale === 'en' ? 'Testimonials' : 'Témoignages'}<span className="text-emerald-500">.</span>
+                                </h2>
+                            </div>
+                            <TestimonialsTabs audioTestimonials={audioTestimonials} imageTestimonials={imageTestimonials} locale={locale} />
                         </section>
                     )}
 
