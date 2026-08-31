@@ -140,21 +140,18 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
 /**
  * Modifier les informations d'une commande
  */
-export async function updateOrderDetails(orderId: string, data: {
-    fullName?: string
-    phone?: string
-    address?: string
-    city?: string
-    total?: number
-    comment?: string
-}) {
+export async function updateOrderDetails(orderId: string, data: any) {
     try {
         await verifyAdmin()
+
+        const cleanData = { ...data }
+        if (cleanData.shippingFees === null) cleanData.shippingFees = 0
+        if (cleanData.total === null) cleanData.total = 0
 
         await prisma.order.update({
             where: { id: orderId },
             data: {
-                ...data,
+                ...cleanData,
                 updatedAt: new Date()
             }
         })

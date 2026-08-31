@@ -47,11 +47,10 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
     const [date, setDate] = useState<string>(
         expense?.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     )
-
-    // Calculs pour les lots
     const [bookCount, setBookCount] = useState<number | string>('')
     const [booksCost, setBooksCost] = useState<number | string>('')
     const [transportCost, setTransportCost] = useState<number | string>(0)
+    const [error, setError] = useState('')
 
     const totalLotCost = (Number(booksCost) || 0) + (Number(transportCost) || 0)
     const averagePrice = Number(bookCount) > 0 ? (totalLotCost / Number(bookCount)) : 0
@@ -92,27 +91,42 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             return
         }
         
-        const lines = rawDeliveryText.trim().split('\n')
+        // Flatten text to ignore all newlines which cause split lines
+        const flatText = rawDeliveryText.replace(/\r?\n/g, ' ')
+        const flatTokens = flatText.split(/\s+/)
+        
         let parsedOrderIds: string[] = []
         let totalFrais = 0
         let orderFraisMap: Record<string, number> = {}
         
-        lines.forEach(line => {
-            const parts = line.trim().split(/\s+/)
-            if (parts.length >= 2 && parts[0] !== '#') {
-                const matchedOrder = availableOrders.find(o => 
-                    (o.trackingID && parts.includes(o.trackingID)) || 
-                    parts.includes(o.id)
-                )
-                
-                if (matchedOrder) {
-                    parsedOrderIds.push(matchedOrder.id)
-                    const fraisStr = parts[parts.length - 1].replace(',', '.')
-                    const frais = parseFloat(fraisStr)
-                    if (!isNaN(frais)) {
-                        totalFrais += frais
-                        orderFraisMap[matchedOrder.id] = frais
+        availableOrders.forEach(order => {
+            let matchedIndex = -1
+            const idIndex = flatTokens.indexOf(order.id)
+            if (idIndex !== -1) {
+                matchedIndex = idIndex
+            } else if (order.trackingID && order.trackingID.length > 4) {
+                const trackingIndex = flatTokens.indexOf(order.trackingID)
+                if (trackingIndex !== -1) {
+                    matchedIndex = trackingIndex
+                }
+            }
+
+            if (matchedIndex !== -1) {
+                parsedOrderIds.push(order.id)
+                // Cherche les 2 prochains nombres après l'ID (généralement Prix puis Frais)
+                const numbersFound: number[] = []
+                for (let i = matchedIndex + 1; i < Math.min(matchedIndex + 12, flatTokens.length); i++) {
+                    const token = flatTokens[i]
+                    if (/^\d+([.,]\d+)?$/.test(token)) {
+                        numbersFound.push(parseFloat(token.replace(',', '.')))
                     }
+                }
+                
+                // Si on trouve au moins 2 nombres, le 2ème est le Frais. Sinon le 1er.
+                const frais = numbersFound.length >= 2 ? numbersFound[1] : numbersFound[0]
+                if (frais !== undefined && !isNaN(frais)) {
+                    totalFrais += frais
+                    orderFraisMap[order.id] = frais
                 }
             }
         })
@@ -165,6 +179,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         setLoading(true)
+        setError('')
         
         let finalAmount = parseFloat(amount as string)
         let finalDescription = description
@@ -193,11 +208,22 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
             date: date
         }
 
+        let res: any;
         if (isEditing) {
-            await updateExpense(expense.id, data)
+            res = await updateExpense(expense.id, data)
+        } else {
+            res = await createExpense(data)
+        }
+        
+        if (res && res.error) {
+            setError(res.error)
+            setLoading(false)
+            return
+        }
+
+        if (isEditing) {
             setIsOpen(false)
         } else {
-            await createExpense(data)
             setTitle('')
             setAmount('')
             setDescription('')
@@ -251,6 +277,11 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
     const formContent = (
         <>
             <h3 className="font-bold text-lg mb-4 text-gray-800">{isEditing ? 'Modifier la transaction' : 'Ajouter une transaction'}</h3>
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded text-sm font-bold flex items-center gap-2">
+                    <span className="text-xl">⚠️</span> {error}
+                </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Choix du type de transaction */}
@@ -412,7 +443,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                                 />
                                 {parsedDeliveryFrais > 0 && (
                                     <p className="mt-2 text-xs font-bold text-emerald-600">
-                                        ✓ Détection réussie. Frais totaux déduits : {parsedDeliveryFrais} درهم
+                                        ✓ Détection réussie. Frais totaux détectés : {parsedDeliveryFrais} درهم
                                     </p>
                                 )}
                             </div>
@@ -480,29 +511,45 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
 
                             <div className="pt-2 flex justify-between items-center text-emerald-800 font-bold text-sm">
                                 <span>{selectedOrderIds.length} commande(s) sélectionnée(s)</span>
-                                <span>Total estimé: {(selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0) - parsedDeliveryFrais).toFixed(2)} درهم</span>
+                                <span>Total estimé: {(selectedOrderIds.reduce((sum, id) => sum + (availableOrders.find(o => o.id === id)?.total || 0), 0)).toFixed(2)} درهم</span>
                             </div>
                         </div>
                     )}
 
                     {(!isLot || selectedCategory !== 'BOOKS_PURCHASE') && (
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">Montant Total (درهم)</label>
-                            <input 
-                                value={amount}
-                                onChange={e => setAmount(e.target.value)}
-                                type="number" 
-                                step="0.01" 
-                                required={!isLot && selectedCategory !== 'INCOME_DELIVERY'}
-                                readOnly={selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0}
-                                className={`w-full px-3 py-2 border rounded-lg outline-none transition-all ${
-                                    selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0
-                                    ? 'bg-gray-100 text-gray-600 cursor-not-allowed font-bold'
-                                    : 'bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500'
-                                }`} 
-                                placeholder="0.00" 
-                            />
-                        </div>
+                        <>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Montant Total (درهم)</label>
+                                <input 
+                                    value={amount}
+                                    onChange={e => setAmount(e.target.value)}
+                                    type="number" 
+                                    step="0.01" 
+                                    required={!isLot && selectedCategory !== 'INCOME_DELIVERY'}
+                                    readOnly={selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0}
+                                    className={`w-full px-3 py-2 border rounded-lg outline-none transition-all ${
+                                        selectedCategory === 'INCOME_DELIVERY' && selectedOrderIds.length > 0
+                                        ? 'bg-gray-100 text-gray-600 cursor-not-allowed font-bold'
+                                        : 'bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500'
+                                    }`} 
+                                    placeholder="0.00" 
+                                />
+                            </div>
+                            
+                            {selectedCategory === 'INCOME_DELIVERY' && (
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">Frais de livraison (درهم)</label>
+                                    <input 
+                                        type="number"
+                                        step="0.01"
+                                        value={selectedOrderIds.reduce((sum, id) => sum + (parsedOrderFraisMap[id] !== undefined ? parsedOrderFraisMap[id] : (availableOrders.find(o => o.id === id)?.shippingFees || 0)), 0).toFixed(2)}
+                                        readOnly
+                                        className="w-full px-3 py-2 border rounded-lg bg-gray-100 text-gray-600 font-bold outline-none cursor-not-allowed"
+                                        placeholder="Ex: 70"
+                                    />
+                                </div>
+                            )}
+                        </>
                     )}
 
                     <div className={isLot && selectedCategory === 'BOOKS_PURCHASE' ? 'md:col-span-2' : ''}>

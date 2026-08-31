@@ -20,10 +20,23 @@ export async function createExpense(data: {
 }) {
     await verifyAdmin()
     try {
+        if (data.type === 'INCOME' && data.category === 'INCOME_DELIVERY') {
+            const existing = await prisma.expense.findFirst({
+                where: {
+                    title: data.title,
+                    type: 'INCOME',
+                    category: 'INCOME_DELIVERY'
+                }
+            })
+            if (existing) {
+                return { success: false, error: 'Une facture de livraison avec ce numéro existe déjà.' }
+            }
+        }
+
         const expense = await prisma.expense.create({
             data: {
                 title: data.title,
-                amount: data.amount,
+                amount: Number(data.amount) || 0,
                 category: data.category,
                 type: data.type,
                 description: data.description,
@@ -79,7 +92,7 @@ export async function updateExpense(id: string, data: {
 }) {
     await verifyAdmin()
     try {
-        const updateData: any = { ...data }
+        const updateData: any = { ...data, amount: Number(data.amount) || 0 }
         if (data.date) {
             updateData.date = new Date(data.date)
         }
