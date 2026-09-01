@@ -595,11 +595,26 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
             const message = `👀 Nouvelle visite sur un livre !
             
 📖 Titre: ${book.title}
-👤 Visiteur: ${userSession}
+📦 Quantité en stock: ${book.stock}
+👤 Session: ${userSession}
 📈 Vues totales: ${book.views}`
-            await sendTelegramMessage(message)
-        } catch (e) {
-            console.error('Erreur Telegram notification visite:', e)
+            
+            const replyMarkup = {
+                inline_keyboard: [
+                    [
+                        { text: '🎁 -10 Dhs', callback_data: `offer_10:${userSession}` },
+                        { text: '🎁 -20 Dhs', callback_data: `offer_20:${userSession}` },
+                        { text: '🎁 -30 Dhs', callback_data: `offer_30:${userSession}` }
+                    ],
+                    [
+                        { text: '🟢 Ping (Session)', callback_data: `ping:${userSession}` }
+                    ]
+                ]
+            }
+
+            await sendTelegramMessage(message, undefined, undefined, replyMarkup)
+        } catch (error) {
+            console.error('Erreur Telegram notification visite:', error)
         }
 
         return { success: true }
