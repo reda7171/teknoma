@@ -264,14 +264,14 @@ export async function getFinancialStats(filters?: { month?: number, year?: numbe
     let totalFixedCosts = 0
 
     for (const order of orders) {
-        totalRevenue += order.total
-        totalFixedCosts += 2.65 + (order.shippingFees || 0)
+        totalRevenue += Number(order.total) || 0
+        totalFixedCosts += 2.65 + Number(order.shippingFees || 0)
         for (const item of order.items) {
             // Utiliser le costPrice de l'item ou celui du produit s'il est  0
             const itemCost = ((item as any).costPrice && (item as any).costPrice > 0)
                 ? (item as any).costPrice
                 : ((item as any).book?.costPrice || (item as any).pack?.costPrice || 0)
-            totalCostOfGoodsSold += itemCost * item.quantity
+            totalCostOfGoodsSold += Number(itemCost || 0) * Number(item.quantity || 1)
         }
     }
 
