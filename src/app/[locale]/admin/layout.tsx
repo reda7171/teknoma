@@ -285,6 +285,35 @@ export default function AdminLayout({
             })
         }
         
+        if (userRole === 'SELLER') {
+            filteredNav = filteredNav.filter(item => 
+                item.name === 'Tableau de Bord' || 
+                item.name === 'Catalogue' || 
+                item.name === 'Ventes & Opérations'
+            )
+            filteredNav = filteredNav.map(item => {
+                if (item.name === 'Tableau de Bord') {
+                    return {
+                        ...item,
+                        children: item.children.filter(child => child.name === 'Vue Globale')
+                    }
+                }
+                if (item.name === 'Catalogue') {
+                    return {
+                        ...item,
+                        children: item.children.filter(child => child.name === 'Livres Physiques')
+                    }
+                }
+                if (item.name === 'Ventes & Opérations') {
+                    return {
+                        ...item,
+                        children: item.children.filter(child => child.name === 'Commandes Web')
+                    }
+                }
+                return item
+            })
+        }
+        
         return filteredNav
     }, [allNavigation, features, userRole])
 

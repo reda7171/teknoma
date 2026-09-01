@@ -3,15 +3,26 @@ import { Search, Filter, Eye, Usb, Baby, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import ExportOrdersButton from '@/components/admin/ExportOrdersButton'
 import ImportOrdersButton from '@/components/admin/ImportOrdersButton'
-import { isAuthenticated } from '@/lib/actions/auth'
+import { isAuthenticated, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
+import { Prisma } from '@prisma/client'
 
 import OrdersTableClient from './OrdersTableClient'
 import OrdersPageClient from './OrdersPageClient'
 
-async function getOrders(status?: string) {
+async function getOrders(status?: string, role?: string | null, userId?: string | null) {
+    let where: Prisma.OrderWhereInput = status ? { status: status as any } : {}
+    if (role === 'SELLER' && userId) {
+        where = {
+            ...where,
+            items: {
+                some: { sellerId: userId }
+            }
+        }
+    }
+
     const orders = await prisma.order.findMany({
-        where: status ? { status: status as any } : undefined,
+        where,
         orderBy: { createdAt: 'desc' },
         include: {
             items: {
@@ -49,7 +60,10 @@ export default async function AdminOrdersPage(props: {
         redirect(`/${locale}/admin/login`)
     }
 
-    const orders = await getOrders(searchParams.status)
+    const role = await getAdminRole()
+    const userId = await getAdminUser()
+
+    const orders = await getOrders(searchParams.status, role, userId)
 
     const statusColors = {
         PENDING: 'bg-yellow-100 text-yellow-800',

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getBadgeStats } from '@/lib/actions/analytics'
 import DashboardAnalytics from '@/components/admin/DashboardAnalytics'
-import { isAuthenticated } from '@/lib/actions/auth'
+import { isAuthenticated, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import { getSetting } from '@/lib/actions/site-settings'
 import ScanRetourButton from '@/components/admin/ScanRetourButton'
@@ -13,65 +13,94 @@ import StatsGridController from '@/components/admin/StatsGridController'
 import { getJumiaStats as getJumiaRemoteStats } from './jumia-orders/actions'
 import CronLogsPopup from '@/components/admin/CronLogsPopup'
 
-async function getStats() {
+async function getStats(role: string | null, userId: string | null) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
+    const sellerBookWhere = role === 'SELLER' && userId ? { sellerId: userId } : {}
+    const sellerOrderWhere: any = role === 'SELLER' && userId ? { items: { some: { sellerId: userId } } } : {}
+
     const [
-        booksCount, packsCount, ordersCount, totalRevenue, deliveredCount,
+        booksCount, packsCount, ordersCount, deliveredCount,
         pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount,
-        shippedOrders, confirmedOrders, ordersToday, revenueMonth, returnedCount,
-        stockValueRaw, booksNoImage, booksSoldTodayRaw, paidOrdersCount, uniqueCustomersResult
+        shippedOrders, confirmedOrders, ordersToday, returnedCount,
+        stockValueRaw, booksNoImage, paidOrdersCount, uniqueCustomersResult
     ] = await prisma.$transaction([
-        prisma.book.count({ where: { active: true } }),
-        prisma.pack.count({ where: { active: true } }),
-        prisma.order.count({ where: { status: { notIn: ['CANCELLED', 'RETURNED'] } } }),
-        prisma.order.aggregate({ where: { status: 'DELIVERED' }, _sum: { total: true } }),
-        prisma.order.count({ where: { status: 'DELIVERED' } }),
-        prisma.order.count({ where: { status: 'PENDING' } }),
-        prisma.user.count(),
-        prisma.book.count({ where: { active: true, stock: 0 } }),
-        prisma.order.count({ where: { status: { in: ['CANCELLED', 'RETURNED'] } } }),
-        prisma.order.count(),
+        prisma.book.count({ where: { active: true, ...sellerBookWhere } }),
+        prisma.pack.count({ where: { active: true } }), // Packs are complicated, keep as is or filter? We'll ignore seller filter for packs count for now
+        prisma.order.count({ where: { status: { notIn: ['CANCELLED', 'RETURNED'] }, ...sellerOrderWhere } }),
+        prisma.order.count({ where: { status: 'DELIVERED', ...sellerOrderWhere } }),
+        prisma.order.count({ where: { status: 'PENDING', ...sellerOrderWhere } }),
+        role === 'SELLER' ? prisma.user.count({ where: { id: 'impossible' } }) : prisma.user.count(),
+        prisma.book.count({ where: { active: true, stock: 0, ...sellerBookWhere } }),
+        prisma.order.count({ where: { status: { in: ['CANCELLED', 'RETURNED'] }, ...sellerOrderWhere } }),
+        prisma.order.count({ where: { ...sellerOrderWhere } }),
         // Nouveaux KPIs
-        prisma.order.count({ where: { status: 'SHIPPED' } }),
-        prisma.order.count({ where: { status: 'CONFIRMED' } }),
-        prisma.order.count({ where: { createdAt: { gte: today } } }),
-        prisma.order.aggregate({ where: { createdAt: { gte: firstDayOfMonth }, status: 'DELIVERED' }, _sum: { total: true } }),
-        prisma.order.count({ where: { status: 'RETURNED' } }),
-        prisma.book.aggregate({ where: { active: true }, _sum: { stock: true } }),
-        prisma.book.count({ where: { active: true, image: '' } }),
-        prisma.orderItem.aggregate({
-            where: {
-                order: { createdAt: { gte: today }, status: { notIn: ['CANCELLED', 'RETURNED'] } },
-                type: 'BOOK'
-            },
-            _sum: { quantity: true }
-        }),
-        prisma.order.count({ where: { isPaid: true } }),
-        prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' } })
+        prisma.order.count({ where: { status: 'SHIPPED', ...sellerOrderWhere } }),
+        prisma.order.count({ where: { status: 'CONFIRMED', ...sellerOrderWhere } }),
+        prisma.order.count({ where: { createdAt: { gte: today }, ...sellerOrderWhere } }),
+        prisma.order.count({ where: { status: 'RETURNED', ...sellerOrderWhere } }),
+        prisma.book.aggregate({ where: { active: true, ...sellerBookWhere }, _sum: { stock: true } }),
+        prisma.book.count({ where: { active: true, image: '', ...sellerBookWhere } }),
+        prisma.order.count({ where: { isPaid: true, ...sellerOrderWhere } }),
+        role === 'SELLER' 
+            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }) 
+            : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } })
     ])
 
-    const totalRev = totalRevenue._sum.total || 0
+    // For totalRevenue, revenueMonth, booksSoldToday we have to sum the specific items if it's a SELLER
+    let totalRev = 0
+    let revenueMois = 0
+    let booksSoldToday = 0
+
+    if (role === 'SELLER' && userId) {
+        const deliveredItems = await prisma.orderItem.aggregate({
+            where: { order: { status: 'DELIVERED' }, sellerId: userId },
+            _sum: { price: true, quantity: true }
+        })
+        const monthItems = await prisma.orderItem.aggregate({
+            where: { order: { createdAt: { gte: firstDayOfMonth }, status: 'DELIVERED' }, sellerId: userId },
+            _sum: { price: true, quantity: true }
+        })
+        const todayItems = await prisma.orderItem.aggregate({
+            where: { order: { createdAt: { gte: today }, status: { notIn: ['CANCELLED', 'RETURNED'] } }, sellerId: userId, type: 'BOOK' },
+            _sum: { quantity: true }
+        })
+
+        totalRev = deliveredItems._sum.price || 0
+        revenueMois = monthItems._sum.price || 0
+        booksSoldToday = todayItems._sum.quantity || 0
+    } else {
+        const tr = await prisma.order.aggregate({ where: { status: 'DELIVERED' }, _sum: { total: true } })
+        const rm = await prisma.order.aggregate({ where: { createdAt: { gte: firstDayOfMonth }, status: 'DELIVERED' }, _sum: { total: true } })
+        const bst = await prisma.orderItem.aggregate({
+            where: { order: { createdAt: { gte: today }, status: { notIn: ['CANCELLED', 'RETURNED'] } }, type: 'BOOK' },
+            _sum: { quantity: true }
+        })
+        totalRev = tr._sum.total || 0
+        revenueMois = rm._sum.total || 0
+        booksSoldToday = bst._sum.quantity || 0
+    }
+
     const panierMoyen = deliveredCount > 0 ? totalRev / deliveredCount : 0
     const tauxConversion = ordersCount > 0 ? (deliveredCount / ordersCount) * 100 : 0
     const tauxAnnulation = totalOrdersCount > 0 ? (cancelledCount / totalOrdersCount) * 100 : 0
-    const revenueMois = revenueMonth._sum.total || 0
     const stockTotal = stockValueRaw._sum.stock || 0
-    const booksSoldToday = booksSoldTodayRaw._sum.quantity || 0
     const uniqueCustomersCount = uniqueCustomersResult.length || 0
     const ltv = uniqueCustomersCount > 0 ? totalRev / uniqueCustomersCount : 0
+    const netRevenue = role === 'SELLER' ? totalRev * 0.85 : totalRev // 15% commission par défaut
 
     return {
         booksCount,
         packsCount,
         ordersCount,
         totalRevenue: totalRev,
+        netRevenue,
         panierMoyen,
         tauxConversion,
         pendingOrders,
-        totalUsers,
+        totalUsers: role === 'SELLER' ? 0 : totalUsers,
         outOfStockBooks,
         tauxAnnulation,
         shippedOrders,
@@ -83,7 +112,7 @@ async function getStats() {
         booksNoImage,
         booksSoldToday,
         paidOrdersCount,
-        ltv,
+        ltv: role === 'SELLER' ? 0 : ltv,
     }
 }
 
@@ -115,39 +144,41 @@ async function getJumiaStats() {
     }
 }
 
-async function getRecentOrders() {
+async function getRecentOrders(role: string | null, userId: string | null) {
+    const sellerOrderWhere = role === 'SELLER' && userId ? { items: { some: { sellerId: userId } } } : {}
     return prisma.order.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
+        where: sellerOrderWhere,
         include: {
             items: true,
         },
     })
 }
 
-async function getLowStockBooks() {
+async function getLowStockBooks(role: string | null, userId: string | null) {
+    const sellerBookWhere = role === 'SELLER' && userId ? { sellerId: userId } : {}
     return prisma.book.findMany({
         where: {
             stock: { lte: 5 },
-            active: true
+            active: true,
+            ...sellerBookWhere
         },
         orderBy: { stock: 'asc' },
         take: 5
     })
 }
 
-async function getTopPerformers() {
+async function getTopPerformers(role: string | null, userId: string | null) {
+    const sellerOrderWhere: any = role === 'SELLER' && userId ? { order: { status: { notIn: ['CANCELLED', 'RETURNED'] } }, sellerId: userId } : { order: { status: { notIn: ['CANCELLED', 'RETURNED'] } } }
+
     // Récupérer les livres les plus vendus
     const topBooks = await prisma.orderItem.groupBy({
         by: ['bookId'],
         where: {
             type: 'BOOK',
             bookId: { not: null },
-            order: {
-                status: {
-                    notIn: ['CANCELLED', 'RETURNED']
-                }
-            }
+            ...sellerOrderWhere
         },
         _sum: {
             quantity: true,
@@ -173,7 +204,7 @@ async function getTopPerformers() {
             })
             return {
                 ...book,
-                totalOrders: item._count.id,
+                totalOrders: item._count?.id || 0,
                 totalQuantity: item._sum.quantity || 0,
                 totalRevenue: item._sum.price || 0
             }
@@ -186,11 +217,8 @@ async function getTopPerformers() {
         where: {
             type: 'PACK',
             packId: { not: null },
-            order: {
-                status: {
-                    notIn: ['CANCELLED', 'RETURNED']
-                }
-            }
+            // Ignore seller for packs? If sellers don't have packs, this will be empty, which is fine
+            ...sellerOrderWhere
         },
         _sum: {
             quantity: true,
@@ -216,7 +244,7 @@ async function getTopPerformers() {
             })
             return {
                 ...pack,
-                totalOrders: item._count.id,
+                totalOrders: item._count?.id || 0,
                 totalQuantity: item._sum.quantity || 0,
                 totalRevenue: item._sum.price || 0
             }
@@ -226,15 +254,15 @@ async function getTopPerformers() {
     // Meilleurs Revenus (Livres + Packs confondus)
     const topRevenueBooksRaw = await prisma.orderItem.groupBy({
         by: ['bookId'],
-        where: { type: 'BOOK', bookId: { not: null }, order: { status: { notIn: ['CANCELLED', 'RETURNED'] } } },
+        where: { type: 'BOOK', bookId: { not: null }, ...sellerOrderWhere },
         _sum: { quantity: true, price: true },
         orderBy: { _sum: { price: 'desc' } },
         take: 5
     })
-    
+
     const topRevenuePacksRaw = await prisma.orderItem.groupBy({
         by: ['packId'],
-        where: { type: 'PACK', packId: { not: null }, order: { status: { notIn: ['CANCELLED', 'RETURNED'] } } },
+        where: { type: 'PACK', packId: { not: null }, ...sellerOrderWhere },
         _sum: { quantity: true, price: true },
         orderBy: { _sum: { price: 'desc' } },
         take: 5
@@ -277,51 +305,55 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         redirect(`/${locale}/admin/login`)
     }
 
-    const stats = await getStats()
-    const recentOrders = await getRecentOrders()
-    const lowStockBooks = await getLowStockBooks()
-    const badgeStats = await getBadgeStats()
-    const topPerformers = await getTopPerformers()
+    const role = await getAdminRole()
+    const userId = await getAdminUser()
+
+    const stats = await getStats(role, userId)
+    const recentOrders = await getRecentOrders(role, userId)
+    const lowStockBooks = await getLowStockBooks(role, userId)
+    const badgeStats = await getBadgeStats() // Can leave as is
+    const topPerformers = await getTopPerformers(role, userId)
     const jumiaStats = await getJumiaStats()
-    
+
     // Timeout-wrapped remote stats to prevent slow loading
     const jumiaRemoteStats = await Promise.race([
         getJumiaRemoteStats().catch(() => ({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0, recentOrders: [] })),
         new Promise<any>((resolve) => setTimeout(() => resolve({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0, recentOrders: [] }), 3000))
     ])
-    
+
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
 
     const currency = locale === 'ar' ? 'درهم' : 'MAD'
 
     const statCards = [
-        { name: 'Livres Actifs',        value: stats.booksCount,                        iconName: 'BookOpen',    color: 'blue'   },
-        { name: 'Packs Actifs',         value: stats.packsCount,                        iconName: 'Package',     color: 'amber'  },
-        { name: 'Commandes',            value: stats.ordersCount,                       iconName: 'ShoppingCart',color: 'green'  },
-        { name: 'Commandes Payées',     value: stats.paidOrdersCount,                   iconName: 'DollarSign',  color: 'emerald'},
-        { name: 'LTV (Client)',         value: `${stats.ltv.toFixed(0)} ${currency}`,          iconName: 'Users',       color: 'blue'   },
-        { name: 'En Attente',           value: stats.pendingOrders,                     iconName: 'Clock',       color: 'yellow' },
-        { name: "Chiffre d'affaires",   value: `${stats.totalRevenue.toFixed(0)} ${currency}`,  iconName: 'TrendingUp',  color: 'orange' },
-        { name: 'Panier Moyen',         value: `${stats.panierMoyen.toFixed(0)} ${currency}`,   iconName: 'ShoppingBag', color: 'rose'   },
-        { name: 'Utilisateurs',         value: stats.totalUsers,                        iconName: 'Users',       color: 'blue'   },
-        { name: 'Ruptures Stock',       value: stats.outOfStockBooks,                   iconName: 'AlertTriangle',color: 'red'   },
-        { name: 'Taux Conversion',      value: `${stats.tauxConversion.toFixed(1)}%`,   iconName: 'BarChart2',   color: 'teal'   },
-        { name: 'Taux Annulation',      value: `${stats.tauxAnnulation.toFixed(1)}%`,   iconName: 'XOctagon',    color: 'gray'   },
-        { name: "Cmd Aujourd'hui",      value: stats.ordersToday,                       iconName: 'CalendarDays',color: 'teal'   },
-        { name: "Livres Vendus (Auj)",  value: stats.booksSoldToday,                    iconName: 'BookOpen',    color: 'emerald'},
-        { name: 'En Livraison',         value: stats.shippedOrders,                     iconName: 'Truck',       color: 'cyan'   },
-        { name: 'Confirmées',           value: stats.confirmedOrders,                   iconName: 'CheckCircle', color: 'green'  },
-        { name: 'CA du mois',           value: `${stats.revenueMois.toFixed(0)} ${currency}`,   iconName: 'TrendingUp',  color: 'orange' },
-        { name: 'Retours',              value: stats.returnedCount,                     iconName: 'RefreshCw',   color: 'rose'   },
-        { name: 'Stock Total',          value: stats.stockTotal,                        iconName: 'Archive',     color: 'amber'  },
-        { name: 'Sans Image',           value: stats.booksNoImage,                      iconName: 'ImageOff',    color: 'red'    },
-        { name: 'Livres SKU (Jumia)',   value: jumiaStats.booksWithSku,                 iconName: 'Link2',       color: 'orange' },
-        { name: 'Synchro Jumia',        value: jumiaStats.syncedBooks,                  iconName: 'CheckCircle', color: 'green'  },
-        { name: 'Commandes (Jumia)',    value: jumiaRemoteStats?.total || 0,            iconName: 'ShoppingCart',color: 'orange' },
-        { name: 'En Attente (Jumia)',   value: jumiaRemoteStats?.pending || 0,          iconName: 'Clock',       color: 'yellow' },
-        { name: 'Expédiées (Jumia)',    value: jumiaRemoteStats?.shipped || 0,          iconName: 'Truck',       color: 'cyan'   },
-        { name: 'Livrées (Jumia)',      value: jumiaRemoteStats?.delivered || 0,        iconName: 'CheckCircle', color: 'green'  },
-    ]
+        { name: 'Livres Actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
+        { name: 'Commandes', value: stats.ordersCount, iconName: 'ShoppingCart', color: 'green', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Commandes Payées', value: stats.paidOrdersCount, iconName: 'DollarSign', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
+        { name: 'LTV (Client)', value: `${stats.ltv.toFixed(0)} ${currency}`, iconName: 'Users', color: 'blue', roles: ['ADMIN'] },
+        { name: 'En Attente', value: stats.pendingOrders, iconName: 'Clock', color: 'yellow', roles: ['ADMIN', 'SELLER'] },
+        { name: "CA (Brut)", value: `${stats.totalRevenue.toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'orange', roles: ['ADMIN', 'SELLER'] },
+        { name: "CA (Net)", value: `${stats.netRevenue.toFixed(0)} ${currency}`, iconName: 'DollarSign', color: 'emerald', roles: ['SELLER'] },
+        { name: 'Panier Moyen', value: `${stats.panierMoyen.toFixed(0)} ${currency}`, iconName: 'ShoppingBag', color: 'rose', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Utilisateurs', value: stats.totalUsers, iconName: 'Users', color: 'blue', roles: ['ADMIN'] },
+        { name: 'Ruptures Stock', value: stats.outOfStockBooks, iconName: 'AlertTriangle', color: 'red', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Taux Conversion', value: `${stats.tauxConversion.toFixed(1)}%`, iconName: 'BarChart2', color: 'teal', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Taux Annulation', value: `${stats.tauxAnnulation.toFixed(1)}%`, iconName: 'XOctagon', color: 'gray', roles: ['ADMIN', 'SELLER'] },
+        { name: "Cmd Aujourd'hui", value: stats.ordersToday, iconName: 'CalendarDays', color: 'teal', roles: ['ADMIN', 'SELLER'] },
+        { name: "Livres Vendus (Auj)", value: stats.booksSoldToday, iconName: 'BookOpen', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
+        { name: 'En Livraison', value: stats.shippedOrders, iconName: 'Truck', color: 'cyan', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Confirmées', value: stats.confirmedOrders, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN', 'SELLER'] },
+        { name: 'CA du mois', value: `${stats.revenueMois.toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'orange', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Retours', value: stats.returnedCount, iconName: 'RefreshCw', color: 'rose', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Stock Total', value: stats.stockTotal, iconName: 'Archive', color: 'amber', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Sans Image', value: stats.booksNoImage, iconName: 'ImageOff', color: 'red', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Livres SKU (Jumia)', value: jumiaStats.booksWithSku, iconName: 'Link2', color: 'orange', roles: ['ADMIN'] },
+        { name: 'Synchro Jumia', value: jumiaStats.syncedBooks, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN'] },
+        { name: 'Commandes (Jumia)', value: jumiaRemoteStats?.total || 0, iconName: 'ShoppingCart', color: 'orange', roles: ['ADMIN'] },
+        { name: 'En Attente (Jumia)', value: jumiaRemoteStats?.pending || 0, iconName: 'Clock', color: 'yellow', roles: ['ADMIN'] },
+        { name: 'Expédiées (Jumia)', value: jumiaRemoteStats?.shipped || 0, iconName: 'Truck', color: 'cyan', roles: ['ADMIN'] },
+        { name: 'Livrées (Jumia)', value: jumiaRemoteStats?.delivered || 0, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN'] },
+    ].filter(card => card.roles.includes(role || 'ADMIN'))
 
 
     const colorClasses = {
@@ -457,13 +489,11 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Erreurs</span>
                         </div>
                         {/* Taux Succès */}
-                        <div className={`flex flex-col items-center justify-center p-6 rounded-2xl border group hover:shadow-md transition-all ${
-                            jumiaStats.tauxSucces >= 70 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'
-                        }`}>
+                        <div className={`flex flex-col items-center justify-center p-6 rounded-2xl border group hover:shadow-md transition-all ${jumiaStats.tauxSucces >= 70 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'
+                            }`}>
                             <BarChart2 className={`w-6 h-6 mb-2 ${jumiaStats.tauxSucces >= 70 ? 'text-emerald-500' : 'text-red-500'}`} />
-                            <span className={`text-3xl font-black tracking-tighter ${
-                                jumiaStats.tauxSucces >= 70 ? 'text-emerald-600' : 'text-red-600'
-                            }`}>{jumiaStats.tauxSucces}%</span>
+                            <span className={`text-3xl font-black tracking-tighter ${jumiaStats.tauxSucces >= 70 ? 'text-emerald-600' : 'text-red-600'
+                                }`}>{jumiaStats.tauxSucces}%</span>
                             <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Taux Succès</span>
                         </div>
                     </div>
@@ -471,22 +501,20 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                     {/* Dernière action */}
                     {jumiaStats.lastAction && (
                         <div className="mt-6 flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                jumiaStats.lastAction.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-red-500'
-                            }`} />
+                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${jumiaStats.lastAction.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-red-500'
+                                }`} />
                             <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Dernière action :</span>
                             <span className="text-[10px] font-black text-black uppercase">{jumiaStats.lastAction.action}</span>
-                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg ${
-                                jumiaStats.lastAction.status === 'SUCCESS'
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg ${jumiaStats.lastAction.status === 'SUCCESS'
                                     ? 'bg-emerald-100 text-emerald-700'
                                     : 'bg-red-100 text-red-700'
-                            }`}>{jumiaStats.lastAction.status}</span>
+                                }`}>{jumiaStats.lastAction.status}</span>
                             <span className="text-[9px] text-gray-400 ml-auto">
                                 {new Date(jumiaStats.lastAction.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                             </span>
                         </div>
                     )}
-                    
+
                     {/* 3 Dernières commandes Jumia */}
                     {jumiaRemoteStats?.recentOrders && jumiaRemoteStats.recentOrders.length > 0 && (
                         <div className="mt-6 overflow-hidden rounded-2xl border border-orange-100 bg-white">
@@ -511,12 +539,11 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                                     {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} {currency}
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
-                                                    <span className={`inline-flex px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg ${
-                                                        (order.status || order.Statuses?.[0] || '').toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
-                                                        (order.status || order.Statuses?.[0] || '').toLowerCase() === 'canceled' ? 'bg-red-100 text-red-700' :
-                                                        (order.status || order.Statuses?.[0] || '').toLowerCase() === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                                                        'bg-orange-100 text-orange-700'
-                                                    }`}>
+                                                    <span className={`inline-flex px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg ${(order.status || order.Statuses?.[0] || '').toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
+                                                            (order.status || order.Statuses?.[0] || '').toLowerCase() === 'canceled' ? 'bg-red-100 text-red-700' :
+                                                                (order.status || order.Statuses?.[0] || '').toLowerCase() === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                                                    'bg-orange-100 text-orange-700'
+                                                        }`}>
                                                         {order.status || order.Statuses?.[0] || 'PENDING'}
                                                     </span>
                                                 </td>

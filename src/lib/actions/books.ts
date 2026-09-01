@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { verifyAdmin } from '@/lib/actions/auth'
+import { verifyAdmin, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
 
 // Schéma de validation pour un livre
@@ -102,11 +102,23 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             }
         }
 
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+        
+        let additionalData: any = {}
+        if (role === 'SELLER' && userId) {
+            additionalData = {
+                sellerId: userId,
+                status: 'PENDING'
+            }
+        }
+
         const book = await prisma.book.create({
             data: {
                 ...validatedData,
                 active: validatedData.active ?? true,
                 isOriginal: validatedData.isOriginal ?? true,
+                ...additionalData,
             },
         })
 
@@ -198,6 +210,17 @@ export async function updateBook(
         const validatedData = BookSchema.parse(input)
         
         const existingBook = await prisma.book.findUnique({ where: { id } })
+        
+        if (!existingBook) {
+            throw new Error('Livre introuvable')
+        }
+
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+        
+        if (role === 'SELLER' && existingBook.sellerId !== userId) {
+            throw new Error('Non autorisé - Ce livre ne vous appartient pas')
+        }
 
         await prisma.book.update({
             where: { id },
@@ -263,6 +286,16 @@ export async function updateBookQuick(
         await verifyAdmin()
         const existingBook = await prisma.book.findUnique({ where: { id } })
         
+        if (!existingBook) {
+            throw new Error('Livre introuvable')
+        }
+
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+        
+        if (role === 'SELLER' && existingBook.sellerId !== userId) {
+            throw new Error('Non autorisé - Ce livre ne vous appartient pas')
+        }
         const updated = await prisma.book.update({
             where: { id },
             data: {
@@ -312,6 +345,19 @@ export async function updateBookQuick(
 export async function deleteBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
+        
+        const existingBook = await prisma.book.findUnique({ where: { id } })
+        if (!existingBook) {
+            throw new Error('Livre introuvable')
+        }
+
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+        
+        if (role === 'SELLER' && existingBook.sellerId !== userId) {
+            throw new Error('Non autorisé - Ce livre ne vous appartient pas')
+        }
+
         await prisma.book.delete({
             where: { id },
         })
