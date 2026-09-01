@@ -14,6 +14,35 @@ export async function POST(req: Request) {
             const chatId = message?.chat?.id
             const messageId = message?.message_id
 
+            // Handle Ping
+            if (data && data.startsWith('ping:')) {
+                const sessionId = data.split(':')[1]
+                const lastView = await prisma.pageView.findFirst({
+                    where: { sessionId },
+                    orderBy: { createdAt: 'desc' }
+                })
+                
+                const setting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } })
+                const token = setting?.value || process.env.TELEGRAM_BOT_TOKEN || ''
+
+                if (token) {
+                    if (!lastView) {
+                        await answerCallbackQuery(callbackQuery.id, '❌ Session introuvable dans les logs.', token, true)
+                    } else {
+                        const diffMs = new Date().getTime() - lastView.createdAt.getTime()
+                        const diffMins = Math.floor(diffMs / 60000)
+                        
+                        if (diffMins < 5) {
+                            await answerCallbackQuery(callbackQuery.id, `✅ En ligne ! (Dernière action il y a ${diffMins} min)`, token, true)
+                        } else {
+                            await answerCallbackQuery(callbackQuery.id, `⚠️ Inactif depuis ${diffMins} min`, token, true)
+                        }
+                    }
+                }
+                
+                return NextResponse.json({ success: true })
+            }
+
             // Handle offer buttons
             if (data && data.startsWith('offer_')) {
                 // e.g. offer_10:session123

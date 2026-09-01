@@ -24,6 +24,9 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
                             { text: '🎁 -10 Dhs', callback_data: `offer_10:${sessionId}` },
                             { text: '🎁 -20 Dhs', callback_data: `offer_20:${sessionId}` },
                             { text: '🎁 -30 Dhs', callback_data: `offer_30:${sessionId}` }
+                        ],
+                        [
+                            { text: '🟢 Ping (Session)', callback_data: `ping:${sessionId}` }
                         ]
                     ]
                 }

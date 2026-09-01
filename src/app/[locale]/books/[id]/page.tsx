@@ -169,8 +169,9 @@ export default async function BookDetailPage({
         notFound()
     }
 
-    // Incrémentation asynchrone des vues
-    incrementBookViews(book.id).catch(console.error)
+    // Incrémentation asynchrone des vues et notification
+    const userSession = user ? (user.name || user.email || 'Utilisateur connecté') : 'Visiteur Anonyme'
+    incrementBookViews(book.id, userSession).catch(console.error)
 
     // Extraction des titres et descriptions dynamiques selon la langue
     const displayTitle = getLocalizedTitle(book, locale);
@@ -233,8 +234,8 @@ export default async function BookDetailPage({
             '@context': 'https://schema.org',
             '@type': 'Review',
             itemReviewed: {
-                '@type': 'Thing',
-                name: displayTitle,
+                '@type': 'Product',
+                name: displayTitle || book.title || "Livre",
                 url: `${baseUrl}/${locale}/books/${book.id}`
             },
             reviewRating: {
@@ -271,7 +272,7 @@ export default async function BookDetailPage({
                 {
                     '@type': 'ListItem',
                     position: 3,
-                    name: displayTitle,
+                    name: displayTitle || book.title || "Livre",
                     item: `${baseUrl}/${locale}/books/${book.id}`
                 }
             ]

@@ -9,7 +9,7 @@ import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia } from '@/lib/actions/jumia'
 import ImageInput from '@/components/admin/ImageInput'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
-import { ImageIcon, Link2 } from 'lucide-react'
+import { ImageIcon, Link2, ExternalLink } from 'lucide-react'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import type { CategoryTree } from '@/lib/constants/categories'
 
@@ -226,6 +226,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             jumiaProductSid: formData.get('jumiaProductSid') as string || undefined,
             isAffiliate: formData.get('isAffiliate') === 'true',
             affiliateLink: formData.get('affiliateLink') as string || undefined,
+            seoKeywords: formData.get('seoKeywords') as string || undefined,
         }
 
         const result = await updateBook(id, input)
@@ -459,24 +460,37 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Retour à la liste
                 </Link>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold text-gray-900">Modifier le livre</h1>
-                    {isLinked !== null && (
-                        isLinked ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">
-                                <Link2 className="w-3 h-3 mr-1" />
-                                Linké
-                            </span>
-                        ) : (
-                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">
-                                Non Linké
-                            </span>
-                        )
-                    )}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-gray-900">Modifier le livre</h1>
+                            {isLinked !== null && (
+                                isLinked ? (
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">
+                                        <Link2 className="w-3 h-3 mr-1" />
+                                        Linké
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">
+                                        Non Linké
+                                    </span>
+                                )
+                            )}
+                        </div>
+                        <p className="mt-2 text-sm text-gray-600">
+                            Modifiez les informations du livre "{book.title}"
+                        </p>
+                    </div>
+                    <a
+                        href={`/${resolvedParams.locale}/books/${bookId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Voir sur le site
+                    </a>
                 </div>
-                <p className="mt-2 text-sm text-gray-600">
-                    Modifiez les informations du livre "{book.title}"
-                </p>
             </div>
 
             {/* Error Message */}
@@ -1110,6 +1124,21 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             placeholder="Ex: https://lien-vers-mon-pdf.com"
                         />
                     </div>
+                </div>
+
+                {/* SEO Keywords */}
+                <div className="mt-6">
+                    <label htmlFor="seoKeywords" className="block text-sm font-medium text-gray-700 mb-2">
+                        Mots-clés SEO (Séparés par des virgules)
+                    </label>
+                    <textarea
+                        id="seoKeywords"
+                        name="seoKeywords"
+                        rows={3}
+                        defaultValue={book.seoKeywords || ''}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ex: roman policier, agatha christie, meurtre mystère..."
+                    />
                 </div>
 
                 {/* SID JUMIA */}

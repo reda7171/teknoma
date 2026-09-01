@@ -41,6 +41,7 @@ const BookSchemaBase = z.object({
     jumiaHighlights: z.string().optional(),
     isAffiliate: z.boolean().optional(),
     affiliateLink: z.string().nullable().optional(),
+    seoKeywords: z.string().nullable().optional(),
 })
 
 const BookSchema = BookSchemaBase.superRefine((data, ctx) => {
@@ -580,14 +581,27 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
 }
 
 
-export async function incrementBookViews(id: string) {
+export async function incrementBookViews(id: string, userSession: string = 'Visiteur Anonyme') {
     try {
         // @ts-ignore - views column is recently added
-        await prisma.book.update({
+        const book = await prisma.book.update({
             where: { id },
             data: { views: { increment: 1 } },
-            select: { id: true }
+            select: { id: true, views: true, title: true }
         })
+        
+        try {
+            const { sendTelegramMessage } = await import('@/lib/telegram')
+            const message = `👀 Nouvelle visite sur un livre !
+            
+📖 Titre: ${book.title}
+👤 Visiteur: ${userSession}
+📈 Vues totales: ${book.views}`
+            await sendTelegramMessage(message)
+        } catch (e) {
+            console.error('Erreur Telegram notification visite:', e)
+        }
+
         return { success: true }
     } catch (error) {
         console.error('Erreur lors de l\'incrémentation des vues du livre:', error)

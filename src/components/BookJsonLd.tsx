@@ -35,7 +35,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": ["Book", "Product"],
+        "@type": "Product",
         "@id": bookUrl,
         "name": displayTitle || book.title || "Livre",
         "author": {

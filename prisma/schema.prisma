@@ -171,6 +171,7 @@ model Book {
   longDescriptionFr   String?           @db.LongText
   isPromoted          Boolean           @default(false)
   imageKeywords       String?           @db.Text
+  seoKeywords         String?           @db.Text
   jumiaHighlights     String?           @db.Text
   jumiaPackageContent String?           @db.VarChar(500)
   jumiaProductSid     String?           @db.VarChar(100)
