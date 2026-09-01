@@ -595,6 +595,7 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
             const message = `👀 Nouvelle visite sur un livre !
             
 📖 Titre: ${book.title}
+📦 Quantité en stock: ${book.stock}
 👤 Session: ${userSession}
 📈 Vues totales: ${book.views}`
             
