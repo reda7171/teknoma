@@ -20,7 +20,7 @@ const OrderSchema = z.object({
         quantity: z.number().int().positive('La quantité doit être supérieure à 0').max(100),
         type: z.enum(['BOOK', 'PACK', 'GIFT', 'DIGITAL', 'ACCESSORY']),
         price: z.number().min(0, 'Le prix doit être positif ou nul').max(100000),
-        replacedBooks: z.record(z.object({ id: z.string(), title: z.string() })).optional()
+        replacedBooks: z.record(z.string(), z.object({ id: z.string(), title: z.string() })).optional()
     })).min(1, 'Panier vide').max(50),
     couponCode: z.string().max(50).optional(),
     discount: z.number().optional(),
@@ -103,7 +103,8 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
         let appendedComment = data.comment ? sanitizeInput(data.comment) : ''
         data.items.forEach(item => {
             if (item.type === 'PACK' && item.replacedBooks && Object.keys(item.replacedBooks).length > 0) {
-                const replacedText = Object.entries(item.replacedBooks)
+                const replacedBooks = item.replacedBooks as Record<string, { id: string, title: string }>
+                const replacedText = Object.entries(replacedBooks)
                     .map(([oldId, newBook]) => `Livre remplacé par: ${newBook.title}`)
                     .join(', ')
                 appendedComment += `\n[Pack personnalisé]: ${replacedText}`
@@ -132,15 +133,18 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
         const order = await prisma.$transaction(async (tx) => {
             let hasFreeShippingItem = false
 
-            // Récupérer les prix de revient (costPrice) pour chaque article
+            // Récupérer les prix de revient (costPrice) et sellerId pour chaque article
             const itemsWithCost = await Promise.all(data.items.map(async (item) => {
                 let costPrice = 0
+                let sellerId: string | null = null
+                
                 if (item.type === 'BOOK') {
                     const book = await tx.book.findUnique({
                         where: { id: item.productId },
-                        select: { costPrice: true }
+                        select: { costPrice: true, sellerId: true }
                     })
                     costPrice = book?.costPrice || 0
+                    sellerId = book?.sellerId || null
                 } else if (item.type === 'PACK') {
                     const pack = await tx.pack.findUnique({
                         where: { id: item.productId },
@@ -157,7 +161,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                     })
                     costPrice = ext?.costPrice || 0
                 }
-                return { ...item, costPrice }
+                return { ...item, costPrice, sellerId }
             }))
 
             // Logique de livraison synchronisée avec le client
@@ -204,6 +208,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                             giftId: item.type === 'GIFT' ? item.productId : null,
                             digitalProductId: item.type === 'DIGITAL' ? item.productId : null,
                             extraProductId: item.type === 'ACCESSORY' ? item.productId : null,
+                            sellerId: item.sellerId,
                             quantity: item.quantity,
                             price: item.price,
                             costPrice: item.costPrice
@@ -245,8 +250,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                         for (const packBook of pack.books) {
                             // If this book was replaced, decrement the replacement book instead
                             let bookIdToDecrement = packBook.bookId
-                            if (item.replacedBooks && item.replacedBooks[packBook.bookId]) {
-                                bookIdToDecrement = item.replacedBooks[packBook.bookId].id
+                            const replacedBooks = item.replacedBooks as Record<string, { id: string, title: string }> | undefined
+                            if (replacedBooks && replacedBooks[packBook.bookId]) {
+                                bookIdToDecrement = replacedBooks[packBook.bookId].id
                             }
                             impactedBookIds.push(bookIdToDecrement)
                             await tx.book.update({

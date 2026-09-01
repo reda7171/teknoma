@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client'
 
 import BookFilters from './BookFilters'
 import { getCategoryTree } from '@/lib/actions/category-tree'
+import { getAdminRole, getAdminUser } from '@/lib/actions/auth'
 
 export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, category?: string, subCategory?: string }> }) {
     const params = await searchParams
@@ -26,7 +27,11 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const categoryParam = params.category || ''
     const subCategoryParam = params.subCategory || ''
 
+    const role = await getAdminRole()
+    const userId = await getAdminUser()
+
     const where: Prisma.BookWhereInput = {
+        ...(role === 'SELLER' && userId ? { sellerId: userId } : {}),
         ...(searchQuery && {
             OR: [
                 { title: { contains: searchQuery } },
