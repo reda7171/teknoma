@@ -11,7 +11,6 @@ import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
 import ReviewList from '@/components/ReviewList'
 import { getBookReviews, getBookAverageRating } from '@/lib/actions/reviews'
-import { incrementBookViews } from '@/lib/actions/books'
 import { getCategoryConfigByName } from '@/lib/actions/categories'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
@@ -168,10 +167,6 @@ export default async function BookDetailPage({
     if (!book) {
         notFound()
     }
-
-    // Incrémentation asynchrone des vues et notification
-    const userSession = user ? (user.name || user.email || 'Utilisateur connecté') : 'Visiteur Anonyme'
-    incrementBookViews(book.id, userSession).catch(console.error)
 
     // Extraction des titres et descriptions dynamiques selon la langue
     const displayTitle = getLocalizedTitle(book, locale);
