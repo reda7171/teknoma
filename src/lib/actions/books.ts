@@ -587,7 +587,7 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
         const book = await prisma.book.update({
             where: { id },
             data: { views: { increment: 1 } },
-            select: { id: true, views: true, title: true }
+            select: { id: true, views: true, title: true, stock: true }
         })
         
         try {
