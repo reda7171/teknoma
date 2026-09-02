@@ -42,6 +42,7 @@ const BookSchemaBase = z.object({
     isAffiliate: z.boolean().optional(),
     affiliateLink: z.string().nullable().optional(),
     seoKeywords: z.string().nullable().optional(),
+    condition: z.enum(['NEW', 'GOOD', 'USED']).optional().default('NEW'),
 })
 
 const BookSchema = BookSchemaBase.superRefine((data, ctx) => {
@@ -160,6 +161,7 @@ export async function getBookById(id: string) {
     try {
         const book = await prisma.book.findUnique({
             where: { id },
+            include: { customerSeller: true }
         })
 
         if (!book) {
@@ -427,10 +429,16 @@ export async function toggleBookStatus(
 export async function approveBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
-        await prisma.book.update({
+        const book = await prisma.book.update({
             where: { id },
-            data: { status: 'APPROVED', active: true },
+            data: { active: true, status: 'APPROVED' },
+            include: { customerSeller: true }
         })
+
+        if (book.customerSeller) {
+            const { sendSellerBookApproved } = await import('@/lib/email')
+            sendSellerBookApproved(book).catch(console.error)
+        }
 
         revalidatePath('/admin/books/pending')
         revalidatePath('/admin/books')
@@ -448,10 +456,22 @@ export async function approveBook(id: string): Promise<BookResult> {
 export async function rejectBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
-        await prisma.book.update({
+        
+        const book = await prisma.book.findUnique({
             where: { id },
-            data: { status: 'REJECTED', active: false },
+            include: { customerSeller: true }
         })
+
+        if (!book) return { success: false, error: 'Livre introuvable' }
+
+        await prisma.book.delete({
+            where: { id },
+        })
+
+        if (book.customerSeller) {
+            const { sendSellerBookRejected } = await import('@/lib/email')
+            sendSellerBookRejected(book, 'Non respect de nos critères de sélection').catch(console.error)
+        }
 
         revalidatePath('/admin/books/pending')
         revalidatePath('/admin/books')
@@ -637,8 +657,12 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
         })
         
         try {
-            const { sendTelegramMessage } = await import('@/lib/telegram')
-            const message = `👀 Nouvelle visite sur un livre !
+            const { getSetting } = await import('@/lib/actions/site-settings')
+            const notifyVisits = await getSetting('telegram_notify_book_visits')
+            
+            if (notifyVisits === 'true') {
+                const { sendTelegramMessage } = await import('@/lib/telegram')
+                const message = `👀 Nouvelle visite sur un livre !
             
 📖 Titre: ${book.title}
 📦 Quantité en stock: ${book.stock}
@@ -659,6 +683,7 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
             }
 
             await sendTelegramMessage(message, undefined, undefined, replyMarkup)
+            }
         } catch (error) {
             console.error('Erreur Telegram notification visite:', error)
         }

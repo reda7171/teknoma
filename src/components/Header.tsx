@@ -177,6 +177,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         ...(features.kids === true ? [{ href: '/mon-enfant', label: t('Kids') }] : []),
         ...(features.usb === true ? [{ href: '/cle-usb', label: t('UsbKey') }] : []),
         ...(features.exchange === true ? [{ href: '/community/market', label: t('Community') }] : []),
+        { href: '/sell-book', label: locale === 'ar' ? 'بيع كتاب' : locale === 'en' ? 'Sell' : 'Vendre' },
     ]
 
     const navItems = navigation && navigation.length > 0

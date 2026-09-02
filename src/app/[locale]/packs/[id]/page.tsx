@@ -131,11 +131,9 @@ export default async function PackDetailPage({
                 name: 'Riwaya',
             },
             offers: {
-                '@type': 'AggregateOffer',
+                '@type': 'Offer',
                 priceCurrency: 'MAD',
-                lowPrice: displayPrice,
-                highPrice: totalOriginalPrice,
-                offerCount: 1,
+                price: displayPrice,
                 availability: 'https://schema.org/InStock',
                 url: `${baseUrl}/packs/${pack.id}`,
                 hasMerchantReturnPolicy: {

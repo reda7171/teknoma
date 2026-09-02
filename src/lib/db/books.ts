@@ -15,6 +15,7 @@ export interface BookFilters {
     language?: string
     author?: string
     inStock?: boolean
+    usedOnly?: boolean
     page?: number
     limit?: number
 }
@@ -70,6 +71,12 @@ export async function getBooks(filters?: BookFilters) {
         // Filtre en stock
         if (filters?.inStock) {
             where.stock = { gt: 0 }
+        }
+
+        // Filtre livres d'occasion
+        if (filters?.usedOnly) {
+            // "USED" ou "GOOD" représentent les livres d'occasion
+            where.condition = { in: ['USED', 'GOOD'] } as any
         }
 
         // Si recherche fuzzy, on doit tout récupérer pour trier
@@ -214,6 +221,10 @@ export async function getBooksCount(filters?: BookFilters) {
             where.stock = { gt: 0 }
         }
 
+        if (filters?.usedOnly) {
+            where.condition = { in: ['USED', 'GOOD'] } as any
+        }
+
         if (filters?.search) {
             // Pour Fuse.js, on doit appliquer le filtre puis filtrer manuellement
             const books = await prisma.book.findMany({
@@ -242,6 +253,7 @@ export async function getBooksCount(filters?: BookFilters) {
 export async function getBookById(id: string) {
     return prisma.book.findUnique({
         where: { id },
+        include: { customerSeller: true },
     })
 }
 
@@ -303,6 +315,23 @@ export async function getPopularBooks(limit = 6) {
             return prisma.book.findMany({
                 where: { active: true },
                 orderBy: { stock: 'desc' },
+                take: limit,
+            })
+        },
+        300 // Cache 5 minutes
+    )
+}
+
+/**
+ * Récupère les livres d'occasion (déjà utilisés)
+ */
+export async function getUsedBooks(limit = 6) {
+    return getCached(
+        `book:used:${limit}`,
+        async () => {
+            return prisma.book.findMany({
+                where: { active: true, condition: { in: ['USED', 'GOOD'] } } as any,
+                orderBy: { createdAt: 'desc' },
                 take: limit,
             })
         },

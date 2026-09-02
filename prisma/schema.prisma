@@ -138,6 +138,7 @@ model Book {
   category            String?           @db.VarChar(100)
   subCategory         String?           @db.VarChar(100)
   language            String            @default("fr") @db.VarChar(10)
+  condition           BookCondition     @default(NEW)
   active              Boolean           @default(true)
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
@@ -181,6 +182,8 @@ model Book {
   affiliateLink       String?           @db.VarChar(1000)
   reservations        BookReservation[]
   seller              User?             @relation("SellerBooks", fields: [sellerId], references: [id])
+  customerSellerId    String?
+  customerSeller      Customer?         @relation("CustomerSellerBooks", fields: [customerSellerId], references: [id])
   orderItems          OrderItem[]
   packBooks           PackBook[]
   readingLists        ReadingList[]
@@ -198,6 +201,7 @@ model Book {
   @@index([createdAt])
   @@index([language])
   @@index([sellerId], map: "books_sellerId_fkey")
+  @@index([customerSellerId])
   @@map("books")
 }
 
@@ -335,6 +339,7 @@ model Customer {
   expoPushToken     String?        @db.VarChar(255)
   aiRecommendations String?        @db.LongText
   ownedBooks        ExchangeBook[] @relation("OwnedBooks")
+  sellerBooks       Book[]         @relation("CustomerSellerBooks")
   sentExchanges     Exchange[]     @relation("SentExchanges")
   receivedExchanges Exchange[]     @relation("ReceivedExchanges")
   messages          Message[]

@@ -7,7 +7,9 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'GOOGLE_CLIENT_ID is not configured' }, { status: 500 })
     }
 
-    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
+    const proto = request.headers.get('x-forwarded-proto') || 'https'
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
+    const origin = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
     const redirectUri = `${origin}/api/auth/google/callback`
 
     const params = new URLSearchParams({

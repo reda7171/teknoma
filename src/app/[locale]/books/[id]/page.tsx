@@ -224,30 +224,7 @@ export default async function BookDetailPage({
 
     const jsonLd: any[] = [];
 
-    if (reviewCount > 0) {
-        const reviewSchema = reviews.map(r => ({
-            '@context': 'https://schema.org',
-            '@type': 'Review',
-            itemReviewed: {
-                '@type': 'Product',
-                name: displayTitle || book.title || "Livre",
-                url: `${baseUrl}/${locale}/books/${book.id}`
-            },
-            reviewRating: {
-                '@type': 'Rating',
-                ratingValue: r.rating,
-                bestRating: '5'
-            },
-            author: {
-                '@type': 'Person',
-                name: r.userName || 'Anonyme'
-            },
-            reviewBody: r.comment || '',
-            datePublished: new Date(r.createdAt).toISOString().split('T')[0]
-        }));
-        jsonLd.push(...reviewSchema);
-    }
-
+    // Reviews will be passed directly to BookJsonLd instead of creating standalone schemas
     jsonLd.push({
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
@@ -316,6 +293,7 @@ export default async function BookDetailPage({
                 imageUrl={imageUrl}
                 averageRating={averageRating}
                 reviewCount={reviewCount}
+                reviews={reviews}
             />
             {jsonLd.length > 0 && (
                 <script
@@ -486,6 +464,14 @@ export default async function BookDetailPage({
                         <div className="flex flex-col gap-8 md:gap-12">
                             <div className="space-y-4 md:space-y-6">
                                 <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-2 md:mb-4">
+                                    {/* Badge Vendeur (Livre d'occasion) */}
+                                    {book.customerSeller && (book.condition === 'USED' || book.condition === 'GOOD') && (
+                                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] md:text-xs font-black rounded-full uppercase tracking-widest shadow-sm">
+                                            <Shield className="w-3.5 h-3.5 text-amber-600" />
+                                            {locale === 'ar' ? 'كتاب مستعمل - بائع:' : locale === 'en' ? 'Used Book - Seller:' : 'Livre d\'occasion - Vendu par'} {book.customerSeller.fullName || 'Vendeur'}
+                                        </div>
+                                    )}
+
                                     {book.category && (
                                         <Link
                                             href={`/books?category=${encodeURIComponent(book.category)}`}

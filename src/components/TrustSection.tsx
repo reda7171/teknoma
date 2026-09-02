@@ -149,7 +149,7 @@ export default function TrustSection({ stats, className, style }: { stats?: { bo
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header with High-End Typography */}
-                <div className="flex flex-col items-start text-left rtl:text-right rtl:items-end max-w-4xl mb-12 space-y-8">
+                <div className="flex flex-col items-start text-start max-w-4xl mb-12 space-y-8">
                     <div className="inline-flex items-center gap-3 px-8 py-3 bg-black text-white rounded-full hover:scale-105 transition-transform cursor-default">
                         <div className={`w-2 h-2 bg-pixio-yellow rounded-full ${pingClass}`}></div>
                         <span className="text-xs md:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal">

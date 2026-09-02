@@ -3,7 +3,9 @@ import { oauthLoginOrRegister } from '@/lib/actions/community-auth'
 
 export async function GET(request: Request) {
     const searchParams = new URL(request.url).searchParams
-    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
+    const proto = request.headers.get('x-forwarded-proto') || 'https'
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
+    const origin = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
     const code = searchParams.get('code')
     const error = searchParams.get('error')
 

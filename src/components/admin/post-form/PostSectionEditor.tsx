@@ -410,6 +410,16 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
         if (sections.length === 0) return
         setIsGeneratingPrompts(true)
         setGeneratedImagePrompts([])
+        
+        const imageStyles = [
+            "flat design, modern, warm tones, bookstore atmosphere, Moroccan aesthetic",
+            "3D render, highly detailed, cinematic lighting, cozy atmosphere, vibrant colors",
+            "watercolor illustration, artistic, soft lighting, cultural Moroccan touch, dreamy",
+            "minimalist line art, elegant, sophisticated, warm beige and terracotta tones",
+            "oil painting style, rich textures, classic, dramatic lighting, storytelling",
+            "digital concept art, vibrant and dynamic, highly polished, inspiring"
+        ]
+
         // Prendre les sections les plus longues/pertinentes
         const sortedSections = [...sections]
             .filter(s => s.title || s.content)
@@ -419,7 +429,8 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
             const title = s.title || `Section ${i + 1}`
             // Nettoyer le contenu HTML pour extraire le texte brut
             const rawContent = s.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
-            return `Image ${i + 1} — Section : "${title}"\nPrompt : A high-quality editorial illustration for an article section titled "${title}". Context: ${rawContent || postTitle}. Style: flat design, modern, warm tones, bookstore atmosphere, Moroccan aesthetic. No text in image.`
+            const style = imageStyles[i % imageStyles.length]
+            return `Image ${i + 1} — Section : "${title}"\nPrompt : A high-quality editorial illustration for an article section titled "${title}". Context: ${rawContent || postTitle}. Style: ${style}. No text in image.`
         })
         setGeneratedImagePrompts(prompts)
         setIsGeneratingPrompts(false)

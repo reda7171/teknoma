@@ -6,11 +6,14 @@ import PendingBooksTable from './PendingBooksTable'
 
 export default async function PendingBooksPage() {
     const books = await prisma.book.findMany({
-        where: { status: 'PENDING' },
+        where: { 
+            active: false,
+            customerSellerId: { not: null }
+        },
         orderBy: { createdAt: 'desc' },
         include: {
-            seller: {
-                select: { fullName: true, email: true }
+            customerSeller: {
+                select: { fullName: true, phone: true }
             }
         }
     })
