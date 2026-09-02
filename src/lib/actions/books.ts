@@ -429,10 +429,16 @@ export async function toggleBookStatus(
 export async function approveBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
-        await prisma.book.update({
+        const book = await prisma.book.update({
             where: { id },
-            data: { active: true },
+            data: { active: true, status: 'APPROVED' },
+            include: { customerSeller: true }
         })
+
+        if (book.customerSeller) {
+            const { sendSellerBookApproved } = await import('@/lib/email')
+            sendSellerBookApproved(book).catch(console.error)
+        }
 
         revalidatePath('/admin/books/pending')
         revalidatePath('/admin/books')
@@ -450,9 +456,22 @@ export async function approveBook(id: string): Promise<BookResult> {
 export async function rejectBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
+        
+        const book = await prisma.book.findUnique({
+            where: { id },
+            include: { customerSeller: true }
+        })
+
+        if (!book) return { success: false, error: 'Livre introuvable' }
+
         await prisma.book.delete({
             where: { id },
         })
+
+        if (book.customerSeller) {
+            const { sendSellerBookRejected } = await import('@/lib/email')
+            sendSellerBookRejected(book, 'Non respect de nos critères de sélection').catch(console.error)
+        }
 
         revalidatePath('/admin/books/pending')
         revalidatePath('/admin/books')
