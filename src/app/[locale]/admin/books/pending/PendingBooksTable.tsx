@@ -14,9 +14,9 @@ type PendingBook = {
     image: string
     price: number
     createdAt: Date
-    seller?: {
+    customerSeller?: {
         fullName: string | null
-        email: string
+        phone: string
     } | null
 }
 
@@ -29,7 +29,7 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
     const filteredBooks = books.filter(b => 
         b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (b.seller?.fullName && b.seller.fullName.toLowerCase().includes(searchTerm.toLowerCase()))
+        (b.customerSeller?.fullName && b.customerSeller.fullName.toLowerCase().includes(searchTerm.toLowerCase()))
     )
 
     const handleApprove = async (id: string, title: string) => {
@@ -129,10 +129,10 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    {book.seller ? (
+                                    {book.customerSeller ? (
                                         <div>
-                                            <div className="font-medium text-gray-900">{book.seller.fullName || 'Vendeur Anonyme'}</div>
-                                            <div className="text-xs text-gray-500">{book.seller.email}</div>
+                                            <div className="font-medium text-gray-900">{book.customerSeller.fullName || 'Vendeur Anonyme'}</div>
+                                            <div className="text-xs text-gray-500">{book.customerSeller.phone}</div>
                                         </div>
                                     ) : (
                                         <span className="text-gray-400 italic">Inconnu</span>

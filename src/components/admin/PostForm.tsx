@@ -7,7 +7,7 @@ import { uploadPostImage } from '@/lib/actions/upload'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
-import { Book as BookIcon, Search, X, Wand2 } from 'lucide-react'
+import { Book as BookIcon, Search, X, Wand2, Copy, Check } from 'lucide-react'
 import { fetchBooks } from '@/lib/actions/books'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { getUsers } from '@/lib/actions/users'
@@ -30,6 +30,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [isRephrasingExcerpt, setIsRephrasingExcerpt] = useState(false)
     const [isRephrasingTitle, setIsRephrasingTitle] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [copiedPrompt, setCopiedPrompt] = useState(false)
 
     // Form state
     const [title, setTitle] = useState(post?.title || '')
@@ -130,6 +131,17 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
         } finally {
             setIsRephrasingTitle(false)
         }
+    }
+
+    const handleCopyChatgptPrompt = () => {
+        const promptText = `Agis comme un expert SEO et rédacteur web. Rédige un bref résumé accrocheur (extrait) d'environ 30 à 50 mots pour l'article suivant, de manière à donner envie au lecteur de cliquer et de lire la suite.\n\nTitre de l'article : "${title}"\n\nContenu :\n${content}`
+        
+        navigator.clipboard.writeText(promptText).then(() => {
+            setCopiedPrompt(true)
+            setTimeout(() => setCopiedPrompt(false), 2000)
+        }).catch(() => {
+            alert('Impossible de copier dans le presse-papier')
+        })
     }
 
     const handleRephraseExcerpt = async () => {
@@ -434,6 +446,15 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                             <div className="flex items-center justify-between mb-2">
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">Extrait / Résumé court</label>
                                 <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleCopyChatgptPrompt}
+                                        className="px-2 py-0.5 bg-[#10a37f]/10 text-[#10a37f] rounded text-[10px] font-black uppercase hover:bg-[#10a37f]/20 border border-[#10a37f]/20 flex items-center gap-1 transition-all"
+                                        title="Copier un prompt pour ChatGPT"
+                                    >
+                                        {copiedPrompt ? <Check className="w-2.5 h-2.5" /> : <Copy className="w-2.5 h-2.5" />}
+                                        Prompt ChatGPT
+                                    </button>
                                     <button
                                         type="button"
                                         onClick={() => handleFieldGenerate('ar', 'EXCERPT')}

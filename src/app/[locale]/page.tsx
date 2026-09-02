@@ -1,4 +1,4 @@
-import { getPopularBooks, getBestSellerBooks, getBestAuthors } from '@/lib/db/books'
+import { getPopularBooks, getBestSellerBooks, getBestAuthors, getUsedBooks } from '@/lib/db/books'
 import { getPopularPacks } from '@/lib/db/packs'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getAllCategoryQuotes } from '@/lib/actions/categories'
@@ -106,7 +106,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     homeSettings,
     homepageContent,
     audioTestimonialsResult,
-    imageTestimonialsResult
+    imageTestimonialsResult,
+    usedBooks
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -121,12 +122,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
     getApprovedAudioTestimonials(),
-    getApprovedImageTestimonials()
+    getApprovedImageTestimonials(),
+    getUsedBooks(8)
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
-  const audioTestimonials = audioTestimonialsResult?.success ? audioTestimonialsResult.testimonials : []
-  const imageTestimonials = imageTestimonialsResult?.success ? imageTestimonialsResult.testimonials : []
+  const audioTestimonials = audioTestimonialsResult?.testimonials || []
+  const imageTestimonials = imageTestimonialsResult?.testimonials || []
   const newBooks = popularBooks.slice(0, 8)
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
@@ -449,6 +451,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     'home_section_authors',
     'home_section_trust',
     'home_section_new_arrivals',
+    'home_section_used_books',
     'home_section_audio_testimonials',
     'home_section_instagram',
     'home_section_exchange',
@@ -669,7 +672,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         return (
           <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-start text-left rtl:items-end rtl:text-right mb-16 space-y-4">
+              <ScrollReveal delay={100} className="flex flex-col items-start text-start mb-16 space-y-4">
                 <span className="text-xs md:text-sm font-black uppercase text-gray-400 tracking-[0.3em] rtl:tracking-normal">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
                 <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight rtl:tracking-normal">
                   {c('collections_title', t('Collections.Title'))}<span className="text-pixio-pink">.</span>
@@ -767,6 +770,40 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_instagram':
         return <InstagramFeed key={key} />
 
+      case 'home_section_used_books':
+        if (!usedBooks || usedBooks.length === 0) return null
+        return (
+          <section key={key} {...getSectionProps('home_section_used_books', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_used_books', 'bg-pixio-cream').className || ''}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
+                <div className="space-y-4">
+                  <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-400 tracking-[0.3em]">
+                    {locale === 'ar' ? 'اكتشف' : locale === 'en' ? 'Discover' : 'Découvrez'}
+                  </span>
+                  <h2 className="text-4xl md:text-6xl rtl:tracking-normal font-black text-black tracking-tight">
+                    {locale === 'ar' ? 'كتب مستعملة' : locale === 'en' ? 'Used Books' : 'Livres d\'occasion'}
+                  </h2>
+                </div>
+                <Link href="/books?condition=USED,GOOD" className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                  <span className="text-xs font-black uppercase tracking-widest text-black">
+                    {locale === 'ar' ? 'عرض الكل' : locale === 'en' ? 'View all' : 'Voir tout'}
+                  </span>
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </Link>
+              </ScrollReveal>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+                {usedBooks.map((book: any, idx: number) => (
+                  <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
+                    <BookCard {...book} variant="default" priority={false} />
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+
       case 'home_section_exchange':
         if (!featureExchange) return null
         return (
@@ -842,7 +879,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         )
 
             case 'home_section_audio_testimonials':
-        if (audioTestimonials.length === 0 && imageTestimonials.length === 0) return null
+        if (!audioTestimonials?.length && !imageTestimonials?.length) return null
         return (
           <section key={key} {...getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream')} className={`py-16 overflow-hidden ${getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1181,9 +1218,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </Link>
             </div>
             {aeoSnippetQ && aeoSnippetA && (
-              <div className="border-t border-white/10 pt-8 max-w-2xl">
-                <p className="text-white/50 text-sm font-bold mb-2">{aeoSnippetQ}</p>
-                <p className="text-white/30 text-sm leading-relaxed">{aeoSnippetA}</p>
+              <div className="border-t border-white/20 pt-8 mt-8 w-full max-w-2xl text-center">
+                <p className="text-white text-lg md:text-xl font-bold mb-3">{aeoSnippetQ}</p>
+                <p className="text-white/90 text-sm md:text-base leading-relaxed">{aeoSnippetA}</p>
               </div>
             )}
           </ScrollReveal>

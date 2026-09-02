@@ -19,9 +19,10 @@ interface BookJsonLdProps {
   imageUrl: string;
   averageRating: number;
   reviewCount: number;
+  reviews?: any[];
 }
 
-export function BookJsonLd({ book, locale, displayTitle, displayDescription, imageUrl, averageRating, reviewCount }: BookJsonLdProps) {
+export function BookJsonLd({ book, locale, displayTitle, displayDescription, imageUrl, averageRating, reviewCount, reviews = [] }: BookJsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store';
   const bookUrl = `${baseUrl}/${locale}/books/${book.id}`;
 
@@ -135,7 +136,20 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "bestRating": 5,
             "worstRating": 1
           },
-          "review": {
+          "review": reviews.length > 0 ? reviews.map(r => ({
+            "@type": "Review",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": r.rating,
+              "bestRating": "5"
+            },
+            "author": {
+              "@type": "Person",
+              "name": r.userName || "Client vérifié"
+            },
+            ...(r.comment ? { "reviewBody": r.comment } : {}),
+            ...(r.createdAt ? { "datePublished": new Date(r.createdAt).toISOString().split('T')[0] } : {})
+          })) : {
             "@type": "Review",
             "reviewRating": {
               "@type": "Rating",

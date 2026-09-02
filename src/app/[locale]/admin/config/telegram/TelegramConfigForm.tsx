@@ -17,6 +17,7 @@ interface Props {
         notifyRegister: boolean
         notifyChat: boolean
         notifyLowStock: boolean
+        notifyBookVisits: boolean
         notifyArticleRead: boolean
         notifyDailySummary: boolean
         notifyReviews: boolean
@@ -64,6 +65,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             await updateSetting('telegram_notify_register', String(settings.notifyRegister), 'config', 'Notif Inscription')
             await updateSetting('telegram_notify_chat', String(settings.notifyChat), 'config', 'Notif ChatBot')
             await updateSetting('telegram_notify_low_stock', String(settings.notifyLowStock), 'config', 'Notif Stock Faible')
+            await updateSetting('telegram_notify_book_visits', String(settings.notifyBookVisits), 'config', 'Notif Visite Livre')
             await updateSetting('telegram_notify_article_read', String(settings.notifyArticleRead), 'config', 'Notif Lecture Article')
             await updateSetting('telegram_notify_daily_summary', String(settings.notifyDailySummary), 'config', 'Résumé Journalier')
             await updateSetting('telegram_notify_reviews', String(settings.notifyReviews), 'config', 'Notif Avis Clients')
@@ -224,6 +226,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                                 { id: 'notifyJumiaPayout', label: 'Virements Jumia', desc: 'Alertes pour les nouveaux paiements Jumia saisis' },
                                 { id: 'notifyInvoices', label: 'Factures Saisies', desc: 'Alertes quand une facture (livraison, virement) est saisie' },
                                 { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
+                                { id: 'notifyBookVisits', label: 'Visite d\'un livre', desc: 'Alertes quand quelqu\'un visite la page d\'un livre' },
                                 { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu', templateKey: 'templateArticleRead', templateVars: '{{title}}, {{viewCount}}, {{country}}' },
                                 { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
                                 { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },

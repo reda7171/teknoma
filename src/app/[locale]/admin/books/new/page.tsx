@@ -119,6 +119,7 @@ function BookFormContent() {
             jumiaPriceMarkup: parseInt(formData.get('jumiaPriceMarkup') as string) || 0,
             isAffiliate: formData.get('isAffiliate') === 'true',
             affiliateLink: formData.get('affiliateLink') as string || undefined,
+            condition: formData.get('condition') as any || 'NEW',
         }
 
         const result = await createBook(input)
@@ -474,6 +475,27 @@ function BookFormContent() {
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
                                 <input type="radio" name="language" value="en" checked={bookLanguage === 'en'} onChange={(e) => { setBookLanguage('en'); setCurrentLang('en'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
                                 <span className="text-sm font-medium text-gray-900">Anglais</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    {/* État du Livre */}
+                    <fieldset>
+                        <legend className="block text-sm font-medium text-gray-700 mb-2">
+                            État du Livre
+                        </legend>
+                        <div className="flex flex-wrap gap-4">
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="condition" value="NEW" defaultChecked className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Neuf</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="condition" value="GOOD" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Bon état</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                <input type="radio" name="condition" value="USED" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                                <span className="text-sm font-medium text-gray-900">Déjà utilisé</span>
                             </label>
                         </div>
                     </fieldset>

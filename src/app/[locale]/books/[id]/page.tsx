@@ -224,30 +224,7 @@ export default async function BookDetailPage({
 
     const jsonLd: any[] = [];
 
-    if (reviewCount > 0) {
-        const reviewSchema = reviews.map(r => ({
-            '@context': 'https://schema.org',
-            '@type': 'Review',
-            itemReviewed: {
-                '@type': 'Product',
-                name: displayTitle || book.title || "Livre",
-                url: `${baseUrl}/${locale}/books/${book.id}`
-            },
-            reviewRating: {
-                '@type': 'Rating',
-                ratingValue: r.rating,
-                bestRating: '5'
-            },
-            author: {
-                '@type': 'Person',
-                name: r.userName || 'Anonyme'
-            },
-            reviewBody: r.comment || '',
-            datePublished: new Date(r.createdAt).toISOString().split('T')[0]
-        }));
-        jsonLd.push(...reviewSchema);
-    }
-
+    // Reviews will be passed directly to BookJsonLd instead of creating standalone schemas
     jsonLd.push({
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
@@ -316,6 +293,7 @@ export default async function BookDetailPage({
                 imageUrl={imageUrl}
                 averageRating={averageRating}
                 reviewCount={reviewCount}
+                reviews={reviews}
             />
             {jsonLd.length > 0 && (
                 <script

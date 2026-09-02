@@ -311,6 +311,23 @@ export async function getPopularBooks(limit = 6) {
 }
 
 /**
+ * Récupère les livres d'occasion (déjà utilisés)
+ */
+export async function getUsedBooks(limit = 6) {
+    return getCached(
+        `book:used:${limit}`,
+        async () => {
+            return prisma.book.findMany({
+                where: { active: true, condition: { in: ['USED', 'GOOD'] } } as any,
+                orderBy: { createdAt: 'desc' },
+                take: limit,
+            })
+        },
+        300 // Cache 5 minutes
+    )
+}
+
+/**
  * Vérifie la disponibilité d'un livre
  */
 export async function checkBookAvailability(bookId: string, quantity: number) {
