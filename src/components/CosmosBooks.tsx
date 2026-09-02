@@ -57,9 +57,8 @@ export default function CosmosBooks({
   const [orbitOrder, setOrbitOrder] = useState<OrbitBook[]>([])
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const [centerHovered, setCenterHovered] = useState(false)
-  const [bookPositions, setBookPositions] = useState<
-    { x: number; y: number; size: number; bookIdx: number }[]
-  >([])
+  const currentBookPositions = useRef<{x: number; y: number; size: number; bookIdx: number}[]>([])
+  const bookRefs = useRef<(HTMLDivElement | null)[]>([])
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
 
   const handleImageError = (id: string) => {
@@ -124,7 +123,7 @@ export default function CosmosBooks({
         ctx.setLineDash([])
       })
 
-      const positions: typeof bookPositions = []
+      const positions: typeof currentBookPositions.current = []
       orbitOrder.forEach((_, i) => {
         const orbitIdx = i % ORBITS.length
         const orbit = ORBITS[orbitIdx]
@@ -137,9 +136,17 @@ export default function CosmosBooks({
         const y = cy + Math.sin(angle) * orbit.radius * 0.55
         const size = BOOK_SIZE[orbitIdx]
         positions.push({ x, y, size, bookIdx: i })
+
+        const el = bookRefs.current[i]
+        if (el) {
+          const relX = (x / CANVAS_W) * 100
+          const relY = (y / CANVAS_H) * 100
+          el.style.left = `${relX}%`
+          el.style.top = `${relY}%`
+        }
       })
 
-      setBookPositions(positions)
+      currentBookPositions.current = positions
       animRef.current = requestAnimationFrame(draw)
     },
     [orbitOrder]
@@ -168,7 +175,7 @@ export default function CosmosBooks({
       // Livres en orbite comme cible
       let closest: number | null = null
       let minDist = DROP_RADIUS
-      bookPositions.forEach(({ x, y, bookIdx }) => {
+      currentBookPositions.current.forEach(({ x, y, bookIdx }) => {
         if (bookIdx === dragFrom) return
         const d = Math.hypot(canvasX - x, canvasY - y)
         if (d < minDist) {
@@ -178,7 +185,7 @@ export default function CosmosBooks({
       })
       return closest
     },
-    [bookPositions]
+    []
   )
 
   const startDrag = (
@@ -320,7 +327,6 @@ export default function CosmosBooks({
                 src={normalizeImage(centerBook.image)} 
                 alt={centerBook.title} 
                 fill
-                unoptimized
                 sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 20vw"
                 className="object-cover" 
                 onError={() => handleImageError(centerBook.id)} 
@@ -339,28 +345,25 @@ export default function CosmosBooks({
       </div>
 
       {/* Livres en orbite */}
-      {bookPositions.map(({ x, y, size, bookIdx }) => {
-        const book = orbitOrder[bookIdx]
+      {orbitOrder.map((book, bookIdx) => {
         if (!book || failedImages.has(book.id)) return null
         const isHovered = hoveredIdx === bookIdx
         const isDragging = dragging?.idx === bookIdx
         const isTarget = dropTarget === bookIdx
         const orbitIdx = bookIdx % ORBITS.length
         const depth = 1 - orbitIdx * 0.12
-        const relX = (x / CANVAS_W) * 100
-        const relY = (y / CANVAS_H) * 100
+        const size = BOOK_SIZE[orbitIdx]
 
         return (
           <div
             key={book.id}
+            ref={el => { bookRefs.current[bookIdx] = el }}
             onMouseEnter={() => !dragging && setHoveredIdx(bookIdx)}
             onMouseLeave={() => setHoveredIdx(null)}
             onClick={() => handleClick(book)}
             onPointerDown={e => startDrag(e, bookIdx, book)}
             style={{
               position: 'absolute',
-              left: `${relX}%`,
-              top: `${relY}%`,
               width: size,
               height: size * 1.35,
               transform: `translate(-50%, -50%) scale(${isTarget ? 1.3 : isHovered ? 1.2 : depth})`,
@@ -383,7 +386,6 @@ export default function CosmosBooks({
                 src={normalizeImage(book.image)} 
                 alt={book.title} 
                 fill
-                unoptimized
                 sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
                 className="object-cover" 
                 onError={() => handleImageError(book.id)} 
@@ -430,7 +432,6 @@ export default function CosmosBooks({
               src={normalizeImage(dragging.book.image)} 
               alt={dragging.book.title} 
               fill
-              unoptimized
               sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
               className="object-cover" 
             />
