@@ -15,6 +15,7 @@ export interface BookFilters {
     language?: string
     author?: string
     inStock?: boolean
+    usedOnly?: boolean
     page?: number
     limit?: number
 }
@@ -70,6 +71,12 @@ export async function getBooks(filters?: BookFilters) {
         // Filtre en stock
         if (filters?.inStock) {
             where.stock = { gt: 0 }
+        }
+
+        // Filtre livres d'occasion
+        if (filters?.usedOnly) {
+            // "USED" ou "GOOD" représentent les livres d'occasion
+            where.condition = { in: ['USED', 'GOOD'] } as any
         }
 
         // Si recherche fuzzy, on doit tout récupérer pour trier
@@ -212,6 +219,10 @@ export async function getBooksCount(filters?: BookFilters) {
 
         if (filters?.inStock) {
             where.stock = { gt: 0 }
+        }
+
+        if (filters?.usedOnly) {
+            where.condition = { in: ['USED', 'GOOD'] } as any
         }
 
         if (filters?.search) {

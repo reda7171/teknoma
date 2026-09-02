@@ -60,6 +60,7 @@ interface BooksFiltersProps {
         search?: string
         language?: string
         inStock?: string
+        usedOnly?: string
         author?: string
     }
     categoryTree: Record<string, string[]>
@@ -96,6 +97,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
         if (params.category) newParams.set('category', params.category)
         if (params.language) newParams.set('language', params.language)
         if (params.inStock) newParams.set('inStock', params.inStock)
+        if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
         router.push(`/books?${newParams.toString()}`)
     }
 
@@ -105,7 +107,19 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
         if (params.search) newParams.set('search', params.search)
         if (params.category) newParams.set('category', params.category)
         if (params.language) newParams.set('language', params.language)
+        if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
         newParams.set('inStock', value ? 'true' : 'false')
+        router.push(`/books?${newParams.toString()}`)
+    }
+
+    const handleUsedOnlyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.checked
+        const newParams = new URLSearchParams()
+        if (params.search) newParams.set('search', params.search)
+        if (params.category) newParams.set('category', params.category)
+        if (params.language) newParams.set('language', params.language)
+        if (params.inStock) newParams.set('inStock', params.inStock)
+        newParams.set('usedOnly', value ? 'true' : 'false')
         router.push(`/books?${newParams.toString()}`)
     }
 
@@ -165,6 +179,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 ...(params.category ? { category: params.category } : {}),
                                 ...(params.search ? { search: params.search } : {}),
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
+                                ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
                             }).toString()}`}
                             scroll={false}
                             className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
@@ -183,6 +198,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                     ...(params.category ? { category: params.category } : {}),
                                     ...(params.search ? { search: params.search } : {}),
                                     ...(params.inStock ? { inStock: params.inStock } : {}),
+                                    ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
                                     language: lang.code
                                 }).toString()}`}
                                 scroll={false}
@@ -220,8 +236,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                 />
             </div>
 
-            {/* Disponibilité */}
-            <div className="mb-6">
+            <div className="mb-4">
                 <label className="flex items-center gap-3 cursor-pointer group">
                     <div className="relative flex items-center">
                         <input 
@@ -234,6 +249,24 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                     </div>
                     <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 group-hover:text-black transition-colors">
                         {tCommon('Available')}
+                    </span>
+                </label>
+            </div>
+
+            {/* Occasion / Used Only */}
+            <div className="mb-6">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative flex items-center">
+                        <input 
+                            type="checkbox" 
+                            className="sr-only peer"
+                            checked={params.usedOnly === 'true'}
+                            onChange={handleUsedOnlyChange}
+                        />
+                        <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                    </div>
+                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-amber-600 group-hover:text-amber-800 transition-colors">
+                        Livre d'occasion
                     </span>
                 </label>
             </div>
@@ -259,6 +292,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 ...(params.search ? { search: params.search } : {}),
                                 ...(params.author ? { author: params.author } : {}),
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
+                                ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
                             }).toString()}`}
                             scroll={false}
                             className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${!params.category
@@ -283,7 +317,8 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                                 ...(params.language ? { language: params.language } : {}),
                                                 ...(params.search ? { search: params.search } : {}),
                                                 ...(params.author ? { author: params.author } : {}),
-                                                ...(params.inStock ? { inStock: params.inStock } : {})
+                                                ...(params.inStock ? { inStock: params.inStock } : {}),
+                                                ...(params.usedOnly ? { usedOnly: params.usedOnly } : {})
                                             }).toString()}`}
                                             scroll={false}
                                             className={`flex-1 flex justify-between items-center px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${isSelected && !params.subCategory
@@ -361,7 +396,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             </div>
 
             {/* Active Filters */}
-            {(params.category || params.subCategory || params.search || params.language || params.inStock) && (
+            {(params.category || params.subCategory || params.search || params.language || params.inStock || params.usedOnly) && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
@@ -410,7 +445,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             <span className="hidden sm:inline">{t('Filters')}</span>
-                            {(params.category || params.subCategory || params.language || params.author || params.inStock) && (
+                            {(params.category || params.subCategory || params.language || params.author || params.inStock || params.usedOnly) && (
                                 <span className="w-2 h-2 rounded-full bg-red-500" />
                             )}
                         </button>
