@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const formData = await request.formData()
+        const formData = (await request.formData()) as any
         
         // Extract fields
         const title = formData.get('title') as string
