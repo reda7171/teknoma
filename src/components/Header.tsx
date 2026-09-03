@@ -170,6 +170,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         { href: '/', label: t('Home') },
         { href: '/books', label: t('Books') },
         { href: '/authors', label: t('Authors') },
+        { href: '/quotes', label: t('Quotes') },
         ...(features.packs === true ? [{ href: '/packs', label: t('Packs') }] : []),
         ...(features.deposerListe === true ? [{ href: '/deposer-liste', label: t('DeposerListe') }] : []),
         { href: '/blog', label: t('Journal'), isJournal: true },
@@ -177,7 +178,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         ...(features.kids === true ? [{ href: '/mon-enfant', label: t('Kids') }] : []),
         ...(features.usb === true ? [{ href: '/cle-usb', label: t('UsbKey') }] : []),
         ...(features.exchange === true ? [{ href: '/community/market', label: t('Community') }] : []),
-        { href: '/sell-book', label: locale === 'ar' ? 'بيع كتاب' : locale === 'en' ? 'Sell' : 'Vendre' },
+        ...(features.seller === true ? [{ href: '/sell-book', label: t('SellBook') }] : []),
     ]
 
     const navItems = navigation && navigation.length > 0
@@ -217,6 +218,14 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
     // Toujours afficher le Journal si absent du menu personnalisé
     if (!finalNavItems.some((i: any) => i.href.includes('/blog') || i.isJournal)) {
         finalNavItems = [...finalNavItems, { href: '/blog', label: t('Journal'), isJournal: true }]
+    }
+
+    if (!finalNavItems.some((i: any) => i.href.includes('usedOnly'))) {
+        finalNavItems = [...finalNavItems, { href: '/books?usedOnly=true', label: t('UsedBooks'), isJournal: false }]
+    }
+
+    if (!finalNavItems.some((i: any) => i.href.includes('jeux-societe'))) {
+        finalNavItems = [...finalNavItems, { href: '/jeux-societe', label: t('BoardGames'), isJournal: false }]
     }
 
     return (
@@ -407,6 +416,15 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     </Link>
                                 )
                             })}
+                            {features.seller === true && mounted && (
+                                <Link 
+                                    href="/devenir-vendeur" 
+                                    className="hidden xl:inline-flex bg-gradient-to-r from-[#FFDC50] to-yellow-400 text-black px-5 py-2 rounded-full text-[13px] rtl:text-[15px] font-black tracking-widest rtl:tracking-normal uppercase hover:scale-105 active:scale-95 shadow-[0_4px_14px_rgba(255,220,80,0.4)] hover:shadow-[0_6px_20px_rgba(255,220,80,0.6)] transition-all duration-300 relative overflow-hidden group items-center"
+                                >
+                                    <span className="relative z-10">{locale === 'ar' ? 'كن بائعاً' : locale === 'en' ? 'Become a seller' : 'Devenir vendeur'}</span>
+                                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+                                </Link>
+                            )}
                         </nav>
 
                         {/* Actions */}

@@ -465,10 +465,10 @@ export default async function BookDetailPage({
                             <div className="space-y-4 md:space-y-6">
                                 <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-2 md:mb-4">
                                     {/* Badge Vendeur (Livre d'occasion) */}
-                                    {book.customerSeller && (book.condition === 'USED' || book.condition === 'GOOD') && (
+                                    {(book.customerSeller || book.seller) && (book.condition === 'USED' || book.condition === 'GOOD') && (
                                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] md:text-xs font-black rounded-full uppercase tracking-widest shadow-sm">
                                             <Shield className="w-3.5 h-3.5 text-amber-600" />
-                                            {locale === 'ar' ? 'كتاب مستعمل - بائع:' : locale === 'en' ? 'Used Book - Seller:' : 'Livre d\'occasion - Vendu par'} {book.customerSeller.fullName || 'Vendeur'}
+                                            {locale === 'ar' ? 'كتاب مستعمل - بائع:' : locale === 'en' ? 'Used Book - Seller:' : 'Livre d\'occasion - Vendu par'} {book.customerSeller?.fullName || book.seller?.fullName || 'Vendeur'}
                                         </div>
                                     )}
 
@@ -534,15 +534,15 @@ export default async function BookDetailPage({
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2">
                                         <div className="flex items-center gap-2">
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />
+                                            <p className="text-xs sm:text-sm rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
                                                 {tBook('TaxesIncluded')}
                                             </p>
                                         </div>
                                         <span className="hidden sm:inline text-gray-300">•</span>
                                         <div className="flex items-center gap-2">
-                                            <Package className="w-4 h-4 text-blue-500" />
-                                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                                            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                                            <p className="text-xs sm:text-sm rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
                                                 {locale === 'ar' ? 'الدفع عند الاستلام' : locale === 'en' ? 'Cash on Delivery' : 'Paiement à la livraison'}
                                             </p>
                                         </div>
@@ -573,7 +573,7 @@ export default async function BookDetailPage({
                             </div>
 
                             {/* CTA */}
-                            <div className="space-y-8">
+                            <div className="md:space-y-8">
                                 {book.stock > 0 ? (
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
@@ -614,7 +614,7 @@ export default async function BookDetailPage({
                                                     type="book"
                                                 />
                                             )}
-                                            <AddToCartButton
+                                                <AddToCartButton
                                                 product={{
                                                     id: book.id,
                                                     title: displayTitle,
@@ -623,7 +623,6 @@ export default async function BookDetailPage({
                                                     type: 'BOOK'
                                                 }}
                                                 disabled={book.stock <= 0}
-                                                className="!py-4 md:!py-8 text-xs uppercase tracking-[0.3em] font-black !rounded-full shadow-2xl hover:shadow-black/20"
                                             />
                                         </>
                                     )}

@@ -7,8 +7,11 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'GOOGLE_CLIENT_ID is not configured' }, { status: 500 })
     }
 
-    const proto = request.headers.get('x-forwarded-proto') || 'https'
+    let proto = request.headers.get('x-forwarded-proto') || 'https'
     const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
+    if (host && host.includes('riwaya.store')) {
+        proto = 'https' // Forcer HTTPS en production (évite l'erreur redirect_uri_mismatch)
+    }
     const origin = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
     const redirectUri = `${origin}/api/auth/google/callback`
 

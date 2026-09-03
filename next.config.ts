@@ -9,7 +9,6 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  swcMinify: true,
   disable: process.env.NODE_ENV === 'development', // Désactivé en dev pour éviter les conflits
   workboxOptions: {
     disableDevLogs: true,
@@ -48,7 +47,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    instrumentationHook: true,
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
   output: 'standalone',
   poweredByHeader: false,
@@ -97,7 +98,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://www.googletagmanager.com https://connect.facebook.net https://pagead2.googlesyndication.com https://challenges.cloudflare.com https://unpkg.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://elfsightcdn.com https://static.elfsight.com https://www.clarity.ms https://*.clarity.ms",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://www.googletagmanager.com https://connect.facebook.net https://pagead2.googlesyndication.com https://challenges.cloudflare.com https://unpkg.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://maps.googleapis.com https://elfsightcdn.com https://static.elfsight.com https://www.clarity.ms https://*.clarity.ms",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
@@ -183,11 +184,7 @@ const nextConfig: NextConfig = {
       ],
     }
   },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
-  },
+
   // Force Turbopack à surveiller les fichiers de traduction
   turbopack: {
     resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],

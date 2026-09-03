@@ -42,12 +42,12 @@ export default function AddToCartButton({
     return (
         <button
             disabled={disabled || isAdded}
-            className={`w-full flex items-center justify-center gap-3 font-bold rounded-2xl transition-all duration-300 py-5 px-8 ${
+            className={`w-full flex items-center justify-center gap-3 font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 py-5 px-8 ${
                 disabled 
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-none' 
                     : isAdded
                         ? 'bg-green-500 text-white scale-105 shadow-xl'
-                        : `active:scale-95 shadow-lg hover:shadow-black/20 ${
+                        : `active:scale-95 shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 ${
                             variant === 'primary'
                                 ? 'bg-black text-white hover:bg-gray-800'
                                 : 'bg-white text-black border-2 border-black hover:bg-gray-50'

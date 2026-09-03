@@ -331,6 +331,9 @@ export default function EditAccessoryPage({
                                 <option value="BOOKMARK">Marque-page</option>
                                 <option value="LIBRARY">Bibliothèque</option>
                                 <option value="USB">Clé USB</option>
+                                <option value="FURNITURE">Fourniture bureau</option>
+                                <option value="BOARD_GAME">Jeux de société</option>
+                                <option value="KIDS">Produit enfant</option>
                                 <option value="ACCESSORY">Autre accessoire</option>
                             </select>
                         </div>

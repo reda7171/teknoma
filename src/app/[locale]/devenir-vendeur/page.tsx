@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import { Store, Truck, ShieldCheck, Wallet, ArrowRight, BookOpen } from 'lucide-react'
 import BecomeSellerForm from './BecomeSellerForm'
-import Header from '@/components/Header'
+import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
     title: 'Devenir vendeur | Riwaya',
@@ -22,9 +23,11 @@ export default async function BecomeSellerPage() {
     const enabled = await isFeatureEnabled('feature_seller')
     if (!enabled) notFound()
 
+    const t = await getTranslations('DevenirVendeur')
+
     return (
         <div className="min-h-screen bg-white">
-            <Header />
+            <HeaderWithUser />
             {/* Hero Section */}
             <section className="relative bg-pixio-cream text-black py-24 md:py-32 overflow-hidden">
                 <div className="absolute inset-0 opacity-40">
@@ -38,25 +41,25 @@ export default async function BecomeSellerPage() {
                     <div className="max-w-3xl">
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-black text-xs font-black uppercase tracking-widest mb-8 shadow-sm">
                             <Store className="w-4 h-4 text-pixio-yellow" />
-                            <span>Programme Vendeur Partenaire</span>
+                            <span>{t('ProgrammeVendeurPartenaire')}</span>
                         </div>
                         <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.1]">
-                            Ouvrez votre<br />
+                            {t('OuvrezVotre')}<br />
                             <span className="text-pixio-yellow relative inline-block">
-                                <span className="relative z-10 text-black">succursale littéraire.</span>
+                                <span className="relative z-10 text-black">{t('SuccursaleLitteraire')}</span>
                                 <span className="absolute bottom-2 left-0 w-full h-4 bg-pixio-yellow -z-10 -rotate-1"></span>
                             </span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed mb-10 max-w-2xl">
-                            Touchez des milliers de lecteurs à travers tout le Maroc. Nous gérons la livraison COD et sécurisons vos paiements.
+                            {t('HeroDescription')}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
                             <a href="#inscription" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1">
-                                <span>Devenir vendeur</span>
+                                <span>{t('BtnDevenirVendeur')}</span>
                                 <ArrowRight className="w-5 h-5" />
                             </a>
                             <a href="#comment-ca-marche" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white border-2 border-gray-200 text-black font-black text-sm uppercase tracking-widest rounded-full hover:border-black transition-all shadow-sm hover:-translate-y-1">
-                                <span>Comment ça marche ?</span>
+                                <span>{t('BtnCommentCaMarche')}</span>
                             </a>
                         </div>
                     </div>
@@ -68,9 +71,9 @@ export default async function BecomeSellerPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
-                            Pourquoi vendre sur Riwaya ?
+                            {t('PourquoiVendre')}
                         </h2>
-                        <p className="mt-4 text-xl text-gray-500 font-medium">Votre croissance, notre priorité.</p>
+                        <p className="mt-4 text-xl text-gray-500 font-medium">{t('CroissancePriorite')}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -79,9 +82,9 @@ export default async function BecomeSellerPage() {
                             <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
                                 <Store className="w-7 h-7 text-blue-600" />
                             </div>
-                            <h3 className="text-xl font-black text-black mb-3">Audience qualifiée</h3>
+                            <h3 className="text-xl font-black text-black mb-3">{t('Feature1Title')}</h3>
                             <p className="text-gray-500 font-medium leading-relaxed">
-                                Vos livres sont directement présentés à des milliers de passionnés de lecture au Maroc.
+                                {t('Feature1Desc')}
                             </p>
                         </div>
 
@@ -90,9 +93,9 @@ export default async function BecomeSellerPage() {
                             <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
                                 <Truck className="w-7 h-7 text-emerald-600" />
                             </div>
-                            <h3 className="text-xl font-black text-black mb-3">Logistique COD</h3>
+                            <h3 className="text-xl font-black text-black mb-3">{t('Feature2Title')}</h3>
                             <p className="text-gray-500 font-medium leading-relaxed">
-                                Oubliez les tracas d'expédition. Notre partenaire logistique récupère et livre en Cash On Delivery.
+                                {t('Feature2Desc')}
                             </p>
                         </div>
 
@@ -101,9 +104,9 @@ export default async function BecomeSellerPage() {
                             <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
                                 <Wallet className="w-7 h-7 text-purple-600" />
                             </div>
-                            <h3 className="text-xl font-black text-black mb-3">Paiements rapides</h3>
+                            <h3 className="text-xl font-black text-black mb-3">{t('Feature3Title')}</h3>
                             <p className="text-gray-500 font-medium leading-relaxed">
-                                Recevez votre argent rapidement et en toute sécurité après la confirmation de chaque livraison.
+                                {t('Feature3Desc')}
                             </p>
                         </div>
 
@@ -112,9 +115,9 @@ export default async function BecomeSellerPage() {
                             <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center mb-6">
                                 <ShieldCheck className="w-7 h-7 text-rose-600" />
                             </div>
-                            <h3 className="text-xl font-black text-black mb-3">Support dédié</h3>
+                            <h3 className="text-xl font-black text-black mb-3">{t('Feature4Title')}</h3>
                             <p className="text-gray-500 font-medium leading-relaxed">
-                                Un accompagnement sur-mesure pour mettre en valeur votre catalogue et doper vos ventes.
+                                {t('Feature4Desc')}
                             </p>
                         </div>
                     </div>
@@ -127,7 +130,7 @@ export default async function BecomeSellerPage() {
                     <div className="flex flex-col lg:flex-row items-center gap-16">
                         <div className="flex-1">
                             <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight mb-8">
-                                Commencez à vendre en 4 étapes simples.
+                                {t('4Etapes')}
                             </h2>
                             
                             <div className="space-y-8">
@@ -135,32 +138,32 @@ export default async function BecomeSellerPage() {
                                 <div className="flex gap-4">
                                     <div className="w-12 h-12 bg-black text-white font-black rounded-full flex items-center justify-center shrink-0">1</div>
                                     <div>
-                                        <h3 className="text-xl font-black text-black mb-2">Créez votre boutique</h3>
-                                        <p className="text-gray-500 font-medium">Remplissez le formulaire d'inscription pour configurer votre compte vendeur en moins de 3 minutes.</p>
+                                        <h3 className="text-xl font-black text-black mb-2">{t('Step1Title')}</h3>
+                                        <p className="text-gray-500 font-medium">{t('Step1Desc')}</p>
                                     </div>
                                 </div>
                                 {/* Step 2 */}
                                 <div className="flex gap-4">
                                     <div className="w-12 h-12 bg-pixio-yellow text-black font-black rounded-full flex items-center justify-center shrink-0">2</div>
                                     <div>
-                                        <h3 className="text-xl font-black text-black mb-2">Ajoutez vos livres</h3>
-                                        <p className="text-gray-500 font-medium">Uploadez vos couvertures, fixez vos prix et gérez facilement votre stock depuis votre tableau de bord.</p>
+                                        <h3 className="text-xl font-black text-black mb-2">{t('Step2Title')}</h3>
+                                        <p className="text-gray-500 font-medium">{t('Step2Desc')}</p>
                                     </div>
                                 </div>
                                 {/* Step 3 */}
                                 <div className="flex gap-4">
                                     <div className="w-12 h-12 bg-black text-white font-black rounded-full flex items-center justify-center shrink-0">3</div>
                                     <div>
-                                        <h3 className="text-xl font-black text-black mb-2">Recevez les commandes</h3>
-                                        <p className="text-gray-500 font-medium">Soyez notifié instantanément à chaque nouvel achat par un client de la plateforme.</p>
+                                        <h3 className="text-xl font-black text-black mb-2">{t('Step3Title')}</h3>
+                                        <p className="text-gray-500 font-medium">{t('Step3Desc')}</p>
                                     </div>
                                 </div>
                                 {/* Step 4 */}
                                 <div className="flex gap-4">
                                     <div className="w-12 h-12 bg-black text-white font-black rounded-full flex items-center justify-center shrink-0">4</div>
                                     <div>
-                                        <h3 className="text-xl font-black text-black mb-2">Expédition & Paiement</h3>
-                                        <p className="text-gray-500 font-medium">Préparez vos colis. Nous occupons de l'expédition (COD). Votre argent est transféré après livraison réussie.</p>
+                                        <h3 className="text-xl font-black text-black mb-2">{t('Step4Title')}</h3>
+                                        <p className="text-gray-500 font-medium">{t('Step4Desc')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -176,15 +179,15 @@ export default async function BecomeSellerPage() {
                                     <div className="absolute top-4 left-4 bg-white shadow-md rounded-2xl p-4 flex items-center gap-3 animate-bounce" style={{ animationDuration: '3s' }}>
                                         <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">✅</div>
                                         <div>
-                                            <div className="text-[10px] font-bold text-gray-400 uppercase">Nouvelle commande</div>
-                                            <div className="font-black text-sm">L'Alchimiste - 80 درهم</div>
+                                            <div className="text-[10px] font-bold text-gray-400 uppercase">{t('NouvelleCommande')}</div>
+                                            <div className="font-black text-sm">{t('AlchimistePrice')}</div>
                                         </div>
                                     </div>
                                     <div className="absolute bottom-10 right-4 bg-black text-white shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-pulse" style={{ animationDuration: '4s' }}>
                                         <Wallet className="w-6 h-6 text-pixio-yellow" />
                                         <div>
-                                            <div className="text-[10px] font-bold text-gray-400 uppercase">Solde disponible</div>
-                                            <div className="font-black text-sm text-pixio-yellow">+1 450 درهم</div>
+                                            <div className="text-[10px] font-bold text-gray-400 uppercase">{t('SoldeDisponible')}</div>
+                                            <div className="font-black text-sm text-pixio-yellow">{t('SoldeAmount')}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -199,8 +202,8 @@ export default async function BecomeSellerPage() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border-2 border-gray-100">
                         <div className="text-center mb-12">
-                            <h2 className="text-4xl font-black text-black tracking-tight mb-4">Rejoindre les vendeurs</h2>
-                            <p className="text-gray-500 font-medium">Remplissez le formulaire ci-dessous pour que notre équipe valide votre compte et lance votre boutique.</p>
+                            <h2 className="text-4xl font-black text-black tracking-tight mb-4">{t('RejoindreVendeurs')}</h2>
+                            <p className="text-gray-500 font-medium">{t('FormDescription')}</p>
                         </div>
 
                         <BecomeSellerForm />

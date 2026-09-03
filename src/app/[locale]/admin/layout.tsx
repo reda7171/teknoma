@@ -13,6 +13,7 @@ import {
     ShoppingBag,
     Users,
     LogOut,
+    Quote,
     Repeat,
     AlertCircle,
     ShieldCheck,
@@ -196,6 +197,7 @@ export default function AdminLayout({
                 { name: 'Concours & Giveaways', href: `/${lang}/admin/giveaways`, icon: Gift },
                 { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
                 { name: 'Blog & Actualités', href: `/${lang}/admin/posts`, icon: FileText },
+                { name: 'Citations (Quotes)', href: `/${lang}/admin/quotes`, icon: Quote },
             ]
         },
         {

@@ -952,7 +952,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 {locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who is the author of this article?` : `Qui est l'auteur de cet article ?`}
                             </h3>
                             <p className="text-slate-600 leading-relaxed font-medium">
-                                {locale === 'ar' ? `تمت كتابة هذا المقال بواسطة ${post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.author?.fullName || 'Riwaya'}.`}
+                                {locale === 'ar' ? `كاتب هذا المقال هو ${post.author?.fullName || 'رواية'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'Riwaya'}.` : `Cet article a été écrit par ${post.author?.fullName || 'Riwaya'}.`}
                             </p>
                         </div>
                     </div>
@@ -971,7 +971,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             {prevPost ? (
                                 <Link
                                     href={`/blog/${prevPost.slug}`}
-                                    className="group flex items-center gap-4 p-6 sm:p-8 hover:bg-slate-50 transition-colors"
+                                    className="group flex items-center gap-4 p-6 sm:p-8 hover:bg-slate-50 transition-all border-b-4 border-transparent hover:border-amber-400"
                                 >
                                     <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-900 transition-colors">
                                         <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-white rotate-180 rtl:rotate-0 transition-colors" />
@@ -993,7 +993,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             {nextPost ? (
                                 <Link
                                     href={`/blog/${nextPost.slug}`}
-                                    className="group flex items-center gap-4 p-6 sm:p-8 hover:bg-slate-50 transition-colors sm:flex-row-reverse sm:text-right rtl:sm:flex-row rtl:sm:text-left"
+                                    className="group flex items-center gap-4 p-6 sm:p-8 hover:bg-slate-50 transition-all sm:flex-row-reverse sm:text-right rtl:sm:flex-row rtl:sm:text-left border-b-4 border-transparent hover:border-amber-400"
                                 >
                                     <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-900 transition-colors">
                                         <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-white rtl:rotate-180 transition-colors" />

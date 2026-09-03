@@ -253,7 +253,7 @@ export async function getBooksCount(filters?: BookFilters) {
 export async function getBookById(id: string) {
     return prisma.book.findUnique({
         where: { id },
-        include: { customerSeller: true },
+        include: { customerSeller: true, seller: true },
     })
 }
 

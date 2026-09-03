@@ -191,6 +191,7 @@ model Book {
   wishlists           Wishlist[]
   posts               Post[]            @relation("PostBooks")
   seoCategoryBooks    SeoCategoryBook[]
+  quotes              Quote[]
 
   @@index([category])
   @@index([subCategory])
@@ -335,6 +336,7 @@ model Customer {
   updatedAt         DateTime       @updatedAt
   password          String?        @db.VarChar(255)
   credits           Int            @default(10)
+  rating            Float          @default(5.0)
   image             String?        @db.VarChar(500)
   expoPushToken     String?        @db.VarChar(255)
   aiRecommendations String?        @db.LongText
@@ -1316,4 +1318,21 @@ model ImageTestimonial {
   updatedAt    DateTime @updatedAt
 
   @@map("image_testimonials")
+}
+
+model Quote {
+  id        String   @id @default(uuid())
+  text      String   @db.Text
+  author    String   @db.VarChar(255)
+  source    String?  @db.VarChar(255)
+  bookId    String?
+  book      Book?    @relation(fields: [bookId], references: [id])
+  tags      String?  @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([author])
+  @@index([bookId])
+  @@map("quotes")
 }
