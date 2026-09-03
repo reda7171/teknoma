@@ -232,7 +232,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                 <SearchInput 
                     currentSearch={params.search || ''}
                     onChange={handleSearchChange}
-                    placeholder="Titre, auteur, description..."
+                    placeholder={tCommon('SearchPlaceholder') || "Titre, auteur, description..."}
                 />
             </div>
 
@@ -266,7 +266,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                     </div>
                     <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-amber-600 group-hover:text-amber-800 transition-colors">
-                        Livre d'occasion
+                        {tCommon('UsedBook') || "Livre d'occasion"}
                     </span>
                 </label>
             </div>

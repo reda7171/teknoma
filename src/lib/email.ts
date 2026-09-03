@@ -111,12 +111,13 @@ export async function sendOrderStatusUpdate(order: any, status: string) {
 }
 
 export async function sendSellerBookApproved(book: any) {
-    if (!book.customerSeller?.email) return
+    const seller = book.seller || book.customerSeller;
+    if (!seller?.email) return
 
     const html = `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #000;">Bonne nouvelle ! Votre livre est en ligne 🎉</h1>
-            <p>Bonjour ${book.customerSeller.fullName || 'Vendeur'},</p>
+            <p>Bonjour ${seller.fullName || seller.email?.split('@')[0] || 'Vendeur'},</p>
             <p>Nous avons le plaisir de vous informer que votre livre <strong>"${book.title}"</strong> a été examiné et approuvé par notre équipe.</p>
             <p>Il est désormais visible par tous les acheteurs sur la plateforme Riwaya.</p>
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0;">
@@ -131,7 +132,7 @@ export async function sendSellerBookApproved(book: any) {
     try {
         await transporter.sendMail({
             from: '"Riwaya Marketplace" <admin@riwaya.store>',
-            to: book.customerSeller.email,
+            to: seller.email,
             subject: `Votre livre "${book.title}" est maintenant en ligne !`,
             html,
         })
@@ -141,12 +142,13 @@ export async function sendSellerBookApproved(book: any) {
 }
 
 export async function sendSellerBookRejected(book: any, reason: string = '') {
-    if (!book.customerSeller?.email) return
+    const seller = book.seller || book.customerSeller;
+    if (!seller?.email) return
 
     const html = `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #000;">Mise à jour concernant votre livre</h1>
-            <p>Bonjour ${book.customerSeller.fullName || 'Vendeur'},</p>
+            <p>Bonjour ${seller.fullName || seller.email?.split('@')[0] || 'Vendeur'},</p>
             <p>Nous avons examiné votre proposition pour le livre <strong>"${book.title}"</strong>.</p>
             <p>Malheureusement, nous ne pouvons pas l'accepter sur notre plateforme pour le moment.</p>
             ${reason ? `<div style="background-color: #fdf2f2; border: 1px solid #f8b4b4; padding: 15px; border-radius: 8px; margin: 20px 0;"><p style="color: #c81e1e; margin:0;"><strong>Motif :</strong> ${reason}</p></div>` : ''}
@@ -159,7 +161,7 @@ export async function sendSellerBookRejected(book: any, reason: string = '') {
     try {
         await transporter.sendMail({
             from: '"Riwaya Marketplace" <admin@riwaya.store>',
-            to: book.customerSeller.email,
+            to: seller.email,
             subject: `Information concernant votre livre "${book.title}"`,
             html,
         })

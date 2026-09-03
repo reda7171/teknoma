@@ -142,18 +142,27 @@ export async function getSmartMatches() {
                 }))
             },
             include: {
-                owner: {
-                    include: {
-                        wishlist: true
-                    }
-                }
+                owner: true
             },
             take: 20
         })
 
+        // Fetch wishlists for the owners separately to avoid Prisma include error (wishlist is not on Customer model)
+        const ownerIds = matchingBooks.map((b: any) => b.ownerId)
+        const ownerWishlists = await (prisma as any).wishlist.findMany({
+            where: { userId: { in: ownerIds } }
+        })
+
+        // Map wishlists to owners
+        const wishlistsByOwner = ownerWishlists.reduce((acc: any, w: any) => {
+            if (!acc[w.userId]) acc[w.userId] = []
+            acc[w.userId].push(w)
+            return acc
+        }, {})
+
         // 4. Filtrer pour ne garder que ceux où le propriétaire veut un de mes livres
         const smartMatches = matchingBooks.filter((book: any) => {
-            const ownerWishlist = (book.owner as any).wishlist || []
+            const ownerWishlist = wishlistsByOwner[book.ownerId] || []
             return ownerWishlist.some((w: any) =>
                 myTitles.some((myTitle: any) => myTitle.includes(w.title.toLowerCase()) || w.title.toLowerCase().includes(myTitle))
             )

@@ -234,6 +234,7 @@ export default async function BooksPage({
                                         active: true,
                                         language: params.language,
                                         inStock: params.inStock === undefined ? true : params.inStock === 'true',
+                                        usedOnly: params.usedOnly === 'true',
                                         author: params.author,
                                         page: 1,
                                         limit: 12

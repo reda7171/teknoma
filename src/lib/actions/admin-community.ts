@@ -173,6 +173,7 @@ export async function getAllUsers(page = 1) {
                     fullName: true,
                     city: true,
                     rating: true,
+                    image: true,
                     credits: true,
                     image: true,
                     isBanned: true,

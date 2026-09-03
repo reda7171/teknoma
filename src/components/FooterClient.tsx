@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Link } from '@/i18n/routing'
 import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtSign, CheckCircle } from 'lucide-react'
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Script from 'next/script'
 
 interface FooterProps {
@@ -83,6 +83,7 @@ function NewsletterForm({ t }: { t: any }) {
 }
 
 export default function FooterClient({ features = {}, siteLogo = null, socials = {}, paymentSettings = {} }: FooterProps = {}) {
+    const locale = useLocale();
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
     const tTrack = useTranslations('Tracking');
@@ -172,6 +173,16 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 <Link href="/books" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
                             </li>
                             <li suppressHydrationWarning>
+                                <Link href="/books?usedOnly=true" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>
+                                    {tNav('UsedBooks')}
+                                </Link>
+                            </li>
+                            <li suppressHydrationWarning>
+                                <Link href="/jeux-societe" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>
+                                    {tNav('BoardGames')}
+                                </Link>
+                            </li>
+                            <li suppressHydrationWarning>
                                 <Link href="/packs" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
                             </li>
                             <li suppressHydrationWarning>
@@ -185,8 +196,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                             {features.seller === true && (
                                 <li suppressHydrationWarning>
                                     <Link href="/devenir-vendeur" className="text-pixio-yellow hover:text-white transition-colors text-sm font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
-                                        Devenir vendeur
-                                        <span className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">✨</span>
+                                        {locale === 'ar' ? 'كن بائعاً' : locale === 'en' ? 'Become a seller' : 'Devenir vendeur'}
                                     </Link>
                                 </li>
                             )}

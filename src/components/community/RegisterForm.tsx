@@ -46,34 +46,34 @@ export default function RegisterForm() {
             <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-black/5 border border-gray-100">
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullName')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('FullName')}</label>
                         <input name="fullName" required className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black" placeholder="Taha Hussein" />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Email')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
                         <input name="email" type="email" required className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black" placeholder="hello@example.com" />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Phone')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Phone')}</label>
                         <input name="phone" type="tel" required className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black" placeholder="0612345678" />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Password')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
                         <div className="relative">
                             <input
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 required
-                                className="w-full pl-6 pr-12 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                className="w-full ltr:pl-6 ltr:pr-12 rtl:pr-6 rtl:pl-12 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
                                 placeholder="••••••••"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
+                                className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
@@ -81,7 +81,7 @@ export default function RegisterForm() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('City')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('City')}</label>
                         <div className="relative">
                             <select
                                 name="city"
@@ -94,7 +94,7 @@ export default function RegisterForm() {
                                     <option key={city} value={city}>{city}</option>
                                 ))}
                             </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <div className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -110,7 +110,7 @@ export default function RegisterForm() {
 
                     <button type="submit" disabled={loading} className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('RegisterButton')}
-                        {!loading && <ArrowRight className="w-4 h-4" />}
+                        {!loading && <ArrowRight className="w-4 h-4 rtl:rotate-180" />}
                     </button>
                 </form>
 

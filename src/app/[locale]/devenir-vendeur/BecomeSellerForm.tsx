@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { Send, CheckCircle2, X } from 'lucide-react'
 import { createSellerRequest } from '@/lib/actions/seller-requests'
+import { useTranslations } from 'next-intl'
 
 export default function BecomeSellerForm() {
     const [showAlert, setShowAlert] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
+    const t = useTranslations('DevenirVendeurForm')
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -35,7 +37,7 @@ export default function BecomeSellerForm() {
                 setShowAlert(false)
             }, 5000)
         } else {
-            setErrorMsg(res.error || 'Une erreur est survenue.')
+            setErrorMsg(res.error || t('ErrorMsg'))
         }
     }
 
@@ -44,30 +46,30 @@ export default function BecomeSellerForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Nom de la boutique / Librairie *</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('StoreNameLabel')}</label>
                         <input
                             type="text"
                             name="storeName"
                             required
                             className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-black focus:bg-white transition-all font-medium placeholder-gray-400"
-                            placeholder="Ex: Librairie des Oliviers"
+                            placeholder={t('StoreNamePlaceholder')}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Nom du gérant *</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('ManagerNameLabel')}</label>
                         <input
                             type="text"
                             name="managerName"
                             required
                             className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-black focus:bg-white transition-all font-medium placeholder-gray-400"
-                            placeholder="Votre prénom et nom"
+                            placeholder={t('ManagerNamePlaceholder')}
                         />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Adresse Email *</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('EmailLabel')}</label>
                         <input
                             type="email"
                             name="email"
@@ -77,7 +79,7 @@ export default function BecomeSellerForm() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Téléphone *</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('PhoneLabel')}</label>
                         <input
                             type="tel"
                             name="phone"
@@ -90,27 +92,27 @@ export default function BecomeSellerForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Ville *</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('CityLabel')}</label>
                         <input
                             type="text"
                             name="city"
                             required
                             className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-black focus:bg-white transition-all font-medium placeholder-gray-400"
-                            placeholder="Casablanca"
+                            placeholder={t('CityPlaceholder')}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Taille du stock estimée *</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('StockSizeLabel')}</label>
                         <select
                             name="stockSize"
                             required
                             className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-black focus:bg-white transition-all font-medium text-gray-700 appearance-none bg-no-repeat bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0iIzQ3NTU2OSI+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTAgMjhMMTAgMTJsLTYgNmwtNi02eiIgY2xpcC1ydWxlPSJldmVub2RkIi8+PC9zdmc+')] bg-[length:20px_20px] bg-[position:right_1rem_center]"
                         >
-                            <option value="">Sélectionnez...</option>
-                            <option value="1-50">1 - 50 livres</option>
-                            <option value="50-200">50 - 200 livres</option>
-                            <option value="200-1000">200 - 1000 livres</option>
-                            <option value="1000+">1000+ livres</option>
+                            <option value="">{t('SelectPlaceholder')}</option>
+                            <option value="1-50">{t('Stock1')}</option>
+                            <option value="50-200">{t('Stock2')}</option>
+                            <option value="200-1000">{t('Stock3')}</option>
+                            <option value="1000+">{t('Stock4')}</option>
                         </select>
                     </div>
                 </div>
@@ -122,11 +124,11 @@ export default function BecomeSellerForm() {
                         disabled={isSubmitting}
                         className={`w-full px-8 py-5 bg-black text-white font-black text-sm uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl ${isSubmitting ? 'opacity-70 cursor-wait' : 'hover:bg-gray-800 hover:shadow-black/20 hover:-translate-y-1'}`}
                     >
-                        <span>{isSubmitting ? 'Envoi en cours...' : 'Soumettre ma candidature'}</span>
+                        <span>{isSubmitting ? t('Submitting') : t('SubmitBtn')}</span>
                         {!isSubmitting && <Send className="w-5 h-5" />}
                     </button>
                     <p className="text-center text-xs text-gray-400 font-bold mt-4">
-                        En soumettant ce formulaire, vous acceptez d&apos;être recontacté par l&apos;équipe Riwaya.
+                        {t('Disclaimer')}
                     </p>
                 </div>
             </form>
@@ -144,9 +146,9 @@ export default function BecomeSellerForm() {
                         <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                             <CheckCircle2 className="w-8 h-8" />
                         </div>
-                        <h3 className="text-2xl font-black text-center mb-3">Merci !</h3>
+                        <h3 className="text-2xl font-black text-center mb-3">{t('ThanksTitle')}</h3>
                         <p className="text-gray-500 font-medium text-center leading-relaxed">
-                            Votre candidature a bien été reçue. Notre équipe vous contactera très prochainement pour finaliser la création de votre boutique.
+                            {t('ThanksMsg')}
                         </p>
                     </div>
                 </div>

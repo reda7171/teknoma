@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 
 export default function SellBookClient({ locale }: { locale: string }) {
     const t = useTranslations('Nav')
+    const tSell = useTranslations('SellBook')
     const router = useRouter()
     
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,7 +32,7 @@ export default function SellBookClient({ locale }: { locale: string }) {
         const file = e.target.files?.[0]
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
-                setError('L\'image ne doit pas dépasser 5MB.')
+                setError(tSell('ErrImageSize'))
                 return
             }
             setImageFile(file)
@@ -46,7 +47,7 @@ export default function SellBookClient({ locale }: { locale: string }) {
         setError('')
         
         if (!imageFile) {
-            setError('Veuillez ajouter une photo de votre livre.')
+            setError(tSell('ErrMissingImage'))
             return
         }
 
@@ -67,7 +68,7 @@ export default function SellBookClient({ locale }: { locale: string }) {
             const result = await res.json()
 
             if (!res.ok) {
-                throw new Error(result.error || 'Une erreur est survenue')
+                throw new Error(result.error || tSell('ErrGeneral'))
             }
 
             setIsSuccess(true)
@@ -84,10 +85,10 @@ export default function SellBookClient({ locale }: { locale: string }) {
             <main className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-black text-pixio-dark mb-4">
-                        Vendez vos livres d'occasion
+                        {tSell('Title')}
                     </h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Donnez une seconde vie à vos livres. Remplissez ce formulaire, nous validerons votre annonce et elle sera publiée sur notre boutique.
+                        {tSell('Description')}
                     </p>
                 </div>
 
@@ -96,9 +97,9 @@ export default function SellBookClient({ locale }: { locale: string }) {
                         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                             <CheckCircle className="w-10 h-10 text-green-600" />
                         </div>
-                        <h2 className="text-2xl font-bold text-green-900 mb-4">Félicitations !</h2>
+                        <h2 className="text-2xl font-bold text-green-900 mb-4">{tSell('SuccessTitle')}</h2>
                         <p className="text-green-800 text-lg mb-8 max-w-md mx-auto">
-                            Votre livre a été soumis avec succès. Notre équipe va examiner votre annonce et elle sera publiée très prochainement.
+                            {tSell('SuccessDesc')}
                         </p>
                         <button 
                             onClick={() => {
@@ -109,11 +110,11 @@ export default function SellBookClient({ locale }: { locale: string }) {
                             }}
                             className="inline-flex px-8 py-4 bg-pixio-dark text-white rounded-full font-bold hover:bg-black transition-colors"
                         >
-                            Vendre un autre livre
+                            {tSell('BtnSellAnother')}
                         </button>
                         <div className="mt-4">
                             <Link href={`/${locale}`} className="text-pixio-primary font-bold hover:underline">
-                                Retour à l'accueil
+                                {tSell('BtnHome')}
                             </Link>
                         </div>
                     </div>
@@ -131,7 +132,7 @@ export default function SellBookClient({ locale }: { locale: string }) {
                             <section>
                                 <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                                     <span className="w-8 h-8 rounded-full bg-pixio-primary/20 text-pixio-primary flex items-center justify-center text-sm">1</span>
-                                    Photo du livre
+                                    {tSell('Step1')}
                                 </h3>
                                 <div className="flex justify-center">
                                     <div className="w-full max-w-sm">
@@ -141,15 +142,15 @@ export default function SellBookClient({ locale }: { locale: string }) {
                                                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <span className="text-white font-bold bg-white/20 backdrop-blur px-4 py-2 rounded-full flex items-center gap-2">
-                                                            <Camera className="w-4 h-4" /> Changer l'image
+                                                            <Camera className="w-4 h-4" /> {tSell('ChangeImage')}
                                                         </span>
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <div className="aspect-[3/4] w-full rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center text-gray-500 group-hover:bg-gray-100 group-hover:border-pixio-primary transition-colors">
                                                     <Upload className="w-10 h-10 mb-3 text-gray-400 group-hover:text-pixio-primary transition-colors" />
-                                                    <span className="font-bold">Ajouter une photo</span>
-                                                    <span className="text-xs mt-2 text-gray-400">JPG, PNG, WEBP (Max 5MB)</span>
+                                                    <span className="font-bold">{tSell('AddImage')}</span>
+                                                    <span className="text-xs mt-2 text-gray-400">{tSell('ImageFormat')}</span>
                                                 </div>
                                             )}
                                             <input 
@@ -169,26 +170,26 @@ export default function SellBookClient({ locale }: { locale: string }) {
                             <section>
                                 <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                                     <span className="w-8 h-8 rounded-full bg-pixio-primary/20 text-pixio-primary flex items-center justify-center text-sm">2</span>
-                                    Détails du livre
+                                    {tSell('Step2')}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">Titre du livre <span className="text-red-500">*</span></label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('BookTitle')}</label>
                                         <input 
                                             required 
                                             type="text" 
-                                            placeholder="Ex: L'Étranger"
+                                            placeholder={tSell('BookTitlePlaceholder')}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.title}
                                             onChange={e => setFormData({...formData, title: e.target.value})}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">Auteur <span className="text-red-500">*</span></label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('Author')}</label>
                                         <input 
                                             required 
                                             type="text" 
-                                            placeholder="Ex: Albert Camus"
+                                            placeholder={tSell('AuthorPlaceholder')}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.author}
                                             onChange={e => setFormData({...formData, author: e.target.value})}
@@ -196,10 +197,10 @@ export default function SellBookClient({ locale }: { locale: string }) {
                                     </div>
                                     
                                     <div className="space-y-2 md:col-span-2">
-                                        <label className="text-sm font-bold text-gray-700">Description ou résumé (optionnel)</label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('DescLabel')}</label>
                                         <textarea 
                                             rows={3}
-                                            placeholder="Parlez un peu du livre ou de pourquoi vous l'avez aimé..."
+                                            placeholder={tSell('DescPlaceholder')}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.description}
                                             onChange={e => setFormData({...formData, description: e.target.value})}
@@ -207,44 +208,44 @@ export default function SellBookClient({ locale }: { locale: string }) {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">Catégorie</label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('Category')}</label>
                                         <select 
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.category}
                                             onChange={e => setFormData({...formData, category: e.target.value})}
                                         >
-                                            <option value="">Sélectionner une catégorie</option>
-                                            <option value="Romans">Romans & Fiction</option>
-                                            <option value="Développement Personnel">Développement Personnel</option>
-                                            <option value="Religion & Spiritualité">Religion & Spiritualité</option>
-                                            <option value="Business">Business</option>
-                                            <option value="Histoire">Histoire</option>
-                                            <option value="Philosophie">Philosophie</option>
+                                            <option value="">{tSell('CatPlaceholder')}</option>
+                                            <option value="Romans">{tSell('CatRomans')}</option>
+                                            <option value="Développement Personnel">{tSell('CatDev')}</option>
+                                            <option value="Religion & Spiritualité">{tSell('CatReligion')}</option>
+                                            <option value="Business">{tSell('CatBusiness')}</option>
+                                            <option value="Histoire">{tSell('CatHistoire')}</option>
+                                            <option value="Philosophie">{tSell('CatPhilo')}</option>
                                         </select>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">État du livre <span className="text-red-500">*</span></label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('Condition')}</label>
                                         <select 
                                             required
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.condition}
                                             onChange={e => setFormData({...formData, condition: e.target.value})}
                                         >
-                                            <option value="GOOD">Bon état (Quelques marques mineures)</option>
-                                            <option value="USED">Déjà utilisé (Marques visibles)</option>
+                                            <option value="GOOD">{tSell('CondGood')}</option>
+                                            <option value="USED">{tSell('CondUsed')}</option>
                                         </select>
                                     </div>
                                     
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">Prix souhaité (DH) <span className="text-red-500">*</span></label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('Price')}</label>
                                         <div className="relative">
                                             <input 
                                                 required 
                                                 type="number" 
                                                 min="1"
                                                 step="1"
-                                                placeholder="Ex: 50"
+                                                placeholder={tSell('PricePlaceholder')}
                                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none pr-16"
                                                 value={formData.price}
                                                 onChange={e => setFormData({...formData, price: e.target.value})}
@@ -263,26 +264,26 @@ export default function SellBookClient({ locale }: { locale: string }) {
                             <section>
                                 <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                                     <span className="w-8 h-8 rounded-full bg-pixio-primary/20 text-pixio-primary flex items-center justify-center text-sm">3</span>
-                                    Vos coordonnées
+                                    {tSell('Step3')}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">Nom complet <span className="text-red-500">*</span></label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('FullName')}</label>
                                         <input 
                                             required 
                                             type="text" 
-                                            placeholder="Votre nom"
+                                            placeholder={tSell('FullNamePlaceholder')}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.fullName}
                                             onChange={e => setFormData({...formData, fullName: e.target.value})}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-700">Numéro de téléphone <span className="text-red-500">*</span></label>
+                                        <label className="text-sm font-bold text-gray-700">{tSell('Phone')}</label>
                                         <input 
                                             required 
                                             type="tel" 
-                                            placeholder="Ex: 0612345678"
+                                            placeholder={tSell('PhonePlaceholder')}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.phone}
                                             onChange={e => setFormData({...formData, phone: e.target.value})}
@@ -301,11 +302,11 @@ export default function SellBookClient({ locale }: { locale: string }) {
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        Publication en cours...
+                                        {tSell('Submitting')}
                                     </>
                                 ) : (
                                     <>
-                                        Soumettre l'annonce
+                                        {tSell('SubmitBtn')}
                                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                     </>
                                 )}

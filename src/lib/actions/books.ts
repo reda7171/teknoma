@@ -432,10 +432,10 @@ export async function approveBook(id: string): Promise<BookResult> {
         const book = await prisma.book.update({
             where: { id },
             data: { active: true, status: 'APPROVED' },
-            include: { customerSeller: true }
+            include: { customerSeller: true, seller: true }
         })
 
-        if (book.customerSeller) {
+        if (book.customerSeller || book.seller) {
             const { sendSellerBookApproved } = await import('@/lib/email')
             sendSellerBookApproved(book).catch(console.error)
         }
@@ -459,7 +459,7 @@ export async function rejectBook(id: string): Promise<BookResult> {
         
         const book = await prisma.book.findUnique({
             where: { id },
-            include: { customerSeller: true }
+            include: { customerSeller: true, seller: true }
         })
 
         if (!book) return { success: false, error: 'Livre introuvable' }
@@ -468,7 +468,7 @@ export async function rejectBook(id: string): Promise<BookResult> {
             where: { id },
         })
 
-        if (book.customerSeller) {
+        if (book.customerSeller || book.seller) {
             const { sendSellerBookRejected } = await import('@/lib/email')
             sendSellerBookRejected(book, 'Non respect de nos critères de sélection').catch(console.error)
         }
