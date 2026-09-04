@@ -963,7 +963,7 @@ export async function updateOrderItems(orderId: string, items: {
                     entity: 'ORDER',
                     entityId: order.id,
                     details: `Mise à jour des articles. Nouveau total: ${newTotal}`,
-                    userId: 'SYSTEM'
+                    adminId: null
                 }
             })
         })

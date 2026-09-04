@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createQuote, updateQuote, deleteQuote } from '@/lib/actions/quotes'
-import { Plus, Edit2, Trash2, Search, Quote as QuoteIcon, CheckCircle, X } from 'lucide-react'
+import { Plus, Edit2, Trash2, Search, Quote as QuoteIcon, CheckCircle, X, Bot } from 'lucide-react'
 
 interface Quote {
     id: string
@@ -11,12 +11,13 @@ interface Quote {
     source: string | null
     bookId: string | null
     tags: string | null
+    locale: string
     isActive: boolean
     createdAt: Date
     book?: { id: string, title: string } | null
 }
 
-export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[] }) {
+export default function QuotesClient({ initialQuotes, authors = [] }: { initialQuotes: Quote[], authors?: string[] }) {
     const [quotes, setQuotes] = useState<Quote[]>(initialQuotes)
     const [search, setSearch] = useState('')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -29,6 +30,7 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
         source: '',
         bookId: '',
         tags: '',
+        locale: 'fr',
         isActive: true
     })
 
@@ -52,6 +54,7 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
             source: quote.source || '',
             bookId: quote.bookId || '',
             tags: quote.tags || '',
+            locale: quote.locale || 'fr',
             isActive: quote.isActive
         })
         setIsAddModalOpen(true)
@@ -65,9 +68,66 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
             source: '',
             bookId: '',
             tags: '',
+            locale: 'fr',
             isActive: true
         })
         setIsAddModalOpen(true)
+    }
+
+    const handleChatGPT = () => {
+        if (!formData.author) {
+            alert('Veuillez d\'abord renseigner le nom de l\'auteur dans le champ ci-dessous.')
+            return
+        }
+        
+        const langMap: Record<string, string> = { fr: 'français', en: 'anglais', ar: 'arabe' }
+        const lang = langMap[formData.locale] || 'français'
+        const prompt = `Donne-moi 5 citations célèbres de l'auteur ${formData.author} en ${lang}. Ne renvoie strictement que le texte des citations, et sépare chaque citation par "##". Ne mets pas de numéros, de guillemets, ni de tirets.`
+        
+        navigator.clipboard.writeText(prompt)
+        alert('Prompt copié !\n\nCollez ce texte dans ChatGPT. Il vous retournera les citations séparées par ##.\nEnsuite, copiez la réponse de ChatGPT et utilisez le bouton "Coller les citations".')
+        window.open('https://chatgpt.com', '_blank')
+    }
+
+    const handlePasteQuotes = async () => {
+        if (!formData.author) {
+            alert('Veuillez d\'abord renseigner l\'auteur dans le formulaire avant de coller.')
+            return
+        }
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text) return
+            
+            const quotesToInsert = text.split('##').map(q => q.trim()).filter(q => q.length > 0)
+            
+            if (quotesToInsert.length === 0) {
+                alert('Aucune citation trouvée. Assurez-vous qu\'elles sont séparées par ##.')
+                return
+            }
+
+            if (!confirm(`Voulez-vous insérer ces ${quotesToInsert.length} citations pour l'auteur ${formData.author} ?`)) {
+                return
+            }
+
+            setLoading(true)
+            for (const quoteText of quotesToInsert) {
+                await createQuote({
+                    text: quoteText,
+                    author: formData.author,
+                    source: formData.source,
+                    bookId: formData.bookId,
+                    tags: formData.tags,
+                    locale: formData.locale,
+                    isActive: true
+                })
+            }
+            alert(`${quotesToInsert.length} citations ajoutées avec succès ! La page va se recharger.`)
+            window.location.reload()
+        } catch (error) {
+            console.error(error)
+            alert('Erreur lors du collage. Vous devez autoriser l\'accès au presse-papier ou bien utiliser le formulaire manuellement.')
+            setLoading(false)
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -119,6 +179,7 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
                         <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-600">
                             <th className="p-4">Texte</th>
                             <th className="p-4">Auteur</th>
+                            <th className="p-4">Langue</th>
                             <th className="p-4">Tags</th>
                             <th className="p-4 text-center">Statut</th>
                             <th className="p-4 text-right">Actions</th>
@@ -139,6 +200,15 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
                                 <td className="p-4">
                                     <p className="text-sm font-medium text-gray-900">{quote.author}</p>
                                     {quote.source && <p className="text-xs text-gray-500">{quote.source}</p>}
+                                </td>
+                                <td className="p-4">
+                                    <span className={`inline-flex px-2 py-1 rounded text-xs font-bold uppercase ${
+                                        quote.locale === 'ar' ? 'bg-amber-100 text-amber-700' :
+                                        quote.locale === 'en' ? 'bg-blue-100 text-blue-700' :
+                                        'bg-purple-100 text-purple-700'
+                                    }`}>
+                                        {quote.locale || 'FR'}
+                                    </span>
                                 </td>
                                 <td className="p-4">
                                     <div className="flex flex-wrap gap-1">
@@ -190,13 +260,34 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
             {isAddModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-xl">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-gray-900">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                                 {editingQuoteId ? 'Modifier la citation' : 'Nouvelle citation'}
                             </h2>
-                            <button onClick={() => setIsAddModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full">
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleChatGPT}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
+                                    title="Générer avec ChatGPT"
+                                >
+                                    <Bot className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Demander à ChatGPT</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handlePasteQuotes}
+                                    disabled={loading}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                                    title="Coller les citations depuis le presse-papier"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Coller les citations</span>
+                                </button>
+                                <button onClick={() => setIsAddModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-200 rounded-full transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
                         
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -217,11 +308,15 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Auteur *</label>
                                     <input 
                                         type="text" required
+                                        list="authors-list"
                                         value={formData.author}
                                         onChange={e => setFormData({...formData, author: e.target.value})}
                                         className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none"
                                         placeholder="Oscar Wilde"
                                     />
+                                    <datalist id="authors-list">
+                                        {authors.map((a, i) => <option key={i} value={a} />)}
+                                    </datalist>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Source (Optionnel)</label>
@@ -246,6 +341,22 @@ export default function QuotesClient({ initialQuotes }: { initialQuotes: Quote[]
                                         placeholder="love, inspirational, funny..."
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Langue *</label>
+                                    <select 
+                                        required
+                                        value={formData.locale}
+                                        onChange={e => setFormData({...formData, locale: e.target.value})}
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none bg-white"
+                                    >
+                                        <option value="fr">Français (FR)</option>
+                                        <option value="ar">Arabe (AR)</option>
+                                        <option value="en">Anglais (EN)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Lier à un livre (ID, Optionnel)</label>
                                     <input 

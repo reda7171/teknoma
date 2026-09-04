@@ -161,7 +161,19 @@ export async function getBookById(id: string) {
     try {
         const book = await prisma.book.findUnique({
             where: { id },
-            include: { customerSeller: true }
+            include: {
+                customerSeller: true,
+                packBooks: {
+                    include: {
+                        pack: { select: { id: true, name: true, active: true } }
+                    }
+                },
+                seoCategoryBooks: {
+                    include: {
+                        seoCategory: { select: { id: true, title: true, slug: true } }
+                    }
+                }
+            }
         })
 
         if (!book) {
@@ -677,7 +689,8 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
                         { text: '🎁 -30 Dhs', callback_data: `offer_30:${userSession}` }
                     ],
                     [
-                        { text: '🟢 Ping (Session)', callback_data: `ping:${userSession}` }
+                        { text: '🟢 Ping (Session)', callback_data: `ping:${userSession}` },
+                        { text: '🔴 Stock Zéro', callback_data: `zero_stock:${book.id}` }
                     ]
                 ]
             }

@@ -1327,6 +1327,7 @@ model Quote {
   source    String?  @db.VarChar(255)
   bookId    String?
   book      Book?    @relation(fields: [bookId], references: [id])
+  locale    String   @default("fr") @db.VarChar(10)
   tags      String?  @db.Text
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

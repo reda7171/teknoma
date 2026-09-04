@@ -1,4 +1,5 @@
 import { getQuotes } from '@/lib/actions/quotes'
+import { getAllAuthors } from '@/lib/actions/admin-authors'
 import QuotesClient from './QuotesClient'
 import { Quote } from 'lucide-react'
 
@@ -12,6 +13,8 @@ export default async function QuotesPage(props: { searchParams: Promise<{ q?: st
     const tag = searchParams.tag || ''
 
     const quotes = await getQuotes(q, tag)
+    const authorsResult = await getAllAuthors()
+    const authors = authorsResult.success ? authorsResult.data.map(a => a.name) : []
     
     return (
         <div className="space-y-8 max-w-7xl mx-auto">
@@ -25,7 +28,7 @@ export default async function QuotesPage(props: { searchParams: Promise<{ q?: st
                 </div>
             </div>
 
-            <QuotesClient initialQuotes={quotes} />
+            <QuotesClient initialQuotes={quotes} authors={authors} />
         </div>
     )
 }
