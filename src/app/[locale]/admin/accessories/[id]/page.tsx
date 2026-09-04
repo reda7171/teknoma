@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, Trash2, Package, Image as ImageIcon, Upload, Link2, Loader2, Video, Play, X } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { publishAccessoriesToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
@@ -44,6 +44,9 @@ export default function EditAccessoryPage({
         jumiaPriceMarkup: '0',
         jumiaStock: ''
     })
+    const [videos, setVideos] = useState<string[]>([])
+    const [isUploadingVideo, setIsUploadingVideo] = useState(false)
+    const videoInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         fetch(`/api/admin/accessories/${id}`)
@@ -70,6 +73,10 @@ export default function EditAccessoryPage({
                     jumiaPriceMarkup: data.jumiaPriceMarkup?.toString() || '0',
                     jumiaStock: data.jumiaStock?.toString() || ''
                 })
+                // Charger les videos si elles existent
+                if (data.videos && Array.isArray(data.videos)) {
+                    setVideos(data.videos)
+                }
                 
                 if (data.sellerSku) {
                     checkJumiaLinkBySkuExact(data.sellerSku, data.jumiaProductSid).then(linked => {
@@ -157,7 +164,7 @@ export default function EditAccessoryPage({
             const res = await fetch(`/api/admin/accessories/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ ...formData, videos })
             })
 
             if (res.ok) {
@@ -334,7 +341,7 @@ export default function EditAccessoryPage({
                                 <option value="FURNITURE">Fourniture bureau</option>
                                 <option value="BOARD_GAME">Jeux de société</option>
                                 <option value="KIDS">Produit enfant</option>
-                                <option value="ACCESSORY">Autre accessoire</option>
+                                <option value="ACCESSORY">Accessoire</option>
                             </select>
                         </div>
 
@@ -593,6 +600,106 @@ export default function EditAccessoryPage({
                     </div>
                 </div>
             </form>
+
+            {/* Section Videos UGC */}
+            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6 mt-8">
+                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                            <Video className="w-5 h-5 text-rose-500" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-black text-slate-900">Vidéos UGC</h3>
+                            <p className="text-[10px] text-slate-400 font-medium">User Generated Content — témoignages & démonstrations</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => videoInputRef.current?.click()}
+                        disabled={isUploadingVideo}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-rose-500 text-white rounded-xl font-black text-xs hover:bg-rose-600 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                        {isUploadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                        {isUploadingVideo ? 'Upload...' : 'Ajouter une vidéo'}
+                    </button>
+                    <input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        multiple
+                        className="hidden"
+                        onChange={async (e) => {
+                            const files = e.target.files
+                            if (!files || files.length === 0) return
+                            setIsUploadingVideo(true)
+                            try {
+                                const uploaded: string[] = []
+                                for (let i = 0; i < files.length; i++) {
+                                    const fd = new FormData()
+                                    fd.append('file', files[i])
+                                    const res = await fetch('/api/admin/upload-video', { method: 'POST', body: fd })
+                                    if (res.ok) {
+                                        const json = await res.json()
+                                        uploaded.push(json.url)
+                                    }
+                                }
+                                if (uploaded.length > 0) {
+                                    const newVideos = [...videos, ...uploaded]
+                                    setVideos(newVideos)
+                                    // Sauvegarder automatiquement
+                                    await fetch(`/api/admin/accessories/${id}`, {
+                                        method: 'PATCH',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ ...formData, videos: newVideos })
+                                    })
+                                }
+                            } finally {
+                                setIsUploadingVideo(false)
+                                if (videoInputRef.current) videoInputRef.current.value = ''
+                            }
+                        }}
+                    />
+                </div>
+
+                {videos.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-300">
+                        <Play className="w-12 h-12 mb-3" />
+                        <p className="text-sm font-bold">Aucune vidéo UGC pour cet article</p>
+                        <p className="text-xs mt-1">MP4, WebM, MOV — Max 200MB</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {videos.map((url, i) => (
+                            <div key={i} className="relative group rounded-2xl overflow-hidden bg-slate-900 aspect-video">
+                                <video
+                                    src={url}
+                                    className="w-full h-full object-cover"
+                                    controls
+                                    preload="metadata"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const newVideos = videos.filter((_, idx) => idx !== i)
+                                        setVideos(newVideos)
+                                        await fetch(`/api/admin/accessories/${id}`, {
+                                            method: 'PATCH',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ ...formData, videos: newVideos })
+                                        })
+                                    }}
+                                    className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                                <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-lg">
+                                    UGC #{i + 1}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

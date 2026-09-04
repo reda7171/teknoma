@@ -30,7 +30,7 @@ export default function CheckoutClient({
     minOrderAmount = 0,
     paymentSettings
 }: { 
-    user?: { fullName?: string | null; email: string; image?: string | null } | null;
+    user?: { fullName?: string | null; email: string; image?: string | null; credits?: number } | null;
     minOrderAmount?: number;
     paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] }
 }) {
@@ -43,6 +43,7 @@ export default function CheckoutClient({
     const [coupon, setCoupon] = useState<any>(null)
     const [gifts, setGifts] = useState<any[]>([])
     const [selectedBankIndex, setSelectedBankIndex] = useState<number | null>(null)
+    const [useCredits, setUseCredits] = useState(false)
     const t = useTranslations('Checkout')
     const locale = useLocale()
 
@@ -188,7 +189,9 @@ export default function CheckoutClient({
     const instantDiscount = instantOfferDiscount || 0
     const totalDiscountAmount = discountAmount + instantDiscount
 
-    const finalTotal = Math.max(0, subtotal - totalDiscountAmount + shippingFee)
+    const finalTotalBeforeCredits = Math.max(0, subtotal - totalDiscountAmount + shippingFee)
+    const creditsToUse = useCredits && user?.credits ? Math.min(user.credits, finalTotalBeforeCredits) : 0
+    const finalTotal = Math.max(0, finalTotalBeforeCredits - creditsToUse)
 
     // Sélectionner le meilleur cadeau éligible
     const eligibleGift = gifts
@@ -245,6 +248,7 @@ export default function CheckoutClient({
                 items: orderItems,
                 couponCode: coupon?.code,
                 discount: totalDiscountAmount,
+                useCredits: useCredits,
                 utmSource: localStorage.getItem('utm_source') || undefined,
                 utmMedium: localStorage.getItem('utm_medium') || undefined,
                 utmCampaign: localStorage.getItem('utm_campaign') || undefined,
@@ -715,6 +719,32 @@ export default function CheckoutClient({
                                     <span className="text-black">{shippingFee} درهم</span>
                                 )}
                             </div>
+                            
+                            {user?.credits && user.credits > 0 ? (
+                                <div className="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100 mt-4">
+                                    <div className="flex items-center gap-3">
+                                        <Wallet className="w-6 h-6 text-amber-500" />
+                                        <div>
+                                            <p className="text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-amber-900">{locale === 'ar' ? 'استخدام الرصيد' : 'Utiliser mon solde'}</p>
+                                            <p className="text-[10px] font-bold text-amber-600">{user.credits} درهم {locale === 'ar' ? 'متاح' : 'disponible'}</p>
+                                        </div>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" className="sr-only peer" checked={useCredits} onChange={(e) => setUseCredits(e.target.checked)} />
+                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] rtl:after:right-[2px] rtl:after:left-auto after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                                    </label>
+                                </div>
+                            ) : null}
+
+                            {creditsToUse > 0 && (
+                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-amber-800 bg-amber-100 px-4 py-3 rounded-2xl mt-2">
+                                    <span className="flex items-center gap-2">
+                                        <Wallet className="w-4 h-4" /> {locale === 'ar' ? 'خصم الرصيد' : 'Solde appliqué'}
+                                    </span>
+                                    <span>-{creditsToUse.toFixed(0)} درهم</span>
+                                </div>
+                            )}
+
                             <div className="pt-6 border-t border-gray-50">
                                 <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-widest rtl:tracking-normal mb-1">{t('TotalAmount')}</p>
                                 <div className="flex items-baseline justify-between">
@@ -734,7 +764,7 @@ export default function CheckoutClient({
                             form="checkout-form"
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full bg-black text-white font-black py-6 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.2)] hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                            className="w-full bg-black text-white font-black py-6 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.2)] hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs rtl:text-lg rtl:tracking-normal animate-bounce-light"
                         >
                             {isSubmitting ? (
                                 <>

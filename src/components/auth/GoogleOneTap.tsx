@@ -39,7 +39,7 @@ function GoogleOneTapInner() {
             console.log('Google One Tap Error')
         },
         auto_select: false,
-        use_fedcm_for_prompt: false, // Disabled to prevent FedCM NetworkError in local dev
+        use_fedcm_for_prompt: true,
     })
 
     if (!mounted) return null

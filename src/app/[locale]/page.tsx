@@ -1247,5 +1247,8 @@ async function GoogleOneTapWrapper() {
   const { getCommunityUser } = await import('@/lib/actions/community-auth');
   const user = await getCommunityUser();
   if (user) return null;
+  const { prisma } = await import('@/lib/prisma');
+  const googleEnabledSetting = await prisma.siteSettings.findUnique({ where: { key: 'auth_google_enabled' } });
+  if (googleEnabledSetting?.value === 'false') return null;
   return <GoogleOneTap />;
 }

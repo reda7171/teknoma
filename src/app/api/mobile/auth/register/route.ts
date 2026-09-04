@@ -56,6 +56,21 @@ export async function POST(req: Request) {
       });
     }
 
+    // Generate a welcome coupon
+    try {
+      const couponCode = `BIENVENUE-${Math.random().toString(36).substring(2,6).toUpperCase()}${customer.id.substring(0,4).toUpperCase()}`
+      await prisma.coupon.create({
+          data: {
+              code: couponCode,
+              discount: 10,
+              type: 'FIXED_AMOUNT',
+              isActive: true,
+          }
+      })
+    } catch (err) {
+      console.error('Failed to create welcome gift', err)
+    }
+
     // Generate JWT
     const token = jwt.sign(
       { id: customer.id, email: customer.email, role: 'CUSTOMER' },

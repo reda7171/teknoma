@@ -65,14 +65,14 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                                     <h3 className="text-lg font-black text-black">
                                         {t('OrderNumber')}{order.id.slice(0, 8)}
                                     </h3>
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
+                                    <span className={`px-3 py-1 rounded-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest ${order.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
                                         order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
                                             'bg-yellow-100 text-yellow-700'
                                         }`}>
                                         {t(`Status.${order.status}`)}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-gray-400 font-bold">
+                                <div className="flex items-center gap-2 text-xs rtl:text-sm rtl:tracking-normal text-gray-400 font-bold">
                                     <Calendar className="w-4 h-4" />
                                     {new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR', {
                                         day: 'numeric',
@@ -89,7 +89,7 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                                     <button
                                         onClick={() => handleCancelOrder(order.id)}
                                         disabled={cancellingOrderId === order.id}
-                                        className="text-red-600 bg-white border-2 border-red-100 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:border-red-200 transition-all active:scale-95 disabled:opacity-50"
+                                        className="text-red-600 bg-white border-2 border-red-100 px-6 py-2.5 rounded-xl text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest hover:bg-red-50 hover:border-red-200 transition-all active:scale-95 disabled:opacity-50"
                                     >
                                         {cancellingOrderId === order.id ? '...' : (locale === 'ar' ? 'إلغاء الطلب' : locale === 'en' ? 'Cancel Order' : 'Annuler')}
                                     </button>
@@ -97,7 +97,7 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                                 {order.status !== 'CANCELLED' && !order.trackingID && (
                                     <Link
                                         href={`/tracking?orderId=${order.id}&contact=${order.phone || order.email || ''}`}
-                                        className="text-black bg-white border-2 border-black px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all active:scale-95 text-center"
+                                        className="text-black bg-white border-2 border-black px-6 py-2.5 rounded-xl text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all active:scale-95 text-center"
                                     >
                                         {t('TrackButton')}
                                     </Link>
@@ -160,7 +160,7 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                             <div className="flex items-start gap-3">
                                 <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                                    <p className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1">
                                         {t('DeliveryAddress')}
                                     </p>
                                     <p className="text-sm font-bold text-black leading-tight">
@@ -174,10 +174,10 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                             <div className="flex items-start gap-3">
                                 <Phone className="w-5 h-5 text-gray-400 mt-0.5" />
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                                    <p className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1">
                                         {t('Contact')}
                                     </p>
-                                    <p className="text-sm font-bold text-black">
+                                    <p className="text-sm font-bold text-black" dir="ltr" style={{ unicodeBidi: 'plaintext' }}>
                                         {order.phone}
                                     </p>
                                 </div>

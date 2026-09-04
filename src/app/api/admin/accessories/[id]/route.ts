@@ -50,7 +50,8 @@ export async function PATCH(
                 isSyncedWithJumia: data.isSyncedWithJumia,
                 jumiaPriceMarkup: data.jumiaPriceMarkup !== undefined ? parseFloat(data.jumiaPriceMarkup) : undefined,
                 jumiaProductSid: data.jumiaProductSid,
-                jumiaStock: data.jumiaStock !== undefined ? parseInt(data.jumiaStock) : undefined
+                jumiaStock: data.jumiaStock !== undefined ? parseInt(data.jumiaStock) : undefined,
+                videos: data.videos !== undefined ? data.videos : undefined
             }
         })
 

@@ -1774,5 +1774,58 @@
       "friends": "Friends",
       "positive": "Positive"
     }
+  },
+  "ExtraProductDetail": {
+    "BackToCatalog": "Back to catalog",
+    "StockLeft": "Only {stock} left",
+    "OutOfStock": "Out of stock",
+    "FastDelivery": "24/48h Delivery",
+    "COD": "Cash on Delivery",
+    "QualityGuaranteed": "Quality Guaranteed",
+    "ExcellentRating": "(Excellent rating)",
+    "ProductPresentation": "Product Presentation",
+    "TechSpecs": "Technical Specs & Dimensions",
+    "Availability": "Availability",
+    "InStockReady": "In stock (Ready to ship)",
+    "OnOrder": "On order",
+    "DeliveryAndWarranty": "Delivery & Warranty",
+    "DeliveryStep1": "<strong>Cash on Delivery (COD):</strong> Order safely. You inspect your product upon arrival and pay the exact amount in cash to our delivery partner.",
+    "DeliveryStep2": "<strong>Fast delivery:</strong> We ship to all major cities in Morocco within 24 to 48 hours. For other regions, expect up to 72 hours maximum.",
+    "DeliveryStep3": "<strong>Satisfaction or Exchange Guarantee:</strong> In case of a manufacturing defect, you have 3 days to request a free exchange.",
+    "YouMightAlsoLike": "You might also like...",
+    "SeeAll": "See all",
+    "Edit": "Edit product",
+    "Categories": {
+      "FURNITURE": "Office Supplies",
+      "BOARD_GAME": "Board Games",
+      "BOOKMARK": "Bookmarks",
+      "LIBRARY": "Bookcases",
+      "USB": "USB Flash Drives",
+      "ACCESSORY": "Accessories"
+    },
+    "Specs": {
+      "TypeDuration": "Type / Duration",
+      "AgePlayers": "Age / Players",
+      "Content": "Content",
+      "Warranty": "Warranty",
+      "BoardGameDuration": "30 to 60 mins",
+      "Standard": "Standard",
+      "BoardGameAge": "10+ years / 2-4 players",
+      "BoardGameContent": "Complete",
+      "RiwayaWarranty": "Riwaya Quality Warranty"
+    }
+  },
+  "AuthBenefits": {
+    "title": "Why join Riwaya?",
+    "b1_title": "Welcome Bonus",
+    "b1_desc": "Get 10 DH in your wallet and a promo code upon registration.",
+    "b2_title": "Cash on Delivery",
+    "b2_desc": "Shop safely and pay only when you receive your order.",
+    "b3_title": "Fast Delivery",
+    "b3_desc": "Express delivery everywhere in Morocco.",
+    "b4_title": "Book Exchange",
+    "b4_desc": "Exchange your books with a community of readers.",
+    "b5_title": "Economical Packs",
+    "b5_desc": "Take advantage of our exclusive offers on book packs."
   }
 }

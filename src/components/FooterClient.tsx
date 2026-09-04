@@ -237,7 +237,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Pinterest" className="text-gray-400 hover:text-white transition-colors"><PinterestIcon className="w-5 h-5" /></a>}
                 </div>
 
-                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">
                     <p>© 2026 riwaya world. {t('Rights')}</p>
 
                     <div className="md:absolute md:left-1/2 md:-translate-x-1/2 text-center">

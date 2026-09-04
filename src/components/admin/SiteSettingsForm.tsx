@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { updateMultipleSettings } from '@/lib/actions/site-settings'
-import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link, MessageSquare } from 'lucide-react'
+import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link, MessageSquare, Users } from 'lucide-react'
 interface SettingsFormProps {
     initialSettings: Record<string, string>
 }
@@ -49,6 +49,9 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
             } else if (key === 'n8n_facebook_webhook' || key.startsWith('facebook_') || key.startsWith('meta_')) {
                 category = 'integrations'
                 description = `Intégration ${key}`
+            } else if (key.startsWith('auth_')) {
+                category = 'auth'
+                description = `Authentification ${key}`
             }
 
             return { key, value, category, description }
@@ -466,6 +469,36 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Authentification Sociale */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-8">
+                <h2 className="text-2xl font-black text-black mb-6 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                        <Users className="w-5 h-5 text-white" />
+                    </div>
+                    Authentification Sociale
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.auth_google_enabled !== 'false'}
+                            onChange={(e) => handleChange('auth_google_enabled', e.target.checked ? 'true' : 'false')}
+                            className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black accent-black"
+                        />
+                        <span className="text-sm font-bold text-gray-700">Activer la connexion Google</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.auth_facebook_enabled !== 'false'}
+                            onChange={(e) => handleChange('auth_facebook_enabled', e.target.checked ? 'true' : 'false')}
+                            className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black accent-black"
+                        />
+                        <span className="text-sm font-bold text-gray-700">Activer la connexion Facebook</span>
+                    </label>
                 </div>
             </div>
 

@@ -966,6 +966,7 @@ model ExtraProduct {
   warranty            String?     @db.VarChar(255)
   weight              String?     @db.VarChar(255)
   images              Json?
+  videos              Json?
   sellerSku           String?     @unique @db.VarChar(100)
   jumiaHighlights     String?     @db.Text
   jumiaPackageContent String?     @db.VarChar(500)

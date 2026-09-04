@@ -184,28 +184,28 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Nom */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{tc('FullName')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{tc('FullName')}</label>
                         <div className="relative">
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                             <input
                                 name="fullName"
                                 defaultValue={user.fullName}
                                 required
-                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black rtl:text-base"
                             />
                         </div>
                     </div>
 
                     {/* Ville */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{tc('City')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{tc('City')}</label>
                         <div className="relative">
                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none z-10" />
                             <select
                                 name="city"
                                 defaultValue={user.city}
                                 required
-                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black appearance-none cursor-pointer"
+                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black appearance-none cursor-pointer rtl:text-base"
                             >
                                 <option value="" disabled>{tc('CityPlaceholder')}</option>
                                 {MOROCCO_CITIES.map((city) => (
@@ -224,28 +224,28 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Quartier */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('NeighborhoodLabel')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{t('NeighborhoodLabel')}</label>
                         <div className="relative">
                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                             <input
                                 name="neighborhood"
                                 defaultValue={user.neighborhood || ''}
                                 placeholder={t('NeighborhoodPlaceholder')}
-                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black rtl:text-base rtl:placeholder:text-sm"
                             />
                         </div>
                     </div>
 
                     {/* Adresse */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('AddressLabel')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{t('AddressLabel')}</label>
                         <div className="relative">
                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                             <input
                                 name="address"
                                 defaultValue={user.address || ''}
                                 placeholder={t('AddressPlaceholder')}
-                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black rtl:text-base rtl:placeholder:text-sm"
                             />
                         </div>
                     </div>
@@ -253,14 +253,14 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
 
                 {/* Bio */}
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('BioLabel')}</label>
+                    <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{t('BioLabel')}</label>
                     <div className="relative">
                         <FileText className="absolute left-4 top-4 w-5 h-5 text-gray-300" />
                         <textarea
                             name="bio"
                             defaultValue={user.bio || ''}
                             rows={3}
-                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black resize-none"
+                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black resize-none rtl:text-base rtl:placeholder:text-sm"
                             placeholder={t('BioPlaceholder')}
                         />
                     </div>
@@ -268,7 +268,7 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
 
                 {/* Réseaux Sociaux */}
                 <div className="space-y-4 pt-4 border-t border-gray-100">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-black">{t('Socials')}</h3>
+                    <h3 className="text-sm rtl:text-lg rtl:tracking-normal font-black uppercase tracking-widest text-black">{t('Socials')}</h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="relative">
@@ -277,7 +277,7 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                                 name="instagram"
                                 defaultValue={user.instagram || ''}
                                 placeholder="@username"
-                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-black outline-none text-xs font-bold"
+                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-black outline-none text-xs font-bold rtl:text-sm rtl:placeholder:text-sm"
                             />
                         </div>
 
@@ -287,7 +287,7 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                                 name="facebook"
                                 defaultValue={user.facebook || ''}
                                 placeholder="@username"
-                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-black outline-none text-xs font-bold"
+                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-black outline-none text-xs font-bold rtl:text-sm rtl:placeholder:text-sm"
                             />
                         </div>
 
@@ -297,7 +297,7 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                                 name="twitter"
                                 defaultValue={user.twitter || ''}
                                 placeholder="@username"
-                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-black outline-none text-xs font-bold"
+                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-black outline-none text-xs font-bold rtl:text-sm rtl:placeholder:text-sm"
                             />
                         </div>
                     </div>
@@ -305,33 +305,33 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                 
                 {/* Security Section */}
                 <div className="space-y-4 pt-6 border-t border-gray-100">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-black">{tc('Password')}</h3>
+                    <h3 className="text-sm rtl:text-lg rtl:tracking-normal font-black uppercase tracking-widest text-black">{tc('Password')}</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Nouveau mot de passe */}
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('NewPasswordLabel')}</label>
+                            <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{t('NewPasswordLabel')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                                 <input
                                     type="password"
                                     name="password"
                                     placeholder={t('NewPasswordPlaceholder')}
-                                    className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                    className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black rtl:text-base rtl:placeholder:text-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Confirmer le mot de passe */}
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('ConfirmPasswordLabel')}</label>
+                            <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{t('ConfirmPasswordLabel')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                                 <input
                                     type="password"
                                     name="confirmPassword"
                                     placeholder={t('ConfirmPasswordPlaceholder')}
-                                    className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                    className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black rtl:text-base rtl:placeholder:text-sm"
                                 />
                             </div>
                         </div>
@@ -353,7 +353,7 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
                 <button
                     type="submit"
                     disabled={loading || success}
-                    className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                    className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs rtl:text-sm rtl:tracking-normal"
                 >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                         <>

@@ -98,8 +98,8 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
                         <BookMarked className="w-5 h-5 text-amber-600" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-black tracking-tight">{t('Title')}</h2>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('Subtitle')}</p>
+                        <h2 className="text-2xl rtl:text-3xl font-black text-black tracking-tight">{t('Title')}</h2>
+                        <p className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{t('Subtitle')}</p>
                     </div>
                 </div>
                 <button
