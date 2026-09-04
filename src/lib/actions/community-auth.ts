@@ -68,9 +68,33 @@ export async function register(formData: FormData): Promise<AuthResult> {
                 password: hashedPassword,
                 city: data.city,
                 role: 'USER' as any, // Cast car enum généré peut-être pas à jour dans l'IDE
-                credits: 10, // Cadeau de bienvenue
+                credits: 10, // Cadeau de bienvenue (-10 Dhs dans le wallet)
             }
         })
+
+        // Créer un bon de réduction et une notification de bienvenue
+        try {
+            const couponCode = `BIENVENUE-${Math.random().toString(36).substring(2,6).toUpperCase()}${user.id.substring(0,4).toUpperCase()}`
+            await prisma.coupon.create({
+                data: {
+                    code: couponCode,
+                    discount: 10,
+                    type: 'FIXED_AMOUNT',
+                    isActive: true,
+                }
+            })
+            
+            await prisma.notification.create({
+                data: {
+                    userId: user.id,
+                    title: '🎁 Cadeau de bienvenue !',
+                    message: `Bienvenue sur Riwaya ! Vous avez reçu 10 Dhs dans votre wallet et un bon de réduction supplémentaire de 10 Dhs avec le code : ${couponCode}`,
+                    type: 'SYSTEM' as any,
+                }
+            })
+        } catch (err) {
+            console.error('Failed to create welcome gift', err)
+        }
 
         // Notification Telegram
         try {

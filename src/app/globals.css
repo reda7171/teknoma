@@ -94,6 +94,15 @@
   100% { transform: translateX(100%); }
 }
 
+@keyframes bounce-light {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce-light {
+  animation: bounce-light 2s infinite ease-in-out;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

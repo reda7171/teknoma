@@ -26,7 +26,7 @@ export default async function OrdersPage({
                     <h1 className="text-4xl md:text-5xl font-black text-black tracking-tighter mb-2">
                         {t('Title')}
                     </h1>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs rtl:text-sm rtl:tracking-normal">
                         {t('Subtitle')}
                     </p>
                 </div>

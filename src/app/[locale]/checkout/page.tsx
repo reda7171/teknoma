@@ -22,6 +22,7 @@ export default async function CheckoutPage() {
         fullName: user.fullName,
         email: user.email,
         image: user.image,
+        credits: user.credits,
     } : null
 
     return (

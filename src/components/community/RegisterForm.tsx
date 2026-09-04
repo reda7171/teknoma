@@ -9,7 +9,12 @@ import { MOROCCO_CITIES } from '@/lib/constants/cities'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import OAuthButtons from './OAuthButtons'
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+    googleEnabled?: boolean;
+    facebookEnabled?: boolean;
+}
+
+export default function RegisterForm({ googleEnabled = true, facebookEnabled = true }: RegisterFormProps) {
     const t = useTranslations('Community')
     const tm = useTranslations('Community.Market')
     const tcmn = useTranslations('Common')
@@ -115,7 +120,7 @@ export default function RegisterForm() {
                 </form>
 
                 <div className="mt-8">
-                    <OAuthButtons />
+                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
                 </div>
 
                 <div className="mt-8 text-center">

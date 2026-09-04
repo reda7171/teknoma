@@ -7,7 +7,12 @@ import { Link, useRouter } from '@/i18n/routing'
 import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import OAuthButtons from './OAuthButtons'
 
-export default function LoginForm() {
+interface LoginFormProps {
+    googleEnabled?: boolean;
+    facebookEnabled?: boolean;
+}
+
+export default function LoginForm({ googleEnabled = true, facebookEnabled = true }: LoginFormProps) {
     const t = useTranslations('Community')
     const tcmn = useTranslations('Common')
     const router = useRouter()
@@ -36,13 +41,13 @@ export default function LoginForm() {
         <div className="w-full max-w-md">
             <div className="text-center mb-10">
                 <h1 className="text-4xl font-black text-black tracking-tighter mb-2">{t('LoginTitle')}</h1>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">{t('LoginSubtitle')}</p>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs rtl:text-sm rtl:tracking-normal">{t('LoginSubtitle')}</p>
             </div>
 
             <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-black/5 border border-gray-100">
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
                         <input
                             name="email"
                             type="email"
@@ -53,7 +58,7 @@ export default function LoginForm() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
                         <div className="relative">
                             <input
                                 name="password"
@@ -81,7 +86,7 @@ export default function LoginForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                        className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs rtl:text-sm rtl:tracking-normal"
                     >
                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('LoginButton')}
                         {!loading && <ArrowRight className="w-4 h-4 rtl:rotate-180" />}
@@ -89,11 +94,11 @@ export default function LoginForm() {
                 </form>
 
                 <div className="mt-8">
-                    <OAuthButtons />
+                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
                 </div>
 
                 <div className="mt-8 text-center">
-                    <p className="text-xs font-bold text-gray-400">
+                    <p className="text-xs rtl:text-sm font-bold text-gray-400">
                         {t('NoAccount')} <Link href="/community/register" className="text-black underline decoration-2 underline-offset-4 hover:text-gray-600 transition-colors">{t('RegisterButton')}</Link>
                     </p>
                 </div>

@@ -111,13 +111,20 @@ export default async function CommunityDashboard() {
                         </div>
                     </div>
 
-                    <div className="flex gap-4 z-10">
+                    <div className="flex gap-4 z-10 flex-wrap justify-center md:justify-start">
                         <Link href="/community/exchanges" className="bg-white border-2 border-gray-100 px-8 py-4 rounded-3xl flex flex-col items-center min-w-[120px] hover:border-black transition-all group hover:shadow-lg text-center">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors">{t('ExchangesLabel')}</span>
+                            <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors">{t('ExchangesLabel')}</span>
                             <span className="text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">
                                 {exchangeCount}
                             </span>
                         </Link>
+                        
+                        <div className="bg-amber-100 border-2 border-transparent px-8 py-4 rounded-3xl flex flex-col items-center min-w-[120px] hover:border-amber-400 transition-all shadow-sm text-center">
+                            <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-amber-700 mb-1">{t('Credits')}</span>
+                            <span className="text-3xl font-black text-amber-900 tracking-tighter flex items-center gap-2">
+                                {u.credits || 0} DH <Coins className="w-6 h-6 text-amber-600" />
+                            </span>
+                        </div>
                     </div>
 
                     {/* Logout Button (Absolute Top Right) */}
@@ -139,11 +146,11 @@ export default async function CommunityDashboard() {
                                 <BookOpen className="w-7 h-7 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-black group-hover:text-amber-600 transition-colors">{t('Dashboard.ExploreMarketTitle')}</h3>
-                                <p className="text-xs font-bold text-gray-400">{t('Dashboard.ExploreMarketDesc')}</p>
+                                <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors">{t('Dashboard.ExploreMarketTitle')}</h3>
+                                <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400">{t('Dashboard.ExploreMarketDesc')}</p>
                             </div>
                         </div>
-                        <p className="text-sm text-gray-500">{t('Dashboard.ExploreMarketLong')}</p>
+                        <p className="text-sm rtl:text-base text-gray-500">{t('Dashboard.ExploreMarketLong')}</p>
                     </Link>
 
                     <Link href="/community/exchanges" className="bg-white rounded-[2.5rem] p-8 border border-gray-100 hover:border-black transition-all group hover:shadow-xl">
@@ -152,11 +159,11 @@ export default async function CommunityDashboard() {
                                 <RefreshCw className="w-7 h-7 text-black group-hover:text-white transition-colors" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-black group-hover:text-amber-600 transition-colors">{t('Dashboard.ManageExchangesTitle')}</h3>
-                                <p className="text-xs font-bold text-gray-400">{t('Dashboard.ManageExchangesDesc')}</p>
+                                <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors">{t('Dashboard.ManageExchangesTitle')}</h3>
+                                <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400">{t('Dashboard.ManageExchangesDesc')}</p>
                             </div>
                         </div>
-                        <p className="text-sm text-gray-500">{t('Dashboard.ManageExchangesLong')}</p>
+                        <p className="text-sm rtl:text-base text-gray-500">{t('Dashboard.ManageExchangesLong')}</p>
                     </Link>
                 </div>
                 )}
@@ -168,7 +175,7 @@ export default async function CommunityDashboard() {
                     <h2 className="text-2xl font-black text-black uppercase tracking-normal flex items-center gap-3">
                         <BookOpen className="w-6 h-6" /> {t('MyBooks')}
                     </h2>
-                    <Link href="/community/books/new" className="bg-black text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all shadow-lg active:scale-95 group">
+                    <Link href="/community/books/new" className="bg-black text-white px-6 py-3 rounded-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all shadow-lg active:scale-95 group">
                         <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> {t('AddBook')}
                     </Link>
                 </div>

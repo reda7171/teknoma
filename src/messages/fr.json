@@ -799,7 +799,7 @@
     "AlreadyAccount": "Déjà inscrit ?",
     "MyBooks": "Mes Livres",
     "AddBook": "Proposer un livre",
-    "Credits": "Crédits",
+    "Credits": "Solde",
     "ExchangesLabel": "Échanges",
     "TopReaders": "Top Lecteurs",
     "TopReadersTitle": "Les Plus Grands Lecteurs",
@@ -1685,5 +1685,58 @@
       "friends": "Amitié",
       "positive": "Positif"
     }
+  },
+  "ExtraProductDetail": {
+    "BackToCatalog": "Retour au catalogue",
+    "StockLeft": "Reste {stock}",
+    "OutOfStock": "Rupture de stock",
+    "FastDelivery": "Livraison 24/48h",
+    "COD": "Paiement COD",
+    "QualityGuaranteed": "Garantie Qualité",
+    "ExcellentRating": "(Excellente appréciation)",
+    "ProductPresentation": "Présentation du produit",
+    "TechSpecs": "Fiche technique & Dimensions",
+    "Availability": "Disponibilité",
+    "InStockReady": "En stock (Prêt à l'envoi)",
+    "OnOrder": "Sur commande",
+    "DeliveryAndWarranty": "Livraison & Garantie",
+    "DeliveryStep1": "<strong>Paiement à la Livraison (COD) :</strong> Commandez en toute sécurité. Vous inspectez votre produit à l'arrivée et réglez le montant exact en espèces auprès de notre livreur partenaire.",
+    "DeliveryStep2": "<strong>Délais rapides :</strong> Nous expédions dans toutes les grandes villes du Maroc en 24h à 48h. Pour les autres régions, comptez 72h maximum.",
+    "DeliveryStep3": "<strong>Garantie Satisfait ou Échangé :</strong> En cas de défaut de fabrication ou de non-conformité, vous disposez de 3 jours calendaires pour demander un échange gratuit.",
+    "YouMightAlsoLike": "Vous aimerez aussi...",
+    "SeeAll": "Tout voir",
+    "Edit": "Modifier le produit",
+    "Categories": {
+      "FURNITURE": "Fournitures de bureau",
+      "BOARD_GAME": "Jeux de société",
+      "BOOKMARK": "Marque-pages",
+      "LIBRARY": "Bibliothèques",
+      "USB": "Clés USB",
+      "ACCESSORY": "Accessoires"
+    },
+    "Specs": {
+      "TypeDuration": "Type / Durée",
+      "AgePlayers": "Âge / Joueurs",
+      "Content": "Contenu",
+      "Warranty": "Garantie",
+      "BoardGameDuration": "30 à 60 min",
+      "Standard": "Standard",
+      "BoardGameAge": "10+ ans / 2-4 joueurs",
+      "BoardGameContent": "Complet",
+      "RiwayaWarranty": "Garantie qualité Riwaya"
+    }
+  },
+  "AuthBenefits": {
+    "title": "Pourquoi rejoindre Riwaya ?",
+    "b1_title": "Bonus de Bienvenue",
+    "b1_desc": "Recevez 10 DH dans votre portefeuille et un code promo dès votre inscription.",
+    "b2_title": "Paiement à la Livraison",
+    "b2_desc": "Achetez en toute sécurité et payez uniquement à la réception de votre commande.",
+    "b3_title": "Livraison Rapide",
+    "b3_desc": "Livraison express partout au Maroc.",
+    "b4_title": "Échange de Livres",
+    "b4_desc": "Échangez vos livres avec une communauté de passionnés.",
+    "b5_title": "Packs Économiques",
+    "b5_desc": "Profitez de nos offres exclusives sur les packs de livres."
   }
 }

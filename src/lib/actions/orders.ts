@@ -29,7 +29,9 @@ const OrderSchema = z.object({
     utmCampaign: z.string().max(255).optional(),
     fbclid: z.string().max(255).optional(),
     ttclid: z.string().max(255).optional(),
-    paymentMethod: z.enum(['COD', 'STRIPE', 'PAYPAL', 'CMI', 'BANK_TRANSFER']).optional()
+    utmttclid: z.string().max(255).optional(),
+    paymentMethod: z.enum(['COD', 'STRIPE', 'PAYPAL', 'CMI', 'BANK_TRANSFER']).optional(),
+    useCredits: z.boolean().optional()
 })
 
 export async function getOrders() {
@@ -129,6 +131,13 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
         const hasOnlyDigital = sanitizedData.items.length > 0 && sanitizedData.items.every(item => item.type === 'DIGITAL')
 
+        // Gestion de l'utilisation du solde (credits)
+        let creditsToUse = 0
+        let userForCredits: any = null
+        if (sanitizedData.useCredits) {
+            userForCredits = await getCommunityUser()
+        }
+
         // Création commande transactionnelle
         const order = await prisma.$transaction(async (tx) => {
             let hasFreeShippingItem = false
@@ -167,6 +176,24 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             // Logique de livraison synchronisée avec le client
             let shippingFees = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
             let total = Math.max(0, subtotal - discount + shippingFees)
+
+            // Déduction du solde si demandé et disponible
+            if (sanitizedData.useCredits && userForCredits && userForCredits.credits > 0) {
+                creditsToUse = Math.min(total, userForCredits.credits)
+                if (creditsToUse > 0) {
+                    total = total - creditsToUse
+                    discount = discount + creditsToUse
+                    sanitizedData.comment = sanitizedData.comment 
+                        ? `${sanitizedData.comment}\n[Payé avec solde: ${creditsToUse} DH]`
+                        : `[Payé avec solde: ${creditsToUse} DH]`
+                    
+                    // Décrémenter les crédits de l'utilisateur
+                    await tx.user.update({
+                        where: { id: userForCredits.id },
+                        data: { credits: { decrement: creditsToUse } }
+                    })
+                }
+            }
 
             // Validation du montant minimum avec le total final
             const minOrderAmountSetting = await tx.siteSettings.findUnique({
@@ -388,6 +415,33 @@ export async function getOrderById(orderId: string) {
     } catch (error) {
         console.error('Error fetching order:', error)
         return null
+    }
+}
+
+export async function updateOrderEmail(orderId: string, email: string) {
+    try {
+        const order = await (prisma.order as any).findUnique({ where: { id: orderId } })
+        if (!order) return { success: false, error: 'Commande introuvable' }
+
+        // Mettre à jour l'email dans la DB
+        await (prisma.order as any).update({
+            where: { id: orderId },
+            data: { email: email.trim() }
+        })
+
+        // Enregistrer l'email dans les cookies pour que l'utilisateur puisse suivre la commande
+        const cookieStore = await cookies()
+        cookieStore.set('userEmail', email.trim(), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30 // 30 jours 
+        })
+
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur updateOrderEmail:', error)
+        return { success: false, error: 'Une erreur est survenue' }
     }
 }
 

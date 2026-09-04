@@ -4,7 +4,7 @@ import Footer from '@/components/FooterWithFeatures'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, ShoppingCart, Truck, Shield, Package, CheckCircle2, Briefcase, HelpCircle, Heart, Star, Sparkles } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Truck, Shield, Package, CheckCircle2, Briefcase, HelpCircle, Heart, Star, Sparkles, Play } from 'lucide-react'
 import AddToCartButton from '@/components/AddToCartButton'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/actions/site-settings'
@@ -42,7 +42,7 @@ export default async function ProductDetailPage({
 }: {
     params: Promise<{ id: string; locale: string }>
 }) {
-    const { id } = await params
+    const { id, locale } = await params
     const product = await prisma.extraProduct.findUnique({
         where: { id },
     })
@@ -61,24 +61,18 @@ export default async function ProductDetailPage({
     const whatsappPhone = await getSetting('contact_whatsapp')
     const tBook = await getTranslations('BookDetail')
     const tCommon = await getTranslations('Common')
+    const t = await getTranslations('ExtraProductDetail')
+    const { getAdminUser } = await import('@/lib/actions/auth')
+    const adminUserId = await getAdminUser()
 
-    const categoryLabels: Record<string, string> = {
-        FURNITURE: 'Fournitures de bureau',
-        BOARD_GAME: 'Jeux de société',
-        BOOKMARK: 'Marque-pages',
-        LIBRARY: 'Bibliothèques',
-        USB: 'Clés USB',
-        ACCESSORY: 'Accessoires',
-    }
-
-    const categoryLabel = categoryLabels[product.category] || 'Accessoire'
+    const categoryLabel = t(`Categories.${product.category}`) || t('Categories.ACCESSORY')
 
     // Spécifications techniques dynamiques ou basées sur la catégorie par défaut
     const productSpecs = [
-        { label: 'Type / Durée', value: product.materials || (product.category === 'BOARD_GAME' ? '30 à 60 min' : 'Standard') },
-        { label: 'Âge / Joueurs', value: product.dimensions || (product.category === 'BOARD_GAME' ? '10+ ans / 2-4 joueurs' : 'Standard') },
-        { label: 'Contenu', value: product.weight || (product.category === 'BOARD_GAME' ? 'Complet' : 'Standard') },
-        { label: 'Garantie', value: product.warranty || 'Garantie qualité Riwaya' },
+        { label: t('Specs.TypeDuration'), value: product.materials || (product.category === 'BOARD_GAME' ? t('Specs.BoardGameDuration') : t('Specs.Standard')) },
+        { label: t('Specs.AgePlayers'), value: product.dimensions || (product.category === 'BOARD_GAME' ? t('Specs.BoardGameAge') : t('Specs.Standard')) },
+        { label: t('Specs.Content'), value: product.weight || (product.category === 'BOARD_GAME' ? t('Specs.BoardGameContent') : t('Specs.Standard')) },
+        { label: t('Specs.Warranty'), value: product.warranty || t('Specs.RiwayaWarranty') },
     ]
 
     return (
@@ -86,14 +80,27 @@ export default async function ProductDetailPage({
             <HeaderWithUser />
 
             <div className="max-w-6xl mx-auto px-4 py-12 pb-32">
-                {/* Bouton Retour */}
-                <Link
-                    href="/jeux-societe"
-                    className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 mb-8 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Retour au catalogue</span>
-                </Link>
+                <div className="flex items-center justify-between mb-8">
+                    {/* Bouton Retour */}
+                    <Link
+                        href={`/${locale}/jeux-societe`}
+                        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>{t('BackToCatalog')}</span>
+                    </Link>
+
+                    {/* Admin Edit Button */}
+                    {adminUserId && (
+                        <Link
+                            href={`/${locale}/admin/accessories/${product.id}`}
+                            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-slate-900 text-white hover:bg-slate-800 transition-colors px-4 py-2 rounded-xl shadow-sm"
+                        >
+                            <Briefcase className="w-4 h-4" />
+                            <span>{t('Edit')}</span>
+                        </Link>
+                    )}
+                </div>
 
                 {/* ──────── SECTION PRINCIPALE PRODUIT ──────── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mb-20">
@@ -119,14 +126,14 @@ export default async function ProductDetailPage({
                                 {product.stock <= 5 && product.stock > 0 && (
                                     <div className="absolute top-4 left-4 z-10">
                                         <span className="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-black rounded-full shadow-md uppercase tracking-wider animate-pulse">
-                                            Reste {product.stock}
+                                            {t('StockLeft', { stock: product.stock })}
                                         </span>
                                     </div>
                                 )}
                                 {product.stock === 0 && (
                                     <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 flex items-center justify-center">
                                         <span className="px-4 py-2 bg-slate-900 text-white text-xs font-black rounded-xl uppercase tracking-widest">
-                                            Rupture de stock
+                                            {t('OutOfStock')}
                                         </span>
                                     </div>
                                 )}
@@ -138,19 +145,19 @@ export default async function ProductDetailPage({
                                     <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-2 text-purple-600 group-hover:scale-110 transition-transform">
                                         <Truck className="w-5 h-5" />
                                     </div>
-                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">Livraison 24/48h</p>
+                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">{t('FastDelivery')}</p>
                                 </div>
                                 <div className="group cursor-pointer">
                                     <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-2 text-emerald-600 group-hover:scale-110 transition-transform">
                                         <Shield className="w-5 h-5" />
                                     </div>
-                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">Paiement COD</p>
+                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">{t('COD')}</p>
                                 </div>
                                 <div className="group cursor-pointer">
                                     <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center mx-auto mb-2 text-sky-600 group-hover:scale-110 transition-transform">
                                         <CheckCircle2 className="w-5 h-5" />
                                     </div>
-                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">Garantie Qualité</p>
+                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">{t('QualityGuaranteed')}</p>
                                 </div>
                             </div>
                         </div>
@@ -169,7 +176,7 @@ export default async function ProductDetailPage({
                             <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-3">
                                 {product.name}
                             </h1>
-                            
+
                             {/* Note / Avis Simulés Premium */}
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center text-purple-400">
@@ -179,7 +186,7 @@ export default async function ProductDetailPage({
                                     <Star className="w-4 h-4 fill-current" />
                                     <Star className="w-4 h-4 fill-current" />
                                 </div>
-                                <span className="text-xs text-slate-500 font-bold">(Excellente appréciation)</span>
+                                <span className="text-xs text-slate-500 font-bold">{t('ExcellentRating')}</span>
                             </div>
                         </div>
 
@@ -215,7 +222,7 @@ export default async function ProductDetailPage({
                                     disabled
                                     className="w-full py-4 bg-slate-100 text-slate-400 text-xs font-black uppercase tracking-widest rounded-2xl cursor-not-allowed text-center"
                                 >
-                                    Rupture de stock
+                                    {t('OutOfStock')}
                                 </button>
                             )}
                         </div>
@@ -225,7 +232,7 @@ export default async function ProductDetailPage({
                             <div className="space-y-3">
                                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
                                     <Package className="w-4 h-4 text-purple-500" />
-                                    Présentation du produit
+                                    {t('ProductPresentation')}
                                 </h3>
                                 <div className="bg-white p-6 rounded-2xl border border-slate-100 text-slate-600 text-sm leading-relaxed whitespace-pre-line shadow-sm">
                                     {product.description}
@@ -240,7 +247,7 @@ export default async function ProductDetailPage({
                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                         <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-purple-500" />
-                            Fiche technique & Dimensions
+                            {t('TechSpecs')}
                         </h3>
                         <dl className="space-y-4">
                             {productSpecs.map((spec, i) => (
@@ -250,8 +257,8 @@ export default async function ProductDetailPage({
                                 </div>
                             ))}
                             <div className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-b-0">
-                                <dt className="text-xs font-bold text-slate-400">Disponibilité</dt>
-                                <dd className="text-xs font-black text-emerald-600">{product.stock > 0 ? 'En stock (Prêt à l\'envoi)' : 'Sur commande'}</dd>
+                                <dt className="text-xs font-bold text-slate-400">{t('Availability')}</dt>
+                                <dd className="text-xs font-black text-emerald-600">{product.stock > 0 ? t('InStockReady') : t('OnOrder')}</dd>
                             </div>
                         </dl>
                     </div>
@@ -260,38 +267,70 @@ export default async function ProductDetailPage({
                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                         <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                             <HelpCircle className="w-4 h-4 text-purple-500" />
-                            Livraison & Garantie Maroc
+                            {t('DeliveryAndWarranty')}
                         </h3>
                         <div className="space-y-4 text-slate-600 text-xs leading-relaxed">
                             <div className="flex gap-4">
                                 <div className="w-8 h-8 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0 text-purple-600 font-bold">1</div>
-                                <p><strong>Paiement à la Livraison (COD) :</strong> Commandez en toute sécurité. Vous inspectez votre produit à l'arrivée et réglez le montant exact en espèces auprès de notre livreur partenaire.</p>
+                                <p dangerouslySetInnerHTML={{ __html: t.raw('DeliveryStep1') }}></p>
                             </div>
                             <div className="flex gap-4">
                                 <div className="w-8 h-8 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0 text-purple-600 font-bold">2</div>
-                                <p><strong>Délais rapides :</strong> Nous expédions dans toutes les grandes villes du Maroc (Casablanca, Rabat, Marrakech, Tanger...) en 24h à 48h. Pour les autres régions, comptez 72h maximum.</p>
+                                <p dangerouslySetInnerHTML={{ __html: t.raw('DeliveryStep2') }}></p>
                             </div>
                             <div className="flex gap-4">
                                 <div className="w-8 h-8 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0 text-purple-600 font-bold">3</div>
-                                <p><strong>Garantie Satisfait ou Échangé :</strong> En cas de défaut de fabrication ou de non-conformité, vous disposez de 3 jours calendaires pour demander un échange gratuit.</p>
+                                <p dangerouslySetInnerHTML={{ __html: t.raw('DeliveryStep3') }}></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                {/* ──────── SECTION: VIDÉOS UGC ──────── */}
+                {(() => {
+                    const videos = Array.isArray((product as any).videos) ? (product as any).videos as string[] : []
+                    if (videos.length === 0) return null
+                    return (
+                        <section className="mb-20">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-10 h-10 bg-rose-50 rounded-2xl flex items-center justify-center">
+                                    <Play className="w-5 h-5 text-rose-500" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Vidéos & Témoignages</h2>
+                                    <p className="text-xs text-slate-400 font-medium">Découvrez ce produit en action</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {videos.map((url: string, i: number) => (
+                                    <div key={i} className="rounded-3xl overflow-hidden bg-slate-900 aspect-video shadow-lg">
+                                        <video
+                                            src={url}
+                                            className="w-full h-full object-cover"
+                                            controls
+                                            preload="metadata"
+                                            playsInline
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )
+                })()}
+
                 {/* ──────── SECTION: PRODUITS RECOMMANDÉS (CROSS-SELL) ──────── */}
                 {suggestedProducts.length > 0 && (
                     <section className="border-t border-slate-200 pt-16">
                         <div className="flex items-center justify-between mb-10">
-                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Vous aimerez aussi...</h2>
-                            <Link href="/jeux-societe" className="text-xs font-black text-purple-600 hover:text-purple-700 bg-white border border-slate-100 shadow-sm px-5 py-2.5 rounded-xl transition-all">
-                                Tout voir
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{t('YouMightAlsoLike')}</h2>
+                            <Link href={`/${locale}/jeux-societe`} className="text-xs font-black text-purple-600 hover:text-purple-700 bg-white border border-slate-100 shadow-sm px-5 py-2.5 rounded-xl transition-all">
+                                {t('SeeAll')}
                             </Link>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             {suggestedProducts.map(sProd => {
-                                const sCategoryLabel = categoryLabels[sProd.category] || 'Accessoire'
+                                const sCategoryLabel = t(`Categories.${sProd.category}`) || t('Categories.ACCESSORY')
                                 return (
                                     <div key={sProd.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden flex flex-col">
                                         <Link href={`/jeux-societe/${sProd.id}`} className="flex flex-col flex-grow">

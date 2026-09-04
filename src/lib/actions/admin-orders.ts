@@ -526,7 +526,8 @@ export async function bulkDeleteOrders(orderIds: string[]) {
             details: `Suppression groupée de ${orderIds.length} commandes`
         })
 
-        sendTelegramMessage(`🗑️ *Suppression Massive*\n\n${orderIds.length} commandes ont été supprimées par l'administrateur.\n🕒 ${new Date().toLocaleString('fr-FR')}`).catch(console.error)
+        const formattedIds = orderIds.map(id => `\`${id.slice(0, 8)}\``).join('\n- ')
+        sendTelegramMessage(`🗑️ *Suppression Massive*\n\n${orderIds.length} commandes ont été supprimées par l'administrateur.\n\n*Commandes :*\n- ${formattedIds}\n\n🕒 ${new Date().toLocaleString('fr-FR')}`).catch(console.error)
 
         return {
             success: true,
