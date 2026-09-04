@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function getQuotes(search?: string, tag?: string) {
+export async function getQuotes(search?: string, tag?: string, locale?: string) {
     const where: any = {}
     if (search) {
         where.OR = [
@@ -14,6 +14,11 @@ export async function getQuotes(search?: string, tag?: string) {
     if (tag) {
         where.tags = { contains: tag }
     }
+    if (locale) {
+        where.locale = locale
+    }
+    // Note: getQuotes will be updated to filter by locale if passed, or fetch all.
+    // We'll leave this as-is and update getQuotes to take locale in a future step if needed.
 
     return await (prisma as any).quote.findMany({
         where,
@@ -46,6 +51,7 @@ export async function createQuote(data: {
     source?: string
     bookId?: string
     tags?: string
+    locale?: string
     isActive?: boolean
 }) {
     const quote = await (prisma as any).quote.create({
@@ -55,9 +61,19 @@ export async function createQuote(data: {
             source: data.source || null,
             bookId: data.bookId || null,
             tags: data.tags || null,
+            locale: data.locale || 'fr',
             isActive: data.isActive ?? true
         }
     })
+    
+    // S'assurer que le profil auteur existe
+    if (data.author) {
+        await prisma.authorProfile.upsert({
+            where: { name: data.author },
+            update: {},
+            create: { name: data.author }
+        })
+    }
     
     revalidatePath('/[locale]/quotes', 'layout')
     revalidatePath('/[locale]/admin/quotes', 'layout')
@@ -70,6 +86,7 @@ export async function updateQuote(id: string, data: {
     source?: string
     bookId?: string
     tags?: string
+    locale?: string
     isActive?: boolean
 }) {
     const quote = await (prisma as any).quote.update({
@@ -80,9 +97,19 @@ export async function updateQuote(id: string, data: {
             source: data.source || null,
             bookId: data.bookId || null,
             tags: data.tags || null,
+            locale: data.locale,
             isActive: data.isActive
         }
     })
+    
+    // S'assurer que le profil auteur existe (en cas de modification du nom)
+    if (data.author) {
+        await prisma.authorProfile.upsert({
+            where: { name: data.author },
+            update: {},
+            create: { name: data.author }
+        })
+    }
     
     revalidatePath('/[locale]/quotes', 'layout')
     revalidatePath('/[locale]/admin/quotes', 'layout')
@@ -96,6 +123,29 @@ export async function deleteQuote(id: string) {
     
     revalidatePath('/[locale]/quotes', 'layout')
     revalidatePath('/[locale]/admin/quotes', 'layout')
+}
+
+export async function getQuotesByAuthorExact(authorName: string, locale?: string) {
+    const where: any = { 
+        author: authorName,
+        isActive: true
+    }
+    if (locale) {
+        where.locale = locale
+    }
+
+    return await (prisma as any).quote.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include: {
+            book: {
+                select: {
+                    title: true,
+                    image: true
+                }
+            }
+        }
+    })
 }
 
 export async function getPopularQuoteTags() {

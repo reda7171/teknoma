@@ -3,6 +3,7 @@ import { getAuthorProfile } from '@/lib/db/authors'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import BookCard from '@/components/BookCard'
+import QuoteCard from '@/components/quotes/QuoteCard'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import { ArrowLeft, User, Edit, Quote, BookOpen, Globe2, Calendar } from 'lucide-react'
@@ -13,6 +14,7 @@ import ImageWithFallback from '@/components/ImageWithFallback'
 import ShareArticle from '@/components/blog/ShareArticle'
 import { getSimilarAuthors } from '@/lib/db/authors'
 import { isAuthenticated } from '@/lib/actions/auth'
+import { getQuotesByAuthorExact } from '@/lib/actions/quotes'
 
 // Generate metadata for the author page
 export async function generateMetadata({
@@ -109,10 +111,11 @@ export default async function AuthorPage({
     const tCommon = await getTranslations('Common')
     const isAuth = await isAuthenticated()
 
-    const [books, authorProfile, similarAuthors] = await Promise.all([
+    const [books, authorProfile, similarAuthors, quotes] = await Promise.all([
         getBooks({ author: authorName, active: true, limit: 100 }),
         getAuthorProfile(authorName),
-        getSimilarAuthors(authorName)
+        getSimilarAuthors(authorName),
+        getQuotesByAuthorExact(authorName, locale)
     ])
 
     const profile = authorProfile
@@ -292,18 +295,39 @@ export default async function AuthorPage({
                         </span>
                     </div>
 
+                    {/* Books Grid */}
                     {books.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-12">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                             {books.map((book) => (
-                                <BookCard key={book.id} {...book} />
+                                <BookCard key={book.id} book={book} locale={locale} isAuth={isAuth} />
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-3xl p-20 text-center border border-slate-100 shadow-sm">
-                            <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-                            <p className="text-xl font-bold text-slate-400 uppercase tracking-widest">
-                                {tCommon('NoResultsDesc')}
-                            </p>
+                        <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
+                            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">{tBook('NoBooksFound')}</h3>
+                            <p className="text-slate-500 max-w-sm mx-auto">{tBook('NoBooksDesc')}</p>
+                        </div>
+                    )}
+
+                    {/* Author Quotes */}
+                    {quotes && quotes.length > 0 && (
+                        <div className="mt-20">
+                            <div className="flex items-center gap-3 mb-8">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+                                    {locale === 'ar' ? 'اقتباسات الكاتب' : locale === 'en' ? 'Author Quotes' : 'Citations de l\'auteur'}
+                                </h2>
+                                <div className="flex-1 h-px bg-slate-200" />
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {quotes.map((quote: any) => (
+                                    <QuoteCard 
+                                        key={quote.id} 
+                                        quote={quote} 
+                                        locale={locale} 
+                                    />
+                                ))}
+                            </div>
                         </div>
                     )}
 

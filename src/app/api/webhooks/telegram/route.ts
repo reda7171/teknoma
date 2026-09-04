@@ -89,6 +89,34 @@ export async function POST(req: Request) {
             }
             // ─────────────────────────────────────────────────────────────────
 
+            // ─── Bouton Stock Zéro (depuis les notifications de visite) ──────
+            if (data && data.startsWith('zero_stock:')) {
+                const parts = data.split(':')
+                const bookId = parts[1]
+
+                if (bookId) {
+                    await prisma.book.update({
+                        where: { id: bookId },
+                        data: { stock: 0 }
+                    })
+
+                    await answerCallbackQuery(callbackId, `✅ Le stock du livre a été remis à zéro!`, token)
+
+                    // Mettre à jour le message pour indiquer que ça a été fait
+                    if (message?.chat?.id && message?.message_id) {
+                        const newText = (message.text || '') + `\n\n✅ <b>Stock remis à 0</b>`
+                        // On garde les autres boutons (ou on pourrait les enlever si on veut)
+                        await editTelegramMessage(message.chat.id, message.message_id, newText, token, { inline_keyboard: message.reply_markup?.inline_keyboard || [] })
+                    }
+
+                    return NextResponse.json({ ok: true })
+                }
+                
+                await answerCallbackQuery(callbackId, '❌ Erreur ID livre', token)
+                return NextResponse.json({ ok: true })
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             // Format attendu: os:{orderId}:{STATUS}
             if (data && data.startsWith('os:')) {
                 const parts = data.split(':')

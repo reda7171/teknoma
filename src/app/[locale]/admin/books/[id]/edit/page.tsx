@@ -12,6 +12,8 @@ import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { ImageIcon, Link2, ExternalLink } from 'lucide-react'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import type { CategoryTree } from '@/lib/constants/categories'
+import BookSeoScore from '@/components/admin/BookSeoScore'
+import BookMemberships from '@/components/admin/BookMemberships'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
     const router = useRouter()
@@ -62,6 +64,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
     const [selectedSubCategory, setSelectedSubCategory] = useState<string>('')
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
+    const [seoKeywordsState, setSeoKeywordsState] = useState<string>('')
     const mainCategories = Object.keys(categoryTree)
 
     useEffect(() => {
@@ -135,6 +138,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setBookImage(result.data.image || '')
                 setSelectedMainCategory(result.data.category || '')
                 setSelectedSubCategory(result.data.subCategory || '')
+                setSeoKeywordsState((result.data as any).seoKeywords || '')
                 
                 if (result.data.sellerSku) {
                     console.log('Checking Jumia link for SKU:', result.data.sellerSku);
@@ -1158,6 +1162,17 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     </div>
                 </div>
 
+                {/* Score SEO en temps réel */}
+                <BookSeoScore
+                    book={book}
+                    description={description}
+                    descriptionFr={descriptionFr}
+                    descriptionEn={descriptionEn}
+                    longDescription={longDescription}
+                    seoKeywords={seoKeywordsState}
+                    bookImage={bookImage}
+                />
+
                 {/* SEO Keywords */}
                 <div className="mt-6">
                     <label htmlFor="seoKeywords" className="block text-sm font-medium text-gray-700 mb-2">
@@ -1167,7 +1182,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         id="seoKeywords"
                         name="seoKeywords"
                         rows={3}
-                        defaultValue={book.seoKeywords || ''}
+                        value={seoKeywordsState}
+                        onChange={(e) => setSeoKeywordsState(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Ex: roman policier, agatha christie, meurtre mystère..."
                     />
@@ -1188,6 +1204,13 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         placeholder="SID généré par Jumia"
                     />
                 </div>
+
+                {/* Appartenance packs & collections */}
+                <BookMemberships
+                    locale={resolvedParams.locale}
+                    packs={(book?.packBooks || []).map((pb: any) => pb.pack).filter(Boolean)}
+                    collections={(book?.seoCategoryBooks || []).map((scb: any) => scb.seoCategory).filter(Boolean)}
+                />
 
                 {/* Actions */}
                 <div className="mt-6 flex items-center justify-between gap-4">

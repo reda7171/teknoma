@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function QuotesPage(props: { params: Promise<{ locale: string }> }) {
     const { locale } = await props.params
     const t = await getTranslations({ locale, namespace: 'QuotesPage' })
-    const quotes = await getQuotes()
+    const quotes = await getQuotes(undefined, undefined, locale)
     const activeQuotes = quotes.filter((q: any) => q.isActive)
 
     return (

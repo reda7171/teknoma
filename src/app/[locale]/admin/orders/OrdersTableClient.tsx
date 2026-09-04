@@ -239,15 +239,17 @@ export default function OrdersTableClient({
                                         />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-2">
-                                            <div className="text-sm font-black text-gray-900">#{order.id.slice(0, 8)}</div>
-                                            {order.trackingID && (
-                                                <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer" title={`Expédié: ${order.trackingID}\nCliquez pour synchroniser`} onClick={() => handleSyncDelivery(order.id)}>
-                                                    <Search className={`w-2.5 h-2.5 text-blue-600 ${syncingId === order.id ? 'animate-spin' : ''}`} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString('fr-FR')}</div>
+                                        <Link href={`/${locale}/admin/orders/${order.id}`} className="group flex flex-col gap-0.5">
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-sm font-black text-gray-900 group-hover:text-blue-600 transition-colors">#{order.id.slice(0, 8)}</div>
+                                                {order.trackingID && (
+                                                    <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer" title={`Expédié: ${order.trackingID}\nCliquez pour synchroniser`} onClick={(e) => { e.preventDefault(); handleSyncDelivery(order.id) }}>
+                                                        <Search className={`w-2.5 h-2.5 text-blue-600 ${syncingId === order.id ? 'animate-spin' : ''}`} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors">{new Date(order.createdAt).toLocaleString('fr-FR')}</div>
+                                        </Link>
                                     </td>
                                     <td className="px-6 py-4 max-w-[150px] truncate" title={order.fullName || ''}>
                                         <div className="text-sm font-semibold text-gray-900 truncate">{order.fullName}</div>
