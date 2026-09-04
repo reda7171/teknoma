@@ -429,7 +429,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         <SearchInput 
                             currentSearch={params.search || ''}
                             onChange={handleSearchChange}
-                            placeholder="Rechercher..."
+                            placeholder={tCommon('Search') || "Rechercher..."}
                             isCondensed={true}
                         />
 
