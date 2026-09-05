@@ -2,20 +2,13 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { getAdminUser, getAdminRole, getCommunityUser } from '@/lib/actions/auth'
+import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
 
 async function getSellerId() {
-    let userId = await getAdminUser()
-    let role = await getAdminRole()
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
     
     if (!userId || role !== 'SELLER') {
-        const commUserId = await getCommunityUser()
-        if (commUserId) {
-            const commUser = await prisma.user.findUnique({ where: { id: commUserId } })
-            if (commUser && commUser.role === 'SELLER') {
-                return commUserId
-            }
-        }
         return null
     }
     return userId
