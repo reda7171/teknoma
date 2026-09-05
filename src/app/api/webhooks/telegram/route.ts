@@ -51,6 +51,31 @@ export async function POST(req: Request) {
             
             console.log(`[TELEGRAM CALLBACK] Received ID: ${callbackId}, Data: ${data}`)
 
+            // ─── Bouton Ping (Session) ───────────────────────────────────────
+            if (data && data.startsWith('ping:')) {
+                const sessionId = data.split(':')[1]
+                const lastView = await prisma.pageView.findFirst({
+                    where: { sessionId },
+                    orderBy: { createdAt: 'desc' }
+                })
+
+                if (!lastView) {
+                    await answerCallbackQuery(callbackId, '❌ Session introuvable dans les logs.', token, true)
+                } else {
+                    const diffMs = new Date().getTime() - lastView.createdAt.getTime()
+                    const diffMins = Math.floor(diffMs / 60000)
+                    
+                    if (diffMins < 5) {
+                        await answerCallbackQuery(callbackId, `✅ En ligne ! (Dernière action il y a ${diffMins} min)`, token, true)
+                    } else {
+                        await answerCallbackQuery(callbackId, `⚠️ Inactif depuis ${diffMins} min`, token, true)
+                    }
+                }
+                
+                return NextResponse.json({ ok: true })
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             // ─── Boutons offre panier (-10, -20, -30 Dhs) ────────────────────
             if (data && data.startsWith('offer_')) {
                 const parts = data.split(':')

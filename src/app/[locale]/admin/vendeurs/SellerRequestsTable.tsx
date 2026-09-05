@@ -1,12 +1,54 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, X, Store, Mail, Phone, MapPin } from 'lucide-react'
-import { updateSellerRequestStatus, deleteSellerRequest } from '@/lib/actions/seller-requests'
+import { Check, X, Store, Mail, Phone, MapPin, MessageCircle, Edit } from 'lucide-react'
+import { updateSellerRequestStatus, deleteSellerRequest, updateSellerRequest } from '@/lib/actions/seller-requests'
 
 export default function SellerRequestsTable({ initialRequests }: { initialRequests: any[] }) {
     const [requests, setRequests] = useState(initialRequests)
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
+    const [editingRequest, setEditingRequest] = useState<any | null>(null)
+    const [editFormData, setEditFormData] = useState<any>({})
+
+    const handleEditClick = (req: any) => {
+        setEditingRequest(req)
+        setEditFormData({
+            storeName: req.storeName,
+            managerName: req.managerName,
+            email: req.email,
+            phone: req.phone,
+            city: req.city,
+            stockSize: req.stockSize,
+        })
+    }
+
+    const handleSaveEdit = async () => {
+        if (!editingRequest) return
+        setLoadingMap(prev => ({ ...prev, [editingRequest.id]: true }))
+        
+        const res = await updateSellerRequest(editingRequest.id, editFormData)
+        if (res.success) {
+            setRequests(prev => prev.map(r => r.id === editingRequest.id ? { ...r, ...editFormData } : r))
+            setEditingRequest(null)
+        } else {
+            alert(res.error)
+        }
+        setLoadingMap(prev => ({ ...prev, [editingRequest.id]: false }))
+    }
+
+    const handleWhatsApp = (req: any) => {
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://riwaya.com'
+        const resetLink = `${baseUrl}/fr/reset-password?email=${encodeURIComponent(req.email)}`
+        const message = `Bonjour ${req.managerName},\n\nVotre compte vendeur sur Riwaya a été créé avec succès. 🎉\n\n📧 Votre email de connexion : ${req.email}\n🔗 Définissez votre mot de passe ici : ${resetLink}\n\nBienvenue sur Riwaya !`
+        
+        let phone = req.phone.replace(/[^0-9]/g, '')
+        if (phone.startsWith('0')) {
+            phone = '212' + phone.substring(1)
+        }
+        
+        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+        window.open(whatsappUrl, '_blank')
+    }
 
     const handleUpdateStatus = async (id: string, newStatus: string) => {
         setLoadingMap(prev => ({ ...prev, [id]: true }))
@@ -128,6 +170,20 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                                                 </>
                                             )}
                                             <button
+                                                onClick={() => handleWhatsApp(req)}
+                                                className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm border border-green-100"
+                                                title="Confirmation WhatsApp"
+                                            >
+                                                <MessageCircle className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleEditClick(req)}
+                                                className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100"
+                                                title="Modifier"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button
                                                 disabled={loadingMap[req.id]}
                                                 onClick={() => handleDelete(req.id)}
                                                 className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
@@ -207,10 +263,106 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                                     </button>
                                 )}
                             </div>
+                            <button
+                                onClick={() => handleWhatsApp(req)}
+                                className="w-full py-3 bg-green-50 text-green-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 border border-green-100 hover:bg-green-600 hover:text-white mt-2"
+                            >
+                                <MessageCircle className="w-4 h-4" />
+                                Confirmation WhatsApp
+                            </button>
+                            <button
+                                onClick={() => handleEditClick(req)}
+                                className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 border border-blue-100 hover:bg-blue-600 hover:text-white mt-2"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Modifier la demande
+                            </button>
                         </div>
                     ))
                 )}
             </div>
+
+            {/* Modal de modification */}
+            {editingRequest && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-xl font-black uppercase tracking-tight mb-6">Modifier la demande</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Boutique</label>
+                                <input 
+                                    type="text" 
+                                    value={editFormData.storeName}
+                                    onChange={e => setEditFormData({...editFormData, storeName: e.target.value})}
+                                    className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Gérant</label>
+                                <input 
+                                    type="text" 
+                                    value={editFormData.managerName}
+                                    onChange={e => setEditFormData({...editFormData, managerName: e.target.value})}
+                                    className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email</label>
+                                <input 
+                                    type="email" 
+                                    value={editFormData.email}
+                                    onChange={e => setEditFormData({...editFormData, email: e.target.value})}
+                                    className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Téléphone</label>
+                                <input 
+                                    type="text" 
+                                    value={editFormData.phone}
+                                    onChange={e => setEditFormData({...editFormData, phone: e.target.value})}
+                                    className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ville</label>
+                                    <input 
+                                        type="text" 
+                                        value={editFormData.city}
+                                        onChange={e => setEditFormData({...editFormData, city: e.target.value})}
+                                        className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Stock</label>
+                                    <input 
+                                        type="text" 
+                                        value={editFormData.stockSize}
+                                        onChange={e => setEditFormData({...editFormData, stockSize: e.target.value})}
+                                        className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-8">
+                            <button 
+                                onClick={() => setEditingRequest(null)}
+                                className="px-6 py-3 bg-gray-100 text-gray-500 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all"
+                            >
+                                Annuler
+                            </button>
+                            <button 
+                                onClick={handleSaveEdit}
+                                disabled={loadingMap[editingRequest.id]}
+                                className="px-6 py-3 bg-black text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50"
+                            >
+                                {loadingMap[editingRequest.id] ? 'Enregistrement...' : 'Enregistrer'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

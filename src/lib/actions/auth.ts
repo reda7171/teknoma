@@ -351,3 +351,37 @@ export async function getAdminRole() {
     return cookieStore.get('admin-role')?.value || null
 }
 
+export async function resetPassword(email: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        if (!email || !newPassword) {
+            return { success: false, error: 'Email et mot de passe requis' }
+        }
+        if (newPassword.length < 6) {
+            return { success: false, error: 'Le mot de passe doit contenir au moins 6 caractères' }
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user) {
+            return { success: false, error: 'Utilisateur introuvable' }
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+        await prisma.user.update({
+            where: { email },
+            data: { password: hashedPassword }
+        })
+
+        await createAuditLog({
+            action: 'UPDATE',
+            entity: 'AUTH',
+            details: `Réinitialisation du mot de passe pour: ${email}`
+        })
+
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur lors de la réinitialisation du mot de passe:', error)
+        return { success: false, error: 'Une erreur est survenue' }
+    }
+}
+
