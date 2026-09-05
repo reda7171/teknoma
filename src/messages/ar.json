@@ -401,7 +401,8 @@
     "SpecialOffer": "عرض خاص",
     "OrderViaWhatsApp": "أنا متاح على واتساب",
     "Currency": "درهم",
-    "EndOfCollection": "نهاية المجموعة"
+    "EndOfCollection": "نهاية المجموعة",
+    "LocalizeMe": "تحديد موقعي"
   },
   "Packs": {
     "Save": "وفر",

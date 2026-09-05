@@ -401,7 +401,8 @@
     "SpecialOffer": "Offre Spéciale",
     "OrderViaWhatsApp": "Je suis disponible sur WhatsApp",
     "Currency": "MAD",
-    "EndOfCollection": "Fin de la collection"
+    "EndOfCollection": "Fin de la collection",
+    "LocalizeMe": "Me localiser"
   },
   "Packs": {
     "Save": "Économisez",

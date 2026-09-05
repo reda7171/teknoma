@@ -178,7 +178,12 @@ export default function BookCard({
                                         currentSessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
                                         setSessionId(currentSessionId)
                                     }
-                                    notifyAddToCart(displayTitle, price, 'BOOK', currentSessionId).catch(console.error)
+                                    
+                                    const { items, discount } = useCartStore.getState()
+                                    const currentTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+                                    const itemsText = items.map(i => `${i.quantity}x ${i.title}`).join(', ')
+                                    
+                                    notifyAddToCart(displayTitle, price, 'BOOK', currentSessionId, currentTotal, itemsText, discount).catch(console.error)
 
                                     showNotification(t('AddedToCartSuccess'), 'success')
                                     

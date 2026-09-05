@@ -109,6 +109,23 @@ export async function deleteReview(id: string) {
     }
 }
 
+export async function updateReview(id: string, newComment: string) {
+    try {
+        await verifyAdmin()
+        if (!newComment || newComment.trim().length < 5) {
+            return { success: false, error: 'Le commentaire est trop court' }
+        }
+        await prisma.review.update({
+            where: { id },
+            data: { comment: newComment.trim() }
+        })
+        revalidatePath('/admin/reviews')
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Erreur lors de la modification' }
+    }
+}
+
 export async function deleteReviews(ids: string[]) {
     try {
         await verifyAdmin()

@@ -126,3 +126,23 @@ export async function updateProfile(formData: FormData) {
         return { success: false, error: 'Une erreur est survenue lors de la mise à jour' }
     }
 }
+
+export async function updateUserCity(city: string) {
+    const user = await getCommunityUser()
+    if (!user) return { success: false, error: 'Non authentifié' }
+
+    if (!city || city.trim().length < 2) {
+        return { success: false, error: 'Ville invalide' }
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { city: city.trim() }
+        })
+        revalidatePath('/community')
+        return { success: true, city: city.trim() }
+    } catch (error) {
+        return { success: false, error: 'Erreur technique' }
+    }
+}

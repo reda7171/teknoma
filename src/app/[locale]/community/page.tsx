@@ -14,6 +14,8 @@ import { getPrimaryImage } from '@/lib/utils/image'
 import { getUserRecommendations } from '@/lib/actions/community-recommendations'
 import RecommendationsSection from '@/components/community/RecommendationsSection'
 import RegistrationTracker from '@/components/community/RegistrationTracker'
+import CityLocalizer from '@/components/community/CityLocalizer'
+import WelcomeOfferPopup from '@/components/community/WelcomeOfferPopup'
 
 export default async function CommunityDashboard() {
     const user = await getCommunityUser()
@@ -39,6 +41,7 @@ export default async function CommunityDashboard() {
     return (
         <main className="min-h-screen bg-pixio-cream flex flex-col">
             <RegistrationTracker />
+            <WelcomeOfferPopup />
             <HeaderWithUser />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32 flex-grow w-full">
@@ -49,8 +52,8 @@ export default async function CommunityDashboard() {
                             <RefreshCw className="w-6 h-6 text-amber-600" />
                         </div>
                         <div>
-                            <h3 className="text-amber-900 font-black text-sm uppercase tracking-tight">{t('Dashboard.RestrictedAccess')}</h3>
-                            <p className="text-amber-700 text-xs font-bold leading-relaxed">
+                            <h3 className="text-amber-900 font-black text-xl md:text-2xl uppercase tracking-tight mb-2">{t('Dashboard.RestrictedAccess')}</h3>
+                            <p className="text-amber-700 text-sm md:text-base font-bold leading-relaxed">
                                 {t('Dashboard.EligibilityDesc')}
                                 <Link href="/" className="ml-2 underline hover:text-amber-900">{t('Dashboard.BrowseShop')} →</Link>
                             </p>
@@ -79,7 +82,7 @@ export default async function CommunityDashboard() {
                                 </Link>
                             </div>
                             <div className="flex items-center gap-4 text-gray-400 font-bold text-sm justify-center md:justify-start">
-                                <span className="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-full"><MapPin className="w-3 h-3" /> {u.city}</span>
+                                <CityLocalizer currentCity={u.city || ''} />
                                 <span className="flex items-center gap-1 bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full"><Star className="w-3 h-3 fill-yellow-500" /> {u.rating?.toFixed(1) || 'N/A'}</span>
                             </div>
 
@@ -121,7 +124,7 @@ export default async function CommunityDashboard() {
                         
                         <div className="bg-amber-100 border-2 border-transparent px-8 py-4 rounded-3xl flex flex-col items-center min-w-[120px] hover:border-amber-400 transition-all shadow-sm text-center">
                             <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-amber-700 mb-1">{t('Credits')}</span>
-                            <span className="text-3xl font-black text-amber-900 tracking-tighter flex items-center gap-2">
+                            <span className="text-3xl font-black text-amber-900 tracking-tighter flex items-center gap-2" dir="ltr">
                                 {u.credits || 0} DH <Coins className="w-6 h-6 text-amber-600" />
                             </span>
                         </div>
