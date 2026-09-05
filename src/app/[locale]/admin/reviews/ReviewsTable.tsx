@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Star, CheckCircle, Trash2, MessageSquare } from 'lucide-react'
+import { Star, CheckCircle, Trash2, MessageSquare, Pencil } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { approveReview, deleteReviews, deleteReview } from '@/lib/actions/reviews'
+import { approveReview, deleteReviews, deleteReview, updateReview } from '@/lib/actions/reviews'
 
 interface Review {
     id: string
@@ -192,12 +192,26 @@ export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
                                                 )}
                                                 <button
                                                     onClick={async () => {
+                                                        const newComment = prompt("Modifier l'avis :", review.comment)
+                                                        if (newComment && newComment !== review.comment) {
+                                                            await updateReview(review.id, newComment)
+                                                            router.refresh()
+                                                        }
+                                                    }}
+                                                    className="p-3 bg-white text-blue-600 border border-blue-50 rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm active:scale-90"
+                                                    title="Modifier l'avis"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
                                                         if (confirm('Voulez-vous supprimer cet avis ?')) {
                                                             await deleteReview(review.id)
                                                             router.refresh()
                                                         }
                                                     }}
                                                     className="p-3 bg-white text-red-600 border border-red-50 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm active:scale-90"
+                                                    title="Supprimer"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>

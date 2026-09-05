@@ -33,7 +33,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
 
         if (res.success) {
             fbPixelEvents.completeRegistration()
-            router.push('/community')
+            router.push('/community?welcome=true')
             router.refresh()
         } else {
             setError(res.error || tcmn('Errors.UnexpectedError'))

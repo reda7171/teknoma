@@ -198,7 +198,48 @@ export default function ProfileEditForm({ user }: { user: UserProps }) {
 
                     {/* Ville */}
                     <div className="space-y-2">
-                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{tc('City')}</label>
+                        <div className="flex items-center justify-between">
+                            <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ml-1">{tc('City')}</label>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!navigator.geolocation) return;
+                                    setLoading(true);
+                                    navigator.geolocation.getCurrentPosition(
+                                        async (position) => {
+                                            try {
+                                                const { latitude, longitude } = position.coords;
+                                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`, { headers: { 'Accept-Language': 'fr' } });
+                                                const data = await res.json();
+                                                const newCity = data.address.city || data.address.town || data.address.village || data.address.county || data.address.state;
+                                                if (newCity) {
+                                                    // Since the select is uncontrolled, we can update it directly by name or we can switch to controlled
+                                                    const select = document.querySelector('select[name="city"]') as HTMLSelectElement;
+                                                    if (select) {
+                                                        // Check if city exists in options, else we could add it dynamically or just set it
+                                                        const optionExists = Array.from(select.options).some(opt => opt.value === newCity);
+                                                        if (!optionExists) {
+                                                            const newOption = new Option(newCity, newCity);
+                                                            select.add(newOption);
+                                                        }
+                                                        select.value = newCity;
+                                                    }
+                                                }
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        },
+                                        () => setLoading(false),
+                                        { timeout: 10000 }
+                                    );
+                                }}
+                                disabled={loading}
+                                className="flex items-center gap-1 text-[10px] rtl:text-sm font-bold text-black hover:text-amber-600 transition-colors"
+                            >
+                                {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <MapPin className="w-3 h-3" />}
+                                {tcmn('LocalizeMe')}
+                            </button>
+                        </div>
                         <div className="relative">
                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none z-10" />
                             <select

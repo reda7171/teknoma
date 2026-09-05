@@ -42,50 +42,50 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 { sellerSku: { contains: searchQuery } }
             ]
         }),
-        ...(statusParam === 'no-image' && {
+        ...(statusParam.split(',').includes('no-image') && {
             image: { in: ['', '/book-placeholder.png'] }
         }),
-        ...(statusParam === 'out-of-stock' && {
+        ...(statusParam.split(',').includes('out-of-stock') && {
             stock: { equals: 0 }
         }),
-        ...(statusParam === 'in-stock' && {
+        ...(statusParam.split(',').includes('in-stock') && {
             stock: { gt: 0 }
         }),
-        ...(statusParam === 'active' && {
+        ...(statusParam.split(',').includes('active') && {
             active: true
         }),
-        ...(statusParam === 'inactive' && {
+        ...(statusParam.split(',').includes('inactive') && {
             active: false
         }),
         ...(langParam && {
-            language: langParam
+            language: { in: langParam.split(',') }
         }),
-        ...(jumiaParam === 'synced' && {
+        ...(jumiaParam.split(',').includes('synced') && {
             isSyncedWithJumia: true
         }),
-        ...(jumiaParam === 'not-synced' && {
+        ...(jumiaParam.split(',').includes('not-synced') && {
             isSyncedWithJumia: false
         }),
-        ...(jumiaParam === 'has-sku' && {
+        ...(jumiaParam.split(',').includes('has-sku') && {
             sellerSku: { not: null }
         }),
-        ...(jumiaParam === 'no-sku' && {
+        ...(jumiaParam.split(',').includes('no-sku') && {
             sellerSku: null
         }),
         ...(categoryParam && {
-            category: categoryParam
+            category: { in: categoryParam.split(',') }
         }),
         ...(subCategoryParam && {
-            subCategory: subCategoryParam
+            subCategory: { in: subCategoryParam.split(',') }
         })
     }
 
-    const productTypeFilter = typeParam || 'all'
+    const productTypes = typeParam ? typeParam.split(',') : ['all']
 
     let allProducts: any[] = []
 
     // 1. Fetch Books
-    if (productTypeFilter === 'all' || productTypeFilter === 'book') {
+    if (productTypes.includes('all') || productTypes.includes('book')) {
         const books = await prisma.book.findMany({
             where,
             include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } } }
@@ -94,17 +94,17 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     // 2. Fetch Packs
-    if (productTypeFilter === 'all' || productTypeFilter === 'pack') {
+    if (productTypes.includes('all') || productTypes.includes('pack')) {
         const packWhere: any = {}
         if (searchQuery) {
             packWhere.OR = [ { name: { contains: searchQuery } }, { nameFr: { contains: searchQuery } }, { nameEn: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
         }
-        if (statusParam === 'active') packWhere.active = true
-        if (statusParam === 'inactive') packWhere.active = false
-        if (jumiaParam === 'synced') packWhere.isSyncedWithJumia = true
-        if (jumiaParam === 'not-synced') packWhere.isSyncedWithJumia = false
-        if (jumiaParam === 'has-sku') packWhere.sellerSku = { not: null }
-        if (jumiaParam === 'no-sku') packWhere.sellerSku = null
+        if (statusParam.split(',').includes('active')) packWhere.active = true
+        if (statusParam.split(',').includes('inactive')) packWhere.active = false
+        if (jumiaParam.split(',').includes('synced')) packWhere.isSyncedWithJumia = true
+        if (jumiaParam.split(',').includes('not-synced')) packWhere.isSyncedWithJumia = false
+        if (jumiaParam.split(',').includes('has-sku')) packWhere.sellerSku = { not: null }
+        if (jumiaParam.split(',').includes('no-sku')) packWhere.sellerSku = null
         
         const packs = await prisma.pack.findMany({
             where: packWhere,
@@ -134,20 +134,22 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
-    if (productTypeFilter === 'all' || ['kids', 'usb', 'bookmarks'].includes(productTypeFilter)) {
+    const accessoryTypes = productTypes.filter(t => ['kids', 'usb', 'bookmarks'].includes(t))
+    if (productTypes.includes('all') || accessoryTypes.length > 0) {
         const extraWhere: any = {}
         if (searchQuery) {
             extraWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
         }
-        if (productTypeFilter !== 'all') {
-            extraWhere.category = productTypeFilter.toUpperCase()
+        if (statusParam.split(',').includes('active')) extraWhere.active = true
+        if (statusParam.split(',').includes('inactive')) extraWhere.active = false
+        if (jumiaParam.split(',').includes('synced')) extraWhere.isSyncedWithJumia = true
+        if (jumiaParam.split(',').includes('not-synced')) extraWhere.isSyncedWithJumia = false
+        if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null }
+        if (jumiaParam.split(',').includes('no-sku')) extraWhere.sellerSku = null
+        
+        if (!productTypes.includes('all') && accessoryTypes.length > 0) {
+            extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }
         }
-        if (statusParam === 'active') extraWhere.active = true
-        if (statusParam === 'inactive') extraWhere.active = false
-        if (jumiaParam === 'synced') extraWhere.isSyncedWithJumia = true
-        if (jumiaParam === 'not-synced') extraWhere.isSyncedWithJumia = false
-        if (jumiaParam === 'has-sku') extraWhere.sellerSku = { not: null }
-        if (jumiaParam === 'no-sku') extraWhere.sellerSku = null
         
         const extras = await prisma.extraProduct.findMany({
             where: extraWhere,
@@ -178,7 +180,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
     const totalBooks = allProducts.length
     const activeBooks = allProducts.filter(b => b.active).length
-    const stockProducts = productTypeFilter === 'all' ? allProducts.filter(p => p.productType === 'BOOK') : allProducts
+    const stockProducts = productTypes.includes('all') ? allProducts.filter(p => p.productType === 'BOOK') : allProducts
     const totalStock = stockProducts.reduce((sum, p) => sum + (p.stock || 0), 0)
     const stockValue = stockProducts.reduce((sum, p) => sum + ((p.costPrice || 0) * (p.stock || 0)), 0)
 

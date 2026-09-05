@@ -299,7 +299,19 @@ export default async function AuthorPage({
                     {books.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                             {books.map((book) => (
-                                <BookCard key={book.id} book={book} locale={locale} isAuth={isAuth} />
+                                <BookCard 
+                                    key={book.id} 
+                                    id={book.id}
+                                    title={book.title}
+                                    titleFr={book.titleFr}
+                                    titleEn={book.titleEn}
+                                    author={book.author}
+                                    price={book.price}
+                                    image={book.image || '/book-placeholder.png'}
+                                    category={book.category}
+                                    language={book.language}
+                                    stock={book.stock}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -312,7 +324,7 @@ export default async function AuthorPage({
 
                     {/* Author Quotes */}
                     {quotes && quotes.length > 0 && (
-                        <div className="mt-20">
+                        <div className="relative z-10 mt-32 pt-16 border-t border-slate-200">
                             <div className="flex items-center gap-3 mb-8">
                                 <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
                                     {locale === 'ar' ? 'اقتباسات الكاتب' : locale === 'en' ? 'Author Quotes' : 'Citations de l\'auteur'}

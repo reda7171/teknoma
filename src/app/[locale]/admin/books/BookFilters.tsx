@@ -137,23 +137,37 @@ export default function BookFilters({
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[
-                                    { id: '', label: 'Tous' },
                                     { id: 'active', label: 'Actifs' },
                                     { id: 'inactive', label: 'Inactifs' },
                                     { id: 'no-image', label: 'Sans Image' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ status: f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            activeFilters.status === f.id && !['in-stock', 'out-of-stock'].includes(activeFilters.status)
-                                            ? 'bg-black text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const currentStatus = activeFilters.status ? activeFilters.status.split(',') : []
+                                    const isActive = currentStatus.includes(f.id)
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => {
+                                                let newStatus = [...currentStatus]
+                                                if (newStatus.includes(f.id)) {
+                                                    newStatus = newStatus.filter(s => s !== f.id)
+                                                } else {
+                                                    // Handle exclusive active/inactive
+                                                    if (f.id === 'active') newStatus = [...newStatus.filter(s => s !== 'inactive'), f.id]
+                                                    else if (f.id === 'inactive') newStatus = [...newStatus.filter(s => s !== 'active'), f.id]
+                                                    else newStatus.push(f.id)
+                                                }
+                                                handleApplyFilters({ status: newStatus.join(',') })
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                isActive
+                                                ? 'bg-black text-white' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -171,19 +185,36 @@ export default function BookFilters({
                                     { id: 'kids', label: 'Enfants (Kids)' },
                                     { id: 'usb', label: 'Clés USB' },
                                     { id: 'bookmarks', label: 'Marque-pages' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ type: f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            activeFilters.type === f.id
-                                            ? 'bg-black text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const currentTypes = activeFilters.type ? activeFilters.type.split(',') : []
+                                    const isActive = f.id === '' ? currentTypes.length === 0 : currentTypes.includes(f.id)
+
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => {
+                                                if (f.id === '') {
+                                                    handleApplyFilters({ type: '' })
+                                                } else {
+                                                    let newTypes = [...currentTypes]
+                                                    if (newTypes.includes(f.id)) {
+                                                        newTypes = newTypes.filter(t => t !== f.id)
+                                                    } else {
+                                                        newTypes.push(f.id)
+                                                    }
+                                                    handleApplyFilters({ type: newTypes.join(',') })
+                                                }
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                isActive
+                                                ? 'bg-black text-white' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -197,19 +228,34 @@ export default function BookFilters({
                                 {[
                                     { id: 'in-stock', label: 'En Stock' },
                                     { id: 'out-of-stock', label: 'Rupture' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ status: activeFilters.status === f.id ? '' : f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            activeFilters.status === f.id 
-                                            ? 'bg-black text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const currentStatus = activeFilters.status ? activeFilters.status.split(',') : []
+                                    const isActive = currentStatus.includes(f.id)
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => {
+                                                let newStatus = [...currentStatus]
+                                                if (newStatus.includes(f.id)) {
+                                                    newStatus = newStatus.filter(s => s !== f.id)
+                                                } else {
+                                                    // Exclusive in-stock / out-of-stock
+                                                    if (f.id === 'in-stock') newStatus = [...newStatus.filter(s => s !== 'out-of-stock'), f.id]
+                                                    else if (f.id === 'out-of-stock') newStatus = [...newStatus.filter(s => s !== 'in-stock'), f.id]
+                                                    else newStatus.push(f.id)
+                                                }
+                                                handleApplyFilters({ status: newStatus.join(',') })
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                isActive 
+                                                ? 'bg-black text-white' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -224,19 +270,31 @@ export default function BookFilters({
                                     { id: 'fr', label: 'Français' },
                                     { id: 'ar', label: 'العربية' },
                                     { id: 'en', label: 'English' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ lang: activeFilters.lang === f.id ? '' : f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            activeFilters.lang === f.id 
-                                            ? 'bg-black text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const currentLangs = activeFilters.lang ? activeFilters.lang.split(',') : []
+                                    const isActive = currentLangs.includes(f.id)
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => {
+                                                let newLangs = [...currentLangs]
+                                                if (newLangs.includes(f.id)) {
+                                                    newLangs = newLangs.filter(l => l !== f.id)
+                                                } else {
+                                                    newLangs.push(f.id)
+                                                }
+                                                handleApplyFilters({ lang: newLangs.join(',') })
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                isActive 
+                                                ? 'bg-black text-white' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -257,55 +315,93 @@ export default function BookFilters({
                                 >
                                     Toutes
                                 </button>
-                                {categories.map((cat) => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => handleApplyFilters({ category: activeFilters.category === cat ? '' : cat, subCategory: '' })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            activeFilters.category === cat 
-                                            ? 'bg-black text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* SubCategory Filter */}
-                        {activeFilters.category && categoryTree && categoryTree[activeFilters.category]?.length > 0 && (
-                            <div className="space-y-3 lg:col-span-2 xl:col-span-3">
-                                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                    <Search className="w-3 h-3" />
-                                    Sous-catégorie
-                                </label>
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        onClick={() => handleApplyFilters({ subCategory: '' })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            !activeFilters.subCategory 
-                                            ? 'bg-black text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        Toutes
-                                    </button>
-                                    {categoryTree[activeFilters.category].map((subCat) => (
+                                {categories.map((cat) => {
+                                    const currentCats = activeFilters.category ? activeFilters.category.split(',') : []
+                                    const isActive = currentCats.includes(cat)
+                                    return (
                                         <button
-                                            key={subCat}
-                                            onClick={() => handleApplyFilters({ subCategory: activeFilters.subCategory === subCat ? '' : subCat })}
+                                            key={cat}
+                                            onClick={() => {
+                                                let newCats = [...currentCats]
+                                                if (newCats.includes(cat)) {
+                                                    newCats = newCats.filter(c => c !== cat)
+                                                } else {
+                                                    newCats.push(cat)
+                                                }
+                                                handleApplyFilters({ category: newCats.join(','), subCategory: '' })
+                                            }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                activeFilters.subCategory === subCat 
+                                                isActive 
                                                 ? 'bg-black text-white' 
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
-                                            {subCat}
+                                            {cat}
                                         </button>
-                                    ))}
-                                </div>
+                                    )
+                                })}
                             </div>
+                        </div>
+
+                        {/* SubCategory Filter */}
+                        {activeFilters.category && categoryTree && (
+                            (() => {
+                                const selectedCategories = activeFilters.category.split(',');
+                                let availableSubCategories: string[] = [];
+                                selectedCategories.forEach(cat => {
+                                    if (categoryTree[cat]) {
+                                        availableSubCategories.push(...categoryTree[cat]);
+                                    }
+                                });
+                                
+                                if (availableSubCategories.length === 0) return null;
+
+                                return (
+                                    <div className="space-y-3 lg:col-span-2 xl:col-span-3">
+                                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                            <Search className="w-3 h-3" />
+                                            Sous-catégorie
+                                        </label>
+                                        <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => handleApplyFilters({ subCategory: '' })}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                    !activeFilters.subCategory 
+                                                    ? 'bg-black text-white' 
+                                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                Toutes
+                                            </button>
+                                            {availableSubCategories.map((subCat) => {
+                                                const currentSubCats = activeFilters.subCategory ? activeFilters.subCategory.split(',') : []
+                                                const isActive = currentSubCats.includes(subCat)
+                                                return (
+                                                    <button
+                                                        key={subCat}
+                                                        onClick={() => {
+                                                            let newSubCats = [...currentSubCats]
+                                                            if (newSubCats.includes(subCat)) {
+                                                                newSubCats = newSubCats.filter(c => c !== subCat)
+                                                            } else {
+                                                                newSubCats.push(subCat)
+                                                            }
+                                                            handleApplyFilters({ subCategory: newSubCats.join(',') })
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                            isActive 
+                                                            ? 'bg-black text-white' 
+                                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                                        }`}
+                                                    >
+                                                        {subCat}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                )
+                            })()
                         )}
 
                         {/* Jumia Filter */}
@@ -320,19 +416,37 @@ export default function BookFilters({
                                     { id: 'not-synced', label: 'Non Synchronisé' },
                                     { id: 'has-sku', label: 'Avec SKU' },
                                     { id: 'no-sku', label: 'Sans SKU' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ jumia: activeFilters.jumia === f.id ? '' : f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            activeFilters.jumia === f.id 
-                                            ? 'bg-[#f68b1e] text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const currentJumiaArray = activeFilters.jumia ? activeFilters.jumia.split(',') : [];
+                                    const isActive = currentJumiaArray.includes(f.id);
+                                    
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => {
+                                                let newJumiaArray;
+                                                if (isActive) {
+                                                    newJumiaArray = currentJumiaArray.filter(i => i !== f.id);
+                                                } else {
+                                                    // Handle exclusive filters (can't be synced and not-synced at same time)
+                                                    if (f.id === 'synced') newJumiaArray = [...currentJumiaArray.filter(i => i !== 'not-synced'), f.id];
+                                                    else if (f.id === 'not-synced') newJumiaArray = [...currentJumiaArray.filter(i => i !== 'synced'), f.id];
+                                                    else if (f.id === 'has-sku') newJumiaArray = [...currentJumiaArray.filter(i => i !== 'no-sku'), f.id];
+                                                    else if (f.id === 'no-sku') newJumiaArray = [...currentJumiaArray.filter(i => i !== 'has-sku'), f.id];
+                                                    else newJumiaArray = [...currentJumiaArray, f.id];
+                                                }
+                                                handleApplyFilters({ jumia: newJumiaArray.join(',') });
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                isActive 
+                                                ? 'bg-[#f68b1e] text-white ring-2 ring-[#f68b1e] ring-offset-1' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 

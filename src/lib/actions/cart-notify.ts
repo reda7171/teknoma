@@ -4,13 +4,14 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import { getIpIdentifier } from '@/lib/rate-limit'
 import { isAuthenticated } from '@/lib/actions/auth'
 
-export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string) {
+export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string, cartTotal?: number, cartItemsText?: string, discount?: number | null) {
     try {
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
         
         const cleanTitle = productTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const cleanItemsText = cartItemsText ? cartItemsText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''
 
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
@@ -32,8 +33,21 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
                 }
             }
             // On envoie une notification asynchrone
+            let message = `🛒 <b>Nouveau Produit Ajouté</b>${adminTag}\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`
+            
+            if (discount) {
+                message += `\n🎯 <b>Réduction active:</b> ${discount} درهم`
+            }
+            
+            if (cartTotal !== undefined) {
+                message += `\n\n💳 <b>Total du panier actuel:</b> ${cartTotal.toFixed(2)} درهم`
+            }
+            if (cleanItemsText) {
+                message += `\n📚 <b>Contenu du panier:</b>\n<i>${cleanItemsText}</i>`
+            }
+
             await sendTelegramMessage(
-                `🛒 <b>Nouveau Panier</b>${adminTag}\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`,
+                message,
                 undefined,
                 undefined,
                 replyMarkup
