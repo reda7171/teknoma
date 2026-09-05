@@ -1,4 +1,116 @@
 {
+  "Seller": {
+    "Sidebar": {
+      "Logo": "روايـة",
+      "LogoSub": "بائع",
+      "Dashboard": "لوحة التحكم",
+      "MyBooks": "كتبي",
+      "MyOrders": "طلباتي",
+      "MyBlog": "مقالاتي",
+      "NewBook": "كتاب جديد",
+      "Logout": "تسجيل الخروج"
+    },
+    "Dashboard": {
+      "Title": "مرحباً",
+      "Subtitle": "متجرك على Riwaya Marketplace",
+      "Stats": {
+        "Books": "كتبي",
+        "Orders": "الطلبات",
+        "Revenue": "الإيرادات"
+      },
+      "RecentOrders": "أحدث الطلبات",
+      "SeeAll": "عرض الكل",
+      "NoOrders": "لا توجد طلبات بعد.",
+      "Tip": {
+        "Title": "نصيحة للبيع",
+        "Body": "حسّن فرص بيعك بإضافة صور حقيقية لكتبك ووصف تفصيلي. لا تنسَ ذكر الحالة بدقة (كالجديد، جيد، مستعمل).",
+        "Btn": "اعرف أكثر"
+      },
+      "NewBook": "كتاب جديد"
+    },
+    "Books": {
+      "Title": "كتالوج كتبي",
+      "Subtitle": "إدارة كتبك على المتجر",
+      "NewBook": "كتاب جديد",
+      "Empty": "لا توجد كتب بعد.",
+      "EmptyHint": "ابدأ البيع بإضافة كتابك الأول.",
+      "Price": "السعر",
+      "Stock": "المخزون",
+      "Status": {
+        "Approved": "مقبول",
+        "Pending": "في الانتظار",
+        "Rejected": "مرفوض"
+      }
+    },
+    "NewBook": {
+      "Title": "بيع كتاب",
+      "Back": "العودة إلى الكتالوج",
+      "GoogleSearch": "البحث في Google Books",
+      "SearchPlaceholder": "ابحث بالعنوان أو المؤلف أو ISBN...",
+      "Search": "بحث",
+      "SelectBook": "اختيار",
+      "ImageLabel": "صورة الكتاب",
+      "ImageHint": "أضف صورة عبر الرابط",
+      "TitleLabel": "عنوان الكتاب",
+      "AuthorLabel": "المؤلف",
+      "CategoryLabel": "الفئة",
+      "LanguageLabel": "اللغة",
+      "PriceLabel": "سعر البيع (درهم)",
+      "StockLabel": "الكمية المتوفرة",
+      "DescriptionLabel": "وصف تفصيلي",
+      "DescriptionPlaceholder": "أخبرنا عن هذا الكتاب (الحالة، الطبعة، المحتوى)...",
+      "Info": "بنشر هذا الكتاب، سيظهر فوراً على Riwaya Marketplace. تأكد من دقة المعلومات.",
+      "Submit": "نشر على المتجر",
+      "Submitting": "جارٍ النشر...",
+      "Languages": {
+        "fr": "الفرنسية",
+        "ar": "العربية",
+        "en": "الإنجليزية"
+      }
+    },
+    "Orders": {
+      "Title": "طلباتي",
+      "Subtitle": "تتبع مبيعاتك",
+      "Empty": "لا توجد طلبات بعد.",
+      "OrderId": "الطلب",
+      "Customer": "العميل",
+      "Date": "التاريخ",
+      "Total": "المجموع",
+      "Status": "الحالة"
+    },
+    "Blog": {
+      "Title": "مقالاتي",
+      "Subtitle": "روّج لكتبك — كل مقال يخضع للمراجعة قبل النشر",
+      "NewPost": "مقال جديد",
+      "ApprovalNotice": "تخضع مقالاتك للموافقة قبل نشرها على مدونة روايـة.",
+      "Empty": "لا توجد مقالات",
+      "EmptyHint": "ابدأ الكتابة لترويج كتبك",
+      "Write": "اكتب مقالاً",
+      "StatusPublished": "منشور",
+      "StatusPending": "في الانتظار",
+      "Views": "مشاهدة",
+      "Edit": "تعديل",
+      "View": "عرض المقال",
+      "Delete": "حذف"
+    },
+    "NewPost": {
+      "Title": "مقال جديد",
+      "Back": "العودة إلى المقالات",
+      "Preview": "معاينة",
+      "Edit": "تحرير",
+      "TitleLabel": "العنوان",
+      "ExcerptLabel": "ملخص",
+      "CategoryLabel": "الفئة",
+      "SubCategoryLabel": "الفئة الفرعية",
+      "CoverLabel": "صورة الغلاف (رابط)",
+      "ContentLabel": "المحتوى",
+      "ContentPlaceholder": "اكتب مقالك هنا... تحدث عن كتبك ومتجرك وشارك خبرتك...",
+      "ApprovalNotice": "سيُرسَل المقال للمراجعة قبل النشر.",
+      "Submit": "إرسال المقال",
+      "Submitting": "جارٍ الإرسال...",
+      "ErrorRequired": "العنوان والمحتوى إلزاميان."
+    }
+  },
   "KidsPage": {
     "Title": "طفلي",
     "Description": "اكتشف مجموعتنا السحرية من كتب الأطفال والقصص القصيرة وكتب التلوين.",
@@ -511,7 +623,9 @@
     "RecommendedReads": "قراءات مقترحة",
     "ExploreAll": "استكشف الكل",
     "FrequentlyBoughtTogether": "اشتره مع",
-    "ArticleMentions": "مقالات تتحدث عن هذا المنتج"
+    "ArticleMentions": "مقالات تتحدث عن هذا المنتج",
+    "SoldBy": "البائع",
+    "SellerRating": "تقييم البائع"
   },
   "Cart": {
     "Title": "سلتك",

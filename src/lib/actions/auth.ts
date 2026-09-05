@@ -22,7 +22,10 @@ export type LoginResult =
 /**
  * Connexion admin
  */
-export async function login(email: string, password: string): Promise<LoginResult> {
+export async function login(formData: FormData): Promise<LoginResult> {
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`login_${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 }) // 5 essais par 15 min
 
@@ -77,7 +80,7 @@ export async function login(email: string, password: string): Promise<LoginResul
 
         const isProd = process.env.NODE_ENV === 'production'
         
-        if (user.role !== 'INFLUENCER') {
+        if (user.role !== 'INFLUENCER' && user.role !== 'SELLER') {
             // Créer une requête d'approbation
             const request = await prisma.adminAuthRequest.create({
                 data: {
@@ -164,7 +167,7 @@ export async function login(email: string, password: string): Promise<LoginResul
 
         return {
             success: true,
-            redirect: user.role === 'INFLUENCER' ? '/influencer' : '/admin',
+            redirect: user.role === 'INFLUENCER' ? '/influencer' : (user.role === 'SELLER' ? '/seller' : '/admin'),
         }
     } catch (error) {
         console.error('Erreur lors de la connexion:', error)
@@ -263,8 +266,9 @@ export async function logout() {
         entity: 'AUTH'
     })
     const cookieStore = await cookies()
-    cookieStore.delete('admin-token')
-    cookieStore.delete('admin-email')
+    cookieStore.set('admin-token', '', { maxAge: 0, path: '/' })
+    cookieStore.set('admin-email', '', { maxAge: 0, path: '/' })
+    cookieStore.set('admin-role', '', { maxAge: 0, path: '/' })
 }
 
 /**

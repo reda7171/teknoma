@@ -1,18 +1,43 @@
 import { getSellerDashboardData } from '@/lib/actions/seller/dashboard'
 import { BookOpen, ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
 import { Link } from '@/i18n/routing'
+import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
 import { getCommunityUser } from '@/lib/actions/community-auth'
+import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
-export default async function SellerDashboardPage() {
+export default async function SellerDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
+    const locale = (await params).locale
+    const t = await getTranslations('Seller.Dashboard')
+
+    let userId = await getAdminUser()
+    let role = await getAdminRole()
+    
+    if (!userId || role !== 'SELLER') {
+        const commUserId = await getCommunityUser()
+        if (commUserId) {
+            const commUser = await prisma.user.findUnique({ where: { id: commUserId } })
+            if (commUser && commUser.role === 'SELLER') {
+                userId = commUserId
+                role = 'SELLER'
+            }
+        }
+    }
+
+    if (!userId || role !== 'SELLER') {
+        redirect(`/${locale}/admin/login`)
+    }
+
     const [user, data] = await Promise.all([
-        getCommunityUser(),
+        prisma.user.findUnique({ where: { id: userId as string } }),
         getSellerDashboardData()
     ])
 
     const stats = [
-        { label: 'Mes Livres', value: data.booksCount, icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-        { label: 'Commandes', value: data.ordersCount, icon: ShoppingBag, color: 'bg-purple-100 text-purple-600' },
-        { label: 'CA Total', value: `${data.totalRevenue.toFixed(2)} درهم`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
+        { label: t('Stats.Books'), value: data.booksCount, icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
+        { label: t('Stats.Orders'), value: data.ordersCount, icon: ShoppingBag, color: 'bg-purple-100 text-purple-600' },
+        { label: t('Stats.Revenue'), value: `${data.totalRevenue.toFixed(2)} درهم`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
     ]
 
     return (
@@ -20,18 +45,22 @@ export default async function SellerDashboardPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-4xl font-black text-black tracking-tighter capitalize">Salut, {user?.fullName}! 👋</h1>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">Votre boutique Riwaya Marketplace</p>
+                    <h1 className="text-4xl font-black text-black tracking-tighter capitalize">
+                        {t('Title')}, {user?.fullName}! 👋
+                    </h1>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">
+                        {t('Subtitle')}
+                    </p>
                 </div>
                 <Link 
                     href="/seller/books/new" 
                     className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all active:scale-95"
                 >
-                    Nouveau Livre
+                    {t('NewBook')}
                 </Link>
             </div>
 
-            {/* Stats Overview */}
+            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {stats.map((stat) => (
                     <div key={stat.label} className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-black/5 flex flex-col gap-6">
@@ -51,13 +80,15 @@ export default async function SellerDashboardPage() {
                 {/* Recent Orders */}
                 <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-black/5">
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-xl font-black text-black uppercase tracking-tight">Dernières commandes</h2>
-                        <Link href="/seller/orders" className="text-xs font-black text-gray-400 hover:text-black transition-colors underline underline-offset-4 decoration-2">Tout voir</Link>
+                        <h2 className="text-xl font-black text-black uppercase tracking-tight">{t('RecentOrders')}</h2>
+                        <Link href="/seller/orders" className="text-xs font-black text-gray-400 hover:text-black transition-colors underline underline-offset-4 decoration-2">
+                            {t('SeeAll')}
+                        </Link>
                     </div>
                     {data.recentOrders.length === 0 ? (
                         <div className="text-center py-10">
                             <ShoppingBag className="w-12 h-12 text-gray-100 mx-auto mb-4" />
-                            <p className="text-gray-400 font-bold text-sm">Aucune commande pour le moment.</p>
+                            <p className="text-gray-400 font-bold text-sm">{t('NoOrders')}</p>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -69,7 +100,7 @@ export default async function SellerDashboardPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-black text-black truncate max-w-[150px]">{order.fullName}</p>
-                                            <p className="text-[10px] font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
+                                            <p className="text-[10px] font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR')}</p>
                                         </div>
                                     </div>
                                     <p className="text-sm font-black text-black">{order.total.toFixed(2)} درهم</p>
@@ -79,16 +110,13 @@ export default async function SellerDashboardPage() {
                     )}
                 </div>
 
-                {/* Quick Tips or Info */}
+                {/* Tip */}
                 <div className="bg-pixio-cream rounded-[2.5rem] p-10 relative overflow-hidden group">
                     <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-pixio-yellow/20 rounded-full blur-3xl transition-all group-hover:scale-125" />
-                    <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4 relative z-10">Conseil de vente</h2>
-                    <p className="text-gray-600 font-bold text-sm leading-relaxed mb-8 relative z-10">
-                        Améliorez vos chances de vendre en ajoutant des photos réelles de vos livres et des descriptions détaillées. 
-                        N'oubliez pas d'indiquer l'état exact (Comme neuf, Bon état, Occasion).
-                    </p>
+                    <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4 relative z-10">{t('Tip.Title')}</h2>
+                    <p className="text-gray-600 font-bold text-sm leading-relaxed mb-8 relative z-10">{t('Tip.Body')}</p>
                     <button className="bg-black text-white px-6 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest relative z-10 group-hover:translate-x-2 transition-transform shadow-xl">
-                        En savoir plus
+                        {t('Tip.Btn')}
                     </button>
                     <TrendingUp className="absolute right-10 top-10 w-24 h-24 text-black/5 -rotate-12 group-hover:rotate-0 transition-all duration-500" />
                 </div>

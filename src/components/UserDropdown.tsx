@@ -73,7 +73,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                 >
                     <User className="w-6 h-6 text-gray-900 group-hover:text-black" />
                 </Link>
-                
+
                 {/* Dropdown Menu on Hover */}
                 <div className="absolute right-0 rtl:left-0 rtl:right-auto mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-4 px-4 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="text-center mb-4">
@@ -188,9 +188,13 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                             <span className="text-sm font-bold text-gray-700 group-hover:text-black">{t('UserMenu.Orders')}</span>
                         </Link>
 
-                        {(user.email === 'admin@riwaya.store' || user.role === 'ADMIN') && (
+                        {(['ADMIN', 'MANAGER', 'SELLER', 'INFLUENCER', 'CONFIRMATOR'].includes(user.role?.toUpperCase() || '') || user.email === 'admin@riwaya.store') && (
                             <Link
-                                href="/admin"
+                                href={
+                                    user.role?.toUpperCase() === 'SELLER' ? '/seller' :
+                                        user.role?.toUpperCase() === 'INFLUENCER' ? '/influencer' :
+                                            '/admin'
+                                }
                                 onClick={() => setIsOpen(false)}
                                 className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors group"
                             >
@@ -198,19 +202,6 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                                     <ShieldCheck className="w-4 h-4 text-blue-600 group-hover:text-white" />
                                 </div>
                                 <span className="text-sm font-bold text-blue-700 group-hover:text-blue-800">{t('UserMenu.AdminPanel')}</span>
-                            </Link>
-                        )}
-
-                        {(user.role === 'INFLUENCER' || user.role === 'influencer') && (
-                            <Link
-                                href="/influencer"
-                                onClick={() => setIsOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 transition-colors group"
-                            >
-                                <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors">
-                                    <Sparkles className="w-4 h-4 text-purple-600 group-hover:text-white" />
-                                </div>
-                                <span className="text-sm font-bold text-purple-700 group-hover:text-purple-800">{t('UserMenu.InfluencerDashboard')}</span>
                             </Link>
                         )}
 

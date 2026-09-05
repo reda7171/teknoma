@@ -1,4 +1,116 @@
 {
+  "Seller": {
+    "Sidebar": {
+      "Logo": "Riwaya",
+      "LogoSub": "Seller",
+      "Dashboard": "Dashboard",
+      "MyBooks": "My Books",
+      "MyOrders": "My Orders",
+      "MyBlog": "My Blog",
+      "NewBook": "New Book",
+      "Logout": "Logout"
+    },
+    "Dashboard": {
+      "Title": "Hello",
+      "Subtitle": "Your Riwaya Marketplace store",
+      "Stats": {
+        "Books": "My Books",
+        "Orders": "Orders",
+        "Revenue": "Total Revenue"
+      },
+      "RecentOrders": "Recent Orders",
+      "SeeAll": "See all",
+      "NoOrders": "No orders yet.",
+      "Tip": {
+        "Title": "Sales tip",
+        "Body": "Improve your chances of selling by adding real photos of your books and detailed descriptions. Don't forget to indicate the exact condition (Like new, Good, Used).",
+        "Btn": "Learn more"
+      },
+      "NewBook": "New Book"
+    },
+    "Books": {
+      "Title": "My Catalogue",
+      "Subtitle": "Manage your books on the Marketplace",
+      "NewBook": "New Book",
+      "Empty": "No books yet.",
+      "EmptyHint": "Start selling by adding your first book.",
+      "Price": "Price",
+      "Stock": "Stock",
+      "Status": {
+        "Approved": "Approved",
+        "Pending": "Pending",
+        "Rejected": "Rejected"
+      }
+    },
+    "NewBook": {
+      "Title": "Sell a book",
+      "Back": "Back to catalogue",
+      "GoogleSearch": "Google Books Search",
+      "SearchPlaceholder": "Search by title, author or ISBN...",
+      "Search": "Search",
+      "SelectBook": "Select",
+      "ImageLabel": "Book image",
+      "ImageHint": "Add an image via URL",
+      "TitleLabel": "Book title",
+      "AuthorLabel": "Author",
+      "CategoryLabel": "Category",
+      "LanguageLabel": "Language",
+      "PriceLabel": "Selling price (MAD)",
+      "StockLabel": "Stock quantity",
+      "DescriptionLabel": "Detailed description",
+      "DescriptionPlaceholder": "Tell us about this book (condition, edition, content)...",
+      "Info": "By publishing this book, it will be immediately visible on the Riwaya Marketplace. Make sure the information is accurate.",
+      "Submit": "Publish on Marketplace",
+      "Submitting": "Publishing...",
+      "Languages": {
+        "fr": "French",
+        "ar": "Arabic",
+        "en": "English"
+      }
+    },
+    "Orders": {
+      "Title": "My Orders",
+      "Subtitle": "Track your sales",
+      "Empty": "No orders yet.",
+      "OrderId": "Order",
+      "Customer": "Customer",
+      "Date": "Date",
+      "Total": "Total",
+      "Status": "Status"
+    },
+    "Blog": {
+      "Title": "My Articles",
+      "Subtitle": "Promote your books — each article is validated before publishing",
+      "NewPost": "New Article",
+      "ApprovalNotice": "Your articles are subject to approval before being published on the Riwaya blog.",
+      "Empty": "No articles",
+      "EmptyHint": "Start writing to promote your books",
+      "Write": "Write an article",
+      "StatusPublished": "Published",
+      "StatusPending": "Pending",
+      "Views": "views",
+      "Edit": "Edit",
+      "View": "View article",
+      "Delete": "Delete"
+    },
+    "NewPost": {
+      "Title": "New Article",
+      "Back": "Back to articles",
+      "Preview": "Preview",
+      "Edit": "Edit",
+      "TitleLabel": "Title",
+      "ExcerptLabel": "Summary",
+      "CategoryLabel": "Category",
+      "SubCategoryLabel": "Sub-category",
+      "CoverLabel": "Cover image (URL)",
+      "ContentLabel": "Content",
+      "ContentPlaceholder": "Write your article here... Talk about your books, your store, share your expertise...",
+      "ApprovalNotice": "The article will be submitted for approval before publication.",
+      "Submit": "Submit article",
+      "Submitting": "Sending...",
+      "ErrorRequired": "Title and content are required."
+    }
+  },
   "KidsPage": {
     "Title": "My Child",
     "Description": "Discover our magical collection of children's books, short stories, and coloring books.",
@@ -511,7 +623,9 @@
     "RecommendedReads": "Recommended Reads",
     "ExploreAll": "Explore all",
     "FrequentlyBoughtTogether": "Buy it with",
-    "ArticleMentions": "Articles about this product"
+    "ArticleMentions": "Articles about this product",
+    "SoldBy": "Sold by",
+    "SellerRating": "Seller rating"
   },
   "Cart": {
     "Title": "Your Cart",

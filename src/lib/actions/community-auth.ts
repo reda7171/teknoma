@@ -188,6 +188,13 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
         await createSession(user.id)
 
+        if (user.role === 'SELLER') {
+            return { success: true, redirect: '/seller' }
+        }
+        if (user.role === 'INFLUENCER' || user.role === 'influencer' as any) {
+            return { success: true, redirect: '/influencer' }
+        }
+
         return { success: true, redirect: '/community' }
 
     } catch (error) {
@@ -267,6 +274,13 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
         }
 
         await createSession(user.id)
+
+        if (user.role === 'SELLER') {
+            return { success: true, redirect: '/seller' }
+        }
+        if (user.role === 'INFLUENCER' || user.role === 'influencer' as any) {
+            return { success: true, redirect: '/influencer' }
+        }
 
         return { success: true, redirect: '/community' }
 

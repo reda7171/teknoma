@@ -1,4 +1,116 @@
 {
+  "Seller": {
+    "Sidebar": {
+      "Logo": "Riwaya",
+      "LogoSub": "Seller",
+      "Dashboard": "Tableau de bord",
+      "MyBooks": "Mes Livres",
+      "MyOrders": "Mes Commandes",
+      "MyBlog": "Mon Blog",
+      "NewBook": "Nouveau Livre",
+      "Logout": "Déconnexion"
+    },
+    "Dashboard": {
+      "Title": "Salut",
+      "Subtitle": "Votre boutique Riwaya Marketplace",
+      "Stats": {
+        "Books": "Mes Livres",
+        "Orders": "Commandes",
+        "Revenue": "CA Total"
+      },
+      "RecentOrders": "Dernières commandes",
+      "SeeAll": "Tout voir",
+      "NoOrders": "Aucune commande pour le moment.",
+      "Tip": {
+        "Title": "Conseil de vente",
+        "Body": "Améliorez vos chances de vendre en ajoutant des photos réelles de vos livres et des descriptions détaillées. N'oubliez pas d'indiquer l'état exact (Comme neuf, Bon état, Occasion).",
+        "Btn": "En savoir plus"
+      },
+      "NewBook": "Nouveau Livre"
+    },
+    "Books": {
+      "Title": "Mon Catalogue",
+      "Subtitle": "Gérez vos livres sur le Marketplace",
+      "NewBook": "Nouveau Livre",
+      "Empty": "Aucun livre pour le moment.",
+      "EmptyHint": "Commencez à vendre en ajoutant votre premier livre.",
+      "Price": "Prix",
+      "Stock": "Stock",
+      "Status": {
+        "Approved": "Approuvé",
+        "Pending": "En attente",
+        "Rejected": "Rejeté"
+      }
+    },
+    "NewBook": {
+      "Title": "Vendre un livre",
+      "Back": "Retour au catalogue",
+      "GoogleSearch": "Recherche Google Books",
+      "SearchPlaceholder": "Rechercher par titre, auteur ou ISBN...",
+      "Search": "Chercher",
+      "SelectBook": "Sélectionner",
+      "ImageLabel": "Image du livre",
+      "ImageHint": "Ajoutez une image via l'URL",
+      "TitleLabel": "Titre du livre",
+      "AuthorLabel": "Auteur",
+      "CategoryLabel": "Catégorie",
+      "LanguageLabel": "Langue",
+      "PriceLabel": "Prix de vente (درهم)",
+      "StockLabel": "Quantité en Stock",
+      "DescriptionLabel": "Description détaillée",
+      "DescriptionPlaceholder": "Parlez-nous de ce livre (état, édition, contenu)...",
+      "Info": "En publiant ce livre, il sera immédiatement visible sur le Marketplace de Riwaya. Veillez à ce que les informations soient exactes.",
+      "Submit": "Publier sur le Marketplace",
+      "Submitting": "Publication en cours...",
+      "Languages": {
+        "fr": "Français",
+        "ar": "Arabe",
+        "en": "Anglais"
+      }
+    },
+    "Orders": {
+      "Title": "Mes Commandes",
+      "Subtitle": "Suivi de vos ventes",
+      "Empty": "Aucune commande pour le moment.",
+      "OrderId": "Commande",
+      "Customer": "Client",
+      "Date": "Date",
+      "Total": "Total",
+      "Status": "Statut"
+    },
+    "Blog": {
+      "Title": "Mes Articles",
+      "Subtitle": "Promouvez vos livres — chaque article est validé avant publication",
+      "NewPost": "Nouvel Article",
+      "ApprovalNotice": "Vos articles sont soumis à approbation avant d'être publiés sur le blog de Riwaya.",
+      "Empty": "Aucun article",
+      "EmptyHint": "Commencez à rédiger pour promouvoir vos livres",
+      "Write": "Écrire un article",
+      "StatusPublished": "Publié",
+      "StatusPending": "En attente",
+      "Views": "vues",
+      "Edit": "Modifier",
+      "View": "Voir l'article",
+      "Delete": "Supprimer"
+    },
+    "NewPost": {
+      "Title": "Nouvel Article",
+      "Back": "Retour aux articles",
+      "Preview": "Prévisualiser",
+      "Edit": "Éditer",
+      "TitleLabel": "Titre",
+      "ExcerptLabel": "Résumé",
+      "CategoryLabel": "Catégorie",
+      "SubCategoryLabel": "Sous-catégorie",
+      "CoverLabel": "Image de couverture (URL)",
+      "ContentLabel": "Contenu",
+      "ContentPlaceholder": "Rédigez votre article ici... Parlez de vos livres, de votre boutique, partagez votre expertise...",
+      "ApprovalNotice": "L'article sera soumis à approbation avant publication.",
+      "Submit": "Soumettre l'article",
+      "Submitting": "Envoi...",
+      "ErrorRequired": "Le titre et le contenu sont obligatoires."
+    }
+  },
   "KidsPage": {
     "Title": "Mon Enfant",
     "Description": "Découvrez notre collection magique de livres pour enfants, petites histoires et coloriages.",
@@ -511,7 +623,9 @@
     "RecommendedReads": "Lectures Recommandées",
     "ExploreAll": "Tout explorer",
     "FrequentlyBoughtTogether": "Achetez-le avec",
-    "ArticleMentions": "L'article parle de ce produit"
+    "ArticleMentions": "L'article parle de ce produit",
+    "SoldBy": "Vendu par",
+    "SellerRating": "Note du vendeur"
   },
   "Cart": {
     "Title": "Votre Panier",

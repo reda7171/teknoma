@@ -3,7 +3,7 @@
 import { Link, usePathname } from '@/i18n/routing'
 import {
     BookOpen, ShoppingCart, Search, Menu, X, User,
-    Home, Book, Users, Package, FileText, Newspaper,
+    Home, Book, Users, Package, FileText, Newspaper, Gamepad2, Recycle,
     Monitor, Baby, Usb, UsersRound, ChevronDown, ChevronRight, LayoutGrid, Heart, Check
 } from 'lucide-react'
 import Image from 'next/image'
@@ -50,6 +50,8 @@ interface HeaderProps {
 export default function Header({ user, notificationDropdown, navigation, megaMenu = [], features = {}, siteLogo = null }: HeaderProps = { user: null }) {
     const getIconForUrl = (url: string, className = "w-4 h-4") => {
         if (url === '/') return <Home className={className} />
+        if (url.includes('usedOnly=true')) return <Recycle className={className} />
+        if (url.includes('/jeux-societe')) return <Gamepad2 className={className} />
         if (url.includes('/books')) return <Book className={className} />
         if (url.includes('/authors')) return <Users className={className} />
         if (url.includes('/packs')) return <Package className={className} />
@@ -416,7 +418,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     </Link>
                                 )
                             })}
-                            {features.seller === true && mounted && (
+                            {features.seller === true && mounted && !user && (
                                 <Link 
                                     href="/devenir-vendeur" 
                                     className="hidden xl:inline-flex bg-gradient-to-r from-[#FFDC50] to-yellow-400 text-black px-5 py-2 rounded-full text-[13px] rtl:text-[15px] font-black tracking-widest rtl:tracking-normal uppercase hover:scale-105 active:scale-95 shadow-[0_4px_14px_rgba(255,220,80,0.4)] hover:shadow-[0_6px_20px_rgba(255,220,80,0.6)] transition-all duration-300 relative overflow-hidden group items-center"

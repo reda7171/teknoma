@@ -1,21 +1,22 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { getCommunityUser } from '@/lib/actions/community-auth'
+import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
 import { revalidatePath } from 'next/cache'
 
 /**
  * Récupère les stats du dashboard vendeur
  */
 export async function getSellerDashboardData() {
-    const user = await getCommunityUser()
-    if (!user || user.role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
 
     const [booksCount, ordersCount, recentOrders] = await Promise.all([
-        prisma.book.count({ where: { sellerId: user.id } }),
-        prisma.order.count({ where: { sellerId: user.id } }),
+        prisma.book.count({ where: { sellerId: userId } }),
+        prisma.order.count({ where: { sellerId: userId } }),
         prisma.order.findMany({
-            where: { sellerId: user.id },
+            where: { sellerId: userId },
             take: 5,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -30,7 +31,7 @@ export async function getSellerDashboardData() {
 
     // Calcul du CA
     const orders = await prisma.order.findMany({
-        where: { sellerId: user.id, status: 'DELIVERED' },
+        where: { sellerId: userId, status: 'DELIVERED' },
         select: { total: true }
     })
     const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
@@ -47,11 +48,12 @@ export async function getSellerDashboardData() {
  * Récupère les livres du vendeur
  */
 export async function getSellerBooks() {
-    const user = await getCommunityUser()
-    if (!user || user.role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
 
     return prisma.book.findMany({
-        where: { sellerId: user.id },
+        where: { sellerId: userId },
         orderBy: { createdAt: 'desc' }
     })
 }
@@ -60,11 +62,12 @@ export async function getSellerBooks() {
  * Récupère les commandes du vendeur
  */
 export async function getSellerOrders() {
-    const user = await getCommunityUser()
-    if (!user || user.role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
 
     return prisma.order.findMany({
-        where: { sellerId: user.id },
+        where: { sellerId: userId },
         orderBy: { createdAt: 'desc' },
         include: {
             items: {
@@ -80,13 +83,14 @@ export async function getSellerOrders() {
  * Créer un livre ( Marketplace )
  */
 export async function createSellerBook(data: any) {
-    const user = await getCommunityUser()
-    if (!user || user.role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
 
     const book = await prisma.book.create({
         data: {
             ...data,
-            sellerId: user.id,
+            sellerId: userId,
             active: false,
             status: 'PENDING'
         }
@@ -95,3 +99,4 @@ export async function createSellerBook(data: any) {
     revalidatePath('/seller/books')
     return { success: true, book }
 }
+

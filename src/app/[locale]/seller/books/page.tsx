@@ -2,6 +2,7 @@ import { getSellerBooks } from '@/lib/actions/seller/dashboard'
 import { Plus, BookOpen, MapPin, Eye, Trash2 } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
+import SellerBookActionsClient from './SellerBookActionsClient'
 
 export default async function SellerBooksPage() {
     const books = await getSellerBooks()
@@ -46,14 +47,7 @@ export default async function SellerBooksPage() {
                                 <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg ${book.active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                     {book.active ? 'En ligne' : 'Inactif'}
                                 </div>
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                    <Link href={`/books/${book.id}`} className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-xl">
-                                        <Eye className="w-5 h-5 text-black" />
-                                    </Link>
-                                    <button className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-xl">
-                                        <Trash2 className="w-5 h-5 text-white" />
-                                    </button>
-                                </div>
+                                <SellerBookActionsClient bookId={book.id} isActive={book.active} />
                             </div>
                             
                             <div className="flex-grow">
