@@ -96,3 +96,24 @@ export async function deleteSellerRequest(id: string) {
         return { success: false, error: 'Impossible de supprimer la demande.' }
     }
 }
+
+export async function updateSellerRequest(id: string, data: {
+    storeName: string
+    managerName: string
+    email: string
+    phone: string
+    city: string
+    stockSize: string
+}) {
+    try {
+        const request = await prisma.sellerRequest.update({
+            where: { id },
+            data
+        })
+        revalidatePath('/admin/vendeurs')
+        return { success: true, request }
+    } catch (error) {
+        console.error('Erreur updateSellerRequest:', error)
+        return { success: false, error: 'Impossible de mettre à jour la demande.' }
+    }
+}
