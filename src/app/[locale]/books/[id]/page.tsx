@@ -551,6 +551,34 @@ export default async function BookDetailPage({
                             </div>
 
                             {/* Trust Badges */}
+                            {/* Carte Vendeur — visible uniquement si le livre appartient à un seller tiers */}
+                            {book.seller && book.sellerId && (
+                                <div className="bg-white border border-gray-100 rounded-[2rem] p-5 shadow-sm flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 text-lg font-black text-blue-700 uppercase">
+                                        {book.seller.fullName?.substring(0, 2) || 'SE'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
+                                            {tBook('SoldBy')}
+                                        </p>
+                                        <p className="text-sm font-black text-black truncate">
+                                            {book.seller.fullName || book.seller.email}
+                                        </p>
+                                        {book.seller.city && (
+                                            <p className="text-[10px] font-medium text-gray-400 flex items-center gap-1 mt-0.5">
+                                                <span>📍</span> {book.seller.city}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col items-end shrink-0">
+                                        <div className="flex items-center gap-1 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full" title={tBook('SellerRating')}>
+                                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                            <span className="text-[10px] font-black text-amber-700">{book.seller.rating?.toFixed(1) || '5.0'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-3 gap-2 sm:gap-6 py-6 border-y border-gray-50">
                                 <div className="text-center group cursor-pointer">
                                     <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">

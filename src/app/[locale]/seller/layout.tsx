@@ -1,6 +1,8 @@
+import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
 import { getCommunityUser } from '@/lib/actions/community-auth'
 import { redirect } from 'next/navigation'
 import SellerSidebar from '@/components/seller/SellerSidebar'
+import { prisma } from '@/lib/prisma'
 
 export default async function SellerLayout({
     children,
@@ -10,10 +12,30 @@ export default async function SellerLayout({
     params: Promise<{ locale: string }>
 }) {
     const locale = (await params).locale
-    const user = await getCommunityUser()
+    let userId = await getAdminUser()
+    let role = await getAdminRole()
 
-    if (!user || user.role !== 'SELLER') {
-        redirect(`/${locale}/community/login`)
+    if (!userId || role !== 'SELLER') {
+        const commUserId = await getCommunityUser()
+        if (commUserId) {
+            const user = await prisma.user.findUnique({ where: { id: commUserId } })
+            if (user && user.role === 'SELLER') {
+                userId = commUserId
+                role = 'SELLER'
+            }
+        }
+    }
+
+    if (!userId || role !== 'SELLER') {
+        redirect(`/${locale}/admin/login`)
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId }
+    })
+
+    if (!user) {
+        redirect(`/${locale}/admin/login`)
     }
 
     return (

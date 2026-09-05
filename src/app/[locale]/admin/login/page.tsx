@@ -63,10 +63,7 @@ export default function LoginPage() {
         setError(null)
 
         const formData = new FormData(e.currentTarget)
-        const email = formData.get('email') as string
-        const password = formData.get('password') as string
-
-        const result = await login(email, password)
+        const result = await login(formData)
 
         if (result.success) {
             if ('pendingApproval' in result && result.pendingApproval) {
