@@ -1,0 +1,21 @@
+# Riwaya - Librairie en Ligne au Maroc
+
+Riwaya est une plateforme e-commerce de vente de livres neufs et d'occasion, proposant le paiement à la livraison (Cash on Delivery) partout au Maroc. 
+Notre objectif est de rendre la lecture accessible avec des prix abordables, des promotions régulières, et une communauté grandissante de lecteurs.
+
+## Navigation et Structure
+- **Accueil** : https://riwaya.store
+- **Catalogue Livres** : https://riwaya.store/fr/books
+- **Packs & Lots** : https://riwaya.store/fr/packs
+- **Devenir Vendeur** : https://riwaya.store/fr/devenir-vendeur
+- **Communauté** : https://riwaya.store/fr/community
+- **Blog** : https://riwaya.store/fr/blog
+
+## Services Clés
+- Paiement à la livraison partout au Maroc.
+- Achat et revente de livres d'occasion.
+- Espace communautaire pour l'échange de livres et le marché local de l'occasion.
+- Récompenses, offres instantanées et remises régulières (Cadeaux, Cashflow, Wallet).
+- Livraison 1h express disponible sur Rabat.
+
+Pour plus d'informations ou pour contacter le support client, veuillez visiter : https://riwaya.store/fr/contact

@@ -170,6 +170,26 @@ const nextConfig: NextConfig = {
         destination: '/:locale/books/:path*',
         permanent: true,
       },
+      {
+        source: '/return-policy',
+        destination: '/returns',
+        permanent: true,
+      },
+      {
+        source: '/:locale/return-policy',
+        destination: '/:locale/returns',
+        permanent: true,
+      },
+      {
+        source: '/sell-book',
+        destination: '/devenir-vendeur',
+        permanent: true,
+      },
+      {
+        source: '/:locale/sell-book',
+        destination: '/:locale/devenir-vendeur',
+        permanent: true,
+      },
     ]
   },
   async rewrites() {

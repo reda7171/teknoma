@@ -18,7 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         description: `Achetez vos livres en ligne et profitez d'une livraison express à ${cityName}. Paiement à la livraison, large choix de romans et développement personnel au Maroc.`,
         keywords: `librairie ${cityName}, acheter livre ${cityName}, livraison livre ${cityName}, book store ${cityName}, romans ${cityName}, développement personnel ${cityName}`,
         alternates: {
-            canonical: `https://riwaya.store/${locale}/livraison/${city}`,
+            canonical: city.toLowerCase() === 'rabat' 
+                ? `https://riwaya.store/${locale}/livraison-1h-rabat`
+                : `https://riwaya.store/${locale}/livraison/${city}`,
         },
         openGraph: {
             title: `Livraison de Livres à ${cityName} - Achat en Ligne | Riwaya`,
