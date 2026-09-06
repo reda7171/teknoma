@@ -30,12 +30,19 @@
     },
     "Books": {
       "Title": "كتالوج كتبي",
-      "Subtitle": "إدارة كتبك على المتجر",
+      "Subtitle": "إدارة المنتجات المعروضة للبيع",
+      "Add": "إضافة",
       "NewBook": "كتاب جديد",
       "Empty": "لا توجد كتب بعد.",
+      "EmptyTitle": "متجرك فارغ",
+      "EmptyDesc": "ابدأ الآن بإضافة كتابك الأول على Riwaya Marketplace.",
+      "EmptyBtn": "أضف كتابي الأول",
       "EmptyHint": "ابدأ البيع بإضافة كتابك الأول.",
       "Price": "السعر",
       "Stock": "المخزون",
+      "InStock": "في المخزن",
+      "Online": "نشط",
+      "Inactive": "غير نشط",
       "Status": {
         "Approved": "مقبول",
         "Pending": "في الانتظار",
@@ -46,6 +53,7 @@
       "Title": "بيع كتاب",
       "Back": "العودة إلى الكتالوج",
       "GoogleSearch": "البحث في Google Books",
+      "QuickSearch": "بحث سريع",
       "SearchPlaceholder": "ابحث بالعنوان أو المؤلف أو ISBN...",
       "Search": "بحث",
       "SelectBook": "اختيار",
@@ -62,21 +70,43 @@
       "Info": "بنشر هذا الكتاب، سيظهر فوراً على Riwaya Marketplace. تأكد من دقة المعلومات.",
       "Submit": "نشر على المتجر",
       "Submitting": "جارٍ النشر...",
+      "ErrorAdd": "حدث خطأ أثناء إضافة الكتاب.",
+      "SearchError": "لم يُعثر على أي كتاب.",
       "Languages": {
         "fr": "الفرنسية",
         "ar": "العربية",
         "en": "الإنجليزية"
+      },
+      "Categories": {
+        "DevPerso": "التطوير الشخصي",
+        "Business": "الأعمال والمال",
+        "Productivite": "الإنتاجية",
+        "Psychologie": "علم النفس",
+        "Fiction": "خيال"
       }
     },
     "Orders": {
       "Title": "طلباتي",
-      "Subtitle": "تتبع مبيعاتك",
-      "Empty": "لا توجد طلبات بعد.",
+      "Subtitle": "تتبع وإدارة مبيعاتك في السوق",
+      "TotalOrders": "إجمالي الطلبات",
+      "Empty": "لم تصلك أي طلبات بعد.",
       "OrderId": "الطلب",
       "Customer": "العميل",
       "Date": "التاريخ",
-      "Total": "المجموع",
-      "Status": "الحالة"
+      "Total": "المبلغ الإجمالي",
+      "Status": "الحالة",
+      "Articles": "المنتجات",
+      "ChangeStatus": "تغيير الحالة",
+      "Ship": "شحن",
+      "StatusPending": "في الانتظار",
+      "StatusConfirmed": "مؤكد",
+      "StatusShipped": "تم الشحن",
+      "StatusDelivered": "تم التسليم",
+      "StatusCancelled": "ملغى",
+      "StatusReturned": "مُرتجع",
+      "StatusInTransit": "في الطريق",
+      "StatusOutForDelivery": "خارج للتسليم",
+      "StatusFailed": "فشل"
     },
     "Blog": {
       "Title": "مقالاتي",
@@ -441,11 +471,11 @@
       "InfluencerDashboard": "لوحة التحكم"
     },
     "Menu": "القائمة",
-    "BoardGames": "ألعاب لوحية",
+    "BoardGames": "ألعاب جماعية",
     "Quotes": "اقتباسات"
   },
   "Footer": {
-    "About": "عن ريواية",
+    "About": "عن رواية",
     "Contact": "اتصل بنا",
     "Terms": "الشروط والأحكام",
     "Privacy": "سياسة الخصوصية",

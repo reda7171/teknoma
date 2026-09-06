@@ -48,14 +48,14 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
             <Header />
             <main className="min-h-screen bg-white">
                 {/* Hero Section */}
-                <section className="relative pt-32 pb-20 overflow-hidden bg-pixio-cream">
+                <section className="relative pt-24 pb-20 overflow-hidden bg-pixio-cream">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-yellow/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-pixio-pink/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 animate-float-slow"></div>
                     
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <div className="flex flex-col items-center text-center space-y-8">
                             <ScrollReveal animation="animate-reveal-up">
-                                <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-xs font-black uppercase tracking-widest shadow-xl">
+                                <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-xs rtl:text-sm rtl:tracking-normal font-black uppercase rtl:uppercase-none tracking-widest shadow-xl">
                                     <Users className="w-4 h-4 text-pixio-yellow" />
                                     <span>{t('AllAuthors')}</span>
                                 </div>
@@ -84,7 +84,7 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                 <div className="p-3 bg-pixio-yellow rounded-2xl">
                                     <Sparkles className="w-6 h-6 text-black" />
                                 </div>
-                                <h2 className="text-2xl font-black text-black uppercase tracking-widest">{t('Featured')}</h2>
+                                <h2 className="text-2xl font-black text-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal">{t('Featured')}</h2>
                                 <div className="h-px flex-grow bg-gray-100"></div>
                             </div>
 
@@ -109,17 +109,17 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                                     )}
                                                 </Link>
                                                 <h3 className="text-xl font-black text-black mb-2 line-clamp-1">{author.name}</h3>
-                                                <p className="text-xs font-black text-pixio-pink uppercase tracking-widest mb-4">
+                                                <p className="text-xs rtl:text-sm rtl:uppercase-none rtl:tracking-normal font-black text-pixio-pink uppercase tracking-widest mb-4">
                                                     {t('BooksCount', { count: author.bookCount })}
                                                 </p>
                                                 {author.bio && (
-                                                    <p className="text-sm text-gray-400 line-clamp-2 mb-6 italic">
+                                                    <p className="text-sm rtl:text-base rtl:font-bold text-gray-400 line-clamp-2 mb-6 italic">
                                                         "{author.bio}"
                                                     </p>
                                                 )}
                                                 <Link 
                                                     href={`/authors/${encodeURIComponent(author.name)}`}
-                                                    className="px-6 py-3 bg-pixio-cream text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-black hover:text-white transition-all border border-transparent hover:border-black"
+                                                    className="px-6 py-3 bg-pixio-cream text-black text-[10px] rtl:text-sm rtl:uppercase-none rtl:tracking-normal font-black uppercase tracking-widest rounded-full hover:bg-black hover:text-white transition-all border border-transparent hover:border-black"
                                                 >
                                                     {t('ViewBooks')}
                                                 </Link>

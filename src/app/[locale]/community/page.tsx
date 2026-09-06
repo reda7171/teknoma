@@ -62,7 +62,7 @@ export default async function CommunityDashboard() {
                 )}
                 {/* Profile Header */}
                 <div className="bg-white rounded-[3rem] p-10 lg:p-12 shadow-xl shadow-black/5 border border-gray-100 mb-12 flex flex-col md:flex-row gap-10 items-center md:justify-between relative overflow-hidden">
-                    <div className="flex items-center gap-6 z-10 w-full md:w-auto">
+                    <div className="flex flex-col md:flex-row items-center gap-6 z-10 w-full md:w-auto">
                         <div className="w-24 h-24 bg-pixio-yellow rounded-full flex items-center justify-center text-3xl font-black text-black uppercase shadow-lg transform rotate-3 border-4 border-white overflow-hidden flex-shrink-0">
                             {u.image ? (
                                 <img src={u.image} alt={u.fullName || 'User'} className="w-full h-full object-cover" />
@@ -70,9 +70,14 @@ export default async function CommunityDashboard() {
                                 u.fullName?.[0] || 'U'
                             )}
                         </div>
-                        <div className="space-y-2 text-center md:text-left min-w-0">
-                            <div className="flex items-center gap-3 justify-center md:justify-start">
-                                <h1 className="text-3xl lg:text-4xl font-black text-black tracking-tighter capitalize truncate">{u.fullName}</h1>
+                        <div className="space-y-3 text-center md:text-left min-w-0 w-full md:w-auto">
+                            <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+                                <h1 className="text-3xl lg:text-4xl font-black text-black tracking-tighter capitalize max-w-full truncate">
+                                    {u.fullName}
+                                </h1>
+                                <span className="text-xs rtl:text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal font-bold shrink-0">
+                                    {u.role}
+                                </span>
                                 <Link
                                     href="/community/profile/edit"
                                     className="w-10 h-10 bg-gray-100 hover:bg-black hover:text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"

@@ -61,7 +61,7 @@ function NewsletterForm({ t }: { t: any }) {
 
     return (
         <>
-            <p className="text-gray-300 text-sm font-medium mb-4">{t('NewsletterText')}</p>
+            <p className="text-gray-300 text-sm rtl:text-base rtl:font-bold font-medium mb-4">{t('NewsletterText')}</p>
             <form onSubmit={handleSubmit} className="flex gap-2">
                 <input
                     type="email"
@@ -73,7 +73,7 @@ function NewsletterForm({ t }: { t: any }) {
                 />
                 <button
                     type="submit"
-                    className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] rtl:text-xs font-black uppercase shadow-lg hover:bg-gray-200 transition-all active:scale-95 shrink-0"
+                    className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase shadow-lg hover:bg-gray-200 transition-all active:scale-95 shrink-0"
                 >
                     {t('Join')}
                 </button>
@@ -162,65 +162,65 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 </>
                             )}
                         </Link>
-                        <p className="text-gray-300 text-sm font-medium leading-relaxed max-w-xs">
+                        <p className="text-gray-300 text-sm rtl:text-base rtl:font-bold font-medium leading-relaxed max-w-xs">
                             {t('Slogan')}
                         </p>
                     </div>
                     <div>
-                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Navigation')}</h3>
+                        <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Navigation')}</h3>
                         <ul className="space-y-4" suppressHydrationWarning>
                             <li suppressHydrationWarning>
-                                <Link href="/books" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
+                                <Link href="/books" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/books?usedOnly=true" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/books?usedOnly=true" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tNav('UsedBooks')}
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/jeux-societe" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/jeux-societe" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tNav('BoardGames')}
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/packs" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
+                                <Link href="/packs" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/about" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{t('About')}</Link>
+                                <Link href="/about" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{t('About')}</Link>
                             </li>
                             {features.exchange === true && (
                                 <li suppressHydrationWarning>
-                                    <Link href="/community/market" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>{tNav('Community')}</Link>
+                                    <Link href="/community/market" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Community')}</Link>
                                 </li>
                             )}
                             {features.seller === true && (
                                 <li suppressHydrationWarning>
-                                    <Link href="/devenir-vendeur" className="text-pixio-yellow hover:text-white transition-colors text-sm font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
+                                    <Link href="/devenir-vendeur" className="text-pixio-yellow hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
                                         {locale === 'ar' ? 'كن بائعاً' : locale === 'en' ? 'Become a seller' : 'Devenir vendeur'}
                                     </Link>
                                 </li>
                             )}
                             <li suppressHydrationWarning>
-                                <Link href="/join-us" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/join-us" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tJoinUs('heroTitle1')} {tJoinUs('heroTitle2')}
                                 </Link>
                             </li>
                         </ul>
                     </div>
                     <div>
-                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Support')}</h3>
+                        <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Support')}</h3>
                         <ul className="space-y-4">
-                            <li><Link href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Shipping')}</Link></li>
-                            <li><Link href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Returns')}</Link></li>
-                            <li><Link href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Privacy')}</Link></li>
-                            <li><Link href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Terms')}</Link></li>
-                            <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{t('Contact')}</Link></li>
+                            <li><Link href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Shipping')}</Link></li>
+                            <li><Link href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Returns')}</Link></li>
+                            <li><Link href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Privacy')}</Link></li>
+                            <li><Link href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Terms')}</Link></li>
+                            <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Contact')}</Link></li>
                         </ul>
                     </div>
                     <div className="col-span-2 md:col-span-1">
-                        <h3 className="text-[11px] rtl:text-sm font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Journal')}</h3>
+                        <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Journal')}</h3>
                         <ul className="space-y-4 mb-8">
-                            <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm font-bold tracking-tight">{tNav('Journal')}</Link></li>
+                            <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{tNav('Journal')}</Link></li>
                         </ul>
                         <NewsletterForm t={t} />
                     </div>
@@ -237,7 +237,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Pinterest" className="text-gray-400 hover:text-white transition-colors"><PinterestIcon className="w-5 h-5" /></a>}
                 </div>
 
-                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-base font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">
                     <p>© 2026 riwaya world. {t('Rights')}</p>
 
                     <div className="md:absolute md:left-1/2 md:-translate-x-1/2 text-center">

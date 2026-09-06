@@ -16,11 +16,12 @@ export default async function SellerLayout({
     let role = await getAdminRole()
 
     if (!userId || role !== 'SELLER') {
-        const commUserId = await getCommunityUser()
-        if (commUserId) {
-            const user = await prisma.user.findUnique({ where: { id: commUserId } })
+        const commUser = await getCommunityUser()
+        if (commUser) {
+            const commId = typeof commUser === 'string' ? commUser : (commUser as any).id
+            const user = await prisma.user.findUnique({ where: { id: commId } })
             if (user && user.role === 'SELLER') {
-                userId = commUserId
+                userId = commId
                 role = 'SELLER'
             }
         }
@@ -31,7 +32,7 @@ export default async function SellerLayout({
     }
 
     const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId as string }
     })
 
     if (!user) {
@@ -42,10 +43,10 @@ export default async function SellerLayout({
         <div className="min-h-screen bg-gray-50 flex">
             {/* Sidebar */}
             <SellerSidebar user={user} />
-            
-            {/* Main Content (Like Admin) */}
-            <div className="pl-64 flex-grow">
-                <main className="p-8 mx-auto w-full">
+
+            {/* Main Content — padding seulement sur desktop */}
+            <div className={`${locale === 'ar' ? 'md:pr-64' : 'md:pl-64'} flex-grow`}>
+                <main className="p-4 md:p-8 mx-auto w-full">
                     {children}
                 </main>
             </div>

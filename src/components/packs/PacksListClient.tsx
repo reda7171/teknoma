@@ -32,8 +32,8 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                 <div className="w-24 h-24 bg-pixio-cream rounded-full flex items-center justify-center mx-auto mb-8">
                     <Package className="w-10 h-10 text-black/10" />
                 </div>
-                <h3 className="text-2xl md:text-3xl font-black text-black mb-4">{t('NoCollections')}</h3>
-                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs md:text-sm">{t('Curating')}</p>
+                <h3 className="text-3xl md:text-4xl font-black text-black mb-4">{t('NoCollections')}</h3>
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-sm md:text-base">{t('Curating')}</p>
             </div>
         )
     }
@@ -47,7 +47,7 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
             <div className="flex justify-end mb-10">
                 <button
                     onClick={() => setFilterAvailable(!filterAvailable)}
-                    className={`flex items-center gap-3 px-6 py-4 rounded-full font-black text-sm uppercase tracking-widest transition-all whitespace-nowrap shadow-xl ${
+                    className={`flex items-center gap-3 px-6 py-4 rounded-full font-black text-sm md:text-base uppercase tracking-widest transition-all whitespace-nowrap shadow-xl ${
                         filterAvailable 
                             ? 'bg-black text-white' 
                             : 'bg-white text-gray-400 hover:text-black'
@@ -65,8 +65,8 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                         <span className="text-2xl font-black text-black tracking-tighter">%</span>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-base md:text-lg font-black uppercase tracking-widest text-black">{t('Benefits.HighSavings.Title')}</h3>
-                        <p className="text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.HighSavings.Desc')}</p>
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-black">{t('Benefits.HighSavings.Title')}</h3>
+                        <p className="text-sm md:text-base font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.HighSavings.Desc')}</p>
                     </div>
                 </div>
                 <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
@@ -74,8 +74,8 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                         <Sparkles className="w-8 h-8 text-black" />
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-base md:text-lg font-black uppercase tracking-widest text-black">{t('Benefits.CuratedMix.Title')}</h3>
-                        <p className="text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.CuratedMix.Desc')}</p>
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-black">{t('Benefits.CuratedMix.Title')}</h3>
+                        <p className="text-sm md:text-base font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.CuratedMix.Desc')}</p>
                     </div>
                 </div>
                 <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
@@ -83,8 +83,8 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                         <Package className="w-8 h-8 text-black" />
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-base md:text-lg font-black uppercase tracking-widest text-black">{t('Benefits.ExpressPack.Title')}</h3>
-                        <p className="text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.ExpressPack.Desc')}</p>
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-black">{t('Benefits.ExpressPack.Title')}</h3>
+                        <p className="text-sm md:text-base font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.ExpressPack.Desc')}</p>
                     </div>
                 </div>
             </div>

@@ -330,7 +330,7 @@ export async function getUsedBooks(limit = 6) {
         `book:used:${limit}`,
         async () => {
             return prisma.book.findMany({
-                where: { active: true, condition: { in: ['USED', 'GOOD'] } } as any,
+                where: { active: true, stock: { gt: 0 }, condition: { in: ['USED', 'GOOD'] } } as any,
                 orderBy: { createdAt: 'desc' },
                 take: limit,
             })

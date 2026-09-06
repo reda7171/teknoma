@@ -213,22 +213,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         ? [...navItems, { href: '/authors', label: t('Authors'), isJournal: false }]
         : navItems
 
-    if (features.deposerListe === true && !finalNavItems.some((i: any) => i.href.includes('deposer-liste'))) {
-        finalNavItems = [{ href: '/deposer-liste', label: t('DeposerListe'), isJournal: false }, ...finalNavItems]
-    }
 
-    // Toujours afficher le Journal si absent du menu personnalisé
-    if (!finalNavItems.some((i: any) => i.href.includes('/blog') || i.isJournal)) {
-        finalNavItems = [...finalNavItems, { href: '/blog', label: t('Journal'), isJournal: true }]
-    }
 
-    if (!finalNavItems.some((i: any) => i.href.includes('usedOnly'))) {
-        finalNavItems = [...finalNavItems, { href: '/books?usedOnly=true', label: t('UsedBooks'), isJournal: false }]
-    }
-
-    if (!finalNavItems.some((i: any) => i.href.includes('jeux-societe'))) {
-        finalNavItems = [...finalNavItems, { href: '/jeux-societe', label: t('BoardGames'), isJournal: false }]
-    }
 
     return (
         <>
