@@ -21,7 +21,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { path: '/terms', priority: 0.3, freq: 'yearly' as const },
         { path: '/tracking', priority: 0.5, freq: 'weekly' as const },
         { path: '/livraison', priority: 0.6, freq: 'monthly' as const },
-        { path: '/return-policy', priority: 0.4, freq: 'yearly' as const },
+        { path: '/returns', priority: 0.4, freq: 'yearly' as const },
+        { path: '/devenir-vendeur', priority: 0.7, freq: 'monthly' as const },
     ]
 
     const staticUrls = locales.flatMap((locale) =>
