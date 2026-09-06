@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { getCached } from '@/lib/cache'
 
 // Récupérer tous les paramètres
@@ -64,9 +64,10 @@ export async function updateSetting(key: string, value: string, category: string
             create: { key, value, category, description }
         })
 
-        // revalidatePath('/admin/settings')
-        // revalidatePath('/admin/config/n8n')
-        // revalidatePath('/')
+        revalidatePath('/admin/settings')
+        revalidatePath('/')
+        revalidateTag('setting')
+        revalidateTag('settings')
 
         return { success: true, setting }
     } catch (error: any) {
@@ -91,6 +92,8 @@ export async function updateMultipleSettings(settings: { key: string; value: str
 
         revalidatePath('/admin/settings')
         revalidatePath('/')
+        revalidateTag('setting')
+        revalidateTag('settings')
 
         return { success: true }
     } catch (error: any) {

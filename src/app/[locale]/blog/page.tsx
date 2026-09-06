@@ -62,6 +62,10 @@ export default async function BlogPage({
         getSetting('adsense_slot_sidebar')
     ])
 
+    const displayCategories = locale === 'ar' 
+        ? categories.filter(cat => /[\u0600-\u06FF]/.test(cat)) 
+        : categories;
+
     return (
         <div className="min-h-screen bg-pixio-cream font-sans">
             <script
@@ -99,15 +103,15 @@ export default async function BlogPage({
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <Link
                             href="/blog"
-                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs rtl:text-sm rtl:md:text-base font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                         >
                             {t('All')}
                         </Link>
-                        {categories.map((cat) => (
+                        {displayCategories.map((cat) => (
                             <Link
                                 key={cat}
                                 href={`/blog?category=${cat}`}
-                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs rtl:text-sm rtl:md:text-base font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
                             >
                                 {cat}
                             </Link>

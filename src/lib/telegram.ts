@@ -339,7 +339,11 @@ export async function sendUserRegistrationNotification(user: {
     const ip = await getClientIp()
     const location = await getLocationFromIp(ip)
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_register' } })
-    let text = templateSetting?.value || `👤 <b>Nouveau Compte Créé</b>\n\n📛 <b>Nom:</b> {{fullName}}\n📧 <b>Email:</b> {{email}}\n{{phone}}📍 <b>Ville:</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n🔑 <b>Rôle:</b> {{role}}\n🌐 <b>IP:</b> {{ip}}\n📅 <b>Date:</b> {{date}}`
+    
+    const headersList = await headers()
+    const session = headersList.get('user-agent') || 'Inconnu'
+
+    let text = templateSetting?.value || `👤 <b>Nouveau Compte Créé</b>\n\n📛 <b>Nom:</b> {{fullName}}\n📧 <b>Email:</b> {{email}}\n{{phone}}📍 <b>Ville:</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n🔑 <b>Rôle:</b> {{role}}\n🌐 <b>IP:</b> {{ip}}\n💻 <b>Session:</b> {{session}}\n📅 <b>Date:</b> {{date}}`
 
     text = text.replace(/\{\{fullName\}\}/g, user.fullName)
                .replace(/\{\{email\}\}/g, user.email)
@@ -348,6 +352,7 @@ export async function sendUserRegistrationNotification(user: {
                .replace(/\{\{location\}\}/g, location)
                .replace(/\{\{role\}\}/g, user.role || 'USER')
                .replace(/\{\{ip\}\}/g, ip)
+               .replace(/\{\{session\}\}/g, session)
                .replace(/\{\{date\}\}/g, new Date().toLocaleString('fr-FR'))
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
@@ -474,7 +479,7 @@ export async function sendTelegramDocument(documentBuffer: Buffer, filename: str
         formData.append('chat_id', cid)
         formData.append('caption', caption)
         formData.append('parse_mode', 'HTML')
-        formData.append('document', new Blob([documentBuffer], { type: 'application/pdf' }), filename)
+        formData.append('document', new Blob([documentBuffer as any], { type: 'application/pdf' }), filename)
 
         return fetch(`${TELEGRAM_API}${token}/sendDocument`, {
             method: 'POST',

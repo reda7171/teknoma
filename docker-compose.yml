@@ -47,6 +47,7 @@ services:
       - .env
     environment:
       - DATABASE_URL=mysql://${DB_USER:-riwaya_user}:${DB_PASSWORD:-riwaya_pass}@db:3306/${DB_NAME:-riwaya_db}?connect_timeout=30
+      - KEEP_ALIVE_TIMEOUT=75000
     depends_on:
       db:
         condition: service_healthy

@@ -145,7 +145,7 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                                                     <h3 className="text-base sm:text-lg font-black text-black truncate group-hover:text-pixio-pink transition-colors">
                                                         {author.name}
                                                     </h3>
-                                                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                                                    <p className="text-[10px] rtl:text-xs rtl:uppercase-none rtl:tracking-normal font-black uppercase text-gray-400 tracking-widest">
                                                         {t('BooksCount', { count: author.bookCount })}
                                                     </p>
                                                 </div>

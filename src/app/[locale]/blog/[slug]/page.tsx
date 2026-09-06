@@ -20,11 +20,12 @@ import ReadingProgress from '@/components/blog/ReadingProgress'
 import PostTimeTracker from '@/components/blog/PostTimeTracker'
 import BlogDynamicContent from '@/components/blog/BlogDynamicContent'
 const MobileSectionNavigation = dynamic(() => import('@/components/blog/MobileSectionNavigation'))
+import FontSizeRegulator from '@/components/blog/FontSizeRegulator'
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
 import AdBanner from '@/components/AdBanner'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
-import { getOgImageUrl, getBaseUrl } from '@/lib/utils'
+import { getOgImageUrl, getBaseUrl, normalizeImage } from '@/lib/utils'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
@@ -100,6 +101,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         .use(remarkHtml, { sanitize: false })
         .process(rawContent)
     let contentHtml = processedContent.toString()
+
+    if (process.env.NODE_ENV === 'development') {
+        contentHtml = contentHtml.replace(/src="\/uploads\//g, 'src="https://riwaya.store/uploads/')
+    }
 
     // Mettre en gras le premier groupe de mots avant deux-points dans les listes
     contentHtml = contentHtml.replace(/<li>([^<]{2,60}?)\s*:/g, '<li><strong>$1</strong> :');
@@ -310,6 +315,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {post.title}
                     </h1>
 
+                    {/* Régulateur de police */}
+                    <div className="mb-6 flex md:hidden">
+                        <FontSizeRegulator />
+                    </div>
+
                     {/* Extrait */}
                     {post.excerpt && (
                         <p dir={post.language === 'ar' ? 'rtl' : 'ltr'} className={`text-base sm:text-lg md:text-xl text-slate-500 mb-6 md:mb-8 max-w-3xl font-medium ${post.language === 'ar' ? 'font-tajawal text-right leading-[1.8]' : 'text-left leading-relaxed'}`}>
@@ -349,7 +359,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             {/* Blurred Ambient Background */}
                             <div className="absolute inset-0 z-0">
                                 <Image
-                                    src={post.coverImage}
+                                    src={normalizeImage(post.coverImage)}
                                     alt=""
                                     fill
                                     className="object-cover opacity-30 blur-[40px] scale-125 saturate-150"
@@ -360,7 +370,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             
                             {/* Foreground Image */}
                             <Image
-                                src={post.coverImage}
+                                src={normalizeImage(post.coverImage)}
                                 alt={post.title}
                                 fill
                                 className="object-cover md:object-contain z-10 md:drop-shadow-2xl group-hover:scale-105 transition-transform duration-700"

@@ -223,7 +223,7 @@ export default function BookCard({
             {/* Out of Stock Ribbon - Top Most Layer */}
             {stock === 0 && (
                 <div className="absolute top-0 left-0 w-36 h-36 overflow-hidden z-30 pointer-events-none">
-                    <div className="absolute top-8 -left-11 w-48 py-2.5 bg-gradient-to-r from-red-800 via-red-600 to-red-800 text-white text-[10px] rtl:text-xs font-black uppercase tracking-[0.25em] rtl:tracking-normal text-center -rotate-45 shadow-[0_10px_20px_rgba(0,0,0,0.5)] border-y border-white/10 backdrop-blur-md ring-1 ring-black/20">
+                    <div className="absolute top-8 -left-11 w-48 py-2.5 bg-gradient-to-r from-red-800 via-red-600 to-red-800 text-white text-[10px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black uppercase tracking-[0.25em] text-center -rotate-45 shadow-[0_10px_20px_rgba(0,0,0,0.5)] border-y border-white/10 backdrop-blur-md ring-1 ring-black/20">
                         {t('OutOfStock')}
                     </div>
                 </div>
