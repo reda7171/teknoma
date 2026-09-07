@@ -92,6 +92,7 @@ export async function uploadImageTestimonial(formData: FormData) {
         })
 
         revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message || "Erreur lors de l'upload de l'image" }
@@ -140,6 +141,7 @@ export async function deleteImageTestimonial(id: string) {
 
         await prisma.imageTestimonial.delete({ where: { id } })
         revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message || 'Erreur lors de la suppression' }
@@ -169,6 +171,7 @@ export async function deleteImageTestimonials(ids: string[]) {
             where: { id: { in: ids } }
         })
         revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message || 'Erreur lors de la suppression' }
@@ -190,6 +193,7 @@ export async function toggleImageTestimonial(id: string) {
         })
 
         revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message || "Erreur lors du changement d'état" }
