@@ -194,12 +194,13 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                         <div className="flex items-center gap-4">
                                             {post.coverImage ? (
                                                 <div className="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-100 shadow-sm">
-                                                    <Image
-                                                        src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${post.coverImage}` : post.coverImage}
+                                                <Image
+                                                        src={post.coverImage?.startsWith('http') ? post.coverImage : `https://riwaya.store${post.coverImage}`}
                                                         alt={post.title}
                                                         fill
                                                         className="object-cover"
                                                         sizes="40px"
+                                                        unoptimized
                                                     />
                                                 </div>
                                             ) : (
@@ -272,44 +273,58 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-4 py-4">
                                         {(() => {
-                                            let score = 0;
-                                            let wordCount = 0;
-                                            let hasImage = false;
-                                            let hasLink = false;
-                                            
                                             const contentStr = post.content || '';
-                                            
-                                            if (contentStr.includes('<img') || /!\[.*?\]\(.*?\)/.test(contentStr)) {
-                                                hasImage = true;
-                                            }
-                                            
-                                            if (contentStr.includes('<a href=') || /(?<!!)\[.*?\]\(.*?\)/.test(contentStr)) {
-                                                hasLink = true;
-                                            }
-                                            
+
+                                            // Images
+                                            const htmlImgs = (contentStr.match(/<img[^>]*>/gi) || []).length;
+                                            const mdImgs = (contentStr.match(/!\[.*?\]\(.*?\)/g) || []).length;
+                                            const imageCount = htmlImgs + mdImgs;
+
+                                            // Liens
+                                            const htmlLinks = (contentStr.match(/<a\s[^>]*href=/gi) || []).length;
+                                            const mdLinks = (contentStr.match(/(?<!!)\[.*?\]\(.*?\)/g) || []).length;
+                                            const linkCount = htmlLinks + mdLinks;
+
+                                            // Mots
                                             const plainText = contentStr
-                                                .replace(/<[^>]*>?/gm, ' ') // replace tags with space
-                                                .replace(/&nbsp;/g, ' ') // replace non-breaking spaces
-                                                .replace(/&[a-z]+;/g, ' ') // replace other html entities
-                                                .replace(/[#*`_]/g, ' '); // replace markdown formatting
-                                            wordCount = plainText.split(/\s+/).filter(Boolean).length;
-                                            
-                                            score += Math.min(50, Math.floor(wordCount / 10)); // up to 50 pts for words (500 words = max)
-                                            if (hasImage) score += 25;
-                                            if (hasLink) score += 25;
-                                            
-                                            const scoreColor = score >= 80 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : score >= 50 ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-red-50 text-red-600 border-red-100';
-                                            
+                                                .replace(/<[^>]*>?/gm, ' ')
+                                                .replace(/&nbsp;/g, ' ')
+                                                .replace(/&[a-z]+;/g, ' ')
+                                                .replace(/[#*`_]/g, ' ');
+                                            const wordCount = plainText.split(/\s+/).filter(Boolean).length;
+
+                                            // Score
+                                            let score = Math.min(50, Math.floor(wordCount / 10));
+                                            if (imageCount > 0) score += 25;
+                                            if (linkCount > 0) score += 25;
+                                            score = Math.min(100, score);
+
+                                            const scoreColor = score >= 80
+                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                : score >= 50
+                                                ? 'bg-amber-50 text-amber-600 border-amber-100'
+                                                : 'bg-red-50 text-red-600 border-red-100';
+
                                             return (
-                                                <div className="flex flex-col gap-1">
+                                                <div className="flex flex-col gap-1.5 min-w-[130px]">
+                                                    {/* Score SEO */}
                                                     <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${scoreColor}`}>
                                                         {score}/100
                                                     </span>
-                                                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider text-center mt-1">
-                                                        {wordCount} Mots
-                                                    </span>
+                                                    {/* Stats */}
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${imageCount > 0 ? 'bg-blue-50 text-blue-500 border-blue-100' : 'bg-gray-50 text-gray-300 border-gray-100'}`}>
+                                                            🖼 {imageCount}
+                                                        </span>
+                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${wordCount >= 500 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : wordCount >= 200 ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-gray-50 text-gray-400 border-gray-100'}`}>
+                                                            📝 {wordCount}
+                                                        </span>
+                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${linkCount > 0 ? 'bg-indigo-50 text-indigo-500 border-indigo-100' : 'bg-gray-50 text-gray-300 border-gray-100'}`}>
+                                                            🔗 {linkCount}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             )
                                         })()}

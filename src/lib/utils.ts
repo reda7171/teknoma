@@ -73,3 +73,27 @@ export function getBaseUrl(): string {
     return url;
 }
 
+/**
+ * Calcule le score SEO d'un article à partir de son contenu.
+ * Même logique que dans AdminPostsTable.
+ */
+export function computePostSeoScore(content: string | null | undefined): number {
+    const contentStr = content || '';
+    let score = 0;
+
+    const hasImage = contentStr.includes('<img') || /!\[.*?\]\(.*?\)/.test(contentStr);
+    const hasLink = contentStr.includes('<a href=') || /(?<!!)\[.*?\]\(.*?\)/.test(contentStr);
+
+    const plainText = contentStr
+        .replace(/<[^>]*>?/gm, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&[a-z]+;/g, ' ')
+        .replace(/[#*`_]/g, ' ');
+    const wordCount = plainText.split(/\s+/).filter(Boolean).length;
+
+    score += Math.min(50, Math.floor(wordCount / 10));
+    if (hasImage) score += 25;
+    if (hasLink) score += 25;
+
+    return Math.min(100, score);
+}

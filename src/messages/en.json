@@ -473,7 +473,8 @@
     },
     "Menu": "Menu",
     "Quotes": "Quotes",
-    "BecomeSeller": "Become a seller"
+    "BecomeSeller": "Become a seller",
+    "KidsWorld": "Kids World"
   },
   "Footer": {
     "About": "About",
@@ -545,7 +546,11 @@
     "OrderViaWhatsApp": "I'm available on WhatsApp",
     "Currency": "MAD",
     "EndOfCollection": "End of collection",
-    "LocalizeMe": "Localize me"
+    "LocalizeMe": "Localize me",
+    "Navigation": {
+      "BoardGames": "Board Games",
+      "KidsWorld": "Kids World"
+    }
   },
   "Packs": {
     "Save": "Save",

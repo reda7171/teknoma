@@ -471,9 +471,10 @@
       "InfluencerDashboard": "لوحة التحكم"
     },
     "Menu": "القائمة",
-    "BoardGames": "ألعاب جماعية",
+    "BoardGames": "ألعاب الطاولة",
     "Quotes": "اقتباسات",
-    "BecomeSeller": "كن بائعاً"
+    "BecomeSeller": "كن بائعاً",
+    "KidsWorld": "عالم الأطفال"
   },
   "Footer": {
     "About": "عن رواية",
@@ -545,7 +546,11 @@
     "OrderViaWhatsApp": "أنا متاح على واتساب",
     "Currency": "درهم",
     "EndOfCollection": "نهاية المجموعة",
-    "LocalizeMe": "تحديد موقعي"
+    "LocalizeMe": "تحديد موقعي",
+    "Navigation": {
+      "BoardGames": "ألعاب الطاولة",
+      "KidsWorld": "عالم الأطفال"
+    }
   },
   "Packs": {
     "Save": "وفر",

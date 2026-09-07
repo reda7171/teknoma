@@ -3,6 +3,23 @@
 import { prisma } from '@/lib/prisma'
 import { headers } from 'next/headers'
 
+// Résout le pays depuis une IP via ip-api.com (gratuit, 45 req/min)
+async function resolveCountry(ip: string | null): Promise<string> {
+    if (!ip) return 'Inconnu'
+    // Ignorer les IPs privées / localhost
+    if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+        return 'Local'
+    }
+    try {
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`, { next: { revalidate: 3600 } })
+        if (!res.ok) return 'Inconnu'
+        const json = await res.json()
+        return json.countryCode || 'Inconnu'
+    } catch {
+        return 'Inconnu'
+    }
+}
+
 export async function trackPageView(data: {
     url: string
     referrer: string | null
@@ -12,12 +29,19 @@ export async function trackPageView(data: {
     try {
         const headersList = await headers()
         const userAgent = (headersList.get('user-agent') || '').substring(0, 1000)
-        const safeUrl = data.url.substring(0, 2000)
-        const safeReferrer = (data.referrer || '').substring(0, 2000)
-        
-        // Extract IP and Country if available (Cloudflare or Vercel)
-        const country = headersList.get('cf-ipcountry') || headersList.get('x-vercel-ip-country') || 'Inconnu'
-        const ip = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || headersList.get('cf-connecting-ip')
+        const safeUrl = data.url.substring(0, 500)
+        const safeReferrer = (data.referrer || '').substring(0, 500)
+
+        const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
+            || headersList.get('x-real-ip')
+            || headersList.get('cf-connecting-ip')
+            || null
+
+        // Priorité : headers Cloudflare/Vercel → fallback ip-api.com
+        let country = headersList.get('cf-ipcountry') || headersList.get('x-vercel-ip-country') || ''
+        if (!country || country === 'XX' || country === 'Inconnu') {
+            country = await resolveCountry(ip)
+        }
 
         await prisma.pageView.create({
             data: {
@@ -26,7 +50,7 @@ export async function trackPageView(data: {
                 userId: data.userId || null,
                 sessionId: data.sessionId || null,
                 userAgent: userAgent || null,
-                country: country,
+                country: country || 'Inconnu',
                 ip: ip || null
             }
         })
