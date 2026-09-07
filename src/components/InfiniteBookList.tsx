@@ -7,7 +7,7 @@ import BookCard from '@/components/BookCard'
 import AdBanner from '@/components/AdBanner'
 import { Book } from '@prisma/client'
 import { Link } from '@/i18n/routing'
-import { Package, ArrowRight, Sparkles } from 'lucide-react'
+import { Package, ArrowRight, Sparkles, Gamepad2, Baby, BookOpen } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { useTranslations, useLocale } from 'next-intl'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
@@ -29,6 +29,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
     const [hasMore, setHasMore] = useState(true)
     const [loading, setLoading] = useState(false)
     const tCommon = useTranslations('Common')
+    const tCTA = useTranslations('CTA')
     const locale = useLocale()
     const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -104,8 +105,19 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                     let ctaBlock = null;
 
                     if (isCtaPosition) {
-                        // Alterner entre le pack aléatoire (si dispo) et le custom pack builder
-                        if (ctaIndex % 2 === 0 && randomPack) {
+                        const usedBooksCount = books.filter(b => b.condition === 'USED').length;
+                        const showUsedCTA = usedBooksCount > 4;
+                        
+                        const ctaTypesList = [];
+                        if (randomPack) ctaTypesList.push('PACK');
+                        ctaTypesList.push('CUSTOM');
+                        ctaTypesList.push('BOARD_GAMES');
+                        ctaTypesList.push('KIDS');
+                        if (showUsedCTA) ctaTypesList.push('USED');
+                        
+                        const ctaType = ctaTypesList[ctaIndex % ctaTypesList.length];
+                        
+                        if (ctaType === 'PACK' && randomPack) {
                             const pack = randomPack;
                             ctaBlock = (
                                 <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-purple-900 to-indigo-900 rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 shadow-2xl my-4">
@@ -147,23 +159,104 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                     </div>
                                 </div>
                             );
+                        } else if (ctaType === 'BOARD_GAMES') {
+                            ctaBlock = (
+                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-purple-100 to-fuchsia-50 rounded-[2.5rem] p-6 md:p-10 border border-purple-200 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm my-4">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                                    <div className="flex-1 text-center md:text-left relative z-10">
+                                        <div className="inline-flex items-center gap-2 bg-purple-500/10 px-4 py-2 rounded-full mb-4">
+                                            <Gamepad2 className="w-4 h-4 text-purple-600" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-purple-700">{tCommon('Navigation.BoardGames')}</span>
+                                        </div>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-purple-900">{tCTA('BoardGamesTitle')}</h3>
+                                        <p className="text-purple-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
+                                            {tCTA('BoardGamesDesc')}
+                                        </p>
+                                        <Link 
+                                            href="/jeux-societe" 
+                                            className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-purple-700 transition-all shadow-xl hover:scale-105 active:scale-95"
+                                        >
+                                            {tCTA('DiscoverBoardGames')}
+                                            <ArrowRight className="w-4 h-4" />
+                                        </Link>
+                                    </div>
+                                    <div className="hidden md:flex items-center justify-center relative w-48 h-48 z-10">
+                                        <div className="absolute inset-0 bg-white/40 rounded-[2.5rem] rotate-6 shadow-inner" />
+                                        <Gamepad2 className="w-24 h-24 text-purple-500 drop-shadow-md" />
+                                    </div>
+                                </div>
+                            );
+                        } else if (ctaType === 'KIDS') {
+                            ctaBlock = (
+                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-pink-100 to-rose-50 rounded-[2.5rem] p-6 md:p-10 border border-pink-200 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm my-4">
+                                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+                                    <div className="flex-1 text-center md:text-left relative z-10">
+                                        <div className="inline-flex items-center gap-2 bg-pink-500/10 px-4 py-2 rounded-full mb-4">
+                                            <Baby className="w-4 h-4 text-pink-600" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-pink-700">{tCommon('Navigation.KidsWorld')}</span>
+                                        </div>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-pink-900">{tCTA('KidsWorldTitle')}</h3>
+                                        <p className="text-pink-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
+                                            {tCTA('KidsWorldDesc')}
+                                        </p>
+                                        <Link 
+                                            href="/mon-enfant" 
+                                            className="inline-flex items-center gap-2 bg-pink-500 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-pink-600 transition-all shadow-xl hover:scale-105 active:scale-95"
+                                        >
+                                            {tCTA('DiscoverKidsWorld')}
+                                            <ArrowRight className="w-4 h-4" />
+                                        </Link>
+                                    </div>
+                                    <div className="hidden md:flex items-center justify-center relative w-48 h-48 z-10">
+                                        <div className="absolute inset-0 bg-white/40 rounded-full animate-pulse shadow-inner" />
+                                        <Baby className="w-24 h-24 text-pink-500 drop-shadow-md relative z-10" />
+                                    </div>
+                                </div>
+                            );
+                        } else if (ctaType === 'USED') {
+                            ctaBlock = (
+                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-amber-100 to-yellow-50 rounded-[2.5rem] p-6 md:p-10 border border-amber-200 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm my-4">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                                    <div className="flex-1 text-center md:text-left relative z-10">
+                                        <div className="inline-flex items-center gap-2 bg-amber-500/10 px-4 py-2 rounded-full mb-4">
+                                            <BookOpen className="w-4 h-4 text-amber-600" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-700">{tCommon('Navigation.UsedBooks')}</span>
+                                        </div>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-amber-900">{tCTA('UsedBooksTitle')}</h3>
+                                        <p className="text-amber-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
+                                            {tCTA('UsedBooksDesc')}
+                                        </p>
+                                        <Link 
+                                            href="/books?usedOnly=true" 
+                                            className="inline-flex items-center gap-2 bg-amber-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-amber-700 transition-all shadow-xl hover:scale-105 active:scale-95"
+                                        >
+                                            {tCTA('BrowseUsedBooks')}
+                                            <ArrowRight className="w-4 h-4" />
+                                        </Link>
+                                    </div>
+                                    <div className="hidden md:flex items-center justify-center relative w-48 h-48 z-10">
+                                        <div className="absolute inset-0 bg-white/40 rounded-[2.5rem] rotate-6 shadow-inner" />
+                                        <BookOpen className="w-24 h-24 text-amber-500 drop-shadow-md" />
+                                    </div>
+                                </div>
+                            );
                         } else {
                             ctaBlock = (
                                 <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-pixio-cream rounded-[2.5rem] p-6 md:p-10 border border-black/5 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm my-4">
                                     <div className="flex-1 text-center md:text-left">
                                         <div className="inline-flex items-center gap-2 bg-black/5 px-4 py-2 rounded-full mb-4">
                                             <Package className="w-4 h-4 text-black" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-black">{tCommon('CustomPackCTA.Tag')}</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-black">{tCTA('CustomPack')}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-black">{tCommon('CustomPackCTA.Title')}</h3>
-                                        <p className="text-gray-600 text-sm font-medium mb-6 max-w-md">
-                                            {tCommon('CustomPackCTA.Description')}
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-black">{tCTA('CustomPackTitle')}</h3>
+                                        <p className="text-gray-600 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
+                                            {tCTA('CustomPackDesc')}
                                         </p>
                                         <Link 
                                             href="/packs?custom=true" 
-                                            className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-900 transition-all shadow-xl"
+                                            className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-900 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
-                                            {tCommon('CustomPackCTA.Button')}
+                                            {tCTA('CreatePack')}
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>

@@ -370,6 +370,34 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     const finalBg = isJournal ? 'bg-[#FDFBF7]' : vibrantBg
                                     const finalText = isJournal ? 'text-black' : vibrantText
 
+                                    if (isKids) {
+                                        return (
+                                            <div key={item.href} className="relative group/kids inline-block">
+                                                <div
+                                                    className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive
+                                                            ? `${vibrantBg} text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]`
+                                                            : `bg-white ${vibrantText} ${vibrantBorder} hover:${vibrantBg} hover:text-black shadow-sm`
+                                                        }`}
+                                                >
+                                                    <span>{item.label}</span>
+                                                    <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/kids:rotate-180" />
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : vibrantBg}`} />
+                                                </div>
+                                                
+                                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-pink-100 opacity-0 invisible group-hover/kids:opacity-100 group-hover/kids:visible group-hover/kids:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
+                                                    <Link href="/mon-enfant" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors border-b border-pink-50 flex items-center gap-2">
+                                                        <Baby className="w-4 h-4" />
+                                                        {locale === 'ar' ? 'كتب' : locale === 'en' ? 'Books' : 'Livres'}
+                                                    </Link>
+                                                    <Link href="/jeux-societe" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors flex items-center gap-2">
+                                                        <Gamepad2 className="w-4 h-4" />
+                                                        {locale === 'ar' ? 'ألعاب الطاولة' : locale === 'en' ? 'Board Games' : 'Jeux de Société'}
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        )
+                                    }
+
                                     return (
                                         <Link
                                             key={item.href}
@@ -567,6 +595,35 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                             const vibrantText = isKids ? 'text-pink-600' : isDigital ? 'text-amber-600' : isJournal ? 'text-black' : isDeposer ? 'text-green-600' : 'text-blue-600'
                             const vibrantActiveBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : isDeposer ? 'bg-green-500' : 'bg-blue-500'
                             const vibrantActiveText = isJournal ? 'text-white' : 'text-white'
+
+                            if (isKids) {
+                                return (
+                                    <details key={item.href} className="group/mobile-kids">
+                                        <summary className={`px-5 py-4 rounded-[1.5rem] transition-colors font-bold text-sm min-h-[52px] flex items-center cursor-pointer list-none ${isActive
+                                                ? `${vibrantActiveBg} ${vibrantActiveText} shadow-md`
+                                                : `${vibrantBg} ${vibrantText} border-2 border-transparent hover:border-gray-200`
+                                            }`}>
+                                            <div className="flex justify-between items-center w-full">
+                                                <span className="flex items-center gap-2 uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black">
+                                                    {getIconForUrl(item.href, "w-5 h-5")}
+                                                    <span>{item.label}</span>
+                                                </span>
+                                                <ChevronDown className="w-5 h-5 transition-transform group-open/mobile-kids:rotate-180" />
+                                            </div>
+                                        </summary>
+                                        <div className="mt-2 pl-4 pr-2 space-y-2">
+                                            <Link href="/mon-enfant" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                                                <Baby className="w-4 h-4" />
+                                                {locale === 'ar' ? 'كتب' : locale === 'en' ? 'Books' : 'Livres'}
+                                            </Link>
+                                            <Link href="/jeux-societe" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                                                <Gamepad2 className="w-4 h-4" />
+                                                {locale === 'ar' ? 'ألعاب الطاولة' : locale === 'en' ? 'Board Games' : 'Jeux de Société'}
+                                            </Link>
+                                        </div>
+                                    </details>
+                                )
+                            }
 
                             return (
                                 <Link

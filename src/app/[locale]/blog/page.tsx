@@ -188,7 +188,15 @@ export default async function BlogPage({
                                         {(post.authorName || post.author?.fullName) && (
                                             <div className="flex items-center gap-1">
                                                 <User className="w-3 h-3" />
-                                                <span>{post.authorName || post.author.fullName}</span>
+                                                <span>
+                                                    {(() => {
+                                                        let name = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق رواية' : locale === 'en' ? 'Riwaya Team' : 'Équipe Riwaya');
+                                                        if (name.toLowerCase() === 'admin') {
+                                                            name = locale === 'ar' ? 'مشرف' : locale === 'en' ? 'Moderator' : 'Modérateur';
+                                                        }
+                                                        return name;
+                                                    })()}
+                                                </span>
                                             </div>
                                         )}
                                         {post.category && (

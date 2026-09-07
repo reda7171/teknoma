@@ -472,7 +472,8 @@
       "InfluencerDashboard": "Dashboard"
     },
     "Menu": "Menu",
-    "Quotes": "Citations"
+    "Quotes": "Citations",
+    "BecomeSeller": "Devenir vendeur"
   },
   "Footer": {
     "About": "À propos",
@@ -1883,5 +1884,20 @@
     "b4_desc": "Échangez vos livres avec une communauté de passionnés.",
     "b5_title": "Packs Économiques",
     "b5_desc": "Profitez de nos offres exclusives sur les packs de livres."
+  },
+  "CTA": {
+    "BoardGamesTitle": "Découvrez notre collection de Jeux de Société",
+    "BoardGamesDesc": "Profitez de moments inoubliables en famille ou entre amis avec notre sélection de jeux de société.",
+    "DiscoverBoardGames": "Parcourir les jeux",
+    "KidsWorldTitle": "Des livres et activités pour l'éveil de votre enfant",
+    "KidsWorldDesc": "Une sélection spéciale de livres et d'histoires conçus pour les enfants.",
+    "DiscoverKidsWorld": "Découvrir la sélection",
+    "UsedBooksTitle": "Découvrez notre sélection de livres d'occasion à petits prix",
+    "UsedBooksDesc": "Des livres en très bon état à des prix réduits.",
+    "BrowseUsedBooks": "Parcourir les livres",
+    "CustomPack": "Pack personnalisé",
+    "CustomPackTitle": "Créez votre propre pack",
+    "CustomPackDesc": "Sélectionnez 3 livres ou plus et profitez de réductions intéressantes.",
+    "CreatePack": "Créer mon pack"
   }
 }

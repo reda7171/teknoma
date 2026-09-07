@@ -183,6 +183,11 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
+                                <Link href="/mon-enfant" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                    {tNav('KidsWorld')}
+                                </Link>
+                            </li>
+                            <li suppressHydrationWarning>
                                 <Link href="/packs" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
                             </li>
                             <li suppressHydrationWarning>
@@ -196,7 +201,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                             {features.seller === true && (
                                 <li suppressHydrationWarning>
                                     <Link href="/devenir-vendeur" className="text-pixio-yellow hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
-                                        {locale === 'ar' ? 'كن بائعاً' : locale === 'en' ? 'Become a seller' : 'Devenir vendeur'}
+                                        {tNav('BecomeSeller')}
                                     </Link>
                                 </li>
                             )}
