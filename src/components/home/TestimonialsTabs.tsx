@@ -54,7 +54,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                 )}
 
                 {activeTab === 'image' && imageTestimonials.length > 0 && (
-                    <div className="flex overflow-x-auto gap-6 animate-in fade-in zoom-in-95 duration-500 w-full max-w-7xl mx-auto pb-8 px-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    <div className="flex overflow-x-auto gap-6 animate-in fade-in zoom-in-95 duration-500 w-full max-w-7xl mx-auto pb-8 px-4 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                         {imageTestimonials.map((testimonial: any, idx: number) => (
                             <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up" className="min-w-[260px] md:min-w-[300px] max-w-[300px] shrink-0 snap-center">
                                 <div className="group relative w-full aspect-[9/16] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white hover:border-emerald-400 bg-gray-100 hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.4)] transition-all duration-500 ease-out cursor-pointer">

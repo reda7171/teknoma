@@ -73,25 +73,43 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                         <Link href={`/jeux-societe/${product.id}`} className="flex flex-col flex-grow z-10">
                             {/* Image */}
                             <div className="relative h-40 sm:h-52 bg-slate-50 w-full overflow-hidden p-4 flex items-center justify-center">
-                                {product.image ? (
-                                    <Image
-                                        src={
-                                            product.image.startsWith('http') || product.image.startsWith('/') || product.image.startsWith('data:') 
-                                                ? product.image 
-                                                : product.image.startsWith('/9j/') ? `data:image/jpeg;base64,${product.image}` 
-                                                : product.image.startsWith('iVBOR') ? `data:image/png;base64,${product.image}` 
-                                                : `data:image/jpeg;base64,${product.image}`
+                                {(() => {
+                                    let src = product.image;
+                                    if (src) {
+                                        try {
+                                            const parsed = JSON.parse(src);
+                                            if (Array.isArray(parsed) && parsed.length > 0) src = parsed[0];
+                                        } catch (e) {}
+                                    }
+                                    if (!src) return (
+                                        <div className="flex items-center justify-center h-full w-full bg-slate-100 rounded-2xl">
+                                            <Package className="w-12 h-12 text-slate-300" />
+                                        </div>
+                                    );
+                                    
+                                    if (!src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
+                                        if (src.startsWith('/9j/') || src.startsWith('iVBOR') || src.length > 500) {
+                                            src = src.startsWith('iVBOR') ? `data:image/png;base64,${src}` : `data:image/jpeg;base64,${src}`;
+                                        } else {
+                                            src = `/uploads/images/${src}`;
                                         }
-                                        alt={product.name}
-                                        fill
-                                        className="object-contain p-4 group-hover:scale-110 transition-transform duration-700 ease-out drop-shadow-sm"
-                                        unoptimized
-                                    />
-                                ) : (
-                                    <div className="flex items-center justify-center h-full w-full bg-slate-100 rounded-2xl">
-                                        <Package className="w-12 h-12 text-slate-300" />
-                                    </div>
-                                )}
+                                    }
+                                    
+                                    // Load images from production in dev mode
+                                    if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
+                                        src = `https://riwaya.store${src}`;
+                                    }
+                                    
+                                    return (
+                                        <Image
+                                            src={src}
+                                            alt={product.name}
+                                            fill
+                                            className="object-contain p-4 group-hover:scale-110 transition-transform duration-700 ease-out drop-shadow-sm"
+                                            unoptimized={process.env.NODE_ENV === 'development'}
+                                        />
+                                    );
+                                })()}
                                 {/* Badge stock */}
                                 {product.stock <= 5 && product.stock > 0 && (
                                     <div className={`absolute top-3 ${locale === 'ar' ? 'right-3' : 'left-3'} px-2.5 py-1 bg-orange-100/90 backdrop-blur-sm border border-orange-200/50 text-orange-700 text-[10px] sm:text-xs font-black rounded-full shadow-sm`}>

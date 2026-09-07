@@ -105,8 +105,14 @@ export default function AccessoriesTable({
                                                         <Package className="w-5 h-5 text-slate-300" />
                                                     </div>
                                                 );
-                                                const src = img.startsWith('http') || img.startsWith('/') ? img : `/uploads/images/${img}`;
-                                                return <Image src={src} alt={item.name} fill className="object-cover" />;
+                                                let src = img.startsWith('http') || img.startsWith('/') ? img : `/uploads/images/${img}`;
+                                                
+                                                // Load images from production in dev mode
+                                                if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
+                                                    src = `https://riwaya.store${src}`;
+                                                }
+
+                                                return <Image src={src} alt={item.name} fill className="object-cover" unoptimized={process.env.NODE_ENV === 'development'} />;
                                             })()}
                                         </div>
                                         <div>

@@ -45,19 +45,37 @@ export default function KidsProductsClient({ products }: { products: Product[] }
                     className="bg-white rounded-[2rem] border border-pink-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group"
                 >
                     <Link href={`/mon-enfant/${product.id}`} className="relative h-48 bg-pink-50 w-full overflow-hidden block">
-                        {product.image ? (
-                            <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-contain group-hover:scale-105 transition-transform duration-500"
-                                unoptimized
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full">
-                                <Package className="w-12 h-12 text-pink-200" />
-                            </div>
-                        )}
+                        {(() => {
+                            let src = product.image;
+                            if (src) {
+                                try {
+                                    const parsed = JSON.parse(src);
+                                    if (Array.isArray(parsed) && parsed.length > 0) src = parsed[0];
+                                } catch (e) {}
+                            }
+                            if (!src) return (
+                                <div className="flex items-center justify-center h-full">
+                                    <Package className="w-12 h-12 text-pink-200" />
+                                </div>
+                            );
+                            
+                            src = src.startsWith('http') || src.startsWith('/') ? src : `/uploads/images/${src}`;
+                            
+                            // Load images from production in dev mode
+                            if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
+                                src = `https://riwaya.store${src}`;
+                            }
+                            
+                            return (
+                                <Image
+                                    src={src}
+                                    alt={product.name}
+                                    fill
+                                    className="object-contain group-hover:scale-105 transition-transform duration-500"
+                                    unoptimized={process.env.NODE_ENV === 'development'}
+                                />
+                            );
+                        })()}
                         {/* Badge stock */}
                         {product.stock <= 5 && product.stock > 0 && (
                             <div className="absolute top-3 left-3 px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-black rounded-full shadow-sm">

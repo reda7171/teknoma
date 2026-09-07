@@ -183,6 +183,11 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
+                                <Link href="/mon-enfant" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                    {locale === 'ar' ? 'عالم الأطفال' : locale === 'en' ? 'Kids World' : 'Mon Enfant'}
+                                </Link>
+                            </li>
+                            <li suppressHydrationWarning>
                                 <Link href="/packs" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
                             </li>
                             <li suppressHydrationWarning>
