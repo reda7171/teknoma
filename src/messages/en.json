@@ -472,7 +472,8 @@
       "InfluencerDashboard": "Dashboard"
     },
     "Menu": "Menu",
-    "Quotes": "Quotes"
+    "Quotes": "Quotes",
+    "BecomeSeller": "Become a seller"
   },
   "Footer": {
     "About": "About",
@@ -1972,5 +1973,20 @@
     "b4_desc": "Exchange your books with a community of readers.",
     "b5_title": "Economical Packs",
     "b5_desc": "Take advantage of our exclusive offers on book packs."
+  },
+  "CTA": {
+    "BoardGamesTitle": "Discover our Board Games collection",
+    "BoardGamesDesc": "Enjoy time with family and friends with the best board games.",
+    "DiscoverBoardGames": "Browse Games",
+    "KidsWorldTitle": "Books and activities to develop your child's skills",
+    "KidsWorldDesc": "A special selection of books and stories designed specifically for kids.",
+    "DiscoverKidsWorld": "Discover Collection",
+    "UsedBooksTitle": "Discover our collection of used books at great prices",
+    "UsedBooksDesc": "Books in very good condition at discounted prices.",
+    "BrowseUsedBooks": "Browse Books",
+    "CustomPack": "Custom Pack",
+    "CustomPackTitle": "Create your own pack",
+    "CustomPackDesc": "Select 3 or more books and enjoy great discounts.",
+    "CreatePack": "Create my pack"
   }
 }

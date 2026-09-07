@@ -57,12 +57,21 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
+    dangerouslyAllowLocalIP: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
+      {
+        protocol: 'https',
+        hostname: 'riwaya.store',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      }
     ],
   },
   async headers() {

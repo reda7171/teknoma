@@ -52,13 +52,29 @@ export default function EditAccessoryPage({
         fetch(`/api/admin/accessories/${id}`)
             .then(res => res.json())
             .then(data => {
+                let parsedImages = [];
+                if (data.images && Array.isArray(data.images)) {
+                    parsedImages = data.images;
+                } else if (data.image) {
+                    try {
+                        const parsed = JSON.parse(data.image);
+                        if (Array.isArray(parsed)) {
+                            parsedImages = parsed;
+                        } else {
+                            parsedImages = [data.image];
+                        }
+                    } catch (e) {
+                        parsedImages = [data.image];
+                    }
+                }
+
                 setFormData({
                     name: data.name,
                     description: data.description || '',
                     price: data.price.toString(),
                     costPrice: data.costPrice.toString(),
                     stock: data.stock.toString(),
-                    images: data.images || (data.image ? [data.image] : []),
+                    images: parsedImages,
                     category: data.category,
                     materials: data.materials || '',
                     dimensions: data.dimensions || '',
@@ -452,7 +468,17 @@ export default function EditAccessoryPage({
                                 <div className="mt-4 grid grid-cols-2 gap-3">
                                     {formData.images.map((img, i) => (
                                         <div key={i} className="relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 group">
-                                            <Image src={img} alt={`preview ${i}`} fill className="object-cover" unoptimized />
+                                            {(() => {
+                                                let src = img;
+                                                if (!src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
+                                                    src = `/uploads/images/${src}`;
+                                                }
+                                                // Load images from production in dev mode
+                                                if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
+                                                    src = `https://riwaya.store${src}`;
+                                                }
+                                                return <Image src={src} alt={`preview ${i}`} fill className="object-cover" unoptimized={process.env.NODE_ENV === 'development'} />
+                                            })()}
                                             
                                             {/* Reorder Controls */}
                                             <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/90 px-1 py-0.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-sm">

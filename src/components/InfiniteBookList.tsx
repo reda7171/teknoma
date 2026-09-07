@@ -29,6 +29,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
     const [hasMore, setHasMore] = useState(true)
     const [loading, setLoading] = useState(false)
     const tCommon = useTranslations('Common')
+    const tCTA = useTranslations('CTA')
     const locale = useLocale()
     const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -165,17 +166,17 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                     <div className="flex-1 text-center md:text-left relative z-10">
                                         <div className="inline-flex items-center gap-2 bg-purple-500/10 px-4 py-2 rounded-full mb-4">
                                             <Gamepad2 className="w-4 h-4 text-purple-600" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-purple-700">{locale === 'ar' ? 'ألعاب الطاولة' : locale === 'en' ? 'Board Games' : 'Jeux de Société'}</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-purple-700">{tCommon('Navigation.BoardGames')}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-purple-900">{locale === 'ar' ? 'اكتشف مجموعتنا من ألعاب الطاولة' : locale === 'en' ? 'Discover our Board Games collection' : 'Découvrez notre collection de Jeux de Société'}</h3>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-purple-900">{tCTA('BoardGamesTitle')}</h3>
                                         <p className="text-purple-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
-                                            {locale === 'ar' ? 'استمتع بوقتك مع العائلة والأصدقاء مع أفضل ألعاب الطاولة.' : locale === 'en' ? 'Enjoy time with family and friends with the best board games.' : 'Profitez de moments inoubliables en famille ou entre amis avec notre sélection de jeux de société.'}
+                                            {tCTA('BoardGamesDesc')}
                                         </p>
                                         <Link 
                                             href="/jeux-societe" 
                                             className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-purple-700 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
-                                            {locale === 'ar' ? 'تصفح الألعاب' : locale === 'en' ? 'Browse Games' : 'Parcourir les jeux'}
+                                            {tCTA('DiscoverBoardGames')}
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>
@@ -192,17 +193,17 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                     <div className="flex-1 text-center md:text-left relative z-10">
                                         <div className="inline-flex items-center gap-2 bg-pink-500/10 px-4 py-2 rounded-full mb-4">
                                             <Baby className="w-4 h-4 text-pink-600" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-pink-700">{locale === 'ar' ? 'عالم الأطفال' : locale === 'en' ? 'Kids World' : 'Mon Enfant'}</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-pink-700">{tCommon('Navigation.KidsWorld')}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-pink-900">{locale === 'ar' ? 'كتب وأنشطة لتنمية مهارات طفلك' : locale === 'en' ? 'Books and activities to develop your child\'s skills' : 'Des livres et activités pour l\'éveil de votre enfant'}</h3>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-pink-900">{tCTA('KidsWorldTitle')}</h3>
                                         <p className="text-pink-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
-                                            {locale === 'ar' ? 'تشكيلة مميزة من الكتب والقصص المصممة خصيصاً للأطفال.' : locale === 'en' ? 'A special selection of books and stories designed specifically for kids.' : 'Une sélection spéciale de livres et d\'histoires conçus pour les enfants.'}
+                                            {tCTA('KidsWorldDesc')}
                                         </p>
                                         <Link 
                                             href="/mon-enfant" 
                                             className="inline-flex items-center gap-2 bg-pink-500 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-pink-600 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
-                                            {locale === 'ar' ? 'اكتشف التشكيلة' : locale === 'en' ? 'Discover Collection' : 'Découvrir la sélection'}
+                                            {tCTA('DiscoverKidsWorld')}
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>
@@ -219,17 +220,17 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                     <div className="flex-1 text-center md:text-left relative z-10">
                                         <div className="inline-flex items-center gap-2 bg-amber-500/10 px-4 py-2 rounded-full mb-4">
                                             <BookOpen className="w-4 h-4 text-amber-600" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-700">{locale === 'ar' ? 'كتب مستعملة' : locale === 'en' ? 'Used Books' : 'Livres d\'occasion'}</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-700">{tCommon('Navigation.UsedBooks')}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-amber-900">{locale === 'ar' ? 'اكتشف مجموعتنا من الكتب المستعملة بأسعار رائعة' : locale === 'en' ? 'Discover our collection of used books at great prices' : 'Découvrez notre sélection de livres d\'occasion à petits prix'}</h3>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-amber-900">{tCTA('UsedBooksTitle')}</h3>
                                         <p className="text-amber-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
-                                            {locale === 'ar' ? 'كتب بحالة جيدة جداً بأسعار مخفضة.' : locale === 'en' ? 'Books in very good condition at discounted prices.' : 'Des livres en très bon état à des prix réduits.'}
+                                            {tCTA('UsedBooksDesc')}
                                         </p>
                                         <Link 
                                             href="/books?usedOnly=true" 
                                             className="inline-flex items-center gap-2 bg-amber-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-amber-700 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
-                                            {locale === 'ar' ? 'تصفح الكتب' : locale === 'en' ? 'Browse Books' : 'Parcourir les livres'}
+                                            {tCTA('BrowseUsedBooks')}
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>
@@ -245,17 +246,17 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                     <div className="flex-1 text-center md:text-left">
                                         <div className="inline-flex items-center gap-2 bg-black/5 px-4 py-2 rounded-full mb-4">
                                             <Package className="w-4 h-4 text-black" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-black">{tCommon('CustomPackCTA.Tag')}</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-black">{tCTA('CustomPack')}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-black">{tCommon('CustomPackCTA.Title')}</h3>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-black">{tCTA('CustomPackTitle')}</h3>
                                         <p className="text-gray-600 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
-                                            {tCommon('CustomPackCTA.Description')}
+                                            {tCTA('CustomPackDesc')}
                                         </p>
                                         <Link 
                                             href="/packs?custom=true" 
                                             className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-900 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
-                                            {tCommon('CustomPackCTA.Button')}
+                                            {tCTA('CreatePack')}
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>

@@ -72,6 +72,14 @@ function estimateReadingTime(content: string): number {
     return Math.max(1, Math.ceil(words / 200))
 }
 
+function getDisplayAuthor(name: string | null | undefined, locale: string): string {
+    let author = name || (locale === 'ar' ? 'فريق رواية' : locale === 'en' ? 'Riwaya Team' : 'Équipe Riwaya');
+    if (author.toLowerCase() === 'admin') {
+        return locale === 'ar' ? 'مشرف' : locale === 'en' ? 'Moderator' : 'Modérateur';
+    }
+    return author;
+}
+
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
     const { slug: rawSlug, locale } = await params
     const decodedSlug = decodeURIComponent(rawSlug)
@@ -89,7 +97,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const adminRole = cookieStore.get('admin-role')?.value
     const isAdmin = adminRole === 'ADMIN'
 
-    const displayAuthor = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق رواية' : locale === 'en' ? 'Riwaya Team' : 'Équipe Riwaya');
+    const displayAuthor = getDisplayAuthor(post.authorName || post.author?.fullName, locale);
 
     // Convertir markdown → HTML et réparer quelques soucis de formattage
     let rawContent = post.content || '';
@@ -393,7 +401,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* Colonne article (8 colonnes sur Desktop) */}
                     <div className="lg:col-span-8 w-full min-w-0">
                         {/* AdSense haut */}
-                        {adsenseEnabled === 'true' && (
+                        {adsenseEnabled && (
                             <AdBanner
                                 publisherId={adsensePublisherId}
                                 slotId={slotTop}
@@ -492,7 +500,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         </article>
 
                         {/* AdSense bas */}
-                        {adsenseEnabled === 'true' && (
+                        {adsenseEnabled && (
                             <AdBanner
                                 publisherId={adsensePublisherId}
                                 slotId={slotBottom}
@@ -545,7 +553,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                                     {/* Infos */}
                                     <div className="flex-1 min-w-0 pt-1">
-                                        <h3 className="text-lg md:text-xl font-black mb-1 text-slate-800 truncate">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
+                                        <h3 className="text-lg md:text-xl font-black mb-1 text-slate-800 truncate">{displayAuthor}</h3>
                                         <p className="text-xs md:text-sm text-slate-500 font-medium truncate mb-4">
                                             {(!post.authorName && post.author?.bio) ? post.author.bio : (post.author?.editorialRole || t('ModeratorRole'))}
                                         </p>
@@ -700,7 +708,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                                         {/* Infos */}
                                         <div className="flex-1 min-w-0 pt-1">
-                                            <h3 className="text-lg font-black mb-1 text-slate-800 truncate">{post.authorName || post.author?.fullName || "Riwaya"}</h3>
+                                            <h3 className="text-lg font-black mb-1 text-slate-800 truncate">{displayAuthor}</h3>
                                             <p className="text-xs text-slate-500 font-medium truncate mb-4">
                                                 {(!post.authorName && post.author?.bio) ? post.author.bio : (post.author?.editorialRole || t('ModeratorRole'))}
                                             </p>
@@ -922,7 +930,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 )}
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-1">
-                                                        <span className="text-xs font-bold text-slate-700">{related.authorName || related.author?.fullName || 'Riwaya Team'}</span>
+                                                        <span className="text-xs font-bold text-slate-700">{getDisplayAuthor(related.authorName || related.author?.fullName, locale)}</span>
                                                         <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10 shrink-0" />
                                                     </div>
                                                     <span className="text-[10px] text-slate-400 capitalize font-medium leading-none mt-0.5">
