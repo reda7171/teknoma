@@ -784,7 +784,7 @@ model FinanceArchive {
 
 model PageView {
   id        String   @id @default(uuid())
-  url       String
+  url       String   @db.Text
   ip        String?
   userAgent String?  @db.LongText
   sessionId String?
@@ -792,7 +792,7 @@ model PageView {
   country   String?
   city      String?
   device    String?
-  referrer  String?
+  referrer  String?  @db.Text
   createdAt DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id])
 

@@ -426,7 +426,7 @@
     }
   },
   "Navigation": {
-    "BoardGames": "Jeux de société",
+    "BoardGames": "Jeux de Société",
     "UsedBooks": "Livres d'occasion",
     "SellBook": "Vendre",
     "JoinCommunity": "Rejoignez la communauté !",
@@ -473,7 +473,8 @@
     },
     "Menu": "Menu",
     "Quotes": "Citations",
-    "BecomeSeller": "Devenir vendeur"
+    "BecomeSeller": "Devenir vendeur",
+    "KidsWorld": "Mon Enfant"
   },
   "Footer": {
     "About": "À propos",
@@ -545,7 +546,11 @@
     "OrderViaWhatsApp": "Je suis disponible sur WhatsApp",
     "Currency": "MAD",
     "EndOfCollection": "Fin de la collection",
-    "LocalizeMe": "Me localiser"
+    "LocalizeMe": "Me localiser",
+    "Navigation": {
+      "BoardGames": "Jeux de Société",
+      "KidsWorld": "Mon Enfant"
+    }
   },
   "Packs": {
     "Save": "Économisez",

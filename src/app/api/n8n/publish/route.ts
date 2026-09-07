@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json()
-        const { bookId, packId, format, scheduleAt, platform, useDescription, customImageUrl } = body
+        const { bookId, packId, extraId, format, scheduleAt, platform, useDescription, customImageUrl } = body
 
         // URL du webhook n8n (Priorité à la DB, puis .env)
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
@@ -37,18 +37,25 @@ export async function POST(req: NextRequest) {
         let itemType: 'BOOK' | 'PACK' | 'OTHER' = 'OTHER';
 
         if (bookId) {
+            console.log('[N8N PUBLISH] Searching for bookId:', bookId)
             item = await prisma.book.findUnique({ where: { id: bookId } })
+            console.log('[N8N PUBLISH] Found item:', !!item)
             itemType = 'BOOK';
         } else if (packId) {
             item = await prisma.pack.findUnique({ where: { id: packId } })
             itemType = 'PACK';
+        } else if (extraId) {
+            item = await prisma.extraProduct.findUnique({ where: { id: extraId } })
+            itemType = 'OTHER';
         } else if (body.isPack) {
             itemType = 'PACK';
         }
 
-        // Si pas de livre/pack et pas d'image custom, on arrête
+        console.log('[N8N PUBLISH] Final item status:', { bookId, packId, extraId, found: !!item, customImageUrl: !!customImageUrl })
+
+        // Si pas de livre/pack/extra et pas d'image custom, on arrête
         if (!item && !customImageUrl) {
-            return NextResponse.json({ error: 'bookId, packId ou image requis' }, { status: 400 })
+            return NextResponse.json({ error: 'bookId, packId, extraId ou image requis' }, { status: 400 })
         }
 
         // Jeton d'accès Facebook, IG et TikTok (Stocké en DB via l'admin)

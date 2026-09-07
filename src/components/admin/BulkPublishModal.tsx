@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { X, Play, Pause, CheckCircle, XCircle, Clock, Send, Loader2 } from 'lucide-react'
 
 interface Book {
@@ -10,6 +10,7 @@ interface Book {
     price: number
     image: string
     category: string | null
+    productType?: string
 }
 
 interface BulkPublishModalProps {
@@ -36,8 +37,6 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     const pauseRef = useRef(false)
     const stopRef = useRef(false)
 
-    if (!isOpen) return null
-
     const resetState = () => {
         setStatuses([])
         setCurrentIndex(-1)
@@ -46,6 +45,15 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
         pauseRef.current = false
         stopRef.current = false
     }
+
+    useEffect(() => {
+        if (isOpen) {
+            resetState()
+        }
+    }, [isOpen])
+
+    if (!isOpen) return null
+
 
     const updateStatus = (bookId: string, status: PublishStatus, message?: string) => {
         setStatuses(prev => {
@@ -78,11 +86,16 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
             updateStatus(book.id, 'running')
 
             try {
+                const isPack = book.productType === 'PACK' || book.category === 'PACK'
+                const isExtra = book.productType === 'EXTRA'
+                
+                const payloadId = isPack ? { packId: book.id } : (isExtra ? { extraId: book.id } : { bookId: book.id })
+
                 const res = await fetch('/api/n8n/publish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        bookId: book.id,
+                        ...payloadId,
                         format: 'post',
                         platform,
                         useDescription: 'short',
@@ -224,6 +237,9 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold text-gray-900 truncate">{book.title}</p>
                                     <p className="text-xs text-gray-500 truncate">{book.author}</p>
+                                    {status?.status === 'error' && status.message && (
+                                        <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight whitespace-normal">{status.message}</p>
+                                    )}
                                 </div>
                                 {/* Statut */}
                                 <div className="flex-shrink-0">
@@ -234,9 +250,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                         <CheckCircle className="w-5 h-5 text-green-500" />
                                     )}
                                     {status?.status === 'error' && (
-                                        <span title={status.message}>
-                                            <XCircle className="w-5 h-5 text-red-500" />
-                                        </span>
+                                        <XCircle className="w-5 h-5 text-red-500" />
                                     )}
                                     {!status && !isCurrent && (
                                         <Clock className="w-4 h-4 text-gray-300" />
