@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { deleteAudioFile } from './upload-audio'
+import { revalidatePath } from 'next/cache'
 
 export async function getAudioTestimonials() {
     try {
@@ -44,6 +45,7 @@ export async function createAudioTestimonial(data: { customerName: string, audio
                 duration: data.duration
             }
         })
+        revalidatePath('/', 'layout')
         return { success: true, testimonial }
     } catch (error) {
         console.error('[CREATE AUDIO TESTIMONIAL]', error)
@@ -58,6 +60,7 @@ export async function toggleAudioTestimonialStatus(id: string, isApproved: boole
             where: { id },
             data: { isApproved }
         })
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error) {
         console.error('[TOGGLE AUDIO TESTIMONIAL]', error)
@@ -88,6 +91,8 @@ export async function deleteAudioTestimonial(id: string) {
             where: { id }
         })
 
+        revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error) {
         console.error('[DELETE AUDIO TESTIMONIAL]', error)
