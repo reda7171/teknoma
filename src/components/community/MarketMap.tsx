@@ -48,6 +48,44 @@ export default function MarketMap({ books, isBlurred, isLoggedIn }: { books: any
     })
 
     const [selectedCity, setSelectedCity] = React.useState<string | null>(null)
+    const [mapCenter, setMapCenter] = React.useState(center)
+    const [mapZoom, setMapZoom] = React.useState(6)
+    
+    const mapRef = React.useRef<google.maps.Map | null>(null)
+
+    const onMapLoad = React.useCallback((map: google.maps.Map) => {
+        mapRef.current = map
+    }, [])
+
+    const onMapUnmount = React.useCallback(() => {
+        mapRef.current = null
+    }, [])
+
+    React.useEffect(() => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const newPos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                }
+                
+                if (mapRef.current) {
+                    // Animation : On se déplace d'abord, puis on zoome
+                    mapRef.current.panTo(newPos)
+                    setTimeout(() => {
+                        if (mapRef.current) {
+                            mapRef.current.setZoom(12)
+                        }
+                    }, 800)
+                } else {
+                    setMapCenter(newPos)
+                    setMapZoom(12)
+                }
+            }, (error) => {
+                console.error("Erreur de géolocalisation:", error)
+            })
+        }
+    }, [])
 
     const cityData = useMemo(() => {
         const counts: Record<string, number> = {}
@@ -87,30 +125,16 @@ export default function MarketMap({ books, isBlurred, isLoggedIn }: { books: any
         <div className="w-full h-[calc(100dvh-80px)] sm:h-[60vh] min-h-[300px] sm:min-h-[400px] relative z-0">
             <GoogleMap
                 mapContainerStyle={mapContainerStyle}
-                center={center}
-                zoom={6}
+                center={mapCenter}
+                zoom={mapZoom}
+                onLoad={onMapLoad}
+                onUnmount={onMapUnmount}
                 options={{
                     disableDefaultUI: false,
                     zoomControl: true,
                     streetViewControl: false,
                     mapTypeControl: false,
-                    fullscreenControl: true,
-                    styles: [
-                        { "elementType": "geometry", "stylers": [{ "color": "#111111" }] },
-                        { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
-                        { "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
-                        { "elementType": "labels.text.stroke", "stylers": [{ "color": "#111111" }] },
-                        { "featureType": "administrative", "elementType": "geometry", "stylers": [{ "color": "#757575" }] },
-                        { "featureType": "administrative.country", "elementType": "labels.text.fill", "stylers": [{ "color": "#9e9e9e" }] },
-                        { "featureType": "poi", "stylers": [{ "visibility": "off" }] },
-                        { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#222222" }] },
-                        { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#8a8a8a" }] },
-                        { "featureType": "road.arterial", "elementType": "geometry", "stylers": [{ "color": "#373737" }] },
-                        { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#3c3c3c" }] },
-                        { "featureType": "transit", "stylers": [{ "visibility": "off" }] },
-                        { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#000000" }] },
-                        { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#3d3d3d" }] }
-                    ]
+                    fullscreenControl: true
                 }}
             >
                 {cityData.map((city, i) => (

@@ -23,7 +23,7 @@ export default function AddToReadingListButton({ bookId, title, author, cover, t
     const [mounted, setMounted] = useState(false)
     const { addItem, removeItem, isInReadingList } = useReadingListStore()
     const isAdded = isInReadingList(bookId)
-    const { showNotification } = useUIStore()
+    const { showNotification, openAuthModal } = useUIStore()
     const t = useTranslations()
 
     useEffect(() => {
@@ -64,9 +64,7 @@ export default function AddToReadingListButton({ bookId, title, author, cover, t
         } else {
             // Si erreur de connexion
             if (result.error === 'Vous devez être connecté') {
-                showNotification("Veuillez vous connecter pour gérer votre liste de lecture", 'error')
-                // Optionnel : Rediriger vers login
-                // router.push('/community/login')
+                openAuthModal()
             } else {
                 showNotification(result.error || 'Erreur', 'error')
             }

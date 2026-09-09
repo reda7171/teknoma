@@ -38,7 +38,7 @@ export default function ArticleMeta({
     const authorHref = author?.id ? `/blog/author/${author.id}` : null
 
     return (
-        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-[12px] font-bold uppercase tracking-wide text-slate-500 border-y md:border-t md:border-b-0 border-slate-100 py-4 md:pt-6 md:pb-0 mt-6 md:mt-8">
+        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 text-sm font-bold uppercase tracking-wide text-slate-500 border-y md:border-t md:border-b-0 border-slate-100 py-4 md:pt-6 md:pb-0 mt-6 md:mt-8">
             
             {/* Ligne 1 sur mobile : Auteur et Date */}
             <div className="flex items-center gap-4">

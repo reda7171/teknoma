@@ -5,6 +5,9 @@ interface UIStore {
     openCart: () => void
     closeCart: () => void
     toggleCart: () => void
+    isAuthModalOpen: boolean
+    openAuthModal: () => void
+    closeAuthModal: () => void
     // Notifications system
     notification: {
         message: string
@@ -20,6 +23,9 @@ export const useUIStore = create<UIStore>((set) => ({
     openCart: () => set({ isCartOpen: true }),
     closeCart: () => set({ isCartOpen: false }),
     toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
+    isAuthModalOpen: false,
+    openAuthModal: () => set({ isAuthModalOpen: true }),
+    closeAuthModal: () => set({ isAuthModalOpen: false }),
     notification: null,
     showNotification: (message, type = 'success') => {
         const id = Date.now()

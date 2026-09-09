@@ -4,8 +4,9 @@ import ReadingListBoard from '@/components/ReadingListBoard'
 import AddManualBookReadingList from '@/components/AddManualBookReadingList'
 import ReadingListStats from '@/components/ReadingListStats'
 import Header from '@/components/HeaderWithUser'
-import { getCommunityUser } from '@/lib/actions/community-auth'
+import { getCommunityUser, getTopReaders } from '@/lib/actions/community-auth'
 import Footer from '@/components/Footer'
+import ReadingLeaderboard from '@/components/community/ReadingLeaderboard'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { notFound } from 'next/navigation'
 
@@ -15,8 +16,11 @@ export default async function ReadingListPage() {
     if (!enabled) notFound()
 
     const t = await getTranslations('Community')
-    const readingList = await getReadingList()
-    const user = await getCommunityUser()
+    const [readingList, user, topReaders] = await Promise.all([
+        getReadingList(),
+        getCommunityUser(),
+        getTopReaders(10)
+    ])
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -24,6 +28,8 @@ export default async function ReadingListPage() {
             <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 pb-32 md:pb-8">
                 <h1 className="text-2xl md:text-3xl font-black mb-2 text-black">{t('ReadingList.Title')}</h1>
                 <p className="text-sm md:text-base text-gray-500 mb-6 md:mb-8 font-medium">{t('ReadingList.Subtitle')}</p>
+
+                <ReadingLeaderboard topReaders={topReaders} />
 
                 <ReadingListStats items={readingList} />
 

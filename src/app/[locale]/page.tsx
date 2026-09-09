@@ -30,9 +30,10 @@ import CosmosBooks from '@/components/CosmosBooks'
 import CatalogDownload from '@/components/home/CatalogDownload'
 import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import { getPrimaryImage } from '@/lib/utils/image'
-import { getCommunityUser } from '@/lib/actions/community-auth'
+import { getCommunityUser, getTopReaders } from '@/lib/actions/community-auth'
 import GoogleOneTap from '@/components/auth/GoogleOneTap'
 import SeoCategoriesSection from '@/components/SeoCategoriesSection'
+import HomeLeaderboard from '@/components/home/HomeLeaderboard'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -107,7 +108,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     homepageContent,
     audioTestimonialsResult,
     imageTestimonialsResult,
-    usedBooks
+    usedBooks,
+    topReaders
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -123,7 +125,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
     getApprovedAudioTestimonials(),
     getApprovedImageTestimonials(),
-    getUsedBooks(8)
+    getUsedBooks(8),
+    getTopReaders(10)
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
@@ -445,6 +448,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     'home_section_sonic_delivery',
     'home_section_custom_html',
     'home_section_features',
+    'home_section_leaderboard',
     'home_section_best_sellers',
     'home_section_quote',
     'home_section_packs',
@@ -596,6 +600,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </section>
         )
+
+      case 'home_section_leaderboard':
+        return <HomeLeaderboard key={key} topReaders={topReaders} />
 
       case 'home_section_best_sellers':
         return (

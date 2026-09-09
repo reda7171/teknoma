@@ -57,7 +57,7 @@ export default function DigitalAddToCartButton({ product }: Props) {
     <button 
       disabled={isAdded}
       onClick={handleAddToCart}
-      className={`w-full flex items-center justify-center gap-3 px-8 py-5 font-black uppercase tracking-widest text-sm rounded-xl transition-all duration-300 ${
+      className={`w-full flex items-center justify-center gap-2 sm:gap-3 px-4 py-4 sm:px-8 sm:py-5 font-black uppercase tracking-[0.1em] sm:tracking-widest text-base sm:text-sm rounded-xl transition-all duration-300 ${
         isAdded 
           ? 'bg-green-500 text-white scale-105 shadow-xl'
           : 'bg-amber-400 text-black hover:bg-amber-500 hover:shadow-xl hover:shadow-amber-400/20 active:scale-95'

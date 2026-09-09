@@ -23,6 +23,7 @@ const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 import UtmTracker from '@/components/UtmTracker'
 import DelayedScripts from '@/components/DelayedScripts'
 import GoogleReviewsBadge from '@/components/GoogleReviewsBadge'
+const AuthModal = dynamic(() => import('@/components/auth/AuthModal'))
 
 
 const outfit = localFont({
@@ -552,6 +553,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
           <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
+          <AuthModal />
           <DelayedScripts>
             <Suspense fallback={null}>
               <PixelTracker />

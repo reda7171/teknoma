@@ -21,9 +21,11 @@ interface InfiniteBookListProps {
         slotId: string
     }
     packsCTA?: any[]
+    boardGames?: any[]
+    kidsProducts?: any[]
 }
 
-export default function InfiniteBookList({ initialBooks, initialFilters, adsense, packsCTA = [] }: InfiniteBookListProps) {
+export default function InfiniteBookList({ initialBooks, initialFilters, adsense, packsCTA = [], boardGames = [], kidsProducts = [] }: InfiniteBookListProps) {
     const [books, setBooks] = useState<Book[]>(initialBooks)
     const [page, setPage] = useState(2)
     const [hasMore, setHasMore] = useState(true)
@@ -180,9 +182,32 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>
-                                    <div className="hidden md:flex items-center justify-center relative w-48 h-48 z-10">
+                                    <div className="hidden md:flex items-center justify-center relative w-64 h-48 z-10">
                                         <div className="absolute inset-0 bg-white/40 rounded-[2.5rem] rotate-6 shadow-inner" />
-                                        <Gamepad2 className="w-24 h-24 text-purple-500 drop-shadow-md" />
+                                        {boardGames.length > 0 ? (
+                                            <div className="relative w-full h-full flex items-center justify-center">
+                                                {boardGames.slice(0, 3).map((game, i) => (
+                                                    <Link 
+                                                        href={`/jeux-societe/${game.id}`}
+                                                        key={game.id} 
+                                                        className="absolute w-28 h-28 rounded-xl overflow-hidden shadow-xl border-2 border-white transform transition-transform hover:-translate-y-4"
+                                                        style={{
+                                                            left: `${(i * 30)}%`,
+                                                            zIndex: 10 - i,
+                                                            transform: `rotate(${i === 0 ? -5 : i === 1 ? 5 : -3}deg)`
+                                                        }}
+                                                    >
+                                                        <ImageWithFallback 
+                                                            src={game.images[0] || ''} 
+                                                            alt={game.name} 
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <Gamepad2 className="w-24 h-24 text-purple-500 drop-shadow-md" />
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -207,9 +232,32 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                             <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     </div>
-                                    <div className="hidden md:flex items-center justify-center relative w-48 h-48 z-10">
-                                        <div className="absolute inset-0 bg-white/40 rounded-full animate-pulse shadow-inner" />
-                                        <Baby className="w-24 h-24 text-pink-500 drop-shadow-md relative z-10" />
+                                    <div className="hidden md:flex items-center justify-center relative w-64 h-48 z-10">
+                                        <div className="absolute inset-0 bg-white/40 rounded-[2.5rem] rotate-6 shadow-inner" />
+                                        {kidsProducts.length > 0 ? (
+                                            <div className="relative w-full h-full flex items-center justify-center">
+                                                {kidsProducts.slice(0, 3).map((prod, i) => (
+                                                    <Link 
+                                                        href={`/mon-enfant/${prod.id}`}
+                                                        key={prod.id} 
+                                                        className="absolute w-28 h-28 rounded-xl overflow-hidden shadow-xl border-2 border-white transform transition-transform hover:-translate-y-4"
+                                                        style={{
+                                                            left: `${(i * 30)}%`,
+                                                            zIndex: 10 - i,
+                                                            transform: `rotate(${i === 0 ? -5 : i === 1 ? 5 : -3}deg)`
+                                                        }}
+                                                    >
+                                                        <ImageWithFallback 
+                                                            src={prod.images[0] || ''} 
+                                                            alt={prod.name} 
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <Baby className="w-24 h-24 text-pink-500 drop-shadow-md relative z-10" />
+                                        )}
                                     </div>
                                 </div>
                             );
