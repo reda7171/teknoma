@@ -18,7 +18,7 @@ export default function AuthModal() {
 
     if (!mounted || !isAuthModalOpen) return null;
     
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
     
     const handleSuccess = async (credentialResponse: any) => {
         if (!credentialResponse.credential) return
