@@ -27,7 +27,7 @@ export default function WhatsAppButton({ phone }: WhatsAppButtonProps) {
         setMounted(true)
     }, [])
  
-    const phoneNumber = (phone || '212600000000').replace(/[^0-9]/g, '')
+    const phoneNumber = (phone || '212702220575').replace(/[^0-9]/g, '')
     
     // Traductions du message WhatsApp
     const messages: Record<string, string> = {

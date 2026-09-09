@@ -650,8 +650,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 </Link>
                             )
                         })}
-                        <div className="py-4">
-                            <LanguageSwitcher />
+                        <div className="py-4 flex justify-center">
+                            <LanguageSwitcher upward={true} />
                         </div>
                     </nav>
                 </div>

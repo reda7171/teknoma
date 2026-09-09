@@ -300,6 +300,11 @@ model Order {
   isPaid           Boolean              @default(false)
   invoiceNumber    String?              @db.VarChar(100)
   posSessionId     String?
+  utmSource        String?              @db.VarChar(100)
+  utmMedium        String?              @db.VarChar(100)
+  utmCampaign      String?              @db.VarChar(255)
+  fbclid           String?              @db.VarChar(500)
+  ttclid           String?              @db.VarChar(500)
   items            OrderItem[]
   statusHistory    OrderStatusHistory[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
