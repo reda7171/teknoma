@@ -779,26 +779,26 @@ export default function CheckoutClient({
                             )}
                         </button>
 
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
-                                <Truck className="w-6 h-6 text-black shrink-0" />
+                        <div className="space-y-4 mt-6">
+                            <div className="flex items-center gap-5 p-5 bg-pixio-cream/50 rounded-2xl border border-gray-50">
+                                <Truck className="w-8 h-8 text-black shrink-0" />
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('FastShippingTitle')}</p>
-                                    <p className="text-[9px] text-gray-500 mt-1">{t('DeliveryMorocco')}</p>
+                                    <p className="text-sm rtl:text-base font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('FastShippingTitle')}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{t('DeliveryMorocco')}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
-                                <ShieldCheck className="w-6 h-6 text-black shrink-0" />
+                            <div className="flex items-center gap-5 p-5 bg-pixio-cream/50 rounded-2xl border border-gray-50">
+                                <ShieldCheck className="w-8 h-8 text-black shrink-0" />
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('SecurePaymentTitle')}</p>
-                                    <p className="text-[9px] text-gray-500 mt-1">{t('CashOrCard')}</p>
+                                    <p className="text-sm rtl:text-base font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('SecurePaymentTitle')}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{t('CashOrCard')}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4 p-4 bg-pixio-cream/50 rounded-2xl border border-gray-50">
-                                <Headset className="w-6 h-6 text-black shrink-0" />
+                            <div className="flex items-center gap-5 p-5 bg-pixio-cream/50 rounded-2xl border border-gray-50">
+                                <Headset className="w-8 h-8 text-black shrink-0" />
                                 <div>
-                                    <p className="text-[10px] rtl:text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('CustomerServiceTitle')}</p>
-                                    <p className="text-[9px] text-gray-500 mt-1">{t('WhatsAppSupport')}</p>
+                                    <p className="text-sm rtl:text-base font-black text-black uppercase tracking-widest rtl:tracking-normal leading-tight">{t('CustomerServiceTitle')}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{t('WhatsAppSupport')}</p>
                                 </div>
                             </div>
                         </div>

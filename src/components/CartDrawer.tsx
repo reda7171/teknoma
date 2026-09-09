@@ -280,11 +280,11 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             {/* Summary - Total uniquement */}
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center pt-2">
-                                    <span className="text-[13px] font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
-                                    <span className="text-3xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    <span className="text-sm sm:text-base font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
+                                    <span className="text-4xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <div className="text-center">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>
+                                    <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>
                                 </div>
                             </div>
 
@@ -292,8 +292,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <div className="space-y-4">
                                 <Link
                                     href="/checkout"
-                                    onClick={handleCheckoutClick}
-                                    className="flex items-center justify-center gap-3 w-full py-4 sm:py-6 min-h-[56px] bg-black text-white font-black text-xs uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20"
+                                    onClick={(e) => {
+                                        const value = getTotalPrice()
+                                        const count = getTotalItems()
+                                        notifyCheckoutInitiated(value, count, sessionId || undefined).catch(console.error)
+                                        // Ne pas appeler onClose ici pour éviter d'annuler la navigation du Link
+                                    }}
+                                    className="flex items-center justify-center gap-3 w-full py-4 sm:py-6 min-h-[56px] bg-black text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20"
                                 >
                                     <span>{t('ProceedToCheckout')}</span>
                                     <ArrowRight className="w-4 h-4 rtl:rotate-180" />
@@ -301,7 +306,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                                 <button
                                     onClick={onClose}
-                                    className="w-full text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                                    className="flex items-center justify-center w-full py-4 sm:py-6 min-h-[56px] bg-white border-2 border-black text-black font-black text-xs sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-gray-50 transition-all"
                                 >
                                     {t('KeepExploring')}
                                 </button>
