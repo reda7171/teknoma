@@ -13,7 +13,7 @@ interface Props {
 export default function WhatsAppOrderButton({ title, price, phone, type = 'book', replacedBooks }: Props) {
     const tCommon = useTranslations('Common')
     const locale = useLocale()
-    const phoneNumber = (phone || '212600000000').replace(/[\s+\-()]/g, '')
+    const phoneNumber = (phone || '212702220575').replace(/[\s+\-()]/g, '')
 
     let replacedInfo = ''
     if (replacedBooks && Object.keys(replacedBooks).length > 0) {
