@@ -1,4 +1,17 @@
 {
+  "HomeLeaderboard": {
+    "WallOfFame": "Top Lecteurs",
+    "Subtitle": "Classement en direct",
+    "Badge": "Live",
+    "Books": "Livres",
+    "Anonymous": "Anonyme",
+    "Headline": "Ta place est-elle dans ce classement ?",
+    "Body": "Chaque livre lu te rapproche du sommet. Des centaines de lecteurs se battent chaque jour pour leur rang — où en es-tu ?",
+    "CTA": "Rejoindre la course",
+    "Sub": "Connexion gratuite via Google",
+    "Pages": "pages",
+    "Hours": "h"
+  },
   "Seller": {
     "Sidebar": {
       "Logo": "Riwaya",
@@ -495,6 +508,14 @@
     "DownloadApp": "Téléchargez l'App",
     "SoonOn": "Bientôt sur",
     "AppComingSoon": "Bientôt disponible"
+  },
+  "AuthModal": {
+    "Title": "Connexion requise",
+    "Description": "Veuillez vous connecter pour gérer votre liste de lecture ou effectuer d'autres actions.",
+    "LoginSuccess": "Connexion réussie",
+    "LoginError": "Erreur de connexion",
+    "UnexpectedError": "Erreur inattendue",
+    "GoogleLoginError": "Erreur Google Login"
   },
   "Common": {
     "Search": "Rechercher",
@@ -1000,8 +1021,8 @@
       }
     },
     "Market": {
-      "Title": "Marché aux Livres",
-      "Subtitle": "Trouvez des perles rares près de chez vous",
+      "Title": "La Bourse d'Échange",
+      "Subtitle": "Donnez une seconde vie à vos livres et dénichez des pépites près de chez vous.",
       "SearchPlaceholder": "Rechercher par titre, auteur...",
       "CityFilter": "Filtrer par ville",
       "ConditionFilter": "Filtrer par état",

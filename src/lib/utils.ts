@@ -14,7 +14,9 @@ export function normalizeImage(raw: string | null | undefined): string {
     const img = raw?.trim() || ''
     if (!img) return '/book-placeholder.png'
     
-    if (process.env.NODE_ENV === 'development' && (img.startsWith('/uploads/') || img.startsWith('uploads/'))) {
+    // Always use absolute URL for uploads so Next.js Image optimizer fetches via HTTP
+    // This fixes issues where the local public directory doesn't have the uploaded files.
+    if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
         return `https://riwaya.store${img.startsWith('/') ? img : '/' + img}`;
     }
 
@@ -27,9 +29,6 @@ export function normalizeImage(raw: string | null | undefined): string {
         if (img.startsWith('/9j/')) return 'data:image/jpeg;base64,' + img
         return img
     }
-
-    // Détection de chemin local sans slash (ex: uploads/books/...)
-    if (img.startsWith('uploads/')) return '/' + img
 
     // Détection Base64 pure (Odoo)
     if (img.includes(' ')) return '/book-placeholder.png'

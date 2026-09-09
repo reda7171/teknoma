@@ -42,7 +42,7 @@ export default function AddToCartButton({
     return (
         <button
             disabled={disabled || isAdded}
-            className={`w-full flex items-center justify-center gap-3 font-black text-sm uppercase tracking-widest rounded-full transition-all duration-300 py-5 px-8 ${
+            className={`w-full flex items-center justify-center gap-2 sm:gap-3 font-black text-base sm:text-sm uppercase tracking-[0.1em] sm:tracking-widest rounded-full transition-all duration-300 py-4 px-4 sm:py-5 sm:px-8 ${
                 disabled 
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-none' 
                     : isAdded

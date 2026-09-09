@@ -46,7 +46,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             image: { in: ['', '/book-placeholder.png'] }
         }),
         ...(statusParam.split(',').includes('out-of-stock') && {
-            stock: { equals: 0 }
+            stock: { lte: 0 }
         }),
         ...(statusParam.split(',').includes('in-stock') && {
             stock: { gt: 0 }
@@ -106,31 +106,53 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('has-sku')) packWhere.sellerSku = { not: null }
         if (jumiaParam.split(',').includes('no-sku')) packWhere.sellerSku = null
         
+        if (statusParam.split(',').includes('no-image')) {
+            packWhere.image = { in: ['', '/book-placeholder.png'] }
+        }
+
         const packs = await prisma.pack.findMany({
             where: packWhere,
-            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
+            include: {
+                books: {
+                    include: {
+                        book: { select: { stock: true } }
+                    }
+                },
+                _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } }
+            }
         })
-        allProducts.push(...packs.map(p => ({
-            id: p.id,
-            title: p.name,
-            titleFr: p.nameFr,
-            titleEn: p.nameEn,
-            author: 'Pack',
-            price: p.price,
-            costPrice: p.costPrice || 0,
-            stock: 0, // Packs have 0 stock
-            image: p.image || '/book-placeholder.png',
-            category: 'PACK',
-            language: 'fr',
-            description: p.description || '',
-            active: p.active,
-            isOriginal: true,
-            productType: 'PACK',
-            orderCount: p._count?.orderItems || 0,
-            sellerSku: p.sellerSku,
-            jumiaStock: p.jumiaStock,
-            createdAt: p.createdAt
-        })))
+
+        const mappedPacks = packs.map(p => {
+            const bookStocks = p.books?.map((pb: any) => pb.book?.stock ?? 0) || []
+            const packStock = bookStocks.length > 0 ? Math.min(...bookStocks) : 0
+            return {
+                id: p.id,
+                title: p.name,
+                titleFr: p.nameFr,
+                titleEn: p.nameEn,
+                author: 'Pack',
+                price: p.price,
+                costPrice: p.costPrice || 0,
+                stock: packStock,
+                image: p.image || '/book-placeholder.png',
+                category: 'PACK',
+                language: 'fr',
+                description: p.description || '',
+                active: p.active,
+                isOriginal: true,
+                productType: 'PACK',
+                orderCount: p._count?.orderItems || 0,
+                sellerSku: p.sellerSku,
+                jumiaStock: p.jumiaStock,
+                createdAt: p.createdAt
+            }
+        }).filter(p => {
+            if (statusParam.split(',').includes('out-of-stock') && p.stock > 0) return false;
+            if (statusParam.split(',').includes('in-stock') && p.stock <= 0) return false;
+            return true;
+        })
+
+        allProducts.push(...mappedPacks)
     }
 
     // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
@@ -142,6 +164,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (statusParam.split(',').includes('active')) extraWhere.active = true
         if (statusParam.split(',').includes('inactive')) extraWhere.active = false
+        if (statusParam.split(',').includes('out-of-stock')) extraWhere.stock = { lte: 0 }
+        if (statusParam.split(',').includes('in-stock')) extraWhere.stock = { gt: 0 }
+        if (statusParam.split(',').includes('no-image')) extraWhere.image = { in: ['', '/book-placeholder.png'] }
         if (jumiaParam.split(',').includes('synced')) extraWhere.isSyncedWithJumia = true
         if (jumiaParam.split(',').includes('not-synced')) extraWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null }

@@ -134,7 +134,7 @@ export default async function BooksPage({
         author: params.author,
     };
 
-    const [books, totalCount, categoryTree, categoryConfig, authors, adsenseEnabled, adsensePublisherId, adsenseSlotBetweenBooks, popularPacks, categoryCounts] = await Promise.all([
+    const [books, totalCount, categoryTree, categoryConfig, authors, adsenseEnabled, adsensePublisherId, adsenseSlotBetweenBooks, popularPacks, categoryCounts, boardGames, kidsProductsData] = await Promise.all([
         getBooks(filterObj),
         getBooksCount(filterObj),
         getCategoryTree(),
@@ -144,7 +144,9 @@ export default async function BooksPage({
         getSetting('adsense_publisher_id'),
         getSetting('adsense_slot_between_books'),
         getPopularPacks(5),
-        import('@/lib/db/books').then(m => m.getCategoryCounts())
+        import('@/lib/db/books').then(m => m.getCategoryCounts()),
+        prisma.extraProduct.findMany({ where: { category: 'BOARD_GAME', active: true }, take: 3, select: { id: true, name: true, images: true } }),
+        prisma.extraProduct.findMany({ where: { category: 'KIDS', active: true }, take: 3, select: { id: true, name: true, images: true } })
     ])
 
     const isEnfants = params.category?.toLowerCase() === 'enfants'
@@ -245,6 +247,8 @@ export default async function BooksPage({
                                         slotId: adsenseSlotBetweenBooks || ''
                                     }}
                                     packsCTA={popularPacks}
+                                    boardGames={boardGames}
+                                    kidsProducts={kidsProductsData}
                                 />
                             </>
                         )}

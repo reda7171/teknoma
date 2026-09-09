@@ -1,4 +1,25 @@
 {
+  "AuthModal": {
+    "Title": "Login Required",
+    "Description": "Please log in to manage your reading list or perform other actions.",
+    "LoginSuccess": "Login successful",
+    "LoginError": "Login error",
+    "UnexpectedError": "Unexpected error",
+    "GoogleLoginError": "Google Login error"
+  },
+  "HomeLeaderboard": {
+    "WallOfFame": "Top Readers",
+    "Subtitle": "Live Rankings",
+    "Badge": "Live",
+    "Books": "Books",
+    "Anonymous": "Anonymous",
+    "Headline": "Is your name on this list?",
+    "Body": "Every book you read earns your rank. Hundreds of readers compete every day — are you one of them?",
+    "CTA": "Join the race",
+    "Sub": "Free · Sign in with Google",
+    "Pages": "pages",
+    "Hours": "h"
+  },
   "Seller": {
     "Sidebar": {
       "Logo": "Riwaya",

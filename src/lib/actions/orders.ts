@@ -372,7 +372,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             return { success: false, error: error.message }
         }
         console.error('Erreur createOrder:', error)
-        return { success: false, error: "Une erreur est survenue lors de la commande." }
+        return { success: false, error: "Erreur serveur: " + (error.message || String(error)) }
     }
 }
 

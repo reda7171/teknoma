@@ -426,7 +426,7 @@ export default async function BookDetailPage({
                                                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
                                                     {post.coverImage ? (
                                                         <Image
-                                                            src={post.coverImage}
+                                                            src={normalizeImage(post.coverImage)}
                                                             alt={post.title}
                                                             fill
                                                             className="object-cover group-hover:scale-105 transition-transform duration-300"

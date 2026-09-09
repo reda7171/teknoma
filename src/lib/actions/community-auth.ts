@@ -427,3 +427,46 @@ export async function checkExchangeEligibility(user: any): Promise<boolean> {
 
     return exchangeCount < 1
 }
+
+export async function getTopReaders(limit: number = 10) {
+    try {
+        // Find users with their completed books count
+        const users = await prisma.user.findMany({
+            where: {
+                role: 'USER',
+            },
+            select: {
+                id: true,
+                fullName: true,
+                city: true,
+                image: true,
+                _count: {
+                    select: {
+                        readingList: {
+                            where: {
+                                status: 'COMPLETED'
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        // Sort in memory by the conditional count and take the top N
+        return users
+            .filter(u => u._count.readingList > 0)
+            .sort((a, b) => b._count.readingList - a._count.readingList)
+            .slice(0, limit)
+            .map((reader, index) => ({
+                id: reader.id,
+                name: reader.fullName,
+                city: reader.city,
+                image: reader.image,
+                booksRead: reader._count.ReadingList,
+                rank: index + 1
+            }))
+    } catch (error) {
+        console.error('Erreur getTopReaders:', error)
+        return []
+    }
+}

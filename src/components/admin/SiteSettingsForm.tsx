@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { updateMultipleSettings } from '@/lib/actions/site-settings'
 import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link, MessageSquare, Users } from 'lucide-react'
+import GoogleReviewsEmailManager from './GoogleReviewsEmailManager'
+
 interface SettingsFormProps {
     initialSettings: Record<string, string>
 }
@@ -501,6 +503,12 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                     </label>
                 </div>
             </div>
+
+            {/* Emails pour Google Avis */}
+            <GoogleReviewsEmailManager 
+                value={settings.google_reviews_emails || '[]'} 
+                onChange={(val) => handleChange('google_reviews_emails', val)} 
+            />
 
             {/* Message de feedback */}
             {message && (

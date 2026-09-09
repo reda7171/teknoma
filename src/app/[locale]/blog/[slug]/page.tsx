@@ -274,7 +274,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 md:pt-6 md:pb-6">
                     {/* Fil d'Ariane + btn admin */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
-                        <nav className="flex items-center gap-2 sm:gap-3 text-[10px] rtl:text-[11px] font-bold uppercase tracking-widest rtl:tracking-normal text-slate-500 overflow-x-auto no-scrollbar py-1">
+                        <nav className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-slate-500 overflow-x-auto no-scrollbar py-1">
                             <Link href="/blog" className="flex items-center gap-1.5 hover:text-slate-900 transition-colors bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-200/50 shadow-sm whitespace-nowrap">
                                 <Home className="w-3 h-3" />
                                 {t('Blog')}
@@ -311,7 +311,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <div className="mb-4 md:mb-6">
                             <Link
                                 href={`/blog?category=${post.category}`}
-                                className="inline-block px-4 py-1.5 bg-slate-50 text-slate-600 text-[10px] rtl:text-xs font-black uppercase tracking-widest rtl:tracking-normal rounded-full hover:bg-slate-100 transition-colors"
+                                className="inline-block px-4 py-1.5 bg-slate-50 text-slate-600 text-xs sm:text-sm font-black uppercase tracking-widest rtl:tracking-normal rounded-full hover:bg-slate-100 transition-colors"
                             >
                                 {post.category}
                             </Link>

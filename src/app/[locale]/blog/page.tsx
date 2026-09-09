@@ -169,7 +169,7 @@ export default async function BlogPage({
 
                                 {/* Content */}
                                 <div className={`flex flex-col justify-center p-6 md:p-8 ${idx === 0 ? 'lg:w-1/2 lg:p-12' : ''}`}>
-                                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
+                                    <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm font-black uppercase tracking-widest text-gray-400 mb-4">
                                         {post.publishedAt && (
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="w-3 h-3" />
@@ -200,7 +200,7 @@ export default async function BlogPage({
                                             </div>
                                         )}
                                         {post.category && (
-                                            <div className="flex items-center gap-1 bg-black text-white px-2 py-0.5 rounded-full text-[8px]">
+                                            <div className="flex items-center gap-1 bg-black text-white px-3 py-1 rounded-full text-[10px] md:text-xs">
                                                 <span>{post.category}</span>
                                             </div>
                                         )}
