@@ -451,7 +451,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
       </head>
       <body
-        className={`${outfit.className} ${tajawal.variable} font-cairo-var font-sans antialiased bg-white overflow-x-hidden`}
+        className={`${outfit.className} ${tajawal.variable} font-cairo-var font-sans antialiased bg-white`}
         suppressHydrationWarning={true}
       >
         <noscript>
