@@ -362,8 +362,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <div className="absolute inset-0 bg-black rounded-3xl md:rounded-[2rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl hidden md:block" />
                         <div className="absolute inset-0 bg-gray-200 rounded-3xl md:rounded-[2rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20 hidden md:block" />
                         
-                        {/* Main Container - Full width edge-to-edge on mobile, rounded on desktop */}
-                        <div className="relative h-[250px] sm:h-[300px] md:h-auto md:aspect-[21/9] w-[calc(100%+2rem)] -ml-4 sm:w-full sm:ml-0 overflow-hidden sm:rounded-3xl md:rounded-[2rem] md:border-8 border-white bg-slate-50 shadow-sm md:shadow-2xl md:shadow-black/10 group-hover:-translate-y-1 transition-transform duration-700">
+                        {/* Main Container - Rounded on mobile, larger on desktop */}
+                        <div className="relative h-[250px] sm:h-[300px] md:h-auto md:aspect-[21/9] w-full overflow-hidden rounded-2xl md:rounded-[2rem] md:border-8 border-white bg-slate-50 shadow-sm md:shadow-2xl md:shadow-black/10 group-hover:-translate-y-1 transition-transform duration-700">
                             {/* Blurred Ambient Background */}
                             <div className="absolute inset-0 z-0">
                                 <Image

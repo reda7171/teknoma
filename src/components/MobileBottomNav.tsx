@@ -39,8 +39,8 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
     ]
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[120] pb-safe">
-            <div className="flex items-center justify-around h-16 px-2">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[120]">
+            <div className="flex items-stretch justify-around px-2">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                     const Icon = item.icon
@@ -48,7 +48,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+                            className={`flex flex-col items-center justify-center w-full pt-3 pb-safe min-h-[4rem] space-y-1 ${
                                 isActive ? 'text-black' : 'text-gray-500 hover:text-black'
                             }`}
                         >
@@ -60,7 +60,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
                 <button
                     onClick={openCart}
-                    className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-black relative"
+                    className="flex flex-col items-center justify-center w-full pt-3 pb-safe min-h-[4rem] space-y-1 text-gray-500 hover:text-black relative"
                 >
                     <div className={`relative transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12' : 'animate-cart-vibrate'}`}>
                         <ShoppingCart className={`w-5 h-5 stroke-2 transition-colors ${isCartAnimating ? 'text-blue-600' : ''}`} />
@@ -75,7 +75,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
                 <button
                     onClick={onMenuClick}
-                    className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-black"
+                    className="flex flex-col items-center justify-center w-full pt-3 pb-safe min-h-[4rem] space-y-1 text-gray-500 hover:text-black"
                 >
                     <Menu className="w-5 h-5 stroke-2" />
                     <span className="text-[10px] font-medium">{t('Menu')}</span>

@@ -164,6 +164,7 @@ export default function AdminLayout({
             icon: ShoppingCart,
             children: [
                 { name: 'Commandes Web', href: `/${lang}/admin/orders`, icon: ShoppingCart },
+                { name: 'Paniers Abandonnés', href: `/${lang}/admin/abandoned-carts`, icon: ShoppingCart },
                 { name: 'Commandes Jumia', href: `/${lang}/admin/jumia-orders`, icon: ShoppingBag, badge: pendingJumiaCount },
                 { name: 'Consignation (FBJ)', href: `/${lang}/admin/jumia-consignment`, icon: Package },
                 { name: 'Point de Vente (POS)', href: `/${lang}/admin/pos`, icon: Monitor, featureKey: 'feature_pos' },

@@ -9,7 +9,7 @@ import { Link } from '@/i18n/routing'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params
-    const t = await getTranslations('PacksPage')
+    const t = await getTranslations({ locale, namespace: 'PacksPage' })
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
 
@@ -36,7 +36,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export const dynamic = 'force-dynamic'
 
-export default async function PacksPage() {
+export default async function PacksPage({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
     const packs = await getPacks()
     const availableBooks = await prisma.book.findMany({
         where: {
@@ -48,8 +49,8 @@ export default async function PacksPage() {
         }
     })
 
-    const t = await getTranslations('PacksPage')
-    const tNav = await getTranslations('Navigation')
+    const t = await getTranslations({ locale, namespace: 'PacksPage' })
+    const tNav = await getTranslations({ locale, namespace: 'Navigation' })
 
     return (
         <div className="min-h-screen bg-pixio-cream">

@@ -97,7 +97,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                     </div>
 
                     {/* ── Colonne copywriting ── */}
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-center md:items-start text-center md:text-left">
                         <div className="inline-flex items-center gap-2 text-orange-500 font-black text-[10px] uppercase tracking-[0.25em] mb-5">
                             <Flame className="w-4 h-4" />
                             Challenge

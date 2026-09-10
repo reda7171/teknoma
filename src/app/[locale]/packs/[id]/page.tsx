@@ -94,9 +94,9 @@ export default async function PackDetailPage({
 }) {
     const { id, locale } = await params
     const pack = await getPackById(id)
-    const t = await getTranslations('PackDetail')
-    const tPacks = await getTranslations('Packs')
-    const tNav = await getTranslations('Navigation')
+    const t = await getTranslations({ locale, namespace: 'PackDetail' })
+    const tPacks = await getTranslations({ locale, namespace: 'Packs' })
+    const tNav = await getTranslations({ locale, namespace: 'Navigation' })
     const [whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, user, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
         getSetting('contact_whatsapp'),
         getSetting('announcement_bar_enabled'),

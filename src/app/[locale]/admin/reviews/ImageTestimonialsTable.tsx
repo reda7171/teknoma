@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CheckCircle, Trash2, ImageIcon } from 'lucide-react'
-import Image from 'next/image'
+import ImageWithFallback from '@/components/ImageWithFallback'
 import { useRouter } from 'next/navigation'
 import { deleteImageTestimonials, deleteImageTestimonial, toggleImageTestimonial, uploadImageTestimonial } from '@/lib/actions/image-testimonials'
 
@@ -163,12 +163,10 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
                                         </td>
                                         <td className="px-6 py-6">
                                             <div className="relative w-16 h-24 bg-gray-100 rounded-lg overflow-hidden shadow-sm hover:scale-[2] hover:z-10 transition-transform origin-left cursor-pointer">
-                                                <Image
+                                                <ImageWithFallback
                                                     src={testimonial.imageUrl}
-                                                    alt="WhatsApp Screenshot"
-                                                    fill
-                                                    className="object-cover"
-                                                    unoptimized
+                                                    alt="Testimonial Client"
+                                                    className="object-cover w-full h-full"
                                                 />
                                             </div>
                                         </td>
@@ -251,7 +249,7 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
                                     />
                                     <div className="w-full h-40 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 group-hover:border-black group-hover:bg-gray-50 transition-all overflow-hidden relative">
                                         {previewUrl ? (
-                                            <Image src={previewUrl} alt="Preview" fill className="object-contain" unoptimized />
+                                            <ImageWithFallback src={previewUrl} alt="Preview" className="object-contain w-full h-full" />
                                         ) : (
                                             <>
                                                 <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-black transition-colors" />
