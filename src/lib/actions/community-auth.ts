@@ -462,7 +462,7 @@ export async function getTopReaders(limit: number = 10) {
                 name: reader.fullName,
                 city: reader.city,
                 image: reader.image,
-                booksRead: reader._count.ReadingList,
+                booksRead: reader._count.readingList,
                 rank: index + 1
             }))
     } catch (error) {

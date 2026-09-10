@@ -21,9 +21,8 @@ export default function FontSizeRegulator() {
     return (
         <div className="
             flex items-center gap-2 w-fit
-            bg-white/95 backdrop-blur-xl border border-slate-200 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)]
-            px-4 py-2.5 fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]
-            md:relative md:bottom-auto md:left-auto md:transform-none md:z-auto md:px-3 md:py-1.5 md:shadow-sm md:bg-white/50 md:backdrop-blur-sm
+            bg-white/95 backdrop-blur-xl border border-slate-200 rounded-full shadow-sm
+            px-3 py-1.5 relative z-10
             transition-all duration-300
         ">
             <Type className="w-4 h-4 md:w-4 md:h-4 text-slate-400 hidden md:block" />

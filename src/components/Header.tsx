@@ -418,6 +418,29 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     )
                                 }
 
+                                if (item.href === '/books') {
+                                    return (
+                                        <div key={item.href} className="relative group/books inline-block">
+                                            <div className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive ? 'bg-blue-500 text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]' : 'bg-white text-blue-500 border-blue-500/20 hover:border-blue-500 hover:bg-blue-500 hover:text-black shadow-sm'}`}>
+                                                <span>{item.label}</span>
+                                                <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/books:rotate-180" />
+                                                <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : 'bg-blue-500'}`} />
+                                            </div>
+                                            
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-blue-100 opacity-0 invisible group-hover/books:opacity-100 group-hover/books:visible group-hover/books:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
+                                                <Link href="/books" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors border-b border-blue-50 flex items-center gap-2">
+                                                    <Book className="w-4 h-4" />
+                                                    {locale === 'ar' ? 'جديد' : locale === 'en' ? 'New Books' : 'Livres Neufs'}
+                                                </Link>
+                                                <Link href="/books?usedOnly=true" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-2">
+                                                    <Recycle className="w-4 h-4" />
+                                                    {locale === 'ar' ? 'مستعمل' : locale === 'en' ? 'Used Books' : 'Livres Occasion'}
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+
                                 return (
                                     <Link
                                         key={item.href}
@@ -619,6 +642,32 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                             <Link href="/jeux-societe" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
                                                 <Gamepad2 className="w-4 h-4" />
                                                 {locale === 'ar' ? 'ألعاب الطاولة' : locale === 'en' ? 'Board Games' : 'Jeux de Société'}
+                                            </Link>
+                                        </div>
+                                    </details>
+                                )
+                            }
+
+                            if (item.href === '/books') {
+                                return (
+                                    <details key={item.href} className="group/mobile-books">
+                                        <summary className={`px-5 py-4 rounded-[1.5rem] transition-colors font-bold text-sm min-h-[52px] flex items-center cursor-pointer list-none ${isActive ? 'text-black bg-gray-50 border-2 border-transparent' : 'text-gray-900 hover:bg-gray-50 border-2 border-transparent'}`}>
+                                            <div className="flex justify-between items-center w-full">
+                                                <span className="flex items-center gap-2 uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black">
+                                                    {getIconForUrl(item.href, "w-5 h-5")}
+                                                    <span>{item.label}</span>
+                                                </span>
+                                                <ChevronDown className="w-5 h-5 transition-transform group-open/mobile-books:rotate-180" />
+                                            </div>
+                                        </summary>
+                                        <div className="mt-2 pl-4 pr-2 space-y-2">
+                                            <Link href="/books" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                                                <Book className="w-4 h-4" />
+                                                {locale === 'ar' ? 'جديد' : locale === 'en' ? 'New Books' : 'Livres Neufs'}
+                                            </Link>
+                                            <Link href="/books?usedOnly=true" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 hover:text-green-600 hover:bg-green-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                                                <Recycle className="w-4 h-4" />
+                                                {locale === 'ar' ? 'مستعمل' : locale === 'en' ? 'Used Books' : 'Livres Occasion'}
                                             </Link>
                                         </div>
                                     </details>
