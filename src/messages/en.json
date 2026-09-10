@@ -1,4 +1,24 @@
 {
+  "PacksPage": {
+    "Title": "Packs",
+    "Subtitle": "Our carefully selected collections",
+    "NoCollections": "No collections",
+    "Curating": "We are preparing new packs",
+    "Benefits": {
+      "HighSavings": {
+        "Title": "High Savings",
+        "Desc": "Up to 40% discount compared to single purchases"
+      },
+      "CuratedMix": {
+        "Title": "Expert Selections",
+        "Desc": "Carefully chosen books around the same theme"
+      },
+      "ExpressPack": {
+        "Title": "Ready to Read",
+        "Desc": "The essentials to master a subject in one click"
+      }
+    }
+  },
   "AuthModal": {
     "Title": "Login Required",
     "Description": "Please log in to manage your reading list or perform other actions.",
