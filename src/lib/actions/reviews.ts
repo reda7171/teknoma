@@ -142,6 +142,23 @@ export async function deleteReviews(ids: string[]) {
     }
 }
 
+export async function approveReviews(ids: string[]) {
+    try {
+        await verifyAdmin()
+        if (!ids || ids.length === 0) {
+            return { success: false, error: 'Aucun avis sélectionné' }
+        }
+        await prisma.review.updateMany({
+            where: { id: { in: ids } },
+            data: { isApproved: true }
+        })
+        revalidatePath('/admin/reviews')
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Erreur lors de l\'approbation en masse' }
+    }
+}
+
 /**
  * Récupérer tous les avis avec filtres (admin)
  */

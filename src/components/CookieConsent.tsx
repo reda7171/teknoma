@@ -37,8 +37,8 @@ export default function CookieConsent() {
     if (!isVisible) return null
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] pointer-events-auto bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-8">
+        <div className="fixed bottom-0 left-0 right-0 z-[200] pointer-events-auto bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] pb-safe md:pb-0">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-8">
                 
                 {/* Text & Icon */}
                 <div className="flex items-start lg:items-center gap-4 flex-1 rtl:text-right">

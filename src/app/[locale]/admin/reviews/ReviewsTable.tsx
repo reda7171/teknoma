@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Star, CheckCircle, Trash2, MessageSquare, Pencil } from 'lucide-react'
-import Image from 'next/image'
+import ImageWithFallback from '@/components/ImageWithFallback'
 import { useRouter } from 'next/navigation'
-import { approveReview, deleteReviews, deleteReview, updateReview } from '@/lib/actions/reviews'
+import { approveReview, approveReviews, deleteReviews, deleteReview, updateReview } from '@/lib/actions/reviews'
 
 interface Review {
     id: string
@@ -24,6 +24,7 @@ interface Review {
 export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isApproving, setIsApproving] = useState(false)
     const router = useRouter()
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +61,22 @@ export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
         }
     }
 
+    const handleBulkApprove = async () => {
+        if (selectedIds.size === 0) return
+        if (!confirm(`Êtes-vous sûr de vouloir valider ${selectedIds.size} avis ?`)) return
+
+        setIsApproving(true)
+        const res = await approveReviews(Array.from(selectedIds))
+        setIsApproving(false)
+
+        if (res.success) {
+            setSelectedIds(new Set())
+            router.refresh()
+        } else {
+            alert(res.error)
+        }
+    }
+
     return (
         <div className="space-y-4">
             {selectedIds.size > 0 && (
@@ -67,14 +84,24 @@ export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
                     <span className="text-sm font-bold text-blue-800">
                         {selectedIds.size} avis sélectionné(s)
                     </span>
-                    <button
-                        onClick={handleBulkDelete}
-                        disabled={isDeleting}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-black uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        {isDeleting ? 'Suppression...' : 'Supprimer'}
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleBulkApprove}
+                            disabled={isApproving || isDeleting}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-black uppercase tracking-wider hover:bg-green-700 transition-colors disabled:opacity-50"
+                        >
+                            <CheckCircle className="w-4 h-4" />
+                            {isApproving ? 'Validation...' : 'Valider'}
+                        </button>
+                        <button
+                            onClick={handleBulkDelete}
+                            disabled={isDeleting || isApproving}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-black uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            {isDeleting ? 'Suppression...' : 'Supprimer'}
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -135,12 +162,10 @@ export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-4">
                                                 <div className="relative w-12 h-16 bg-gray-100 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
-                                                    <Image
-                                                        src={review.book.image}
-                                                        alt={review.book.title}
-                                                        fill
-                                                        className="object-cover"
-                                                        unoptimized
+                                                    <ImageWithFallback
+                                                        src={review.book?.image}
+                                                        alt={review.book?.title || 'Livre'}
+                                                        className="object-cover w-full h-full"
                                                     />
                                                 </div>
                                                 <span className="font-bold text-black text-[10px] uppercase tracking-tight line-clamp-2 max-w-[150px] italic leading-relaxed">
@@ -154,12 +179,10 @@ export default function ReviewsTable({ reviews }: { reviews: Review[] }) {
                                             </p>
                                             {review.image && (
                                                 <div className="mt-2 relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 shadow-sm cursor-pointer hover:scale-110 transition-transform">
-                                                    <Image
+                                                    <ImageWithFallback
                                                         src={review.image}
                                                         alt="Avis Image"
-                                                        fill
-                                                        className="object-cover"
-                                                        unoptimized
+                                                        className="object-cover w-full h-full"
                                                     />
                                                 </div>
                                             )}

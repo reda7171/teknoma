@@ -513,7 +513,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 date: scheduleAt.toISOString(),
                 time: timeSlot,
                 content: content,
-                platforms: ['facebook', 'instagram'],
+                platforms: ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'],
                 mediaUrl: book.image,
                 suggestedProductId: book.id,
                 suggestedProductType: book.type

@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const cats = await prisma.book.findMany({ select: { subCategory: true }, distinct: ['subCategory'] }); console.log(cats.map(c => c.subCategory).filter(c => c).join(', ')); } main().finally(() => prisma.$disconnect());

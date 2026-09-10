@@ -50,7 +50,7 @@ export default function WhatsAppOrderButton({ title, price, phone, type = 'book'
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 sm:gap-3 w-full py-4 px-4 sm:py-5 sm:px-8 rounded-full font-black text-base sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.2em] bg-[#25D366] text-white shadow-lg shadow-[#25D366]/25 hover:bg-[#1ebe5d] hover:shadow-[#25D366]/40 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+            className="flex items-center justify-center gap-2 sm:gap-3 w-full py-3 px-3 sm:py-5 sm:px-8 rounded-full font-black text-[11px] sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.2em] bg-[#25D366] text-white shadow-lg shadow-[#25D366]/25 hover:bg-[#1ebe5d] hover:shadow-[#25D366]/40 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
         >
             {/* WhatsApp SVG icon */}
             <svg viewBox="0 0 32 32" className="w-5 h-5 fill-white flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
