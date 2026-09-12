@@ -1,21 +1,21 @@
 {
   "PacksPage": {
-    "Title": "Packs",
-    "Subtitle": "Our carefully selected collections",
-    "NoCollections": "No collections",
-    "Curating": "We are preparing new packs",
+    "Title": "Bundle Deals",
+    "Subtitle": "Save up to 30% by choosing our curated book collections. Hand-picked literature for universal minds.",
+    "NoCollections": "No collections found",
+    "Curating": "New arrivals are being curated.",
     "Benefits": {
       "HighSavings": {
         "Title": "High Savings",
-        "Desc": "Up to 40% discount compared to single purchases"
+        "Desc": "Up to 30% off unit price"
       },
       "CuratedMix": {
-        "Title": "Expert Selections",
-        "Desc": "Carefully chosen books around the same theme"
+        "Title": "Curated Mix",
+        "Desc": "Selected by local experts"
       },
       "ExpressPack": {
-        "Title": "Ready to Read",
-        "Desc": "The essentials to master a subject in one click"
+        "Title": "Express Pack",
+        "Desc": "All volumes in one delivery"
       }
     }
   },
@@ -1256,26 +1256,6 @@
       "Success": "Book added to your wishlist"
     }
   },
-  "PacksPage": {
-    "Title": "Bundle Deals",
-    "Subtitle": "Save up to 30% by choosing our curated book collections. Hand-picked literature for universal minds.",
-    "NoCollections": "No collections found",
-    "Curating": "New arrivals are being curated.",
-    "Benefits": {
-      "HighSavings": {
-        "Title": "High Savings",
-        "Desc": "Up to 30% off unit price"
-      },
-      "CuratedMix": {
-        "Title": "Curated Mix",
-        "Desc": "Selected by local experts"
-      },
-      "ExpressPack": {
-        "Title": "Express Pack",
-        "Desc": "All volumes in one delivery"
-      }
-    }
-  },
   "PackDetail": {
     "BackToBundles": "Back to bundles",
     "VolumeSelection": "{count} Volumes Selection",
@@ -1993,7 +1973,8 @@
       "BOOKMARK": "Bookmarks",
       "LIBRARY": "Bookcases",
       "USB": "USB Flash Drives",
-      "ACCESSORY": "Accessories"
+      "ACCESSORY": "Accessories",
+      "KIDS": "Kids"
     },
     "Specs": {
       "TypeDuration": "Type / Duration",
@@ -2034,5 +2015,41 @@
     "CustomPackTitle": "Create your own pack",
     "CustomPackDesc": "Select 3 or more books and enjoy great discounts.",
     "CreatePack": "Create my pack"
+  },
+  "AccessoryDetail": {
+    "BackToCatalog": "Back to catalog",
+    "FastDelivery": "24/48h Delivery",
+    "CODPayment": "COD Payment",
+    "QualityGuarantee": "Quality Guarantee",
+    "ExcellentRating": "(Excellent rating)",
+    "ProductPresentation": "Product presentation",
+    "SpecsAndDimensions": "Specs & Dimensions",
+    "Availability": "Availability",
+    "InStock": "In stock (Ready to ship)",
+    "OnOrder": "On order",
+    "DeliveryAndService": "Delivery & Warranty Morocco",
+    "CODTitle": "Cash on Delivery:",
+    "CODDesc": "Order securely. Inspect your product on arrival and pay the exact amount in cash.",
+    "SpeedTitle": "Fast processing:",
+    "SpeedDesc": "We ship to all major cities in Morocco in 24-48h. Other regions take up to 72h.",
+    "GuaranteeTitle": "Guarantee:",
+    "GuaranteeDesc": "If the item is defective or doesn't match, Riwaya will replace or refund it.",
+    "YouMightAlsoLike": "You might also like...",
+    "StockLeft": "{stock} left",
+    "OutOfStock": "Out of stock",
+    "Currency": "MAD",
+    "SeeAll": "See all",
+    "Specs": {
+      "Material": "Material",
+      "Dimensions": "Dimensions",
+      "WeightCapacity": "Weight / Capacity",
+      "Warranty": "Warranty",
+      "MaterialPremium": "Premium materials",
+      "BookmarkMaterial": "Carved metal / Leather",
+      "BookmarkDim": "12 x 3 cm",
+      "Standard": "Standard",
+      "USBCapacity": "64 Go",
+      "RiwayaWarranty": "Riwaya quality guarantee"
+    }
   }
 }

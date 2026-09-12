@@ -204,11 +204,33 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                 throw new Error(`Le montant minimum du panier pour passer commande est de ${minOrderAmount} MAD.`)
             }
 
+            // Gestion automatique des emails pour Google Avis
+            let finalEmail = sanitizedData.email;
+            const googleEmailsSetting = await tx.siteSettings.findUnique({
+                where: { key: 'google_reviews_emails' }
+            });
+            if (googleEmailsSetting && googleEmailsSetting.value) {
+                try {
+                    const emailsList = JSON.parse(googleEmailsSetting.value);
+                    const unusedIndex = emailsList.findIndex((e: any) => !e.used);
+                    if (unusedIndex !== -1) {
+                        finalEmail = emailsList[unusedIndex].email;
+                        emailsList[unusedIndex].used = true;
+                        await tx.siteSettings.update({
+                            where: { key: 'google_reviews_emails' },
+                            data: { value: JSON.stringify(emailsList) }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Erreur parsing google_reviews_emails", e);
+                }
+            }
+
             // Créer la commande
             const newOrder = await (tx.order as any).create({
                 data: {
                     fullName: sanitizedData.fullName,
-                    email: sanitizedData.email,
+                    email: finalEmail,
                     phone: sanitizedData.phone,
                     address: sanitizedData.address,
                     city: sanitizedData.city,
@@ -302,7 +324,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
         // Sauvegarder l'email dans un cookie pour le suivi invité
         const cookieStore = await cookies()
-        if (!cookieStore.get('userEmail')) {
+        if (data.email && !cookieStore.get('userEmail')) {
             cookieStore.set('userEmail', data.email, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',

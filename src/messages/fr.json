@@ -1884,7 +1884,8 @@
       "BOOKMARK": "Marque-pages",
       "LIBRARY": "Bibliothèques",
       "USB": "Clés USB",
-      "ACCESSORY": "Accessoires"
+      "ACCESSORY": "Accessoires",
+      "KIDS": "Enfants"
     },
     "Specs": {
       "TypeDuration": "Type / Durée",
@@ -1925,5 +1926,41 @@
     "CustomPackTitle": "Créez votre propre pack",
     "CustomPackDesc": "Sélectionnez 3 livres ou plus et profitez de réductions intéressantes.",
     "CreatePack": "Créer mon pack"
+  },
+  "AccessoryDetail": {
+    "BackToCatalog": "Retour au catalogue",
+    "FastDelivery": "Livraison 24/48h",
+    "CODPayment": "Paiement COD",
+    "QualityGuarantee": "Garantie Qualité",
+    "ExcellentRating": "(Excellente appréciation)",
+    "ProductPresentation": "Présentation du produit",
+    "SpecsAndDimensions": "Fiche technique & Dimensions",
+    "Availability": "Disponibilité",
+    "InStock": "En stock (Prêt à l'envoi)",
+    "OnOrder": "Sur commande",
+    "DeliveryAndService": "Livraison & Garantie Maroc",
+    "CODTitle": "Paiement à la Livraison (COD) :",
+    "CODDesc": "Commandez en toute sécurité. Vous inspectez votre produit à l'arrivée et réglez le montant exact en espèces auprès de notre livreur partenaire.",
+    "SpeedTitle": "Délais rapides :",
+    "SpeedDesc": "Nous expédions dans toutes les grandes villes du Maroc en 24h à 48h. Pour les autres régions, comptez 72h maximum.",
+    "GuaranteeTitle": "Garantie :",
+    "GuaranteeDesc": "Si l'article ne correspond pas à la description ou présente un défaut, Riwaya s'engage à vous le remplacer ou vous rembourser.",
+    "YouMightAlsoLike": "Vous aimerez aussi...",
+    "StockLeft": "Reste {stock}",
+    "OutOfStock": "Rupture de stock",
+    "Currency": "DH",
+    "SeeAll": "Tout voir",
+    "Specs": {
+      "Material": "Matériau / Matière",
+      "Dimensions": "Dimensions",
+      "WeightCapacity": "Poids / Capacité",
+      "Warranty": "Garantie",
+      "MaterialPremium": "Matériaux premium",
+      "BookmarkMaterial": "Métal ciselé / Cuir",
+      "BookmarkDim": "12 x 3 cm",
+      "Standard": "Standard",
+      "USBCapacity": "64 Go",
+      "RiwayaWarranty": "Garantie qualité Riwaya"
+    }
   }
 }

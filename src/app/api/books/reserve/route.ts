@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         };
 
         // Send Telegram notification
-        const message = `📚 <b>Nouvelle Session</b>\n\nSession: ${reservation.book.title}\nWhatsApp: ${whatsapp}\n\nVous pouvez le contacter directement ou gérer les réservations depuis l'admin.`;
+        const message = `📚 <b>Nouvelle Réservation</b>\n\nLivre: ${reservation.book.title}\nWhatsApp: ${whatsapp}\n\nVous pouvez le contacter directement ou gérer les réservations depuis l'admin.`;
         await sendTelegramMessage(message, undefined, undefined, replyMarkup).catch(console.error);
 
         return NextResponse.json({ success: true, reservation });
