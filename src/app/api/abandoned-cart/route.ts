@@ -48,8 +48,18 @@ export async function POST(req: Request) {
                             `💳 *Paiement:* ${paymentInfo}\n` +
                             `💰 *Total:* ${total} DH\n` +
                             `\n_Contact ou mode de paiement mis à jour en temps réel._`;
+                        let replyMarkup = undefined;
+                        if (safePhone) {
+                            let cleanPhone = safePhone.replace(/[^0-9]/g, '');
+                            if (cleanPhone.startsWith('0')) cleanPhone = '212' + cleanPhone.substring(1);
+                            else if (!cleanPhone.startsWith('212') && cleanPhone.length === 9) cleanPhone = '212' + cleanPhone;
+                            const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}`;
+                            replyMarkup = {
+                                inline_keyboard: [[{ text: '💬 Contacter sur WhatsApp', url: whatsappUrl }]]
+                            };
+                        }
                         
-                        await sendTelegramMessage(message)
+                        await sendTelegramMessage(message, undefined, undefined, replyMarkup)
                     } catch (telegramError) {
                         console.error('Erreur lors de l\'envoi de la notification Telegram:', telegramError)
                     }
@@ -86,8 +96,18 @@ export async function POST(req: Request) {
                 `💰 *Total:* ${total} DH\n` +
                 `📦 *Articles:* ${items.length}\n` +
                 `\n_Saisi en temps réel, commande non finalisée._`;
+            let replyMarkup = undefined;
+            if (safePhone) {
+                let cleanPhone = safePhone.replace(/[^0-9]/g, '');
+                if (cleanPhone.startsWith('0')) cleanPhone = '212' + cleanPhone.substring(1);
+                else if (!cleanPhone.startsWith('212') && cleanPhone.length === 9) cleanPhone = '212' + cleanPhone;
+                const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}`;
+                replyMarkup = {
+                    inline_keyboard: [[{ text: '💬 Contacter sur WhatsApp', url: whatsappUrl }]]
+                };
+            }
             
-            await sendTelegramMessage(message)
+            await sendTelegramMessage(message, undefined, undefined, replyMarkup)
         } catch (telegramError) {
             console.error('Erreur lors de l\'envoi de la notification Telegram:', telegramError)
         }

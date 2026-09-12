@@ -26,12 +26,14 @@ export async function GET(req: Request) {
         const now = new Date()
         const lastCheckDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Look back 24 hours to catch delayed orders
         
-        // Format pour l'API Jumia Vendor (attendu : YYYY-MM-DD HH:MM:SS)
-        const formatJumiaDate = (d: Date) => d.toISOString().replace('T', ' ').split('.')[0]
+        // Format pour l'API Jumia Vendor (attendu : YYYY-MM-DD HH:MM:SS ou ISO 8601)
+        // L'utilisation d'une date sans fuseau horaire explicite provoque un décalage de 1h avec Jumia (GMT+1).
+        // On convertit en heure locale Maroc ou on passe directement l'ISO avec +0000.
+        const formatJumiaDate = (d: Date) => d.toISOString().split('.')[0] + '+0000'
         const createdAfter = formatJumiaDate(lastCheckDate)
-        const createdBefore = formatJumiaDate(now)
 
-        const response = await jumia.getOrders(100, undefined, undefined, createdAfter, createdBefore)
+        // On supprime createdBefore pour toujours inclure les commandes jusqu'à la seconde présente
+        const response = await jumia.getOrders(100, undefined, undefined, createdAfter, undefined)
         const orders = response?.orders || response?.data?.orders || []
 
         // Filtrer les commandes qui n'ont pas encore été notifiées
@@ -66,12 +68,20 @@ export async function GET(req: Request) {
                     const firstItem = allItems[0]
                     imageUrl = firstItem.product?.imageUrl || firstItem.product?.productMainImage || firstItem.imageUrl || firstItem.productMainImage || firstItem.productImage || undefined
                     
-                    itemsText = "\n\n📦 <b>Articles :</b>\n"
+                    itemsText = `\n\n📦 <b>Articles de la commande (${allItems.length})</b>\n\n`
                     for (const item of allItems) {
                         const productName = item.product?.name || item.name || item.productName || 'Article inconnu'
                         const quantity = item.quantity || 1
                         const price = item.price?.value || item.price || item.unitPrice || '0'
-                        itemsText += `- ${quantity}x ${productName} (<b>${price} درهم</b>)\n`
+                        const itemSellerSku = item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku || 'N/A'
+                        const status = item.status || order.status || 'N/A'
+                        const tracking = item.trackingCode || item.trackingNumber || 'En attente'
+                        
+                        itemsText += `🔸 <b>Produit:</b> ${quantity}x ${productName}\n`
+                        itemsText += `🏷 <b>SKU Vendeur:</b> ${itemSellerSku}\n`
+                        itemsText += `📝 <b>Statut:</b> ${status}\n`
+                        itemsText += `💰 <b>Prix:</b> ${price} درهم\n`
+                        itemsText += `🚚 <b>Tracking:</b> ${tracking}\n\n`
 
                         const sellerSku = item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku
                         if (sellerSku) {
@@ -80,10 +90,18 @@ export async function GET(req: Request) {
                                     where: { sellerSku: sellerSku },
                                     data: { stock: { decrement: quantity } }
                                 })
-                                await prisma.pack.updateMany({
+                                const pack = await prisma.pack.findUnique({
                                     where: { sellerSku: sellerSku },
-                                    data: { stock: { decrement: quantity } }
+                                    include: { books: true }
                                 })
+                                if (pack) {
+                                    for (const packBook of pack.books) {
+                                        await prisma.book.update({
+                                            where: { id: packBook.bookId },
+                                            data: { stock: { decrement: quantity } }
+                                        })
+                                    }
+                                }
                                 await prisma.extraProduct.updateMany({
                                     where: { sellerSku: sellerSku },
                                     data: { stock: { decrement: quantity } }

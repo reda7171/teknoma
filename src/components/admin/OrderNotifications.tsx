@@ -1,19 +1,21 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Bell, ShoppingCart, X, ExternalLink, Star, RotateCcw } from 'lucide-react'
+import { Bell, ShoppingCart, X, ExternalLink, Star, RotateCcw, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
 interface OrderNotif {
     id: string
-    type: 'order' | 'cart' | 'review' | 'return'
+    type: 'order' | 'cart' | 'review' | 'return' | 'reservation'
     fullName: string
     total?: number
     city?: string
     phone?: string
     status?: string
     rating?: number
+    bookTitle?: string
+    whatsapp?: string
     createdAt: string
 }
 
@@ -58,6 +60,10 @@ export default function OrderNotifications() {
             if (order.type === 'return') {
                 title = '🔄 Commande Retournée !'
                 body = `La commande de ${order.fullName} a été retournée.`
+            }
+            if (order.type === 'reservation') {
+                title = '📖 Nouvelle Réservation Livre !'
+                body = `${order.whatsapp || 'Anonyme'} — ${order.bookTitle || 'Livre'}` 
             }
             
             if (order.type === 'order' || order.type === 'cart') {
@@ -143,6 +149,23 @@ export default function OrderNotifications() {
                             return [...fresh, ...prev].slice(0, 20)
                         })
                     }
+                    if (data.type === 'new_reservations' && data.reservations?.length > 0) {
+                        const newReservations = data.reservations.map((r: any) => ({
+                            ...r,
+                            type: 'reservation',
+                            fullName: r.whatsapp || 'Anonyme',
+                            bookTitle: r.book?.title || 'Livre'
+                        }))
+                        setNotifications(prev => {
+                            const existingIds = new Set(prev.map(n => n.id))
+                            const fresh = newReservations.filter((o: OrderNotif) => !existingIds.has(o.id))
+                            if (fresh.length === 0) return prev
+                            fresh.forEach((o: OrderNotif) => sendBrowserNotif(o))
+                            playSound()
+                            setUnread(u => u + fresh.length)
+                            return [...fresh, ...prev].slice(0, 20)
+                        })
+                    }
                 } catch {}
             }
         }
@@ -181,9 +204,14 @@ export default function OrderNotifications() {
                 <span className={`absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
             </button>
 
-            {/* Dropdown */}
+            {/* Dropdown / Modal */}
             {open && (
-                <div className="absolute right-0 top-12 w-[85vw] max-w-[320px] sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                <>
+                    {/* Backdrop */}
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]" onClick={() => setOpen(false)} />
+                    
+                    {/* Modal Content */}
+                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden">
                     <div className="px-4 py-3 bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                             <Bell className="w-4 h-4 text-orange-400" />
@@ -211,6 +239,13 @@ export default function OrderNotifications() {
                             >
                                 Commandes <ExternalLink className="w-3 h-3" />
                             </Link>
+                            <Link
+                                href={`/${lang}/admin/reservations`}
+                                className="text-[10px] px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 font-bold transition-colors flex items-center gap-1"
+                                onClick={() => setOpen(false)}
+                            >
+                                Réservations <ExternalLink className="w-3 h-3" />
+                            </Link>
                         </div>
                     </div>
 
@@ -227,24 +262,29 @@ export default function OrderNotifications() {
                                         order.type === 'cart' ? 'bg-red-100' :
                                         order.type === 'review' ? 'bg-yellow-100' :
                                         order.type === 'return' ? 'bg-purple-100' :
+                                        order.type === 'reservation' ? 'bg-emerald-100' :
                                         'bg-orange-100'
                                     }`}>
                                         {order.type === 'cart' && <ShoppingCart className="w-4 h-4 text-red-600" />}
                                         {order.type === 'review' && <Star className="w-4 h-4 text-yellow-600" />}
                                         {order.type === 'return' && <RotateCcw className="w-4 h-4 text-purple-600" />}
+                                        {order.type === 'reservation' && <BookOpen className="w-4 h-4 text-emerald-600" />}
                                         {order.type === 'order' && <ShoppingCart className="w-4 h-4 text-orange-600" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <p className="text-sm font-black text-gray-900 truncate">{order.fullName || 'Anonyme'}</p>
+                                            <p className="text-sm font-black text-gray-900 truncate">{order.type === 'reservation' ? (order.whatsapp || 'Anonyme') : (order.fullName || 'Anonyme')}</p>
                                             {order.type === 'cart' && <span className="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-black uppercase">Abandon</span>}
                                             {order.type === 'review' && <span className="text-[9px] bg-yellow-100 text-yellow-600 px-1.5 py-0.5 rounded-md font-black uppercase">Avis</span>}
                                             {order.type === 'return' && <span className="text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-md font-black uppercase">Retour</span>}
+                                            {order.type === 'reservation' && <span className="text-[9px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-md font-black uppercase">Réservation</span>}
                                         </div>
                                         {order.type === 'review' ? (
                                             <p className="text-xs text-gray-500 font-medium truncate">{order.rating} ⭐ — En attente de modération</p>
                                         ) : order.type === 'return' ? (
                                             <p className="text-xs text-gray-500 font-medium truncate">{order.city || '-'} — Retournée</p>
+                                        ) : order.type === 'reservation' ? (
+                                            <p className="text-xs text-gray-500 font-medium truncate">📖 {order.bookTitle || 'Livre'}</p>
                                         ) : (
                                             <p className="text-xs text-gray-500 font-medium truncate">{order.city || order.phone || '-'} — <span className={`${order.type === 'cart' ? 'text-red-600' : 'text-orange-600'} font-black`}>{order.total} درهم</span></p>
                                         )}
@@ -262,7 +302,8 @@ export default function OrderNotifications() {
                             ))
                         )}
                     </div>
-                </div>
+                    </div>
+                </>
             )}
         </div>
     )

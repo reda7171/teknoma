@@ -1,15 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+
 import { 
     Edit, 
     Trash2, 
     Eye, 
-    MoreHorizontal, 
     Search,
-    Filter,
     Package,
-    AlertCircle
+    Star
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -24,6 +23,7 @@ interface Accessory {
     image: string | null
     category: string
     active: boolean
+    isFeatured: boolean
     createdAt: string
 }
 
@@ -57,6 +57,21 @@ export default function AccessoriesTable({
         }
     }
 
+    async function handleToggleFeatured(id: string, current: boolean) {
+        try {
+            const res = await fetch(`/api/admin/accessories/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isFeatured: !current })
+            })
+            if (res.ok) {
+                setData(prev => prev.map(item => item.id === id ? { ...item, isFeatured: !current } : item))
+            }
+        } catch (err) {
+            alert('Erreur technique')
+        }
+    }
+
     return (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             {/* Header / Actions */}
@@ -83,6 +98,7 @@ export default function AccessoriesTable({
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Prix</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Stock</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Statut</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-center">Vedette</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -94,6 +110,15 @@ export default function AccessoriesTable({
                                         <div className="w-12 h-12 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden border border-slate-200 relative">
                                             {(() => {
                                                 let img = item.image;
+                                                const anyItem = item as any;
+                                                if (!img && anyItem.images) {
+                                                    try {
+                                                        const parsed = typeof anyItem.images === 'string' ? JSON.parse(anyItem.images) : anyItem.images;
+                                                        if (Array.isArray(parsed) && parsed.length > 0) {
+                                                            img = parsed[0];
+                                                        }
+                                                    } catch (e) {}
+                                                }
                                                 if (img) {
                                                     try {
                                                         const parsed = JSON.parse(img);
@@ -146,6 +171,19 @@ export default function AccessoriesTable({
                                     }`}>
                                         {item.active ? 'Actif' : 'Inactif'}
                                     </span>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <button
+                                        onClick={() => handleToggleFeatured(item.id, item.isFeatured)}
+                                        title={item.isFeatured ? 'Retirer de la vedette' : 'Mettre en vedette'}
+                                        className={`p-2 rounded-xl transition-all ${
+                                            item.isFeatured
+                                                ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
+                                                : 'text-slate-300 hover:text-amber-400 hover:bg-amber-50'
+                                        }`}
+                                    >
+                                        <Star className={`w-5 h-5 ${item.isFeatured ? 'fill-amber-500' : ''}`} />
+                                    </button>
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex items-center justify-end gap-2">

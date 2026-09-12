@@ -24,6 +24,7 @@ interface BookCardProps {
     category?: string | null
     language?: string | null
     stock: number
+    condition?: string | null
     variant?: 'default' | 'compact' | 'featured'
     priority?: boolean
 }
@@ -39,6 +40,7 @@ export default function BookCard({
     category,
     language,
     stock,
+    condition,
     variant = 'default',
     priority = false,
 }: BookCardProps) {
@@ -46,6 +48,7 @@ export default function BookCard({
     const locale = useLocale();
     const isCompact = variant === 'compact'
     const isFeatured = variant === 'featured'
+    const isUsed = condition === 'USED' || condition === 'GOOD'
     const addItem = useCartStore((state) => state.addItem)
     const sessionId = useCartStore((state) => state.sessionId)
     const setSessionId = useCartStore((state) => state.setSessionId)
@@ -216,6 +219,15 @@ export default function BookCard({
                 <div className="absolute top-6 left-6">
                     <div className="bg-pixio-yellow text-black px-5 py-2 rounded-full text-[9px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal border border-yellow-300 shadow-xl">
                         ✨ {t('BestSeller')}
+                    </div>
+                </div>
+            )}
+
+            {/* Ribbon Occasion - livres d'occasion ou bon état */}
+            {isUsed && stock > 0 && (
+                <div className="absolute top-0 right-0 w-32 h-32 overflow-hidden z-20 pointer-events-none">
+                    <div className="absolute top-8 -right-9 w-44 py-2 bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700 text-white text-[9px] font-black uppercase tracking-[0.2em] text-center rotate-45 shadow-[0_6px_15px_rgba(0,0,0,0.4)] border-y border-white/20">
+                        {locale === 'ar' ? 'مستعمل' : 'Occasion'}
                     </div>
                 </div>
             )}

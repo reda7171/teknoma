@@ -978,10 +978,12 @@ model ExtraProduct {
   jumiaPriceMarkup    Float?      @default(0)
   jumiaProductSid     String?     @db.VarChar(100)
   jumiaStock          Int?
+  isFeatured          Boolean     @default(false)
   orderItems          OrderItem[]
 
   @@index([category])
   @@index([active])
+  @@index([isFeatured])
   @@map("extra_products")
 }
 

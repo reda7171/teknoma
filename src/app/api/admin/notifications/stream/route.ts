@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     let lastCartId: string | null = null
     let lastReviewId: string | null = null
     let lastReturnDate: Date = new Date()
+    let lastReservationId: string | null = null
 
     try {
         const latestOrder = await prisma.order.findFirst({
@@ -30,6 +31,12 @@ export async function GET(req: NextRequest) {
             select: { id: true }
         })
         lastReviewId = latestReview?.id ?? null
+
+        const latestReservation = await prisma.bookReservation.findFirst({
+            orderBy: { createdAt: 'desc' },
+            select: { id: true }
+        })
+        lastReservationId = latestReservation?.id ?? null
     } catch {}
 
     const stream = new ReadableStream({
@@ -112,6 +119,31 @@ export async function GET(req: NextRequest) {
                     if (newReturns.length > 0) {
                         lastReturnDate = newReturns[0].updatedAt
                         const payload = JSON.stringify({ type: 'returned_orders', orders: newReturns })
+                        controller.enqueue(encoder.encode(`data: ${payload}\n\n`))
+                        hasNewData = true
+                    }
+
+                    // Chercher les nouvelles réservations de livres
+                    const whereReservation = lastReservationId
+                        ? { createdAt: { gt: (await prisma.bookReservation.findUnique({ where: { id: lastReservationId }, select: { createdAt: true } }))?.createdAt } }
+                        : {}
+
+                    const newReservations = await prisma.bookReservation.findMany({
+                        where: whereReservation,
+                        orderBy: { createdAt: 'desc' },
+                        take: 5,
+                        select: { 
+                            id: true, 
+                            whatsapp: true, 
+                            status: true, 
+                            createdAt: true,
+                            book: { select: { title: true } }
+                        }
+                    })
+
+                    if (newReservations.length > 0) {
+                        lastReservationId = newReservations[0].id
+                        const payload = JSON.stringify({ type: 'new_reservations', reservations: newReservations })
                         controller.enqueue(encoder.encode(`data: ${payload}\n\n`))
                         hasNewData = true
                     }
