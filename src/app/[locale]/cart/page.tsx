@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default async function CartPage() {
     const minAmount = await getSetting('min_order_amount', '0')
+    const feature3For4 = await getSetting('feature_3_for_4', 'false')
     const recommendedBooks = await getPopularBooks(4)
 
     return (
@@ -24,6 +25,7 @@ export default async function CartPage() {
             <CartClient 
                 minOrderAmount={Number(minAmount)} 
                 recommendedBooks={JSON.parse(JSON.stringify(recommendedBooks))} 
+                is3For4Active={feature3For4 === 'true'}
             />
 
             <Footer />

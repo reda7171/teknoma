@@ -56,6 +56,17 @@ export async function PATCH(
             }
         })
 
+        try {
+            const { revalidatePath } = require('next/cache')
+            revalidatePath('/[locale]/admin/accessories', 'page')
+            revalidatePath('/[locale]/admin/accessories/library', 'page')
+            revalidatePath('/[locale]/admin/accessories/usb', 'page')
+            revalidatePath('/[locale]/admin/accessories/bookmarks', 'page')
+            revalidatePath('/[locale]/admin/accessories/kids', 'page')
+        } catch (e) {
+            console.error(e)
+        }
+
         return NextResponse.json(accessory)
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })

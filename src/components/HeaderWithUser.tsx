@@ -30,6 +30,7 @@ export default async function HeaderWithUser() {
         digital: featureSettings['feature_digital_books'] !== 'false',
         packs: featureSettings['feature_packs'] !== 'false',
         deposerListe: featureSettings['feature_deposer_liste'] !== 'false',
+        threeForFour: featureSettings['feature_3_for_4'] === 'true',
     }
 
     return (

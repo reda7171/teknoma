@@ -39,30 +39,30 @@ export default async function OrderSuccessPage({
             />
             <Header />
 
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">
-                <div className="bg-white rounded-[3rem] p-12 md:p-20 shadow-2xl shadow-black/5 text-center relative overflow-hidden">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 pb-24 md:pb-32">
+                <div className="bg-white rounded-3xl md:rounded-[3rem] p-6 sm:p-12 md:p-20 shadow-2xl shadow-black/5 text-center relative overflow-hidden">
                     {/* Background Decorative Element */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-pixio-yellow/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
                     <div className="relative z-10 text-center flex flex-col items-center">
-                        <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mb-10 shadow-2xl">
-                            <CheckCircle className="w-10 h-10 text-white" />
+                        <div className="w-16 h-16 md:w-24 md:h-24 bg-black rounded-full flex items-center justify-center mb-6 md:mb-10 shadow-2xl">
+                            <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-white" />
                         </div>
 
-                        <h1 className="text-5xl font-black text-black mb-4 tracking-tighter">{t('OrderConfirmed')}<span className="text-gray-200">.</span></h1>
-                        <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-12">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-black mb-3 md:mb-4 tracking-tighter">{t('OrderConfirmed')}<span className="text-gray-200">.</span></h1>
+                        <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-xs sm:text-sm mb-8 md:mb-12">
                             {t('ThankYou', { name: order.fullName.split(' ')[0] })}
                         </p>
 
-                        <div className="w-full bg-pixio-cream/50 rounded-[2rem] p-8 md:p-10 mb-12 text-left border border-gray-100 flex flex-col gap-10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="w-full bg-pixio-cream/50 rounded-2xl md:rounded-[2rem] p-5 sm:p-8 md:p-10 mb-8 md:mb-12 text-left border border-gray-100 flex flex-col gap-8 md:gap-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-10">
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('OrderReference')}</p>
-                                    <p className="text-xl font-black text-black tracking-tight">#{order.id.slice(0, 8).toUpperCase()}</p>
+                                    <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400 mb-2">{t('OrderReference')}</p>
+                                    <p className="text-xl sm:text-2xl font-black text-black tracking-tight">#{order.id.slice(0, 8).toUpperCase()}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('OrderDate')}</p>
-                                    <p className="text-lg font-black text-black tracking-tight">
+                                    <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400 mb-2">{t('OrderDate')}</p>
+                                    <p className="text-lg sm:text-xl font-black text-black tracking-tight">
                                         {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                                             month: 'long',
                                             day: 'numeric',
@@ -73,7 +73,7 @@ export default async function OrderSuccessPage({
                             </div>
 
                             <div className="pt-8 border-t border-gray-100">
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black mb-6">Récapitulatif de la commande</h3>
+                                <h3 className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-black mb-6">Récapitulatif de la commande</h3>
                                 <div className="space-y-4 mb-8">
                                     {order.items.map((item: any) => (
                                         <div key={item.id} className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
@@ -92,46 +92,46 @@ export default async function OrderSuccessPage({
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.book?.title || item.pack?.name || item.digitalProduct?.title}</p>
-                                                    <p className="text-xs font-bold text-gray-400">Quantité : {item.quantity}</p>
+                                                    <p className="text-base font-bold text-gray-900 line-clamp-1">{item.book?.title || item.pack?.name || item.digitalProduct?.title}</p>
+                                                    <p className="text-sm font-bold text-gray-400">Quantité : {item.quantity}</p>
                                                 </div>
                                             </div>
-                                            <p className="text-sm font-black text-black whitespace-nowrap ml-4">{item.price * item.quantity} درهم</p>
+                                            <p className="text-base font-black text-black whitespace-nowrap ml-4">{item.price * item.quantity} درهم</p>
                                         </div>
                                     ))}
                                 </div>
                                 
                                 <div className="flex justify-between items-center mb-2">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sous-total</p>
-                                    <p className="text-sm font-bold text-black">{order.subtotal} درهم</p>
+                                    <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400">Sous-total</p>
+                                    <p className="text-base font-bold text-black">{order.subtotal} درهم</p>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Livraison</p>
-                                    <p className="text-sm font-bold text-black">{order.shippingFees === 0 ? 'Gratuite' : `${order.shippingFees} درهم`}</p>
+                                    <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400">Livraison</p>
+                                    <p className="text-base font-bold text-black">{order.shippingFees === 0 ? 'Gratuite' : `${order.shippingFees} درهم`}</p>
                                 </div>
                                 {order.discount > 0 && (
                                     <div className="flex justify-between items-center mb-4">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-green-500">Réduction</p>
-                                        <p className="text-sm font-bold text-green-500">-{order.discount} درهم</p>
+                                        <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-green-500">Réduction</p>
+                                        <p className="text-base font-bold text-green-500">-{order.discount} درهم</p>
                                     </div>
                                 )}
                                 
                                 <div className="flex justify-between items-end pt-4 border-t border-gray-100 border-dashed">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t('TotalPaid')}</p>
-                                    <p className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{order.total} <span className="text-[10px] uppercase font-black text-gray-400 ml-1">درهم</span></p>
+                                    <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400 mb-1">{t('TotalPaid')}</p>
+                                    <p className="text-4xl sm:text-5xl font-black text-black tracking-tighter">{order.total} <span className="text-xs uppercase font-black text-gray-400 ml-1">درهم</span></p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black">{t('NextSteps')}</h3>
+                                <h3 className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-black">{t('NextSteps')}</h3>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-2 h-2 bg-black rounded-full"></div>
-                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest leading-relaxed">{t('AgentContact')}</p>
+                                        <p className="text-sm sm:text-base font-bold text-gray-500 uppercase tracking-widest leading-relaxed">{t('AgentContact')}</p>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="w-2 h-2 bg-black rounded-full"></div>
-                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest leading-relaxed">{t('PrepareAmount')}</p>
+                                        <p className="text-sm sm:text-base font-bold text-gray-500 uppercase tracking-widest leading-relaxed">{t('PrepareAmount')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -139,7 +139,7 @@ export default async function OrderSuccessPage({
 
                         <Link
                             href="/"
-                            className="inline-flex items-center justify-center gap-4 px-12 py-6 bg-black text-white font-black text-xs uppercase tracking-[0.3em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20 group"
+                            className="inline-flex items-center justify-center gap-3 md:gap-4 px-8 py-4 md:px-12 md:py-6 bg-black text-white font-black text-xs sm:text-sm uppercase tracking-[0.3em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20 group"
                         >
                             <span>{t('BackHome')}</span>
                             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

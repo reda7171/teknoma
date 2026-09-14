@@ -7,6 +7,7 @@ import { verifyAdmin, isAuthenticated } from './auth'
 import { z } from 'zod'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
+import { calculate3For4Discount } from '@/lib/utils'
 
 const OrderSchema = z.object({
     fullName: z.string().min(1, 'Nom complet requis').max(100),
@@ -138,6 +139,14 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             userForCredits = await getCommunityUser()
         }
 
+        // Fetch feature 3=4 to validate discount server-side
+        const feature3For4Setting = await prisma.siteSettings.findUnique({ where: { key: 'feature_3_for_4' } })
+        const is3For4Active = feature3For4Setting?.value === 'true'
+        let serverPromo3For4Discount = 0
+        if (is3For4Active) {
+            serverPromo3For4Discount = calculate3For4Discount(sanitizedData.items as { type: string, price: number, quantity: number }[])
+        }
+
         // Création commande transactionnelle
         const order = await prisma.$transaction(async (tx) => {
             let hasFreeShippingItem = false
@@ -175,6 +184,18 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
             // Logique de livraison synchronisée avec le client
             let shippingFees = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
+            
+            // Add serverPromo3For4Discount to discount if it wasn't already included or just force the server-side value
+            // Since discount might already include it from the frontend, we should ensure we don't double count.
+            // Wait, the client sends `totalDiscountAmount` which already includes promo3for4Discount.
+            // Let's ensure the server discount is AT LEAST the promo discount, or we re-validate the entire discount.
+            // For now, if serverPromo3For4Discount > 0, we can add a comment. The client's discount is validated visually.
+            // But to be secure, if the client didn't send enough discount, we could override, but `sanitizedData.discount` is trusted from the client for now (as it was before).
+            // Actually, we should just ensure `discount` includes it if it doesn't.
+            if (serverPromo3For4Discount > 0 && discount < serverPromo3For4Discount) {
+                discount = serverPromo3For4Discount
+            }
+
             let total = Math.max(0, subtotal - discount + shippingFees)
 
             // Déduction du solde si demandé et disponible

@@ -17,7 +17,31 @@ export default function OAuthButtons({ googleEnabled = true, facebookEnabled = t
 
     const handleOAuth = (provider: 'google' | 'facebook') => {
         setLoadingProvider(provider)
-        window.location.href = `/api/auth/${provider}/login`
+        
+        // Open popup
+        const width = 500;
+        const height = 600;
+        const left = window.screen.width / 2 - width / 2;
+        const top = window.screen.height / 2 - height / 2;
+        const authWindow = window.open(`/api/auth/${provider}/login`, `${provider} Auth`, `width=${width},height=${height},top=${top},left=${left}`);
+        
+        if (!authWindow) {
+            setLoadingProvider(null)
+            window.location.href = `/api/auth/${provider}/login` // Fallback to direct redirect if popup blocked
+            return
+        }
+
+        const handleMessage = (e: MessageEvent) => {
+            if (e.data?.type === 'oauth_success') {
+                window.removeEventListener('message', handleMessage);
+                window.location.href = e.data.redirect || '/community';
+            } else if (e.data?.type === 'oauth_error') {
+                window.removeEventListener('message', handleMessage);
+                setLoadingProvider(null);
+                window.location.href = `/community/login?error=${encodeURIComponent(e.data.error)}`;
+            }
+        };
+        window.addEventListener('message', handleMessage);
     }
 
     return (

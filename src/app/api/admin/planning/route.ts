@@ -59,6 +59,10 @@ export async function POST(req: NextRequest) {
         const tiktokCreatorId = await getSetting('tiktok_creator_id')
         const tiktokAppId = await getSetting('tiktok_app_id')
         const tiktokClientSecret = await getSetting('tiktok_client_secret')
+        const threadsAccessToken = await getSetting('threads_access_token')
+        const threadsAccountId = await getSetting('threads_account_id')
+        const pinterestAccessToken = await getSetting('pinterest_access_token')
+        const pinterestBoardId = await getSetting('pinterest_board_id')
 
         // URL publique du site (jamais localhost)
         const rawBase = process.env.NEXT_PUBLIC_APP_URL || ''
@@ -87,6 +91,10 @@ export async function POST(req: NextRequest) {
                 tiktok_creator_id: tiktokCreatorId,
                 tiktok_app_id: tiktokAppId,
                 tiktok_client_secret: tiktokClientSecret,
+                threads_access_token: threadsAccessToken,
+                threads_account_id: threadsAccountId,
+                pinterest_access_token: pinterestAccessToken,
+                pinterest_board_id: pinterestBoardId,
             })
         }
 

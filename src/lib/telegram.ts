@@ -74,20 +74,20 @@ export async function sendOrderNotification(order: {
     const location = await getLocationFromIp(ip)
     const shortId = order.id.slice(0, 8).toUpperCase()
     const itemsList = order.items
-        ?.map(i => `  • ${i.book?.title || i.pack?.name || 'Article'} x${i.quantity}`)
+        ?.map(i => `  • ${escapeHtml(i.book?.title || i.pack?.name || 'Article')} x${i.quantity}`)
         .join('\n') || ''
 
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_order' } })
     let text = templateSetting?.value || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`
 
-    text = text.replace(/\{\{shortId\}\}/g, shortId)
-               .replace(/\{\{fullName\}\}/g, order.fullName)
-               .replace(/\{\{source\}\}/g, order.source || 'Boutique')
-               .replace(/\{\{phone\}\}/g, order.phone)
-               .replace(/\{\{city\}\}/g, order.city)
-               .replace(/\{\{location\}\}/g, location)
+    text = text.replace(/\{\{shortId\}\}/g, escapeHtml(shortId))
+               .replace(/\{\{fullName\}\}/g, escapeHtml(order.fullName))
+               .replace(/\{\{source\}\}/g, escapeHtml(order.source || 'Boutique'))
+               .replace(/\{\{phone\}\}/g, escapeHtml(order.phone))
+               .replace(/\{\{city\}\}/g, escapeHtml(order.city))
+               .replace(/\{\{location\}\}/g, escapeHtml(location))
                .replace(/\{\{total\}\}/g, order.total.toFixed(2))
-               .replace(/\{\{comment\}\}/g, order.comment ? `📝 <b>Note:</b> ${order.comment}` : '')
+               .replace(/\{\{comment\}\}/g, order.comment ? `📝 <b>Note:</b> ${escapeHtml(order.comment)}` : '')
                .replace(/\{\{itemsList\}\}/g, itemsList ? `📦 <b>Articles:</b>\n${itemsList}` : '')
                .replace(/\{\{ip\}\}/g, ip)
                .replace(/\{\{orderUrl\}\}/g, `${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}`)

@@ -7,6 +7,7 @@ import { getSetting } from '@/lib/actions/site-settings'
 export default async function CheckoutPage() {
     const user = await getCommunityUser()
     const minAmount = await getSetting('min_order_amount', '0')
+    const feature3For4 = await getSetting('feature_3_for_4', 'false')
     
     const stripeEnabled = await getSetting('payment_stripe_enabled') === 'true'
     const paypalEnabled = await getSetting('payment_paypal_enabled') === 'true'
@@ -32,6 +33,7 @@ export default async function CheckoutPage() {
                 user={userProps} 
                 minOrderAmount={Number(minAmount)} 
                 paymentSettings={{ stripeEnabled, codEnabled, paypalEnabled, cmiEnabled, bankTransferEnabled, bankTransferAccounts }}
+                is3For4Active={feature3For4 === 'true'}
             />
             <Footer />
         </div>

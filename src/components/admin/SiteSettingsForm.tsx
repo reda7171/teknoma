@@ -166,6 +166,36 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             )}
                         </div>
                     </div>
+
+                    {/* Developer Info */}
+                    <div className="pt-6 border-t border-gray-100 mt-2">
+                        <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            Crédits / Développeur (Footer)
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1">Nom du développeur</label>
+                                <input
+                                    type="text"
+                                    value={settings.developer_name || ''}
+                                    onChange={(e) => handleChange('developer_name', e.target.value)}
+                                    placeholder="itsmereda1"
+                                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-1">Lien du profil</label>
+                                <input
+                                    type="url"
+                                    value={settings.developer_link || ''}
+                                    onChange={(e) => handleChange('developer_link', e.target.value)}
+                                    placeholder="https://instagram.com/itsmereda1"
+                                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

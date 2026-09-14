@@ -5,6 +5,7 @@ import { Link } from '@/i18n/routing'
 import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtSign, CheckCircle } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl';
 import Script from 'next/script'
+import PushSubscribeButton from '@/components/PushSubscribeButton'
 
 interface FooterProps {
     features?: {
@@ -31,11 +32,15 @@ interface FooterProps {
         cod?: boolean
         bank?: boolean
     }
+    developer?: {
+        name: string
+        link: string
+    }
 }
 
 const PinterestIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.63 7.85 6.35 9.31-.09-.79-.17-2.01.03-2.87.19-.83 1.22-5.18 1.22-5.18s-.31-.62-.31-1.54c0-1.44.84-2.52 1.88-2.52.88 0 1.3.66 1.3 1.45 0 .89-.57 2.22-.86 3.45-.25 1.04.52 1.88 1.54 1.88 1.85 0 3.27-1.95 3.27-4.77 0-2.49-1.79-4.23-4.35-4.23-2.98 0-4.73 2.24-4.73 4.54 0 .89.34 1.85.77 2.37.08.1.1.19.07.31l-.25 1.05c-.04.16-.14.2-.31.12-1.16-.54-1.89-2.25-1.89-3.62 0-2.95 2.14-5.66 6.18-5.66 3.25 0 5.77 2.32 5.77 5.42 0 3.23-2.03 5.83-4.85 5.83-1.07 0-2.08-.56-2.43-1.22l-.66 2.52c-.24.93-.89 2.09-1.33 2.8C10.75 21.93 11.37 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.63 7.85 6.35 9.31-.09-.79-.17-2.01.03-2.87.19-.83 1.22-5.18 1.22-5.18s-.31-.62-.31-1.54c0-1.44.84-2.52 1.88-2.52.88 0 1.3.66 1.3 1.45 0 .89-.57 2.22-.86 3.45-.25 1.04.52 1.88 1.54 1.88 1.85 0 3.27-1.95 3.27-4.77 0-2.49-1.79-4.23-4.35-4.23-2.98 0-4.73 2.24-4.73 4.54 0 .89.34 1.85.77 2.37.08.1.1.19.07.31l-.25 1.05c-.04.16-.14.2-.31.12-1.16-.54-1.89-2.25-1.89-3.62 0-2.95 2.14-5.66 6.18-5.66 3.25 0 5.77 2.32 5.77 5.42 0 3.23-2.03 5.83-4.85 5.83-1.07 0-2.08-.56-2.43-1.22l-.66 2.52c-.24.93-.89 2.09-1.33 2.8C10.75 21.93 11.37 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
     </svg>
 )
 
@@ -82,7 +87,7 @@ function NewsletterForm({ t }: { t: any }) {
     )
 }
 
-export default function FooterClient({ features = {}, siteLogo = null, socials = {}, paymentSettings = {} }: FooterProps = {}) {
+export default function FooterClient({ features = {}, siteLogo = null, socials = {}, paymentSettings = {}, developer }: FooterProps = {}) {
     const locale = useLocale();
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
@@ -170,43 +175,43 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Navigation')}</h3>
                         <ul className="space-y-4" suppressHydrationWarning>
                             <li suppressHydrationWarning>
-                                <Link href="/books" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
+                                <Link href="/books" title="Découvrir tous nos livres" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/books?usedOnly=true" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/books?usedOnly=true" title="Livres d'occasion à petits prix" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tNav('UsedBooks')}
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/jeux-societe" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/jeux-societe" title="Jeux de société pour tous" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tNav('BoardGames')}
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/mon-enfant" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/mon-enfant" title="Livres et activités pour enfants" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tNav('KidsWorld')}
                                 </Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/packs" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
+                                <Link href="/packs" title="Packs de livres économiques" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
                             </li>
                             <li suppressHydrationWarning>
-                                <Link href="/about" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{t('About')}</Link>
+                                <Link href="/about" title="En savoir plus sur notre histoire" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{t('About')}</Link>
                             </li>
                             {features.exchange === true && (
                                 <li suppressHydrationWarning>
-                                    <Link href="/community/market" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Community')}</Link>
+                                    <Link href="/community/market" title="Échanger vos livres avec la communauté" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Community')}</Link>
                                 </li>
                             )}
                             {features.seller === true && (
                                 <li suppressHydrationWarning>
-                                    <Link href="/devenir-vendeur" className="text-pixio-yellow hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
+                                    <Link href="/devenir-vendeur" title="Créer une boutique et commencer à vendre vos livres !" className="text-pixio-yellow hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
                                         {tNav('BecomeSeller')}
                                     </Link>
                                 </li>
                             )}
                             <li suppressHydrationWarning>
-                                <Link href="/join-us" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/join-us" title="Rejoindre l'équipe Riwaya" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tJoinUs('heroTitle1')} {tJoinUs('heroTitle2')}
                                 </Link>
                             </li>
@@ -215,19 +220,22 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     <div>
                         <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Support')}</h3>
                         <ul className="space-y-4">
-                            <li><Link href="/shipping-policy" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Shipping')}</Link></li>
-                            <li><Link href="/return-policy" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Returns')}</Link></li>
-                            <li><Link href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Privacy')}</Link></li>
-                            <li><Link href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Terms')}</Link></li>
-                            <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Contact')}</Link></li>
+                            <li><Link href="/shipping-policy" title="Politique et délais de livraison" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Shipping')}</Link></li>
+                            <li><Link href="/return-policy" title="Conditions de retour et remboursement" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Returns')}</Link></li>
+                            <li><Link href="/privacy" title="Protection de vos données personnelles" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Privacy')}</Link></li>
+                            <li><Link href="/terms" title="Conditions générales d'utilisation" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Terms')}</Link></li>
+                            <li><Link href="/contact" title="Nous contacter" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Contact')}</Link></li>
                         </ul>
                     </div>
                     <div className="col-span-2 md:col-span-1">
                         <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Journal')}</h3>
                         <ul className="space-y-4 mb-8">
-                            <li><Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{tNav('Journal')}</Link></li>
+                            <li><Link href="/blog" title="Lire notre blog et nos actualités" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{tNav('Journal')}</Link></li>
                         </ul>
                         <NewsletterForm t={t} />
+                        <div className="mt-4 flex justify-center md:justify-start">
+                            <PushSubscribeButton />
+                        </div>
                     </div>
                 </div>
 
@@ -243,19 +251,19 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                 </div>
 
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-base font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">
-                    <p>© 2026 riwaya world. {t('Rights')}</p>
+                    <p>© 2026 riwaya. {t('Rights')}</p>
 
                     <div className="md:absolute md:left-1/2 md:-translate-x-1/2 text-center">
                         <p className="hover:text-white transition-colors cursor-default">
                             {t.rich('DevelopedBy', {
                                 name: (chunks) => (
                                     <a
-                                        href="https://instagram.com/itsmereda1"
+                                        href={developer?.link || 'https://instagram.com/itsmereda1'}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-white font-bold hover:text-pixio-yellow transition-colors"
                                     >
-                                        {chunks}
+                                        {developer?.name || chunks}
                                     </a>
                                 )
                             })}

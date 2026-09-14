@@ -80,26 +80,26 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                         <h3 className="font-black text-lg">{t('JoinCommunity')}</h3>
                         <p className="text-xs text-gray-500 mt-1">{t('LoginToEnjoy')}</p>
                     </div>
-                    <div className="space-y-3">
-                        <div className="flex items-start gap-3">
-                            <div className="bg-pixio-yellow/20 p-2 rounded-lg text-yellow-600"><Sparkles className="w-4 h-4" /></div>
+                    <div className="space-y-4">
+                        <div className="flex flex-col items-center text-center gap-1">
+                            <div className="bg-pixio-yellow/20 p-2 rounded-full text-yellow-600 mb-1"><Sparkles className="w-4 h-4" /></div>
                             <div>
                                 <p className="text-sm font-bold">{t('ReadingTracking')}</p>
-                                <p className="text-xs text-gray-500">{t('SaveProgress')}</p>
+                                <p className="text-[11px] text-gray-500">{t('SaveProgress')}</p>
                             </div>
                         </div>
-                        <div className="flex items-start gap-3">
-                            <div className="bg-blue-50 p-2 rounded-lg text-blue-500"><BookOpen className="w-4 h-4" /></div>
+                        <div className="flex flex-col items-center text-center gap-1">
+                            <div className="bg-blue-50 p-2 rounded-full text-blue-500 mb-1"><BookOpen className="w-4 h-4" /></div>
                             <div>
                                 <p className="text-sm font-bold">{t('BookExchange')}</p>
-                                <p className="text-xs text-gray-500">{t('SwapWithReaders')}</p>
+                                <p className="text-[11px] text-gray-500">{t('SwapWithReaders')}</p>
                             </div>
                         </div>
-                        <div className="flex items-start gap-3">
-                            <div className="bg-red-50 p-2 rounded-lg text-red-500"><Heart className="w-4 h-4" /></div>
+                        <div className="flex flex-col items-center text-center gap-1">
+                            <div className="bg-red-50 p-2 rounded-full text-red-500 mb-1"><Heart className="w-4 h-4" /></div>
                             <div>
                                 <p className="text-sm font-bold">{t('Wishlist')}</p>
-                                <p className="text-xs text-gray-500">{t('SaveFavorites')}</p>
+                                <p className="text-[11px] text-gray-500">{t('SaveFavorites')}</p>
                             </div>
                         </div>
                     </div>

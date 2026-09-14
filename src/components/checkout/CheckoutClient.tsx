@@ -14,6 +14,7 @@ import { useUIStore } from '@/store/ui'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { getActiveGifts } from '@/lib/actions/gifts'
 import { getWithYouCities } from '@/lib/actions/delivery'
+import { calculate3For4Discount } from '@/lib/utils'
 
 interface CheckoutForm {
     fullName: string
@@ -33,6 +34,7 @@ export default function CheckoutClient({
     user?: { fullName?: string | null; email: string; image?: string | null; credits?: number } | null;
     minOrderAmount?: number;
     paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] }
+    is3For4Active?: boolean;
 }) {
     const router = useRouter()
     const { items, getTotalPrice, clearCart, discount: instantOfferDiscount } = useCartStore()
@@ -158,7 +160,8 @@ export default function CheckoutClient({
                 }
             }
             const currentInstantDiscount = instantOfferDiscount || 0
-            const currentFinalTotal = Math.max(0, currentSubtotal - discountAmount - currentInstantDiscount + shippingFee)
+            const currentPromo3for4 = is3For4Active ? calculate3For4Discount(items) : 0
+            const currentFinalTotal = Math.max(0, currentSubtotal - discountAmount - currentInstantDiscount - currentPromo3for4 + shippingFee)
 
             if (items.length === 0 || (minOrderAmount > 0 && currentFinalTotal < minOrderAmount)) {
                 router.replace('/cart')
@@ -185,9 +188,10 @@ export default function CheckoutClient({
             discountAmount = coupon.discount
         }
     }
-    // Ajout de la remise de l'offre instantanée
+    // Ajout de la remise de l'offre instantanée et 3=4
     const instantDiscount = instantOfferDiscount || 0
-    const totalDiscountAmount = discountAmount + instantDiscount
+    const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
+    const totalDiscountAmount = discountAmount + instantDiscount + promo3for4Discount
 
     const finalTotalBeforeCredits = Math.max(0, subtotal - totalDiscountAmount + shippingFee)
     const creditsToUse = useCredits && user?.credits ? Math.min(user.credits, finalTotalBeforeCredits) : 0
@@ -693,14 +697,14 @@ export default function CheckoutClient({
                         <div className="space-y-5 pt-10 border-t border-gray-50">
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
                                 <span>{t('SelectionSummary')}</span>
-                                <span className="text-black">{subtotal.toFixed(0)} درهم</span>
+                                <span className="text-black">{subtotal.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                             </div>
                             {discountAmount > 0 && (
                                 <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-pixio-pink bg-black px-4 py-3 rounded-2xl">
                                     <span className="flex items-center gap-2">
                                         <Ticket className="w-4 h-4" /> {t('CodeApplied')}
                                     </span>
-                                    <span>-{discountAmount.toFixed(0)} درهم</span>
+                                    <span>-{discountAmount.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                             )}
                             {instantDiscount > 0 && (
@@ -708,7 +712,15 @@ export default function CheckoutClient({
                                     <span className="flex items-center gap-2">
                                         <Gift className="w-4 h-4" /> Offre Instantanée
                                     </span>
-                                    <span>-{instantDiscount.toFixed(0)} درهم</span>
+                                    <span>-{instantDiscount.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                </div>
+                            )}
+                            {promo3for4Discount > 0 && (
+                                <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-rose-800 bg-rose-100 px-4 py-3 rounded-2xl">
+                                    <span className="flex items-center gap-2">
+                                        <Ticket className="w-4 h-4" /> {locale === 'ar' ? 'الكتاب الرابع مجاناً' : '4ème Livre Offert'}
+                                    </span>
+                                    <span>-{promo3for4Discount.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
@@ -716,19 +728,19 @@ export default function CheckoutClient({
                                 {shippingFee === 0 ? (
                                     <span className="text-black bg-pixio-yellow px-2 py-1 rounded-md">{t('Free')}</span>
                                 ) : (
-                                    <span className="text-black">{shippingFee} درهم</span>
+                                    <span className="text-black">{shippingFee} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 )}
                             </div>
                             
                             {user?.credits && user.credits > 0 ? (
-                                <div className="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100 mt-4">
-                                    <div className="flex items-center gap-3">
-                                        <Wallet className="w-6 h-6 text-amber-500" />
-                                        <div>
-                                            <p className="text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-amber-900">{locale === 'ar' ? 'استخدام الرصيد' : 'Utiliser mon solde'}</p>
-                                            <p className="text-[10px] font-bold text-amber-600">{user.credits} درهم {locale === 'ar' ? 'متاح' : 'disponible'}</p>
+                                    <div className="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100 mt-4">
+                                        <div className="flex items-center gap-3">
+                                            <Wallet className="w-6 h-6 text-amber-500" />
+                                            <div>
+                                                <p className="text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-amber-900">{locale === 'ar' ? 'استخدام الرصيد' : 'Utiliser mon solde'}</p>
+                                                <p className="text-[10px] font-bold text-amber-600">{user.credits} {locale === 'ar' ? 'درهم' : 'MAD'} {locale === 'ar' ? 'متاح' : 'disponible'}</p>
+                                            </div>
                                         </div>
-                                    </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" className="sr-only peer" checked={useCredits} onChange={(e) => setUseCredits(e.target.checked)} />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] rtl:after:right-[2px] rtl:after:left-auto after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
@@ -741,7 +753,7 @@ export default function CheckoutClient({
                                     <span className="flex items-center gap-2">
                                         <Wallet className="w-4 h-4" /> {locale === 'ar' ? 'خصم الرصيد' : 'Solde appliqué'}
                                     </span>
-                                    <span>-{creditsToUse.toFixed(0)} درهم</span>
+                                    <span>-{creditsToUse.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                             )}
 
@@ -749,7 +761,7 @@ export default function CheckoutClient({
                                 <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-widest rtl:tracking-normal mb-1">{t('TotalAmount')}</p>
                                 <div className="flex items-baseline justify-between">
                                     <p className="text-4xl font-black text-black tracking-tighter leading-none">{finalTotal.toFixed(0)}</p>
-                                    <p className="text-[10px] rtl:text-sm font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">درهم</p>
+                                    <p className="text-[10px] rtl:text-sm font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</p>
                                 </div>
                             </div>
                         </div>

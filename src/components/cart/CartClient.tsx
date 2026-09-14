@@ -9,16 +9,17 @@ import { ArrowRight, Minus, Plus, Trash2, ShoppingCart, Shield, Truck, AlertCirc
 import { useEffect, useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { normalizeImage } from '@/lib/utils'
-
 import AddToCartButton from '@/components/AddToCartButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import { calculate3For4Discount } from '@/lib/utils'
 
 interface CartClientProps {
     minOrderAmount?: number
     recommendedBooks?: any[]
+    is3For4Active?: boolean
 }
 
-export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }: CartClientProps) {
+export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], is3For4Active = false }: CartClientProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('CartPage')
@@ -61,7 +62,11 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
 
     const totalPrice = getTotalPrice()
     const totalItems = getTotalItems()
-    const isMinAmountReached = totalPrice >= minOrderAmount
+    
+    const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
+    const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
+    
+    const isMinAmountReached = finalTotal >= minOrderAmount
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 pb-20 sm:pb-40">
@@ -225,14 +230,14 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Calculé à l'étape suivante</span>
                                 </div>
 
-                                {totalPrice < 500 && (
+                                {finalTotal < 500 && (
                                     <div className="bg-pixio-cream/50 p-8 rounded-[2rem] border border-gray-50">
                                         <p className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500 mb-6 leading-relaxed"
-                                            dangerouslySetInnerHTML={{ __html: t.raw('FreeShippingAd').replace('{amount}', (500 - totalPrice).toString()) }} />
+                                            dangerouslySetInnerHTML={{ __html: t.raw('FreeShippingAd').replace('{amount}', (500 - finalTotal).toString()) }} />
                                         <div className="w-full bg-white h-2 rounded-full overflow-hidden shadow-inner">
                                             <div
                                                 className="bg-black h-full rounded-full transition-all duration-1000"
-                                                style={{ width: `${(totalPrice / 500) * 100}%` }}
+                                                style={{ width: `${(finalTotal / 500) * 100}%` }}
                                             />
                                         </div>
                                     </div>
@@ -240,9 +245,15 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [] }
                             </div>
 
                             <div className="border-t border-gray-50 pt-6 sm:pt-8 mb-8 sm:mb-12">
+                                {promo3for4Discount > 0 && (
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-4 gap-2 text-rose-500">
+                                        <span className="text-xs font-black uppercase tracking-[0.3em]">{locale === 'ar' ? 'الكتاب الرابع مجاناً' : '4ème Livre Offert'}</span>
+                                        <span className="text-xl sm:text-2xl font-black tracking-tighter">-{promo3for4Discount} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    </div>
+                                )}
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-2 gap-2">
                                     <span className="text-xs font-black uppercase tracking-[0.3em]">{t('TotalValue')}</span>
-                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{totalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-left sm:text-right">{t('TaxesNote')}</p>
                             </div>

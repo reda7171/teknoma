@@ -6,9 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Normalise une URL d'image ou une chaîne Base64 (Odoo)
+ * Normalise une URL d'image ou une chaÃ®ne Base64 (Odoo)
  * @param raw L'image brute de la BDD
- * @returns L'image normalisée ou le placeholder
+ * @returns L'image normalisÃ©e ou le placeholder
  */
 export function normalizeImage(raw: string | null | undefined): string {
     const img = raw?.trim() || ''
@@ -20,17 +20,17 @@ export function normalizeImage(raw: string | null | undefined): string {
         return `https://riwaya.store${img.startsWith('/') ? img : '/' + img}`;
     }
 
-    // Déjà une URL ou déjà formaté
+    // DÃ©jÃ  une URL ou dÃ©jÃ  formatÃ©
     if (img.startsWith('http') || img.startsWith('data:') || img.startsWith('/')) {
         // Ignorer si c'est un message d'erreur
         if (img.includes('cellule')) return '/book-placeholder.png'
         
-        // Cas particulier : /9j/ détecté comme chemin local alors que c'est du JPEG Base64
+        // Cas particulier : /9j/ dÃ©tectÃ© comme chemin local alors que c'est du JPEG Base64
         if (img.startsWith('/9j/')) return 'data:image/jpeg;base64,' + img
         return img
     }
 
-    // Détection Base64 pure (Odoo)
+    // DÃ©tection Base64 pure (Odoo)
     if (img.includes(' ')) return '/book-placeholder.png'
     
     if (img.startsWith('iVBOR')) return 'data:image/png;base64,' + img
@@ -41,8 +41,8 @@ export function normalizeImage(raw: string | null | undefined): string {
 }
 
 /**
- * Génère une URL absolue pour l'image Open Graph.
- * Évite les redirections pour les URL externes ou locales,
+ * GÃ©nÃ¨re une URL absolue pour l'image Open Graph.
+ * Ã‰vite les redirections pour les URL externes ou locales,
  * et utilise l'API de fallback uniquement pour le Base64.
  */
 export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, fallbackApiUrl: string): string {
@@ -56,13 +56,13 @@ export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, f
         return `${baseUrl}${img}`;
     }
     
-    // Si c'est du base64 ou autre chose non géré, on passe par l'API pour que Next.js puisse servir le binaire
+    // Si c'est du base64 ou autre chose non gÃ©rÃ©, on passe par l'API pour que Next.js puisse servir le binaire
     return fallbackApiUrl;
 }
 
 /**
- * Retourne l'URL de base de l'application, en forçant le domaine public
- * si l'URL configurée pointe vers localhost ou une IP (fréquent avec un reverse proxy).
+ * Retourne l'URL de base de l'application, en forÃ§ant le domaine public
+ * si l'URL configurÃ©e pointe vers localhost ou une IP (frÃ©quent avec un reverse proxy).
  */
 export function getBaseUrl(): string {
     let url = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
@@ -73,8 +73,8 @@ export function getBaseUrl(): string {
 }
 
 /**
- * Calcule le score SEO d'un article à partir de son contenu.
- * Même logique que dans AdminPostsTable.
+ * Calcule le score SEO d'un article Ã  partir de son contenu.
+ * MÃªme logique que dans AdminPostsTable.
  */
 export function computePostSeoScore(content: string | null | undefined): number {
     const contentStr = content || '';
@@ -96,3 +96,34 @@ export function computePostSeoScore(content: string | null | undefined): number 
 
     return Math.min(100, score);
 }
+
+export function calculate3For4Discount(items: { type: string, price: number, quantity: number }[]): number {
+    // Ne prendre en compte que les livres physiques (type === 'BOOK')
+    const bookItems = items.filter(item => item.type === 'BOOK');
+    
+    // Aplatir le panier pour avoir une liste de prix (ex: 2 livres à 100 = [100, 100])
+    const allPrices: number[] = [];
+    bookItems.forEach(item => {
+        for (let i = 0; i < item.quantity; i++) {
+            allPrices.push(item.price);
+        }
+    });
+
+    if (allPrices.length < 4) return 0;
+
+    // Trier les prix par ordre croissant (le moins cher en premier)
+    allPrices.sort((a, b) => a - b);
+
+    // Calculer le nombre de livres gratuits (1 pour chaque lot de 4)
+    const freeBooksCount = Math.floor(allPrices.length / 4);
+
+    // Sommer les prix des N livres les moins chers
+    let discount = 0;
+    for (let i = 0; i < freeBooksCount; i++) {
+        discount += allPrices[i];
+    }
+
+    return discount;
+}
+
+

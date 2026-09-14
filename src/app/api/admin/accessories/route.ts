@@ -45,9 +45,22 @@ export async function POST(request: NextRequest) {
                 isSyncedWithJumia: data.isSyncedWithJumia || false,
                 jumiaPriceMarkup: data.jumiaPriceMarkup !== undefined ? parseFloat(data.jumiaPriceMarkup) : 0,
                 jumiaProductSid: data.jumiaProductSid,
-                jumiaStock: data.jumiaStock !== undefined ? parseInt(data.jumiaStock) : undefined
+                jumiaStock: data.jumiaStock !== undefined ? parseInt(data.jumiaStock) : undefined,
+                videos: data.videos !== undefined ? data.videos : undefined,
+                isFeatured: data.isFeatured !== undefined ? Boolean(data.isFeatured) : false
             }
         })
+
+        try {
+            const { revalidatePath } = require('next/cache')
+            revalidatePath('/[locale]/admin/accessories', 'page')
+            revalidatePath('/[locale]/admin/accessories/library', 'page')
+            revalidatePath('/[locale]/admin/accessories/usb', 'page')
+            revalidatePath('/[locale]/admin/accessories/bookmarks', 'page')
+            revalidatePath('/[locale]/admin/accessories/kids', 'page')
+        } catch (e) {
+            console.error(e)
+        }
 
         return NextResponse.json(accessory)
     } catch (error: any) {

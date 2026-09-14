@@ -1344,3 +1344,32 @@ model Quote {
   @@index([bookId])
   @@map("quotes")
 }
+
+// Abonnements Web Push
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @db.VarChar(512)
+  p256dh    String   @db.Text
+  auth      String   @db.VarChar(500)
+  userAgent String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  @@unique([endpoint(length: 512)])
+  @@map("push_subscriptions")
+}
+
+// Campagnes de notifications promo
+model PushCampaign {
+  id        String    @id @default(uuid())
+  title     String    @db.VarChar(255)
+  body      String    @db.Text
+  url       String?   @db.VarChar(500)
+  icon      String?   @db.VarChar(500)
+  sentAt    DateTime?
+  totalSent Int       @default(0)
+  status    String    @default("DRAFT") @db.VarChar(50)
+  createdAt DateTime  @default(now())
+
+  @@map("push_campaigns")
+}
+
