@@ -11,13 +11,15 @@ import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
 import { usePathname } from 'next/navigation'
+import { calculate3For4Discount } from '@/lib/utils'
 
 interface CartDrawerProps {
     isOpen: boolean
     onClose: () => void
+    is3For4Active?: boolean
 }
 
-export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
+export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: CartDrawerProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('Cart');
@@ -66,7 +68,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             console.error('Erreur notification', error)
         }
     }
-    const finalTotal = totalPrice
+    
+    const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
+    const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
+
 
     const handleCheckoutClick = () => {
         const value = getTotalPrice()
@@ -277,8 +282,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     {/* Footer - Style Pixio Summary */}
                     {items.length > 0 && (
                         <div className="p-4 md:p-8 bg-white border-t border-gray-50 space-y-6 md:space-y-8 pb-24 md:pb-safe">
-                            {/* Summary - Total uniquement */}
+                            {/* Summary */}
                             <div className="space-y-4">
+                                {promo3for4Discount > 0 && (
+                                    <div className="flex justify-between items-center text-rose-500 mb-2">
+                                        <span className="text-sm font-black uppercase tracking-widest">{locale === 'ar' ? 'الكتاب الرابع مجاناً' : '4ème Livre Offert'}</span>
+                                        <span className="text-xl font-black">-{promo3for4Discount} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center pt-2">
                                     <span className="text-sm sm:text-base font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
                                     <span className="text-4xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>

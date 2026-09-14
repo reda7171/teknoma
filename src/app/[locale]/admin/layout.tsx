@@ -51,7 +51,8 @@ import {
     Headset,
     Calendar,
     Wallet,
-    Network
+    Network,
+    Bell
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -207,6 +208,7 @@ export default function AdminLayout({
             icon: Sparkles,
             children: [
                 { name: 'Campagnes & Offres', href: `/${lang}/admin/marketing`, icon: Sparkles },
+                { name: 'Notifications Push', href: `/${lang}/admin/push-campaigns`, icon: Bell },
                 { name: 'Codes Promo', href: `/${lang}/admin/coupons`, icon: Ticket },
                 { name: 'Affiliation', href: `/${lang}/admin/affiliates`, icon: Share2 },
                 { name: 'Cartes Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },

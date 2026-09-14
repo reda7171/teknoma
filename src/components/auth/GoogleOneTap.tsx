@@ -40,6 +40,7 @@ function GoogleOneTapInner() {
         },
         auto_select: false,
         use_fedcm_for_prompt: true,
+        itp_support: true,
     })
 
     if (!mounted) return null

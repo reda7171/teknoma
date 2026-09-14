@@ -12,24 +12,42 @@ export async function GET(request: Request) {
     const code = searchParams.get('code')
     const error = searchParams.get('error')
 
-    if (error) {
-        return NextResponse.redirect(`${origin}/community/login?error=${encodeURIComponent(error)}`)
+    // Helper function to handle popup or direct redirect
+    const handleRedirect = (url: string, error?: string) => {
+        const payload = error ? `{ type: 'oauth_error', error: '${error}' }` : `{ type: 'oauth_success', redirect: '${url}' }`
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <script>
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.postMessage(${payload}, '*');
+                        window.close();
+                    } else {
+                        window.location.href = '${url}';
+                    }
+                </script>
+            </head>
+            <body>
+                Authentification en cours... Veuillez patienter.
+            </body>
+            </html>
+        `
+        return new NextResponse(html, { headers: { 'Content-Type': 'text/html' } })
     }
 
-    if (!code) {
-        return NextResponse.redirect(`${origin}/community/login?error=NoCodeProvided`)
-    }
+    if (error) return handleRedirect(`${origin}/community/login?error=${encodeURIComponent(error)}`, error)
+    if (!code) return handleRedirect(`${origin}/community/login?error=NoCodeProvided`, 'NoCodeProvided')
 
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
     const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
     const redirectUri = `${origin}/api/auth/google/callback`
 
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-        return NextResponse.redirect(`${origin}/community/login?error=GoogleAuthNotConfigured`)
+        return handleRedirect(`${origin}/community/login?error=GoogleAuthNotConfigured`, 'GoogleAuthNotConfigured')
     }
 
     try {
-        // Exchange code for access token
         const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -46,23 +64,17 @@ export async function GET(request: Request) {
 
         if (tokenData.error) {
             console.error('Google token error:', tokenData)
-            return NextResponse.redirect(`${origin}/community/login?error=TokenExchangeFailed`)
+            return handleRedirect(`${origin}/community/login?error=TokenExchangeFailed`, 'TokenExchangeFailed')
         }
 
         const { access_token } = tokenData
-
-        // Fetch user profile
         const profileResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
             headers: { Authorization: `Bearer ${access_token}` }
         })
-
         const profileData = await profileResponse.json()
 
-        if (!profileData.email) {
-            return NextResponse.redirect(`${origin}/community/login?error=NoEmailProvidedByGoogle`)
-        }
+        if (!profileData.email) return handleRedirect(`${origin}/community/login?error=NoEmailProvidedByGoogle`, 'NoEmailProvidedByGoogle')
 
-        // Connect to community-auth
         const authResult = await oauthLoginOrRegister({
             email: profileData.email,
             fullName: profileData.name || profileData.given_name || 'Utilisateur Google',
@@ -70,13 +82,13 @@ export async function GET(request: Request) {
         })
 
         if (authResult.success) {
-            return NextResponse.redirect(`${origin}${authResult.redirect || '/community'}`)
+            return handleRedirect(`${origin}${authResult.redirect || '/community'}`)
         } else {
-            return NextResponse.redirect(`${origin}/community/login?error=${encodeURIComponent(authResult.error || 'Erreur inconnue')}`)
+            return handleRedirect(`${origin}/community/login?error=${encodeURIComponent(authResult.error || 'Erreur inconnue')}`, authResult.error || 'Erreur inconnue')
         }
 
     } catch (err) {
         console.error('Google Auth Error:', err)
-        return NextResponse.redirect(`${origin}/community/login?error=InternalAuthError`)
+        return handleRedirect(`${origin}/community/login?error=InternalAuthError`, 'InternalAuthError')
     }
 }

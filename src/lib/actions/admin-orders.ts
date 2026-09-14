@@ -35,7 +35,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
 
         const prevStatus = order.status
         const isNowReturned = status === 'RETURNED' || status === 'CANCELLED'
-        
+
         // Si le statut précédent est déjà CANCELLED ou RETURNED, le stock a déjà été réintégré.
         // Sinon, le stock avait été décrémenté (lors de la création de la commande), et il faut le réintégrer.
         const wasAlreadyRestored = ['CANCELLED', 'RETURNED'].includes(prevStatus)
@@ -66,7 +66,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
                 if (status === 'SHIPPED') wyStatus = 'expedier'
                 if (status === 'RETURNED') wyStatus = 'retour'
                 if (status === 'CANCELLED') wyStatus = 'annuler'
-                
+
                 try {
                     await withyouService.updateStatus(order.trackingID, wyStatus)
                 } catch (err) {
@@ -179,7 +179,7 @@ export async function updateOrderDetails(orderId: string, data: any) {
 export async function updateOrderTrackingId(orderId: string, trackingID: string, shippingCompanyId?: string) {
     try {
         await verifyAdmin()
-        
+
         const dataToUpdate: any = { trackingID }
         if (shippingCompanyId) {
             dataToUpdate.shippingCompany = shippingCompanyId
@@ -202,7 +202,7 @@ export async function updateOrderTrackingId(orderId: string, trackingID: string,
 export async function togglePaymentStatus(orderId: string, isPaid: boolean, expenseId?: string | null) {
     try {
         await verifyAdmin()
-        
+
         const data: any = { isPaid }
         if (expenseId !== undefined) {
             data.expenseId = expenseId
@@ -216,8 +216,8 @@ export async function togglePaymentStatus(orderId: string, isPaid: boolean, expe
         revalidatePath('/admin/orders')
         revalidatePath(`/admin/orders/${orderId}`)
 
-        const details = isPaid 
-            ? `Statut de paiement modifié vers: Payé${expenseId ? ` (Lié à une facture)` : ''}` 
+        const details = isPaid
+            ? `Statut de paiement modifié vers: Payé${expenseId ? ` (Lié à une facture)` : ''}`
             : `Statut de paiement modifié vers: Non payé`
 
         await createAuditLog({
@@ -440,7 +440,7 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
 
             const res = await fetch(`http://partners.olivraison.com/package`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
@@ -451,12 +451,12 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
                 const errData = await res.json().catch(() => null)
                 throw new Error(errData?.message || 'Erreur API Olivraison')
             }
-            
+
             const data = await res.json()
             trackingID = data.trackingID || order.id
         } else {
-             // throw new Error("Société non supportée pour la création automatique")
-             // Pour les autres, on assigne juste le colis à la société
+            // throw new Error("Société non supportée pour la création automatique")
+            // Pour les autres, on assigne juste le colis à la société
         }
 
         // Mettre à jour la commande locale
@@ -633,7 +633,7 @@ export async function bulkSyncDeliveries() {
         })
 
         const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
-        
+
         const updatedOrders: any[] = []
         const BATCH_SIZE = 50
 
@@ -652,17 +652,17 @@ export async function bulkSyncDeliveries() {
             for (let i = 0; i < withYouOrders.length; i += BATCH_SIZE) {
                 const batch = withYouOrders.slice(i, i + BATCH_SIZE)
                 const trackingIds = batch.map(o => o.trackingID!).filter(Boolean)
-                
+
                 try {
                     const res = await withyouService.getStatus(trackingIds)
                     let statusArray: any[] = []
-                    
+
                     if (Array.isArray(res)) {
                         statusArray = res
                     } else if (res?.data && Array.isArray(res.data)) {
                         statusArray = res.data
                     }
-                    
+
                     for (const item of statusArray) {
                         const trackingID = item.id || item.trackingID || item.trackingId || item.code_tracking
                         const extStatusRaw = item.status || item.statut
@@ -672,13 +672,13 @@ export async function bulkSyncDeliveries() {
                         } else {
                             extStatus = String(extStatusRaw || '')
                         }
-                        
+
                         if (trackingID && extStatus) {
                             const orderToUpdate = batch.find(o => o.trackingID === trackingID)
                             if (orderToUpdate && orderToUpdate.deliveryStatus !== extStatus) {
                                 let newInternalStatus = orderToUpdate.status
                                 const statusLower = extStatus.toLowerCase()
-                                
+
                                 if (statusLower.includes('livr') || statusLower.includes('delivered')) {
                                     newInternalStatus = 'DELIVERED'
                                 } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
@@ -726,7 +726,7 @@ export async function bulkSyncDeliveries() {
         // Olivraison
         if (olivraisonOrders.length > 0) {
             const defaultKey = await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } })
-            
+
             for (const order of olivraisonOrders) {
                 try {
                     const comp = companies.find(c => c.id === order.shippingCompany)
@@ -736,7 +736,7 @@ export async function bulkSyncDeliveries() {
                     const res = await fetch(`http://partners.olivraison.com/package/${order.trackingID}`, {
                         headers: { 'authorization': `Bearer ${token}` }
                     })
-                    
+
                     if (res.ok) {
                         const data = await res.json()
                         const extStatusRaw = data.status
@@ -750,7 +750,7 @@ export async function bulkSyncDeliveries() {
                         if (extStatus && extStatus !== order.deliveryStatus) {
                             let newInternalStatus = order.status
                             const statusLower = extStatus.toLowerCase()
-                            
+
                             if (statusLower.includes('livr') || statusLower.includes('delivered')) {
                                 newInternalStatus = 'DELIVERED'
                             } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
@@ -838,7 +838,7 @@ export async function updateOrderItems(orderId: string, items: {
             // 1. Pour chaque ancien item, on regarde s'il est supprimé ou modifié
             for (const oldItem of order.items) {
                 const newItem = items.find(i => i.id === oldItem.id)
-                
+
                 if (!newItem) {
                     // Item supprimé
                     if (impactsStock) {
@@ -877,10 +877,10 @@ export async function updateOrderItems(orderId: string, items: {
                             }
                         }
                     }
-                    
+
                     // Calculer le prix
                     newSubtotal += newItem.price * newItem.quantity
-                    
+
                     await tx.orderItem.update({
                         where: { id: oldItem.id },
                         data: {
@@ -895,7 +895,7 @@ export async function updateOrderItems(orderId: string, items: {
             for (const newItem of items.filter(i => !i.id)) {
                 let costPrice = 0
                 if (newItem.type === 'BOOK') {
-                    const book = await tx.book.findUnique({ where: { id: newItem.productId }})
+                    const book = await tx.book.findUnique({ where: { id: newItem.productId } })
                     if (book) {
                         costPrice = book.costPrice
                         if (impactsStock) {
@@ -906,7 +906,7 @@ export async function updateOrderItems(orderId: string, items: {
                         }
                     }
                 } else if (newItem.type === 'PACK') {
-                    const pack = await tx.pack.findUnique({ where: { id: newItem.productId }})
+                    const pack = await tx.pack.findUnique({ where: { id: newItem.productId } })
                     if (pack) {
                         costPrice = pack.costPrice
                         if (impactsStock) {
@@ -956,7 +956,7 @@ export async function updateOrderItems(orderId: string, items: {
                     createdBy: "ADMIN"
                 }
             })
-            
+
             // Log global
             await tx.auditLog.create({
                 data: {

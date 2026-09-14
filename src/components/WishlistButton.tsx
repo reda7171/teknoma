@@ -8,6 +8,7 @@ import { addToWishlist, removeFromWishlist } from '@/lib/actions/community-wishl
 import { useUIStore } from '@/store/ui'
 import { fbCustomEvents, fbPixelEvents } from '@/lib/facebook-pixel'
 import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/routing'
 
 interface WishlistButtonProps {
     item: WishlistItem
@@ -21,8 +22,9 @@ export default function WishlistButton({ item, className, showText = false, vari
     const [syncing, setSyncing] = useState(false)
     const active = useWishlistStore(state => state.items.find((i) => i.id === item.id) !== undefined)
     const { addItem, removeItem } = useWishlistStore()
-    const { showNotification } = useUIStore()
+    const { showNotification, openAuthModal } = useUIStore()
     const tCommon = useTranslations('Common')
+    const router = useRouter()
 
     useEffect(() => {
         useWishlistStore.persist.rehydrate()
@@ -51,9 +53,7 @@ export default function WishlistButton({ item, className, showText = false, vari
                     removeItem(item.id)
                 } else {
                     if (res.error === "Non connecté") {
-                        showNotification("Veuillez vous connecter pour gérer vos favoris", 'error')
-                        // Optionnel : Rediriger vers login
-                        // router.push('/community/login')
+                        openAuthModal()
                     } else {
                         showNotification(res.error || "Erreur lors de la suppression", 'error')
                     }
@@ -88,9 +88,7 @@ export default function WishlistButton({ item, className, showText = false, vari
                     })
                 } else {
                     if (res.error === "Non connecté") {
-                        showNotification(tCommon('AddToFavorites') + " - Veuillez vous connecter", 'error')
-                        // Optionnel : Rediriger vers login
-                        // router.push('/community/login')
+                        openAuthModal()
                     } else {
                         showNotification(res.error || "Erreur lors de l'ajout", 'error')
                     }

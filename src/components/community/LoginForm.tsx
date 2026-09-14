@@ -1,11 +1,12 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { login } from '@/lib/actions/community-auth'
 import { Link, useRouter } from '@/i18n/routing'
 import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import OAuthButtons from './OAuthButtons'
+import { useUIStore } from '@/store/ui'
 
 interface LoginFormProps {
     googleEnabled?: boolean;
@@ -19,6 +20,14 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const { openAuthModal } = useUIStore()
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            openAuthModal()
+        }, 30000)
+        return () => clearTimeout(timer)
+    }, [openAuthModal])
 
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()

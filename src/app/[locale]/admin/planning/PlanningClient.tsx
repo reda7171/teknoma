@@ -53,7 +53,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [currentTime, setCurrentTime] = useState(new Date())
     const [isLoading, setIsLoading] = useState(false)
     const [toast, setToast] = useState<{ message: string, type: 'error' | 'success' } | null>(null)
-    
+
     // Assets from marketing
     const [assets, setAssets] = useState<Asset[]>([])
     const [showAssetsGrid, setShowAssetsGrid] = useState(false)
@@ -61,6 +61,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedTime, setSelectedTime] = useState('12:00')
+    const [isPublishNow, setIsPublishNow] = useState(false)
     const [newPostContent, setNewPostContent] = useState('')
     const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
     const [selectedMedia, setSelectedMedia] = useState<Asset | null>(null)
@@ -96,14 +97,14 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             }
         }
         fetchAssets()
-        
+
         const timer = setInterval(() => setCurrentTime(new Date()), 60000)
         return () => clearInterval(timer)
     }, [])
 
     const generateSuggestions = (seed?: number) => {
         if (!availableBooks || availableBooks.length === 0) return;
-        
+
         // Exclure les articles avec un stock de 0
         const inStockItems = availableBooks.filter(item => item.stock === undefined || item.stock > 0);
         if (inStockItems.length === 0) return;
@@ -113,8 +114,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         const shuffled = [...inStockItems].sort(() => 0.5 - seededRandom(s++));
         const picked = shuffled.slice(0, 3);
         const newSuggestions = picked.map(book => {
-            const isProgrammed = posts.some(post => 
-                (post.mediaUrl && post.mediaUrl.includes(book.image)) || 
+            const isProgrammed = posts.some(post =>
+                (post.mediaUrl && post.mediaUrl.includes(book.image)) ||
                 (post.content && post.content.includes(book.title))
             );
             return { ...book, isProgrammed };
@@ -131,8 +132,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     useEffect(() => {
         if (dailySuggestions.length > 0) {
             setDailySuggestions(prev => prev.map(book => {
-                const isProgrammed = posts.some(post => 
-                    (post.mediaUrl && post.mediaUrl.includes(book.image)) || 
+                const isProgrammed = posts.some(post =>
+                    (post.mediaUrl && post.mediaUrl.includes(book.image)) ||
                     (post.content && post.content.includes(book.title))
                 );
                 return { ...book, isProgrammed };
@@ -212,15 +213,15 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         const month = selectedDate.getMonth()
         const firstDay = new Date(year, month, 1)
         const lastDay = new Date(year, month + 1, 0)
-        
+
         // Find the Monday before the 1st
         const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1
         const start = new Date(year, month, 1 - startOffset)
-        
+
         // Find the Sunday after the last day
         const endOffset = lastDay.getDay() === 0 ? 0 : 7 - lastDay.getDay()
         const end = new Date(year, month, lastDay.getDate() + endOffset)
-        
+
         const days = []
         let current = new Date(start)
         while (current <= end) {
@@ -232,8 +233,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const isSameDay = (d1: Date, d2: Date) => {
         return d1.getFullYear() === d2.getFullYear() &&
-               d1.getMonth() === d2.getMonth() &&
-               d1.getDate() === d2.getDate()
+            d1.getMonth() === d2.getMonth() &&
+            d1.getDate() === d2.getDate()
     }
 
     const handleOpenModal = (time: string, postToEdit?: ScheduledPost) => {
@@ -257,7 +258,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
             setSelectedMedia(null)
         }
-        
+
         setShowAssetsGrid(false)
         setIsModalOpen(true)
     }
@@ -269,7 +270,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         now.setHours(0, 0, 0, 0)
         const targetDay = new Date(day)
         targetDay.setHours(0, 0, 0, 0)
-        
+
         setSelectedDate(day)
         // Check if 12:00 is past for today, if so use current hour + 1
         let timeToSet = '12:00'
@@ -279,7 +280,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 timeToSet = `${Math.min(23, currentHour + 1).toString().padStart(2, '0')}:00`
             }
         }
-        
+
         // Timeout to let selectedDate state update before opening modal, since handleOpenModal checks isPastTime against selectedDate
         setTimeout(() => handleOpenModal(timeToSet), 0)
     }
@@ -305,8 +306,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     }
 
     const togglePlatform = (platform: string) => {
-        setSelectedPlatforms(prev => 
-            prev.includes(platform) 
+        setSelectedPlatforms(prev =>
+            prev.includes(platform)
                 ? prev.filter(p => p !== platform)
                 : [...prev, platform]
         )
@@ -353,6 +354,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
                 setSelectedMedia(tempMedia as any)
                 setShowAssetsGrid(false)
+                setIsPublishNow(false)
                 setIsModalOpen(true)
             }, 0)
         }
@@ -385,18 +387,19 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setSelectedMedia(tempMedia as any)
             setSelectedSuggestedProduct(null)
             setShowAssetsGrid(false)
+            setIsPublishNow(false)
             setIsModalOpen(true)
         }
     }
 
     const handleSavePost = async () => {
         if (!newPostContent.trim() && !selectedMedia) return
-        
+
         setIsLoading(true)
 
         let finalMediaUrl = selectedMedia?.url
         const mediaFile = (selectedMedia as any)?.file
-        
+
         if (mediaFile) {
             const formData = new FormData()
             formData.append('file', mediaFile)
@@ -420,13 +423,22 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             }
         }
 
-        const [hours, minutes] = selectedTime.split(':')
-        const scheduleAt = new Date(selectedDate)
-        scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0)
+        let scheduleAt = new Date(selectedDate)
+        let finalTime = selectedTime
+
+        if (isPublishNow) {
+            scheduleAt = new Date()
+            const h = scheduleAt.getHours().toString().padStart(2, '0')
+            const m = scheduleAt.getMinutes().toString().padStart(2, '0')
+            finalTime = `${h}:${m}`
+        } else {
+            const [hours, minutes] = selectedTime.split(':')
+            scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0)
+        }
 
         const payload = {
             date: scheduleAt.toISOString(),
-            time: selectedTime,
+            time: finalTime,
             content: newPostContent,
             platforms: selectedPlatforms,
             mediaUrl: finalMediaUrl,
@@ -444,7 +456,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 body: JSON.stringify(payload)
             })
             const data = await res.json()
-            
+
             if (data.success) {
                 let parsedPlatforms = []
                 try {
@@ -452,9 +464,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 } catch {
                     parsedPlatforms = []
                 }
-                
+
                 const updatedPost = { ...data.post, date: new Date(data.post.date), platforms: parsedPlatforms }
-                
+
                 if (editingPostId) {
                     setPosts(prev => prev.map(p => p.id === editingPostId ? updatedPost : p))
                     showToast('Publication modifiée', 'success')
@@ -483,24 +495,24 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             setIsLoading(false);
             return;
         }
-        
+
         console.log(`[PlanningClient] ${unprogrammed.length} posts à auto-programmer trouvés.`);
 
         const possibleTimes = ['10:00', '12:30', '15:00', '18:00', '19:30', '20:00', '21:00'];
         const shuffledTimes = [...possibleTimes].sort(() => 0.5 - Math.random());
-        
+
         let newPostsCount = 0;
         let errorsCount = 0;
 
         for (let i = 0; i < unprogrammed.length; i++) {
             const book = unprogrammed[i];
-            
+
             if (book.image && book.image.startsWith('data:image')) {
                 console.error(`Impossible d'auto-programmer ${book.title}: L'image est en Base64.`);
                 errorsCount++;
                 continue;
             }
-            
+
             const timeSlot = shuffledTimes[i % shuffledTimes.length];
             const link = `https://riwaya.store/fr/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
             const content = `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
@@ -569,8 +581,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     }
 
     const getPostsForTime = (time: string) => {
-        return posts.filter(post => 
-            isSameDay(post.date, selectedDate) && 
+        return posts.filter(post =>
+            isSameDay(post.date, selectedDate) &&
             post.time === time &&
             (platformFilter === 'all' || post.platforms.includes(platformFilter)) &&
             (statusFilter === 'all' || post.status === statusFilter)
@@ -581,9 +593,18 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         if (!url) return ''
         if (url.startsWith('http')) return url
         if (url.startsWith('data:image')) return url
-        if (url.startsWith('/uploads')) return url
-        if (url.startsWith('uploads')) return `/${url}`
-        return `/uploads/books/${url}`
+
+        let path = url;
+        if (url.startsWith('uploads')) path = `/${url}`;
+        else if (!url.startsWith('/uploads')) path = `/uploads/books/${url}`;
+
+        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+            return `https://riwaya.store${path}`;
+        }
+        if (process.env.NODE_ENV === 'development') {
+            return `https://riwaya.store${path}`;
+        }
+        return path;
     }
 
     const isVideo = (url: string) => {
@@ -593,7 +614,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
-        
+
         const sourceTime = result.source.droppableId;
         const destTime = result.destination.droppableId;
         const postId = result.draggableId;
@@ -642,7 +663,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     {toast.message}
                 </div>
             )}
-            
+
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-1">
@@ -652,7 +673,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                         Gérez vos publications automatiques. Glissez pour déplacer, cliquez pour modifier.
                     </p>
                 </div>
-                <button 
+                <button
                     onClick={() => handleOpenModal('12:00')}
                     className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 hover:shadow-md"
                 >
@@ -665,16 +686,16 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
                 <div className="flex flex-wrap bg-white rounded-lg p-1 shadow-sm border border-slate-200">
                     <button onClick={() => setPlatformFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${platformFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Réseaux</button>
-                    <button onClick={() => setPlatformFilter('facebook')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'facebook' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}><Facebook className="w-3 h-3"/> Facebook</button>
-                    <button onClick={() => setPlatformFilter('instagram')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'instagram' ? 'bg-pink-50 text-pink-600' : 'text-slate-500 hover:text-slate-700'}`}><Instagram className="w-3 h-3"/> Instagram</button>
-                    <button onClick={() => setPlatformFilter('tiktok')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'tiktok' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}><Music className="w-3 h-3"/> TikTok</button>
-                    <button onClick={() => setPlatformFilter('threads')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'threads' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}><AtSign className="w-3 h-3"/> Threads</button>
-                    <button onClick={() => setPlatformFilter('pinterest')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'pinterest' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg> Pinterest</button>
+                    <button onClick={() => setPlatformFilter('facebook')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'facebook' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}><Facebook className="w-3 h-3" /> Facebook</button>
+                    <button onClick={() => setPlatformFilter('instagram')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'instagram' ? 'bg-pink-50 text-pink-600' : 'text-slate-500 hover:text-slate-700'}`}><Instagram className="w-3 h-3" /> Instagram</button>
+                    <button onClick={() => setPlatformFilter('tiktok')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'tiktok' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}><Music className="w-3 h-3" /> TikTok</button>
+                    <button onClick={() => setPlatformFilter('threads')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'threads' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}><AtSign className="w-3 h-3" /> Threads</button>
+                    <button onClick={() => setPlatformFilter('pinterest')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${platformFilter === 'pinterest' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z" /></svg> Pinterest</button>
                 </div>
                 <div className="flex flex-wrap bg-white rounded-lg p-1 shadow-sm border border-slate-200">
                     <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>Tous Statuts</button>
-                    <button onClick={() => setStatusFilter('PUBLISHED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'PUBLISHED' ? 'bg-green-50 text-green-600' : 'text-slate-500 hover:text-slate-700'}`}><CheckCircle className="w-3 h-3"/> Publiés</button>
-                    <button onClick={() => setStatusFilter('FAILED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'FAILED' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><AlertCircle className="w-3 h-3"/> Échecs</button>
+                    <button onClick={() => setStatusFilter('PUBLISHED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'PUBLISHED' ? 'bg-green-50 text-green-600' : 'text-slate-500 hover:text-slate-700'}`}><CheckCircle className="w-3 h-3" /> Publiés</button>
+                    <button onClick={() => setStatusFilter('FAILED')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${statusFilter === 'FAILED' ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:text-slate-700'}`}><AlertCircle className="w-3 h-3" /> Échecs</button>
                 </div>
             </div>
 
@@ -689,7 +710,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                             <h2 className="text-sm font-black text-blue-900 uppercase tracking-wider">Suggestions du jour</h2>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <button 
+                            <button
                                 onClick={handleClearCalendar}
                                 disabled={isLoading}
                                 className="p-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors border border-red-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
@@ -697,7 +718,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                             >
                                 <Trash2 className="w-3.5 h-3.5" /> Tout Vider
                             </button>
-                            <button 
+                            <button
                                 onClick={handleAutoScheduleAll}
                                 disabled={isLoading}
                                 className="p-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors border border-green-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
@@ -705,7 +726,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                             >
                                 {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Auto-programmer
                             </button>
-                            <button 
+                            <button
                                 onClick={() => generateSuggestions(new Date().getTime())}
                                 className="p-1.5 bg-white/50 hover:bg-white text-blue-600 rounded-lg transition-colors border border-blue-200/50 shadow-sm flex items-center gap-1 text-xs font-bold"
                                 title="Rafraîchir les suggestions"
@@ -743,7 +764,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                         )}
                                     </div>
                                     {!book.isProgrammed && (
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 const timeToSet = '12:00';
                                                 handleOpenModal(timeToSet);
@@ -773,7 +794,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     <button onClick={prevDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
                         <ChevronLeft className="w-5 h-5" />
                     </button>
-                    
+
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                             <Calendar className="w-5 h-5" />
@@ -784,19 +805,19 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                     </div>
 
                     <div className="flex flex-wrap justify-center bg-slate-100 p-1 rounded-lg">
-                        <button 
+                        <button
                             onClick={() => setViewMode('day')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'day' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             Jour
                         </button>
-                        <button 
+                        <button
                             onClick={() => setViewMode('week')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'week' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             Semaine
                         </button>
-                        <button 
+                        <button
                             onClick={() => setViewMode('month')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'month' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
@@ -811,250 +832,250 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
                 {/* Grid */}
                 {viewMode === 'day' ? (
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 relative">
-                        {isSameDay(selectedDate, new Date()) && (
-                            <div 
-                                ref={scrollRef}
-                                className="absolute left-20 right-4 h-0.5 bg-red-500 z-20 pointer-events-none"
-                                style={{ 
-                                    top: `${16 + (currentTime.getHours() * 4 + currentTime.getMinutes() / 15) * 48}px`,
-                                    boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)'
-                                }}
-                            >
-                                <div className="absolute -left-2 -top-1 w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm" />
-                            </div>
-                        )}
-                        <div className="flex flex-col space-y-1 relative z-10">
-                            {timeSlots.map((time) => {
-                                const isHour = time.endsWith(':00')
-                                const slotPosts = getPostsForTime(time)
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 relative">
+                            {isSameDay(selectedDate, new Date()) && (
+                                <div
+                                    ref={scrollRef}
+                                    className="absolute left-20 right-4 h-0.5 bg-red-500 z-20 pointer-events-none"
+                                    style={{
+                                        top: `${16 + (currentTime.getHours() * 4 + currentTime.getMinutes() / 15) * 48}px`,
+                                        boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)'
+                                    }}
+                                >
+                                    <div className="absolute -left-2 -top-1 w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm" />
+                                </div>
+                            )}
+                            <div className="flex flex-col space-y-1 relative z-10">
+                                {timeSlots.map((time) => {
+                                    const isHour = time.endsWith(':00')
+                                    const slotPosts = getPostsForTime(time)
 
-                                return (
-                                    <div key={time} className="flex group min-h-[48px]">
-                                        <div className="w-16 sm:w-20 shrink-0 text-right pr-2 sm:pr-4 py-3 border-r border-slate-200 relative">
-                                            {['18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45', '20:00'].includes(time) && (
-                                                <div className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 text-orange-400" title="Heure recommandée pour l'engagement">
-                                                    <Star className="w-3 h-3 fill-orange-400" />
-                                                </div>
-                                            )}
-                                            {isHour ? (
-                                                <span className="text-xs sm:text-sm font-bold text-slate-700">{time}</span>
-                                            ) : (
-                                                <span className="text-[10px] sm:text-xs font-medium text-slate-400">{time}</span>
-                                            )}
-                                        </div>
-                                        <Droppable droppableId={time}>
-                                            {(provided, snapshot) => (
-                                                <div 
-                                                    ref={provided.innerRef}
-                                                    {...provided.droppableProps}
-                                                    onDragOver={(e) => e.preventDefault()}
-                                                    onDrop={(e) => handleImageDrop(e, time)}
-                                                    className={`flex-1 border-b border-slate-100 group-hover:bg-blue-50/50 transition-colors relative rounded-r-lg p-2 ${isPastTime(time) ? 'bg-slate-50/50 opacity-60' : ''} ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
-                                                >
-                                                    {/* Accessible Button to Add Post */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleOpenModal(time)}
-                                                        className="absolute inset-0 w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 rounded-r-lg z-0"
-                                                        aria-label={`Programmer à ${time}`}
+                                    return (
+                                        <div key={time} className="flex group min-h-[48px]">
+                                            <div className="w-16 sm:w-20 shrink-0 text-right pr-2 sm:pr-4 py-3 border-r border-slate-200 relative">
+                                                {['18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45', '20:00'].includes(time) && (
+                                                    <div className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 text-orange-400" title="Heure recommandée pour l'engagement">
+                                                        <Star className="w-3 h-3 fill-orange-400" />
+                                                    </div>
+                                                )}
+                                                {isHour ? (
+                                                    <span className="text-xs sm:text-sm font-bold text-slate-700">{time}</span>
+                                                ) : (
+                                                    <span className="text-[10px] sm:text-xs font-medium text-slate-400">{time}</span>
+                                                )}
+                                            </div>
+                                            <Droppable droppableId={time}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.droppableProps}
+                                                        onDragOver={(e) => e.preventDefault()}
+                                                        onDrop={(e) => handleImageDrop(e, time)}
+                                                        className={`flex-1 border-b border-slate-100 group-hover:bg-blue-50/50 transition-colors relative rounded-r-lg p-2 ${isPastTime(time) ? 'bg-slate-50/50 opacity-60' : ''} ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
                                                     >
-                                                        <span className="opacity-0 group-hover:opacity-100 flex items-center justify-center text-blue-500 font-bold text-xs gap-1 transition-opacity pointer-events-none h-full">
-                                                            <Plus className="w-3 h-3" /> Programmer
-                                                        </span>
-                                                    </button>
-                                                    
-                                                    {/* Scheduled Posts */}
-                                                    <div className="relative z-10 flex flex-col gap-2">
-                                                        {slotPosts.map((post, index) => (
-                                                            <Draggable key={post.id} draggableId={post.id} index={index}>
-                                                                {(provided, snapshot) => (
-                                                                    <div 
-                                                                        ref={provided.innerRef}
-                                                                        {...provided.draggableProps}
-                                                                        {...provided.dragHandleProps}
-                                                                        className={`bg-blue-100 border border-blue-200 text-blue-800 p-2 rounded-lg text-sm shadow-sm flex items-start gap-3 group/post cursor-pointer ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : ''}`}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation()
-                                                                            handleOpenModal(post.time, post)
-                                                                        }}
-                                                                    >
-                                                                        {post.mediaUrl && (
-                                                                            <div className="w-10 h-10 relative rounded border border-blue-200 shrink-0 overflow-hidden bg-slate-900 flex items-center justify-center">
-                                                                                {isVideo(post.mediaUrl) ? (
-                                                                                    <span className="text-[8px] font-bold text-white">VIDEO</span>
-                                                                                ) : (
-                                                                                    <Image src={getImageUrl(post.mediaUrl)} alt="media" fill className="object-cover" />
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <p className="font-medium line-clamp-1 flex-1">{post.content || 'Créative sans texte'}</p>
-                                                                                {getStatusIcon(post.status)}
-                                                                            </div>
-                                                                            <div className="flex justify-between items-center mt-1">
-                                                                                <div className="flex gap-1">
-                                                                                    {post.platforms.includes('facebook') && <Facebook className="w-3 h-3 text-blue-600" />}
-                                                                                    {post.platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-600" />}
-                                                                                    {post.platforms.includes('tiktok') && <Music className="w-3 h-3 text-slate-900" />}
-                                                                                    {post.platforms.includes('threads') && <AtSign className="w-3 h-3 text-slate-900" />}
-                                                                                    {post.platforms.includes('pinterest') && <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>}
+                                                        {/* Accessible Button to Add Post */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleOpenModal(time)}
+                                                            className="absolute inset-0 w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 rounded-r-lg z-0"
+                                                            aria-label={`Programmer à ${time}`}
+                                                        >
+                                                            <span className="opacity-0 group-hover:opacity-100 flex items-center justify-center text-blue-500 font-bold text-xs gap-1 transition-opacity pointer-events-none h-full">
+                                                                <Plus className="w-3 h-3" /> Programmer
+                                                            </span>
+                                                        </button>
+
+                                                        {/* Scheduled Posts */}
+                                                        <div className="relative z-10 flex flex-col gap-2">
+                                                            {slotPosts.map((post, index) => (
+                                                                <Draggable key={post.id} draggableId={post.id} index={index}>
+                                                                    {(provided, snapshot) => (
+                                                                        <div
+                                                                            ref={provided.innerRef}
+                                                                            {...provided.draggableProps}
+                                                                            {...provided.dragHandleProps}
+                                                                            className={`bg-blue-100 border border-blue-200 text-blue-800 p-2 rounded-lg text-sm shadow-sm flex items-start gap-3 group/post cursor-pointer ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : ''}`}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation()
+                                                                                handleOpenModal(post.time, post)
+                                                                            }}
+                                                                        >
+                                                                            {post.mediaUrl && (
+                                                                                <div className="w-10 h-10 relative rounded border border-blue-200 shrink-0 overflow-hidden bg-slate-900 flex items-center justify-center">
+                                                                                    {isVideo(post.mediaUrl) ? (
+                                                                                        <span className="text-[8px] font-bold text-white">VIDEO</span>
+                                                                                    ) : (
+                                                                                        <Image src={getImageUrl(post.mediaUrl)} alt="media" fill className="object-cover" />
+                                                                                    )}
                                                                                 </div>
-                                                                                <div className="flex gap-1">
-                                                                                    <button 
-                                                                                        type="button"
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation()
-                                                                                            handleOpenModal(post.time, post)
-                                                                                        }}
-                                                                                        className="text-blue-500 opacity-0 group-hover/post:opacity-100 transition-opacity p-1 hover:bg-blue-100 rounded"
-                                                                                        title="Modifier"
-                                                                                    >
-                                                                                        <Edit2 className="w-3 h-3" />
-                                                                                    </button>
-                                                                                    <button 
-                                                                                        type="button"
-                                                                                        onClick={(e) => handleDeletePost(post.id, e)}
-                                                                                        className="text-red-500 opacity-0 group-hover/post:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded"
-                                                                                        title="Annuler/Supprimer"
-                                                                                    >
-                                                                                        <X className="w-3 h-3" />
-                                                                                    </button>
+                                                                            )}
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <p className="font-medium line-clamp-1 flex-1">{post.content || 'Créative sans texte'}</p>
+                                                                                    {getStatusIcon(post.status)}
+                                                                                </div>
+                                                                                <div className="flex justify-between items-center mt-1">
+                                                                                    <div className="flex gap-1">
+                                                                                        {post.platforms.includes('facebook') && <Facebook className="w-3 h-3 text-blue-600" />}
+                                                                                        {post.platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-600" />}
+                                                                                        {post.platforms.includes('tiktok') && <Music className="w-3 h-3 text-slate-900" />}
+                                                                                        {post.platforms.includes('threads') && <AtSign className="w-3 h-3 text-slate-900" />}
+                                                                                        {post.platforms.includes('pinterest') && <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z" /></svg>}
+                                                                                    </div>
+                                                                                    <div className="flex gap-1">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation()
+                                                                                                handleOpenModal(post.time, post)
+                                                                                            }}
+                                                                                            className="text-blue-500 opacity-0 group-hover/post:opacity-100 transition-opacity p-1 hover:bg-blue-100 rounded"
+                                                                                            title="Modifier"
+                                                                                        >
+                                                                                            <Edit2 className="w-3 h-3" />
+                                                                                        </button>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={(e) => handleDeletePost(post.id, e)}
+                                                                                            className="text-red-500 opacity-0 group-hover/post:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded"
+                                                                                            title="Annuler/Supprimer"
+                                                                                        >
+                                                                                            <X className="w-3 h-3" />
+                                                                                        </button>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
-                                                                )}
-                                                            </Draggable>
-                                                        ))}
-                                                        {provided.placeholder}
+                                                                    )}
+                                                                </Draggable>
+                                                            ))}
+                                                            {provided.placeholder}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </Droppable>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    </DragDropContext>
+                ) : viewMode === 'week' ? (
+                    <div className="flex-1 overflow-auto custom-scrollbar p-4 bg-slate-50">
+                        <div className="grid grid-cols-7 gap-4 min-w-[800px]">
+                            {weekDays.map(day => {
+                                const isToday = isSameDay(day, new Date())
+                                const dayPosts = posts.filter(p => isSameDay(p.date, day) && (platformFilter === 'all' || p.platforms.includes(platformFilter)) && (statusFilter === 'all' || p.status === statusFilter)).sort((a, b) => a.time.localeCompare(b.time))
+
+                                return (
+                                    <div
+                                        key={day.toISOString()}
+                                        onClick={(e) => handleScheduleOnDay(day, e)}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={(e) => handleImageDropOnDay(e, day)}
+                                        className={`flex flex-col bg-white rounded-xl border ${isToday ? 'border-blue-500 shadow-md ring-2 ring-blue-500/20' : 'border-slate-200'} overflow-hidden cursor-pointer hover:border-blue-300 transition-colors group/day`}
+                                    >
+                                        <div className={`p-3 text-center border-b relative ${isToday ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
+                                            <div className="text-xs font-bold uppercase">{new Intl.DateTimeFormat('fr-FR', { weekday: 'short' }).format(day)}</div>
+                                            <div className={`text-2xl font-black mt-1 ${isToday ? 'text-blue-600' : 'text-slate-800'}`}>{day.getDate()}</div>
+                                        </div>
+                                        <div className="p-2 flex-1 flex flex-col gap-2 min-h-[150px]">
+                                            {dayPosts.map(post => (
+                                                <div
+                                                    key={post.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenModal(post.time, post);
+                                                    }}
+                                                    className="bg-slate-50 border border-slate-200 rounded-lg p-2 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                                                >
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="text-xs font-bold text-slate-600 bg-white px-1.5 py-0.5 rounded shadow-sm border border-slate-100">{post.time}</span>
+                                                        {getStatusIcon(post.status)}
+                                                    </div>
+                                                    <p className="text-xs text-slate-700 line-clamp-2 leading-tight">{post.content || 'Image'}</p>
+                                                    <div className="flex gap-1 mt-2 border-t border-slate-100 pt-1">
+                                                        {post.platforms.includes('facebook') && <Facebook className="w-3 h-3 text-blue-600" />}
+                                                        {post.platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-600" />}
+                                                        {post.platforms.includes('tiktok') && <Music className="w-3 h-3 text-slate-900" />}
+                                                        {post.platforms.includes('threads') && <AtSign className="w-3 h-3 text-slate-900" />}
+                                                        {post.platforms.includes('pinterest') && <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z" /></svg>}
                                                     </div>
                                                 </div>
-                                            )}
-                                        </Droppable>
+                                            ))}
+
+                                            <div className="mt-auto pt-2 opacity-0 group-hover/day:opacity-100 transition-opacity">
+                                                <button
+                                                    className="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-slate-500 text-xs font-bold flex items-center justify-center gap-1 bg-white hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                                                >
+                                                    <Plus className="w-3 h-3" /> Programmer
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 )
                             })}
                         </div>
                     </div>
-                </DragDropContext>
-                ) : viewMode === 'week' ? (
-                <div className="flex-1 overflow-auto custom-scrollbar p-4 bg-slate-50">
-                    <div className="grid grid-cols-7 gap-4 min-w-[800px]">
-                        {weekDays.map(day => {
-                            const isToday = isSameDay(day, new Date())
-                            const dayPosts = posts.filter(p => isSameDay(p.date, day) && (platformFilter === 'all' || p.platforms.includes(platformFilter)) && (statusFilter === 'all' || p.status === statusFilter)).sort((a, b) => a.time.localeCompare(b.time))
-                            
-                            return (
-                                <div 
-                                    key={day.toISOString()} 
-                                    onClick={(e) => handleScheduleOnDay(day, e)}
-                                    onDragOver={(e) => e.preventDefault()}
-                                    onDrop={(e) => handleImageDropOnDay(e, day)}
-                                    className={`flex flex-col bg-white rounded-xl border ${isToday ? 'border-blue-500 shadow-md ring-2 ring-blue-500/20' : 'border-slate-200'} overflow-hidden cursor-pointer hover:border-blue-300 transition-colors group/day`}
-                                >
-                                    <div className={`p-3 text-center border-b relative ${isToday ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
-                                        <div className="text-xs font-bold uppercase">{new Intl.DateTimeFormat('fr-FR', { weekday: 'short' }).format(day)}</div>
-                                        <div className={`text-2xl font-black mt-1 ${isToday ? 'text-blue-600' : 'text-slate-800'}`}>{day.getDate()}</div>
-                                    </div>
-                                    <div className="p-2 flex-1 flex flex-col gap-2 min-h-[150px]">
-                                        {dayPosts.map(post => (
-                                            <div 
-                                                key={post.id} 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOpenModal(post.time, post);
-                                                }}
-                                                className="bg-slate-50 border border-slate-200 rounded-lg p-2 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors group"
-                                            >
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <span className="text-xs font-bold text-slate-600 bg-white px-1.5 py-0.5 rounded shadow-sm border border-slate-100">{post.time}</span>
-                                                    {getStatusIcon(post.status)}
-                                                </div>
-                                                <p className="text-xs text-slate-700 line-clamp-2 leading-tight">{post.content || 'Image'}</p>
-                                                <div className="flex gap-1 mt-2 border-t border-slate-100 pt-1">
-                                                    {post.platforms.includes('facebook') && <Facebook className="w-3 h-3 text-blue-600" />}
-                                                    {post.platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-600" />}
-                                                    {post.platforms.includes('tiktok') && <Music className="w-3 h-3 text-slate-900" />}
-                                                    {post.platforms.includes('threads') && <AtSign className="w-3 h-3 text-slate-900" />}
-                                                    {post.platforms.includes('pinterest') && <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>}
-                                                </div>
-                                            </div>
-                                        ))}
-                                        
-                                        <div className="mt-auto pt-2 opacity-0 group-hover/day:opacity-100 transition-opacity">
-                                            <button 
-                                                className="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-slate-500 text-xs font-bold flex items-center justify-center gap-1 bg-white hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                                            >
-                                                <Plus className="w-3 h-3" /> Programmer
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
                 ) : (
-                <div className="flex-1 overflow-auto custom-scrollbar p-4 bg-slate-50">
-                    <div className="grid grid-cols-7 gap-2 min-w-[800px] mb-2">
-                        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
-                            <div key={d} className="text-center text-sm font-bold text-slate-500 uppercase">{d}</div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-7 gap-2 min-w-[800px]">
-                        {monthDays.map(day => {
-                            const isToday = isSameDay(day, new Date())
-                            const isCurrentMonth = day.getMonth() === selectedDate.getMonth()
-                            const dayPosts = posts.filter(p => isSameDay(p.date, day) && (platformFilter === 'all' || p.platforms.includes(platformFilter)) && (statusFilter === 'all' || p.status === statusFilter)).sort((a, b) => a.time.localeCompare(b.time))
-                            
-                            return (
-                                <div 
-                                    key={day.toISOString()} 
-                                    onClick={(e) => handleScheduleOnDay(day, e)}
-                                    onDragOver={(e) => e.preventDefault()}
-                                    onDrop={(e) => handleImageDropOnDay(e, day)}
-                                    className={`flex flex-col bg-white rounded-xl border ${isToday ? 'border-blue-500 shadow-md ring-1 ring-blue-500/20' : 'border-slate-200'} ${!isCurrentMonth ? 'opacity-50 bg-slate-50/50' : ''} min-h-[100px] overflow-hidden group/day cursor-pointer hover:border-blue-300 transition-colors`}
-                                >
-                                    <div className={`px-2 py-1 text-right text-sm font-bold ${isToday ? 'text-blue-600' : 'text-slate-600'}`}>
-                                        {day.getDate()}
-                                    </div>
-                                    <div className="p-1 flex-1 flex flex-col gap-1 overflow-y-auto custom-scrollbar max-h-[80px]">
-                                        {dayPosts.map(post => (
-                                            <div 
-                                                key={post.id} 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOpenModal(post.time, post);
-                                                }}
-                                                className="bg-blue-50 border border-blue-100 rounded px-1.5 py-1 cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-1"
-                                                title={post.content || 'Image'}
-                                            >
-                                                <span className="text-[10px] font-bold text-blue-700">{post.time}</span>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-[10px] text-blue-900 truncate">{post.content || 'Image'}</p>
+                    <div className="flex-1 overflow-auto custom-scrollbar p-4 bg-slate-50">
+                        <div className="grid grid-cols-7 gap-2 min-w-[800px] mb-2">
+                            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
+                                <div key={d} className="text-center text-sm font-bold text-slate-500 uppercase">{d}</div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-2 min-w-[800px]">
+                            {monthDays.map(day => {
+                                const isToday = isSameDay(day, new Date())
+                                const isCurrentMonth = day.getMonth() === selectedDate.getMonth()
+                                const dayPosts = posts.filter(p => isSameDay(p.date, day) && (platformFilter === 'all' || p.platforms.includes(platformFilter)) && (statusFilter === 'all' || p.status === statusFilter)).sort((a, b) => a.time.localeCompare(b.time))
+
+                                return (
+                                    <div
+                                        key={day.toISOString()}
+                                        onClick={(e) => handleScheduleOnDay(day, e)}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={(e) => handleImageDropOnDay(e, day)}
+                                        className={`flex flex-col bg-white rounded-xl border ${isToday ? 'border-blue-500 shadow-md ring-1 ring-blue-500/20' : 'border-slate-200'} ${!isCurrentMonth ? 'opacity-50 bg-slate-50/50' : ''} min-h-[100px] overflow-hidden group/day cursor-pointer hover:border-blue-300 transition-colors`}
+                                    >
+                                        <div className={`px-2 py-1 text-right text-sm font-bold ${isToday ? 'text-blue-600' : 'text-slate-600'}`}>
+                                            {day.getDate()}
+                                        </div>
+                                        <div className="p-1 flex-1 flex flex-col gap-1 overflow-y-auto custom-scrollbar max-h-[80px]">
+                                            {dayPosts.map(post => (
+                                                <div
+                                                    key={post.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenModal(post.time, post);
+                                                    }}
+                                                    className="bg-blue-50 border border-blue-100 rounded px-1.5 py-1 cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-1"
+                                                    title={post.content || 'Image'}
+                                                >
+                                                    <span className="text-[10px] font-bold text-blue-700">{post.time}</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-[10px] text-blue-900 truncate">{post.content || 'Image'}</p>
+                                                    </div>
+                                                    <div className="shrink-0 scale-75 origin-right">
+                                                        {getStatusIcon(post.status)}
+                                                    </div>
                                                 </div>
-                                                <div className="shrink-0 scale-75 origin-right">
-                                                    {getStatusIcon(post.status)}
-                                                </div>
+                                            ))}
+
+                                            <div className="mt-auto opacity-0 group-hover/day:opacity-100 transition-opacity pb-1">
+                                                <button
+                                                    className="w-full py-1 border border-dashed border-slate-200 rounded text-slate-400 text-[10px] font-bold flex items-center justify-center gap-1 bg-white hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                                                >
+                                                    <Plus className="w-3 h-3" /> Ajouter
+                                                </button>
                                             </div>
-                                        ))}
-                                        
-                                        <div className="mt-auto opacity-0 group-hover/day:opacity-100 transition-opacity pb-1">
-                                            <button 
-                                                className="w-full py-1 border border-dashed border-slate-200 rounded text-slate-400 text-[10px] font-bold flex items-center justify-center gap-1 bg-white hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                                            >
-                                                <Plus className="w-3 h-3" /> Ajouter
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                            )
-                        })}
+                                )
+                            })}
+                        </div>
                     </div>
-                </div>
                 )}
             </div>
 
@@ -1071,229 +1092,256 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        
+
                         <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100">
-                        {/* Form Column */}
-                        <div className="p-4 space-y-4 md:w-1/2">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Heure de publication</label>
-                                <select
-                                    value={selectedTime}
-                                    onChange={(e) => setSelectedTime(e.target.value)}
-                                    className="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm bg-white"
-                                    disabled={isLoading}
-                                >
-                                    {timeSlots.map(time => (
-                                        <option 
-                                            key={time} 
-                                            value={time} 
-                                            disabled={!editingPostId && isPastTime(time)}
+                            {/* Form Column */}
+                            <div className="p-4 space-y-4 md:w-1/2">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Quand publier ?</label>
+                                    <div className="flex gap-6 mb-4">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="publishType"
+                                                checked={!isPublishNow}
+                                                onChange={() => setIsPublishNow(false)}
+                                                className="text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                                disabled={isLoading}
+                                            />
+                                            <span className="text-sm text-slate-700">Heure de publication</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="publishType"
+                                                checked={isPublishNow}
+                                                onChange={() => setIsPublishNow(true)}
+                                                className="text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                                disabled={isLoading}
+                                            />
+                                            <span className="text-sm text-slate-700 font-bold text-red-600">Maintenant</span>
+                                        </label>
+                                    </div>
+
+                                    {!isPublishNow && (
+                                        <select
+                                            value={selectedTime}
+                                            onChange={(e) => setSelectedTime(e.target.value)}
+                                            className="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm bg-white"
+                                            disabled={isLoading}
                                         >
-                                            {time} {!editingPostId && isPastTime(time) ? '(Dépassé)' : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Plateformes</label>
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={() => {
-                                            if (selectedPlatforms.length === 5) {
-                                                setSelectedPlatforms([])
-                                            } else {
-                                                setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
-                                            }
-                                        }}
-                                        className={`px-3 py-2 rounded-lg border text-xs font-bold uppercase tracking-wide flex items-center justify-center ${selectedPlatforms.length === 5 ? 'border-purple-600 bg-purple-50 text-purple-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        All
-                                    </button>
-                                    <button 
-                                        onClick={() => togglePlatform('facebook')}
-                                        className={`p-2 rounded-lg border ${selectedPlatforms.includes('facebook') ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <Facebook className="w-5 h-5" />
-                                    </button>
-                                    <button 
-                                        onClick={() => togglePlatform('instagram')}
-                                        className={`p-2 rounded-lg border ${selectedPlatforms.includes('instagram') ? 'border-pink-600 bg-pink-50 text-pink-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <Instagram className="w-5 h-5" />
-                                    </button>
-                                    <button 
-                                        onClick={() => togglePlatform('tiktok')}
-                                        className={`p-2 rounded-lg border ${selectedPlatforms.includes('tiktok') ? 'border-slate-900 bg-slate-100 text-slate-900' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <Music className="w-5 h-5" />
-                                    </button>
-                                    <button 
-                                        onClick={() => togglePlatform('threads')}
-                                        className={`p-2 rounded-lg border ${selectedPlatforms.includes('threads') ? 'border-slate-900 bg-slate-100 text-slate-900' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <AtSign className="w-5 h-5" />
-                                    </button>
-                                    <button 
-                                        onClick={() => togglePlatform('pinterest')}
-                                        className={`p-2 rounded-lg border ${selectedPlatforms.includes('pinterest') ? 'border-red-600 bg-red-50 text-red-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>
-                                    </button>
+                                            {timeSlots.map(time => (
+                                                <option
+                                                    key={time}
+                                                    value={time}
+                                                    disabled={!editingPostId && isPastTime(time)}
+                                                >
+                                                    {time} {!editingPostId && isPastTime(time) ? '(Dépassé)' : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Contenu du post</label>
-                                <textarea 
-                                    value={newPostContent}
-                                    onChange={(e) => setNewPostContent(e.target.value)}
-                                    placeholder="Qu'allez-vous annoncer ?"
-                                    className="w-full border border-slate-200 rounded-xl p-3 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                                    disabled={isLoading}
-                                />
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Média</label>
-                                {selectedMedia ? (
-                                    <div className="relative border border-slate-200 rounded-xl p-2 flex items-start gap-3 bg-slate-50">
-                                        <div className="w-16 h-16 relative rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-black">
-                                            {isVideo(selectedMedia.url) ? (
-                                                <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted />
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Plateformes</label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                if (selectedPlatforms.length === 5) {
+                                                    setSelectedPlatforms([])
+                                                } else {
+                                                    setSelectedPlatforms(['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
+                                                }
+                                            }}
+                                            className={`px-3 py-2 rounded-lg border text-xs font-bold uppercase tracking-wide flex items-center justify-center ${selectedPlatforms.length === 5 ? 'border-purple-600 bg-purple-50 text-purple-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            All
+                                        </button>
+                                        <button
+                                            onClick={() => togglePlatform('facebook')}
+                                            className={`p-2 rounded-lg border ${selectedPlatforms.includes('facebook') ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            <Facebook className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => togglePlatform('instagram')}
+                                            className={`p-2 rounded-lg border ${selectedPlatforms.includes('instagram') ? 'border-pink-600 bg-pink-50 text-pink-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            <Instagram className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => togglePlatform('tiktok')}
+                                            className={`p-2 rounded-lg border ${selectedPlatforms.includes('tiktok') ? 'border-slate-900 bg-slate-100 text-slate-900' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            <Music className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => togglePlatform('threads')}
+                                            className={`p-2 rounded-lg border ${selectedPlatforms.includes('threads') ? 'border-slate-900 bg-slate-100 text-slate-900' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            <AtSign className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => togglePlatform('pinterest')}
+                                            className={`p-2 rounded-lg border ${selectedPlatforms.includes('pinterest') ? 'border-red-600 bg-red-50 text-red-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Contenu du post</label>
+                                    <textarea
+                                        value={newPostContent}
+                                        onChange={(e) => setNewPostContent(e.target.value)}
+                                        placeholder="Qu'allez-vous annoncer ?"
+                                        className="w-full border border-slate-200 rounded-xl p-3 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Média</label>
+                                    {selectedMedia ? (
+                                        <div className="relative border border-slate-200 rounded-xl p-2 flex items-start gap-3 bg-slate-50">
+                                            <div className="w-16 h-16 relative rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-black">
+                                                {isVideo(selectedMedia.url) ? (
+                                                    <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted />
+                                                ) : (
+                                                    <Image src={getImageUrl(selectedMedia.url)} alt={selectedMedia.name} fill className="object-cover" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-bold text-slate-700 truncate">{selectedMedia.name}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setSelectedMedia(null)}
+                                                className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                                disabled={isLoading}
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col sm:flex-row gap-2">
+                                            <label className={`flex-1 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 hover:border-slate-300 cursor-pointer'}`}>
+                                                <ImageIcon className="w-4 h-4" />
+                                                Depuis Médiathèque
+                                                <input
+                                                    type="file"
+                                                    accept="image/*,video/*"
+                                                    className="hidden"
+                                                    disabled={isLoading}
+                                                    onChange={(e) => {
+                                                        if (e.target.files && e.target.files.length > 0) {
+                                                            const file = e.target.files[0];
+                                                            const tempUrl = URL.createObjectURL(file);
+                                                            const tempMedia = {
+                                                                name: file.name,
+                                                                url: tempUrl,
+                                                                type: file.type.startsWith('video/') ? 'video' : 'image',
+                                                                createdAt: new Date().toISOString(),
+                                                                file: file
+                                                            };
+                                                            setSelectedMedia(tempMedia as any);
+                                                            setShowAssetsGrid(false);
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAssetsGrid(!showAssetsGrid)}
+                                                className="flex-1 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-slate-300 transition-all"
+                                                disabled={isLoading}
+                                            >
+                                                <ImageIcon className="w-4 h-4" />
+                                                Depuis Créatives Marketing
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {showAssetsGrid && !selectedMedia && (
+                                        <div className="mt-3 p-3 border border-slate-200 rounded-xl bg-slate-50/50 max-h-[200px] overflow-y-auto custom-scrollbar">
+                                            {assets.length === 0 ? (
+                                                <p className="text-xs text-slate-500 text-center py-4">Aucune créative trouvée. Allez dans Marketing pour en ajouter.</p>
                                             ) : (
-                                                <Image src={getImageUrl(selectedMedia.url)} alt={selectedMedia.name} fill className="object-cover" />
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {assets.map(asset => (
+                                                        <div
+                                                            key={asset.name}
+                                                            onClick={() => {
+                                                                setSelectedMedia(asset)
+                                                                setShowAssetsGrid(false)
+                                                            }}
+                                                            className="aspect-square relative rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-blue-500 transition-colors group bg-black"
+                                                        >
+                                                            {isVideo(asset.url) ? (
+                                                                <>
+                                                                    <video src={getImageUrl(asset.url)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted />
+                                                                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                                                        <div className="bg-white/90 rounded-full p-1 shadow-sm">
+                                                                            <Music className="w-4 h-4 text-slate-800" />
+                                                                        </div>
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <Image src={getImageUrl(asset.url)} alt={asset.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             )}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-bold text-slate-700 truncate">{selectedMedia.name}</p>
-                                        </div>
-                                        <button 
-                                            onClick={() => setSelectedMedia(null)}
-                                            className="p-1 text-slate-400 hover:text-red-500 transition-colors"
-                                            disabled={isLoading}
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col sm:flex-row gap-2">
-                                        <label className={`flex-1 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 hover:border-slate-300 cursor-pointer'}`}>
-                                            <ImageIcon className="w-4 h-4" />
-                                            Depuis Médiathèque
-                                            <input 
-                                                type="file" 
-                                                accept="image/*,video/*" 
-                                                className="hidden" 
-                                                disabled={isLoading}
-                                                onChange={(e) => {
-                                                    if (e.target.files && e.target.files.length > 0) {
-                                                        const file = e.target.files[0];
-                                                        const tempUrl = URL.createObjectURL(file);
-                                                        const tempMedia = {
-                                                            name: file.name,
-                                                            url: tempUrl,
-                                                            type: file.type.startsWith('video/') ? 'video' : 'image',
-                                                            createdAt: new Date().toISOString(),
-                                                            file: file
-                                                        };
-                                                        setSelectedMedia(tempMedia as any);
-                                                        setShowAssetsGrid(false);
-                                                    }
-                                                }} 
-                                            />
-                                        </label>
-                                        <button 
-                                            type="button"
-                                            onClick={() => setShowAssetsGrid(!showAssetsGrid)}
-                                            className="flex-1 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 font-medium flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-slate-300 transition-all"
-                                            disabled={isLoading}
-                                        >
-                                            <ImageIcon className="w-4 h-4" />
-                                            Depuis Créatives Marketing
-                                        </button>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
+                            </div>
 
-                                {showAssetsGrid && !selectedMedia && (
-                                    <div className="mt-3 p-3 border border-slate-200 rounded-xl bg-slate-50/50 max-h-[200px] overflow-y-auto custom-scrollbar">
-                                        {assets.length === 0 ? (
-                                            <p className="text-xs text-slate-500 text-center py-4">Aucune créative trouvée. Allez dans Marketing pour en ajouter.</p>
-                                        ) : (
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {assets.map(asset => (
-                                                    <div 
-                                                        key={asset.name}
-                                                        onClick={() => {
-                                                            setSelectedMedia(asset)
-                                                            setShowAssetsGrid(false)
-                                                        }}
-                                                        className="aspect-square relative rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-blue-500 transition-colors group bg-black"
-                                                    >
-                                                        {isVideo(asset.url) ? (
-                                                            <>
-                                                                <video src={getImageUrl(asset.url)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted />
-                                                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                                                    <div className="bg-white/90 rounded-full p-1 shadow-sm">
-                                                                        <Music className="w-4 h-4 text-slate-800" />
-                                                                    </div>
-                                                                </div>
-                                                            </>
-                                                        ) : (
-                                                            <Image src={getImageUrl(asset.url)} alt={asset.name} fill className="object-cover group-hover:scale-105 transition-transform" />
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        
-                        {/* Preview Column */}
-                        <div className="p-4 md:w-1/2 bg-slate-50/50 flex flex-col">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Smartphone className="w-5 h-5 text-slate-500" />
-                                <h4 className="font-bold text-slate-700">Aperçu mobile</h4>
-                            </div>
-                            
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden max-w-[320px] mx-auto w-full">
-                                {/* Header Mock */}
-                                <div className="p-3 flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-slate-200" />
-                                    <div>
-                                        <div className="h-3 w-20 bg-slate-200 rounded mb-1" />
-                                        <div className="h-2 w-12 bg-slate-100 rounded" />
-                                    </div>
+                            {/* Preview Column */}
+                            <div className="p-4 md:w-1/2 bg-slate-50/50 flex flex-col">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Smartphone className="w-5 h-5 text-slate-500" />
+                                    <h4 className="font-bold text-slate-700">Aperçu mobile</h4>
                                 </div>
-                                {/* Content Mock */}
-                                <div className="px-3 pb-2">
-                                    <p className="text-sm text-slate-800 whitespace-pre-wrap font-sans break-words">{newPostContent || 'Votre texte apparaîtra ici...'}</p>
-                                </div>
-                                {/* Media Mock */}
-                                {selectedMedia && (
-                                    <div className="aspect-square relative bg-black">
-                                        {isVideo(selectedMedia.url) ? (
-                                            <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Image src={getImageUrl(selectedMedia.url)} alt="Preview" fill className="object-cover" />
-                                        )}
+
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden max-w-[320px] mx-auto w-full">
+                                    {/* Header Mock */}
+                                    <div className="p-3 flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-slate-200" />
+                                        <div>
+                                            <div className="h-3 w-20 bg-slate-200 rounded mb-1" />
+                                            <div className="h-2 w-12 bg-slate-100 rounded" />
+                                        </div>
                                     </div>
-                                )}
-                                {/* Footer Mock */}
-                                <div className="p-3 flex items-center gap-4 border-t border-slate-100">
-                                    <div className="h-4 w-4 bg-slate-200 rounded-full" />
-                                    <div className="h-4 w-4 bg-slate-200 rounded-full" />
-                                    <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                    {/* Content Mock */}
+                                    <div className="px-3 pb-2">
+                                        <p className="text-sm text-slate-800 whitespace-pre-wrap font-sans break-words">{newPostContent || 'Votre texte apparaîtra ici...'}</p>
+                                    </div>
+                                    {/* Media Mock */}
+                                    {selectedMedia && (
+                                        <div className="aspect-square relative bg-black">
+                                            {isVideo(selectedMedia.url) ? (
+                                                <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Image src={getImageUrl(selectedMedia.url)} alt="Preview" fill className="object-cover" />
+                                            )}
+                                        </div>
+                                    )}
+                                    {/* Footer Mock */}
+                                    <div className="p-3 flex items-center gap-4 border-t border-slate-100">
+                                        <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                        <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                        <div className="h-4 w-4 bg-slate-200 rounded-full" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        </div>
-                        
+
                         <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 sticky bottom-0 z-20 shrink-0">
                             {editingPostId && (
-                                <button 
+                                <button
                                     onClick={(e) => {
                                         handleDeletePost(editingPostId, e as any)
                                         setIsModalOpen(false)
@@ -1304,7 +1352,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     <X className="w-4 h-4" /> Supprimer
                                 </button>
                             )}
-                            <button 
+                            <button
                                 onClick={() => {
                                     setIsModalOpen(false)
                                     setSelectedSuggestedProduct(null)
@@ -1314,7 +1362,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                             >
                                 Annuler
                             </button>
-                            <button 
+                            <button
                                 onClick={handleSavePost}
                                 disabled={isLoading}
                                 className="px-4 py-2 font-bold bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"

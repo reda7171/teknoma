@@ -21,7 +21,9 @@ export default async function Footer() {
         paypal,
         cmi,
         cod,
-        bank
+        bank,
+        developer_name,
+        developer_link
     ] = await Promise.all([
         isFeatureEnabled('feature_seller', false),
         isFeatureEnabled('feature_exchange'),
@@ -40,7 +42,9 @@ export default async function Footer() {
         getSetting('payment_paypal_enabled'),
         getSetting('payment_cmi_enabled'),
         getSetting('payment_cod_enabled'),
-        getSetting('payment_bank_transfer_enabled')
+        getSetting('payment_bank_transfer_enabled'),
+        getSetting('developer_name'),
+        getSetting('developer_link')
     ])
  
     const features = {
@@ -69,5 +73,10 @@ export default async function Footer() {
         bank: bank === 'true',
     }
 
-    return <FooterClient features={features} siteLogo={siteLogo} socials={socials} paymentSettings={paymentSettings} />
+    const developer = {
+        name: developer_name || 'itsmereda1',
+        link: developer_link || 'https://instagram.com/itsmereda1',
+    }
+
+    return <FooterClient features={features} siteLogo={siteLogo} socials={socials} paymentSettings={paymentSettings} developer={developer} />
 }

@@ -706,8 +706,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 </div>
             </div>
 
-            {/* Cart Drawer */}
-            <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
+            <CartDrawer isOpen={isCartOpen} onClose={closeCart} is3For4Active={features.threeForFour === true} />
 
             {/* Mobile Bottom Navigation */}
             <MobileBottomNav onMenuClick={() => setMobileMenuOpen(true)} />

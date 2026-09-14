@@ -78,10 +78,17 @@ const FEATURES = [
     },
     {
         key: 'feature_chatbot',
-        label: 'Assistant Riwaya',
-        description: 'Active l\'assistant virtuel (ChatBot) sur toutes les pages du site.',
-        icon: Zap,
-        color: 'text-indigo-600'
+        label: 'Chatbot IA',
+        description: 'Active le chatbot assistant virtuel sur le site.',
+        icon: MessageCircle,
+        color: 'text-purple-600'
+    },
+    {
+        key: 'feature_3_for_4',
+        label: 'Promotion 3=4',
+        description: 'Active la promotion "4ème article gratuit (le moins cher)".',
+        icon: Calculator,
+        color: 'text-rose-500'
     },
     {
         key: 'feature_whatsapp',
