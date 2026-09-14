@@ -1,11 +1,15 @@
 import webpush from 'web-push'
 
-// Configuration VAPID
-webpush.setVapidDetails(
-    process.env.VAPID_EMAIL || 'mailto:admin@riwaya.com',
-    process.env.VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
-)
+// Configuration VAPID (only if keys are present to avoid build errors)
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+        process.env.VAPID_EMAIL || 'mailto:admin@riwaya.com',
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+    )
+} else {
+    console.warn('VAPID keys not found. Web push notifications will not work.');
+}
 
 export interface PushPayload {
     title: string
