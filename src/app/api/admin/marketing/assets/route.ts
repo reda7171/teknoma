@@ -63,15 +63,15 @@ export async function GET() {
             const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'books')
             try {
                 const files = await fs.readdir(uploadDir)
-                const marketingFiles = files.filter(file => 
-                    file.startsWith('creative_') || 
-                    file.startsWith('pack_') || 
+                const marketingFiles = files.filter(file =>
+                    file.startsWith('creative_') ||
+                    file.startsWith('pack_') ||
                     file.startsWith('desc_')
                 )
 
                 if (marketingFiles.length > 0) {
                     const diskAssets = []
-                    
+
                     // Pré-charger les livres et packs pour le matching (plus efficace qu'une requête par fichier)
                     const [allBooks, allPacks] = await Promise.all([
                         prisma.book.findMany({ select: { id: true, title: true } }),
@@ -99,7 +99,7 @@ export async function GET() {
                         }
 
                         const stats = await fs.stat(path.join(uploadDir, file))
-                        
+
                         const assetData = {
                             name: file,
                             url: `/uploads/books/${file}`,
@@ -115,15 +115,15 @@ export async function GET() {
                             try {
                                 await prisma.marketingAsset.upsert({
                                     where: { name: file },
-                                    update: { 
-                                        url: assetData.url, 
+                                    update: {
+                                        url: assetData.url,
                                         type,
                                         bookId,
                                         packId
                                     },
-                                    create: { 
-                                        name: file, 
-                                        url: assetData.url, 
+                                    create: {
+                                        name: file,
+                                        url: assetData.url,
                                         type,
                                         bookId,
                                         packId
@@ -134,7 +134,7 @@ export async function GET() {
                             }
                         }
                     }
-                    
+
                     // Si on a récupéré du disque, on trie et on utilise ces données
                     if (assets.length === 0) {
                         assets = diskAssets.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -162,15 +162,15 @@ export async function POST(request: NextRequest) {
 
         const asset = await prisma.marketingAsset.upsert({
             where: { name },
-            update: { 
-                url, 
+            update: {
+                url,
                 type: type || 'CREATIVE',
                 bookId,
                 packId
             },
-            create: { 
-                name, 
-                url, 
+            create: {
+                name,
+                url,
                 type: type || 'CREATIVE',
                 bookId,
                 packId

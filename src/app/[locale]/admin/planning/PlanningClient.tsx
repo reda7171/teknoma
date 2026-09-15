@@ -329,8 +329,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0]
-            if (!file.type.startsWith('image/')) {
-                showToast('Veuillez déposer une image valide.', 'error')
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showToast('Veuillez déposer une image ou une vidéo valide.', 'error')
                 return
             }
 
@@ -371,8 +371,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0]
-            if (!file.type.startsWith('image/')) {
-                showToast('Veuillez déposer une image valide.', 'error')
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showToast('Veuillez déposer une image ou une vidéo valide.', 'error')
                 return
             }
 
@@ -409,7 +409,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const formData = new FormData()
             formData.append('file', mediaFile)
             try {
-                const upRes = await fetch('/api/admin/upload', {
+                const upRes = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
                 })
