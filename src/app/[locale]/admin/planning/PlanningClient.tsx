@@ -656,9 +656,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'PUBLISHED': return <CheckCircle className="w-3 h-3 text-green-500" title="Publié" />
-            case 'FAILED': return <AlertCircle className="w-3 h-3 text-red-500" title="Échec de publication" />
-            default: return <Loader2 className="w-3 h-3 text-blue-400 animate-spin" title="En attente" />
+            case 'PUBLISHED': return <span title="Publié"><CheckCircle className="w-3 h-3 text-green-500" /></span>
+            case 'FAILED': return <span title="Échec de publication"><AlertCircle className="w-3 h-3 text-red-500" /></span>
+            default: return <span title="En attente"><Loader2 className="w-3 h-3 text-blue-400 animate-spin" /></span>
         }
     }
 
