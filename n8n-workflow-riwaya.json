@@ -316,7 +316,7 @@
             },
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $json.tiktok_access_token }}"
+              "value": "={{ 'Bearer ' + $json.tiktok_access_token }}"
             }
           ]
         },
