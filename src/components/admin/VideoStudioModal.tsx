@@ -714,6 +714,9 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                                         { key: 'tiktok', label: 'TikTok', emoji: '🎵', cls: 'bg-black text-white border-white' },
                                         { key: 'instagram', label: 'Instagram', emoji: '📸', cls: 'bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 text-white border-pink-500' },
                                         { key: 'facebook', label: 'Facebook', emoji: '👍', cls: 'bg-blue-600 text-white border-blue-500' },
+                                        { key: 'threads', label: 'Threads', emoji: '🧵', cls: 'bg-slate-900 text-white border-slate-700' },
+                                        { key: 'pinterest', label: 'Pinterest', emoji: '📌', cls: 'bg-red-600 text-white border-red-500' },
+                                        { key: 'all', label: 'Toutes', emoji: '🚀', cls: 'bg-indigo-600 text-white border-indigo-500' },
                                     ].map(({ key, label, emoji, cls }) => (
                                         <button key={key} onClick={() => setPlatform(key as any)}
                                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl border-2 text-sm font-bold transition-all ${platform === key ? cls : 'border-white/10 bg-white/5 text-white/50'}`}>
