@@ -72,6 +72,11 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [dailySuggestions, setDailySuggestions] = useState<SuggestedBook[]>([])
     const [selectedSuggestedProduct, setSelectedSuggestedProduct] = useState<SuggestedBook | null>(null)
 
+    // Popup "Quand publier ?"
+    const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false)
+    const [autoSchedulePlatform, setAutoSchedulePlatform] = useState('all')
+    const [autoScheduleMode, setAutoScheduleMode] = useState<'now' | 'schedule'>('schedule')
+
     const scrollRef = useRef<HTMLDivElement>(null)
 
     const seededRandom = (seed: number) => {
@@ -485,8 +490,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         setIsLoading(false)
     }
 
-    const handleAutoScheduleAll = async () => {
-        console.log('[PlanningClient] Clic sur Auto-programmer détecté ! Lancement...');
+    const handleAutoScheduleAll = async (mode: 'now' | 'schedule', platform: string) => {
+        setShowAutoScheduleModal(false)
         setIsLoading(true);
         const unprogrammed = dailySuggestions.filter(b => !b.isProgrammed);
         if (unprogrammed.length === 0) {
@@ -518,14 +523,15 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const content = `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
 
             const [hours, minutes] = timeSlot.split(':');
-            const scheduleAt = new Date(selectedDate);
-            scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            const scheduleAt = mode === 'now' ? new Date() : new Date(selectedDate);
+            if (mode !== 'now') scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            const platforms = platform === 'all' ? ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'] : [platform];
 
             const payload = {
                 date: scheduleAt.toISOString(),
-                time: timeSlot,
+                time: mode === 'now' ? new Date().toTimeString().slice(0, 5) : timeSlot,
                 content: content,
-                platforms: ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'],
+                platforms: platforms,
                 mediaUrl: book.image,
                 suggestedProductId: book.id,
                 suggestedProductType: book.type
@@ -719,13 +725,44 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 <Trash2 className="w-3.5 h-3.5" /> Tout Vider
                             </button>
                             <button
-                                onClick={handleAutoScheduleAll}
+                                onClick={() => setShowAutoScheduleModal(true)}
                                 disabled={isLoading}
                                 className="p-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors border border-green-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
                                 title="Programmer aléatoirement"
                             >
                                 {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Auto-programmer
                             </button>
+                            {showAutoScheduleModal && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowAutoScheduleModal(false)}>
+                                    <div className="bg-white rounded-2xl shadow-2xl p-6 w-80 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="font-black text-slate-800 text-base">Quand publier ?</h3>
+                                            <button onClick={() => setShowAutoScheduleModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-4 h-4" /></button>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Heure de publication</label>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setAutoScheduleMode('now')} className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-all ${autoScheduleMode === 'now' ? 'bg-green-600 text-white border-green-600 shadow-lg' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>Maintenant</button>
+                                                <button onClick={() => setAutoScheduleMode('schedule')} className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-all ${autoScheduleMode === 'schedule' ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>Programmer</button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Plateformes</label>
+                                            <select value={autoSchedulePlatform} onChange={e => setAutoSchedulePlatform(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                                <option value="all">Toutes</option>
+                                                <option value="facebook">Facebook</option>
+                                                <option value="instagram">Instagram</option>
+                                                <option value="threads">Threads</option>
+                                                <option value="tiktok">TikTok</option>
+                                                <option value="pinterest">Pinterest</option>
+                                            </select>
+                                        </div>
+                                        <button onClick={() => handleAutoScheduleAll(autoScheduleMode, autoSchedulePlatform)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition-colors flex items-center justify-center gap-2">
+                                            <Plus className="w-4 h-4" /> Lancer
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <button
                                 onClick={() => generateSuggestions(new Date().getTime())}
                                 className="p-1.5 bg-white/50 hover:bg-white text-blue-600 rounded-lg transition-colors border border-blue-200/50 shadow-sm flex items-center gap-1 text-xs font-bold"
