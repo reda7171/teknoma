@@ -85,7 +85,28 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
             {/* Avatar */}
             <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0 mt-auto relative shadow-sm">
                 {testimonial.avatarUrl ? (
-                    <Image src={testimonial.avatarUrl} alt={testimonial.customerName} fill className="object-cover" />
+                    (() => {
+                        const normalizedImg = testimonial.avatarUrl?.trim() || '';
+                        const finalImage = normalizedImg.startsWith('http') || normalizedImg.startsWith('data:') 
+                            ? normalizedImg 
+                            : normalizedImg.startsWith('/') 
+                                ? normalizedImg 
+                                : '/' + normalizedImg;
+                        return <Image 
+                            src={finalImage} 
+                            alt={testimonial.customerName} 
+                            fill 
+                            className="object-cover" 
+                            unoptimized={process.env.NODE_ENV === 'development'} 
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {
+                                    target.src = `https://riwaya.store${new URL(target.src).pathname}`;
+                                    target.srcset = '';
+                                }
+                            }}
+                        />
+                    })()
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
                         {testimonial.customerName.charAt(0).toUpperCase()}

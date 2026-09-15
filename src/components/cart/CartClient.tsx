@@ -80,33 +80,33 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
             </div>
 
             {items.length === 0 ? (
-                <div className="bg-white rounded-[3rem] p-32 text-center shadow-2xl shadow-black/5 border border-gray-100">
-                    <div className="w-32 h-32 bg-pixio-cream rounded-full flex items-center justify-center mx-auto mb-10 transition-transform hover:scale-110">
-                        <ShoppingCart className="w-12 h-12 text-gray-500" />
+                <div className="bg-white rounded-3xl sm:rounded-[3rem] p-8 sm:p-16 md:p-32 text-center shadow-2xl shadow-black/5 border border-gray-100 mx-4 sm:mx-0">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-pixio-cream rounded-full flex items-center justify-center mx-auto mb-8 sm:mb-10 transition-transform hover:scale-110">
+                        <ShoppingCart className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500" />
                     </div>
-                    <h2 className="text-3xl font-black mb-6 tracking-tighter">{t('EmptyTitle')}<span className="text-gray-500">.</span></h2>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-16 max-w-sm mx-auto leading-loose">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 sm:mb-6 tracking-tighter">{t('EmptyTitle')}<span className="text-gray-500">.</span></h2>
+                    <p className="text-xs sm:text-sm md:text-base rtl:text-lg font-black uppercase tracking-widest rtl:tracking-normal text-gray-600 mb-10 sm:mb-16 max-w-md mx-auto leading-loose px-2">
                         {t('EmptyDesc')}
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4 sm:px-0">
                         <Link
                             href="/books"
-                            className="px-12 py-6 bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:bg-gray-800 transition-all shadow-xl"
+                            className="px-8 sm:px-12 py-5 sm:py-6 bg-black text-white text-[10px] sm:text-xs md:text-sm rtl:text-base font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:bg-gray-800 transition-all shadow-xl w-full sm:w-auto text-center"
                         >
                             {t('BrowseLibrary')}
                         </Link>
                         <Link
                             href="/packs"
-                            className="px-12 py-6 bg-white text-black border-2 border-black/5 text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:border-black transition-all"
+                            className="px-8 sm:px-12 py-5 sm:py-6 bg-white text-black border-2 border-black/5 text-[10px] sm:text-xs md:text-sm rtl:text-base font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:border-black transition-all w-full sm:w-auto text-center"
                         >
                             {t('ViewBundles')}
                         </Link>
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-16">
                     {/* Cart Items */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-6 sm:space-y-8 px-4 sm:px-0">
 
                         {items.map((item) => (
                             <div

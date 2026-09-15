@@ -556,15 +556,12 @@
     },
     {
       "parameters": {
+        "authentication": "oAuth2",
         "method": "POST",
-        "url": "https://api.pinterest.com/v5/pins",
+        "url": "https://api-sandbox.pinterest.com/v5/pins",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.pinterest_access_token }}"
-            },
             {
               "name": "Content-Type",
               "value": "application/json"

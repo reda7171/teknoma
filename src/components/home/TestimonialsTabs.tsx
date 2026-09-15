@@ -55,15 +55,30 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
 
                 {activeTab === 'image' && imageTestimonials.length > 0 && (
                     <div className="flex overflow-x-auto gap-6 animate-in fade-in zoom-in-95 duration-500 w-full max-w-7xl mx-auto pb-8 px-4 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-                        {imageTestimonials.map((testimonial: any, idx: number) => (
-                            <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up" className="min-w-[260px] md:min-w-[300px] max-w-[300px] shrink-0 snap-center">
-                                <div className="group relative w-full aspect-[9/16] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white hover:border-emerald-400 bg-gray-100 hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.4)] transition-all duration-500 ease-out cursor-pointer">
+                        {imageTestimonials.map((testimonial: any, idx: number) => {
+                            const normalizedImg = testimonial.imageUrl?.trim() || '';
+                            const finalImage = normalizedImg.startsWith('http') || normalizedImg.startsWith('data:') 
+                                ? normalizedImg 
+                                : normalizedImg.startsWith('/') 
+                                    ? normalizedImg 
+                                    : '/' + normalizedImg;
+                            
+                            return (
+                                <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up" className="min-w-[260px] md:min-w-[300px] max-w-[300px] shrink-0 snap-center">
+                                    <div className="group relative w-full aspect-[9/16] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white hover:border-emerald-400 bg-gray-100 hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.4)] transition-all duration-500 ease-out cursor-pointer">
                                     <Image
-                                        src={testimonial.imageUrl}
+                                        src={finalImage}
                                         alt={testimonial.customerName || 'Testimonial'}
                                         fill
                                         className="object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 ease-out"
-                                        unoptimized
+                                        unoptimized={process.env.NODE_ENV === 'development'}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {
+                                                target.src = `https://riwaya.store${new URL(target.src).pathname}`;
+                                                target.srcset = '';
+                                            }
+                                        }}
                                     />
                                     {/* Gradient overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500" />
@@ -88,7 +103,8 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                                     </div>
                                 </div>
                             </ScrollReveal>
-                        ))}
+                        )
+                    })}
                     </div>
                 )}
             </div>
