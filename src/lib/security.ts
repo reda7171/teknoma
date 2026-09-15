@@ -58,7 +58,8 @@ export function isValidPhone(phone: string): boolean {
  */
 export function sanitizeFilename(filename: string): string {
     return filename
-        .replace(/[^a-zA-Z0-9._-]/g, '_')
+        .replace(/[\/\\:*?"<>|]/g, '_') // Remplacer uniquement les caractères interdits par le système de fichiers
+        .replace(/\s+/g, '-') // Remplacer les espaces par des tirets
         .replace(/\.{2,}/g, '.')
         .replace(/^\.+/, '')
         .slice(0, 255)

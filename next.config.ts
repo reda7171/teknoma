@@ -55,6 +55,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: process.env.NODE_ENV === 'production',
   images: {
+    unoptimized: process.env.NODE_ENV === 'development',
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
     dangerouslyAllowLocalIP: true,
@@ -205,12 +206,12 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [],
       afterFiles: [],
-      fallback: [
+      fallback: process.env.NODE_ENV === 'development' ? [
         {
           source: '/uploads/:path*',
           destination: 'https://riwaya.store/uploads/:path*',
         },
-      ],
+      ] : [],
     }
   },
 
