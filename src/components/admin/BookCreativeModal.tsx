@@ -1144,6 +1144,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                             { id: 'facebook', label: 'FB', icon: 'FB' },
                                             { id: 'instagram', label: 'IG', icon: 'IG' },
                                             { id: 'tiktok', label: 'TK', icon: 'TK' },
+                                            { id: 'threads', label: 'TH', icon: 'TH' },
+                                            { id: 'pinterest', label: 'PI', icon: 'PI' },
                                             { id: 'all', label: 'All', icon: '🚀' }
                                         ].map(p => (
                                             <button

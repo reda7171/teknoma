@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useState, useEffect } from 'react'
-import { X, Download, ImageIcon, Sparkles, Facebook, Instagram, Phone, Loader2, Send, Clock, Music } from 'lucide-react'
+import { X, Download, ImageIcon, Sparkles, Facebook, Instagram, Phone, Loader2, Send, Clock, Music, AtSign } from 'lucide-react'
 import * as htmlToImage from 'html-to-image'
 import { injectXMPToPNG } from '@/lib/pngXmpInjector'
 import { normalizeImage } from '@/lib/utils'
@@ -2090,6 +2090,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         { val: 'facebook', label: 'Facebook', Icon: Facebook, color: 'blue' },
                                         { val: 'instagram', label: 'Instagram', Icon: Instagram, color: 'pink' },
                                         { val: 'tiktok', label: 'TikTok', Icon: Music, color: 'black' },
+                                        { val: 'threads', label: 'Threads', Icon: AtSign, color: 'slate' },
                                         { val: 'pinterest', label: 'Pinterest', Icon: ImageIcon, color: 'red' },
                                         { val: 'all', label: 'Toutes', Icon: Send, color: 'indigo' },
                                     ] as const).map(({ val, label, Icon, color }) => {
