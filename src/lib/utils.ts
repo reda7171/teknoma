@@ -14,10 +14,8 @@ export function normalizeImage(raw: string | null | undefined): string {
     const img = raw?.trim() || ''
     if (!img) return '/book-placeholder.png'
     
-    // Always use absolute URL for uploads so Next.js Image optimizer fetches via HTTP
-    // This fixes issues where the local public directory doesn't have the uploaded files.
     if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
-        return `https://riwaya.store${img.startsWith('/') ? img : '/' + img}`;
+        return img.startsWith('/') ? img : '/' + img;
     }
 
     // DÃ©jÃ  une URL ou dÃ©jÃ  formatÃ©

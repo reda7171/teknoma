@@ -29,7 +29,8 @@ interface CheckoutForm {
 export default function CheckoutClient({ 
     user,
     minOrderAmount = 0,
-    paymentSettings
+    paymentSettings,
+    is3For4Active
 }: { 
     user?: { fullName?: string | null; email: string; image?: string | null; credits?: number } | null;
     minOrderAmount?: number;
