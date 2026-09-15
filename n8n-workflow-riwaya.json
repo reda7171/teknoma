@@ -108,7 +108,9 @@
       "position": [
         720,
         180
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -196,7 +198,9 @@
       "position": [
         720,
         460
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -245,7 +249,9 @@
       "position": [
         960,
         460
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -332,7 +338,9 @@
       "position": [
         720,
         620
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -400,7 +408,9 @@
       "position": [
         720,
         780
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -449,7 +459,9 @@
       "position": [
         960,
         780
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -598,7 +610,9 @@
       "position": [
         720,
         940
-      ]
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
     }
   ],
   "connections": {
