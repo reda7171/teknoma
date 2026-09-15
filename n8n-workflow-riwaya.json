@@ -200,6 +200,21 @@
     },
     {
       "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "id": "ig-wait",
+      "name": "IG - Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        840,
+        460
+      ],
+      "webhookId": "ig-wait-webhook"
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "={{ 'https://graph.facebook.com/v19.0/' + ($('Instagram?').item.json.instagram_account_id || '17841448677677311') + '/media_publish' }}",
         "sendQuery": true,
@@ -623,6 +638,17 @@
       ]
     },
     "IG - Créer Container": {
+      "main": [
+        [
+          {
+            "node": "IG - Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG - Wait": {
       "main": [
         [
           {
