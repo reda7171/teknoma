@@ -65,18 +65,15 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                             
                             return (
                                 <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up" className="min-w-[260px] md:min-w-[300px] max-w-[300px] shrink-0 snap-center">
-                                    <div className="group relative w-full aspect-[9/16] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white hover:border-emerald-400 bg-gray-100 hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.4)] transition-all duration-500 ease-out cursor-pointer">
-                                    <Image
+                                    <div className="group relative w-full aspect-[9/16] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white hover:border-emerald-400 bg-gray-100 hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.4)] transition-all duration-500 ease-out cursor-pointer @container">
+                                    <img
                                         src={finalImage}
                                         alt={testimonial.customerName || 'Testimonial'}
-                                        fill
-                                        className="object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 ease-out"
-                                        unoptimized={process.env.NODE_ENV === 'development'}
+                                        className="absolute top-0 left-0 w-full h-auto min-h-full object-cover transition-transform duration-[4000ms] ease-linear group-hover:-translate-y-[calc(100%-100cqh)]"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {
                                                 target.src = `https://riwaya.store${new URL(target.src).pathname}`;
-                                                target.srcset = '';
                                             }
                                         }}
                                     />
