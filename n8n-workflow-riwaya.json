@@ -87,7 +87,7 @@
           "parameters": [
             {
               "name": "url",
-              "value": "={{ $json.image }}"
+              "value": "={{ encodeURI($json.image) }}"
             },
             {
               "name": "message",
@@ -179,7 +179,7 @@
           "parameters": [
             {
               "name": "image_url",
-              "value": "={{ $json.image }}"
+              "value": "={{ encodeURI($json.image) }}"
             },
             {
               "name": "caption",
@@ -307,7 +307,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"post_info\": {\n    \"title\": \"{{ $json.caption }}\",\n    \"privacy_level\": \"PUBLIC_TO_EVERYONE\",\n    \"disable_duet\": false,\n    \"disable_comment\": false,\n    \"disable_stitch\": false\n  },\n  \"source_info\": {\n    \"source\": \"PULL_FROM_URL\",\n    {{ $json.image && !$json.image.toLowerCase().endsWith('.mp4') ? '\\\"photo_images\\\": [\\\"' + $json.image + '\\\"]' : '\\\"video_url\\\": \\\"' + $json.image + '\\\"' }}\n  },\n  \"post_mode\": \"DIRECT_POST\",\n  \"media_type\": \"{{ $json.image && !$json.image.toLowerCase().endsWith('.mp4') ? 'PHOTO' : 'VIDEO' }}\"\n}",
+        "jsonBody": "={{ { post_info: { title: $json.caption, privacy_level: 'PUBLIC_TO_EVERYONE', disable_duet: false, disable_comment: false, disable_stitch: false }, source_info: Object.assign({ source: 'PULL_FROM_URL' }, $json.image && !$json.image.toLowerCase().endsWith('.mp4') ? { photo_images: [encodeURI($json.image)] } : { video_url: encodeURI($json.image) }), post_mode: 'DIRECT_POST', media_type: $json.image && !$json.image.toLowerCase().endsWith('.mp4') ? 'PHOTO' : 'VIDEO' } }}",
         "options": {}
       },
       "id": "tiktok-post",
@@ -375,7 +375,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"media_type\": \"{{ $json.image ? 'IMAGE' : 'TEXT' }}\",\n  {{ $json.image ? '\\\"image_url\\\": \\\"' + $json.image + '\\\",' : '' }}\n  \"text\": \"{{ $json.caption }}\"\n}",
+        "jsonBody": "={{ Object.assign({ media_type: $json.image ? 'IMAGE' : 'TEXT', text: $json.caption }, $json.image ? { image_url: encodeURI($json.image) } : {}) }}",
         "options": {}
       },
       "id": "threads-container",
@@ -556,7 +556,6 @@
     },
     {
       "parameters": {
-        "authentication": "oAuth2",
         "method": "POST",
         "url": "https://api-sandbox.pinterest.com/v5/pins",
         "sendHeaders": true,
@@ -565,12 +564,16 @@
             {
               "name": "Content-Type",
               "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.pinterest_access_token }}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"board_id\": \"{{ $json.pinterest_board_id }}\",\n  \"title\": \"{{ $json.title }}\",\n  \"description\": \"{{ $json.caption }}\",\n  \"link\": \"{{ $json.itemUrl }}\",\n  \"media_source\": {\n    \"source_type\": \"image_url\",\n    \"url\": \"{{ $json.image }}\"\n  }\n}",
+        "jsonBody": "={{ { board_id: $json.pinterest_board_id, title: $json.title, description: $json.caption, link: $json.itemUrl, media_source: { source_type: 'image_url', url: encodeURI($json.image) } } }}",
         "options": {}
       },
       "id": "post-pinterest",

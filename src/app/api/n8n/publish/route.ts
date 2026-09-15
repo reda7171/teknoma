@@ -113,6 +113,13 @@ export async function POST(req: NextRequest) {
             imageUrl = `${baseUrl}${imagePath}`;
         }
 
+        // Encoder les caractères non-ASCII dans l'URL (ex: noms de fichiers arabes)
+        // encodeURI préserve les / : ? & = mais encode les caractères spéciaux
+        try {
+            const urlObj = new URL(imageUrl);
+            imageUrl = urlObj.origin + urlObj.pathname.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/') + urlObj.search;
+        } catch { /* ignore si URL invalide */ }
+
         // --- PROXY HTTPS POUR META (Instagram/Facebook/Threads) ---
         // Instagram/Facebook exigent HTTPS. On utilise wsrv.nl comme proxy gratuit pour les images.
         const isVideo = imageUrl && (imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm'));
