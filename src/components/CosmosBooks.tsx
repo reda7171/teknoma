@@ -330,7 +330,7 @@ export default function CosmosBooks({
                 sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 20vw"
                 className="object-cover" 
                 onError={() => handleImageError(centerBook.id)} 
-                priority
+                priority={true}
               />
             )}
           </div>

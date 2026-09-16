@@ -19,9 +19,9 @@ export default function BookSubNav({ bookTitle, homeLabel, booksLabel, backLabel
                 <nav aria-label="Breadcrumb" className="overflow-hidden flex-1">
                     <ol className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs rtl:text-[11px] rtl:sm:text-sm font-medium text-gray-500 whitespace-nowrap">
                         <li className="flex items-center">
-                            <Link href="/" className="hover:text-black transition-colors flex items-center gap-1">
+                            <Link href="/" className="hover:text-black transition-colors flex items-center gap-1" aria-label={homeLabel}>
                                 <Home className="w-3 h-3" />
-                                <span className="hidden sm:inline">{homeLabel}</span>
+                                <span className="hidden sm:inline" aria-hidden="true">{homeLabel}</span>
                             </Link>
                         </li>
                         <li className="flex items-center gap-1.5 sm:gap-2">

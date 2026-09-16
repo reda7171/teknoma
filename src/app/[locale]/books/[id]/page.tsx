@@ -384,12 +384,12 @@ export default async function BookDetailPage({
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                            <UserIcon className="w-8 h-8 text-gray-300" />
+                                            <UserIcon className="w-8 h-8 text-gray-500" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
+                                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
                                     <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
                                         {book.author}
                                     </Link>
@@ -432,13 +432,13 @@ export default async function BookDetailPage({
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
-                                                            <span className="text-gray-300 font-black text-xs opacity-50">Blog</span>
+                                                            <span className="text-gray-500 font-black text-xs opacity-50">Blog</span>
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0 py-1">
                                                     {post.publishedAt && (
-                                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
                                                             <Calendar className="w-2.5 h-2.5" />
                                                             {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
                                                         </p>
@@ -500,7 +500,7 @@ export default async function BookDetailPage({
                                     {displayTitle}<span className="text-gray-200">.</span>
                                 </h1>
 
-                                <p className="text-xl font-black text-gray-300 uppercase tracking-widest">
+                                <p className="text-xl font-black text-gray-500 uppercase tracking-widest">
                                     {tCommon('By')} <Link href={`/authors/${encodeURIComponent(book.author)}`} className="hover:text-black transition-colors border-b-2 border-transparent hover:border-black">{book.author}</Link>
                                 </p>
                             </div>
@@ -518,7 +518,7 @@ export default async function BookDetailPage({
                                     </div>
                                     <span className="text-[10px] font-black text-black ml-2 uppercase tracking-widest">{averageRating > 0 ? averageRating.toFixed(1) : '5.0'}</span>
                                 </div>
-                                <span className="text-[9px] rtl:text-sm rtl:tracking-normal font-black text-gray-400 uppercase tracking-[0.2em]">
+                                <span className="text-[9px] rtl:text-sm rtl:tracking-normal font-black text-gray-500 uppercase tracking-[0.2em]">
                                     {reviews.length > 0 ? tBook('ReaderReviews', { count: reviews.length }) : tBook('BeFirstToReview')}
                                 </span>
                             </div>
@@ -528,7 +528,7 @@ export default async function BookDetailPage({
                                 <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-black/5">
                                     <div className="flex items-baseline gap-3 mb-3 md:mb-4">
                                         <span className="text-4xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
-                                        <span className="text-xl font-black text-gray-300 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'درهم'}</span>
+                                        <span className="text-xl font-black text-gray-500 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'درهم'}</span>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2">
                                         <div className="flex items-center gap-2">
@@ -537,7 +537,7 @@ export default async function BookDetailPage({
                                                 {tBook('TaxesIncluded')}
                                             </p>
                                         </div>
-                                        <span className="hidden sm:inline text-gray-300">•</span>
+                                        <span className="hidden sm:inline text-gray-500">•</span>
                                         <div className="flex items-center gap-2">
                                             <Package className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                                             <p className="text-xs sm:text-sm rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
@@ -556,14 +556,14 @@ export default async function BookDetailPage({
                                         {book.seller.fullName?.substring(0, 2) || 'SE'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-0.5">
                                             {tBook('SoldBy')}
                                         </p>
                                         <p className="text-sm font-black text-black truncate">
                                             {book.seller.fullName || book.seller.email}
                                         </p>
                                         {book.seller.city && (
-                                            <p className="text-[10px] font-medium text-gray-400 flex items-center gap-1 mt-0.5">
+                                            <p className="text-[10px] font-medium text-gray-500 flex items-center gap-1 mt-0.5">
                                                 <span>📍</span> {book.seller.city}
                                             </p>
                                         )}
@@ -582,19 +582,19 @@ export default async function BookDetailPage({
                                     <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Truck className="w-6 h-6 text-black" />
                                     </div>
-                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('FastMove')}</p>
+                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{tBook('FastMove')}</p>
                                 </div>
                                 <div className="text-center group cursor-pointer">
                                     <div className="w-14 h-14 bg-pixio-pink rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Shield className="w-6 h-6 text-black" />
                                     </div>
-                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Secured')}</p>
+                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{tBook('Secured')}</p>
                                 </div>
                                 <div className="text-center group cursor-pointer">
                                     <div className="w-14 h-14 bg-pixio-yellow rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Package className="w-6 h-6 text-black" />
                                     </div>
-                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{tBook('Original')}</p>
+                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{tBook('Original')}</p>
                                 </div>
                             </div>
 
@@ -608,7 +608,7 @@ export default async function BookDetailPage({
                                 ) : (
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 bg-gray-200 rounded-full" />
-                                        <p className="text-[10px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black text-gray-300 uppercase tracking-widest">{tBook('OutOfStock')}</p>
+                                        <p className="text-[10px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black text-gray-500 uppercase tracking-widest">{tBook('OutOfStock')}</p>
                                     </div>
                                 )}
 
@@ -674,7 +674,7 @@ export default async function BookDetailPage({
                             {/* Frequently Bought Together (Upsell/Cross-sell) */}
                             {frequentlyBoughtTogether.length > 0 && (
                                 <div className="mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                                    <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h3>
+                                    <h2 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h2>
                                     <div className="flex flex-col gap-3 sm:gap-4">
                                         {frequentlyBoughtTogether.map(fbBook => {
                                             const fbDisplayTitle = getLocalizedTitle(fbBook, locale);
@@ -691,7 +691,7 @@ export default async function BookDetailPage({
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <span className="text-xs font-black text-black group-hover:text-gray-600 line-clamp-1 truncate block transition-colors">{fbDisplayTitle}</span>
-                                                        <p className="text-[9px] font-bold text-gray-400 mt-0.5 sm:mt-1 truncate">{fbBook.author}</p>
+                                                        <p className="text-[9px] font-bold text-gray-500 mt-0.5 sm:mt-1 truncate">{fbBook.author}</p>
                                                         <p className="text-[10px] font-black text-black mt-1.5 sm:mt-2">{fbBook.price} {locale === 'ar' ? 'درهم' : 'درهم'}</p>
                                                     </div>
                                                 </Link>
@@ -720,7 +720,7 @@ export default async function BookDetailPage({
                                         <Package className="w-4 h-4 text-black" />
                                         <h2 className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
                                     </div>
-                                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
+                                    <div className="text-sm font-bold text-gray-500 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
                                         <p>{displayDescription}</p>
                                         {book.longDescription && (
                                             <p className="text-gray-600 font-medium normal-case tracking-normal mt-4">{book.longDescription}</p>
@@ -733,11 +733,11 @@ export default async function BookDetailPage({
                                         <h2 className="text-sm font-black text-black uppercase tracking-[0.3em]">{tBook('Technical')}</h2>
                                         <dl className="space-y-5">
                                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
-                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-300">{tBook('Reference')}</dt>
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">{tBook('Reference')}</dt>
                                                 <dd className="text-sm font-black text-black tracking-widest break-all sm:text-right">{book.isbn || 'RIWAYA-GEN'}</dd>
                                             </div>
                                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
-                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-300">{tBook('Volume')}</dt>
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">{tBook('Volume')}</dt>
                                                 <dd className="text-sm font-black text-black tracking-widest sm:text-right">~{Math.floor(Math.random() * 200) + 150} {tBook('Pages')}</dd>
                                             </div>
                                         </dl>
@@ -760,7 +760,7 @@ export default async function BookDetailPage({
                                         <p className="text-2xl md:text-5xl font-black text-black leading-tight tracking-tighter mb-10 italic max-w-4xl mx-auto">
                                             "{categoryConfig.quote}"
                                         </p>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">
                                             — {categoryConfig.quoteSource}
                                         </p>
                                     </div>
@@ -778,12 +778,12 @@ export default async function BookDetailPage({
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                            <UserIcon className="w-8 h-8 text-gray-300" />
+                                            <UserIcon className="w-8 h-8 text-gray-500" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 text-center sm:text-left rtl:sm:text-right">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
+                                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">{tBook('AboutAuthor') || 'À propos de l\'auteur'}</h3>
                                     <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
                                         {book.author}
                                     </Link>
@@ -826,13 +826,13 @@ export default async function BookDetailPage({
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
-                                                            <span className="text-gray-300 font-black text-xs opacity-50">Blog</span>
+                                                            <span className="text-gray-500 font-black text-xs opacity-50">Blog</span>
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0 py-1">
                                                     {post.publishedAt && (
-                                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
                                                             <Calendar className="w-2.5 h-2.5" />
                                                             {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
                                                         </p>
@@ -863,7 +863,7 @@ export default async function BookDetailPage({
                                         <MessageSquare className="w-7 h-7" />
                                     </div>
                                     <h2 className="text-4xl font-black text-black tracking-tighter">{tBook('Voices')}<span className="text-gray-200">.</span></h2>
-                                    <p className="text-sm font-black text-gray-400 uppercase tracking-widest leading-loose">
+                                    <p className="text-sm font-black text-gray-500 uppercase tracking-widest leading-loose">
                                         {tBook('SharePerspective')}
                                     </p>
                                 </div>
@@ -935,7 +935,7 @@ export default async function BookDetailPage({
                                                 {post.title}
                                             </h3>
                                             <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
                                                     {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR') : ''}
                                                 </span>
                                                 <ArrowUpRight className="w-4 h-4 text-black group-hover:text-orange-500 transition-colors rtl:-scale-x-100" />
@@ -967,7 +967,7 @@ export default async function BookDetailPage({
                                     <h2 className="text-4xl font-black text-black tracking-tighter mb-4">
                                         {locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}<span className="text-blue-500">.</span>
                                     </h2>
-                                    <p className="text-sm font-bold text-gray-400">
+                                    <p className="text-sm font-bold text-gray-500">
                                         {locale === 'ar' ? 'كل ما تحتاج معرفته عن هذا الكتاب.' : locale === 'en' ? 'Everything you need to know about this book.' : 'Tout ce que vous devez savoir sur ce livre.'}
                                     </p>
                                 </div>
@@ -988,3 +988,4 @@ export default async function BookDetailPage({
         </>
     )
 }
+

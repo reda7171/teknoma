@@ -33,7 +33,7 @@ export default function WishlistButton({ item, className, showText = false, vari
 
     if (!mounted) {
         return (
-            <button className={cn("rounded-full p-2 bg-gray-100", className)} disabled>
+            <button className={cn("rounded-full p-2 bg-gray-100", className)} aria-label={tCommon('AddToFavorites')} disabled>
                 <Heart className="w-5 h-5 text-gray-300" />
             </button>
         )
@@ -131,6 +131,7 @@ export default function WishlistButton({ item, className, showText = false, vari
                 className
             )}
             title={active ? tCommon('RemoveFromFavorites') : tCommon('AddToFavorites')}
+            aria-label={active ? tCommon('RemoveFromFavorites') : tCommon('AddToFavorites')}
         >
             {syncing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Heart className={cn("w-5 h-5", active && "fill-current")} />}
         </button>

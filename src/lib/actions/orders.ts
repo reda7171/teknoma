@@ -353,6 +353,14 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                 maxAge: 60 * 60 * 24 * 30 // 30 jours 
             })
         }
+        
+        // Sauvegarder l'ID de la commande pour éviter l'erreur 404 sur la page de succès
+        cookieStore.set('lastOrderId', order.id, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 // 24 heures
+        })
 
         // Notification Telegram (asynchrone, on ne bloque pas la réponse)
         try {
@@ -444,12 +452,18 @@ export async function getOrderById(orderId: string) {
         const isAdmin = await isAuthenticated()
         if (!isAdmin) {
             const cookieStore = await cookies()
+            const lastOrderId = cookieStore.get('lastOrderId')?.value
+            
+            // Allow access if this is the order they just placed
+            if (lastOrderId === order.id) {
+                return order
+            }
+
             const guestEmail = cookieStore.get('userEmail')?.value
             const communityUser = await getCommunityUser()
             const emailToCheck = communityUser?.email || guestEmail
 
-            if (order.email !== emailToCheck) {
-
+            if (!emailToCheck || order.email !== emailToCheck) {
                 return null
             }
         }
