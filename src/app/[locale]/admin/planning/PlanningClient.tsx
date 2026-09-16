@@ -72,6 +72,12 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [dailySuggestions, setDailySuggestions] = useState<SuggestedBook[]>([])
     const [selectedSuggestedProduct, setSelectedSuggestedProduct] = useState<SuggestedBook | null>(null)
 
+    // Popup "Quand publier ?"
+    const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false)
+    const [autoSchedulePlatform, setAutoSchedulePlatform] = useState('all')
+    const [autoScheduleMode, setAutoScheduleMode] = useState<'now' | 'schedule'>('schedule')
+    const [isMounted, setIsMounted] = useState(false)
+
     const scrollRef = useRef<HTMLDivElement>(null)
 
     const seededRandom = (seed: number) => {
@@ -85,6 +91,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     }
 
     useEffect(() => {
+        setIsMounted(true)
         const fetchAssets = async () => {
             try {
                 const res = await fetch('/api/admin/marketing/assets')
@@ -324,8 +331,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0]
-            if (!file.type.startsWith('image/')) {
-                showToast('Veuillez déposer une image valide.', 'error')
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showToast('Veuillez déposer une image ou une vidéo valide.', 'error')
                 return
             }
 
@@ -333,7 +340,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const tempMedia = {
                 name: file.name,
                 url: tempUrl,
-                type: 'image',
+                type: file.type.startsWith('video/') ? 'video' : 'image',
                 createdAt: new Date().toISOString(),
                 file: file
             }
@@ -366,8 +373,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0]
-            if (!file.type.startsWith('image/')) {
-                showToast('Veuillez déposer une image valide.', 'error')
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                showToast('Veuillez déposer une image ou une vidéo valide.', 'error')
                 return
             }
 
@@ -375,7 +382,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const tempMedia = {
                 name: file.name,
                 url: tempUrl,
-                type: 'image',
+                type: file.type.startsWith('video/') ? 'video' : 'image',
                 createdAt: new Date().toISOString(),
                 file: file
             }
@@ -404,7 +411,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const formData = new FormData()
             formData.append('file', mediaFile)
             try {
-                const upRes = await fetch('/api/admin/upload', {
+                const upRes = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
                 })
@@ -485,8 +492,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         setIsLoading(false)
     }
 
-    const handleAutoScheduleAll = async () => {
-        console.log('[PlanningClient] Clic sur Auto-programmer détecté ! Lancement...');
+    const handleAutoScheduleAll = async (mode: 'now' | 'schedule', platform: string) => {
+        setShowAutoScheduleModal(false)
         setIsLoading(true);
         const unprogrammed = dailySuggestions.filter(b => !b.isProgrammed);
         if (unprogrammed.length === 0) {
@@ -518,14 +525,15 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const content = `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
 
             const [hours, minutes] = timeSlot.split(':');
-            const scheduleAt = new Date(selectedDate);
-            scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            const scheduleAt = mode === 'now' ? new Date() : new Date(selectedDate);
+            if (mode !== 'now') scheduleAt.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            const platforms = platform === 'all' ? ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'] : [platform];
 
             const payload = {
                 date: scheduleAt.toISOString(),
-                time: timeSlot,
+                time: mode === 'now' ? new Date().toTimeString().slice(0, 5) : timeSlot,
                 content: content,
-                platforms: ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'],
+                platforms: platforms,
                 mediaUrl: book.image,
                 suggestedProductId: book.id,
                 suggestedProductType: book.type
@@ -591,8 +599,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const getImageUrl = (url: string) => {
         if (!url) return ''
-        if (url.startsWith('http')) return url
-        if (url.startsWith('data:image')) return url
+        if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url
 
         let path = url;
         if (url.startsWith('uploads')) path = `/${url}`;
@@ -607,7 +614,12 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         return path;
     }
 
-    const isVideo = (url: string) => {
+    const isVideo = (url: string, mediaObj?: any) => {
+        if (mediaObj?.type === 'video') return true
+        if (mediaObj?.name) {
+            const n = mediaObj.name.toLowerCase()
+            if (n.endsWith('.mp4') || n.endsWith('.mov') || n.endsWith('.webm')) return true
+        }
         if (!url) return false
         return url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov') || url.toLowerCase().endsWith('.webm')
     }
@@ -650,9 +662,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'PUBLISHED': return <CheckCircle className="w-3 h-3 text-green-500" title="Publié" />
-            case 'FAILED': return <AlertCircle className="w-3 h-3 text-red-500" title="Échec de publication" />
-            default: return <Loader2 className="w-3 h-3 text-blue-400 animate-spin" title="En attente" />
+            case 'PUBLISHED': return <span title="Publié"><CheckCircle className="w-3 h-3 text-green-500" /></span>
+            case 'FAILED': return <span title="Échec de publication"><AlertCircle className="w-3 h-3 text-red-500" /></span>
+            default: return <span title="En attente"><Loader2 className="w-3 h-3 text-blue-400 animate-spin" /></span>
         }
     }
 
@@ -719,13 +731,44 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 <Trash2 className="w-3.5 h-3.5" /> Tout Vider
                             </button>
                             <button
-                                onClick={handleAutoScheduleAll}
+                                onClick={() => setShowAutoScheduleModal(true)}
                                 disabled={isLoading}
                                 className="p-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors border border-green-200 shadow-sm flex items-center gap-1 text-xs font-bold disabled:opacity-50"
                                 title="Programmer aléatoirement"
                             >
                                 {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Auto-programmer
                             </button>
+                            {showAutoScheduleModal && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowAutoScheduleModal(false)}>
+                                    <div className="bg-white rounded-2xl shadow-2xl p-6 w-80 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="font-black text-slate-800 text-base">Quand publier ?</h3>
+                                            <button onClick={() => setShowAutoScheduleModal(false)} className="text-slate-400 hover:text-slate-700"><X className="w-4 h-4" /></button>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Heure de publication</label>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setAutoScheduleMode('now')} className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-all ${autoScheduleMode === 'now' ? 'bg-green-600 text-white border-green-600 shadow-lg' : 'bg-white text-slate-600 border-slate-200 hover:border-green-400'}`}>Maintenant</button>
+                                                <button onClick={() => setAutoScheduleMode('schedule')} className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-all ${autoScheduleMode === 'schedule' ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}>Programmer</button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Plateformes</label>
+                                            <select value={autoSchedulePlatform} onChange={e => setAutoSchedulePlatform(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                                <option value="all">Toutes</option>
+                                                <option value="facebook">Facebook</option>
+                                                <option value="instagram">Instagram</option>
+                                                <option value="threads">Threads</option>
+                                                <option value="tiktok">TikTok</option>
+                                                <option value="pinterest">Pinterest</option>
+                                            </select>
+                                        </div>
+                                        <button onClick={() => handleAutoScheduleAll(autoScheduleMode, autoSchedulePlatform)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition-colors flex items-center justify-center gap-2">
+                                            <Plus className="w-4 h-4" /> Lancer
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <button
                                 onClick={() => generateSuggestions(new Date().getTime())}
                                 className="p-1.5 bg-white/50 hover:bg-white text-blue-600 rounded-lg transition-colors border border-blue-200/50 shadow-sm flex items-center gap-1 text-xs font-bold"
@@ -834,7 +877,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 {viewMode === 'day' ? (
                     <DragDropContext onDragEnd={onDragEnd}>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 relative">
-                            {isSameDay(selectedDate, new Date()) && (
+                            {isMounted && isSameDay(selectedDate, new Date()) && (
                                 <div
                                     ref={scrollRef}
                                     className="absolute left-20 right-4 h-0.5 bg-red-500 z-20 pointer-events-none"
@@ -1207,8 +1250,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     {selectedMedia ? (
                                         <div className="relative border border-slate-200 rounded-xl p-2 flex items-start gap-3 bg-slate-50">
                                             <div className="w-16 h-16 relative rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-black">
-                                                {isVideo(selectedMedia.url) ? (
-                                                    <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted />
+                                                {isVideo(selectedMedia.url, selectedMedia) ? (
+                                                    <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted autoPlay loop playsInline />
                                                 ) : (
                                                     <Image src={getImageUrl(selectedMedia.url)} alt={selectedMedia.name} fill className="object-cover" />
                                                 )}
@@ -1278,7 +1321,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                             }}
                                                             className="aspect-square relative rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-blue-500 transition-colors group bg-black"
                                                         >
-                                                            {isVideo(asset.url) ? (
+                                                            {isVideo(asset.url, asset) ? (
                                                                 <>
                                                                     <video src={getImageUrl(asset.url)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted />
                                                                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
@@ -1321,9 +1364,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     </div>
                                     {/* Media Mock */}
                                     {selectedMedia && (
-                                        <div className="aspect-square relative bg-black">
-                                            {isVideo(selectedMedia.url) ? (
-                                                <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" />
+                                        <div className={`relative bg-black ${isVideo(selectedMedia.url, selectedMedia) ? 'aspect-[9/16]' : 'aspect-square'}`}>
+                                            {isVideo(selectedMedia.url, selectedMedia) ? (
+                                                <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted autoPlay loop playsInline />
                                             ) : (
                                                 <Image src={getImageUrl(selectedMedia.url)} alt="Preview" fill className="object-cover" />
                                             )}

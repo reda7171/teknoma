@@ -425,12 +425,10 @@ export default async function BookDetailPage({
                                             >
                                                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
                                                     {post.coverImage ? (
-                                                        <Image
+                                                        <ImageWithFallback
                                                             src={normalizeImage(post.coverImage)}
                                                             alt={post.title}
-                                                            fill
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            unoptimized
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
@@ -821,12 +819,10 @@ export default async function BookDetailPage({
                                             >
                                                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
                                                     {post.coverImage ? (
-                                                        <Image
+                                                        <ImageWithFallback
                                                             src={post.coverImage}
                                                             alt={post.title}
-                                                            fill
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            unoptimized
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
@@ -918,12 +914,10 @@ export default async function BookDetailPage({
                                     <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300">
                                         <div className="relative aspect-[4/3] w-full overflow-hidden">
                                             {post.coverImage ? (
-                                                <Image 
+                                                <ImageWithFallback 
                                                     src={normalizeImage(post.coverImage)} 
                                                     alt={post.title} 
-                                                    fill 
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-700" 
-                                                    unoptimized 
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-gray-50 flex items-center justify-center">

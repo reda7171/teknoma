@@ -31,28 +31,42 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 1. Sauvegarder en DB avec status PUBLISHED (pour que le cron l'ignore, vu qu'on l'envoie à n8n directement)
+        const scheduleDate = new Date(date)
+        const isNow = scheduleDate.getTime() <= Date.now() + 5 * 60 * 1000 // si c'est dans moins de 5 min
+
+        // 1. Sauvegarder en DB (PENDING si futur, PUBLISHED si on lance maintenant)
         const post = await prisma.scheduledPost.create({
             data: {
-                date: new Date(date),
+                date: scheduleDate,
                 time,
                 content,
                 platforms: JSON.stringify(platforms),
                 mediaUrl,
-                status: 'PUBLISHED'
+                status: isNow ? 'PUBLISHED' : 'PENDING'
             }
         })
 
-        // 2. Récupérer l'URL du webhook n8n (priorité à la DB)
+        if (!isNow) {
+            console.log(`[Planning API] Post sauvegardé pour plus tard: ${scheduleDate.toISOString()}`)
+            return NextResponse.json({ success: true, post, message: 'Programmé pour plus tard' })
+        }
+
+        // 2. Récupérer l'URL du webhook n8n
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
-        const n8nWebhookUrl = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
+        const envWebhookUrl = process.env.N8N_WEBHOOK_URL
+        let n8nWebhookUrl = dbWebhookUrl || envWebhookUrl
+
+        // Remplacer hostname interne Docker pour que `npm run dev` puisse l'atteindre
+        if (n8nWebhookUrl && (n8nWebhookUrl.includes('://n8n') || n8nWebhookUrl.includes('://localhost'))) {
+            n8nWebhookUrl = envWebhookUrl || n8nWebhookUrl
+        }
 
         if (!n8nWebhookUrl) {
             console.error('n8nWebhookUrl non défini, post sauvegardé mais non envoyé à n8n');
             return NextResponse.json({ success: true, post })
         }
 
-        // 3. Préparer le payload batch pour n8n
+        // 3. Préparer le payload batch complet
         const facebookAccessToken = await getSetting('facebook_access_token')
         const instagramAccountId = await getSetting('instagram_account_id')
         const tiktokAccessToken = await getSetting('tiktok_access_token')
@@ -64,27 +78,36 @@ export async function POST(req: NextRequest) {
         const pinterestAccessToken = await getSetting('pinterest_access_token')
         const pinterestBoardId = await getSetting('pinterest_board_id')
 
-        // URL publique du site (jamais localhost)
         const rawBase = process.env.NEXT_PUBLIC_APP_URL || ''
         const appBaseUrl = rawBase.includes('127.0.0.1') || rawBase.includes('localhost')
             ? 'https://riwaya.store'
             : (rawBase || 'https://riwaya.store')
-        // Convertir l'URL image relative en URL absolue publique
-        const absoluteImage = mediaUrl
-            ? (mediaUrl.startsWith('http') && !mediaUrl.includes('127.0.0.1') && !mediaUrl.includes('localhost')
-                ? mediaUrl
-                : `https://riwaya.store${mediaUrl.startsWith('/') ? mediaUrl : `/${mediaUrl}`}`)
-            : ''
+            
+        let absoluteImage = mediaUrl || ''
+        if (absoluteImage && !absoluteImage.startsWith('http')) {
+            absoluteImage = `${appBaseUrl}${absoluteImage.startsWith('/') ? '' : '/'}${absoluteImage}`
+        }
 
-        const batch = []
-        for (const platform of platforms) {
-            batch.push({
+        const isVideo = absoluteImage && (absoluteImage.endsWith('.mp4') || absoluteImage.endsWith('.mov') || absoluteImage.endsWith('.webm'))
+        if (absoluteImage && !isVideo) {
+            absoluteImage = `https://wsrv.nl/?url=${encodeURIComponent(absoluteImage)}&output=jpg&q=85`
+        }
+
+        const payload = {
+            batch: platforms.map((platform: string) => ({
                 itemId: post.id,
-                itemType: 'POST',
-                caption: content || 'Riwaya Post',
+                itemType: 'OTHER',
+                title: 'Riwaya',
                 image: absoluteImage,
+                isVideo,
+                isPack: false,
+                caption: content || 'Riwaya Post',
+                description: content || '',
+                format: 'post',
                 platform: platform,
-                scheduleAt: new Date(date).toISOString(),
+                scheduleAt: '',
+                source: 'riwaya-admin',
+                postId: post.id,
                 facebook_access_token: facebookAccessToken,
                 instagram_account_id: instagramAccountId,
                 tiktok_access_token: tiktokAccessToken,
@@ -95,24 +118,31 @@ export async function POST(req: NextRequest) {
                 threads_account_id: threadsAccountId,
                 pinterest_access_token: pinterestAccessToken,
                 pinterest_board_id: pinterestBoardId,
-            })
+            }))
         }
 
-        // 4. Envoyer à n8n et attendre la réponse (pour déboguer)
-        console.log(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${batch.length} items`)
+        // 4. Envoyer à n8n avec timeout
+        console.log(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${payload.batch.length} items`)
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         let n8nStatus = 'not_sent'
         let n8nError = null
         try {
             const n8nRes = await fetch(n8nWebhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ batch })
+                body: JSON.stringify(payload),
+                signal: controller.signal
             })
             n8nStatus = `${n8nRes.status} ${n8nRes.statusText}`
             console.log(`[Planning API] Réponse n8n: ${n8nStatus}`)
         } catch (err: any) {
             n8nError = err.message
             console.error(`[Planning API] Erreur fetch n8n: ${err.message}`)
+        } finally {
+            clearTimeout(timeoutId);
         }
 
         return NextResponse.json({ success: true, post, n8nStatus, n8nError, n8nUrl: n8nWebhookUrl })

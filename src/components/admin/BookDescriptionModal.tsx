@@ -653,6 +653,8 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                                 { id: 'facebook', label: 'FB' },
                                                 { id: 'instagram', label: 'IG' },
                                                 { id: 'tiktok', label: 'TK' },
+                                                { id: 'threads', label: 'TH' },
+                                                { id: 'pinterest', label: 'PI' },
                                                 { id: 'all', label: 'All' }
                                             ].map(p => (
                                                 <button

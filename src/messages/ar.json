@@ -703,6 +703,8 @@
     "FrequentlyBoughtTogether": "اشتره مع",
     "ArticleMentions": "مقالات تتحدث عن هذا المنتج",
     "SoldBy": "البائع",
+    "NoBooksFound": "لم يتم العثور على كتب",
+    "NoBooksDesc": "هذا الكاتب لم ينشر أي كتب على منصتنا بعد.",
     "SellerRating": "تقييم البائع"
   },
   "Cart": {

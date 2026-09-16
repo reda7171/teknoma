@@ -272,7 +272,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                         </Link>
 
                         {/* Desktop Navigation - Elegant & Clean */}
-                        <nav className="hidden lg:flex flex-1 justify-center items-center gap-4 xl:gap-8">
+                        <nav className="hidden 2xl:flex flex-1 justify-center items-center gap-4 xl:gap-8">
                             {/* Navigation Items - Only render client side after mounting */}
                             {mounted && finalNavItems.slice(0, 8).map((item: any) => {
                                 const isActive = pathname === item.href || (item.href !== '/' && item.href !== '#categories' && pathname.startsWith(item.href))
@@ -488,7 +488,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 {mounted && <UserDropdown user={user} features={features} />}
                                 <button
                                     onClick={() => setMobileMenuOpen(true)}
-                                    className="w-10 h-10 border-2 border-transparent hover:bg-gray-50 rounded-full flex items-center justify-center transition-all ml-2 rtl:ml-0 rtl:mr-2"
+                                    className="w-10 h-10 border-2 border-transparent hover:bg-gray-50 rounded-full flex 2xl:hidden items-center justify-center transition-all ml-2 rtl:ml-0 rtl:mr-2"
                                     aria-label="Menu principal"
                                 >
                                     <Menu className="w-6 h-6 text-gray-900" />
