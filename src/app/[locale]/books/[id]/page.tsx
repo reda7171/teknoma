@@ -36,8 +36,6 @@ import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 
-export const revalidate = 300; // 5 minutes d'ISR pour le cache
-
 export async function generateMetadata({
     params,
 }: {
