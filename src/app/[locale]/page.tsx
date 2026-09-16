@@ -35,10 +35,6 @@ import GoogleOneTap from '@/components/auth/GoogleOneTap'
 import SeoCategoriesSection from '@/components/SeoCategoriesSection'
 import HomeLeaderboard from '@/components/home/HomeLeaderboard'
 
-// ISR: Activer la génération statique incrémentale. Le cache complet de la page se rafraîchit toutes les 5 minutes (300 secondes)
-// Cela permet de servir la page d'accueil quasi-instantanément sans requêter la DB à chaque visite.
-export const revalidate = 300;
-
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations('HomePage.seo');
