@@ -55,27 +55,27 @@ async function getStats(role: string | null, userId: string | null) {
     let booksSoldToday = 0
 
     if (role === 'SELLER' && userId) {
-        const deliveredItems = await prisma.orderItem.aggregate({
-            where: { order: { status: 'DELIVERED' }, sellerId: userId },
+        const allItems = await prisma.orderItem.aggregate({
+            where: { sellerId: userId },
             _sum: { price: true, quantity: true }
         })
         const monthItems = await prisma.orderItem.aggregate({
-            where: { order: { createdAt: { gte: firstDayOfMonth }, status: 'DELIVERED' }, sellerId: userId },
+            where: { order: { createdAt: { gte: firstDayOfMonth } }, sellerId: userId },
             _sum: { price: true, quantity: true }
         })
         const todayItems = await prisma.orderItem.aggregate({
-            where: { order: { createdAt: { gte: today }, status: { notIn: ['CANCELLED', 'RETURNED'] } }, sellerId: userId, type: 'BOOK' },
+            where: { order: { createdAt: { gte: today } }, sellerId: userId, type: 'BOOK' },
             _sum: { quantity: true }
         })
 
-        totalRev = deliveredItems._sum.price || 0
+        totalRev = allItems._sum.price || 0
         revenueMois = monthItems._sum.price || 0
         booksSoldToday = todayItems._sum.quantity || 0
     } else {
-        const tr = await prisma.order.aggregate({ where: { status: 'DELIVERED' }, _sum: { total: true } })
-        const rm = await prisma.order.aggregate({ where: { createdAt: { gte: firstDayOfMonth }, status: 'DELIVERED' }, _sum: { total: true } })
+        const tr = await prisma.order.aggregate({ _sum: { total: true } })
+        const rm = await prisma.order.aggregate({ where: { createdAt: { gte: firstDayOfMonth } }, _sum: { total: true } })
         const bst = await prisma.orderItem.aggregate({
-            where: { order: { createdAt: { gte: today }, status: { notIn: ['CANCELLED', 'RETURNED'] } }, type: 'BOOK' },
+            where: { order: { createdAt: { gte: today } }, type: 'BOOK' },
             _sum: { quantity: true }
         })
         totalRev = tr._sum.total || 0
@@ -83,8 +83,8 @@ async function getStats(role: string | null, userId: string | null) {
         booksSoldToday = bst._sum.quantity || 0
     }
 
-    const panierMoyen = deliveredCount > 0 ? totalRev / deliveredCount : 0
-    const tauxConversion = ordersCount > 0 ? (deliveredCount / ordersCount) * 100 : 0
+    const panierMoyen = totalOrdersCount > 0 ? totalRev / totalOrdersCount : 0
+    const tauxConversion = totalOrdersCount > 0 ? (deliveredCount / totalOrdersCount) * 100 : 0
     const tauxAnnulation = totalOrdersCount > 0 ? (cancelledCount / totalOrdersCount) * 100 : 0
     const stockTotal = stockValueRaw._sum.stock || 0
     const uniqueCustomersCount = uniqueCustomersResult.length || 0

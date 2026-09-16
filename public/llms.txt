@@ -1,21 +1,17 @@
-# Riwaya - Librairie en Ligne au Maroc
+# Riwaya
 
-Riwaya est une plateforme e-commerce de vente de livres neufs et d'occasion, proposant le paiement à la livraison (Cash on Delivery) partout au Maroc. 
-Notre objectif est de rendre la lecture accessible avec des prix abordables, des promotions régulières, et une communauté grandissante de lecteurs.
+> Riwaya est une plateforme e-commerce de vente de livres neufs et d'occasion au Maroc proposant le paiement à la livraison.
 
-## Navigation et Structure
-- **Accueil** : https://riwaya.store
-- **Catalogue Livres** : https://riwaya.store/fr/books
-- **Packs & Lots** : https://riwaya.store/fr/packs
-- **Devenir Vendeur** : https://riwaya.store/fr/devenir-vendeur
-- **Communauté** : https://riwaya.store/fr/community
-- **Blog** : https://riwaya.store/fr/blog
+## Liens
 
-## Services Clés
-- Paiement à la livraison partout au Maroc.
-- Achat et revente de livres d'occasion.
-- Espace communautaire pour l'échange de livres et le marché local de l'occasion.
-- Récompenses, offres instantanées et remises régulières (Cadeaux, Cashflow, Wallet).
-- Livraison 1h express disponible sur Rabat.
+- [Accueil](https://riwaya.store/): Page d'accueil de la librairie en ligne
+- [Catalogue Livres](https://riwaya.store/fr/books): Catalogue complet de tous les livres
+- [Packs et Lots](https://riwaya.store/fr/packs): Nos livres vendus en packs avec réduction
+- [Devenir Vendeur](https://riwaya.store/fr/devenir-vendeur): Informations pour vendre ses livres d'occasion
+- [Communauté](https://riwaya.store/fr/community): Espace d'échange et marché local de l'occasion
+- [Blog](https://riwaya.store/fr/blog): Nos articles et actualités littéraires
+- [Contact](https://riwaya.store/fr/contact): Contacter le support client
 
-Pour plus d'informations ou pour contacter le support client, veuillez visiter : https://riwaya.store/fr/contact
+## Services
+
+Riwaya propose le paiement à la livraison partout au Maroc, l'achat et revente de livres d'occasion, un espace communautaire pour l'échange de livres, ainsi que des remises régulières (Cadeaux, Cashflow, Wallet).
