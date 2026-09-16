@@ -76,6 +76,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false)
     const [autoSchedulePlatform, setAutoSchedulePlatform] = useState('all')
     const [autoScheduleMode, setAutoScheduleMode] = useState<'now' | 'schedule'>('schedule')
+    const [isMounted, setIsMounted] = useState(false)
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -90,6 +91,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     }
 
     useEffect(() => {
+        setIsMounted(true)
         const fetchAssets = async () => {
             try {
                 const res = await fetch('/api/admin/marketing/assets')
@@ -338,7 +340,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const tempMedia = {
                 name: file.name,
                 url: tempUrl,
-                type: 'image',
+                type: file.type.startsWith('video/') ? 'video' : 'image',
                 createdAt: new Date().toISOString(),
                 file: file
             }
@@ -380,7 +382,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             const tempMedia = {
                 name: file.name,
                 url: tempUrl,
-                type: 'image',
+                type: file.type.startsWith('video/') ? 'video' : 'image',
                 createdAt: new Date().toISOString(),
                 file: file
             }
@@ -597,8 +599,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const getImageUrl = (url: string) => {
         if (!url) return ''
-        if (url.startsWith('http')) return url
-        if (url.startsWith('data:image')) return url
+        if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url
 
         let path = url;
         if (url.startsWith('uploads')) path = `/${url}`;
@@ -613,7 +614,12 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         return path;
     }
 
-    const isVideo = (url: string) => {
+    const isVideo = (url: string, mediaObj?: any) => {
+        if (mediaObj?.type === 'video') return true
+        if (mediaObj?.name) {
+            const n = mediaObj.name.toLowerCase()
+            if (n.endsWith('.mp4') || n.endsWith('.mov') || n.endsWith('.webm')) return true
+        }
         if (!url) return false
         return url.toLowerCase().endsWith('.mp4') || url.toLowerCase().endsWith('.mov') || url.toLowerCase().endsWith('.webm')
     }
@@ -871,7 +877,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                 {viewMode === 'day' ? (
                     <DragDropContext onDragEnd={onDragEnd}>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 relative">
-                            {isSameDay(selectedDate, new Date()) && (
+                            {isMounted && isSameDay(selectedDate, new Date()) && (
                                 <div
                                     ref={scrollRef}
                                     className="absolute left-20 right-4 h-0.5 bg-red-500 z-20 pointer-events-none"
@@ -1244,8 +1250,8 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     {selectedMedia ? (
                                         <div className="relative border border-slate-200 rounded-xl p-2 flex items-start gap-3 bg-slate-50">
                                             <div className="w-16 h-16 relative rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-black">
-                                                {isVideo(selectedMedia.url) ? (
-                                                    <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted />
+                                                {isVideo(selectedMedia.url, selectedMedia) ? (
+                                                    <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted autoPlay loop playsInline />
                                                 ) : (
                                                     <Image src={getImageUrl(selectedMedia.url)} alt={selectedMedia.name} fill className="object-cover" />
                                                 )}
@@ -1315,7 +1321,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                             }}
                                                             className="aspect-square relative rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-blue-500 transition-colors group bg-black"
                                                         >
-                                                            {isVideo(asset.url) ? (
+                                                            {isVideo(asset.url, asset) ? (
                                                                 <>
                                                                     <video src={getImageUrl(asset.url)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted />
                                                                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
@@ -1358,9 +1364,9 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     </div>
                                     {/* Media Mock */}
                                     {selectedMedia && (
-                                        <div className="aspect-square relative bg-black">
-                                            {isVideo(selectedMedia.url) ? (
-                                                <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" />
+                                        <div className={`relative bg-black ${isVideo(selectedMedia.url, selectedMedia) ? 'aspect-[9/16]' : 'aspect-square'}`}>
+                                            {isVideo(selectedMedia.url, selectedMedia) ? (
+                                                <video src={getImageUrl(selectedMedia.url)} className="w-full h-full object-cover" muted autoPlay loop playsInline />
                                             ) : (
                                                 <Image src={getImageUrl(selectedMedia.url)} alt="Preview" fill className="object-cover" />
                                             )}

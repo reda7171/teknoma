@@ -683,6 +683,8 @@
     "FrequentlyBoughtTogether": "Achetez-le avec",
     "ArticleMentions": "L'article parle de ce produit",
     "SoldBy": "Vendu par",
+    "NoBooksFound": "Aucun livre trouvé",
+    "NoBooksDesc": "Cet auteur n'a pas encore de livres publiés sur notre plateforme.",
     "SellerRating": "Note du vendeur"
   },
   "Cart": {

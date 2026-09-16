@@ -220,11 +220,26 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
         e.target.value = ''
     }
 
+    // Helper to safely use htmlToImage without Next.js dev overlay popping up on harmless cssRules errors
+    const safeHtmlToImage = async (node: HTMLElement, options: any) => {
+        const originalError = console.error
+        console.error = (...args) => {
+            if (args[0] && typeof args[0] === 'string' && (args[0].includes('cssRules') || args[0].includes('Error inlining remote css file'))) return
+            originalError(...args)
+        }
+        try {
+            // Bypass the hard SecurityError crash in Chromium by skipping cssRules parsing
+            return await htmlToImage.toPng(node, { ...options, fontEmbedCSS: '' })
+        } finally {
+            console.error = originalError
+        }
+    }
+
     // Download PNG
     const handleDownload = async () => {
         if (!previewRef.current) return
         try {
-            const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: false })
+            const dataUrl = await safeHtmlToImage(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: false })
             const a = document.createElement('a'); a.href = dataUrl; a.download = `studio_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'design'}.png`
             document.body.appendChild(a); a.click(); document.body.removeChild(a)
         } catch (e) { console.error(e) }
@@ -241,7 +256,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                 for (let i = 0; i < images.length; i++) {
                     setActiveImageIndex(i)
                     await new Promise(r => setTimeout(r, 800))
-                    const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
+                    const dataUrl = await safeHtmlToImage(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
                     dataUrls.push(dataUrl)
                     setMp4Progress(Math.round(((i + 1) / images.length) * 20))
                 }
@@ -270,9 +285,15 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
             let blob: Blob
             let filename: string
             if (type === 'png') {
-                const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: false })
-                const res = await fetch(dataUrl)
-                blob = await res.blob()
+                const dataUrl = await safeHtmlToImage(previewRef.current, { quality: 1, pixelRatio: 3, cacheBust: false })
+                const byteString = atob(dataUrl.split(',')[1]);
+                const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                blob = new Blob([ab], { type: mimeString });
                 filename = `studio_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'design'}.png`
             } else {
                 setMp4Progress(0)
@@ -282,7 +303,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                     for (let i = 0; i < images.length; i++) {
                         setActiveImageIndex(i)
                         await new Promise(r => setTimeout(r, 800))
-                        const dataUrl = await htmlToImage.toPng(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
+                        const dataUrl = await safeHtmlToImage(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
                         dataUrls.push(dataUrl)
                         setMp4Progress(Math.round(((i + 1) / images.length) * 20))
                     }
@@ -330,19 +351,59 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
 
     // Publish
     const handleGenerate = async () => {
+        if (!previewRef.current) return
         setLoading(true)
         try {
+            setMp4Progress(0)
+            const dataUrls: string[] = []
+            const originalIndex = activeImageIndex
+            if (images.length > 0) {
+                for (let i = 0; i < images.length; i++) {
+                    setActiveImageIndex(i)
+                    await new Promise(r => setTimeout(r, 800))
+                    const dataUrl = await safeHtmlToImage(previewRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: false })
+                    dataUrls.push(dataUrl)
+                    setMp4Progress(Math.round(((i + 1) / images.length) * 20))
+                }
+                setActiveImageIndex(originalIndex)
+            }
+            
+            const { exportToMp4 } = await import('@/lib/videoExport')
+            const blob = await exportToMp4({
+                element: previewRef.current,
+                imagesDataUrls: dataUrls.length > 0 ? dataUrls : undefined,
+                duration: videoDuration * Math.max(images.length, 1),
+                fps: 24,
+                filename: `short_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'video'}.mp4`,
+                onProgress: (pct) => setMp4Progress(dataUrls.length > 0 ? 20 + Math.round(pct * 0.8) : pct),
+                returnBlob: true
+            }) as Blob
+
+            const formData = new FormData()
+            const file = new File([blob], `short_${book?.title?.replace(/[^a-z0-9]/gi, '_') || 'video'}.mp4`, { type: 'video/mp4' })
+            formData.append('file', file)
+            formData.append('type', 'marketing')
+            formData.append('marketingType', 'CREATIVE')
+            if (book?.id) formData.append('bookId', book.id)
+
+            setMp4Progress(null) // Finished rendering
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            const uploadData = await uploadRes.json()
+            if (!uploadRes.ok) throw new Error(uploadData.error || 'Erreur lors du téléversement de la vidéo')
+
             const res = await fetch('/api/n8n/publish', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     platform, 
                     customCaption: `${caption}\n\n${hashtags}`, 
-                    customImageUrl: images[0] || book?.image,
+                    customImageUrl: uploadData.url,
                     bookId: book?.id,
-                    images, 
-                    is_short: true, 
-                    texts: { title, author, price, whatsapp, hashtags } 
+                    is_short: true
                 })
             })
             
@@ -354,9 +415,13 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
             alert('Envoyé avec succès !')
             onClose()
         } catch (e: any) { 
+            console.error('Publish error:', e)
             alert(e.message || 'Erreur lors de la publication') 
         }
-        finally { setLoading(false) }
+        finally { 
+            setLoading(false)
+            setMp4Progress(null)
+        }
     }
 
     if (!isOpen) return null
@@ -732,7 +797,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                                 <button onClick={handleGenerate} disabled={loading || images.length === 0}
                                     className="w-full flex justify-center items-center gap-2 py-3 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-40 text-white font-bold rounded-xl transition">
                                     <Send className="w-4 h-4" />
-                                    {loading ? 'Envoi…' : 'Publier maintenant'}
+                                    {loading ? (mp4Progress !== null ? `Génération ${mp4Progress}%...` : 'Envoi…') : 'Publier maintenant'}
                                 </button>
                             </>}
 
