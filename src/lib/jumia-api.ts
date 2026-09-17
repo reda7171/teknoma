@@ -116,9 +116,13 @@ export class JumiaAPI {
         })
     }
 
-    // --- Endpoints Commandes (Orders) ---
-
     async getOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string) {
+        const formatDate = (d: string) => {
+            const date = new Date(d);
+            if (isNaN(date.getTime())) return d;
+            return date.toISOString().split('.')[0] + '+0000';
+        }
+
         let url = `/orders?size=${size}`
         if (token) {
             url += `&token=${token}`
@@ -128,10 +132,10 @@ export class JumiaAPI {
             url += `&status=${status}`
         }
         if (createdAfter) {
-            url += `&createdAfter=${encodeURIComponent(createdAfter)}`
+            url += `&createdAfter=${encodeURIComponent(formatDate(createdAfter))}`
         }
         if (createdBefore) {
-            url += `&createdBefore=${encodeURIComponent(createdBefore)}`
+            url += `&createdBefore=${encodeURIComponent(formatDate(createdBefore))}`
         }
         return this.request(url)
     }

@@ -69,7 +69,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                                     <img
                                         src={finalImage}
                                         alt={testimonial.customerName || 'Testimonial'}
-                                        className="absolute top-0 left-0 w-full h-auto min-h-full object-cover transition-transform duration-[4000ms] ease-linear group-hover:-translate-y-[calc(100%-100cqh)]"
+                                        className="absolute top-0 left-0 w-full h-full object-cover object-top transition-all duration-[4000ms] ease-linear group-hover:object-bottom"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {

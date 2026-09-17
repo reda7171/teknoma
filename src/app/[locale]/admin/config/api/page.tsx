@@ -19,7 +19,6 @@ export default async function TrackingConfigPage() {
     const fbMarketingAccessToken = await getSetting('fb_marketing_access_token') || ''
     const fbAdAccountId = await getSetting('fb_ad_account_id') || ''
     const fbPageId = await getSetting('fb_page_id') || ''
-    const microsoftClarityId = await getSetting('microsoft_clarity_id') || ''
 
     return (
         <div className="space-y-12">
@@ -60,7 +59,6 @@ export default async function TrackingConfigPage() {
                             initialFbMarketingAccessToken={fbMarketingAccessToken}
                             initialFbAdAccountId={fbAdAccountId}
                             initialFbPageId={fbPageId}
-                            initialMicrosoftClarityId={microsoftClarityId}
                         />
                     </div>
                 </div>

@@ -55,7 +55,10 @@ export async function incrementFollowUp(orderId: string) {
             }
         })
         return { success: true }
-    } catch (e) {
+    } catch (e: any) {
+        if (e.code === 'P2025') {
+            return { success: false, error: 'Order not found' }
+        }
         console.error('Failed to increment follow-up:', e)
         return { success: false }
     }

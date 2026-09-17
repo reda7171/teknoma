@@ -17,7 +17,6 @@ interface Props {
     initialFbMarketingAccessToken: string
     initialFbAdAccountId: string
     initialFbPageId: string
-    initialMicrosoftClarityId: string
 }
 
 export default function TrackingConfigForm({ 
@@ -31,8 +30,7 @@ export default function TrackingConfigForm({
     initialGoogleAnalyticsId,
     initialFbMarketingAccessToken,
     initialFbAdAccountId,
-    initialFbPageId,
-    initialMicrosoftClarityId
+    initialFbPageId
 }: Props) {
     const [fbPixelId, setFbPixelId] = useState(initialFbPixelId)
     const [geminiApiKey, setGeminiApiKey] = useState(initialGeminiApiKey)
@@ -45,7 +43,6 @@ export default function TrackingConfigForm({
     const [fbMarketingAccessToken, setFbMarketingAccessToken] = useState(initialFbMarketingAccessToken)
     const [fbAdAccountId, setFbAdAccountId] = useState(initialFbAdAccountId)
     const [fbPageId, setFbPageId] = useState(initialFbPageId)
-    const [microsoftClarityId, setMicrosoftClarityId] = useState(initialMicrosoftClarityId)
     
     const [showApiKey, setShowApiKey] = useState(false)
     const [showTiktokToken, setShowTiktokToken] = useState(false)
@@ -71,7 +68,6 @@ export default function TrackingConfigForm({
             await updateSetting('fb_marketing_access_token', fbMarketingAccessToken, 'api', 'Facebook Marketing API Token')
             await updateSetting('fb_ad_account_id', fbAdAccountId, 'api', 'Facebook Ad Account ID')
             await updateSetting('fb_page_id', fbPageId, 'api', 'Facebook Page ID')
-            await updateSetting('microsoft_clarity_id', microsoftClarityId, 'tracking', 'Microsoft Clarity Project ID')
 
             setMessage({ type: 'success', text: 'Configuration enregistrée avec succès !' })
             router.refresh()
@@ -319,31 +315,6 @@ export default function TrackingConfigForm({
                         <p className="mt-2 text-[11px] text-gray-400 font-medium ml-1 italic">
                             Copiez ici uniquement la valeur de l'attribut 'content' de la balise meta de vérification HTML fournie par Google.
                         </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Microsoft Clarity Section */}
-            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                        <BarChart className="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <h2 className="text-xl font-black text-gray-900">Microsoft Clarity</h2>
-                </div>
-
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-[13px] font-black text-gray-700 uppercase tracking-wider mb-2 ml-1">
-                            Project ID
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="ex: xyz123"
-                            value={microsoftClarityId}
-                            onChange={(e) => setMicrosoftClarityId(e.target.value)}
-                            className="w-full bg-gray-50/50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-black focus:border-black block p-4 font-medium transition-colors"
-                        />
                     </div>
                 </div>
             </div>

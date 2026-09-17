@@ -17,7 +17,6 @@ const ChatBot = dynamic(() => import('@/components/ChatBot'))
 const PixelTracker = dynamic(() => import('@/components/PixelTracker'))
 const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
-const MicrosoftClarity = dynamic(() => import('@/components/MicrosoftClarity'))
 const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 import UtmTracker from '@/components/UtmTracker'
@@ -411,7 +410,6 @@ export default async function LocaleLayout({
   const fbPixelId = await getSetting('facebook_pixel_id') || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
   const googleSearchConsoleId = await getSetting('google_search_console_id') || await getSetting('seo_google_verification');
   const googleAnalyticsId = await getSetting('google_analytics_id');
-  const clarityProjectId = await getSetting('microsoft_clarity_id');
   const adsenseId = await getSetting('adsense_publisher_id');
   const adsenseEnabled = await getSetting('adsense_enabled');
 
@@ -557,7 +555,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               <PixelTracker />
               <FacebookPixel pixelId={fbPixelId} />
               <GoogleAnalytics gaId={googleAnalyticsId || ''} />
-              <MicrosoftClarity projectId={clarityProjectId || ''} />
             </Suspense>
           </DelayedScripts>
         </NextIntlClientProvider>

@@ -65,7 +65,6 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_google_analytics_id: d['seo_google_analytics_id'] || '',
         seo_gtm_id: d['seo_gtm_id'] || '',
         seo_hotjar_id: d['seo_hotjar_id'] || '',
-        seo_clarity_id: d['seo_clarity_id'] || '',
         // Avancé
         seo_schema_org_type: d['seo_schema_org_type'] || 'OnlineStore',
         seo_price_range: d['seo_price_range'] || '50 درهم - 300 درهم',
@@ -503,7 +502,6 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                 {field('Google Analytics 4', 'seo_google_analytics_id', 'G-XXXXXXXXXX')}
                                 {field('Google Tag Manager', 'seo_gtm_id', 'GTM-XXXXXXX')}
                                 {field('Hotjar (ID)', 'seo_hotjar_id', '1234567')}
-                                {field('Clarity (ID)', 'seo_clarity_id', 'xxxxxxxxxx')}
                             </div>
                         )}
                     </div>
