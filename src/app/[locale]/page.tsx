@@ -5,35 +5,37 @@ import { getAllCategoryQuotes } from '@/lib/actions/categories'
 import { getRecentExchangeBooks } from '@/lib/actions/community-market'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
-import AudioTestimonial from '@/components/AudioTestimonial'
-import TestimonialsTabs from '@/components/home/TestimonialsTabs'
-import SonicDeliveryBanner from '@/components/home/SonicDeliveryBanner'
-import InstagramFeed from '@/components/home/InstagramFeed'
 import { getRecentPosts } from '@/lib/actions/blog'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import BookCard from '@/components/BookCard'
 import PackCard from '@/components/PackCard'
-import TrustSection from '@/components/TrustSection'
 import ScrollReveal from '@/components/ScrollReveal'
 import Footer from '@/components/Footer'
 import TypewriterText from '@/components/TypewriterText'
-import { Link, redirect } from '@/i18n/routing'
+import { Link } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
+import dynamic from 'next/dynamic'
+
+// Dynamic Imports pour les composants lourds / en dessous de la ligne de flottaison
+const TestimonialsTabs = dynamic(() => import('@/components/home/TestimonialsTabs'))
+const SonicDeliveryBanner = dynamic(() => import('@/components/home/SonicDeliveryBanner'))
+const InstagramFeed = dynamic(() => import('@/components/home/InstagramFeed'))
+const TrustSection = dynamic(() => import('@/components/TrustSection'))
+const AuthorsCarousel = dynamic(() => import('@/components/AuthorsCarousel'))
+const CosmosBooks = dynamic(() => import('@/components/CosmosBooks'))
+const HomeLeaderboard = dynamic(() => import('@/components/home/HomeLeaderboard'))
 import { Suspense } from 'react'
-import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download , Headphones } from 'lucide-react'
+import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download, Headphones } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
-import { prisma } from '@/lib/prisma'
 import ImageWithFallback from '@/components/ImageWithFallback'
-import AuthorsCarousel from '@/components/AuthorsCarousel'
-import CosmosBooks from '@/components/CosmosBooks'
-import CatalogDownload from '@/components/home/CatalogDownload'
-import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import { getPrimaryImage } from '@/lib/utils/image'
 import { getCommunityUser, getTopReaders } from '@/lib/actions/community-auth'
+import CatalogDownload from '@/components/home/CatalogDownload'
+import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import GoogleOneTap from '@/components/auth/GoogleOneTap'
 import SeoCategoriesSection from '@/components/SeoCategoriesSection'
-import HomeLeaderboard from '@/components/home/HomeLeaderboard'
+import { prisma } from '@/lib/prisma'
 
 export const revalidate = 3600;
 
@@ -94,41 +96,53 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations('HomePage');
   const tDigital = await getTranslations('DigitalBooks');
 
-  // Optimisation: Regrouper les queries similaires et utiliser le cache
-    const [
+  // Optimisation: Regrouper les requêtes en lots pour ne pas saturer le pool de connexion (max 13)
+  
+  // Lot 1 : Priorité absolue (haut de page)
+  const [
     popularBooks,
     popularPacks,
-    bestSellerBooks,
-    bestAuthors,
-    exchangeBooks,
-    allQuotes,
-    stats,
-    featureDigitalBooks,
-    featureExchange,
-    recentPosts,
     homeSettings,
-    homepageContent,
-    audioTestimonialsResult,
-    imageTestimonialsResult,
-    usedBooks,
-    topReaders
+    homepageContent
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content'))
+  ])
+
+  // Lot 2 : Contenu secondaire
+  const [
+    bestSellerBooks,
+    bestAuthors,
+    usedBooks,
+    stats,
+    allQuotes
+  ] = await Promise.all([
     getBestSellerBooks(4),
     getBestAuthors(8),
-    getRecentExchangeBooks(6),
-    getAllCategoryQuotes(),
+    getUsedBooks(8),
     import('@/lib/db/books').then(m => m.getHomepageStats()),
-    isFeatureEnabled('feature_digital_books'),
-    isFeatureEnabled('feature_exchange'),
-    getRecentPosts(3, locale),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
+    getAllCategoryQuotes()
+  ])
+
+  // Lot 3 : Fonctionnalités (Digital/Market) & Footer/Témoignages
+  const [
+    exchangeBooks,
+    topReaders,
+    audioTestimonialsResult,
+    imageTestimonialsResult,
+    recentPosts,
+    featureDigitalBooks,
+    featureExchange
+  ] = await Promise.all([
+    getRecentExchangeBooks(6),
+    getTopReaders(10),
     getApprovedAudioTestimonials(),
     getApprovedImageTestimonials(),
-    getUsedBooks(8),
-    getTopReaders(10)
+    getRecentPosts(3, locale),
+    isFeatureEnabled('feature_digital_books'),
+    isFeatureEnabled('feature_exchange')
   ])
 
   const [totalBooks, totalUsers, totalExchanges] = stats
@@ -154,18 +168,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     return { className: bg }
   }
 
-  // Alerte Telegram Visite Accueil
-  try {
-    const { getSetting } = await import('@/lib/actions/site-settings')
-    const shouldNotify = await getSetting('telegram_notify_home_visit') === 'true'
-
-    if (shouldNotify) {
-      const { sendTelegramMessage } = await import('@/lib/telegram')
-      await sendTelegramMessage(`🏠 <b>Visite Accueil</b> (${locale.toUpperCase()})\n📅 ${new Date().toLocaleString('fr-FR')}`)
-    }
-  } catch (e) {
-    // Ignorer les erreurs de notification
-  }
+  // Alerte Telegram retirée du SSR pour ne pas bloquer le LCP et le pool de requêtes.
 
   // AEO Settings
   let parsedAeoFaqs: any[] = []

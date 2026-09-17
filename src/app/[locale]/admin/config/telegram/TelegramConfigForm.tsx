@@ -12,13 +12,9 @@ interface Props {
     initialSettings: {
         notifyOrders: boolean
         notifyHomeVisit: boolean
-        notifySearch: boolean
         notifyCart: boolean
         notifyRegister: boolean
-        notifyChat: boolean
         notifyLowStock: boolean
-        notifyBookVisits: boolean
-        notifyArticleRead: boolean
         notifyDailySummary: boolean
         notifyReviews: boolean
         notifyJumiaPayout: boolean
@@ -32,7 +28,6 @@ interface Props {
         templateRegister?: string
         templateReview?: string
         templateLowStock?: string
-        templateArticleRead?: string
         templateWhatsapp?: string
     }
 }
@@ -60,13 +55,9 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             // Sauvegarder les paramètres de notification
             await updateSetting('telegram_notify_orders', String(settings.notifyOrders), 'config', 'Notif Commandes')
             await updateSetting('telegram_notify_home_visit', String(settings.notifyHomeVisit), 'config', 'Notif Visite Accueil')
-            await updateSetting('telegram_notify_search', String(settings.notifySearch), 'config', 'Notif Recherche')
             await updateSetting('telegram_notify_cart', String(settings.notifyCart), 'config', 'Notif Panier')
             await updateSetting('telegram_notify_register', String(settings.notifyRegister), 'config', 'Notif Inscription')
-            await updateSetting('telegram_notify_chat', String(settings.notifyChat), 'config', 'Notif ChatBot')
             await updateSetting('telegram_notify_low_stock', String(settings.notifyLowStock), 'config', 'Notif Stock Faible')
-            await updateSetting('telegram_notify_book_visits', String(settings.notifyBookVisits), 'config', 'Notif Visite Livre')
-            await updateSetting('telegram_notify_article_read', String(settings.notifyArticleRead), 'config', 'Notif Lecture Article')
             await updateSetting('telegram_notify_daily_summary', String(settings.notifyDailySummary), 'config', 'Résumé Journalier')
             await updateSetting('telegram_notify_reviews', String(settings.notifyReviews), 'config', 'Notif Avis Clients')
             await updateSetting('telegram_notify_jumia_payout', String(settings.notifyJumiaPayout), 'config', 'Notif Virements Jumia')
@@ -82,7 +73,6 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             if (settings.templateRegister !== undefined) await updateSetting('telegram_template_register', settings.templateRegister, 'config', 'Template Inscription')
             if (settings.templateReview !== undefined) await updateSetting('telegram_template_review', settings.templateReview, 'config', 'Template Avis')
             if (settings.templateLowStock !== undefined) await updateSetting('telegram_template_low_stock', settings.templateLowStock, 'config', 'Template Stock')
-            if (settings.templateArticleRead !== undefined) await updateSetting('telegram_template_article_read', settings.templateArticleRead, 'config', 'Template Lecture Article')
             if (settings.templateWhatsapp !== undefined) await updateSetting('whatsapp_template_order', settings.templateWhatsapp, 'config', 'Template WhatsApp')
 
             setMessage('Configuration enregistrée avec succès !')
@@ -221,16 +211,12 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                                 { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client', templateKey: 'templateOrder', templateVars: '{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}' },
                                 { id: 'notifyRegister', label: 'Nouvelles inscriptions', desc: 'Alertes lors de la création d\'un compte', templateKey: 'templateRegister', templateVars: '{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}' },
                                 { id: 'notifyCart', label: 'Ajout au panier', desc: 'Alertes quand un client remplit son panier' },
-                                { id: 'notifyChat', label: 'ChatBot (IA)', desc: 'Alertes lors des discussions avec l\'assistant' },
                                 { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer', templateKey: 'templateReview', templateVars: '{{fullName}}, {{rating}}, {{comment}}' },
                                 { id: 'notifyJumiaPayout', label: 'Virements Jumia', desc: 'Alertes pour les nouveaux paiements Jumia saisis' },
                                 { id: 'notifyInvoices', label: 'Factures Saisies', desc: 'Alertes quand une facture (livraison, virement) est saisie' },
                                 { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
-                                { id: 'notifyBookVisits', label: 'Visite d\'un livre', desc: 'Alertes quand quelqu\'un visite la page d\'un livre' },
-                                { id: 'notifyArticleRead', label: 'Lecture Article', desc: 'Alertes quand un article de blog est lu', templateKey: 'templateArticleRead', templateVars: '{{title}}, {{viewCount}}, {{country}}' },
                                 { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
                                 { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },
-                                { id: 'notifySearch', label: 'Recherches & Filtres', desc: 'Alertes lors de recherches dans le catalogue' },
                                 { id: 'statsVisitors', label: 'Stats: Visiteurs uniques', desc: 'Inclure le trafic dans le /bilan' },
                                 { id: 'statsRegistrations', label: 'Stats: Inscriptions', desc: 'Inclure les nouveaux comptes dans le /bilan' },
                                 { id: 'statsTopViews', label: 'Stats: Livres les plus vus', desc: 'Inclure le top consultations dans le /bilan' },
