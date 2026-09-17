@@ -719,7 +719,9 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 !pathname.includes('/community/login') &&
                 !pathname.includes('/community/register') &&
                 !pathname.includes('/community/profile/edit') &&
+                !pathname.includes('/community/market') &&
                 !pathname.includes('/cart') &&
+                !pathname.includes('/blog/') &&
                 !pathname.includes('/checkout')) && (
                     <div className={`${mobileSearchOpen ? 'block' : 'hidden'} md:block py-3 bg-[#FDFBF7] shadow-sm`} suppressHydrationWarning>
                         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">

@@ -4,11 +4,10 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import FooterWithFeatures from '@/components/FooterWithFeatures'
-import { Outfit } from "next/font/google";
+import localFont from 'next/font/local'
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+const outfit = localFont({
+  src: "../fonts/Outfit-VariableFont_wght.ttf",
   variable: "--font-outfit",
 });
 

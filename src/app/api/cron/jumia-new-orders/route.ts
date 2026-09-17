@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         // Format pour l'API Jumia Vendor (attendu : YYYY-MM-DD HH:MM:SS ou ISO 8601)
         // L'utilisation d'une date sans fuseau horaire explicite provoque un décalage de 1h avec Jumia (GMT+1).
         // On convertit en heure locale Maroc ou on passe directement l'ISO avec +0000.
-        const formatJumiaDate = (d: Date) => d.toISOString().split('.')[0] + '+00:00'
+        const formatJumiaDate = (d: Date) => d.toISOString().split('.')[0] + '+0000'
         const createdAfter = formatJumiaDate(lastCheckDate)
 
         // On supprime createdBefore pour toujours inclure les commandes jusqu'à la seconde présente

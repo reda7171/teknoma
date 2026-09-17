@@ -702,8 +702,11 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
         }
 
         return { success: true }
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            return { success: false, error: 'Book not found' }
+        }
         console.error('Erreur lors de l\'incrémentation des vues du livre:', error)
-        return { success: false, error: 'Failed to increment views' }
+        return { success: false, error: 'Impossible d\'incrémenter les vues' }
     }
 }

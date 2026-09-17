@@ -47,6 +47,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
+    instrumentationHook: true,
     serverActions: {
       bodySizeLimit: '10mb',
     },

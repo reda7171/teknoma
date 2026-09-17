@@ -155,9 +155,9 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
 
                                 {/* Floating Action Badge */}
                                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-12 opacity-0 group-hover/card:translate-y-4 group-hover/card:opacity-100 transition-all duration-500 pointer-events-none z-20">
-                                    <div className="bg-black text-white px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2 shadow-2xl">
+                                    <div className="bg-black text-white px-8 py-3 rounded-full text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-[0.3em] flex items-center gap-2 shadow-2xl">
                                         <span>{t('ViewBooks')}</span>
-                                        <ArrowRight className="w-4 h-4" />
+                                        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                                     </div>
                                 </div>
                             </Link>

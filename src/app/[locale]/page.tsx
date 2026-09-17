@@ -832,7 +832,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <Link href="/community/market" className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-green-100 hover:border-green-600 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-2xl">
                   <span className="text-xs font-black uppercase tracking-widest text-green-600">{c('exchange_view_all', t('ExchangeBooks.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </div>
                 </Link>
               </ScrollReveal>
@@ -843,7 +843,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <p className="text-gray-500 font-black text-lg md:text-2xl uppercase tracking-wider mb-8">{c('exchange_no_data', t('ExchangeBooks.NoData'))}</p>
                   <Link href="/community/login" className="inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-black text-sm md:text-base uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg hover:shadow-green-600/30 hover:-translate-y-1">
                     <span>{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </Link>
                 </ScrollReveal>
               ) : (

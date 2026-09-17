@@ -225,8 +225,8 @@ export default function BookCard({
 
             {/* Ribbon Occasion - livres d'occasion ou bon état */}
             {isUsed && stock > 0 && (
-                <div className="absolute top-0 right-0 w-32 h-32 overflow-hidden z-20 pointer-events-none">
-                    <div className="absolute top-8 -right-9 w-44 py-2 bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700 text-white text-[9px] font-black uppercase tracking-[0.2em] text-center rotate-45 shadow-[0_6px_15px_rgba(0,0,0,0.4)] border-y border-white/20">
+                <div className="absolute top-0 left-0 w-36 h-36 overflow-hidden z-20 pointer-events-none">
+                    <div className="absolute top-8 -left-11 w-48 py-2.5 bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700 text-white text-[10px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black uppercase tracking-[0.2em] text-center -rotate-45 shadow-[0_6px_15px_rgba(0,0,0,0.4)] border-y border-white/20">
                         {locale === 'ar' ? 'مستعمل' : 'Occasion'}
                     </div>
                 </div>

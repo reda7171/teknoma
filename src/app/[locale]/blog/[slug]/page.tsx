@@ -274,8 +274,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 md:pt-6 md:pb-6">
                     {/* Fil d'Ariane + btn admin */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
-                        <nav className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-slate-500 overflow-x-auto no-scrollbar py-1">
-                            <Link href="/blog" className="flex items-center gap-1.5 hover:text-slate-900 transition-colors bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-200/50 shadow-sm whitespace-nowrap">
+                        <nav className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-slate-500 overflow-x-auto no-scrollbar py-1.5 px-4 bg-white/70 backdrop-blur-md rounded-full border border-slate-200 shadow-sm">
+                            <Link href="/blog" className="flex items-center gap-1.5 hover:text-slate-900 transition-colors whitespace-nowrap shrink-0">
                                 <Home className="w-3 h-3" />
                                 {t('Blog')}
                             </Link>
@@ -284,13 +284,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             
                             {post.category && (
                                 <>
-                                    <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="hover:text-slate-900 transition-colors bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-200/50 shadow-sm whitespace-nowrap">
+                                    <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="hover:text-slate-900 transition-colors whitespace-nowrap shrink-0">
                                         {post.category}
                                     </Link>
                                     <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0 rtl:rotate-180" />
                                 </>
                             )}
-                            <span className="text-slate-900 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200 shadow-sm truncate max-w-[150px] md:max-w-[250px] lg:max-w-[350px]">
+                            <span className="text-slate-900 truncate max-w-[150px] md:max-w-[250px] lg:max-w-[350px]">
                                 {post.title}
                             </span>
                         </nav>
