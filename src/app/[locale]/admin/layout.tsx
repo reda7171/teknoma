@@ -214,8 +214,7 @@ export default function AdminLayout({
                 { name: 'SEO', href: `/${lang}/admin/seo`, icon: Search },
                 { name: 'AEO', href: `/${lang}/admin/aeo`, icon: MessageCircle },
                 { name: 'GEO (IA)', href: `/${lang}/admin/geo`, icon: Globe },
-                { name: 'Maillage Interne', href: `/${lang}/admin/seo/internal-linking`, icon: Network },
-                { name: 'Cannibalisation', href: `/${lang}/admin/seo/cannibalization`, icon: AlertCircle },
+
                 { name: 'Bot Facebook', href: `/${lang}/admin/seo/facebook-bot`, icon: Sparkles },
             ]
         },
@@ -407,7 +406,7 @@ export default function AdminLayout({
                                 <div
                                     onClick={() => toggleMenu(item.name)}
                                     className={`
-                                        flex items-center py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer
+                                        flex items-center py-3 md:py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer
                                         ${isCollapsed ? 'justify-center px-0' : 'px-4'}
                                         ${isActive
                                             ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
@@ -423,8 +422,9 @@ export default function AdminLayout({
                             ) : (
                                 <Link
                                     href={item.href}
+                                    onClick={() => setSidebarOpen(false)}
                                     className={`
-                                        flex items-center py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
+                                        flex items-center py-3 md:py-2.5 text-sm font-semibold rounded-xl transition-all duration-200
                                         ${isCollapsed ? 'justify-center px-0' : 'px-4'}
                                         ${isActive
                                             ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
@@ -459,8 +459,9 @@ export default function AdminLayout({
                                             <Link
                                                 key={child.name}
                                                 href={child.href}
+                                                onClick={() => setSidebarOpen(false)}
                                                 className={`
-                                                    flex items-center px-4 py-2 text-xs font-semibold rounded-lg transition-all
+                                                    flex items-center px-4 py-3 md:py-2 text-sm md:text-xs font-semibold rounded-lg transition-all
                                                     ${isChildActive
                                                         ? 'text-blue-600 bg-blue-50/50'
                                                         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'

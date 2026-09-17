@@ -11,7 +11,6 @@ interface Props {
     appUrl: string
     initialSettings: {
         notifyOrders: boolean
-        notifyHomeVisit: boolean
         notifyCart: boolean
         notifyRegister: boolean
         notifyLowStock: boolean
@@ -54,7 +53,6 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             
             // Sauvegarder les paramètres de notification
             await updateSetting('telegram_notify_orders', String(settings.notifyOrders), 'config', 'Notif Commandes')
-            await updateSetting('telegram_notify_home_visit', String(settings.notifyHomeVisit), 'config', 'Notif Visite Accueil')
             await updateSetting('telegram_notify_cart', String(settings.notifyCart), 'config', 'Notif Panier')
             await updateSetting('telegram_notify_register', String(settings.notifyRegister), 'config', 'Notif Inscription')
             await updateSetting('telegram_notify_low_stock', String(settings.notifyLowStock), 'config', 'Notif Stock Faible')
@@ -216,7 +214,6 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                                 { id: 'notifyInvoices', label: 'Factures Saisies', desc: 'Alertes quand une facture (livraison, virement) est saisie' },
                                 { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
                                 { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
-                                { id: 'notifyHomeVisit', label: 'Visite Accueil', desc: 'Alertes quand quelqu\'un arrive sur le site' },
                                 { id: 'statsVisitors', label: 'Stats: Visiteurs uniques', desc: 'Inclure le trafic dans le /bilan' },
                                 { id: 'statsRegistrations', label: 'Stats: Inscriptions', desc: 'Inclure les nouveaux comptes dans le /bilan' },
                                 { id: 'statsTopViews', label: 'Stats: Livres les plus vus', desc: 'Inclure le top consultations dans le /bilan' },

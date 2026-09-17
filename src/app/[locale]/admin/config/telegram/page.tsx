@@ -23,7 +23,6 @@ export default async function TelegramConfigPage() {
     // Nouveaux paramètres de notification
     const settings = {
         notifyOrders: await getSetting('telegram_notify_orders') !== 'false', // Défaut true
-        notifyHomeVisit: await getSetting('telegram_notify_home_visit') === 'true',
         notifyCart: await getSetting('telegram_notify_cart') === 'true',
         notifyRegister: await getSetting('telegram_notify_register') === 'true',
         notifyLowStock: await getSetting('telegram_notify_low_stock') !== 'false', // Défaut true
