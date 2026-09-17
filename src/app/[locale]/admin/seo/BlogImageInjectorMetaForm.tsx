@@ -34,6 +34,10 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
     const [isDownloading, setIsDownloading] = useState(false)
     const [progress, setProgress] = useState<{ current: number; total: number; label: string } | null>(null)
 
+    // New state for WEBP Compression
+    const [compressing, setCompressing] = useState<string | null>(null)
+    const [compressSuccess, setCompressSuccess] = useState<Set<string>>(new Set())
+
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(posts.map(p => [p.id, {
             alt: p.altText || `${p.title} - ${p.authorName || 'Riwaya'} | Blog Riwaya`,
@@ -166,6 +170,63 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
             setMessage('Erreur réseau lors du renommage global.')
         } finally {
             setRenaming(null)
+            setTimeout(() => setProgress(null), 2000)
+        }
+    }
+
+    async function compressWebp(postId: string) {
+        setCompressing(postId)
+        setMessage('')
+        try {
+            const res = await fetch(`/api/admin/posts/${postId}/compress-webp`, { method: 'POST' })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setCompressSuccess(prev => new Set([...prev, postId]))
+                setTimeout(() => setCompressSuccess(prev => { const n = new Set(prev); n.delete(postId); return n }), 3000)
+            } else {
+                setMessage('Erreur: ' + (data.error || 'Impossible de compresser'))
+            }
+        } catch (e) {
+            setMessage('Erreur réseau lors de la compression.')
+        } finally {
+            setCompressing(null)
+        }
+    }
+
+    async function compressAllWebp() {
+        setCompressing('all')
+        setMessage('')
+        let successCount = 0
+        let errorCount = 0
+        setProgress({ current: 0, total: filtered.length, label: 'Compression WEBP des images...' })
+        try {
+            for (let i = 0; i < filtered.length; i++) {
+                const post = filtered[i]
+                if (post.coverImage?.toLowerCase().endsWith('.webp')) {
+                    setProgress({ current: i + 1, total: filtered.length, label: 'Compression WEBP des images...' })
+                    continue
+                }
+                const res = await fetch(`/api/admin/posts/${post.id}/compress-webp`, { method: 'POST' })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        successCount++
+                        setCompressSuccess(prev => new Set([...prev, post.id]))
+                    }
+                } else {
+                    errorCount++
+                }
+                setProgress({ current: i + 1, total: filtered.length, label: 'Compression WEBP des images...' })
+            }
+            if (errorCount > 0) {
+                setMessage(`${successCount} images compressées en WEBP ! (${errorCount} erreurs)`)
+            } else {
+                setMessage(`${successCount} images compressées en WEBP !`)
+            }
+        } catch (e) {
+            setMessage('Erreur réseau lors de la compression globale.')
+        } finally {
+            setCompressing(null)
             setTimeout(() => setProgress(null), 2000)
         }
     }
@@ -372,6 +433,15 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                     {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Télécharger tout
                 </button>
+                <button
+                    type="button"
+                    onClick={compressAllWebp}
+                    disabled={compressing === 'all' || filtered.length === 0}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                    {compressing === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                    Compresser TOUT (WEBP)
+                </button>
             </div>
 
             {/* Liste des posts */}
@@ -478,7 +548,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                 type="button"
                                 onClick={() => renameImage(post.id)}
                                 disabled={renaming === post.id}
-                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${renameSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'} disabled:opacity-50`}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${renameSuccess.has(post.id) ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-50'} disabled:opacity-50`}
                             >
                                 {renaming === post.id ? (
                                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -487,7 +557,23 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                 ) : (
                                     <ImageIcon className="w-3 h-3" />
                                 )}
-                                {renameSuccess.has(post.id) ? 'Renommé !' : 'Renommer'}
+                                {renameSuccess.has(post.id) ? 'Renommé' : 'Renommer'}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => compressWebp(post.id)}
+                                disabled={compressing === post.id || post.coverImage?.toLowerCase().endsWith('.webp')}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${compressSuccess.has(post.id) || post.coverImage?.toLowerCase().endsWith('.webp') ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'} disabled:opacity-50`}
+                            >
+                                {compressing === post.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : compressSuccess.has(post.id) || post.coverImage?.toLowerCase().endsWith('.webp') ? (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                    <ImageIcon className="w-3 h-3" />
+                                )}
+                                {post.coverImage?.toLowerCase().endsWith('.webp') ? 'WEBP OK' : compressSuccess.has(post.id) ? 'Compressé' : 'To WEBP'}
                             </button>
                         </div>
                     </div>
