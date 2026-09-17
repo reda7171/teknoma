@@ -34,6 +34,10 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     // New state for Downloading
     const [isDownloading, setIsDownloading] = useState(false)
 
+    // New state for WEBP Compression
+    const [compressing, setCompressing] = useState<string | null>(null)
+    const [compressSuccess, setCompressSuccess] = useState<Set<string>>(new Set())
+
     // Progress bar
     const [progress, setProgress] = useState<{ current: number; total: number; label: string } | null>(null)
 
@@ -193,6 +197,63 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
             setMessage('Erreur réseau lors du renommage global.')
         } finally {
             setRenaming(null)
+            setTimeout(() => setProgress(null), 2000)
+        }
+    }
+
+    async function compressWebp(bookId: string) {
+        setCompressing(bookId)
+        setMessage('')
+        try {
+            const res = await fetch(`/api/admin/books/${bookId}/compress-webp`, { method: 'POST' })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setCompressSuccess(prev => new Set([...prev, bookId]))
+                setTimeout(() => setCompressSuccess(prev => { const n = new Set(prev); n.delete(bookId); return n }), 3000)
+            } else {
+                setMessage('Erreur: ' + (data.error || 'Impossible de compresser'))
+            }
+        } catch (e) {
+            setMessage('Erreur réseau lors de la compression.')
+        } finally {
+            setCompressing(null)
+        }
+    }
+
+    async function compressAllWebp() {
+        setCompressing('all')
+        setMessage('')
+        let successCount = 0
+        let errorCount = 0
+        setProgress({ current: 0, total: filtered.length, label: 'Compression WEBP des images...' })
+        try {
+            for (let i = 0; i < filtered.length; i++) {
+                const book = filtered[i]
+                if (book.image?.toLowerCase().endsWith('.webp')) {
+                    setProgress({ current: i + 1, total: filtered.length, label: 'Compression WEBP des images...' })
+                    continue
+                }
+                const res = await fetch(`/api/admin/books/${book.id}/compress-webp`, { method: 'POST' })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        successCount++
+                        setCompressSuccess(prev => new Set([...prev, book.id]))
+                    }
+                } else {
+                    errorCount++
+                }
+                setProgress({ current: i + 1, total: filtered.length, label: 'Compression WEBP des images...' })
+            }
+            if (errorCount > 0) {
+                setMessage(`${successCount} images compressées en WEBP ! (${errorCount} erreurs)`)
+            } else {
+                setMessage(`${successCount} images compressées en WEBP !`)
+            }
+        } catch (e) {
+            setMessage('Erreur réseau lors de la compression globale.')
+        } finally {
+            setCompressing(null)
             setTimeout(() => setProgress(null), 2000)
         }
     }
@@ -409,6 +470,15 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                     {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Télécharger tout
                 </button>
+                <button
+                    type="button"
+                    onClick={compressAllWebp}
+                    disabled={compressing === 'all' || filtered.length === 0}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                    {compressing === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                    Compresser TOUT (WEBP)
+                </button>
             </div>
 
             {/* Liste des livres */}
@@ -526,6 +596,22 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                     <ImageIcon className="w-3 h-3" />
                                 )}
                                 {renameSuccess.has(book.id) ? 'Renommé !' : 'Renommer'}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => compressWebp(book.id)}
+                                disabled={compressing === book.id || book.image?.toLowerCase().endsWith('.webp')}
+                                className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-[10px] font-black rounded-lg transition-colors border ${compressSuccess.has(book.id) || book.image?.toLowerCase().endsWith('.webp') ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'} disabled:opacity-50`}
+                            >
+                                {compressing === book.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : compressSuccess.has(book.id) || book.image?.toLowerCase().endsWith('.webp') ? (
+                                    <CheckCircle2 className="w-3 h-3" />
+                                ) : (
+                                    <ImageIcon className="w-3 h-3" />
+                                )}
+                                {book.image?.toLowerCase().endsWith('.webp') ? 'WEBP OK' : compressSuccess.has(book.id) ? 'Compressé' : 'To WEBP'}
                             </button>
                         </div>
                     </div>

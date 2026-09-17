@@ -463,44 +463,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                         </p>
                     </div>
 
-                    <div className="pt-6 border-t border-gray-100">
-                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4 text-pink-500" />
-                            Boîte de Réception Instagram & Facebook (Inbox)
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    Token de vérification du Webhook (Verify Token)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.meta_webhook_verify_token || ''}
-                                    onChange={(e) => handleChange('meta_webhook_verify_token', e.target.value)}
-                                    placeholder="Ex: mon_secret_123"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors font-mono text-sm"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Mot de passe secret à saisir dans Meta Developers pour valider l'URL : {origin ? `${origin}/api/webhooks/meta` : '/api/webhooks/meta'}
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    Page Access Token (API Graph)
-                                </label>
-                                <input
-                                    type="password"
-                                    value={settings.meta_inbox_access_token || ''}
-                                    onChange={(e) => handleChange('meta_inbox_access_token', e.target.value)}
-                                    placeholder="EAA..."
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors font-mono text-sm"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Token généré depuis Meta Developers pour autoriser l'envoi de messages.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
 

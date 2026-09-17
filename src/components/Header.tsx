@@ -273,8 +273,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
 
                         {/* Desktop Navigation - Elegant & Clean */}
                         <nav className="hidden 2xl:flex flex-1 justify-center items-center gap-4 xl:gap-8">
-                            {/* Navigation Items - Only render client side after mounting */}
-                            {mounted && finalNavItems.slice(0, 8).map((item: any) => {
+                            {/* Navigation Items - Server Side Rendered */}
+                            {finalNavItems.slice(0, 8).map((item: any) => {
                                 const isActive = pathname === item.href || (item.href !== '/' && item.href !== '#categories' && pathname.startsWith(item.href))
                                 const isSpecial = item.href.includes('/mon-enfant') || item.href.includes('/cle-usb') || item.href.includes('/livres-numeriques') || item.isJournal || item.href.includes('/deposer-liste')
 
@@ -455,7 +455,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     </Link>
                                 )
                             })}
-                            {features.seller === true && mounted && !user && (
+                            {features.seller === true && !user && (
                                 <Link 
                                     href="/devenir-vendeur" 
                                     className="hidden xl:inline-flex bg-gradient-to-r from-[#FFDC50] to-yellow-400 text-black px-5 py-2 rounded-full text-[13px] rtl:text-[15px] font-black tracking-widest rtl:tracking-normal uppercase hover:scale-105 active:scale-95 shadow-[0_4px_14px_rgba(255,220,80,0.4)] hover:shadow-[0_6px_20px_rgba(255,220,80,0.6)] transition-all duration-300 relative overflow-hidden group items-center"
@@ -474,7 +474,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
 
                             {/* Desktop Only Actions */}
                             <div className="hidden md:flex items-center gap-4">
-                                {mounted && notificationDropdown}
+                                {notificationDropdown}
                                 <button onClick={openCart} className="relative group" aria-label="Ouvrir le panier">
                                     <div className={`w-10 h-10 border-2 border-transparent group-hover:border-black rounded-full flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12 bg-blue-50' : 'animate-cart-vibrate'}`}>
                                         <ShoppingCart className={`w-6 h-6 transition-colors ${isCartAnimating ? 'text-blue-600' : 'text-gray-900'}`} />
@@ -485,7 +485,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                         )}
                                     </div>
                                 </button>
-                                {mounted && <UserDropdown user={user} features={features} />}
+                                <UserDropdown user={user} features={features} />
                                 <button
                                     onClick={() => setMobileMenuOpen(true)}
                                     className="w-10 h-10 border-2 border-transparent hover:bg-gray-50 rounded-full flex 2xl:hidden items-center justify-center transition-all ml-2 rtl:ml-0 rtl:mr-2"
@@ -497,11 +497,9 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
 
                             {/* Mobile Actions: Login + Search */}
                             <div className="flex md:hidden items-center gap-2">
-                                {mounted && (
-                                    <div className="scale-90 origin-right rtl:origin-left">
-                                        <UserDropdown user={user} features={features} />
-                                    </div>
-                                )}
+                                <div className="scale-90 origin-right rtl:origin-left">
+                                    <UserDropdown user={user} features={features} />
+                                </div>
                                 <button
                                     onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
                                     aria-label="Recherche mobile"

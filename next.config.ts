@@ -47,7 +47,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    instrumentationHook: true,
     serverActions: {
       bodySizeLimit: '10mb',
     },
@@ -56,7 +55,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: process.env.NODE_ENV === 'production',
   images: {
-    unoptimized: process.env.NODE_ENV === 'development',
+    unoptimized: false,
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
     dangerouslyAllowLocalIP: true,
