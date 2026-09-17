@@ -148,39 +148,45 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
         }
 
         // Création commande transactionnelle
-        const order = await prisma.$transaction(async (tx) => {
+        const { order, lowStockAlerts, impactedBookIds } = await prisma.$transaction(async (tx) => {
+            // Fetch everything we need in batches to avoid N+1 queries
+            const bookIds = data.items.filter(i => i.type === 'BOOK').map(i => i.productId)
+            const packIds = data.items.filter(i => i.type === 'PACK').map(i => i.productId)
+            const accessoryIds = data.items.filter(i => i.type === 'ACCESSORY').map(i => i.productId)
+
+            const [books, packs, accessories] = await Promise.all([
+                bookIds.length > 0 ? tx.book.findMany({ where: { id: { in: bookIds } }, select: { id: true, costPrice: true, sellerId: true } }) : [],
+                packIds.length > 0 ? tx.pack.findMany({ where: { id: { in: packIds } }, select: { id: true, costPrice: true, shippingFees: true, books: true } }) : [],
+                accessoryIds.length > 0 ? tx.extraProduct.findMany({ where: { id: { in: accessoryIds } }, select: { id: true, costPrice: true } }) : []
+            ])
+
+            const bookMap = new Map(books.map(b => [b.id, b]))
+            const packMap = new Map(packs.map(p => [p.id, p]))
+            const accessoryMap = new Map(accessories.map(a => [a.id, a]))
+
             let hasFreeShippingItem = false
 
             // Récupérer les prix de revient (costPrice) et sellerId pour chaque article
-            const itemsWithCost = await Promise.all(data.items.map(async (item) => {
+            const itemsWithCost = data.items.map(item => {
                 let costPrice = 0
                 let sellerId: string | null = null
                 
                 if (item.type === 'BOOK') {
-                    const book = await tx.book.findUnique({
-                        where: { id: item.productId },
-                        select: { costPrice: true, sellerId: true }
-                    })
+                    const book = bookMap.get(item.productId)
                     costPrice = book?.costPrice || 0
                     sellerId = book?.sellerId || null
                 } else if (item.type === 'PACK') {
-                    const pack = await tx.pack.findUnique({
-                        where: { id: item.productId },
-                        select: { costPrice: true, shippingFees: true }
-                    })
+                    const pack = packMap.get(item.productId)
                     costPrice = pack?.costPrice || 0
                     if (pack?.shippingFees === 0) {
                         hasFreeShippingItem = true
                     }
                 } else if (item.type === 'ACCESSORY') {
-                    const ext = await tx.extraProduct.findUnique({
-                        where: { id: item.productId },
-                        select: { costPrice: true }
-                    })
+                    const ext = accessoryMap.get(item.productId)
                     costPrice = ext?.costPrice || 0
                 }
                 return { ...item, costPrice, sellerId }
-            }))
+            })
 
             // Logique de livraison synchronisée avec le client
             let shippingFees = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
@@ -216,10 +222,11 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                 }
             }
 
-            // Validation du montant minimum avec le total final
-            const minOrderAmountSetting = await tx.siteSettings.findUnique({
-                where: { key: 'min_order_amount' }
-            })
+            // Validation du montant minimum et vérification des emails en parallèle
+            const [minOrderAmountSetting, googleEmailsSetting] = await Promise.all([
+                tx.siteSettings.findUnique({ where: { key: 'min_order_amount' } }),
+                tx.siteSettings.findUnique({ where: { key: 'google_reviews_emails' } })
+            ])
             const minOrderAmount = minOrderAmountSetting ? Number(minOrderAmountSetting.value) : 0
             if (minOrderAmount > 0 && total < minOrderAmount) {
                 throw new Error(`Le montant minimum du panier pour passer commande est de ${minOrderAmount} MAD.`)
@@ -227,9 +234,6 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
             // Gestion automatique des emails pour Google Avis
             let finalEmail = sanitizedData.email;
-            const googleEmailsSetting = await tx.siteSettings.findUnique({
-                where: { key: 'google_reviews_emails' }
-            });
             if (googleEmailsSetting && googleEmailsSetting.value) {
                 try {
                     const emailsList = JSON.parse(googleEmailsSetting.value);
@@ -289,7 +293,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
             // Mettre à jour le stock des livres et accessoires
             const impactedBookIds: string[] = []
-            for (const item of data.items) {
+            const lowStockAlerts: { id: string, title: string, stock: number }[] = []
+
+            await Promise.all(data.items.map(async (item) => {
                 if (item.type === 'BOOK') {
                     impactedBookIds.push(item.productId)
                     const updatedBook = await tx.book.update({
@@ -298,12 +304,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                     })
                     
                     if (updatedBook.stock < 3) {
-                        const { sendLowStockNotification } = await import('@/lib/telegram')
-                        sendLowStockNotification({ 
-                            id: updatedBook.id,
-                            title: updatedBook.title, 
-                            stock: updatedBook.stock 
-                        }).catch(console.error)
+                        lowStockAlerts.push({ id: updatedBook.id, title: updatedBook.title, stock: updatedBook.stock })
                     }
                 } else if (item.type === 'ACCESSORY') {
                     await tx.extraProduct.update({
@@ -311,13 +312,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                         data: { stock: { decrement: item.quantity } }
                     })
                 } else if (item.type === 'PACK') {
-                    // Decrement stock for books inside the pack
-                    const pack = await tx.pack.findUnique({
-                        where: { id: item.productId },
-                        include: { books: true }
-                    })
+                    // Decrement stock for books inside the pack (reuse packMap)
+                    const pack = packMap.get(item.productId)
                     if (pack) {
-                        for (const packBook of pack.books) {
+                        await Promise.all(pack.books.map(async (packBook) => {
                             // If this book was replaced, decrement the replacement book instead
                             let bookIdToDecrement = packBook.bookId
                             const replacedBooks = item.replacedBooks as Record<string, { id: string, title: string }> | undefined
@@ -329,19 +327,13 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                                 where: { id: bookIdToDecrement },
                                 data: { stock: { decrement: item.quantity } }
                             })
-                        }
+                        }))
                     }
                 }
-            }
+            }))
 
-            if (impactedBookIds.length > 0) {
-                import('@/lib/actions/jumia').then(({ syncJumiaStockForBooksBackground }) => {
-                    syncJumiaStockForBooksBackground(impactedBookIds).catch(console.error);
-                });
-            }
-
-            return newOrder
-        })
+            return { order: newOrder, lowStockAlerts, impactedBookIds }
+        }, { timeout: 30000, maxWait: 15000 })
 
         // Sauvegarder l'email dans un cookie pour le suivi invité
         const cookieStore = await cookies()
@@ -371,12 +363,14 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                 const user = await getCommunityUser()
                 const source = user ? 'Client Connecté' : 'Client Non Connecté (Invité)'
                 const orderWithSource = { ...fullOrder, source }
-                sendOrderNotification(orderWithSource as any).catch(console.error)
+                const telegramPromise = sendOrderNotification(orderWithSource as any).catch(console.error)
 
                 // Envoi CAPI Facebook (Server-Side)
                 const { getSetting } = await import('@/lib/actions/site-settings')
                 const fbPixelId = await getSetting('facebook_pixel_id')
                 const fbAccessToken = await getSetting('facebook_access_token') || process.env.FACEBOOK_ACCESS_TOKEN
+                
+                let fbPromise = Promise.resolve()
                 if (fbPixelId && fbAccessToken) {
                     const crypto = require('crypto')
                     const hash = (str: string) => crypto.createHash('sha256').update(str.toLowerCase().trim()).digest('hex')
@@ -402,15 +396,33 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                         }]
                     }
 
-                    fetch(`https://graph.facebook.com/v19.0/${fbPixelId}/events?access_token=${fbAccessToken}`, {
+                    fbPromise = fetch(`https://graph.facebook.com/v19.0/${fbPixelId}/events?access_token=${fbAccessToken}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(eventData)
-                    }).catch(console.error)
+                    }).then(() => {}).catch(console.error)
                 }
+
+                // Tâches en arrière-plan liées au stock (déplacées hors de la transaction pour éviter d'épuiser le pool de connexions)
+                let lowStockPromise = Promise.resolve()
+                if (lowStockAlerts && lowStockAlerts.length > 0) {
+                    lowStockPromise = import('@/lib/telegram').then(({ sendLowStockNotification }) => {
+                        return Promise.all(lowStockAlerts.map(alert => sendLowStockNotification(alert).catch(console.error)))
+                    }).then(() => {}).catch(console.error)
+                }
+
+                let jumiaSyncPromise = Promise.resolve()
+                if (impactedBookIds && impactedBookIds.length > 0) {
+                    jumiaSyncPromise = import('@/lib/actions/jumia').then(({ syncJumiaStockForBooksBackground }) => {
+                        return syncJumiaStockForBooksBackground(impactedBookIds).catch(console.error)
+                    }).then(() => {}).catch(console.error)
+                }
+
+                // Attendre la fin des requêtes asynchrones pour éviter qu'elles ne soient coupées par l'environnement Serverless (Vercel)
+                await Promise.all([telegramPromise, fbPromise, lowStockPromise, jumiaSyncPromise])
             }
         } catch (e) {
-            console.error('Erreur Telegram Notification / CAPI:', e)
+            console.error('Erreur Telegram Notification / CAPI / Stock Sync:', e)
         }
 
         return { success: true, orderId: order.id }
