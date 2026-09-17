@@ -19,7 +19,7 @@ import dynamic from 'next/dynamic'
 // Dynamic Imports pour les composants lourds / en dessous de la ligne de flottaison
 const TestimonialsTabs = dynamic(() => import('@/components/home/TestimonialsTabs'))
 const SonicDeliveryBanner = dynamic(() => import('@/components/home/SonicDeliveryBanner'))
-const InstagramFeed = dynamic(() => import('@/components/home/InstagramFeed'))
+
 const TrustSection = dynamic(() => import('@/components/TrustSection'))
 const AuthorsCarousel = dynamic(() => import('@/components/AuthorsCarousel'))
 const CosmosBooks = dynamic(() => import('@/components/CosmosBooks'))
@@ -98,64 +98,58 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   // Optimisation: Regrouper les requêtes en lots pour ne pas saturer le pool de connexion (max 13)
   
-  // Lot 1 : Priorité absolue (haut de page)
+  // Toutes les requêtes DB en parallèle — 1 seul round-trip
   const [
     popularBooks,
     popularPacks,
     homeSettings,
-    homepageContent
-  ] = await Promise.all([
-    getPopularBooks(8),
-    getPopularPacks(3),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content'))
-  ])
-
-  // Lot 2 : Contenu secondaire
-  const [
+    homepageContent,
     bestSellerBooks,
     bestAuthors,
     usedBooks,
     stats,
-    allQuotes
-  ] = await Promise.all([
-    getBestSellerBooks(4),
-    getBestAuthors(8),
-    getUsedBooks(8),
-    import('@/lib/db/books').then(m => m.getHomepageStats()),
-    getAllCategoryQuotes()
-  ])
-
-  // Lot 3 : Fonctionnalités (Digital/Market) & Footer/Témoignages
-  const [
+    allQuotes,
     exchangeBooks,
     topReaders,
     audioTestimonialsResult,
     imageTestimonialsResult,
     recentPosts,
     featureDigitalBooks,
-    featureExchange
+    featureExchange,
+    aeoFaqJson,
+    dbAeoSnippetQ,
+    dbAeoSnippetA,
   ] = await Promise.all([
+    getPopularBooks(8),
+    getPopularPacks(3),
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
+    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
+    getBestSellerBooks(4),
+    getBestAuthors(8),
+    getUsedBooks(8),
+    import('@/lib/db/books').then(m => m.getHomepageStats()),
+    getAllCategoryQuotes(),
     getRecentExchangeBooks(6),
     getTopReaders(10),
     getApprovedAudioTestimonials(),
     getApprovedImageTestimonials(),
     getRecentPosts(3, locale),
     isFeatureEnabled('feature_digital_books'),
-    isFeatureEnabled('feature_exchange')
+    isFeatureEnabled('feature_exchange'),
+    import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_faq_json')),
+    import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question')),
+    import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text')),
   ])
 
+  // Variables dérivées
   const [totalBooks, totalUsers, totalExchanges] = stats
   const audioTestimonials = audioTestimonialsResult?.testimonials || []
   const imageTestimonials = imageTestimonialsResult?.testimonials || []
   const newBooks = popularBooks.slice(0, 8)
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
-  // Lire le contenu depuis DB avec fallback sur la valeur i18n
   const c = (key: string, fallback: string): string => {
     const dbValue = (homepageContent as Record<string, string>)[key]
-    // Les textes personnalisés via l'admin sont sauvegardés en une seule langue (généralement FR).
-    // On ne les utilise que si la locale correspond au français pour ne pas casser les traductions AR et EN.
     if (locale === 'fr' && dbValue) return dbValue
     return fallback
   }
@@ -168,20 +162,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     return { className: bg }
   }
 
-  // Alerte Telegram retirée du SSR pour ne pas bloquer le LCP et le pool de requêtes.
-
-  // AEO Settings
+  // AEO FAQs
   let parsedAeoFaqs: any[] = []
-  try {
-    const { getSetting } = await import('@/lib/actions/site-settings')
-    const aeoFaqJson = await getSetting('aeo_faq_json')
-    if (aeoFaqJson) {
-      parsedAeoFaqs = JSON.parse(aeoFaqJson)
-    }
-  } catch (e) {}
-
-  let dbAeoSnippetQ = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question'))
-  let dbAeoSnippetA = await import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text'))
+  try { if (aeoFaqJson) parsedAeoFaqs = JSON.parse(aeoFaqJson) } catch (e) {}
 
   const defaultQ = t('AEOSnippet.Question')
   const defaultA = t('AEOSnippet.Answer')
@@ -779,8 +762,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </section>
         )
 
-      case 'home_section_instagram':
-        return <InstagramFeed key={key} />
 
       case 'home_section_used_books':
         if (!usedBooks || usedBooks.length === 0) return null

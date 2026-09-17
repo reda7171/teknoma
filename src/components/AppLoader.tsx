@@ -1,50 +1,55 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { BookOpen } from 'lucide-react'
 import { useLocale } from 'next-intl'
 
 export default function AppLoader() {
     const [loading, setLoading] = useState(true)
+    const [fadeOut, setFadeOut] = useState(false)
     const locale = useLocale()
 
     useEffect(() => {
-        // Minimum timeout to show the loader gracefully
-        const timer = setTimeout(() => {
-            setLoading(false)
-        }, 2000)
+        // Disparaît dès que la page est prête (max 400ms)
+        const hide = () => {
+            setFadeOut(true)
+            setTimeout(() => setLoading(false), 250)
+        }
 
-        return () => clearTimeout(timer)
+        if (document.readyState === 'complete') {
+            hide()
+        } else {
+            window.addEventListener('load', hide, { once: true })
+            // Fallback si load tarde : 600ms max
+            const fallback = setTimeout(hide, 600)
+            return () => {
+                window.removeEventListener('load', hide)
+                clearTimeout(fallback)
+            }
+        }
     }, [])
 
     if (!loading) return null
 
     return (
-        <div className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-pixio-cream transition-opacity duration-700 ease-in-out ${loading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center relative">
-                {/* Fallback Elegant Book Loader */}
-                <div className="flex flex-col items-center justify-center gap-6 animate-pulse">
-                    <div className="relative">
-                        <div className="w-20 h-20 bg-black rounded-2xl flex items-center justify-center shadow-2xl relative z-10 animate-bounce">
-                            <BookOpen className="w-10 h-10 text-white" />
-                        </div>
-                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-12 h-2 bg-black/10 blur-xl rounded-[100%]" />
-                    </div>
-                    <span className={`text-3xl font-black text-black tracking-tighter flex items-center justify-center ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                        {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
-                            <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
-                                {char}
-                            </span>
-                        ))}
-                        <span className="text-[#10b981] inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 4 : 6) * 100}ms` }}>.</span>
-                    </span>
+        <div
+            className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-pixio-cream"
+            style={{
+                opacity: fadeOut ? 0 : 1,
+                transition: 'opacity 250ms ease-out',
+                pointerEvents: fadeOut ? 'none' : 'auto',
+            }}
+        >
+            {/* Logo simple et rapide */}
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shadow-xl">
+                    <span className="text-white text-2xl font-black italic">R</span>
                 </div>
-            </div>
-            
-            <div className="mt-8 flex items-center gap-2 opacity-60">
-                <div className="w-2.5 h-2.5 bg-black rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2.5 h-2.5 bg-black rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span
+                    className={`text-2xl font-black text-black tracking-tighter ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}
+                >
+                    {locale === 'ar' ? 'رواية' : 'riwaya'}
+                    <span className="text-emerald-500">.</span>
+                </span>
             </div>
         </div>
     )
