@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText, ExternalLink } from 'lucide-react'
-import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, getJumiaPayoutStatementsAction, printJumiaOrderInvoiceFull, restoreJumiaOrderStock } from './actions'
+import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, printJumiaOrderInvoiceFull, restoreJumiaOrderStock, syncAllJumiaStock } from './actions'
 import JumiaOrdersEvolutionChart from '@/components/admin/JumiaOrdersEvolutionChart'
 
 export default function JumiaOrdersClient() {
@@ -24,6 +24,7 @@ export default function JumiaOrdersClient() {
     const [readyId, setReadyId] = useState<string | null>(null)
     const [confirmReadyId, setConfirmReadyId] = useState<string | null>(null)
     const [restoreStockId, setRestoreStockId] = useState<string | null>(null)
+    const [syncingStock, setSyncingStock] = useState(false)
     
     // Order items details state
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
@@ -364,6 +365,24 @@ export default function JumiaOrdersClient() {
         }
     }
 
+    const handleSyncStock = async () => {
+        setSyncingStock(true)
+        setErrorMsg(null)
+        setSuccessMsg(null)
+        try {
+            const result = await syncAllJumiaStock()
+            if (result.error) {
+                setErrorMsg(`Erreur synchronisation stock: ${result.error}`)
+            } else {
+                setSuccessMsg(`Stock synchronisé avec succès ! (${result.count} produits mis à jour sur Jumia)`)
+            }
+        } catch (e: any) {
+            setErrorMsg(`Erreur lors de la synchronisation: ${e.message}`)
+        } finally {
+            setSyncingStock(false)
+        }
+    }
+
     return (
         <div className="space-y-6">
             {stats && (
@@ -446,6 +465,15 @@ export default function JumiaOrdersClient() {
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all"
                     >
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-orange-500' : ''}`} />
+                    </button>
+                    <button 
+                        onClick={handleSyncStock}
+                        disabled={syncingStock}
+                        className="flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-orange-100 transition-all disabled:opacity-50"
+                        title="Synchroniser le stock local vers Jumia"
+                    >
+                        {syncingStock ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Package className="w-4 h-4" />}
+                        <span className="hidden md:inline">Sync Stock</span>
                     </button>
                     <a
                         href="/api/admin/jumia/export"

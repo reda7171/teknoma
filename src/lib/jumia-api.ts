@@ -120,7 +120,7 @@ export class JumiaAPI {
         const formatDate = (d: string) => {
             const date = new Date(d);
             if (isNaN(date.getTime())) return d;
-            return date.toISOString().split('.')[0] + '+0000';
+            return date.toISOString().split('T')[0];
         }
 
         let url = `/orders?size=${size}`

@@ -34,7 +34,6 @@ export default function ImageWithFallback({
                 sizes={sizes}
                 className={className}
                 priority={priority}
-                unoptimized={process.env.NODE_ENV === 'development'}
                 onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {
