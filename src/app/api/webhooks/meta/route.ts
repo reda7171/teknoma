@@ -25,51 +25,7 @@ export async function POST(request: Request) {
 
         if (body.object === 'instagram' || body.object === 'page') {
             for (const entry of body.entry) {
-                // 1. Handle Messages (Instagram/Messenger)
-                const messaging = entry.messaging
-                if (messaging) {
-
-                for (const event of messaging) {
-                    // Check if it's a message and not an echo from our own bot
-                    if (event.message && !event.message.is_echo && event.message.text) {
-                        const senderId = event.sender.id
-                        const messageText = event.message.text
-                        const messageId = event.message.mid
-                        const platform = body.object === 'instagram' ? 'INSTAGRAM' : 'FACEBOOK'
-
-                        // Upsert Conversation
-                        const conversation = await prisma.socialConversation.upsert({
-                            where: { platformId: senderId },
-                            update: {
-                                lastMessageAt: new Date(),
-                                unreadCount: { increment: 1 }
-                            },
-                            create: {
-                                platform: platform,
-                                platformId: senderId,
-                                lastMessageAt: new Date(),
-                                unreadCount: 1
-                            }
-                        })
-
-                        // Check if message already exists (Meta can retry webhooks)
-                        const existingMessage = await prisma.socialMessage.findUnique({
-                            where: { messageId: messageId }
-                        })
-
-                        if (!existingMessage) {
-                            await prisma.socialMessage.create({
-                                data: {
-                                    conversationId: conversation.id,
-                                    messageId: messageId,
-                                    content: messageText,
-                                    direction: 'INBOUND'
-                                }
-                            })
-                        }
-                    }
-                }
-                }
+                // 1. Inbox messaging has been removed per user request
 
                 // 2. Handle Leadgen (Facebook Lead Ads)
                 const changes = entry.changes
