@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { headers } from 'next/headers'
 
+
 /**
  * Récupérer l'IP du client de manière sécurisée
  */
