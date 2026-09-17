@@ -33,11 +33,21 @@ export async function GET(req: Request) {
         const createdAfter = formatJumiaDate(lastCheckDate)
 
         // On supprime createdBefore pour toujours inclure les commandes jusqu'à la seconde présente
-        const response = await jumia.getOrders(100, undefined, undefined, createdAfter, undefined)
-        const orders = response?.orders || response?.data?.orders || []
+        // On utilise createdAt DESC pour avoir les plus récentes en premier et on pagine
+        let allOrders: any[] = []
+        let currentToken: string | undefined = undefined
+        do {
+            const response = await jumia.getOrders(100, currentToken, undefined, createdAfter, undefined, 'createdAt', 'DESC')
+            const ordersPage = response?.orders || response?.data?.orders || []
+            allOrders = allOrders.concat(ordersPage)
+            currentToken = response?.nextToken || response?.data?.nextToken
+            
+            // Si on ne récupère plus de commandes, on arrête
+            if (ordersPage.length === 0) break
+        } while (currentToken)
 
         // Filtrer les commandes qui n'ont pas encore été notifiées
-        const newOrders = orders.filter((o: any) => !notifiedOrders.has((o.number || o.orderNumber)?.toString()))
+        const newOrders = allOrders.filter((o: any) => !notifiedOrders.has((o.number || o.orderNumber)?.toString()))
 
         for (const order of newOrders) {
             const amount = order.totalAmountLocal?.value || '0'

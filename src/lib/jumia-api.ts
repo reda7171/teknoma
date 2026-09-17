@@ -116,7 +116,7 @@ export class JumiaAPI {
         })
     }
 
-    async getOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string) {
+    async getOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string, sortBy?: string, sortDirection?: string) {
         const formatDate = (d: string) => {
             const date = new Date(d);
             if (isNaN(date.getTime())) return d;
@@ -124,19 +124,13 @@ export class JumiaAPI {
         }
 
         let url = `/orders?size=${size}`
-        if (token) {
-            url += `&token=${token}`
-        }
-        if (status) {
-            // L'API Jumia utilise l'Alternative Name (minuscule, tirets)
-            url += `&status=${status}`
-        }
-        if (createdAfter) {
-            url += `&createdAfter=${encodeURIComponent(formatDate(createdAfter))}`
-        }
-        if (createdBefore) {
-            url += `&createdBefore=${encodeURIComponent(formatDate(createdBefore))}`
-        }
+        if (token) url += `&token=${token}`
+        if (status) url += `&status=${status}`
+        if (createdAfter) url += `&createdAfter=${encodeURIComponent(formatDate(createdAfter))}`
+        if (createdBefore) url += `&createdBefore=${encodeURIComponent(formatDate(createdBefore))}`
+        if (sortBy) url += `&sortBy=${sortBy}`
+        if (sortDirection) url += `&sortDirection=${sortDirection}`
+        
         return this.request(url)
     }
 
