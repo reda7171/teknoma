@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { revalidatePath } from 'next/cache'
+import { getCached } from '@/lib/cache'
 
 export type MenuItemWithChildren = {
     id: string
@@ -16,34 +17,36 @@ export type MenuItemWithChildren = {
 
 // Récupérer un menu actif par son slug
 export async function getActiveMenuBySlug(slug: string) {
-    try {
-        // Utilisation de queryRaw pour contourner les problèmes de client Prisma obsolète
-        const menus: any[] = await prisma.$queryRaw`SELECT * FROM menus WHERE slug = ${slug} AND isActive = 1 LIMIT 1`
+    return getCached(`menu:${slug}`, async () => {
+        try {
+            // Utilisation de queryRaw pour contourner les problèmes de client Prisma obsolète
+            const menus: any[] = await prisma.$queryRaw`SELECT * FROM menus WHERE slug = ${slug} AND isActive = 1 LIMIT 1`
 
-        if (!menus || menus.length === 0) return null
+            if (!menus || menus.length === 0) return null
 
-        const menu = menus[0]
+            const menu = menus[0]
 
-        // Récupérer les items du menu
-        const items: any[] = await prisma.$queryRaw`SELECT * FROM menu_items WHERE menuId = ${menu.id} AND isActive = 1 ORDER BY \`order\` ASC`
+            // Récupérer les items du menu
+            const items: any[] = await prisma.$queryRaw`SELECT * FROM menu_items WHERE menuId = ${menu.id} AND isActive = 1 ORDER BY \`order\` ASC`
 
-        // Structure hiérarchique simple (1 niveau pour le header)
-        const rootItems = items.filter(item => !item.parentId)
+            // Structure hiérarchique simple (1 niveau pour le header)
+            const rootItems = items.filter(item => !item.parentId)
 
-        // Attacher les enfants
-        const rootItemsWithChildren = rootItems.map(root => ({
-            ...root,
-            children: items.filter(child => child.parentId === root.id)
-        }))
+            // Attacher les enfants
+            const rootItemsWithChildren = rootItems.map(root => ({
+                ...root,
+                children: items.filter(child => child.parentId === root.id)
+            }))
 
-        return {
-            ...menu,
-            items: rootItemsWithChildren
+            return {
+                ...menu,
+                items: rootItemsWithChildren
+            }
+        } catch (error) {
+            console.error('Error in getActiveMenuBySlug:', error)
+            return null
         }
-    } catch (error) {
-        console.error('Error in getActiveMenuBySlug:', error)
-        return null
-    }
+    }, 3600) // Cache 1 heure
 }
 
 // Récupérer tous les menus
