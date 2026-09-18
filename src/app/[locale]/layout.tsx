@@ -29,6 +29,8 @@ const AuthModal = dynamic(() => import('@/components/auth/AuthModal'))
 const outfit = localFont({
   src: "../../fonts/Outfit-VariableFont_wght.ttf",
   variable: "--font-outfit",
+  display: 'swap',
+  preload: true,
 });
 
 const tajawal = localFont({
@@ -40,6 +42,8 @@ const tajawal = localFont({
     { path: "../../fonts/Tajawal-Bold.ttf", weight: "700" },
   ],
   variable: "--font-tajawal",
+  display: 'swap',
+  preload: false, // Chargé uniquement pour RTL — pas besoin de précharger
 });
 
 const cairo = Cairo({
