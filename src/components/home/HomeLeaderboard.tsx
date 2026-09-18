@@ -76,8 +76,8 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                                         src={reader.image} 
                                                         alt={reader.name || ''} 
                                                         fill 
+                                                        sizes="(max-width: 640px) 64px, 80px"
                                                         className="object-cover" 
-                                                        unoptimized 
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center font-black text-lg sm:text-xl text-slate-500">
