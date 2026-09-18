@@ -22,7 +22,8 @@ const SonicDeliveryBanner = dynamic(() => import('@/components/home/SonicDeliver
 
 const TrustSection = dynamic(() => import('@/components/TrustSection'))
 const AuthorsCarousel = dynamic(() => import('@/components/AuthorsCarousel'))
-const CosmosBooks = dynamic(() => import('@/components/CosmosBooks'))
+// CosmosBooks est dans le hero (above the fold) — NE PAS lazy-loader pour éviter LCP 9310ms
+import CosmosBooks from '@/components/CosmosBooks'
 const HomeLeaderboard = dynamic(() => import('@/components/home/HomeLeaderboard'))
 import { Suspense } from 'react'
 import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download, Headphones } from 'lucide-react'
@@ -1179,8 +1180,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     }
   }
 
+  // Image LCP : 1er livre populaire valide (utilisé dans CosmosBooks hero)
+  const lcpBook = popularBooks.find(book => {
+    const img = book.image ? book.image.trim() : ''
+    return img && !img.includes('book-placeholder.png') && img !== '/book-placeholder.png'
+  })
+  const lcpImageUrl = lcpBook?.image ? normalizeImage(lcpBook.image) : null
+  // Construire l'URL /_next/image pour le preload (taille 40vw mobile = ~400px)
+  const lcpPreloadUrl = lcpImageUrl
+    ? `/_next/image?url=${encodeURIComponent(lcpImageUrl)}&w=640&q=75`
+    : null
+
   return (
     <>
+      {/* Preload LCP image — annonce au navigateur dès le HTML initial, évite 9310ms de délai */}
+      {lcpPreloadUrl && (
+        <link
+          rel="preload"
+          as="image"
+          href={lcpPreloadUrl}
+          fetchPriority="high"
+        />
+      )}
       {/* RoulettePopup removed */}
       
       <Suspense fallback={<div className="h-[72px] bg-white border-b border-gray-100" />}>
