@@ -481,7 +481,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col lg:flex-row items-center gap-8">
                 <div className="flex-1">
-                  <ScrollReveal animation="animate-reveal-up" delay={200} className="space-y-8 text-center lg:text-start">
+                  <div className="space-y-8 text-center lg:text-start animate-reveal-up" style={{ animationFillMode: 'both', animationDelay: '200ms' }}>
                     <div className={`inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
                       <Truck className="w-4 h-4 text-green-500" />
                       <span>{c('hero_badge', t('hero.Badge'))}</span>
@@ -497,7 +497,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       {c('hero_description', t('hero.Description'))}
                     </p>
 
-                  </ScrollReveal>
+                  </div>
                 </div>
                 <div className="flex-1 relative w-full lg:w-auto flex flex-col items-center justify-center overflow-hidden gap-6">
                   {(() => {
@@ -611,7 +611,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     {c('bestsellers_description', t('BestSellers.Description'))}
                   </p>
                 </div>
-                <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-8 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link href="/books" aria-label={`${c('see_all', t('SeeAll'))} - Nouveautés`} className="group flex items-center gap-4 bg-pixio-cream px-8 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">{c('bestsellers_view_all', t('BestSellers.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
@@ -702,7 +702,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <p className="text-xl text-gray-500 font-medium tracking-tight">{c('authors_description', t('BestAuthors.Description'))}</p>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right" delay={300}>
-                  <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-8 py-4 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                  <Link href="/books" aria-label={`${c('see_all', t('SeeAll'))} - Top Auteurs`} className="group flex items-center gap-4 bg-pixio-cream px-8 py-4 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                     <span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-black">{c('authors_view_books', t('BestAuthors.BooksPlural'))}</span>
                     <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
                       <ArrowRight className="w-4 h-4 rtl:rotate-180" />
@@ -744,7 +744,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
                   <h2 className="text-4xl md:text-6xl rtl:tracking-normal font-black text-black tracking-tight">{c('new_arrivals_title', t('NewArrivals.Title'))}</h2>
                 </div>
-                <Link href="/books" className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link href="/books" aria-label={`${c('see_all', t('SeeAll'))} - Meilleurs Packs`} className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">{c('new_arrivals_view_all', t('NewArrivals.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
@@ -777,7 +777,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     {locale === 'ar' ? 'كتب مستعملة' : locale === 'en' ? 'Used Books' : 'Livres d\'occasion'}
                   </h2>
                 </div>
-                <Link href="/books?condition=USED,GOOD" className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link href="/books?condition=USED,GOOD" aria-label={`${c('see_all', t('SeeAll'))} - Livres d'occasion`} className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">
                     {locale === 'ar' ? 'عرض الكل' : locale === 'en' ? 'View all' : 'Voir tout'}
                   </span>
@@ -813,7 +813,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </h2>
                   <p className="text-lg text-gray-500 font-medium max-w-2xl">{c('exchange_description', t('ExchangeBooks.Description'))}</p>
                 </div>
-                <Link href="/community/market" className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-green-100 hover:border-green-600 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-2xl">
+                <Link href="/community/market" aria-label={`${c('see_all', t('SeeAll'))} - Marché communautaire`} className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-green-100 hover:border-green-600 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-2xl">
                   <span className="text-xs font-black uppercase tracking-widest text-green-600">{c('exchange_view_all', t('ExchangeBooks.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4 rtl:rotate-180" />
@@ -959,6 +959,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 </div>
                 <Link
                   href="/books"
+                  aria-label={`${c('see_all', t('SeeAll'))} - Formats Numériques`}
                   className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl"
                 >
                   <span className="text-xs font-black uppercase tracking-widest text-black">{c('new_arrivals_view_all', t('NewArrivals.ViewAll'))}</span>

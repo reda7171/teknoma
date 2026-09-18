@@ -22,8 +22,8 @@ const rankStyle = [
     { ring: 'ring-yellow-400', bg: 'bg-yellow-50', text: 'text-yellow-600', medal: '🥇' },
     { ring: 'ring-slate-300',  bg: 'bg-slate-50',  text: 'text-slate-500',  medal: '🥈' },
     { ring: 'ring-amber-500',  bg: 'bg-amber-50',  text: 'text-amber-600',  medal: '🥉' },
-    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-400',  medal: null },
-    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-400',  medal: null },
+    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-500',  medal: null },
+    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-500',  medal: null },
 ]
 
 export default async function HomeLeaderboard({ topReaders }: { topReaders: Reader[] }) {
@@ -41,7 +41,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                     {/* ── Colonne classement ── */}
                     <div className="lg:col-span-7">
                         {/* Badge live */}
-                        <div className="inline-flex items-center gap-1.5 text-rose-500 font-black text-[10px] uppercase tracking-[0.3em] bg-white border border-rose-100 px-3 py-1.5 rounded-full shadow-sm mb-5">
+                        <div className="inline-flex items-center gap-1.5 text-rose-700 font-black text-[10px] uppercase tracking-[0.3em] bg-white border border-rose-200 px-3 py-1.5 rounded-full shadow-sm mb-5">
                             <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
                             {t('Badge')}
                         </div>
@@ -80,7 +80,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                                         unoptimized 
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center font-black text-lg sm:text-xl text-slate-400">
+                                                    <div className="w-full h-full flex items-center justify-center font-black text-lg sm:text-xl text-slate-500">
                                                         {reader.name?.charAt(0).toUpperCase() ?? 'U'}
                                                     </div>
                                                 )}
@@ -97,7 +97,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                                     )}
                                                 </div>
                                                 {reader.city && (
-                                                    <p className="text-xs sm:text-sm font-semibold text-slate-400 mt-0.5 truncate">{reader.city}</p>
+                                                    <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5 truncate">{reader.city}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -116,7 +116,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
 
                     {/* ── Colonne copywriting ── */}
                     <div className="lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-start">
-                        <div className="inline-flex items-center gap-2 text-orange-500 font-black text-xs uppercase tracking-[0.25em] rtl:tracking-normal mb-5">
+                        <div className="inline-flex items-center gap-2 text-orange-700 font-black text-xs uppercase tracking-[0.25em] rtl:tracking-normal mb-5">
                             <Flame className="w-5 h-5" />
                             {t('Challenge') || 'Challenge'}
                         </div>
@@ -141,9 +141,9 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
 /* Micro-composant stat */
 function Stat({ value, label, color, tooltip }: { value: string | number; label: string; color: 'emerald' | 'blue' | 'amber', tooltip?: string }) {
     const colors = {
-        emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600 text-emerald-500',
-        blue:    'bg-blue-50 border-blue-100 text-blue-600 text-blue-500',
-        amber:   'bg-amber-50 border-amber-100 text-amber-600 text-amber-500',
+        emerald: 'bg-emerald-50 border-emerald-100 text-emerald-700 text-emerald-700',
+        blue:    'bg-blue-50 border-blue-100 text-blue-700 text-blue-700',
+        amber:   'bg-amber-50 border-amber-100 text-amber-700 text-amber-700',
     }
     const [bg, border, val, sub] = colors[color].split(' ')
 

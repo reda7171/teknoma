@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Cairo } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
@@ -41,31 +42,69 @@ const tajawal = localFont({
   variable: "--font-tajawal",
 });
 
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  display: 'swap',
+  variable: '--font-cairo',
+});
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
 
   // Dynamic SEO configurations from database
-  const seoTitle = await getSetting('seo_default_title');
-  const seoDescription = await getSetting('seo_default_description');
-  const seoKeywords = await getSetting('seo_default_keywords');
-  const seoAuthor = await getSetting('seo_author') || 'Riwaya Team';
-  const seoOgImage = await getSetting('seo_og_image') || '/og-image.jpg';
-  const seoOgWidth = await getSetting('seo_og_image_width') || '1200';
-  const seoOgHeight = await getSetting('seo_og_image_height') || '630';
-  const seoOgAlt = await getSetting('seo_og_image_alt');
-  const seoOgType = await getSetting('seo_og_type') || 'website';
-  const seoTwitterHandle = await getSetting('seo_twitter_handle') || '@riwaya_ma';
-  const seoTwitterCard = await getSetting('seo_twitter_card') || 'summary_large_image';
-  const seoTwitterImage = await getSetting('seo_twitter_image') || seoOgImage;
-  const seoRobotsMeta = await getSetting('seo_robots_meta') || 'index, follow';
-  const seoFavicon = await getSetting('seo_favicon_url') || '/favicon.ico';
-  const googleVerification = await getSetting('seo_google_verification');
-  const bingVerification = await getSetting('seo_bing_verification');
-  const yandexVerification = await getSetting('seo_yandex_verification');
-  const pinterestVerification = await getSetting('seo_pinterest_verification');
+  const [
+    seoTitle,
+    seoDescription,
+    seoKeywords,
+    seoAuthorRaw,
+    seoOgImageRaw,
+    seoOgWidthRaw,
+    seoOgHeightRaw,
+    seoOgAlt,
+    seoOgTypeRaw,
+    seoTwitterHandleRaw,
+    seoTwitterCardRaw,
+    seoTwitterImageRaw,
+    seoRobotsMetaRaw,
+    seoFaviconRaw,
+    googleVerification,
+    bingVerification,
+    yandexVerification,
+    pinterestVerification,
+    t
+  ] = await Promise.all([
+    getSetting('seo_default_title'),
+    getSetting('seo_default_description'),
+    getSetting('seo_default_keywords'),
+    getSetting('seo_author'),
+    getSetting('seo_og_image'),
+    getSetting('seo_og_image_width'),
+    getSetting('seo_og_image_height'),
+    getSetting('seo_og_image_alt'),
+    getSetting('seo_og_type'),
+    getSetting('seo_twitter_handle'),
+    getSetting('seo_twitter_card'),
+    getSetting('seo_twitter_image'),
+    getSetting('seo_robots_meta'),
+    getSetting('seo_favicon_url'),
+    getSetting('seo_google_verification'),
+    getSetting('seo_bing_verification'),
+    getSetting('seo_yandex_verification'),
+    getSetting('seo_pinterest_verification'),
+    getTranslations({ locale, namespace: 'HomePage.seo' })
+  ]);
 
-  const t = await getTranslations({ locale, namespace: 'HomePage.seo' });
+  const seoAuthor = seoAuthorRaw || 'Riwaya Team';
+  const seoOgImage = seoOgImageRaw || '/og-image.jpg';
+  const seoOgWidth = seoOgWidthRaw || '1200';
+  const seoOgHeight = seoOgHeightRaw || '630';
+  const seoOgType = seoOgTypeRaw || 'website';
+  const seoTwitterHandle = seoTwitterHandleRaw || '@riwaya_ma';
+  const seoTwitterCard = seoTwitterCardRaw || 'summary_large_image';
+  const seoTwitterImage = seoTwitterImageRaw || seoOgImage;
+  const seoRobotsMeta = seoRobotsMetaRaw || 'index, follow';
+  const seoFavicon = seoFaviconRaw || '/favicon.ico';
 
   // On injecte "Riwayat" dans le titre par défaut pour un max d'impact SEO
   const title = seoTitle || t('Title') || "Riwaya (Riwayat): 1ère Librairie en ligne au Maroc";
@@ -369,6 +408,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: '#000000',
 };
 
@@ -394,31 +435,55 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
-  const isChatBotEnabled = await isFeatureEnabled('feature_chatbot');
-  const isWhatsAppEnabled = await isFeatureEnabled('feature_whatsapp');
-  const whatsappPhone = await getSetting('contact_whatsapp');
-  const instagram = await getSetting('contact_instagram');
-  const facebook = await getSetting('contact_facebook');
-  const twitter = await getSetting('contact_twitter');
-  const linkedin = await getSetting('contact_linkedin');
-  const tiktok = await getSetting('contact_tiktok');
-  const youtube = await getSetting('contact_youtube');
-  const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
-  const whatsappChannelUrl = await getSetting('social_whatsapp_channel');
-  const injectedHeadTags = await getSetting('seo_injected_head_tags');
-  const fbPixelId = await getSetting('facebook_pixel_id') || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
-  const googleSearchConsoleId = await getSetting('google_search_console_id') || await getSetting('seo_google_verification');
-  const googleAnalyticsId = await getSetting('google_analytics_id');
-  const adsenseId = await getSetting('adsense_publisher_id');
-  const adsenseEnabled = await getSetting('adsense_enabled');
+  const [
+    messages,
+    isChatBotEnabled,
+    isWhatsAppEnabled,
+    whatsappPhone,
+    instagram,
+    facebook,
+    twitter,
+    linkedin,
+    tiktok,
+    youtube,
+    siteUrlRaw,
+    whatsappChannelUrl,
+    injectedHeadTags,
+    fbPixelIdRaw,
+    googleSearchConsoleIdRaw,
+    googleSearchConsoleIdFallback,
+    googleAnalyticsId,
+    adsenseId,
+    adsenseEnabled
+  ] = await Promise.all([
+    getMessages(),
+    isFeatureEnabled('feature_chatbot'),
+    isFeatureEnabled('feature_whatsapp'),
+    getSetting('contact_whatsapp'),
+    getSetting('contact_instagram'),
+    getSetting('contact_facebook'),
+    getSetting('contact_twitter'),
+    getSetting('contact_linkedin'),
+    getSetting('contact_tiktok'),
+    getSetting('contact_youtube'),
+    getSetting('site_url'),
+    getSetting('social_whatsapp_channel'),
+    getSetting('seo_injected_head_tags'),
+    getSetting('facebook_pixel_id'),
+    getSetting('google_search_console_id'),
+    getSetting('seo_google_verification'),
+    getSetting('google_analytics_id'),
+    getSetting('adsense_publisher_id'),
+    getSetting('adsense_enabled')
+  ]);
+
+  const siteUrl = siteUrlRaw || 'https://riwaya.store';
+  const fbPixelId = fbPixelIdRaw || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
+  const googleSearchConsoleId = googleSearchConsoleIdRaw || googleSearchConsoleIdFallback;
 
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet" />
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         <Script
           id="gtm-script"
@@ -447,7 +512,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
       </head>
       <body
-        className={`${outfit.className} ${tajawal.variable} font-cairo-var font-sans antialiased bg-white`}
+        className={`${outfit.variable} ${tajawal.variable} ${cairo.variable} font-cairo-var font-sans antialiased bg-white`}
         suppressHydrationWarning={true}
       >
         <noscript>
@@ -455,7 +520,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
         {/* Google Tag Manager (noscript) */}
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSD75KHT"
-          height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe></noscript>
+          height="0" width="0" style={{ display: 'none', visibility: 'hidden' }} title="Google Tag Manager"></iframe></noscript>
         {/* End Google Tag Manager (noscript) */}
         <UtmTracker />
         <script
@@ -543,7 +608,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         ></script>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <main id="main-content">
+            {children}
+          </main>
           <Toaster />
           <CookieConsent />
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
