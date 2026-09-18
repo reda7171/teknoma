@@ -60,7 +60,6 @@ export default function CosmosBooks({
   const currentBookPositions = useRef<{x: number; y: number; size: number; bookIdx: number}[]>([])
   const bookRefs = useRef<(HTMLDivElement | null)[]>([])
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
-  const [isReady, setIsReady] = useState(false) // Éviter CLS : masquer jusqu'au 1er frame
 
   const handleImageError = (id: string) => {
     setFailedImages(prev => new Set(prev).add(id))
@@ -148,7 +147,6 @@ export default function CosmosBooks({
       })
 
       currentBookPositions.current = positions
-      if (!isReady) setIsReady(true) // Rendre visible après le 1er frame positionné
       animRef.current = requestAnimationFrame(draw)
     },
     [orbitOrder]
@@ -375,7 +373,7 @@ export default function CosmosBooks({
                 ? 'drop-shadow(0 0 12px rgba(0,0,0,0.4))'
                 : `blur(${orbitIdx * 0.3}px) drop-shadow(0 2px 6px rgba(0,0,0,0.18))`,
               zIndex: isTarget ? 40 : isHovered ? 30 : 10 + orbitIdx,
-              opacity: isDragging ? 0.3 : isReady ? 1 : 0, // masqué jusqu'au 1er frame pour éviter CLS
+              opacity: isDragging ? 0.3 : 1,
               transition: 'transform 0.25s ease, filter 0.25s ease, opacity 0.2s',
               cursor: dragging ? 'grabbing' : 'grab',
               outline: isTarget ? '2px dashed #f5c842' : 'none',

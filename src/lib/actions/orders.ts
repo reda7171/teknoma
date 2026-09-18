@@ -40,19 +40,16 @@ export async function getOrders() {
     const userEmail = cookieStore.get('userEmail')?.value
     const user = await getCommunityUser()
 
-    const hasEmail = user?.email || userEmail
-    const hasPhone = user?.phone
+    const emailToUse = user ? user.email : userEmail
 
-    if (!hasEmail && !hasPhone) {
+    if (!emailToUse) {
         return null
     }
 
     try {
         const conditions: any[] = []
-        
-        if (user?.email) conditions.push({ email: user.email })
-        if (userEmail && userEmail !== user?.email) conditions.push({ email: userEmail })
-        if (user?.phone) conditions.push({ phone: user.phone })
+        if (emailToUse) conditions.push({ email: emailToUse })
+        if (user && user.phone) conditions.push({ phone: user.phone })
 
         const orders = await (prisma.order as any).findMany({
             where: {
