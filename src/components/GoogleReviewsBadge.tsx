@@ -34,18 +34,24 @@ export default function GoogleReviewsBadge() {
               position: 'BOTTOM_LEFT',
               region: 'MA'
             });
-            setTimeout(() => {
+            const interval = setInterval(() => {
               // Google génère un ID aléatoire (ex: I0_12345), on le cible via son parent ou son src
               const iframe = document.querySelector('iframe[src*="merchantverse"]') || document.querySelector('#___ratingbadge_0 iframe');
-              if (iframe && !iframe.hasAttribute('title')) {
-                iframe.setAttribute('title', 'Avis clients Google');
+              if (iframe) {
+                if (!iframe.hasAttribute('title')) {
+                  iframe.setAttribute('title', 'Avis clients Google');
+                }
+                // Activer les clics une fois chargé
+                const badge = document.getElementById('___ratingbadge_0');
+                if (badge) {
+                  badge.style.pointerEvents = 'auto';
+                }
+                clearInterval(interval);
               }
-              // Activer les clics une fois chargé
-              const badge = document.getElementById('___ratingbadge_0');
-              if (badge) {
-                badge.style.pointerEvents = 'auto';
-              }
-            }, 2000);
+            }, 100);
+
+            // Cleanup de sécurité après 10s
+            setTimeout(() => clearInterval(interval), 10000);
           }
         }} 
       />
