@@ -15,6 +15,7 @@ import TypewriterText from '@/components/TypewriterText'
 import { Link } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
 import dynamic from 'next/dynamic'
+import ReactDOM from 'react-dom'
 
 // Dynamic Imports pour les composants lourds / en dessous de la ligne de flottaison
 const TestimonialsTabs = dynamic(() => import('@/components/home/TestimonialsTabs'))
@@ -1186,22 +1187,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     return img && !img.includes('book-placeholder.png') && img !== '/book-placeholder.png'
   })
   const lcpImageUrl = lcpBook?.image ? normalizeImage(lcpBook.image) : null
-  // Construire l'URL /_next/image pour le preload (taille 40vw mobile = ~400px)
-  const lcpPreloadUrl = lcpImageUrl
-    ? `/_next/image?url=${encodeURIComponent(lcpImageUrl)}&w=640&q=75`
-    : null
+  // Utiliser ReactDOM.preload() — garanti d'injecter fetchpriority="high" dans <head> (Next.js App Router)
+  if (lcpImageUrl) {
+    const lcpPreloadUrl = `/_next/image?url=${encodeURIComponent(lcpImageUrl)}&w=640&q=75`
+    ReactDOM.preload(lcpPreloadUrl, { as: 'image', fetchPriority: 'high' })
+  }
 
   return (
     <>
-      {/* Preload LCP image — annonce au navigateur dès le HTML initial, évite 9310ms de délai */}
-      {lcpPreloadUrl && (
-        <link
-          rel="preload"
-          as="image"
-          href={lcpPreloadUrl}
-          fetchPriority="high"
-        />
-      )}
       {/* RoulettePopup removed */}
       
       <Suspense fallback={<div className="h-[72px] bg-white border-b border-gray-100" />}>
