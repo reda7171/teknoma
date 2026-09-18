@@ -484,6 +484,10 @@ export default async function LocaleLayout({
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no">
       <head>
+        {/* Preconnect pour réduire la latence des ressources critiques */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://riwaya.store" />
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         <Script
           id="gtm-script"
