@@ -35,8 +35,8 @@ export default function GoogleReviewsBadge() {
               region: 'MA'
             });
             const interval = setInterval(() => {
-              // Google génère un ID aléatoire (ex: I0_12345), on le cible via son parent ou son src
-              const iframe = document.querySelector('iframe[src*="merchantverse"]') || document.querySelector('#___ratingbadge_0 iframe');
+              // Google génère un ID aléatoire ou utilise merchantwidgetiframe
+              const iframe = document.querySelector('iframe#merchantwidgetiframe, iframe[src*="merchantverse"], #___ratingbadge_0 iframe');
               if (iframe) {
                 if (!iframe.hasAttribute('title')) {
                   iframe.setAttribute('title', 'Avis clients Google');
