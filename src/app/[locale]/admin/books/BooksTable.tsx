@@ -505,7 +505,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                         <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-900'}`} title="Vue Liste"><List className="w-4 h-4"/></button>
                         <button onClick={() => setViewMode('kanban')} className={`p-1.5 rounded-lg transition-all ${viewMode === 'kanban' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-900'}`} title="Vue Kanban"><LayoutGrid className="w-4 h-4"/></button>
                     </div>
-                    <select
+                    <select aria-label="Champ de sélection"
                         value={limit}
                         onChange={(e) => router.push(buildUrl(1, Number(e.target.value)))}
                         className="px-3 py-1.5 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all"
@@ -807,7 +807,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 {editingId === book.id ? (
-                                                                    <select
+                                                                    <select aria-label="Champ de sélection"
                                                                         value={editData.active ? 'true' : 'false'}
                                                                         onChange={e => setEditData({ ...editData, active: e.target.value === 'true' })}
                                                                         className={`text-xs px-2 py-1 rounded border outline-none font-medium ${editData.active ? 'border-green-500 text-green-700 bg-green-50' : 'border-gray-400 text-gray-700 bg-gray-50'}`}
@@ -1040,7 +1040,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         <button onClick={() => handleToggleStatus(book.id, book.active)} className={`p-1.5 rounded-md ${book.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`} title={book.active ? 'Désactiver' : 'Activer'}>
                                             {book.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                                         </button>
-                                        <Link href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
+                                        <Link aria-label="Modifier" href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
                                             <Edit className="w-3.5 h-3.5" />
                                         </Link>
                                         <button onClick={() => handleDelete(book.id, book.title)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md">

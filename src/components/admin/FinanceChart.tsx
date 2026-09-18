@@ -11,6 +11,8 @@ import {
   Legend
 } from 'recharts'
 
+const AccessibleTooltip = Tooltip as any;
+
 export default function FinanceChart({ data }: { data: any[] }) {
     return (
         <div className="h-[400px] w-full bg-white p-6 md:p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 mt-6">
@@ -45,7 +47,8 @@ export default function FinanceChart({ data }: { data: any[] }) {
                         tick={{ fontSize: 12, fill: '#9ca3af', fontWeight: 600 }} 
                         tickFormatter={(val) => `${val}`} 
                     />
-                    <Tooltip 
+                    <AccessibleTooltip 
+                        wrapperProps={{ 'aria-label': 'Détails financiers' }}
                         contentStyle={{ 
                             borderRadius: '1rem', 
                             border: 'none', 

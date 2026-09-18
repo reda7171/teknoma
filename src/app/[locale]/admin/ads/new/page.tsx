@@ -174,7 +174,7 @@ export default function NewAdPage() {
                     <label className="block text-sm font-bold text-black mb-2">
                         Emplacement *
                     </label>
-                    <select
+                    <select aria-label="Champ de sélection"
                         required
                         value={formData.placement}
                         onChange={(e) => setFormData({ ...formData, placement: e.target.value as AdPlacement })}

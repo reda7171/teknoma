@@ -349,7 +349,7 @@ export default function OrdersTableClient({
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             value={order.status}
                                             onChange={(e) => handleStatusChange(order.id, e.target.value)}
                                             className={`px-3 py-1 appearance-none text-xs leading-5 font-bold rounded-full border-0 cursor-pointer outline-none focus:ring-2 focus:ring-black transition-colors ${statusColors[order.status as keyof typeof statusColors]}`}
@@ -403,7 +403,7 @@ export default function OrdersTableClient({
                                     value={invoiceSearch}
                                     onChange={e => setInvoiceSearch(e.target.value)}
                                 />
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white outline-none"
                                     value={selectedInvoiceId}
                                     onChange={e => setSelectedInvoiceId(e.target.value)}

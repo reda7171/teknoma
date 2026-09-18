@@ -17,7 +17,7 @@ export async function GET(request: Request) {
         const payload = error ? `{ type: 'oauth_error', error: '${error}' }` : `{ type: 'oauth_success', redirect: '${url}' }`
         const html = `
             <!DOCTYPE html>
-            <html>
+            <html lang="fr">
             <head>
                 <script>
                     if (window.opener && !window.opener.closed) {

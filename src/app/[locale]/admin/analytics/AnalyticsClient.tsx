@@ -27,6 +27,8 @@ import {
 } from '@/lib/actions/analytics'
 import Image from 'next/image'
 
+const AccessibleTooltip = Tooltip as any;
+
 const COLORS = ['#000000', '#FFD700', '#FF69B4', '#10B981', '#3B82F6', '#F59E0B']
 
 export default function AnalyticsClient() {
@@ -152,7 +154,7 @@ export default function AnalyticsClient() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                             <XAxis dataKey="date" stroke="#999" style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }} />
                             <YAxis stroke="#999" style={{ fontSize: '10px', fontWeight: '900' }} />
-                            <Tooltip
+                            <AccessibleTooltip
                                 contentStyle={{
                                     backgroundColor: '#000',
                                     border: 'none',
@@ -241,7 +243,7 @@ export default function AnalyticsClient() {
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <AccessibleTooltip />
                                 <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontWeight: 'black', textTransform: 'uppercase', fontSize: '10px' }} />
                             </PieChart>
                         </ResponsiveContainer>
@@ -267,8 +269,9 @@ export default function AnalyticsClient() {
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                                 <XAxis dataKey="name" stroke="#999" style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }} />
                                 <YAxis stroke="#999" style={{ fontSize: '10px', fontWeight: '900' }} />
-                                <Tooltip
+                                <AccessibleTooltip
                                     cursor={{ fill: '#f8fafc' }}
+                                    wrapperProps={{ 'aria-label': 'Détails de l\'évolution' }}
                                     contentStyle={{
                                         backgroundColor: '#000',
                                         border: 'none',

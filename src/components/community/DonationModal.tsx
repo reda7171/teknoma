@@ -22,7 +22,7 @@ export default function DonationModal({ isOpen, onClose }: DonationModalProps) {
                         <div className="w-12 h-12 rounded-2xl flex items-center justify-center border bg-pink-50 text-pink-500 border-pink-100">
                             <Heart className="w-6 h-6 fill-current" />
                         </div>
-                        <button
+                        <button aria-label="Fermer"
                             onClick={onClose}
                             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                         >

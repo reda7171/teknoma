@@ -82,7 +82,7 @@ export default function AdminSchoolListsPage() {
                                     </a>
                                 </td>
                                 <td className="p-4">
-                                    <select 
+                                    <select aria-label="Champ de sélection" 
                                         value={list.status}
                                         onChange={(e) => handleStatusUpdate(list.id, e.target.value)}
                                         className="text-sm border border-gray-300 rounded-lg p-2 bg-white"

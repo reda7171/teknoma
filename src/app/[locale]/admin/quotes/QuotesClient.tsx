@@ -343,7 +343,7 @@ export default function QuotesClient({ initialQuotes, authors = [] }: { initialQ
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Langue *</label>
-                                    <select 
+                                    <select aria-label="Champ de sélection" 
                                         required
                                         value={formData.locale}
                                         onChange={e => setFormData({...formData, locale: e.target.value})}

@@ -152,7 +152,7 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
@@ -162,7 +162,7 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                         <option value="INACTIVE">Inactifs uniquement</option>
                         <option value="NO_IMAGE">Sans Image</option>
                     </select>
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={stockFilter}
                         onChange={(e) => setStockFilter(e.target.value)}
@@ -171,7 +171,7 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                         <option value="IN_STOCK">Complet</option>
                         <option value="OUT_OF_STOCK">Incomplet (livres manquants)</option>
                     </select>
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={sortFilter}
                         onChange={(e) => setSortFilter(e.target.value)}

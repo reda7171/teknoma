@@ -17,7 +17,7 @@ export default function NewPostPage() {
                     <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-gray-100/50">
                         <div>
                             <div className="flex items-center gap-3 mb-6">
-                                <Link 
+                                <Link aria-label="Action ArrowLeft" 
                                     href="/admin/posts" 
                                     className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-black hover:scale-105 hover:shadow-md transition-all duration-300"
                                 >

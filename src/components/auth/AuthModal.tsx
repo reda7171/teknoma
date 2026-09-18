@@ -39,7 +39,7 @@ export default function AuthModal() {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md relative shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                <button onClick={closeAuthModal} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                <button aria-label="Fermer" onClick={closeAuthModal} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                     <X className="w-5 h-5" />
                 </button>
                 <div className="text-center mb-8 mt-4">

@@ -77,7 +77,7 @@ export default function MediaLibraryModal({ isOpen, onClose, onSelect, initialTa
                         <ImageIcon className="w-5 h-5 mr-2 text-indigo-500" />
                         Parcourir la Médiathèque
                     </h3>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <button aria-label="Fermer" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                         <X className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>

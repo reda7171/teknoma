@@ -90,7 +90,7 @@ export default function ImageUpload({ onImageSelect, currentImage, onRemove }: I
                         className="object-cover"
                         unoptimized={preview.startsWith('data:')}
                     />
-                    <button
+                    <button aria-label="Fermer"
                         type="button"
                         onClick={handleRemove}
                         className="absolute top-3 right-3 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"

@@ -86,7 +86,7 @@ export default function ReportButton({ targetBookId, targetUserId }: { targetBoo
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">{t('ReasonLabel')}</label>
                                     <div className="relative">
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             required
                                             value={reason}
                                             onChange={(e) => setReason(e.target.value)}

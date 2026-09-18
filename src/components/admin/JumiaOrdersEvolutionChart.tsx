@@ -14,6 +14,8 @@ import {
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
+const AccessibleTooltip = Tooltip as any;
+
 interface EvolutionData {
     date: string
     count: number
@@ -67,7 +69,8 @@ export default function JumiaOrdersEvolutionChart({ data }: ChartProps) {
                             tick={{ fontSize: 10, fontWeight: 700, fill: '#fdba74' }}
                             dx={-10}
                         />
-                        <Tooltip 
+                        <AccessibleTooltip
+wrapperProps={{ 'aria-label': 'Détails de l\'évolution des commandes Jumia' }}
                             contentStyle={{ borderRadius: '1rem', border: '1px solid #ffedd5', boxShadow: '0 4px 6px -1px rgb(249 115 22 / 0.1)' }}
                             itemStyle={{ fontSize: '12px', fontWeight: 700 }}
                             labelStyle={{ fontSize: '10px', fontWeight: 900, color: '#f97316', textTransform: 'uppercase', marginBottom: '4px' }}

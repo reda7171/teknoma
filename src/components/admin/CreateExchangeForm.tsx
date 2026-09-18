@@ -84,7 +84,7 @@ export default function CreateExchangeForm() {
 
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Utilisateur</label>
-                        <select
+                        <select aria-label="Champ de sélection"
                             value={requesterId}
                             onChange={(e) => setRequesterId(e.target.value)}
                             className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-black transition-all"
@@ -100,7 +100,7 @@ export default function CreateExchangeForm() {
                     {type === 'DIRECT' && (
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Livre à proposer (Offered)</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={bookOfferedId}
                                 onChange={(e) => setBookOfferedId(e.target.value)}
                                 className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-black transition-all"
@@ -142,7 +142,7 @@ export default function CreateExchangeForm() {
 
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Propriétaire</label>
-                        <select
+                        <select aria-label="Champ de sélection"
                             value={responderId}
                             onChange={(e) => setResponderId(e.target.value)}
                             className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-black transition-all"
@@ -157,7 +157,7 @@ export default function CreateExchangeForm() {
 
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Livre demandé</label>
-                        <select
+                        <select aria-label="Champ de sélection"
                             value={bookRequestedId}
                             onChange={(e) => setBookRequestedId(e.target.value)}
                             className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-black transition-all"

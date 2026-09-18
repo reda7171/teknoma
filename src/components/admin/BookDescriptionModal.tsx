@@ -192,7 +192,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
             const newWindow = window.open()
             if (newWindow) {
                 newWindow.document.write(`
-                    <html>
+                    <html lang="fr">
                         <head>
                             <title>Aperçu Description - Riwaya</title>
                             <style>
@@ -413,7 +413,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
 
                 {/* Right side: Controls */}
                 <div className="w-full md:w-[380px] bg-white border-l border-gray-200 p-8 flex flex-col relative shrink-0">
-                    <button 
+                    <button aria-label="Fermer" 
                         onClick={onClose}
                         className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
                     >
@@ -549,7 +549,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                                     Police (Font Family)
                                 </label>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     value={fontFamily}
                                     onChange={(e) => setFontFamily(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm font-medium"

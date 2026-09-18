@@ -12,6 +12,8 @@ import ExportButton from './ExportButton'
 import { exportSalesReport } from '@/lib/actions/export'
 import { normalizeImage } from '@/lib/utils'
 
+const AccessibleTooltip = Tooltip as any;
+
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#0088fe', '#00c49f', '#ff8042']
 
 export default function DashboardAnalytics() {
@@ -101,7 +103,8 @@ export default function DashboardAnalytics() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
-                                <Tooltip
+                                <AccessibleTooltip
+                                    wrapperProps={{ 'aria-label': 'Détails du graphique' }}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                                     formatter={(value: any) => [`${value} درهم`, 'Total']}
                                 />
@@ -133,7 +136,8 @@ export default function DashboardAnalytics() {
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip
+                                <AccessibleTooltip
+                                    wrapperProps={{ 'aria-label': 'Détails de la répartition' }}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                                     formatter={(value: any) => [`${value} درهم`, 'Revenu']}
                                 />
@@ -155,7 +159,8 @@ export default function DashboardAnalytics() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
-                                <Tooltip
+                                <AccessibleTooltip
+                                    wrapperProps={{ 'aria-label': 'Détails par ville' }}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                                     formatter={(value: any) => [`${value.toLocaleString('fr-FR')} درهم`, 'Revenu']}
                                 />

@@ -92,7 +92,7 @@ export default function EditBookForm({ book }: { book: any }) {
 
     return (
         <div className="w-full max-w-2xl bg-white rounded-[2.5rem] p-10 shadow-xl shadow-black/5 border border-gray-100 relative">
-            <Link href="/community" className="absolute top-10 left-10 p-2 hover:bg-gray-100 rounded-full transition-colors hidden md:block">
+            <Link aria-label="Action ArrowLeft" href="/community" className="absolute top-10 left-10 p-2 hover:bg-gray-100 rounded-full transition-colors hidden md:block">
                 <ArrowLeft className="w-5 h-5 text-black" />
             </Link>
 
@@ -107,7 +107,7 @@ export default function EditBookForm({ book }: { book: any }) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Status.Label') || 'Statut'}</label>
                         <div className="relative">
                             <ShieldAlert className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                            <select
+                            <select aria-label="Sélection status"
                                 name="status"
                                 defaultValue={book.status}
                                 className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black appearance-none"
@@ -164,7 +164,7 @@ export default function EditBookForm({ book }: { book: any }) {
                             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Condition')}</label>
                             <div className="relative">
                                 <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                                <select
+                                <select aria-label="Sélection condition"
                                     name="condition"
                                     defaultValue={book.condition}
                                     required

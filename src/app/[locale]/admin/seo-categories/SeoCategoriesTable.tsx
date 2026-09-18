@@ -109,7 +109,7 @@ export default function SeoCategoriesTable({ categories }: { categories: any[] }
                                     </button>
                                 </td>
                                 <td className="px-6 py-4 text-right space-x-2">
-                                    <Link
+                                    <Link aria-label="Modifier"
                                         href={`/admin/seo-categories/${category.id}`}
                                         className="inline-flex items-center justify-center p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                     >

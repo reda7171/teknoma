@@ -58,7 +58,7 @@ export default function CouponForm() {
 
                 <div className="space-y-3">
                     <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">Type de remise</label>
-                    <select name="type" className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-[1.5rem] font-black text-black focus:bg-white focus:border-black outline-none transition-all appearance-none">
+                    <select aria-label="Sélection type" name="type" className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-[1.5rem] font-black text-black focus:bg-white focus:border-black outline-none transition-all appearance-none">
                         <option value="PERCENTAGE">Pourcentage (%)</option>
                         <option value="FIXED_AMOUNT">Montant fixe (درهم)</option>
                     </select>

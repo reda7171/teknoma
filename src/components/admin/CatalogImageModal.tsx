@@ -188,7 +188,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                         <ImageIcon className="w-6 h-6" />
                         <h2 className="text-xl font-bold uppercase tracking-tight">Générateur IMAGE</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold text-xl"><X className="w-6 h-6" /></button>
+                    <button aria-label="Fermer" onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold text-xl"><X className="w-6 h-6" /></button>
                 </div>
 
                 <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
@@ -276,7 +276,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
 
                             <div>
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Catégorie</label>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     value={config.selectedCategory}
                                     onChange={(e) => {
                                         setConfig({...config, selectedCategory: e.target.value});

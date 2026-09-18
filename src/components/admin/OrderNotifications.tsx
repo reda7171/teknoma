@@ -211,7 +211,12 @@ export default function OrderNotifications() {
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]" onClick={() => setOpen(false)} />
                     
                     {/* Modal Content */}
-                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden">
+                    <div 
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Notifications"
+                        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden"
+                    >
                     <div className="px-4 py-3 bg-gray-900 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                             <Bell className="w-4 h-4 text-orange-400" />

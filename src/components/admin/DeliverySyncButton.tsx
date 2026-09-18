@@ -129,7 +129,7 @@ export default function DeliverySyncButton({
     return (
         <div className="flex flex-col gap-3">
             {companies.length > 0 ? (
-                <select
+                <select aria-label="Champ de sélection"
                     value={selectedCompany}
                     onChange={(e) => setSelectedCompany(e.target.value)}
                     disabled={loading}

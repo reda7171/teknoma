@@ -94,17 +94,17 @@ export default async function CommunityDashboard() {
                             {(u.instagram || u.facebook || u.twitter) && (
                                 <div className="flex items-center gap-3 mt-4 justify-center md:justify-start">
                                     {u.instagram && (
-                                        <a href={`https://instagram.com/${u.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="bg-gray-50 p-2 rounded-full hover:bg-black hover:text-white transition-colors">
+                                        <a aria-label="Action Instagram" href={`https://instagram.com/${u.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="bg-gray-50 p-2 rounded-full hover:bg-black hover:text-white transition-colors">
                                             <Instagram className="w-4 h-4" />
                                         </a>
                                     )}
                                     {u.facebook && (
-                                        <a href={`https://facebook.com/${u.facebook}`} target="_blank" rel="noopener noreferrer" className="bg-gray-50 p-2 rounded-full hover:bg-black hover:text-white transition-colors">
+                                        <a aria-label="Action Facebook" href={`https://facebook.com/${u.facebook}`} target="_blank" rel="noopener noreferrer" className="bg-gray-50 p-2 rounded-full hover:bg-black hover:text-white transition-colors">
                                             <Facebook className="w-4 h-4" />
                                         </a>
                                     )}
                                     {u.twitter && (
-                                        <a href={`https://twitter.com/${u.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="bg-gray-50 p-2 rounded-full hover:bg-black hover:text-white transition-colors">
+                                        <a aria-label="Action Twitter" href={`https://twitter.com/${u.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="bg-gray-50 p-2 rounded-full hover:bg-black hover:text-white transition-colors">
                                             <Twitter className="w-4 h-4" />
                                         </a>
                                     )}

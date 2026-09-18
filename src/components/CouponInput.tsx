@@ -59,7 +59,7 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
                         </p>
                     </div>
                 </div>
-                <button
+                <button aria-label="Fermer"
                     onClick={handleRemove}
                     className="p-1 hover:bg-blue-100 rounded-full text-blue-600 transition-colors"
                 >

@@ -2,6 +2,8 @@
 import React, { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
+const AccessibleTooltip = Tooltip as any;
+
 export default function BlogDynamicContent({ html }: { html: string }) {
     // Regex pour isoler les commentaires HTML spécifiques et le bloc vidéo entier
     const parts = html.split(/(<!--\s*VIDEO_BLOCK\s*-->[\s\S]*?<\/div>|<!--\s*(?:CHART_BLOCK|POLL_BLOCK)[\s\S]*?-->)/gi)
@@ -49,7 +51,7 @@ export default function BlogDynamicContent({ html }: { html: string }) {
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} />
                                             <YAxis axisLine={false} tickLine={false} />
-                                            <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                                            <AccessibleTooltip wrapperProps={{ 'aria-label': 'Détails du blog' }} cursor={{fill: '#f3f4f6'}} contentStyle={{borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
                                             {keys.map((key: string, idx: number) => (
                                                 <Bar key={key} dataKey={key} fill={idx === 0 ? "#3b82f6" : "#10b981"} radius={[4, 4, 0, 0]} />
                                             ))}

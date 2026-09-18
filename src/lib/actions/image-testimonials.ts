@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
+import { getCached } from '@/lib/cache'
 import { revalidatePath } from 'next/cache'
 import { writeFile, mkdir, unlink } from 'fs/promises'
 import { join, normalize } from 'path'
@@ -112,15 +113,17 @@ export async function getImageTestimonials() {
 }
 
 export async function getApprovedImageTestimonials() {
-    try {
-        const testimonials = await prisma.imageTestimonial.findMany({
-            where: { isApproved: true },
-            orderBy: { createdAt: 'desc' }
-        })
-        return { success: true, testimonials }
-    } catch (error: any) {
-        return { success: false, error: error.message }
-    }
+    return getCached('testimonials:image:approved', async () => {
+        try {
+            const testimonials = await prisma.imageTestimonial.findMany({
+                where: { isApproved: true },
+                orderBy: { createdAt: 'desc' }
+            })
+            return { success: true, testimonials }
+        } catch (error: any) {
+            return { success: false, error: error.message }
+        }
+    }, 3600) // 1 hour cache
 }
 
 export async function deleteImageTestimonial(id: string) {

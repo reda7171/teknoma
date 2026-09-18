@@ -74,7 +74,7 @@ export default function ConsignmentOrderForm({ shops, onCancel, onSuccess }: Con
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="font-medium text-slate-700">Boutique Jumia</label>
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         value={shopId} 
                         onChange={(e) => setShopId(e.target.value)}
                         className="w-full border rounded-md px-3 py-2"

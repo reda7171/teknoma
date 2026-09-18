@@ -169,7 +169,7 @@ export default function DigitalProductsTable({
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link
+                      <Link aria-label="Modifier"
                         href={`/admin/digital-products/${p.id}/edit`}
                         className="p-1.5 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
                       >
@@ -198,7 +198,7 @@ export default function DigitalProductsTable({
           </p>
           <div className="flex gap-2">
             {pageNumber > 1 && (
-              <Link
+              <Link aria-label="Action ChevronLeft"
                 href={`/admin/digital-products?page=${pageNumber - 1}&search=${initialSearch}`}
                 className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
@@ -206,7 +206,7 @@ export default function DigitalProductsTable({
               </Link>
             )}
             {pageNumber < totalPages && (
-              <Link
+              <Link aria-label="Action ChevronRight"
                 href={`/admin/digital-products?page=${pageNumber + 1}&search=${initialSearch}`}
                 className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >

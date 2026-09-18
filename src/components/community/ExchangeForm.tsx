@@ -71,7 +71,7 @@ export default function ExchangeForm({ details }: ExchangeFormProps) {
                 {/* Decorative Glow */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-pixio-yellow/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-                <Link href={`/community/market/${book.id}`} className="absolute top-8 left-8 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all group">
+                <Link aria-label="Action ArrowLeft" href={`/community/market/${book.id}`} className="absolute top-8 left-8 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all group">
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 </Link>
 
@@ -130,7 +130,7 @@ export default function ExchangeForm({ details }: ExchangeFormProps) {
                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
                                         <BookOpen className="w-4 h-4 text-black" />
                                     </div>
-                                    <select
+                                    <select aria-label="Sélection bookOfferedId"
                                         name="bookOfferedId"
                                         required
                                         value={selectedBook}

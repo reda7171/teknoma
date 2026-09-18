@@ -326,7 +326,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                                 {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <select
+                                                <select aria-label="Champ de sélection"
                                                     value={user.role}
                                                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                                     className="bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-black focus:border-black block w-full p-2 font-bold uppercase tracking-wider"
@@ -647,7 +647,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Rôle</label>
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             value={formData.role}
                                             onChange={e => setFormData({...formData, role: e.target.value})}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold uppercase tracking-wider text-sm"
@@ -665,7 +665,7 @@ export default function UsersClient({ initialUsers, initialPermissions }: { init
                                     {formData.role === 'BLOG_MODERATOR' && (
                                         <div>
                                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Langues gérées</label>
-                                            <select
+                                            <select aria-label="Champ de sélection"
                                                 value={formData.managedLanguages}
                                                 onChange={e => setFormData({...formData, managedLanguages: e.target.value})}
                                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none font-bold text-sm"

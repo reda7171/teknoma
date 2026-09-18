@@ -537,7 +537,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
                                             <label htmlFor="shippingFees" className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                                                 Frais de livraison
                                             </label>
-                                            <select
+                                            <select aria-label="Sélection shippingFees"
                                                 id="shippingFees"
                                                 value={shippingFees}
                                                 onChange={e => setShippingFees(Number(e.target.value))}

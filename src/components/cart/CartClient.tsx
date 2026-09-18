@@ -330,7 +330,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                             .slice(0, 4)
                             .map((book) => (
                                 <div key={book.id} className="group relative bg-white rounded-[2.5rem] p-6 overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full">
-                                    <Link href={`/books/${book.id}`} className="relative aspect-[3/4] overflow-hidden rounded-[2rem] mb-8 block">
+                                    <Link aria-label="Action ImageWithFallback" href={`/books/${book.id}`} className="relative aspect-[3/4] overflow-hidden rounded-[2rem] mb-8 block">
                                         <ImageWithFallback
                                             src={book.image}
                                             alt={book.title}

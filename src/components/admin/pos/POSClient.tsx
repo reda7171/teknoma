@@ -57,7 +57,7 @@ const InlineNumpad = ({ value, onChange, onClose, title }: { value: number | '',
     <div className="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">{title}</h3>
-        <button onClick={onClose} className="p-2 bg-white border border-gray-100 text-gray-600 rounded-full hover:bg-gray-50 shadow-sm transition-all active:scale-95">
+        <button aria-label="Fermer" onClick={onClose} className="p-2 bg-white border border-gray-100 text-gray-600 rounded-full hover:bg-gray-50 shadow-sm transition-all active:scale-95">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -73,7 +73,7 @@ const InlineNumpad = ({ value, onChange, onClose, title }: { value: number | '',
         <button onClick={() => handlePress('0')} className="h-14 bg-white border border-gray-100 rounded-2xl text-xl font-black hover:border-black hover:bg-black hover:text-white active:scale-95 transition-all shadow-sm">
           0
         </button>
-        <button onClick={handleDelete} className="h-14 bg-white border border-gray-100 text-gray-600 rounded-2xl flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all shadow-sm">
+        <button aria-label="Supprimer" onClick={handleDelete} className="h-14 bg-white border border-gray-100 text-gray-600 rounded-2xl flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all shadow-sm">
           <Delete className="w-6 h-6" />
         </button>
       </div>
@@ -1017,7 +1017,7 @@ export default function POSClient({
             />
             {shippingCompanies.length > 0 && (
                 <div className="relative">
-                    <select
+                    <select aria-label="Champ de sélection"
                         value={selectedShippingCompany}
                         onChange={(e) => setSelectedShippingCompany(e.target.value)}
                         className="w-full px-6 py-4 text-[10px] font-black uppercase tracking-widest bg-white border border-gray-100 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all shadow-sm"

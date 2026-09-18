@@ -100,7 +100,7 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
                         </div>
                         {title}
                     </h2>
-                    <button 
+                    <button aria-label="Fermer" 
                         onClick={onClose}
                         className="w-10 h-10 bg-white rounded-full shadow-sm hover:bg-black hover:text-white transition-all flex items-center justify-center group"
                     >

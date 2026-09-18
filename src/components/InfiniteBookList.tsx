@@ -149,7 +149,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                             const displayTitle = getLocalizedTitle(pb.book, locale);
                                             const bookUrl = generateBookUrl(pb.book, locale);
                                             return (
-                                            <Link href={bookUrl} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
+                                            <Link aria-label="Action ImageWithFallback" href={bookUrl} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
                                                 <ImageWithFallback 
                                                     src={pb.book.image || ''} 
                                                     alt={displayTitle} 
@@ -187,7 +187,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         {boardGames.length > 0 ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {boardGames.slice(0, 3).map((game, i) => (
-                                                    <Link 
+                                                    <Link aria-label="Action ImageWithFallback" 
                                                         href={`/jeux-societe/${game.id}`}
                                                         key={game.id} 
                                                         className="absolute w-28 h-28 rounded-xl overflow-hidden shadow-xl border-2 border-white transform transition-transform hover:-translate-y-4"
@@ -237,7 +237,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         {kidsProducts.length > 0 ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {kidsProducts.slice(0, 3).map((prod, i) => (
-                                                    <Link 
+                                                    <Link aria-label="Action ImageWithFallback" 
                                                         href={`/mon-enfant/${prod.id}`}
                                                         key={prod.id} 
                                                         className="absolute w-28 h-28 rounded-xl overflow-hidden shadow-xl border-2 border-white transform transition-transform hover:-translate-y-4"

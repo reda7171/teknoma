@@ -93,7 +93,7 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
                         {/* Décoration */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                         
-                        <button 
+                        <button aria-label="Fermer" 
                             onClick={handleDecline}
                             className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-gray-400 hover:text-black transition-colors"
                         >

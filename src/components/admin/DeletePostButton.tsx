@@ -20,7 +20,7 @@ export default function DeletePostButton({ id }: { id: string }) {
     }
 
     return (
-        <button
+        <button aria-label="Supprimer"
             onClick={handleDelete}
             disabled={isPending}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"

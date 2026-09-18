@@ -629,7 +629,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                                 placeholder="Saisir le nom du nouvel auteur"
                             />
                         ) : (
-                            <select
+                            <select aria-label="Sélection author"
                                 id="author"
                                 name="author"
                                 required
@@ -722,7 +722,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <label htmlFor="jumiaPriceMarkup" className="block text-sm font-medium text-gray-700 mb-2">
                             Pourcentage à ajouter (Prix Jumia)
                         </label>
-                        <select
+                        <select aria-label="Sélection jumiaPriceMarkup"
                             id="jumiaPriceMarkup"
                             name="jumiaPriceMarkup"
                             defaultValue={book.jumiaPriceMarkup || 0}
@@ -750,7 +750,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1">Associer depuis un Lot d'Achats</label>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     className="w-full px-3 py-2 border border-orange-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-500"
                                     onChange={(e) => {
                                         if (e.target.value) setSelectedCost(e.target.value)
@@ -806,7 +806,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                                 Catégorie Principale
                             </label>
-                            <select
+                            <select aria-label="Sélection category"
                                 id="category"
                                 name="category"
                                 value={selectedMainCategory}
@@ -826,7 +826,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 mb-2">
                                 Sous-catégorie
                             </label>
-                            <select
+                            <select aria-label="Sélection subCategory"
                                 id="subCategory"
                                 name="subCategory"
                                 value={selectedSubCategory}
@@ -889,7 +889,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <label htmlFor="active" className="block text-sm font-medium text-gray-700 mb-2">
                             Visibilité Publique
                         </label>
-                        <select
+                        <select aria-label="Sélection active"
                             id="active"
                             name="active"
                             defaultValue={book.active ? 'true' : 'false'}
@@ -905,7 +905,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                             Statut Administratif
                         </label>
-                        <select
+                        <select aria-label="Sélection status"
                             id="status"
                             name="status"
                             defaultValue={book.status || 'APPROVED'}
@@ -922,7 +922,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <label htmlFor="isBestSeller" className="block text-sm font-medium text-gray-700 mb-2">
                             Mettre en "Meilleure Vente"
                         </label>
-                        <select
+                        <select aria-label="Sélection isBestSeller"
                             id="isBestSeller"
                             name="isBestSeller"
                             defaultValue={book.isBestSeller ? 'true' : 'false'}
@@ -938,7 +938,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <label htmlFor="isOriginal" className="block text-sm font-medium text-gray-700 mb-2">
                             Type de Livre
                         </label>
-                        <select
+                        <select aria-label="Sélection isOriginal"
                             id="isOriginal"
                             name="isOriginal"
                             defaultValue={book.isOriginal ? 'true' : 'false'}
@@ -954,7 +954,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <label htmlFor="isSyncedWithJumia" className="block text-sm font-medium text-gray-700 mb-2">
                             Synchronisé Jumia
                         </label>
-                        <select
+                        <select aria-label="Sélection isSyncedWithJumia"
                             id="isSyncedWithJumia"
                             name="isSyncedWithJumia"
                             defaultValue={book.isSyncedWithJumia ? 'true' : 'false'}

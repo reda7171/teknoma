@@ -50,7 +50,7 @@ export default function WelcomeOfferPopup() {
                 {/* Decorative background circle */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-100 rounded-full blur-3xl opacity-50 pointer-events-none" />
 
-                <button 
+                <button aria-label="Fermer" 
                     onClick={handleClose}
                     className="absolute top-6 right-6 p-2 bg-gray-50 text-gray-400 hover:text-black rounded-full hover:bg-gray-100 transition-colors z-10"
                 >

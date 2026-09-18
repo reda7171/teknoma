@@ -466,7 +466,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
             <header className="h-12 bg-[#141420] border-b border-white/8 flex items-center justify-between px-4 shrink-0 z-50">
                 {/* Left: title */}
                 <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition">
+                    <button aria-label="Action ChevronLeft" onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition">
                         <ChevronLeft className="w-4 h-4" />
                     </button>
                     <div className="w-px h-5 bg-white/10" />
@@ -523,7 +523,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                         <Film className="w-3.5 h-3.5" />
                         {mp4Progress !== null && savingMarketing === null ? 'Export…' : 'Exporter MP4'}
                     </button>
-                    <select value={videoDuration} onChange={e => setVideoDuration(Number(e.target.value))}
+                    <select aria-label="Champ de sélection" value={videoDuration} onChange={e => setVideoDuration(Number(e.target.value))}
                         className="px-2 py-1.5 bg-white/5 border border-white/10 text-white/70 text-xs rounded-lg outline-none">
                         {[3,5,7,10,15,30].map(d => <option key={d} value={d}>{d}s</option>)}
                     </select>

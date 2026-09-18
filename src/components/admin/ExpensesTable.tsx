@@ -66,7 +66,7 @@ export default function ExpensesTable({ expenses }: { expenses: Expense[] }) {
                     {/* Filter by Category */}
                     <div className="relative w-full sm:w-auto">
                         <Filter className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-                        <select 
+                        <select aria-label="Champ de sélection" 
                             value={categoryFilter}
                             onChange={(e) => setCategoryFilter(e.target.value)}
                             className="w-full sm:w-auto pl-10 pr-8 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-black focus:outline-none focus:ring-2 focus:ring-black/5 appearance-none cursor-pointer"

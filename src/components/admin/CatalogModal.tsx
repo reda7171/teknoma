@@ -160,7 +160,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                             <FileText className="w-6 h-6" />
                             <h2 className="text-xl font-black uppercase tracking-tight">Catalogue Riwaya</h2>
                         </div>
-                        <button onClick={handleClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold"><X className="w-6 h-6" /></button>
+                        <button aria-label="Fermer" onClick={handleClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold"><X className="w-6 h-6" /></button>
                     </div>
 
                     <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
@@ -222,7 +222,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
                                     <Filter className="w-4 h-4 text-blue-600" /> Catégorie
                                 </h3>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     value={config.selectedCategory}
                                     onChange={(e) => setConfig({...config, selectedCategory: e.target.value})}
                                     className="w-full px-4 py-2 border rounded-lg text-sm"
@@ -235,7 +235,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
                                     <LayoutList className="w-4 h-4 text-blue-600" /> Page
                                 </h3>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     value={config.booksPerPage}
                                     onChange={(e) => setConfig({...config, booksPerPage: Number(e.target.value)})}
                                     className="w-full px-4 py-2 border rounded-lg text-sm"

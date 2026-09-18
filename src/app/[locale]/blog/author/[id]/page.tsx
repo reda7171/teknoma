@@ -114,17 +114,17 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                             {(user.facebook || user.instagram || user.twitter || isAdmin) && (
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                     {user.facebook && (
-                                        <a href={user.facebook.includes('http') ? user.facebook : `https://facebook.com/${user.facebook}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                                        <a aria-label="Action Facebook" href={user.facebook.includes('http') ? user.facebook : `https://facebook.com/${user.facebook}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all shadow-sm">
                                             <Facebook className="w-5 h-5" />
                                         </a>
                                     )}
                                     {user.instagram && (
-                                        <a href={user.instagram.includes('http') ? user.instagram : `https://instagram.com/${user.instagram}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-pink-50 text-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-all shadow-sm">
+                                        <a aria-label="Action Instagram" href={user.instagram.includes('http') ? user.instagram : `https://instagram.com/${user.instagram}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-pink-50 text-pink-600 rounded-full hover:bg-pink-600 hover:text-white transition-all shadow-sm">
                                             <Instagram className="w-5 h-5" />
                                         </a>
                                     )}
                                     {user.twitter && (
-                                        <a href={user.twitter.includes('http') ? user.twitter : `https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-100 text-slate-700 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">
+                                        <a aria-label="Action Twitter" href={user.twitter.includes('http') ? user.twitter : `https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-100 text-slate-700 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">
                                             <Twitter className="w-5 h-5" />
                                         </a>
                                     )}

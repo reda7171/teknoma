@@ -754,7 +754,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                         </div>
                                         <div>
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Plateformes</label>
-                                            <select value={autoSchedulePlatform} onChange={e => setAutoSchedulePlatform(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                            <select aria-label="Champ de sélection" value={autoSchedulePlatform} onChange={e => setAutoSchedulePlatform(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                                 <option value="all">Toutes</option>
                                                 <option value="facebook">Facebook</option>
                                                 <option value="instagram">Instagram</option>
@@ -834,7 +834,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
                 {/* Header Controls */}
                 <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
-                    <button onClick={prevDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
+                    <button aria-label="Action ChevronLeft" onClick={prevDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
                         <ChevronLeft className="w-5 h-5" />
                     </button>
 
@@ -868,7 +868,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                         </button>
                     </div>
 
-                    <button onClick={nextDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
+                    <button aria-label="Action ChevronRight" onClick={nextDay} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 hover:shadow-sm transition-all text-slate-600">
                         <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>
@@ -1167,7 +1167,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                     </div>
 
                                     {!isPublishNow && (
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             value={selectedTime}
                                             onChange={(e) => setSelectedTime(e.target.value)}
                                             className="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm bg-white"

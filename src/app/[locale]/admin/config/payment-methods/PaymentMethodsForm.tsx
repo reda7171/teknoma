@@ -209,7 +209,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-bold text-slate-700 mb-2">Mode de l'environnement</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={settings.paypalMode}
                                 onChange={(e) => setSettings({ ...settings, paypalMode: e.target.value })}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
@@ -336,7 +336,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-bold text-slate-700 mb-2">Mode de l'environnement</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={settings.cmiMode}
                                 onChange={(e) => setSettings({ ...settings, cmiMode: e.target.value })}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-50 outline-none transition-all"

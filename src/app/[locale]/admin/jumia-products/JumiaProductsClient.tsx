@@ -162,7 +162,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         className="border rounded-md px-3 py-2 text-sm"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
@@ -172,7 +172,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                         <option value="REJECTED">Rejeté (REJECTED)</option>
                         <option value="PENDING">En attente (PENDING)</option>
                     </select>
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         className="border rounded-md px-3 py-2 text-sm"
                         value={visibilityFilter}
                         onChange={(e) => setVisibilityFilter(e.target.value)}
@@ -181,7 +181,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                         <option value="VISIBLE">Visible</option>
                         <option value="HIDDEN">Masqué</option>
                     </select>
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         className="border rounded-md px-3 py-2 text-sm max-w-[200px]"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}

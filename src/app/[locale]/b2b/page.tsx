@@ -216,7 +216,7 @@ export default function B2BPage() {
 
                         <div>
                             <label className="block text-sm font-bold mb-2">Type de collaboration *</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 required
                                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:border-pixio-yellow text-white"
                             >
