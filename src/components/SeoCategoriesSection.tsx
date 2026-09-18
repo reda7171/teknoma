@@ -67,6 +67,7 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
 
                 <Link 
                   href={`/collection/${cat.slug}` as any}
+                  aria-label={`${texts.button} - ${cat.h1?.split(':')[0] || cat.title?.split('|')[0]}`}
                   className="inline-flex items-center gap-3 bg-white text-gray-900 px-6 py-3.5 rounded-full font-black text-sm hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all shadow-lg"
                 >
                   <span>{texts.button}</span>
