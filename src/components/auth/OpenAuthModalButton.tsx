@@ -20,7 +20,7 @@ export default function OpenAuthModalButton({ label, sub }: Props) {
                 {label}
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <p className="text-slate-400 text-xs font-medium text-center md:text-left">{sub}</p>
+            <p className="text-slate-500 text-xs font-medium text-center md:text-left">{sub}</p>
         </div>
     )
 }

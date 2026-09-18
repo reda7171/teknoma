@@ -94,11 +94,11 @@
     "typescript": "^5"
   },
   "browserslist": [
-    "chrome >= 92",
-    "firefox >= 90",
-    "safari >= 15.4",
-    "edge >= 92",
-    "ios >= 15.4"
+    "chrome >= 109",
+    "firefox >= 110",
+    "safari >= 16.4",
+    "edge >= 109",
+    "ios >= 16.4"
   ],
   "optionalDependencies": {
     "exiftool-vendored.exe": "^13.59.0"
