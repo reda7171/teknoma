@@ -47,9 +47,13 @@ export async function getOrders() {
     }
 
     try {
+        const conditions: any[] = []
+        if (emailToUse) conditions.push({ email: emailToUse })
+        if (user && user.phone) conditions.push({ phone: user.phone })
+
         const orders = await (prisma.order as any).findMany({
             where: {
-                email: emailToUse
+                OR: conditions.length > 0 ? conditions : undefined
             },
             include: {
                 items: {
@@ -475,7 +479,10 @@ export async function getOrderById(orderId: string) {
             const communityUser = await getCommunityUser()
             const emailToCheck = communityUser?.email || guestEmail
 
-            if (!emailToCheck || order.email !== emailToCheck) {
+            const emailMatches = emailToCheck && order.email === emailToCheck
+            const phoneMatches = communityUser?.phone && order.phone === communityUser.phone
+
+            if (!emailMatches && !phoneMatches) {
                 return null
             }
         }
@@ -561,7 +568,10 @@ export async function cancelMyOrder(orderId: string) {
             where: { id: orderId }
         })
 
-        if (!order || order.email !== emailToUse) {
+        const emailMatches = emailToUse && order?.email === emailToUse
+        const phoneMatches = user?.phone && order?.phone === user.phone
+
+        if (!order || (!emailMatches && !phoneMatches)) {
             throw new Error('Commande introuvable')
         }
 
