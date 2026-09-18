@@ -7,7 +7,20 @@ export default function GoogleReviewsBadge() {
     <>
       <div 
         id="___ratingbadge_0" 
-        style={{ minHeight: '60px', minWidth: '120px', position: 'fixed', bottom: '0px', left: '0px', zIndex: 2147483647, pointerEvents: 'none' }}
+        style={{ 
+          minHeight: '60px', 
+          minWidth: '120px',
+          width: '180px',
+          height: '72px',
+          position: 'fixed', 
+          bottom: '0px', 
+          left: '0px', 
+          zIndex: 2147483647, 
+          pointerEvents: 'none',
+          // Forcer la réservation d'espace dès le début pour éviter CLS (score 0.182)
+          contain: 'layout',
+          willChange: 'transform',
+        }}
         aria-hidden="true"
       />
       <Script 
