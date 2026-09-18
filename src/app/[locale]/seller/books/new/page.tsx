@@ -186,7 +186,7 @@ export default function NewSellerBookPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-bold text-gray-500 block mb-2">{t('CategoryLabel')}</label>
-                                <select
+                                <select aria-label="Sélection category"
                                     name="category"
                                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-black focus:ring-2 focus:ring-black outline-none appearance-none"
                                 >
@@ -199,7 +199,7 @@ export default function NewSellerBookPage() {
                             </div>
                             <div>
                                 <label className="text-sm font-bold text-gray-500 block mb-2">{t('LanguageLabel')}</label>
-                                <select
+                                <select aria-label="Sélection language"
                                     name="language"
                                     value={language}
                                     onChange={(e) => setLanguage(e.target.value)}

@@ -76,7 +76,7 @@ export default function InstantOfferPopup() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             {showConfetti && <Confetti recycle={false} numberOfPieces={300} />}
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in duration-300">
-                <button 
+                <button aria-label="Fermer" 
                     onClick={handleReject}
                     className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
                 >

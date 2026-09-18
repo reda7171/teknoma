@@ -14,6 +14,8 @@ import {
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
+const AccessibleTooltip = Tooltip as any;
+
 interface PostData {
     language: string
     createdAt: Date
@@ -76,7 +78,8 @@ export default function AdminPostsEvolutionChart({ data }: ChartProps) {
                             tick={{ fontSize: 10, fontWeight: 700, fill: '#9ca3af' }}
                             dx={-10}
                         />
-                        <Tooltip 
+                        <AccessibleTooltip 
+                            wrapperProps={{ 'aria-label': 'Détails des publications' }}
                             contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
                             itemStyle={{ fontSize: '12px', fontWeight: 700 }}
                             labelStyle={{ fontSize: '10px', fontWeight: 900, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '4px' }}

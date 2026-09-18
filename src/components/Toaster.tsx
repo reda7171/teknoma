@@ -37,7 +37,7 @@ export default function Toaster() {
                         {notification.message}
                     </p>
                 </div>
-                <button
+                <button aria-label="Fermer"
                     onClick={hideNotification}
                     className="flex-shrink-0 w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors"
                 >

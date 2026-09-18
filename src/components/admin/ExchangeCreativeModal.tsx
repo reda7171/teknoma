@@ -382,7 +382,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                             <h3 className="text-lg font-black text-gray-900 tracking-tight">Image d'échange</h3>
                             <p className="text-xs text-gray-500 font-medium">Générez un visuel pour les réseaux sociaux</p>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                        <button aria-label="Fermer" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
                             <X className="w-5 h-5 text-gray-500" />
                         </button>
                     </div>
@@ -466,7 +466,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
 
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Plateforme</label>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     value={platform}
                                     onChange={(e) => setPlatform(e.target.value as any)}
                                     className="w-full text-xs p-3 rounded-xl border border-gray-200 outline-none bg-gray-50/50"

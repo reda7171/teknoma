@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { deleteAudioFile } from './upload-audio'
 import { revalidatePath } from 'next/cache'
+import { getCached } from '@/lib/cache'
 
 export async function getAudioTestimonials() {
     try {
@@ -18,16 +19,18 @@ export async function getAudioTestimonials() {
 }
 
 export async function getApprovedAudioTestimonials() {
-    try {
-        const testimonials = await prisma.audioTestimonial.findMany({
-            where: { isApproved: true },
-            orderBy: { createdAt: 'desc' }
-        })
-        return { success: true, testimonials }
-    } catch (error) {
-        console.error('[GET APPROVED AUDIO TESTIMONIALS]', error)
-        return { success: false, error: 'Erreur lors de la récupération des témoignages audio' }
-    }
+    return getCached('testimonials:audio:approved', async () => {
+        try {
+            const testimonials = await prisma.audioTestimonial.findMany({
+                where: { isApproved: true },
+                orderBy: { createdAt: 'desc' }
+            })
+            return { success: true, testimonials }
+        } catch (error) {
+            console.error('[GET APPROVED AUDIO TESTIMONIALS]', error)
+            return { success: false, error: 'Erreur lors de la récupération des témoignages audio' }
+        }
+    }, 3600) // 1 hour cache
 }
 
 export async function createAudioTestimonial(data: { customerName: string, audioUrl: string, duration?: number }) {

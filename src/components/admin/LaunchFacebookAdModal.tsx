@@ -90,7 +90,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Via API Graph Marketing</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                    <button aria-label="Fermer" onClick={onClose} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -142,7 +142,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
                                 <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 ml-1">
                                     <Target className="w-3.5 h-3.5" /> Objectif de Campagne
                                 </label>
-                                <select
+                                <select aria-label="Champ de sélection"
                                     value={objective}
                                     onChange={(e) => setObjective(e.target.value)}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium"

@@ -2,6 +2,8 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
+const AccessibleTooltip = Tooltip as any;
+
 export default function StatsChart({ data }: { data: { name: string, value: number }[] }) {
     return (
         <div className="h-[300px] w-full mt-4">
@@ -29,7 +31,8 @@ export default function StatsChart({ data }: { data: { name: string, value: numb
                         tickLine={false}
                         tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 'bold' }}
                     />
-                    <Tooltip
+                    <AccessibleTooltip
+                        wrapperProps={{ 'aria-label': 'Détails des statistiques' }}
                         contentStyle={{
                             backgroundColor: '#fff',
                             borderRadius: '16px',

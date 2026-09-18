@@ -204,7 +204,7 @@ export default function EditAccessoryPage({
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Link
+                    <Link aria-label="Action ChevronLeft"
                         href={`/${locale}/admin/accessories`}
                         className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 transition-all shadow-sm"
                     >
@@ -346,7 +346,7 @@ export default function EditAccessoryPage({
                     <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Catégorie</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={formData.category}
                                 onChange={e => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
@@ -545,7 +545,7 @@ export default function EditAccessoryPage({
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Synchronisé avec Jumia</label>
-                                <select
+                                <select aria-label="Champ de sélection"
                                     value={formData.isSyncedWithJumia ? 'true' : 'false'}
                                     onChange={e => setFormData({ ...formData, isSyncedWithJumia: e.target.value === 'true' })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"

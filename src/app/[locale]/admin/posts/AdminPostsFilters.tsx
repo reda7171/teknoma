@@ -122,7 +122,7 @@ export default function AdminPostsFilters({
 
                 <div className="flex items-center gap-3">
                     {/* Filtre rapide "Livre lié" toujours visible */}
-                    <select
+                    <select aria-label="Champ de sélection"
                         value={activeFilters.bookId || 'all'}
                         onChange={(e) => handleApplyFilters({ bookId: e.target.value })}
                         className="hidden md:block px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all font-bold text-sm w-48 truncate"
@@ -221,7 +221,7 @@ export default function AdminPostsFilters({
                                 <Tag className="w-3 h-3" />
                                 Catégorie
                             </label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={activeFilters.category || 'all'}
                                 onChange={(e) => handleApplyFilters({ category: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
@@ -239,7 +239,7 @@ export default function AdminPostsFilters({
                                 <User className="w-3 h-3" />
                                 Auteur
                             </label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={activeFilters.authorId || 'all'}
                                 onChange={(e) => handleApplyFilters({ authorId: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
@@ -259,7 +259,7 @@ export default function AdminPostsFilters({
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
                                 Trier par
                             </label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={activeFilters.sort || 'newest'}
                                 onChange={(e) => handleApplyFilters({ sort: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"

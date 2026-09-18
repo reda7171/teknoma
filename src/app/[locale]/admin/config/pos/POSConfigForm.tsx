@@ -289,7 +289,7 @@ export default function POSConfigForm({
                     <label htmlFor="defaultTab" className="block text-sm font-bold text-gray-900 mb-2">
                         Onglet par défaut
                     </label>
-                    <select
+                    <select aria-label="Sélection defaultTab"
                         id="defaultTab"
                         value={defaultTab}
                         onChange={(e) => setDefaultTab(e.target.value)}
@@ -375,7 +375,7 @@ export default function POSConfigForm({
                         <label htmlFor="printerType" className="block text-sm font-bold text-gray-900 mb-2">
                             Type d'imprimante
                         </label>
-                        <select
+                        <select aria-label="Sélection printerType"
                             id="printerType"
                             value={printerType}
                             onChange={(e) => setPrinterType(e.target.value)}

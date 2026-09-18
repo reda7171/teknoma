@@ -178,7 +178,7 @@ export default function DigitalProductForm({ product }: { product?: Product } = 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
             <label className={LABEL_CLASS}>Catégorie</label>
-            <select
+            <select aria-label="Champ de sélection"
               value={form.category}
               onChange={(e) => handleChange('category', e.target.value)}
               className={INPUT_CLASS}
@@ -196,7 +196,7 @@ export default function DigitalProductForm({ product }: { product?: Product } = 
           </div>
           <div>
             <label className={LABEL_CLASS}>Langue</label>
-            <select
+            <select aria-label="Champ de sélection"
               value={form.language}
               onChange={(e) => handleChange('language', e.target.value)}
               className={INPUT_CLASS}

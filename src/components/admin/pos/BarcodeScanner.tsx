@@ -68,7 +68,7 @@ export default function BarcodeScanner({ onResult, onClose }: BarcodeScannerProp
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Placez le code-barres au centre</p>
             </div>
           </div>
-          <button 
+          <button aria-label="Fermer" 
             onClick={onClose}
             className="w-10 h-10 bg-white border border-gray-200 text-gray-500 rounded-xl flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all"
           >

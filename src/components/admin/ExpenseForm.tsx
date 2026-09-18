@@ -305,7 +305,7 @@ export default function ExpenseForm({ expense }: { expense?: any }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1">Catégorie</label>
-                        <select 
+                        <select aria-label="Champ de sélection" 
                             value={selectedCategory} 
                             onChange={e => setSelectedCategory(e.target.value)}
                             required 

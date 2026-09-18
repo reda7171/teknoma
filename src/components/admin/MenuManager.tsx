@@ -402,7 +402,7 @@ export default function MenuManager({ initialMenus }: { initialMenus: Menu[] }) 
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Élément Parent</label>
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={newItemData.parentId}
                                         onChange={(e) => setNewItemData({ ...newItemData, parentId: e.target.value })}
                                         className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
@@ -455,7 +455,7 @@ export default function MenuManager({ initialMenus }: { initialMenus: Menu[] }) 
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Élément Parent</label>
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={editingItem.parentId || ""}
                                         onChange={(e) => setEditingItem({ ...editingItem, parentId: e.target.value || null })}
                                         className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"

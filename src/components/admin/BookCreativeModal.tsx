@@ -444,7 +444,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             const newWindow = window.open()
             if (newWindow) {
                 newWindow.document.write(`
-                    <html>
+                    <html lang="fr">
                         <head>
                             <title>Aperçu Publication - ${book.title}</title>
                             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -842,7 +842,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
                 {/* Right side: Controls */}
                 <div className="w-full md:w-[380px] bg-white border-l border-gray-200 p-8 flex flex-col relative shrink-0">
-                    <button
+                    <button aria-label="Fermer"
                         onClick={onClose}
                         className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
                     >

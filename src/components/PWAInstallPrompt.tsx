@@ -93,7 +93,7 @@ export default function PWAInstallPrompt() {
               </button>
             </div>
           </div>
-          <button onClick={handleDismiss} className="p-1 text-gray-300 hover:text-gray-600 transition-colors">
+          <button aria-label="Fermer" onClick={handleDismiss} className="p-1 text-gray-300 hover:text-gray-600 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>

@@ -25,7 +25,7 @@ export default function MonthYearFilter() {
     return (
         <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-sm">
             <Calendar className="w-4 h-4 text-gray-400" />
-            <select 
+            <select aria-label="Champ de sélection" 
                 value={currentMonth}
                 onChange={(e) => handleFilter(e.target.value, currentYear)}
                 className="bg-transparent border-none text-sm font-bold text-gray-700 focus:ring-0 cursor-pointer outline-none"
@@ -47,7 +47,7 @@ export default function MonthYearFilter() {
 
             <span className="text-gray-300">/</span>
 
-            <select 
+            <select aria-label="Champ de sélection" 
                 value={currentYear}
                 onChange={(e) => handleFilter(currentMonth, e.target.value)}
                 className="bg-transparent border-none text-sm font-bold text-gray-700 focus:ring-0 cursor-pointer outline-none"

@@ -537,7 +537,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
             const newWindow = window.open()
             if (newWindow) {
                 newWindow.document.write(`
-                    <html>
+                    <html lang="fr">
                         <head>
                             <title>Aperçu Publication Pack - ${pack.name}</title>
                             <meta name="viewport" content="width=device-width, initial-scale=1">

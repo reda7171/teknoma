@@ -219,7 +219,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                     <td className="px-8 py-6">
                                         {editingAuthorId === post.id ? (
                                             <div className="flex items-center gap-2">
-                                                <select
+                                                <select aria-label="Champ de sélection"
                                                     value={selectedUserId}
                                                     onChange={(e) => setSelectedUserId(e.target.value)}
                                                     onKeyDown={(e) => {
@@ -330,7 +330,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                         })()}
                                     </td>
                                     <td className="px-8 py-6">
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             value={post.published ? 'published' : 'draft'}
                                             onChange={async (e) => {
                                                 const isPublished = e.target.value === 'published';
@@ -356,7 +356,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                         </select>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             value={post.isCompleted ? 'true' : 'false'}
                                             onChange={async (e) => {
                                                 const isCompleted = e.target.value === 'true';
@@ -398,7 +398,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                             >
                                                 <ExternalLink className="w-4 h-4" />
                                             </a>
-                                            <Link
+                                            <Link aria-label="Modifier"
                                                 href={`/${locale}/admin/posts/${post.id}`}
                                                 className="p-3 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
                                             >

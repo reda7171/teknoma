@@ -103,7 +103,7 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Locale</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 className="w-full p-2 border border-gray-300 rounded-lg"
                                 value={formData.locale}
                                 onChange={(e) => setFormData({...formData, locale: e.target.value})}

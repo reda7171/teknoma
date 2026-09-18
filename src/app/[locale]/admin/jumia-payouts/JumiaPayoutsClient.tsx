@@ -131,14 +131,14 @@ export default function JumiaPayoutsClient() {
                         Page {page}
                     </span>
                     <div className="flex gap-2">
-                        <button
+                        <button aria-label="Action ChevronLeft"
                             onClick={handlePrevPage}
                             disabled={page === 1 || loading}
                             className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
-                        <button
+                        <button aria-label="Action ChevronRight"
                             onClick={handleNextPage}
                             disabled={statements.length < size || loading}
                             className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"

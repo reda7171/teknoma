@@ -389,7 +389,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         <div className="bg-gradient-to-br from-gray-50 to-white rounded-[2rem] p-6 md:p-8 border border-gray-100 space-y-6 shadow-sm">
                             <div>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Catégorie</label>
-                                <select
+                                <select aria-label="Champ de sélection"
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium appearance-none cursor-pointer"
@@ -423,7 +423,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                             <div>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Auteur (Utilisateur)</label>
-                                <select
+                                <select aria-label="Champ de sélection"
                                     value={authorId}
                                     onChange={(e) => {
                                         setAuthorId(e.target.value)
@@ -528,7 +528,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                         <div className="pt-4 border-t border-gray-100">
                             <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Langue de l'article</label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={language}
                                 onChange={(e) => setLanguage(e.target.value)}
                                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"

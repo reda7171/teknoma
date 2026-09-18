@@ -47,7 +47,7 @@ export default function MarketSearch({ cities }: { cities: string[] }) {
             {/* City Filter */}
             <div className="relative w-full md:w-48">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                <select
+                <select aria-label="Sélection city"
                     name="city"
                     defaultValue={searchParams.get('city')?.toString()}
                     className="w-full pl-12 pr-6 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black text-sm appearance-none cursor-pointer"
@@ -62,7 +62,7 @@ export default function MarketSearch({ cities }: { cities: string[] }) {
             {/* Condition Filter */}
             <div className="relative w-full md:w-48">
                 <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                <select
+                <select aria-label="Sélection condition"
                     name="condition"
                     defaultValue={searchParams.get('condition')?.toString()}
                     className="w-full pl-12 pr-6 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black text-sm appearance-none cursor-pointer"

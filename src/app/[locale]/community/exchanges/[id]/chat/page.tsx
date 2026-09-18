@@ -36,7 +36,7 @@ export default async function ExchangeChatPage({
                     {/* Header Chat */}
                     <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 mb-6">
                         <div className="flex items-center gap-4">
-                            <Link
+                            <Link aria-label="Action ArrowLeft"
                                 href="/community/exchanges"
                                 className="p-3 bg-gray-50 hover:bg-pixio-yellow rounded-2xl transition-all active:scale-95"
                             >

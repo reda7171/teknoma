@@ -88,7 +88,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('City')}</label>
                         <div className="relative">
-                            <select
+                            <select aria-label="Sélection city"
                                 name="city"
                                 required
                                 defaultValue=""

@@ -49,7 +49,7 @@ export default function ConfirmationModal({
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colors[variant]}`}>
                             <AlertCircle className="w-6 h-6" />
                         </div>
-                        <button
+                        <button aria-label="Fermer"
                             onClick={onClose}
                             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                         >

@@ -391,7 +391,7 @@ export default function MarketingPage() {
                     {/* Publier la sélection */}
                     {selectionMode && selectedAssets.length > 0 && (
                         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap mt-2 md:mt-0">
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={bulkPlatform}
                                 onChange={e => setBulkPlatform(e.target.value as any)}
                                 className="px-3 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 bg-white outline-none flex-1 md:flex-none"
@@ -451,7 +451,7 @@ export default function MarketingPage() {
                     >
                         <Filter className="w-5 h-5" />
                     </button>
-                    <button 
+                    <button aria-label="Action RefreshCcw" 
                         onClick={fetchAssets}
                         className="p-2 bg-gray-100 rounded-xl text-gray-900"
                     >
@@ -1052,7 +1052,7 @@ export default function MarketingPage() {
 
                             {/* Footer actions */}
                             <div className="px-6 pb-6 flex items-center gap-3">
-                                <select
+                                <select aria-label="Champ de sélection"
                                     value={bulkPlatform}
                                     onChange={e => setBulkPlatform(e.target.value as any)}
                                     className="px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 bg-white outline-none"

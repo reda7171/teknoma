@@ -91,7 +91,7 @@ export default function MarketFiltersClient({ onPendingChange }: MarketFiltersPr
             </div>
             <div className="w-full md:w-64 relative">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
-                <select
+                <select aria-label="Champ de sélection"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className="w-full pl-12 pr-10 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:border-black focus:ring-0 outline-none transition-all font-bold text-sm appearance-none cursor-pointer"

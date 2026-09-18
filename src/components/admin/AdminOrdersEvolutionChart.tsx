@@ -14,6 +14,8 @@ import {
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
+const AccessibleTooltip = Tooltip as any;
+
 interface EvolutionData {
     date: string
     count: number
@@ -71,7 +73,8 @@ export default function AdminOrdersEvolutionChart({ data }: ChartProps) {
                             tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
                             dx={-10}
                         />
-                        <Tooltip 
+                        <AccessibleTooltip 
+                            wrapperProps={{ 'aria-label': 'Détails des commandes' }}
                             contentStyle={{ borderRadius: '1rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(37 99 235 / 0.1)' }}
                             itemStyle={{ fontSize: '12px', fontWeight: 700 }}
                             labelStyle={{ fontSize: '10px', fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px' }}

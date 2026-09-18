@@ -81,7 +81,7 @@ export default function CouponsTable({ coupons }: { coupons: any[] }) {
                                                 onChange={e => setEditData({...editData, discount: e.target.value})}
                                                 className="w-20 px-4 py-2 border rounded-xl text-xs font-black outline-none focus:border-black"
                                             />
-                                            <select 
+                                            <select aria-label="Champ de sélection" 
                                                 value={editData.type}
                                                 onChange={e => setEditData({...editData, type: e.target.value})}
                                                 className="px-4 py-2 border rounded-xl text-xs font-black outline-none focus:border-black"
@@ -100,7 +100,7 @@ export default function CouponsTable({ coupons }: { coupons: any[] }) {
                                             />
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap">
-                                            <select 
+                                            <select aria-label="Champ de sélection" 
                                                 value={editData.isActive ? '1' : '0'}
                                                 onChange={e => setEditData({...editData, isActive: e.target.value === '1'})}
                                                 className="px-4 py-2 border rounded-xl text-xs font-black outline-none focus:border-black"

@@ -143,7 +143,7 @@ export default function OrderFilters({
                                 <Filter className="w-3 h-3" />
                                 Société de livraison
                             </label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={shippingFilter}
                                 onChange={(e) => onShippingFilterChange(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
@@ -161,7 +161,7 @@ export default function OrderFilters({
                                 <Filter className="w-3 h-3" />
                                 Paiement
                             </label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={paymentFilter}
                                 onChange={(e) => onPaymentFilterChange && onPaymentFilterChange(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
@@ -181,7 +181,7 @@ export default function OrderFilters({
                                 <Filter className="w-3 h-3" />
                                 Ville
                             </label>
-                            <select
+                            <select aria-label="Champ de sélection"
                                 value={cityFilter}
                                 onChange={(e) => onCityFilterChange && onCityFilterChange(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"

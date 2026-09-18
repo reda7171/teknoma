@@ -155,7 +155,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                         <PackageSearch className="w-5 h-5 text-blue-600" />
                         Scan Retour (Withyou)
                     </h3>
-                    <button 
+                    <button aria-label="Fermer" 
                         onClick={onClose}
                         className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
                     >
@@ -186,7 +186,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                         onChange={(e) => setManualCode(e.target.value)}
                                         className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
-                                    <button 
+                                    <button aria-label="Rechercher" 
                                         type="submit"
                                         disabled={!manualCode.trim()}
                                         className="px-4 py-3 bg-black text-white rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-all flex items-center justify-center"

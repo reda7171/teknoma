@@ -45,7 +45,7 @@ export default function BookReplacementModal({ isOpen, onClose, originalBookId, 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white rounded-[2rem] w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl relative animate-in fade-in zoom-in duration-300">
-                <button
+                <button aria-label="Fermer"
                     onClick={onClose}
                     className="absolute top-6 right-6 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
                 >

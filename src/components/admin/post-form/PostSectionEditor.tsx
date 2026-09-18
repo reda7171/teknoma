@@ -85,10 +85,23 @@ const blockTemplates: Record<BlockType, string> = {
   <iframe src="https://www.youtube.com/embed/VIDEO_ID" frameborder="0" allowfullscreen
     style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
 </div>`,
-    table: `| Colonne 1 | Colonne 2 | Colonne 3 |
-|-----------|-----------|-----------|
-| Donnée 1  | Donnée 2  | Donnée 3  |
-| Donnée 4  | Donnée 5  | Donnée 6  |`,
+    table: `<table>
+  <caption>Titre descriptif du tableau</caption>
+  <thead>
+    <tr>
+      <th scope="col">Colonne 1</th>
+      <th scope="col">Colonne 2</th>
+      <th scope="col">Colonne 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Donnée 1</td>
+      <td>Donnée 2</td>
+      <td>Donnée 3</td>
+    </tr>
+  </tbody>
+</table>`,
     quote: `> "Votre citation ici..."
 > 
 > — **Auteur / Source**`,
@@ -241,7 +254,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                         setSections(prev => [...prev, {
                             id: Date.now().toString(),
                             title: '',
-                            content: `<p><img src="${data.url}" alt="Image illustratrice" style="border-radius:1rem; width:100%; object-fit:cover;" /></p>`,
+                            content: `<p><img src="${data.url}" alt="Illustration de la section" style="border-radius:1rem; width:100%; object-fit:cover;" /></p>`,
                             blockType: 'image'
                         }])
                     }
@@ -489,14 +502,14 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                         <div className="flex flex-wrap gap-2 items-center bg-blue-50/50 p-2 rounded-xl border border-blue-100 self-end">
                             <Wand2 className="w-4 h-4 text-blue-600 ml-1" />
                             <span className="text-xs font-bold text-blue-800">DeepL Write :</span>
-                            <select value={deeplStyle} onChange={e => setDeeplStyle(e.target.value)} className="text-xs rounded-lg border-blue-200 bg-white text-blue-800 py-1.5 px-3 focus:ring-blue-500">
+                            <select aria-label="Champ de sélection" value={deeplStyle} onChange={e => setDeeplStyle(e.target.value)} className="text-xs rounded-lg border-blue-200 bg-white text-blue-800 py-1.5 px-3 focus:ring-blue-500">
                                 <option value="default">Style (Auto)</option>
                                 <option value="simple">Simple</option>
                                 <option value="business">Business</option>
                                 <option value="academic">Academic</option>
                                 <option value="casual">Casual</option>
                             </select>
-                            <select value={deeplTone} onChange={e => setDeeplTone(e.target.value)} className="text-xs rounded-lg border-blue-200 bg-white text-blue-800 py-1.5 px-3 focus:ring-blue-500">
+                            <select aria-label="Champ de sélection" value={deeplTone} onChange={e => setDeeplTone(e.target.value)} className="text-xs rounded-lg border-blue-200 bg-white text-blue-800 py-1.5 px-3 focus:ring-blue-500">
                                 <option value="default">Ton (Auto)</option>
                                 <option value="enthusiastic">Enthusiastic</option>
                                 <option value="friendly">Friendly</option>

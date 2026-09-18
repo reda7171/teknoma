@@ -226,7 +226,7 @@ export default function DatabasePage() {
                                 <FileText className="w-4 h-4" />
                                 Sauvegardes disponibles ({backups.length})
                             </h2>
-                            <button 
+                            <button aria-label="Action RefreshCw" 
                                 onClick={fetchBackups}
                                 className="p-2 hover:bg-white rounded-lg transition text-gray-400 hover:text-indigo-600 shadow-sm border border-transparent hover:border-gray-100"
                             >
@@ -445,7 +445,7 @@ export default function DatabasePage() {
                                     Résultats de la requête
                                 </h3>
                                 <div className="flex items-center gap-3">
-                                    <select 
+                                    <select aria-label="Champ de sélection" 
                                         className="text-xs font-medium text-gray-600 bg-white px-2 py-1 rounded-lg border border-gray-200 shadow-sm outline-none cursor-pointer hover:border-indigo-300 focus:border-indigo-500 transition-colors"
                                         onChange={(e) => {
                                             const limit = e.target.value;

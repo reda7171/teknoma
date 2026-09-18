@@ -257,7 +257,7 @@ export default function ExchangesTable({ exchanges }: { exchanges: Exchange[] })
                                     >
                                         <ImageIcon className="w-4 h-4" />
                                     </button>
-                                    <Link
+                                    <Link aria-label="Voir"
                                         href={`/admin/exchanges/${exchange.id}`}
                                         className="p-3 bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-200 rounded-2xl transition-all shadow-sm active:scale-95"
                                     >

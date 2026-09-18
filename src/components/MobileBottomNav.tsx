@@ -41,6 +41,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
             <div className="md:hidden h-[4.5rem]" />
 
             <nav
+                aria-label="Navigation principale"
                 className="md:hidden fixed bottom-0 left-0 right-0 z-[120]"
                 style={{
                     background: 'rgba(255,255,255,0.92)',
@@ -61,6 +62,8 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                aria-label={item.label}
+                                aria-current={isActive ? 'page' : undefined}
                                 className="flex flex-col flex-1 items-center justify-center gap-1 py-2 touch-manipulation"
                                 style={{ WebkitTapHighlightColor: 'transparent' }}
                             >
@@ -95,6 +98,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                     {/* Panier */}
                     <button
                         onClick={openCart}
+                        aria-label={`${t('Cart')}${mounted && totalItems > 0 ? ` (${totalItems})` : ''}`}
                         className="flex flex-col flex-1 items-center justify-center gap-1 py-2 touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
@@ -139,6 +143,8 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                     {/* Menu */}
                     <button
                         onClick={onMenuClick}
+                        aria-label={t('Menu')}
+                        aria-expanded={false}
                         className="flex flex-col flex-1 items-center justify-center gap-1 py-2 touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                     >

@@ -57,7 +57,7 @@ export default function FacebookBotClient({ books }: { books: { id: string, titl
                 
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Choisir le livre à publier :</label>
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         value={selectedBook}
                         onChange={(e) => setSelectedBook(e.target.value)}
                         className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none"

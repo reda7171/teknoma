@@ -52,7 +52,7 @@ export function AddTransactionModal({ onClose }: { onClose: () => void }) {
             <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl">
                 <div className="flex items-center justify-between p-6 border-b border-gray-100">
                     <h3 className="text-lg font-black text-black">Ajouter une transaction</h3>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <button aria-label="Fermer" onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
@@ -166,7 +166,7 @@ export function DeleteExpenseButton({ id }: { id: string }) {
     }
 
     return (
-        <button
+        <button aria-label="Supprimer"
             onClick={handleDelete}
             disabled={loading}
             className="w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition-colors disabled:opacity-50 shrink-0"

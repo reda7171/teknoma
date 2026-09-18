@@ -130,32 +130,32 @@ export default async function ContactPage() {
                                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6">{t('SocialNetworks')}</h3>
                                 <div className="flex flex-wrap gap-4">
                                     {socials.instagram && (
-                                        <a href={socials.instagram} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                        <a aria-label="Action Instagram" href={socials.instagram} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-300">
                                             <Instagram className="w-5 h-5" />
                                         </a>
                                     )}
                                     {socials.facebook && (
-                                        <a href={socials.facebook} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-[#1877F2] hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                        <a aria-label="Action Facebook" href={socials.facebook} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-[#1877F2] hover:text-white hover:-translate-y-1 transition-all duration-300">
                                             <Facebook className="w-5 h-5" />
                                         </a>
                                     )}
                                     {socials.linkedin && (
-                                        <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-[#0A66C2] hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                        <a aria-label="Action Linkedin" href={socials.linkedin} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-[#0A66C2] hover:text-white hover:-translate-y-1 transition-all duration-300">
                                             <Linkedin className="w-5 h-5" />
                                         </a>
                                     )}
                                     {socials.twitter && (
-                                        <a href={socials.twitter} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                        <a aria-label="Action Twitter" href={socials.twitter} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-300">
                                             <Twitter className="w-5 h-5" />
                                         </a>
                                     )}
                                     {socials.youtube && (
-                                        <a href={socials.youtube} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-[#FF0000] hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                        <a aria-label="Action Youtube" href={socials.youtube} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-[#FF0000] hover:text-white hover:-translate-y-1 transition-all duration-300">
                                             <Youtube className="w-5 h-5" />
                                         </a>
                                     )}
                                     {socials.threads && (
-                                        <a href={socials.threads} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-300">
+                                        <a aria-label="Action AtSign" href={socials.threads} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md hover:bg-black hover:text-white hover:-translate-y-1 transition-all duration-300">
                                             <AtSign className="w-5 h-5" />
                                         </a>
                                     )}

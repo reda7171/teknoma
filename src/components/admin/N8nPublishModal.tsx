@@ -163,7 +163,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
             const newWindow = window.open()
             if (newWindow) {
                 newWindow.document.write(`
-                    <html>
+                    <html lang="fr">
                         <head><title>Aperçu n8n - Riwaya</title></head>
                         <body style="margin:0;display:flex;align-items:center;justify-content:center;background:#000;min-height:100vh;">
                             <img src="${dataUrl}" style="max-width:95%;max-height:95vh;border-radius:12px;box-shadow:0 0 50px rgba(255,255,255,0.1);" />
@@ -205,7 +205,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                             <p className="text-xs text-gray-500">{book.title} — {format === 'post' ? 'Post' : 'Story'}</p>
                         </div>
                     </div>
-                    <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+                    <button aria-label="Fermer" onClick={handleClose} className="text-gray-400 hover:text-gray-600">
                         <X className="w-5 h-5" />
                     </button>
                 </div>

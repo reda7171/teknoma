@@ -103,7 +103,7 @@ export default function BecomeSellerForm() {
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2">{t('StockSizeLabel')}</label>
-                        <select
+                        <select aria-label="Sélection stockSize"
                             name="stockSize"
                             required
                             className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-black focus:bg-white transition-all font-medium text-gray-700 appearance-none bg-no-repeat bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0iIzQ3NTU2OSI+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTAgMjhMMTAgMTJsLTYgNmwtNi02eiIgY2xpcC1ydWxlPSJldmVub2RkIi8+PC9zdmc+')] bg-[length:20px_20px] bg-[position:right_1rem_center]"

@@ -365,6 +365,7 @@ export default function AdminLayout({
                     {/* Bouton fermer sur mobile */}
                     <button
                         onClick={() => setSidebarOpen(false)}
+                        aria-label="Fermer le menu"
                         className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
                     >
                         <X className="w-5 h-5" />
@@ -373,6 +374,7 @@ export default function AdminLayout({
                     {/* Toggle Desktop */}
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        aria-label={isCollapsed ? "Agrandir le menu" : "Réduire le menu"}
                         className={`hidden md:flex p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors ${isCollapsed ? 'mt-2' : ''}`}
                         title={isCollapsed ? "Agrandir" : "Réduire"}
                     >
@@ -450,7 +452,6 @@ export default function AdminLayout({
 
                             {!isCollapsed && hasChildren && expandedMenus[item.name] && (
                                 <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-100 pl-4 py-1">
-                                    {/* @ts-ignore */}
                                     {item.children.map((child) => {
                                         const isChildActive = pathname === child.href
                                         const ChildIcon = child.icon
@@ -470,10 +471,8 @@ export default function AdminLayout({
                                             >
                                                 <ChildIcon className={`w-4 h-4 mr-3 ${isChildActive ? 'text-blue-600' : 'text-slate-400'}`} />
                                                 <span className="flex-1">{child.name}</span>
-                                                {/* @ts-ignore */}
                                                 {child.badge > 0 && (
                                                     <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isChildActive ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}`}>
-                                                        {/* @ts-ignore */}
                                                         {child.badge}
                                                     </span>
                                                 )}
@@ -546,7 +545,12 @@ export default function AdminLayout({
             )}
 
             {/* Sidebar mobile (drawer) */}
-            <aside className={`md:hidden fixed inset-y-0 left-0 w-72 bg-white border-r border-slate-200/60 shadow-xl z-50 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside 
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu d'administration"
+                className={`md:hidden fixed inset-y-0 left-0 w-72 bg-white border-r border-slate-200/60 shadow-xl z-50 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            >
                 {renderSidebarContent(false)}
             </aside>
 
@@ -557,6 +561,7 @@ export default function AdminLayout({
                     <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shadow-sm">
                         <button
                             onClick={() => setSidebarOpen(true)}
+                            aria-label="Ouvrir le menu"
                             className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
                         >
                             <Menu className="w-5 h-5" />

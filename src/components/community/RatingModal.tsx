@@ -53,7 +53,7 @@ export default function RatingModal({ exchangeId, isOpen, onClose }: RatingModal
                         <h2 className="text-2xl font-black text-black mb-1">{t('Title')}</h2>
                         <p className="text-sm text-gray-400 font-bold">{t('Subtitle')}</p>
                     </div>
-                    <button
+                    <button aria-label="Fermer"
                         onClick={onClose}
                         className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                     >

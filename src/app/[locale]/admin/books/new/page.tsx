@@ -344,7 +344,7 @@ function BookFormContent() {
                         <label htmlFor="jumiaPriceMarkup" className="block text-sm font-medium text-gray-700 mb-2">
                             Pourcentage à ajouter (Prix Jumia)
                         </label>
-                        <select
+                        <select aria-label="Sélection jumiaPriceMarkup"
                             id="jumiaPriceMarkup"
                             name="jumiaPriceMarkup"
                             defaultValue={0}
@@ -372,7 +372,7 @@ function BookFormContent() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1">Associer depuis un Lot d'Achats</label>
-                                <select 
+                                <select aria-label="Champ de sélection" 
                                     className="w-full px-3 py-2 border border-orange-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-500"
                                     onChange={(e) => {
                                         if (e.target.value) setSelectedCost(e.target.value)
@@ -427,7 +427,7 @@ function BookFormContent() {
                             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                                 Catégorie Principale
                             </label>
-                            <select
+                            <select aria-label="Sélection category"
                                 id="category"
                                 name="category"
                                 value={selectedMainCategory}
@@ -444,7 +444,7 @@ function BookFormContent() {
                             <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 mb-2">
                                 Sous-catégorie
                             </label>
-                            <select
+                            <select aria-label="Sélection subCategory"
                                 id="subCategory"
                                 name="subCategory"
                                 disabled={!selectedMainCategory}
@@ -505,7 +505,7 @@ function BookFormContent() {
                         <label htmlFor="isOriginal" className="block text-sm font-medium text-gray-700 mb-2">
                             Type de Livre
                         </label>
-                        <select
+                        <select aria-label="Sélection isOriginal"
                             id="isOriginal"
                             name="isOriginal"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"

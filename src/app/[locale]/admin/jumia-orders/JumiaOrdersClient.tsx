@@ -246,7 +246,7 @@ export default function JumiaOrdersClient() {
 
             // 3. Construct HTML Invoice
             const invoiceHtml = `
-                <html>
+                <html lang="fr">
                 <head>
                     <title>Facture Jumia - ${orderId}</title>
                     <style>
@@ -446,7 +446,7 @@ export default function JumiaOrdersClient() {
                     </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                    <select 
+                    <select aria-label="Champ de sélection" 
                         value={statusFilter}
                         onChange={handleStatusChange}
                         className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -778,7 +778,7 @@ export default function JumiaOrdersClient() {
                             {orders.length} commandes récupérées
                         </p>
                         <div className="flex items-center gap-3">
-                            <button
+                            <button aria-label="Action ChevronLeft"
                                 onClick={handlePrevPage}
                                 disabled={tokenHistory.length === 0 || loading}
                                 className={`p-2 rounded-xl transition-all ${tokenHistory.length === 0 || loading ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white text-slate-700 hover:bg-orange-50 hover:text-orange-600 shadow-sm border border-slate-200'}`}
@@ -786,7 +786,7 @@ export default function JumiaOrdersClient() {
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Page {tokenHistory.length + 1}</span>
-                            <button
+                            <button aria-label="Action ChevronRight"
                                 onClick={handleNextPage}
                                 disabled={!hasNextPage || loading}
                                 className={`p-2 rounded-xl transition-all ${!hasNextPage || loading ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white text-slate-700 hover:bg-orange-50 hover:text-orange-600 shadow-sm border border-slate-200'}`}

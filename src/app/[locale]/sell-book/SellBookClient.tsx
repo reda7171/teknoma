@@ -209,7 +209,7 @@ export default function SellBookClient({ locale }: { locale: string }) {
 
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-gray-700">{tSell('Category')}</label>
-                                        <select 
+                                        <select aria-label="Champ de sélection" 
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.category}
                                             onChange={e => setFormData({...formData, category: e.target.value})}
@@ -226,7 +226,7 @@ export default function SellBookClient({ locale }: { locale: string }) {
 
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-gray-700">{tSell('Condition')}</label>
-                                        <select 
+                                        <select aria-label="Champ de sélection" 
                                             required
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pixio-primary focus:border-transparent transition-all outline-none"
                                             value={formData.condition}

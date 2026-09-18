@@ -169,7 +169,7 @@ function CreateCouponModal({ onClose, onSuccess }: { onClose: () => void, onSucc
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-[3rem] p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
-        <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+        <button aria-label="Fermer" onClick={onClose} className="absolute top-6 right-6 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
           <X className="w-5 h-5" />
         </button>
 
@@ -193,7 +193,7 @@ function CreateCouponModal({ onClose, onSuccess }: { onClose: () => void, onSucc
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Type</label>
-              <select
+              <select aria-label="Champ de sélection"
                 className="w-full mt-1 px-4 py-3 bg-gray-50 border-none rounded-2xl font-bold text-sm focus:ring-2 focus:ring-black transition-all"
                 value={form.type}
                 onChange={e => setForm({ ...form, type: e.target.value as any })}

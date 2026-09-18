@@ -136,7 +136,7 @@ export default function OrderEditModal({ order, companies }: OrderEditModalProps
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black text-gray-600 uppercase tracking-wider mb-1">Société de livraison</label>
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={form.shippingCompany}
                                         onChange={e => setForm({ ...form, shippingCompany: e.target.value })}
                                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium bg-white"

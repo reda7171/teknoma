@@ -133,7 +133,7 @@ export default function NewSellerPostForm({ categoryTree }: Props) {
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-3">{t('CategoryLabel')}</label>
                                 <div className="relative">
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={category}
                                         onChange={e => handleCategoryChange(e.target.value)}
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-black focus:ring-2 focus:ring-black outline-none appearance-none pr-10"
@@ -147,7 +147,7 @@ export default function NewSellerPostForm({ categoryTree }: Props) {
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-3">{t('SubCategoryLabel')}</label>
                                 <div className="relative">
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={subCategory}
                                         onChange={e => setSubCategory(e.target.value)}
                                         disabled={!category || subCategories.length === 0}

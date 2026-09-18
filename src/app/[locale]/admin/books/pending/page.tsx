@@ -26,7 +26,7 @@ export default async function PendingBooksPage() {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
-                        <Link href="/admin/books" className="text-gray-500 hover:text-gray-700">
+                        <Link aria-label="Action ArrowLeft" href="/admin/books" className="text-gray-500 hover:text-gray-700">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <h1 className="text-3xl font-bold text-gray-900">Livres en attente d'approbation</h1>

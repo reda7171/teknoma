@@ -65,7 +65,7 @@ export default function CaptionPreviewModal({ isOpen, onClose, book }: CaptionPr
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-black text-gray-900">Prévisualiser Caption</h2>
-                    <button
+                    <button aria-label="Fermer"
                         onClick={onClose}
                         className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
                     >

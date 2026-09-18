@@ -234,7 +234,7 @@ export default function ImmersivePdfReader({ pdfUrl, title, onClose }: Immersive
                     >
                         {isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5" />}
                     </button>
-                    <button 
+                    <button aria-label="Fermer" 
                         onClick={onClose}
                         className="w-12 h-12 bg-white/5 hover:bg-red-500 transition-colors flex items-center justify-center rounded-xl text-white"
                     >

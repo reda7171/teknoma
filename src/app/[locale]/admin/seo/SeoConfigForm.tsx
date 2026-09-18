@@ -372,7 +372,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                     {field('Viewport', 'seo_viewport', 'width=device-width, initial-scale=1')}
                                     <div>
                                         <label className="block text-xs font-black text-gray-600 uppercase tracking-widest mb-1.5">Robots Meta</label>
-                                        <select
+                                        <select aria-label="Champ de sélection"
                                             value={form.seo_robots_meta}
                                             onChange={e => update('seo_robots_meta', e.target.value)}
                                             className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
@@ -454,7 +454,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                 {field('Handle Twitter', 'seo_twitter_handle', '@riwaya_ma')}
                                 <div>
                                     <label className="block text-xs font-black text-gray-600 uppercase tracking-widest mb-1.5">Twitter Card</label>
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={form.seo_twitter_card}
                                         onChange={e => update('seo_twitter_card', e.target.value)}
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
@@ -513,7 +513,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-black text-gray-600 uppercase tracking-widest mb-1.5">Type Schema.org</label>
-                                    <select
+                                    <select aria-label="Champ de sélection"
                                         value={form.seo_schema_org_type}
                                         onChange={e => update('seo_schema_org_type', e.target.value)}
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"

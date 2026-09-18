@@ -155,7 +155,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                                         className="max-w-full max-h-full object-contain"
                                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                                     />
-                                    <button
+                                    <button aria-label="Supprimer"
                                         type="button"
                                         onClick={handleDeleteLogo}
                                         className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"

@@ -100,7 +100,7 @@ export default function AffiliateForm() {
 
                 <div className="space-y-2">
                     <label className="text-xs font-black uppercase text-gray-500">Type de commission / remise</label>
-                    <select name="type" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <select aria-label="Sélection type" name="type" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
                         <option value="PERCENTAGE">Pourcentage (%)</option>
                         <option value="FIXED_AMOUNT">Montant fixe (درهم)</option>
                     </select>

@@ -489,7 +489,6 @@ export default async function BookDetailPage({
                                             </a>
                                             <div className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full border border-slate-200">
                                                 <Eye className="w-3.5 h-3.5 text-slate-400" />
-                                                {/* @ts-ignore */}
                                                 <span>{(book as any).views || 0} vues</span>
                                             </div>
                                         </>
