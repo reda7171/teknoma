@@ -613,7 +613,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     {c('bestsellers_description', t('BestSellers.Description'))}
                   </p>
                 </div>
-                <Link href="/books" aria-label={`${c('see_all', t('SeeAll'))} - Nouveautés`} className="group flex items-center gap-4 bg-pixio-cream px-8 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link href="/books?ref=bestsellers" aria-label={`${c('see_all', t('SeeAll'))} - Nouveautés`} className="group flex items-center gap-4 bg-pixio-cream px-8 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">{c('bestsellers_view_all', t('BestSellers.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
@@ -704,7 +704,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <p className="text-xl text-gray-500 font-medium tracking-tight">{c('authors_description', t('BestAuthors.Description'))}</p>
                 </ScrollReveal>
                 <ScrollReveal animation="animate-reveal-right" delay={300}>
-                  <Link href="/books" aria-label={`${c('see_all', t('SeeAll'))} - Top Auteurs`} className="group flex items-center gap-4 bg-pixio-cream px-8 py-4 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                  <Link href="/books?ref=authors" aria-label={`${c('see_all', t('SeeAll'))} - Top Auteurs`} className="group flex items-center gap-4 bg-pixio-cream px-8 py-4 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                     <span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-black">{c('authors_view_books', t('BestAuthors.BooksPlural'))}</span>
                     <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
                       <ArrowRight className="w-4 h-4 rtl:rotate-180" />
@@ -746,7 +746,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
                   <h2 className="text-4xl md:text-6xl rtl:tracking-normal font-black text-black tracking-tight">{c('new_arrivals_title', t('NewArrivals.Title'))}</h2>
                 </div>
-                <Link href="/books" aria-label={`${c('see_all', t('SeeAll'))} - Meilleurs Packs`} className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link href="/books?ref=new" aria-label={`${c('see_all', t('SeeAll'))} - Meilleurs Packs`} className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">{c('new_arrivals_view_all', t('NewArrivals.ViewAll'))}</span>
                   <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="w-4 h-4" />
@@ -960,7 +960,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </h2>
                 </div>
                 <Link
-                  href="/books"
+                  href="/books?ref=mobile"
                   aria-label={`${c('see_all', t('SeeAll'))} - Formats Numériques`}
                   className="group flex items-center gap-4 bg-pixio-cream px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl"
                 >

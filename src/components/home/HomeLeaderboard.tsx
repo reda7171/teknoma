@@ -19,11 +19,11 @@ const PAGES_PER_BOOK = 280
 const PAGES_PER_HOUR = 30
 
 const rankStyle = [
-    { ring: 'ring-yellow-400', bg: 'bg-yellow-50', text: 'text-yellow-600', medal: '🥇' },
-    { ring: 'ring-slate-300',  bg: 'bg-slate-50',  text: 'text-slate-500',  medal: '🥈' },
-    { ring: 'ring-amber-500',  bg: 'bg-amber-50',  text: 'text-amber-600',  medal: '🥉' },
-    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-500',  medal: null },
-    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-500',  medal: null },
+    { ring: 'ring-yellow-400', bg: 'bg-yellow-50', text: 'text-yellow-700', medal: '🥇' },
+    { ring: 'ring-slate-300',  bg: 'bg-slate-50',  text: 'text-slate-600',  medal: '🥈' },
+    { ring: 'ring-amber-500',  bg: 'bg-amber-50',  text: 'text-amber-700',  medal: '🥉' },
+    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-600',  medal: null },
+    { ring: 'ring-slate-200',  bg: 'bg-white',     text: 'text-slate-600',  medal: null },
 ]
 
 export default async function HomeLeaderboard({ topReaders }: { topReaders: Reader[] }) {
@@ -97,7 +97,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                                     )}
                                                 </div>
                                                 {reader.city && (
-                                                    <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5 truncate">{reader.city}</p>
+                                                    <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-0.5 truncate">{reader.city}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -141,16 +141,16 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
 /* Micro-composant stat */
 function Stat({ value, label, color, tooltip }: { value: string | number; label: string; color: 'emerald' | 'blue' | 'amber', tooltip?: string }) {
     const colors = {
-        emerald: 'bg-emerald-50 border-emerald-100 text-emerald-700 text-emerald-700',
-        blue:    'bg-blue-50 border-blue-100 text-blue-700 text-blue-700',
-        amber:   'bg-amber-50 border-amber-100 text-amber-700 text-amber-700',
+        emerald: 'bg-emerald-50 border-emerald-100 text-emerald-800 text-emerald-800',
+        blue:    'bg-blue-50 border-blue-100 text-blue-800 text-blue-800',
+        amber:   'bg-amber-50 border-amber-100 text-amber-800 text-amber-800',
     }
     const [bg, border, val, sub] = colors[color].split(' ')
 
     return (
         <div className={`group relative flex flex-col items-center px-3 sm:px-4 py-2 sm:py-2.5 ${bg} border ${border} rounded-xl min-w-[50px] flex-1 sm:flex-none cursor-help hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-md`}>
             <span className={`font-black text-sm sm:text-base leading-none ${val}`}>{value}</span>
-            <span className={`text-[10px] font-bold uppercase mt-1.5 ${sub}/80`}>{label}</span>
+            <span className={`text-[10px] font-bold uppercase mt-1.5 ${sub}`}>{label}</span>
             
             {/* Tooltip */}
             {tooltip && (
