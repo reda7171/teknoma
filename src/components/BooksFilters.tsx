@@ -35,15 +35,15 @@ function SearchInput({
         <form onSubmit={handleSubmit} className={`relative ${isCondensed ? 'flex-1' : ''}`}>
             <Search className={`absolute ${isCondensed ? 'left-3' : 'left-4 rtl:right-4 rtl:left-auto'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10`} />
             <input
-                type="text"
+                type="search"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onBlur={() => onChange(value)}
                 placeholder={placeholder}
                 className={isCondensed 
-                    ? "w-full pl-10 rtl:pr-10 rtl:pl-4 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-xs font-bold text-gray-900 focus:ring-0 outline-none" 
-                    : "w-full pl-12 rtl:pr-12 rtl:pl-6 pr-6 py-4 bg-[#F8F9FA] focus:bg-white border-2 border-transparent focus:border-black rounded-2xl outline-none font-bold text-sm text-gray-800 transition-all"
+                    ? "w-full pl-10 rtl:pr-10 rtl:pl-4 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-base md:text-xs font-bold text-gray-900 focus:ring-0 outline-none" 
+                    : "w-full pl-12 rtl:pr-12 rtl:pl-6 pr-6 py-4 bg-[#F8F9FA] focus:bg-white border-2 border-transparent focus:border-black rounded-2xl outline-none font-bold text-base md:text-sm text-gray-800 transition-all"
                 }
             />
         </form>
@@ -422,7 +422,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             </aside>
 
             {/* Mobile Sticky Top Bar */}
-            <div className="lg:hidden sticky top-[64px] z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-0 mb-4">
+            <div className="lg:hidden sticky top-[64px] z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-4">
                 <div className="bg-white border border-gray-100 shadow-lg shadow-black/5 rounded-2xl px-4 py-3">
                     <div className="max-w-7xl mx-auto flex items-center gap-2">
                         {/* General Search (Condensed) */}
@@ -520,15 +520,15 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                 </div>
             </div>
 
-            {/* Mobile Drawer */}
+            {/* Mobile Drawer (Modal) */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-[60] lg:hidden">
+                <div className="fixed inset-0 z-[60] lg:hidden flex items-center justify-center p-4">
                     <div 
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
-                    <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                    <div className="relative w-full max-w-sm max-h-[85vh] bg-white rounded-3xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center justify-between p-5 border-b border-gray-100 shrink-0">
                             <div>
                                 <h2 className="text-lg font-black text-gray-900 tracking-tight">{t('Filters')}</h2>
                                 <p className="text-[10px] rtl:text-sm rtl:tracking-normal text-gray-400 font-bold uppercase tracking-widest mt-0.5">{tCommon('RefineSearch')}</p>
@@ -540,10 +540,10 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 <X className="w-6 h-6 text-gray-900" />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6">
+                        <div className="flex-1 overflow-y-auto p-5 no-scrollbar">
                             <FilterContent isMobile />
                         </div>
-                        <div className="p-6 border-t border-gray-100 bg-gray-50/50">
+                        <div className="p-5 border-t border-gray-100 bg-gray-50/50 shrink-0 rounded-b-3xl">
                             <button
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-black/10 active:scale-95 transition-all"

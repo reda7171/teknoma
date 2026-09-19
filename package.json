@@ -39,6 +39,7 @@
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "exiftool-vendored": "^37.1.0",
+    "framer-motion": "^13.4.0",
     "fuse.js": "^7.1.0",
     "google-auth-library": "^11.0.2",
     "html-to-image": "^1.11.13",

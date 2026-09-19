@@ -581,19 +581,19 @@ export default async function BookDetailPage({
                                     <div className="w-14 h-14 bg-pixio-beige rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Truck className="w-6 h-6 text-black" />
                                     </div>
-                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{tBook('FastMove')}</p>
+                                    <p className="text-[10px] sm:text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-800">{tBook('FastMove')}</p>
                                 </div>
                                 <div className="text-center group cursor-pointer">
                                     <div className="w-14 h-14 bg-pixio-pink rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Shield className="w-6 h-6 text-black" />
                                     </div>
-                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{tBook('Secured')}</p>
+                                    <p className="text-[10px] sm:text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-800">{tBook('Secured')}</p>
                                 </div>
                                 <div className="text-center group cursor-pointer">
                                     <div className="w-14 h-14 bg-pixio-yellow rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Package className="w-6 h-6 text-black" />
                                     </div>
-                                    <p className="text-[8px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{tBook('Original')}</p>
+                                    <p className="text-[10px] sm:text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-800">{tBook('Original')}</p>
                                 </div>
                             </div>
 
@@ -672,7 +672,7 @@ export default async function BookDetailPage({
 
                             {/* Frequently Bought Together (Upsell/Cross-sell) */}
                             {frequentlyBoughtTogether.length > 0 && (
-                                <div className="mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                                <div className="mt-6 md:mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
                                     <h2 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h2>
                                     <div className="flex flex-col gap-3 sm:gap-4">
                                         {frequentlyBoughtTogether.map(fbBook => {
@@ -713,7 +713,7 @@ export default async function BookDetailPage({
                             )}
 
                             {/* Tabs Layout */}
-                            <div className="flex flex-col gap-12 pt-8 md:pt-12 border-t border-gray-100">
+                            <div className="flex flex-col gap-6 md:gap-12 pt-4 md:pt-12 mt-4 md:mt-0 border-t border-gray-100">
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-4">
                                         <Package className="w-4 h-4 text-black" />

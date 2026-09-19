@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/routing'
 import { useState } from 'react'
-import { ShoppingCart, Star, ArrowRight, Check } from 'lucide-react'
+import { ShoppingCart, Star, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
@@ -132,7 +132,7 @@ export default function BookCard({
 
                 {/* Price & Action */}
                 <div className="mt-auto flex flex-col items-center gap-4 w-full pt-4">
-                    <p className={`font-black text-gray-900 leading-none ${isCompact ? 'text-base' : isFeatured ? 'text-2xl' : 'text-xl'}`}>
+                    <p className={`font-black text-gray-900 leading-none tracking-tighter ${isCompact ? 'text-xl' : isFeatured ? 'text-4xl' : 'text-3xl'}`}>
                         {price} <span className="text-[10px] rtl:text-xs font-black text-gray-500 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                     </p>
 
@@ -204,10 +204,7 @@ export default function BookCard({
                                     <Check className="w-4 h-4 animate-bounce" />
                                 </>
                             ) : (
-                                <>
-                                    <span>{t('AddToCart')}</span>
-                                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180" />
-                                </>
+                                <span>{t('AddToCart')}</span>
                             )}
                         </button>
                     )}

@@ -46,6 +46,7 @@ export default function PredictiveSearch() {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<any[]>([])
     const [history, setHistory] = useState<string[]>([])
+    const [selectedIndex, setSelectedIndex] = useState(-1)
 
     const [popularSearches, setPopularSearches] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -99,6 +100,7 @@ export default function PredictiveSearch() {
                 setIsLoading(true)
                 const data = await searchBooksPredictive(query)
                 setResults(data)
+                setSelectedIndex(-1)
                 setIsLoading(false)
                 setIsOpen(true)
             } else {
@@ -125,6 +127,24 @@ export default function PredictiveSearch() {
         }
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!isOpen || results.length === 0) return;
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedIndex(prev => Math.min(prev + 1, results.length - 1));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedIndex(prev => Math.max(prev - 1, -1));
+        } else if (e.key === 'Enter' && selectedIndex >= 0 && selectedIndex < results.length) {
+            e.preventDefault();
+            const selectedBook = results[selectedIndex];
+            saveToHistory(query);
+            setIsOpen(false);
+            router.push(generateBookUrl(selectedBook, locale));
+        }
+    }
+
     const handleHistoryClick = (searchTerm: string) => {
         setQuery(searchTerm)
         saveToHistory(searchTerm)
@@ -145,12 +165,13 @@ export default function PredictiveSearch() {
             {/* Form standard inspiré par Pixio */}
             <form onSubmit={handleSearch} className="relative group/input">
                 <input
-                    type="text"
+                    type="search"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     onFocus={() => (query.length >= 2 || history.length > 0) && setIsOpen(true)}
                     placeholder={t('Placeholder')}
-                    className="w-full bg-white border-2 border-gray-100 focus:border-black rounded-[2rem] py-4 pl-14 pr-10 rtl:pr-14 rtl:pl-10 font-bold text-gray-900 transition-all outline-none placeholder:text-gray-400 shadow-sm focus:shadow-xl group-hover/input:border-gray-200"
+                    className="w-full bg-white border-2 border-gray-100 focus:border-black rounded-[2rem] py-4 pl-14 pr-10 rtl:pr-14 rtl:pl-10 font-bold text-base text-gray-900 transition-all outline-none placeholder:text-gray-400 shadow-sm focus:shadow-xl group-hover/input:border-gray-200"
                 />
                 <SearchIcon className={`absolute left-5 rtl:right-5 rtl:left-auto top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${isOpen ? 'text-black' : 'text-gray-300'}`} />
 
@@ -179,8 +200,9 @@ export default function PredictiveSearch() {
                                         <span className="text-[11px] font-black uppercase text-gray-900 tracking-widest">{t('RecentSearches')}</span>
                                         <button
                                             onClick={clearHistory}
-                                            className="text-[10px] font-black uppercase text-gray-400 hover:text-red-500 transition-colors"
+                                            className="flex items-center gap-1 text-[10px] font-black uppercase text-gray-400 hover:text-red-500 transition-colors bg-gray-50 hover:bg-red-50 px-2.5 py-1 rounded-full"
                                         >
+                                            <X className="w-3 h-3" />
                                             {t('Clear')}
                                         </button>
                                     </div>
@@ -230,20 +252,38 @@ export default function PredictiveSearch() {
                             </div>
 
                             <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
-                                {results.length > 0 ? (
+                                {isLoading && results.length === 0 ? (
                                     <div className="p-4 space-y-3">
-                                        {results.map((book) => {
+                                        {[...Array(3)].map((_, i) => (
+                                            <div key={i} className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-[1.5rem] animate-pulse">
+                                                <div className="w-14 h-20 bg-gray-100 rounded-xl shrink-0"></div>
+                                                <div className="flex-1 space-y-3">
+                                                    <div className="h-2 bg-gray-100 rounded w-1/4"></div>
+                                                    <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+                                                    <div className="h-2 bg-gray-100 rounded w-1/3"></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : results.length > 0 ? (
+                                    <div className="p-4 space-y-3">
+                                        {results.map((book, idx) => {
                                             const displayTitle = getLocalizedTitle(book, locale);
                                             const bookUrl = generateBookUrl(book, locale);
                                             return (
                                             <Link
                                                 key={book.id}
                                                 href={bookUrl}
+                                                onMouseEnter={() => setSelectedIndex(idx)}
                                                 onClick={() => {
                                                     saveToHistory(query)
                                                     setIsOpen(false)
                                                 }}
-                                                className="flex items-center gap-4 p-4 hover:bg-pixio-beige/30 bg-white border border-gray-100 rounded-[1.5rem] transition-all group/item hover:border-black shadow-sm"
+                                                className={`flex items-center gap-4 p-4 transition-all group/item shadow-sm rounded-[1.5rem] border ${
+                                                    selectedIndex === idx 
+                                                    ? 'bg-pixio-beige/30 border-black' 
+                                                    : 'bg-white border-gray-100 hover:bg-pixio-beige/30 hover:border-black'
+                                                }`}
                                             >
                                                 <div className="relative w-14 h-20 rounded-xl overflow-hidden bg-gray-50 shrink-0 border border-gray-50 shadow-sm transition-all group-hover/item:scale-105">
                                                     <Image
@@ -270,8 +310,8 @@ export default function PredictiveSearch() {
                                         })}
                                     </div>
                                 ) : !isLoading && (
-                                    <div className="p-16 text-center space-y-4 bg-pixio-cream/30">
-                                        <div className="w-20 h-20 bg-white shadow-xl rounded-[2rem] flex items-center justify-center mx-auto rotate-12 group-hover:rotate-0 transition-transform">
+                                    <div className="p-16 text-center space-y-4 bg-pixio-cream/30 group/empty">
+                                        <div className="w-20 h-20 bg-white shadow-xl rounded-[2rem] flex items-center justify-center mx-auto rotate-12 group-hover/empty:rotate-0 transition-transform duration-500">
                                             <BookOpen className="w-10 h-10 text-gray-200" />
                                         </div>
                                         <div>

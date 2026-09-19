@@ -54,7 +54,7 @@ const nextConfig: NextConfig = {
   },
   output: 'standalone',
   poweredByHeader: false,
-  compress: process.env.NODE_ENV === 'production',
+  compress: false, // Désactivé : Nginx s'en occupe (évite le memory leak Gzip de Node.js)
   images: {
     unoptimized: false,
     formats: ['image/avif', 'image/webp'],

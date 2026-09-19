@@ -58,7 +58,15 @@ export async function POST(req: NextRequest) {
 
         // Remplacer hostname interne Docker pour que `npm run dev` puisse l'atteindre
         if (n8nWebhookUrl && (n8nWebhookUrl.includes('://n8n') || n8nWebhookUrl.includes('://localhost'))) {
-            n8nWebhookUrl = envWebhookUrl || n8nWebhookUrl
+            if (process.env.NODE_ENV !== 'production') {
+                n8nWebhookUrl = envWebhookUrl || n8nWebhookUrl
+            }
+        }
+
+        // FORCER le réseau interne Docker en PROD (contourner le blocage IP publique)
+        if (process.env.NODE_ENV === 'production' && n8nWebhookUrl) {
+            n8nWebhookUrl = n8nWebhookUrl.replace('167.86.108.246', 'n8n');
+            n8nWebhookUrl = n8nWebhookUrl.replace('https://', 'http://'); // Le réseau interne est en HTTP
         }
 
         if (!n8nWebhookUrl) {
