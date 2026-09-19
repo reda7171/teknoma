@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 interface MobileBottomNavProps {
     onMenuClick: () => void
@@ -37,9 +38,6 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
     return (
         <>
-            {/* Espace réservé pour éviter le chevauchement */}
-            <div className="md:hidden h-[4.5rem]" />
-
             <nav
                 aria-label="Navigation principale"
                 className="md:hidden fixed bottom-0 left-0 right-0 z-[120]"
@@ -69,16 +67,22 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                             >
                                 {/* Icone avec fond actif */}
                                 <span
-                                    className="flex items-center justify-center rounded-2xl transition-all duration-200"
+                                    className="relative flex items-center justify-center transition-all duration-200"
                                     style={{
                                         width: 44,
                                         height: 32,
-                                        background: isActive ? '#000' : 'transparent',
                                         transform: isActive ? 'scale(1)' : 'scale(0.95)',
                                     }}
                                 >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="mobileNavIndicator"
+                                            className="absolute inset-0 bg-black rounded-2xl"
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
                                     <Icon
-                                        className="w-[18px] h-[18px] transition-all duration-200"
+                                        className="relative z-10 w-[18px] h-[18px] transition-all duration-200"
                                         style={{
                                             color: isActive ? '#fff' : '#9ca3af',
                                             strokeWidth: isActive ? 2.5 : 2,
@@ -86,7 +90,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                     />
                                 </span>
                                 <span
-                                    className="text-[10px] font-semibold transition-all duration-200"
+                                    className="text-xs font-bold transition-all duration-200"
                                     style={{ color: isActive ? '#000' : '#9ca3af' }}
                                 >
                                     {item.label}
@@ -135,7 +139,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                 </span>
                             )}
                         </span>
-                        <span className="text-[10px] font-semibold" style={{ color: '#9ca3af' }}>
+                        <span className="text-xs font-bold" style={{ color: '#9ca3af' }}>
                             {t('Cart')}
                         </span>
                     </button>
@@ -154,7 +158,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                         >
                             <AlignJustify className="w-[18px] h-[18px]" style={{ color: '#9ca3af', strokeWidth: 2 }} />
                         </span>
-                        <span className="text-[10px] font-semibold" style={{ color: '#9ca3af' }}>
+                        <span className="text-xs font-bold" style={{ color: '#9ca3af' }}>
                             {t('Menu')}
                         </span>
                     </button>

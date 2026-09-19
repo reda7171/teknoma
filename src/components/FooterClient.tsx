@@ -270,13 +270,55 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-3 opacity-50 hover:opacity-100 transition-opacity mt-4 md:mt-0">
-                        {paymentSettings?.stripe && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Visa">VISA</div>}
-                        {paymentSettings?.stripe && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Mastercard">MASTERCARD</div>}
-                        {paymentSettings?.paypal && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="PayPal">PAYPAL</div>}
-                        {paymentSettings?.cmi && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="CMI">CMI</div>}
-                        {paymentSettings?.cod && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Cash on Delivery">COD</div>}
-                        {paymentSettings?.bank && <div className="px-2.5 py-1 bg-white/10 rounded border border-white/10 text-[8px] font-black text-white tracking-widest flex items-center justify-center cursor-default" title="Virement Bancaire">BANK</div>}
+                    <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-3 opacity-60 hover:opacity-100 transition-opacity mt-4 md:mt-0">
+                        {/* Visa */}
+                        {paymentSettings?.stripe && (
+                            <div className="h-7 px-2.5 bg-white rounded flex items-center justify-center cursor-default" title="Visa">
+                                <svg viewBox="0 0 48 16" className="h-4 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="15" fill="#1A1F71" letterSpacing="-0.5">VISA</text>
+                                </svg>
+                            </div>
+                        )}
+                        {/* Mastercard */}
+                        {paymentSettings?.stripe && (
+                            <div className="h-7 px-2 bg-white rounded flex items-center gap-0.5 cursor-default" title="Mastercard">
+                                <div className="w-5 h-5 bg-[#EB001B] rounded-full opacity-90" />
+                                <div className="w-5 h-5 bg-[#F79E1B] rounded-full -ml-2.5" />
+                            </div>
+                        )}
+                        {/* PayPal */}
+                        {paymentSettings?.paypal && (
+                            <div className="h-7 px-2.5 bg-white rounded flex items-center cursor-default" title="PayPal">
+                                <svg viewBox="0 0 60 20" className="h-4 w-auto" xmlns="http://www.w3.org/2000/svg">
+                                    <text x="0" y="15" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#003087">Pay</text>
+                                    <text x="22" y="15" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#009CDE">Pal</text>
+                                </svg>
+                            </div>
+                        )}
+                        {/* CMI */}
+                        {paymentSettings?.cmi && (
+                            <div className="h-7 px-2.5 bg-white rounded flex items-center cursor-default" title="CMI">
+                                <span className="text-[10px] font-black text-[#004B87] tracking-widest">CMI</span>
+                            </div>
+                        )}
+                        {/* COD */}
+                        {paymentSettings?.cod && (
+                            <div className="h-7 px-2.5 bg-white rounded flex items-center gap-1.5 cursor-default" title="Cash on Delivery">
+                                <svg className="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M17 9V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2m2 4h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm7-5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+                                </svg>
+                                <span className="text-[10px] font-black text-emerald-700 tracking-widest">COD</span>
+                            </div>
+                        )}
+                        {/* Bank Transfer */}
+                        {paymentSettings?.bank && (
+                            <div className="h-7 px-2.5 bg-white rounded flex items-center gap-1.5 cursor-default" title="Virement Bancaire">
+                                <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M3 10h18M3 14h18M12 3L3 10v11h18V10L12 3z" />
+                                </svg>
+                                <span className="text-[10px] font-black text-blue-700 tracking-widest">BANK</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
