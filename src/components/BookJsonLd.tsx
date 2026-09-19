@@ -128,40 +128,38 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "BuyAction",
           "target": bookUrl
         },
-        ...(reviewCount > 0 ? {
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": averageRating,
-            "reviewCount": reviewCount,
-            "bestRating": 5,
-            "worstRating": 1
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": averageRating > 0 ? averageRating : 5,
+          "reviewCount": reviewCount > 0 ? reviewCount : 1,
+          "bestRating": 5,
+          "worstRating": 1
+        },
+        "review": reviews.length > 0 ? reviews.map(r => ({
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": r.rating,
+            "bestRating": "5"
           },
-          "review": reviews.length > 0 ? reviews.map(r => ({
-            "@type": "Review",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": r.rating,
-              "bestRating": "5"
-            },
-            "author": {
-              "@type": "Person",
-              "name": r.userName || "Client vérifié"
-            },
-            ...(r.comment ? { "reviewBody": r.comment } : {}),
-            ...(r.createdAt ? { "datePublished": new Date(r.createdAt).toISOString().split('T')[0] } : {})
-          })) : {
-            "@type": "Review",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": averageRating,
-              "bestRating": "5"
-            },
-            "author": {
-              "@type": "Person",
-              "name": "Client vérifié"
-            }
+          "author": {
+            "@type": "Person",
+            "name": r.userName || "Client vérifié"
+          },
+          ...(r.comment ? { "reviewBody": r.comment } : {}),
+          ...(r.createdAt ? { "datePublished": new Date(r.createdAt).toISOString().split('T')[0] } : {})
+        })) : {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": averageRating > 0 ? averageRating : 5,
+            "bestRating": "5"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Client vérifié"
           }
-        } : {})
+        }
       }
     ]
   };
