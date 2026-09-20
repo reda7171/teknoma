@@ -28,7 +28,7 @@ interface BookStatus {
 }
 
 export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublishModalProps) {
-    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'both'>('both')
+    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'threads' | 'pinterest' | 'both' | 'all'>('all')
     const [delaySeconds, setDelaySeconds] = useState(5)
     const [isRunning, setIsRunning] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
@@ -162,14 +162,14 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     <div className="px-8 py-6 space-y-5 border-b border-gray-100">
                         <div>
                             <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Plateforme</label>
-                            <div className="flex gap-2">
-                                {(['facebook', 'instagram', 'both'] as const).map(p => (
+                            <div className="flex flex-wrap gap-2">
+                                {(['all', 'both', 'facebook', 'instagram', 'tiktok', 'threads', 'pinterest'] as const).map(p => (
                                     <button
                                         key={p}
                                         onClick={() => setPlatform(p)}
                                         className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${platform === p ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                     >
-                                        {p === 'both' ? 'FB + Insta' : p === 'facebook' ? 'Facebook' : 'Instagram'}
+                                        {p === 'all' ? 'Toutes' : p === 'both' ? 'FB + Insta' : p}
                                     </button>
                                 ))}
                             </div>
