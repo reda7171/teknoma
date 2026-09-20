@@ -97,9 +97,6 @@ export async function POST(req: NextRequest) {
         }
 
         const isVideo = absoluteImage && (absoluteImage.endsWith('.mp4') || absoluteImage.endsWith('.mov') || absoluteImage.endsWith('.webm'))
-        if (absoluteImage && !isVideo) {
-            absoluteImage = `https://wsrv.nl/?url=${encodeURIComponent(absoluteImage)}&output=jpg&q=85`
-        }
 
         const payload = {
             batch: platforms.map((platform: string) => ({

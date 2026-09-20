@@ -67,9 +67,6 @@ export async function GET(req: NextRequest) {
             }
 
             const isVideo = imageUrl && (imageUrl.endsWith('.mp4') || imageUrl.endsWith('.mov'))
-            if (imageUrl && !isVideo) {
-                imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&q=85`
-            }
 
             const payload = {
                 batch: platforms.map(platform => ({

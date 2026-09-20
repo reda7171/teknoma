@@ -832,9 +832,7 @@ export async function POST(req: Request) {
                     }
 
                     const isVideo = imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm')
-                    if (imageUrl && !isVideo && (platform === 'instagram' || platform === 'facebook' || platform === 'all' || platform === 'both')) {
-                        imageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg&q=85`
-                    }
+
 
                     const customCaptionSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_custom_caption' } })
                     const customCaption = customCaptionSetting?.value
