@@ -30,7 +30,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [positions, setPositions] = useState({
         badge: { x: 0, y: 0 },
         logo: { x: 0, y: 0 },
-        book: { x: 0, y: 0 },
+        book: { x: 0, y: -60 },
         title: { x: 0, y: 0 },
         author: { x: 0, y: 0 },
         price: { x: 0, y: 0 },
@@ -132,8 +132,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     useEffect(() => {
         if (!isOpen) {
             setTheme('dark') // reset
-            setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: 0 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 }, socials: { x: 0, y: 0 } })
-            setImageScale(1)
+            setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: -60 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 }, socials: { x: 0, y: 0 } })
+            setImageScale(1.9)
             setImageRotation(0)
             setLogoScale(3)
             setShowFreeDelivery(false)
