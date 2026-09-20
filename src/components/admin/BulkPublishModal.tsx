@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { X, Play, Pause, CheckCircle, XCircle, Clock, Send, Loader2 } from 'lucide-react'
+import { X, Play, Pause, CheckCircle, XCircle, Clock, Send, Loader2, FileText, Eye } from 'lucide-react'
 import { normalizeImage } from '@/lib/utils'
+import BookCreativeModal from './BookCreativeModal'
+import VideoStudioModal from './VideoStudioModal'
+import CaptionPreviewModal from './CaptionPreviewModal'
 
 interface Book {
     id: string
@@ -36,8 +39,12 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     const [isPaused, setIsPaused] = useState(false)
     const [statuses, setStatuses] = useState<BookStatus[]>([])
     const [currentIndex, setCurrentIndex] = useState(-1)
+    const [previewBook, setPreviewBook] = useState<Book | null>(null)
     const pauseRef = useRef(false)
     const stopRef = useRef(false)
+    // Capture auto: livre en cours de capture créative
+    const [captureBook, setCaptureBook] = useState<Book | null>(null)
+    const captureResolveRef = useRef<((url: string) => void) | null>(null)
 
     const resetState = () => {
         setStatuses([])
@@ -69,6 +76,22 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
 
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+    // Capture de l'image créative hors-écran
+    const captureCreative = (book: Book): Promise<string> => {
+        return new Promise((resolve) => {
+            captureResolveRef.current = resolve
+            setCaptureBook(book)
+        })
+    }
+
+    const handleCaptureReady = (url: string) => {
+        setCaptureBook(null)
+        if (captureResolveRef.current) {
+            captureResolveRef.current(url)
+            captureResolveRef.current = null
+        }
+    }
+
     const handleStart = async () => {
         resetState()
         setIsRunning(true)
@@ -93,6 +116,17 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                 
                 const payloadId = isPack ? { packId: book.id } : (isExtra ? { extraId: book.id } : { bookId: book.id })
 
+                // Générer la créative en background avant de publier
+                let customImageBase64: string | undefined
+                if (format === 'post' || format === 'story') {
+                    updateStatus(book.id, 'running', 'Génération de la créative...')
+                    const capturedData = await captureCreative(book)
+                    if (capturedData && capturedData.startsWith('data:')) {
+                        customImageBase64 = capturedData  // base64 → serveur le sauvegarde
+                    }
+                }
+
+                updateStatus(book.id, 'running', 'Publication en cours...')
                 const res = await fetch('/api/n8n/publish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -102,6 +136,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                         platform,
                         useDescription: 'short',
                         scheduleAt: null,
+                        ...(customImageBase64 ? { customImageBase64 } : {})
                     })
                 })
                 const data = await res.json()
@@ -164,12 +199,12 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     <div className="px-8 py-6 space-y-5 border-b border-gray-100">
                         <div>
                             <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Plateforme</label>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-1.5">
                                 {(['all', 'both', 'facebook', 'instagram', 'tiktok', 'threads', 'pinterest'] as const).map(p => (
                                     <button
                                         key={p}
                                         onClick={() => setPlatform(p)}
-                                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${platform === p ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all ${platform === p ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                     >
                                         {p === 'all' ? 'Toutes' : p === 'both' ? 'FB + Insta' : p}
                                     </button>
@@ -178,12 +213,12 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                         </div>
                         <div>
                             <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Format de publication</label>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-1.5">
                                 {(['post', 'story', 'video', 'short'] as const).map(f => (
                                     <button
                                         key={f}
                                         onClick={() => setFormat(f)}
-                                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${format === f ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all ${format === f ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                     >
                                         {f === 'post' ? 'Post créatif' : f === 'story' ? 'Story créative' : f === 'video' ? 'Shorts / Vidéo' : 'Desc. courte'}
                                     </button>
@@ -243,12 +278,45 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 className={`flex items-center gap-4 p-3 rounded-2xl transition-all ${isCurrent ? 'bg-black/5 ring-2 ring-black/10' : 'bg-gray-50'}`}
                             >
                                 {/* Image */}
-                                <img
-                                    src={normalizeImage(book.image) || '/book-placeholder.png'}
-                                    alt={book.title}
-                                    className="w-9 h-12 object-cover rounded-lg flex-shrink-0"
-                                    onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
-                                />
+                                {/* Image */}
+                                {(() => {
+                                    const imgSrc = normalizeImage(book.image) || '/book-placeholder.png'
+                                    if (format === 'post' || format === 'story') {
+                                        return (
+                                            <div className={`w-9 ${format === 'story' ? 'h-16' : 'h-12'} bg-slate-900 rounded-lg flex-shrink-0 flex flex-col items-center justify-center relative overflow-hidden border border-slate-800`}>
+                                                <div className="absolute top-1 right-1 w-2 h-1 bg-white/20 rounded-sm" />
+                                                <img src={imgSrc} className="w-[60%] h-auto object-cover shadow-xl transform -translate-y-1" />
+                                            </div>
+                                        )
+                                    }
+                                    if (format === 'video') {
+                                        return (
+                                            <div className="w-9 h-16 bg-slate-900 rounded-lg flex-shrink-0 flex items-center justify-center relative overflow-hidden">
+                                                <img src={imgSrc} className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[2px]" />
+                                                <div className="w-5 h-5 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center z-10">
+                                                    <Play className="w-2.5 h-2.5 text-white ml-0.5" fill="currentColor" />
+                                                </div>
+                                            </div>
+                                        )
+                                    }
+                                    if (format === 'short') {
+                                        return (
+                                            <div className="w-9 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex flex-col items-center justify-center border border-gray-200">
+                                                <FileText className="w-4 h-4 text-gray-400 mb-1" />
+                                                <div className="w-5 h-0.5 bg-gray-300 rounded mb-0.5" />
+                                                <div className="w-4 h-0.5 bg-gray-300 rounded" />
+                                            </div>
+                                        )
+                                    }
+                                    return (
+                                        <img
+                                            src={imgSrc}
+                                            alt={book.title}
+                                            className="w-9 h-12 object-cover rounded-lg flex-shrink-0"
+                                            onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
+                                        />
+                                    )
+                                })()}
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold text-gray-900 truncate">{book.title}</p>
@@ -257,8 +325,15 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                         <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight whitespace-normal">{status.message}</p>
                                     )}
                                 </div>
-                                {/* Statut */}
-                                <div className="flex-shrink-0">
+                                {/* Statut & Actions */}
+                                <div className="flex-shrink-0 flex items-center gap-2">
+                                    <button
+                                        onClick={() => setPreviewBook(book)}
+                                        className="p-1.5 text-gray-400 hover:text-black hover:bg-black/5 rounded-lg transition-all"
+                                        title="Aperçu"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                    </button>
                                     {isCurrent && (
                                         <Loader2 className="w-5 h-5 text-black animate-spin" />
                                     )}
@@ -317,6 +392,41 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     )}
                 </div>
             </div>
+
+            {/* Aperçu Modal */}
+            {format === 'video' && (
+                <VideoStudioModal
+                    isOpen={!!previewBook}
+                    onClose={() => setPreviewBook(null)}
+                    book={previewBook}
+                />
+            )}
+            {format === 'short' && (
+                <CaptionPreviewModal
+                    isOpen={!!previewBook}
+                    onClose={() => setPreviewBook(null)}
+                    book={previewBook}
+                />
+            )}
+            {(format === 'post' || format === 'story') && (
+                <BookCreativeModal
+                    isOpen={!!previewBook}
+                    onClose={() => setPreviewBook(null)}
+                    book={previewBook}
+                    format={format === 'story' ? 'story' : 'post'}
+                />
+            )}
+
+            {/* Capture auto hors-\u00e9cran pour la publication en boucle */}
+            {captureBook && (format === 'post' || format === 'story') && (
+                <BookCreativeModal
+                    isOpen={true}
+                    onClose={() => {}}
+                    book={captureBook as any}
+                    format={format === 'story' ? 'story' : 'post'}
+                    onAutoCapture={handleCaptureReady}
+                />
+            )}
         </div>
     )
 }

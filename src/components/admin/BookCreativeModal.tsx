@@ -18,9 +18,10 @@ interface BookCreativeModalProps {
         category?: string | null
     } | null
     format?: 'post' | 'story'
+    onAutoCapture?: (uploadUrl: string) => void  // pub en boucle : capture auto
 }
 
-export default function BookCreativeModal({ isOpen, onClose, book, format = 'post' }: BookCreativeModalProps) {
+export default function BookCreativeModal({ isOpen, onClose, book, format = 'post', onAutoCapture }: BookCreativeModalProps) {
     const posterRef = useRef<HTMLDivElement>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [isPublishing, setIsPublishing] = useState(false)
@@ -194,21 +195,37 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         }
     }, [useDescription, fullBookData, editableTexts.whatsapp])
 
-    if (!isOpen || !book) return null
+    // Auto-capture pour la publication en boucle
+    useEffect(() => {
+        if (!onAutoCapture || !isOpen || !book || !posterRef.current) return
+        const run = async () => {
+            await new Promise(r => setTimeout(r, 1200)) // attendre le rendu
+            if (!posterRef.current) return
+            try {
+                const originals = await patchImagesBase64(posterRef.current)
+                await new Promise(r => setTimeout(r, 500))
+                const dataUrl = await htmlToImage.toPng(posterRef.current, { quality: 1, pixelRatio: 2, cacheBust: false })
+                restoreImages(originals)
+                // Retourner le base64 directement — le serveur le sauvegardera
+                onAutoCapture(dataUrl)
+            } catch (e) {
+                console.error('[AutoCapture] Error:', e)
+                onAutoCapture('')
+            }
+        }
+        run()
+    }, [isOpen, book, format])
 
     // Convertit une URL image en base64 via canvas pour contourner CORS
     const toBase64 = async (url: string): Promise<string> => {
         try {
             if (url.startsWith('data:')) return url;
-
-            // Si c'est une URL externe, on passe par notre proxy pour éviter CORS
             let targetUrl = url;
             if (url.startsWith('http') && !url.includes(window.location.host)) {
                 targetUrl = `/api/proxy/image?url=${encodeURIComponent(url)}`;
             }
-
             const res = await fetch(targetUrl);
-            if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText} for ${targetUrl}`);
+            if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
             const blob = await res.blob();
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -217,8 +234,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 reader.readAsDataURL(blob);
             });
         } catch (err: any) {
-            console.warn("Base64 conversion fallback used due to error:", err?.message || err);
-            // Fallback ultime si même le proxy échoue
+            console.warn("Base64 conversion fallback:", err?.message || err);
             return url;
         }
     }
@@ -238,6 +254,9 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const restoreImages = (originals: { el: HTMLImageElement, src: string }[]) => {
         originals.forEach(({ el, src }) => { el.src = src })
     }
+
+    if (!isOpen || !book) return null
+
 
     const handleDownload = async () => {
         if (!posterRef.current) return
@@ -559,6 +578,48 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
     const currentTheme = themes[theme]
 
+    // Mode invisible pour la capture en boucle (pas de modal plein écran)
+    if (onAutoCapture) {
+        return (
+            <div className="fixed" style={{ left: '-9999px', top: 0, width: format === 'story' ? '360px' : '500px', pointerEvents: 'none', zIndex: 0 }}>
+                <div
+                    ref={posterRef}
+                    className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col`}
+                    style={{ aspectRatio: format === 'story' ? '9/16' : '1/1' }}
+                >
+                    {bgImage && <div className="absolute inset-0 z-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', opacity: bgOpacity }} />}
+                    {!bgImage && (<><div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)' }} /><div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%)' }} /></>)}
+                    <div className="pt-8 px-8 flex justify-between items-start z-10">
+                        <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}><p className={`text-[10px] font-black tracking-[0.2em] uppercase ${currentTheme.text} opacity-90`}>{editableTexts.badge}</p></div>
+                        {showLogo && <img src="/logo.png" alt="Riwaya" crossOrigin="anonymous" className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
+                    </div>
+                    <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30`}>
+                        <div className="relative w-full max-w-[200px] mx-auto">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={(() => { const img = normalizeImage(book.image); return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img })() || '/book-placeholder.png'} alt={book.title} crossOrigin="anonymous" className="w-full h-auto object-cover rounded shadow-2xl" style={{ transform: `scale(${imageScale})`, opacity: imageOpacity }} />
+                        </div>
+                    </div>
+                    {showPrice && (
+                        <div className="absolute bottom-16 left-1/2" style={{ transform: 'translate(-50%, 0)' }}>
+                            <div className="flex items-center gap-3">
+                                {showSolde && <div className="text-red-500 font-bold text-xl line-through flex items-baseline gap-1"><span>{editableTexts.oldPrice}</span><span className="text-sm">درهم</span></div>}
+                                <div className={`${currentTheme.accent} font-black text-3xl flex items-baseline gap-1`}><span>{editableTexts.price}</span><span className="text-xl">درهم</span></div>
+                            </div>
+                        </div>
+                    )}
+                    {showWhatsapp && (
+                        <div className="absolute bottom-4 right-4 z-10">
+                            <div className="flex items-center gap-1.5 bg-[#25D366] text-white rounded-full px-3 py-1 shadow-lg text-sm font-bold">
+                                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                                {editableTexts.whatsapp}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black backdrop-blur-md">
             <div className="bg-white w-full h-full flex flex-col md:flex-row overflow-hidden shadow-2xl">
@@ -716,7 +777,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             >
                                 <div className="flex items-center justify-center gap-3">
                                     {showSolde && (
-                                        <div className="text-red-500 font-bold text-2xl line-through drop-shadow-md flex items-baseline gap-1">
+                                        <div className="text-red-500 font-bold text-xl line-through drop-shadow-md flex items-baseline gap-1">
                                             <span
                                                 contentEditable={editing === 'price'}
                                                 suppressContentEditableWarning
@@ -728,7 +789,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                             <span className="text-sm">درهم</span>
                                         </div>
                                     )}
-                                    <div className={`${currentTheme.accent} font-black text-4xl drop-shadow-lg flex items-baseline gap-1`}>
+                                    <div className={`${currentTheme.accent} font-black text-3xl drop-shadow-lg flex items-baseline gap-1`}>
                                         <span
                                             contentEditable={editing === 'price'}
                                             suppressContentEditableWarning
@@ -753,15 +814,15 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 onDoubleClick={() => setEditing('whatsapp')}
                                 title="Double-clic pour éditer"
                             >
-                                <div className="flex items-center justify-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-full shadow-lg">
-                                    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-white rounded-full shadow-lg">
+                                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                                     </svg>
                                     <span
                                         contentEditable={editing === 'whatsapp'}
                                         suppressContentEditableWarning
                                         onBlur={(e) => { handleTextChange('whatsapp', e.currentTarget.textContent || ''); setEditing(null) }}
-                                        className={`font-bold outline-none ${editing === 'whatsapp' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
+                                        className={`font-bold text-sm outline-none ${editing === 'whatsapp' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
                                     >
                                         {editableTexts.whatsapp}
                                     </span>
@@ -772,7 +833,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         {/* Social Icons — drag + double-clic pour éditer */}
                         {showSocials && (
                             <div
-                                className={`absolute bottom-4 left-4 z-10 ${editing === 'socials' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 flex flex-col items-center gap-3 origin-bottom-left`}
+                                className={`absolute bottom-4 left-4 z-10 ${editing === 'socials' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 flex flex-col items-center gap-2 origin-bottom-left`}
                                 style={{ transform: `translate(${positions.socials.x}px, ${positions.socials.y}px) scale(${socialsScale})`, touchAction: 'none' }}
                                 onMouseDown={(e) => handleMouseDown(e, 'socials')}
                                 onTouchStart={(e) => handleTouchStart(e, 'socials')}
@@ -783,24 +844,24 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     contentEditable={editing === 'socials'}
                                     suppressContentEditableWarning
                                     onBlur={(e) => { handleTextChange('socialHandle', e.currentTarget.textContent || ''); setEditing(null) }}
-                                    className={`text-white font-bold text-lg tracking-wide outline-none ${editing === 'socials' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
+                                    className={`text-white font-bold text-sm tracking-wide outline-none ${editing === 'socials' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
                                 >
                                     {editableTexts.socialHandle}
                                 </span>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white">
-                                        <Instagram className="w-6 h-6" />
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white">
+                                        <Instagram className="w-4 h-4" />
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
-                                        <Facebook className="w-6 h-6" fill="currentColor" strokeWidth={0} />
+                                    <div className="w-7 h-7 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                                        <Facebook className="w-4 h-4" fill="currentColor" strokeWidth={0} />
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-[#E60023] flex items-center justify-center text-white border-2 border-white/10">
-                                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                    <div className="w-7 h-7 rounded-full bg-[#E60023] flex items-center justify-center text-white border border-white/20">
+                                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.163 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.624 0 12.017 0z"/>
                                         </svg>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white border-2 border-white/10">
-                                        <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                    <div className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white border border-white/20">
+                                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.44 3.29-1.43 4.54-1.03 1.3-2.58 2.16-4.25 2.38-1.74.22-3.56-.05-5.06-1.02-1.48-.96-2.54-2.5-2.85-4.23-.33-1.84.14-3.79 1.25-5.26 1.13-1.48 2.87-2.39 4.74-2.53V13c-.94.04-1.87.35-2.61.94-.74.57-1.18 1.44-1.28 2.37-.11 1.05.21 2.14.9 2.92.68.78 1.75 1.2 2.81 1.14 1.04-.06 2.02-.6 2.53-1.47.38-.66.56-1.42.56-2.18V.02z" />
                                         </svg>
                                     </div>

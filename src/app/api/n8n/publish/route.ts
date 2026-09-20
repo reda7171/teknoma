@@ -23,11 +23,15 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json()
-        const { bookId, packId, extraId, format, scheduleAt, platform, useDescription, customImageUrl } = body
+        const { bookId, packId, extraId, format, scheduleAt, platform, useDescription, customImageUrl, customImageBase64 } = body
 
         // URL du webhook n8n (Priorité à la DB, puis .env)
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
-        const N8N_WEBHOOK_URL = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
+        let N8N_WEBHOOK_URL = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
+        
+        if (process.env.NODE_ENV === 'development' && N8N_WEBHOOK_URL) {
+            N8N_WEBHOOK_URL = N8N_WEBHOOK_URL.replace('http://n8n:', 'http://167.86.108.246:');
+        }
 
         if (!N8N_WEBHOOK_URL) {
             return NextResponse.json({ error: 'N8N_WEBHOOK_URL non configuré' }, { status: 500 })
@@ -91,7 +95,30 @@ export async function POST(req: NextRequest) {
         
         baseUrl = baseUrl.replace(/\/$/, '');
 
-        let imageUrl = customImageUrl || item?.image || '';
+        // Si base64 fourni, sauvegarder le fichier côté serveur pour obtenir une URL publique
+        let resolvedCustomImageUrl = customImageUrl
+        if (customImageBase64 && customImageBase64.startsWith('data:image')) {
+            try {
+                const { writeFile, mkdir } = await import('fs/promises')
+                const path = await import('path')
+                const { randomBytes } = await import('crypto')
+                const matches = customImageBase64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
+                if (matches) {
+                    const ext = matches[1].includes('png') ? 'png' : 'jpg'
+                    const buffer = Buffer.from(matches[2], 'base64')
+                    const fileName = `creative_${randomBytes(8).toString('hex')}.${ext}`
+                    const uploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives')
+                    await mkdir(uploadDir, { recursive: true })
+                    await writeFile(path.default.join(uploadDir, fileName), buffer)
+                    const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+                    resolvedCustomImageUrl = `${pubUrl}/uploads/creatives/${fileName}`
+                }
+            } catch (e) {
+                console.error('[N8N PUBLISH] Base64 save error:', e)
+            }
+        }
+
+        let imageUrl = resolvedCustomImageUrl || item?.image || '';
         
         if (imageUrl && (imageUrl.includes('localhost') || imageUrl.includes('127.0.0.1'))) {
             try {
@@ -100,12 +127,6 @@ export async function POST(req: NextRequest) {
             } catch (e) {
                 // Ignore
             }
-        }
-
-        if (imageUrl.startsWith('data:image')) {
-            return NextResponse.json({ 
-                error: "L'image de cet élément est au format Base64. Facebook ne supporte pas ce format. Veuillez uploader une image réelle." 
-            }, { status: 400 });
         }
 
         if (imageUrl && !imageUrl.startsWith('http')) {
