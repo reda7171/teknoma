@@ -130,9 +130,8 @@ export async function getQuotesByAuthorExact(authorName: string, locale?: string
         author: authorName,
         isActive: true
     }
-    if (locale) {
-        where.locale = locale
-    }
+    // We intentionally do NOT filter by locale here. 
+    // An author's quotes should be visible on their page regardless of the current site language.
 
     return await (prisma as any).quote.findMany({
         where,

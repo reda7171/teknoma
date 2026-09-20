@@ -470,13 +470,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                         <div className="text-center md:text-start flex-1 space-y-3">
                                                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-[10px] uppercase tracking-widest font-black backdrop-blur-sm border border-white/10 mb-2">
                                                                 <Sparkles className="w-3 h-3 text-emerald-400" />
-                                                                Sélection Spéciale
+                                                                {locale === 'ar' ? 'تشكيلة مميزة' : locale === 'en' ? 'Special Selection' : 'Sélection Spéciale'}
                                                             </div>
                                                             <h4 className="text-2xl md:text-3xl font-black text-white leading-tight">
                                                                 {locale === 'ar' ? 'اكتشف تشكيلتنا من الكتب' : locale === 'en' ? 'Discover our book selection' : 'Découvrez notre sélection de livres'}
                                                             </h4>
                                                             <p className="text-slate-300/90 text-sm md:text-base font-medium max-w-lg">
-                                                                {locale === 'ar' ? 'كتب مختارة بعناية تناسب جميع الأذواق وبأفضل الأسعار.' : locale === 'en' ? 'Carefully selected books for all tastes at the best prices.' : 'Des livres soigneusement sélectionnés pour tous les goûts aux meilleurs prix.'}
+                                                                {locale === 'ar' ? 'كتب مختارة بعناية لتناسب جميع الأذواق وبأفضل الأسعار.' : locale === 'en' ? 'Carefully selected books for all tastes at the best prices.' : 'Des livres soigneusement sélectionnés pour tous les goûts aux meilleurs prix.'}
                                                             </p>
                                                         </div>
                                                         <a 

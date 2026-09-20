@@ -186,7 +186,8 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 })
 
                 if (!uploadResponse.ok) {
-                    throw new Error('Erreur lors de l\'upload de l\'image')
+                    const errData = await uploadResponse.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Erreur lors de l\'upload de l\'image')
                 }
 
                 const uploadResult = await uploadResponse.json()
