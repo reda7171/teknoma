@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { X, Play, Pause, CheckCircle, XCircle, Clock, Send, Loader2 } from 'lucide-react'
+import { normalizeImage } from '@/lib/utils'
 
 interface Book {
     id: string
@@ -243,7 +244,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                             >
                                 {/* Image */}
                                 <img
-                                    src={book.image || '/book-placeholder.png'}
+                                    src={normalizeImage(book.image) || '/book-placeholder.png'}
                                     alt={book.title}
                                     className="w-9 h-12 object-cover rounded-lg flex-shrink-0"
                                     onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}

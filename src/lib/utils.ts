@@ -15,7 +15,11 @@ export function normalizeImage(raw: string | null | undefined): string {
     if (!img) return '/book-placeholder.png'
     
     if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
-        return img.startsWith('/') ? img : '/' + img;
+        const path = img.startsWith('/') ? img : '/' + img;
+        if (process.env.NODE_ENV === 'development') {
+            return `https://www.riwaya.store${path}`;
+        }
+        return path;
     }
 
     // DÃ©jÃ  une URL ou dÃ©jÃ  formatÃ©
