@@ -701,24 +701,6 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </div>
                         </div>
 
-                        {/* Titre - déplacer par glisser, éditer par double-clic */}
-                        <div
-                            className={`absolute bottom-36 left-1/2 z-10 ${editing === 'title' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'title' ? '' : 'transition-transform active:scale-95'}`}
-                            style={{ transform: `translate(calc(-50% + ${positions.title.x}px), ${positions.title.y}px)`, touchAction: 'none' }}
-                            onMouseDown={(e) => handleMouseDown(e, 'title')}
-                            onTouchStart={(e) => handleTouchStart(e, 'title')}
-                            onDoubleClick={() => setEditing('title')}
-                            title="Double-clic pour éditer"
-                        >
-                            <h2
-                                contentEditable={editing === 'title'}
-                                suppressContentEditableWarning
-                                onBlur={(e) => { handleTextChange('title', e.currentTarget.textContent || ''); setEditing(null) }}
-                                className={`text-3xl font-black leading-tight ${currentTheme.text} drop-shadow-md outline-none text-center ${editing === 'title' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
-                            >
-                                {editableTexts.title}
-                            </h2>
-                        </div>
 
 
 
