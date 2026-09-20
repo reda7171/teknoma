@@ -29,6 +29,7 @@ interface BookStatus {
 
 export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublishModalProps) {
     const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'threads' | 'pinterest' | 'both' | 'all'>('all')
+    const [format, setFormat] = useState<'post' | 'story' | 'video' | 'short'>('post')
     const [delaySeconds, setDelaySeconds] = useState(5)
     const [isRunning, setIsRunning] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
@@ -96,7 +97,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         ...payloadId,
-                        format: 'post',
+                        format,
                         platform,
                         useDescription: 'short',
                         scheduleAt: null,
@@ -170,6 +171,20 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                         className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${platform === p ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                     >
                                         {p === 'all' ? 'Toutes' : p === 'both' ? 'FB + Insta' : p}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Format de publication</label>
+                            <div className="flex flex-wrap gap-2">
+                                {(['post', 'story', 'video', 'short'] as const).map(f => (
+                                    <button
+                                        key={f}
+                                        onClick={() => setFormat(f)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${format === f ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                    >
+                                        {f === 'post' ? 'Post créatif' : f === 'story' ? 'Story créative' : f === 'video' ? 'Shorts / Vidéo' : 'Desc. courte'}
                                     </button>
                                 ))}
                             </div>
