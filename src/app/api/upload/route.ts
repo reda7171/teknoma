@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         const formData = await request.formData()
-        const file = formData.get('file') as File
+        const file = (formData as any).get('file') as File
 
         if (!file) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         // OWASP A08: Vérifier les magic bytes (signature du fichier)
         const magicBytes = buffer.slice(0, 4).toString('hex')
         const validSignatures: Record<string, string[]> = {
-            'image/jpeg': ['ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffe3', 'ffd8ffe8'],
+            'image/jpeg': ['ffd8ff'],
             'image/png': ['89504e47'],
             'image/gif': ['47494638'],
             'image/webp': ['52494646']
@@ -155,9 +155,9 @@ export async function POST(request: NextRequest) {
         const sanitizedName = sanitizeFilename(baseName)
 
         // Gestion spécifique Marketing
-        const isMarketing = formData.get('type') === 'marketing'
-        const marketingType = formData.get('marketingType') as string || 'CREATIVE'
-        const customName = formData.get('customName') as string
+        const isMarketing = (formData as any).get('type') === 'marketing'
+        const marketingType = (formData as any).get('marketingType') as string || 'CREATIVE'
+        const customName = (formData as any).get('customName') as string
 
         // Générer un hash unique pour éviter les collisions
         const hash = createHash('sha256')
