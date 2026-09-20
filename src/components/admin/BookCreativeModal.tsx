@@ -43,8 +43,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [offset, setOffset] = useState({ x: 0, y: 0 })
     // Quel élément est en mode édition (double-clic requis)
     const [editing, setEditing] = useState<string | null>(null)
-    const [imageScale, setImageScale] = useState(1.9)
-    const [imageRotation, setImageRotation] = useState(51)
+    const [imageScale, setImageScale] = useState(1.1)
+    const [imageRotation, setImageRotation] = useState(0)
     const [logoScale, setLogoScale] = useState(3)
     const [showLogo, setShowLogo] = useState(true)
     const [showFreeDelivery, setShowFreeDelivery] = useState(false)
@@ -133,7 +133,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         if (!isOpen) {
             setTheme('dark') // reset
             setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: -60 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 }, socials: { x: 0, y: 0 } })
-            setImageScale(1.9)
+            setImageScale(1.1)
             setImageRotation(0)
             setLogoScale(3)
             setShowFreeDelivery(false)
@@ -720,24 +720,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             </h2>
                         </div>
 
-                        {/* Auteur - déplacer par glisser, éditer par double-clic */}
-                        <div
-                            className={`absolute bottom-28 left-1/2 z-10 ${editing === 'author' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'author' ? '' : 'transition-transform active:scale-95'}`}
-                            style={{ transform: `translate(calc(-50% + ${positions.author.x}px), ${positions.author.y}px)`, touchAction: 'none' }}
-                            onMouseDown={(e) => handleMouseDown(e, 'author')}
-                            onTouchStart={(e) => handleTouchStart(e, 'author')}
-                            onDoubleClick={() => setEditing('author')}
-                            title="Double-clic pour éditer"
-                        >
-                            <p
-                                contentEditable={editing === 'author'}
-                                suppressContentEditableWarning
-                                onBlur={(e) => { handleTextChange('author', e.currentTarget.textContent || ''); setEditing(null) }}
-                                className={`text-lg font-medium opacity-80 ${currentTheme.text} outline-none text-center ${editing === 'author' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
-                            >
-                                {editableTexts.author}
-                            </p>
-                        </div>
+
 
                         {/* Prix - déplacer par glisser, éditer par double-clic */}
                         {showPrice && (
