@@ -37,7 +37,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache mysql-client perl exiftool
+RUN apk add --no-cache mysql-client perl exiftool su-exec
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -47,8 +47,15 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Set the correct permission for prerender cache and upload directories
-RUN mkdir -p .next public/uploads backups && chown -R nextjs:nodejs .next public/uploads backups
+# Créer tous les sous-dossiers d'upload avec les bonnes permissions
+RUN mkdir -p .next \
+    public/uploads/books \
+    public/uploads/posts \
+    public/uploads/marketing \
+    public/uploads/creatives \
+    public/uploads/videos \
+    backups \
+    && chown -R nextjs:nodejs .next public/uploads backups
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
@@ -56,12 +63,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
+# Entrypoint: fixe les permissions des volumes montés puis démarre
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT=3000
-# set hostname to localhost
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
