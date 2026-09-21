@@ -76,7 +76,21 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
     const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false)
     const [autoSchedulePlatform, setAutoSchedulePlatform] = useState('all')
     const [autoScheduleMode, setAutoScheduleMode] = useState<'now' | 'schedule'>('schedule')
+    const [captionLanguage, setCaptionLanguage] = useState<'fr' | 'ar' | 'en'>('fr')
+    const [autoScheduleLanguage, setAutoScheduleLanguage] = useState<'fr' | 'ar' | 'en'>('fr')
     const [isMounted, setIsMounted] = useState(false)
+
+    const getCaption = (book: SuggestedBook | null, lang: string) => {
+        if (!book) return '';
+        const link = `https://riwaya.store/${lang === 'ar' ? 'ar' : lang === 'en' ? 'en' : 'fr'}/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
+        if (lang === 'ar') {
+            return `📚 اكتشف "${book.title}" ${book.type === 'pack' ? '' : `للكاتب ${book.author}`} !\n\nمتوفر الآن.\n\n🔗 ${link}\n\n#كتاب #قراءة #رواية`;
+        } else if (lang === 'en') {
+            return `📚 Discover "${book.title}" ${book.type === 'pack' ? '' : `by ${book.author}`} !\n\nAvailable now.\n\n🔗 ${link}\n\n#book #reading #riwaya`;
+        } else {
+            return `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
+        }
+    }
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -492,7 +506,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         setIsLoading(false)
     }
 
-    const handleAutoScheduleAll = async (mode: 'now' | 'schedule', platform: string) => {
+    const handleAutoScheduleAll = async (mode: 'now' | 'schedule', platform: string, lang: 'fr' | 'ar' | 'en') => {
         setShowAutoScheduleModal(false)
         setIsLoading(true);
         const unprogrammed = dailySuggestions.filter(b => !b.isProgrammed);
@@ -521,8 +535,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
             }
 
             const timeSlot = shuffledTimes[i % shuffledTimes.length];
-            const link = `https://riwaya.store/fr/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
-            const content = `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
+            const content = getCaption(book, lang);
 
             const [hours, minutes] = timeSlot.split(':');
             const scheduleAt = mode === 'now' ? new Date() : new Date(selectedDate);
@@ -763,7 +776,15 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                 <option value="pinterest">Pinterest</option>
                                             </select>
                                         </div>
-                                        <button onClick={() => handleAutoScheduleAll(autoScheduleMode, autoSchedulePlatform)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition-colors flex items-center justify-center gap-2">
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Langue du post</label>
+                                            <select aria-label="Langue du post" value={autoScheduleLanguage} onChange={e => setAutoScheduleLanguage(e.target.value as 'fr' | 'ar' | 'en')} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                                <option value="fr">Français</option>
+                                                <option value="ar">العربية</option>
+                                                <option value="en">English</option>
+                                            </select>
+                                        </div>
+                                        <button onClick={() => handleAutoScheduleAll(autoScheduleMode, autoSchedulePlatform, autoScheduleLanguage)} className="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-sm transition-colors flex items-center justify-center gap-2">
                                             <Plus className="w-4 h-4" /> Lancer
                                         </button>
                                     </div>
@@ -812,8 +833,7 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                                 const timeToSet = '12:00';
                                                 handleOpenModal(timeToSet);
                                                 setTimeout(() => {
-                                                    const link = `https://riwaya.store/fr/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
-                                                    setNewPostContent(`📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`);
+                                                    setNewPostContent(getCaption(book, captionLanguage));
                                                     const newMedia = { name: book.title, url: book.image, type: 'image', createdAt: new Date().toISOString() };
                                                     setSelectedMedia(newMedia as any);
                                                     setSelectedSuggestedProduct(book);
@@ -1235,7 +1255,26 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Contenu du post</label>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="block text-sm font-semibold text-slate-700">Contenu du post</label>
+                                        {selectedSuggestedProduct && (
+                                            <select
+                                                aria-label="Langue du caption"
+                                                value={captionLanguage}
+                                                onChange={(e) => {
+                                                    const lang = e.target.value as 'fr' | 'ar' | 'en';
+                                                    setCaptionLanguage(lang);
+                                                    setNewPostContent(getCaption(selectedSuggestedProduct, lang));
+                                                }}
+                                                className="text-xs border border-slate-200 rounded px-2 py-1 text-slate-600 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                                                disabled={isLoading}
+                                            >
+                                                <option value="fr">Français</option>
+                                                <option value="ar">العربية</option>
+                                                <option value="en">English</option>
+                                            </select>
+                                        )}
+                                    </div>
                                     <textarea
                                         value={newPostContent}
                                         onChange={(e) => setNewPostContent(e.target.value)}

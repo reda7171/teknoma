@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useCartStore } from '@/store/cart'
 import { useLocale, useTranslations } from 'next-intl'
+import { notifyWhatsAppClick } from '@/lib/actions/cart-notify'
  
 interface WhatsAppButtonProps {
     phone?: string
@@ -107,7 +108,11 @@ export default function WhatsAppButton({ phone }: WhatsAppButtonProps) {
         if (hasMoved) {
             e.preventDefault()
             e.stopPropagation()
+            return
         }
+        
+        // Notify Telegram when user clicks WhatsApp button
+        notifyWhatsAppClick(finalMessage).catch(console.error)
     }
 
     if (!mounted) return null
