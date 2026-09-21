@@ -16,10 +16,9 @@ export function normalizeImage(raw: string | null | undefined): string {
     
     if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
         const path = img.startsWith('/') ? img : '/' + img;
-        if (process.env.NODE_ENV === 'development') {
-            return `https://www.riwaya.store${path}`;
-        }
-        return path;
+        // Toujours utiliser l'URL absolue pour que next/image fasse une requête HTTP
+        // au lieu d'essayer de lire le fichier local (évite les erreurs 400 et de permissions)
+        return `https://www.riwaya.store${path}`;
     }
 
     // DÃ©jÃ  une URL ou dÃ©jÃ  formatÃ©
