@@ -42,7 +42,8 @@ export default function EditAccessoryPage({
         jumiaProductSid: '',
         isSyncedWithJumia: false,
         jumiaPriceMarkup: '0',
-        jumiaStock: ''
+        jumiaStock: '',
+        isFeatured: false
     })
     const [videos, setVideos] = useState<string[]>([])
     const [isUploadingVideo, setIsUploadingVideo] = useState(false)

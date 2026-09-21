@@ -1149,7 +1149,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                             <ImageWithFallback
                               src={post.coverImage}
                               alt={post.title}
-                              fill
                               className="object-cover group-hover:scale-105 transition-transform duration-700"
                             />
                           ) : (
@@ -1216,7 +1215,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                             <ImageWithFallback
                               src={product.image}
                               alt={product.name}
-                              fill
                               className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
                             />
                           ) : (
