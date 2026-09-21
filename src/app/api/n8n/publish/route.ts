@@ -134,12 +134,37 @@ export async function POST(req: NextRequest) {
             imageUrl = `${baseUrl}${imagePath}`;
         }
 
-        // Encoder les caractères non-ASCII dans l'URL (ex: noms de fichiers arabes)
-        // encodeURI préserve les / : ? & = mais encode les caractères spéciaux
-        try {
-            const urlObj = new URL(imageUrl);
-            imageUrl = urlObj.origin + urlObj.pathname.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/') + urlObj.search;
-        } catch { /* ignore si URL invalide */ }
+        // Make ASCII-safe URL for Facebook if needed (Facebook Graph API has issues with arabic URLs)
+        if (/[^\x00-\x7F]/.test(decodeURIComponent(imageUrl))) {
+            try {
+                const urlObj = new URL(imageUrl);
+                const path = await import('path');
+                const { copyFile, mkdir } = await import('fs/promises');
+                
+                const localPath = path.default.join(process.cwd(), 'public', decodeURIComponent(urlObj.pathname));
+                const ext = path.default.extname(localPath) || '.jpg';
+                const safeFileName = `safe_${Date.now()}_${Math.random().toString(36).substring(7)}${ext}`;
+                const safeUploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives');
+                
+                await mkdir(safeUploadDir, { recursive: true });
+                await copyFile(localPath, path.default.join(safeUploadDir, safeFileName));
+                
+                imageUrl = `${urlObj.origin}/uploads/creatives/${safeFileName}`;
+                console.log('[N8N PUBLISH] Created safe ASCII image copy:', imageUrl);
+            } catch (e) {
+                console.error('[N8N PUBLISH] Failed to create safe ASCII image copy:', e);
+                // Fallback: Encoder les caractères non-ASCII
+                try {
+                    const urlObj = new URL(imageUrl);
+                    imageUrl = urlObj.origin + urlObj.pathname.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/') + urlObj.search;
+                } catch { /* ignore */ }
+            }
+        } else {
+            try {
+                const urlObj = new URL(imageUrl);
+                imageUrl = urlObj.origin + urlObj.pathname.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment))).join('/') + urlObj.search;
+            } catch { /* ignore si URL invalide */ }
+        }
 
         const isVideo = imageUrl && (imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm'));
 

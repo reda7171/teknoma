@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getIpIdentifier } from '@/lib/rate-limit'
@@ -153,6 +153,28 @@ export async function notifyCheckoutInitiated(totalValue: number, totalItems: nu
         return { success: true }
     } catch (error) {
         console.error('Erreur notifyCheckoutInitiated:', error)
+        return { success: false }
+    }
+}
+
+
+
+export async function notifyWhatsAppClick(message: string) {
+    try {
+        const ip = await getIpIdentifier()
+        const isAdmin = await isAuthenticated()
+        const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
+        
+        const cleanMessage = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const { getSetting } = await import('@/lib/actions/site-settings')
+        const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
+        
+        if (shouldNotify) {
+            await sendTelegramMessage(`💬 <b>Nouveau Contact WhatsApp Initié</b>${adminTag}\n\n<b>Message :</b>\n<pre>${cleanMessage}</pre>\n\n🌍 <b>IP:</b> ${ip || 'Inconnue'}`)
+        }
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur notifyWhatsAppClick:', error)
         return { success: false }
     }
 }

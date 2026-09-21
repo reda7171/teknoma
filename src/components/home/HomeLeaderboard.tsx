@@ -19,11 +19,9 @@ const PAGES_PER_BOOK = 280
 const PAGES_PER_HOUR = 30
 
 const rankConfig = [
-    { medal: '🥇', ring: 'ring-2 ring-yellow-300', cardBg: 'bg-gradient-to-br from-yellow-50 to-amber-50/40 border-yellow-200', avatarRing: 'ring-4 ring-yellow-200', rankBg: 'bg-yellow-400 text-white shadow-yellow-200', w: 'w-16 h-16 sm:w-20 sm:h-20' },
-    { medal: '🥈', ring: 'ring-2 ring-slate-300', cardBg: 'bg-gradient-to-br from-slate-50 to-gray-50/40 border-slate-200', avatarRing: 'ring-2 ring-slate-200', rankBg: 'bg-slate-300 text-white shadow-slate-200', w: 'w-12 h-12 sm:w-14 sm:h-14' },
-    { medal: '🥉', ring: 'ring-2 ring-amber-400', cardBg: 'bg-gradient-to-br from-amber-50 to-orange-50/40 border-amber-200', avatarRing: 'ring-2 ring-amber-200', rankBg: 'bg-amber-500 text-white shadow-amber-200', w: 'w-12 h-12 sm:w-14 sm:h-14' },
-    { medal: null, ring: '', cardBg: 'bg-white border-slate-100 hover:border-slate-200', avatarRing: 'ring-2 ring-slate-100', rankBg: 'bg-slate-100 text-slate-500', w: 'w-10 h-10 sm:w-12 sm:h-12' },
-    { medal: null, ring: '', cardBg: 'bg-white border-slate-100 hover:border-slate-200', avatarRing: 'ring-2 ring-slate-100', rankBg: 'bg-slate-100 text-slate-500', w: 'w-10 h-10 sm:w-12 sm:h-12' },
+    { medal: '🥇', ring: 'ring-2 ring-yellow-300', cardBg: 'bg-gradient-to-br from-yellow-50 to-amber-50/40 border-yellow-200', avatarRing: 'ring-4 ring-yellow-200', rankBg: 'text-5xl sm:text-6xl drop-shadow-lg', w: 'w-16 h-16 sm:w-20 sm:h-20' },
+    { medal: '🥈', ring: 'ring-2 ring-slate-300', cardBg: 'bg-gradient-to-br from-slate-50 to-gray-50/40 border-slate-200', avatarRing: 'ring-2 ring-slate-200', rankBg: 'text-4xl sm:text-5xl drop-shadow-md', w: 'w-12 h-12 sm:w-14 sm:h-14' },
+    { medal: '🥉', ring: 'ring-2 ring-amber-400', cardBg: 'bg-gradient-to-br from-amber-50 to-orange-50/40 border-amber-200', avatarRing: 'ring-2 ring-amber-200', rankBg: 'text-4xl sm:text-5xl drop-shadow-md', w: 'w-12 h-12 sm:w-14 sm:h-14' },
 ]
 
 export default async function HomeLeaderboard({ topReaders }: { topReaders: Reader[] }) {
@@ -31,7 +29,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
     const isAdmin = await isAuthenticated()
     if (!topReaders || topReaders.length === 0) return null
 
-    const top5 = topReaders.slice(0, 5)
+    const top3 = topReaders.slice(0, 3)
 
     return (
         <section className="py-20 md:py-28 bg-[#F9F7F4] border-y border-stone-100">
@@ -56,7 +54,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
 
                         {/* Liste des lecteurs */}
                         <div className="flex flex-col gap-3">
-                            {top5.map((reader, idx) => {
+                            {top3.map((reader, idx) => {
                                 const books  = reader.booksRead ?? 0
                                 const pages  = books * PAGES_PER_BOOK
                                 const hours  = Math.round(pages / PAGES_PER_HOUR)
@@ -70,7 +68,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                     >
                                         <div className="flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
                                             {/* Rang */}
-                                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center font-black text-sm sm:text-base flex-shrink-0 shadow-sm ${cfg.rankBg}`}>
+                                            <div className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center font-black flex-shrink-0 ${cfg.rankBg}`}>
                                                 {cfg.medal ?? reader.rank}
                                             </div>
 
@@ -146,7 +144,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                         {/* Indicateur de lecteurs actifs */}
                         <div className="mt-8 flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-sm">
                             <div className="flex -space-x-2">
-                                {top5.slice(0, 3).map((r, i) => (
+                                {top3.slice(0, 3).map((r, i) => (
                                     <div key={r.id} className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white overflow-hidden relative" style={{ zIndex: 3 - i }}>
                                         {r.image ? (
                                             <Image src={r.image} alt={r.name || ''} fill className="object-cover" />
@@ -161,7 +159,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                             <div className="flex items-center gap-1.5 text-slate-600">
                                 <BookOpen className="w-3.5 h-3.5 text-emerald-500" />
                                 <p className="text-xs font-bold">
-                                    <span className="font-black text-slate-900">{top5.length}+</span> lecteurs actifs ce mois
+                                    <span className="font-black text-slate-900">{top3.length}+</span> lecteurs actifs ce mois
                                 </p>
                             </div>
                         </div>
