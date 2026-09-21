@@ -436,7 +436,24 @@ export async function getBestSellerBooks(limit = 6) {
 
             return [...resultBooks, ...others]
         },
-        300 // 5 minutes cache
+        60 * 60 // 1 hour cache
+    )
+}
+
+/**
+ * Récupère les accessoires en vedette (avec cache)
+ */
+export async function getFeaturedAccessories(limit = 6) {
+    return getCached(
+        `accessory:featured:${limit}`,
+        async () => {
+            return prisma.extraProduct.findMany({
+                where: { active: true, isFeatured: true },
+                orderBy: { createdAt: 'desc' },
+                take: limit,
+            })
+        },
+        60 * 60 // 1 hour cache
     )
 }
 

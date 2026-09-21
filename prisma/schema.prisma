@@ -716,6 +716,7 @@ model Post {
   imageAlt      String?   @db.VarChar(500)
   imageTitle    String?   @db.VarChar(500)
   isCompleted   Boolean   @default(false)
+  isFeatured    Boolean   @default(false)
   comments      Comment[]
   author        User      @relation(fields: [authorId], references: [id])
   books         Book[]    @relation("PostBooks")

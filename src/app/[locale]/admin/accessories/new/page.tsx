@@ -38,7 +38,8 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
         jumiaProductSid: '',
         isSyncedWithJumia: false,
         jumiaPriceMarkup: '0',
-        jumiaStock: ''
+        jumiaStock: '',
+        isFeatured: false
     })
 
     /* Upload fichiers multiples vers /api/admin/upload */
@@ -204,6 +205,23 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
                                     placeholder="Ex: 12 x 3 cm"
                                 />
+                            </div>
+                        </div>
+
+                        {/* Featured (Vedette) */}
+                        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                            <h3 className="text-sm font-black text-slate-900 tracking-tight">Mise en avant</h3>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    id="isFeatured"
+                                    checked={formData.isFeatured}
+                                    onChange={e => setFormData({ ...formData, isFeatured: e.target.checked })}
+                                    className="w-5 h-5 text-amber-500 border-slate-200 rounded-md focus:ring-amber-500"
+                                />
+                                <label htmlFor="isFeatured" className="text-sm font-bold text-slate-700 cursor-pointer flex items-center gap-2">
+                                    <span className="text-amber-500">★</span> Mettre en vedette (Page d'accueil)
+                                </label>
                             </div>
                         </div>
 

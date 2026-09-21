@@ -1,11 +1,11 @@
-import { getPopularBooks, getBestSellerBooks, getBestAuthors, getUsedBooks } from '@/lib/db/books'
+import { getPopularBooks, getBestSellerBooks, getBestAuthors, getUsedBooks, getFeaturedAccessories } from '@/lib/db/books'
 import { getPopularPacks } from '@/lib/db/packs'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getAllCategoryQuotes } from '@/lib/actions/categories'
 import { getRecentExchangeBooks } from '@/lib/actions/community-market'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
-import { getRecentPosts } from '@/lib/actions/blog'
+import { getRecentPosts, getFeaturedPosts } from '@/lib/actions/blog'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import BookCard from '@/components/BookCard'
 import PackCard from '@/components/PackCard'
@@ -27,7 +27,7 @@ const AuthorsCarousel = dynamic(() => import('@/components/AuthorsCarousel'))
 import CosmosBooks from '@/components/CosmosBooks'
 const HomeLeaderboard = dynamic(() => import('@/components/home/HomeLeaderboard'))
 import { Suspense } from 'react'
-import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download, Headphones } from 'lucide-react'
+import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download, Headphones, Star } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -121,6 +121,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     aeoFaqJson,
     dbAeoSnippetQ,
     dbAeoSnippetA,
+    featuredPosts,
+    featuredAccessories,
   ] = await Promise.all([
     getPopularBooks(8),
     getPopularPacks(3),
@@ -141,6 +143,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_faq_json')),
     import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question')),
     import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text')),
+    getFeaturedPosts(3, locale),
+    getFeaturedAccessories(4),
   ])
 
   // Variables dérivées
@@ -1120,6 +1124,129 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </ScrollReveal>
                 </>
               )}
+            </div>
+          </section>
+        )
+
+      case 'home_section_featured_blog':
+        if (!featuredPosts || featuredPosts.length === 0) return null
+        return (
+          <section key={key} {...getSectionProps('home_section_featured_blog', 'bg-pixio-cream')} className={`py-32 relative overflow-hidden ${getSectionProps('home_section_featured_blog', 'bg-pixio-cream').className || ''}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+                <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm"><Star className="w-4 h-4 text-amber-500" /><span className="text-xs md:text-sm font-black uppercase text-black tracking-[0.3em]">En Vedette</span></div>
+                  <h2 className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-[0.9]">Articles <br /><span className="text-amber-600 italic">En Vedette</span></h2>
+                </ScrollReveal>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {featuredPosts.map((post: any, idx: number) => (
+                  <ScrollReveal key={post.id} delay={idx * 150} animation="animate-reveal-up">
+                    <Link href={`/blog/${post.slug}`} className="group block h-full">
+                      <article className="h-full flex flex-col bg-white rounded-[2.5rem] overflow-hidden border border-amber-100 hover:border-amber-300 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          {post.coverImage ? (
+                            <ImageWithFallback
+                              src={post.coverImage}
+                              alt={post.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                              <BookOpen className="w-12 h-12 text-slate-300" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-slate-900 flex items-center gap-1 shadow-lg">
+                            <Star className="w-3 h-3 text-amber-500 fill-amber-500" /> Vedette
+                          </div>
+                        </div>
+                        <div className="p-8 flex-1 flex flex-col">
+                          <div className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-widest">
+                            {new Date(post.publishedAt || Date.now()).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </div>
+                          <h3 className="text-2xl font-black text-slate-900 leading-tight mb-4 group-hover:text-amber-600 transition-colors line-clamp-2">
+                            {post.title}
+                          </h3>
+                          <p className="text-slate-600 mb-6 line-clamp-3 text-sm leading-relaxed flex-1">
+                            {post.excerpt}
+                          </p>
+                          <div className="flex items-center gap-3 mt-auto pt-6 border-t border-slate-100">
+                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
+                              <span className="text-xs font-bold text-slate-600">{post.author?.fullName?.charAt(0) || 'R'}</span>
+                            </div>
+                            <span className="text-sm font-bold text-slate-900">{post.author?.fullName || 'Riwaya'}</span>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+
+      case 'home_section_featured_accessories':
+        if (!featuredAccessories || featuredAccessories.length === 0) return null
+        return (
+          <section key={key} {...getSectionProps('home_section_featured_accessories', 'bg-white')} className={`py-24 md:py-32 relative overflow-hidden ${getSectionProps('home_section_featured_accessories', 'bg-white').className || ''}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+                <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full shadow-sm"><Package className="w-4 h-4 text-amber-500" /><span className="text-xs md:text-sm font-black uppercase text-slate-700 tracking-[0.3em]">Accessoires</span></div>
+                  <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]">Accessoires <br /><span className="text-amber-500 italic">En Vedette</span></h2>
+                </ScrollReveal>
+                <ScrollReveal delay={200} className="hidden md:flex">
+                  <Link href={`/${locale}/accessories`} className="group flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all hover:scale-105 shadow-xl shadow-slate-200">
+                    Découvrir tous les accessoires
+                    <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </ScrollReveal>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {featuredAccessories.map((product: any, idx: number) => (
+                  <ScrollReveal key={product.id} delay={idx * 100} animation="animate-reveal-up">
+                    <Link href={`/${locale}/accessories/${product.id}`} className="group block h-full">
+                      <div className="h-full flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-100 hover:border-amber-200 transition-all duration-300 hover:shadow-xl group-hover:-translate-y-1">
+                        <div className="relative aspect-square overflow-hidden bg-slate-50 p-6 flex items-center justify-center">
+                          {product.image ? (
+                            <ImageWithFallback
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <Package className="w-16 h-16 text-slate-200" />
+                          )}
+                          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-amber-600 flex items-center gap-1 shadow-sm border border-amber-100 uppercase tracking-widest">
+                            <Star className="w-3 h-3 fill-amber-500" /> Vedette
+                          </div>
+                        </div>
+                        <div className="p-6 flex-1 flex flex-col">
+                          <h3 className="text-lg font-black text-slate-900 leading-tight mb-2 group-hover:text-amber-500 transition-colors line-clamp-2">
+                            {product.name}
+                          </h3>
+                          {product.description && (
+                            <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">
+                              {product.description}
+                            </p>
+                          )}
+                          <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-50">
+                            <span className="text-xl font-black text-slate-900">{product.price.toFixed(2)} DH</span>
+                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
+                              <ArrowRight className="w-5 h-5 rtl:rotate-180" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </ScrollReveal>
+                ))}
+              </div>
             </div>
           </section>
         )
