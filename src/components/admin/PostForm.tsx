@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { uploadPostImage } from '@/lib/actions/upload'
-import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink } from 'lucide-react'
+import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink, Star } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
 import { Book as BookIcon, Search, X, Wand2, Copy, Check } from 'lucide-react'
@@ -39,6 +39,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [excerpt, setExcerpt] = useState(post?.excerpt || '')
     const [content, setContent] = useState(post?.content || '')
     const [published, setPublished] = useState(post?.published || false)
+    const [isFeatured, setIsFeatured] = useState(post?.isFeatured || false)
     const [coverImage, setCoverImage] = useState(post?.coverImage || '')
     const [tags, setTags] = useState(post?.tags || '')
     const [authorName, setAuthorName] = useState(post?.authorName || '')
@@ -190,6 +191,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                 category,
                 tags,
                 language,
+                isFeatured,
                 bookIds: selectedBookIds
             }
 
@@ -523,6 +525,20 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                             />
                             <label htmlFor="published" className="text-sm font-medium text-gray-700 select-none cursor-pointer">
                                 Publier cet article
+                            </label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="isFeatured"
+                                checked={isFeatured}
+                                onChange={(e) => setIsFeatured(e.target.checked)}
+                                className="w-4 h-4 text-amber-500 border-gray-300 rounded focus:ring-amber-500"
+                            />
+                            <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700 select-none cursor-pointer flex items-center gap-1">
+                                <Star className="w-4 h-4 text-amber-500" />
+                                Mettre en vedette (Page d'accueil)
                             </label>
                         </div>
 

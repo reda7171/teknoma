@@ -204,6 +204,36 @@ export async function getRecentPosts(limit = 3, language: string = 'fr') {
     )
 }
 
+/**
+ * Récupère les articles en vedette pour la page d'accueil
+ */
+export async function getFeaturedPosts(limit = 3, language: string = 'fr') {
+    return getCached(
+        `blog:featured-posts:${language}:${limit}`,
+        async () => {
+            return prisma.post.findMany({
+                where: { published: true, isFeatured: true, language },
+                orderBy: { publishedAt: 'desc' },
+                take: limit,
+                select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    excerpt: true,
+                    coverImage: true,
+                    publishedAt: true,
+                    author: {
+                        select: {
+                            fullName: true
+                        }
+                    }
+                }
+            })
+        },
+        300
+    )
+}
+
 // ============================================
 // ADMIN ACTIONS
 // ============================================
@@ -342,6 +372,7 @@ export async function createPost(data: any) {
                 category: data.category,
                 tags: data.tags || null,
                 language: data.language || 'fr',
+                isFeatured: data.isFeatured || false,
                 books: data.bookIds ? {
                     connect: data.bookIds.map((id: string) => ({ id }))
                 } : undefined
@@ -377,6 +408,7 @@ export async function updatePost(id: string, data: any) {
                 tags: data.tags || null,
                 language: data.language || 'fr',
                 isCompleted: data.isCompleted !== undefined ? data.isCompleted : undefined,
+                isFeatured: data.isFeatured !== undefined ? data.isFeatured : undefined,
                 books: {
                     set: data.bookIds ? data.bookIds.map((id: string) => ({ id })) : []
                 }
