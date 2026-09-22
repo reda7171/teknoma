@@ -139,8 +139,11 @@ export default function AdminLayout({
                 { name: 'Bibliothèques', href: `/${lang}/admin/accessories/library`, icon: Library },
                 { name: 'Clés USB', href: `/${lang}/admin/accessories/usb`, icon: Usb },
                 { name: 'Produits enfants', href: `/${lang}/admin/accessories/kids`, icon: Sparkles },
+                { name: 'Entrepôts', href: `/${lang}/admin/warehouses`, icon: Package },
+                { name: 'Inventaire Multi-Entrepôts', href: `/${lang}/admin/inventory`, icon: Package },
             ]
         },
+
         {
             name: 'Ventes & Opérations',
             href: `/${lang}/admin/orders`,
