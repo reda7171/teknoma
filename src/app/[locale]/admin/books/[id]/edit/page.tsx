@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Languages } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Languages, Warehouse } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia } from '@/lib/actions/jumia'
@@ -55,7 +55,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [authors, setAuthors] = useState<string[]>([])
     const [isNewAuthor, setIsNewAuthor] = useState(false)
     const [selectedAuthor, setSelectedAuthor] = useState<string>('')
-    const [currentLang, setCurrentLang] = useState<'ar' | 'fr'>('ar')
+    const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
     const [isLinked, setIsLinked] = useState<boolean | null>(null)
     const [closeAfterSave, setCloseAfterSave] = useState(false)
@@ -66,6 +66,14 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
     const [seoKeywordsState, setSeoKeywordsState] = useState<string>('')
     const mainCategories = Object.keys(categoryTree)
+
+    interface WarehouseStock {
+        warehouseId: string
+        name: string
+        quantity: number
+        oldQuantity: number
+    }
+    const [warehouseStocks, setWarehouseStocks] = useState<WarehouseStock[]>([])
 
     useEffect(() => {
         getPurchaseLots().then(data => setLots(data)).catch(console.error)
@@ -153,6 +161,28 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     console.log('No sellerSku for this book');
                     setIsLinked(false)
                 }
+
+                // Fetch warehouses and inventory
+                try {
+                    const whRes = await fetch('/api/admin/warehouses')
+                    const warehouses = await whRes.json()
+                    const invRes = await fetch(`/api/admin/inventory?bookId=${bookId}`)
+                    const inventory = await invRes.json()
+                    
+                    const stocks = warehouses.map((w: any) => {
+                        const inv = inventory.find((i: any) => i.warehouseId === w.id)
+                        return {
+                            warehouseId: w.id,
+                            name: w.name,
+                            quantity: inv ? inv.quantity : 0,
+                            oldQuantity: inv ? inv.quantity : 0
+                        }
+                    })
+                    setWarehouseStocks(stocks)
+                } catch(e) {
+                    console.error('Erreur chargement inventaire', e)
+                }
+
             } else {
                 setError(result.error || 'Livre introuvable')
             }
@@ -199,6 +229,25 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             }
         }
 
+        // Mettre à jour le stock par entrepôt
+        let computedStock = 0;
+        for (const ws of warehouseStocks) {
+            computedStock += ws.quantity;
+            const delta = ws.quantity - ws.oldQuantity
+            if (delta !== 0) {
+                await fetch('/api/admin/inventory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bookId: id,
+                        warehouseId: ws.warehouseId,
+                        quantity: delta,
+                        note: 'Mise à jour depuis édition livre'
+                    })
+                })
+            }
+        }
+
         const input: BookInput = {
             title: formData.get('title_ar') as string,
             titleFr: formData.get('title_fr') as string || undefined,
@@ -213,7 +262,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             isbn: formData.get('isbn') as string || undefined,
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
-            stock: parseInt(formData.get('stock') as string),
+            stock: computedStock,
             image: imageUrl || bookImage,
             category: formData.get('category') as string || undefined,
             subCategory: formData.get('subCategory') as string || undefined,
@@ -784,21 +833,30 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         </div>
                     </div>
 
-                    {/* Stock */}
-                    <div>
-                        <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-2">
-                            Stock <span className="text-red-500">*</span>
+                    {/* Stock (Géré par entrepôts) */}
+                    <div className="col-span-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Stock par entrepôt <span className="text-gray-400 font-normal">(Total: {warehouseStocks.reduce((a, b) => a + b.quantity, 0)})</span>
                         </label>
-                        <input
-                            type="number"
-                            id="stock"
-                            name="stock"
-                            required
-                            min="0"
-                            defaultValue={book.stock}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="50"
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {warehouseStocks.map((ws, index) => (
+                                <div key={ws.warehouseId} className="flex flex-col gap-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                    <span className="text-sm font-medium text-gray-700 truncate">{ws.name}</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={ws.quantity}
+                                        onChange={(e) => {
+                                            const newStocks = [...warehouseStocks]
+                                            newStocks[index].quantity = parseInt(e.target.value) || 0
+                                            setWarehouseStocks(newStocks)
+                                        }}
+                                        className="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <input type="hidden" name="stock" value={warehouseStocks.reduce((a, b) => a + b.quantity, 0)} />
                     </div>
 
                     {/* Catégorie et Sous-catégorie */}

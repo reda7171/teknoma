@@ -191,6 +191,8 @@ model Book {
   posts               Post[]            @relation("PostBooks")
   seoCategoryBooks    SeoCategoryBook[]
   quotes              Quote[]
+  inventories         Inventory[]
+  stockMovements      StockMovement[]
 
   @@index([category])
   @@index([subCategory])
@@ -204,6 +206,77 @@ model Book {
   @@index([customerSellerId])
   @@map("books")
 }
+
+// --- Multi-Entrepôts ---
+
+model Warehouse {
+  id            String   @id @default(uuid())
+  name          String   @db.VarChar(255)
+  location      String?  @db.VarChar(500)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  stocks          Inventory[]
+  movementsFrom   StockMovement[] @relation("FromWarehouse")
+  movementsTo     StockMovement[] @relation("ToWarehouse")
+
+  @@map("warehouses")
+}
+
+// Stock par livre et par entrepôt
+model Inventory {
+  id              String   @id @default(uuid())
+  bookId          String?
+  extraProductId  String?
+  warehouseId     String
+  quantity        Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  book            Book?         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  extraProduct    ExtraProduct? @relation(fields: [extraProductId], references: [id], onDelete: Cascade)
+  warehouse       Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, warehouseId])
+  @@unique([extraProductId, warehouseId])
+  @@index([bookId])
+  @@index([extraProductId])
+  @@index([warehouseId])
+  @@map("inventory")
+}
+
+// Historique des mouvements de stock
+model StockMovement {
+  id              String       @id @default(uuid())
+  bookId          String?
+  extraProductId  String?
+  fromWarehouseId String?
+  toWarehouseId   String?
+  quantity        Int
+  type            MovementType
+  note            String?      @db.VarChar(500)
+  createdAt       DateTime     @default(now())
+
+  book          Book?         @relation(fields: [bookId], references: [id])
+  extraProduct  ExtraProduct? @relation(fields: [extraProductId], references: [id])
+  fromWarehouse Warehouse?    @relation("FromWarehouse", fields: [fromWarehouseId], references: [id])
+  toWarehouse   Warehouse?    @relation("ToWarehouse", fields: [toWarehouseId], references: [id])
+
+  @@index([bookId])
+  @@index([extraProductId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+enum MovementType {
+  ENTRANCE
+  TRANSFER
+  EXIT
+  ADJUSTMENT
+}
+
+
 
 model JumiaActionLog {
   id        String   @id @default(uuid())
@@ -955,32 +1028,34 @@ model SellerRequest {
 }
 
 model ExtraProduct {
-  id                  String      @id @default(uuid())
-  name                String      @db.VarChar(255)
-  description         String?     @db.Text
+  id                  String          @id @default(uuid())
+  name                String          @db.VarChar(255)
+  description         String?         @db.Text
   price               Float
-  costPrice           Float       @default(0)
-  stock               Int         @default(0)
-  image               String?     @db.VarChar(500)
-  category            String      @default("ACCESSORY")
-  active              Boolean     @default(true)
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
-  dimensions          String?     @db.VarChar(255)
-  materials           String?     @db.VarChar(255)
-  warranty            String?     @db.VarChar(255)
-  weight              String?     @db.VarChar(255)
+  costPrice           Float           @default(0)
+  stock               Int             @default(0)
+  image               String?         @db.VarChar(500)
+  category            String          @default("ACCESSORY")
+  active              Boolean         @default(true)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  dimensions          String?         @db.VarChar(255)
+  materials           String?         @db.VarChar(255)
+  warranty            String?         @db.VarChar(255)
+  weight              String?         @db.VarChar(255)
   images              Json?
   videos              Json?
-  sellerSku           String?     @unique @db.VarChar(100)
-  jumiaHighlights     String?     @db.Text
-  jumiaPackageContent String?     @db.VarChar(500)
-  isSyncedWithJumia   Boolean     @default(false)
-  jumiaPriceMarkup    Float?      @default(0)
-  jumiaProductSid     String?     @db.VarChar(100)
+  sellerSku           String?         @unique @db.VarChar(100)
+  jumiaHighlights     String?         @db.Text
+  jumiaPackageContent String?         @db.VarChar(500)
+  isSyncedWithJumia   Boolean         @default(false)
+  jumiaPriceMarkup    Float?          @default(0)
+  jumiaProductSid     String?         @db.VarChar(100)
   jumiaStock          Int?
-  isFeatured          Boolean     @default(false)
+  isFeatured          Boolean         @default(false)
   orderItems          OrderItem[]
+  inventories         Inventory[]
+  stockMovements      StockMovement[]
 
   @@index([category])
   @@index([active])
