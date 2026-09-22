@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Warehouse, Plus, Edit2, ToggleLeft, ToggleRight, Package, Save, X } from 'lucide-react'
+import { Warehouse, Plus, Edit2, ToggleLeft, ToggleRight, Package, Save, X, Trash2 } from 'lucide-react'
 
 interface WarehouseData {
     id: string
@@ -58,6 +58,14 @@ export default function WarehousesPage() {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ active: !w.active }),
+        })
+        load()
+    }
+
+    const deleteWarehouse = async (w: WarehouseData) => {
+        if (!confirm(`Voulez-vous vraiment supprimer l'entrepôt "${w.name}" ? Cette action est irréversible et supprimera tout le stock associé !`)) return
+        await fetch(`/api/admin/warehouses/${w.id}`, {
+            method: 'DELETE',
         })
         load()
     }
@@ -161,6 +169,12 @@ export default function WarehousesPage() {
                                 >
                                     <Package className="w-3 h-3" /> Voir le stock
                                 </a>
+                                <button
+                                    onClick={() => deleteWarehouse(w)}
+                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors ml-2"
+                                >
+                                    <Trash2 className="w-3 h-3" /> Supprimer
+                                </button>
                             </div>
                         </div>
                     ))}

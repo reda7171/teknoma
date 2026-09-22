@@ -10,10 +10,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const { bookId, fromWarehouseId, toWarehouseId, quantity, note } = await req.json()
+    const { bookId, extraProductId, fromWarehouseId, toWarehouseId, quantity, note } = await req.json()
 
-    if (!bookId || !fromWarehouseId || !toWarehouseId || !quantity) {
-        return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 })
+    if ((!bookId && !extraProductId) || !fromWarehouseId || !toWarehouseId || !quantity) {
+        return NextResponse.json({ error: 'Tous les champs sont requis (bookId ou extraProductId inclus)' }, { status: 400 })
     }
 
     if (fromWarehouseId === toWarehouseId) {
@@ -22,8 +22,10 @@ export async function POST(req: Request) {
 
     try {
         await prisma.$transaction(async (tx) => {
+            const sourceWhere: any = bookId ? { bookId_warehouseId: { bookId, warehouseId: fromWarehouseId } } : { extraProductId_warehouseId: { extraProductId: extraProductId!, warehouseId: fromWarehouseId } }
+            
             const source = await tx.inventory.findUnique({
-                where: { bookId_warehouseId: { bookId, warehouseId: fromWarehouseId } },
+                where: sourceWhere,
             })
 
             if (!source || source.quantity < Number(quantity)) {
@@ -31,18 +33,21 @@ export async function POST(req: Request) {
             }
 
             await tx.inventory.update({
-                where: { bookId_warehouseId: { bookId, warehouseId: fromWarehouseId } },
+                where: sourceWhere,
                 data: { quantity: { decrement: Number(quantity) } },
             })
 
+            const destWhere: any = bookId ? { bookId_warehouseId: { bookId, warehouseId: toWarehouseId } } : { extraProductId_warehouseId: { extraProductId: extraProductId!, warehouseId: toWarehouseId } }
+            const destCreateData: any = bookId ? { bookId, warehouseId: toWarehouseId, quantity: Number(quantity) } : { extraProductId: extraProductId!, warehouseId: toWarehouseId, quantity: Number(quantity) }
+
             await tx.inventory.upsert({
-                where: { bookId_warehouseId: { bookId, warehouseId: toWarehouseId } },
+                where: destWhere,
                 update: { quantity: { increment: Number(quantity) } },
-                create: { bookId, warehouseId: toWarehouseId, quantity: Number(quantity) },
+                create: destCreateData,
             })
 
             await tx.stockMovement.create({
-                data: { bookId, fromWarehouseId, toWarehouseId, quantity: Number(quantity), type: 'TRANSFER', note },
+                data: { bookId, extraProductId, fromWarehouseId, toWarehouseId, quantity: Number(quantity), type: 'TRANSFER', note } as any,
             })
         })
 

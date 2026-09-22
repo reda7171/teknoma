@@ -24,7 +24,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
 
     const { id } = await params
-    // Désactivation douce
-    await prisma.warehouse.update({ where: { id }, data: { active: false } })
+    
+    // Suppression complète (Hard delete) avec suppression en cascade manuelle
+    await prisma.$transaction([
+        prisma.inventory.deleteMany({ where: { warehouseId: id } }),
+        prisma.stockMovement.deleteMany({ where: { toWarehouseId: id } }),
+        prisma.stockMovement.deleteMany({ where: { fromWarehouseId: id } }),
+        prisma.warehouse.delete({ where: { id } })
+    ])
+    
     return NextResponse.json({ success: true })
 }

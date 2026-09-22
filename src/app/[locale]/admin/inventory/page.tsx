@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Package, ArrowRightLeft, Plus, Search, Warehouse, TrendingUp, RefreshCw } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Package, ArrowRightLeft, Plus, Search, Warehouse, TrendingUp, RefreshCw, Edit2 } from 'lucide-react'
 import Image from 'next/image'
 
 interface InventoryItem {
     id: string
     quantity: number
-    book: { id: string; title: string; author: string; image: string; stock: number }
+    book?: { id: string; title: string; author: string; image: string; stock: number }
+    extraProduct?: { id: string; name: string; image: string; stock: number; category: string }
     warehouse: { id: string; name: string; location: string | null }
 }
 
@@ -18,23 +19,30 @@ export default function InventoryPage() {
     const [warehouses, setWarehouses] = useState<WarehouseData[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
-    const [warehouseFilter, setWarehouseFilter] = useState('')
+    const [warehouseFilter, setWarehouseFilter] = useState('warehouse-principal-001')
+    const [typeFilter, setTypeFilter] = useState('BOOK')
 
     // Modal ajout stock
     const [showAdd, setShowAdd] = useState(false)
-    const [addForm, setAddForm] = useState({ bookId: '', warehouseId: '', quantity: '', note: '', type: 'ENTRANCE' })
+    const [addForm, setAddForm] = useState({ productId: '', productType: 'BOOK', warehouseId: '', quantity: '', note: '', type: 'ENTRANCE' })
     const [addSaving, setAddSaving] = useState(false)
     const [addError, setAddError] = useState('')
 
     // Modal transfert
     const [showTransfer, setShowTransfer] = useState(false)
-    const [tfForm, setTfForm] = useState({ bookId: '', fromWarehouseId: '', toWarehouseId: '', quantity: '', note: '' })
+    const [tfForm, setTfForm] = useState({ productId: '', productType: 'BOOK', fromWarehouseId: '', toWarehouseId: '', quantity: '', note: '' })
     const [tfSaving, setTfSaving] = useState(false)
     const [tfError, setTfError] = useState('')
 
-    // Livres (pour les selects)
-    const [books, setBooks] = useState<{ id: string; title: string }[]>([])
-    const [bookSearch, setBookSearch] = useState('')
+    // Modal Edit
+    const [showEdit, setShowEdit] = useState(false)
+    const [editForm, setEditForm] = useState({ inventoryId: '', productId: '', productType: 'BOOK', warehouseId: '', currentQuantity: 0, newQuantity: 0, note: '' })
+    const [editSaving, setEditSaving] = useState(false)
+    const [editError, setEditError] = useState('')
+
+    // Produits (pour les selects)
+    const [products, setProducts] = useState<{ id: string; title: string; type: string }[]>([])
+    const [productSearch, setProductSearch] = useState('')
 
     const load = useCallback(async () => {
         setLoading(true)
@@ -51,58 +59,135 @@ export default function InventoryPage() {
 
     useEffect(() => { load() }, [load])
 
-    // Chargement des livres pour le select
+    // Chargement des produits pour le select
     useEffect(() => {
         if (showAdd || showTransfer) {
-            fetch(`/api/admin/books/search?q=${bookSearch}&limit=20`)
+            fetch(`/api/admin/inventory/search-products?q=${productSearch}&limit=20`)
                 .then(r => r.json())
-                .then(data => setBooks(Array.isArray(data) ? data : data.books || []))
+                .then(data => setProducts(Array.isArray(data) ? data : []))
                 .catch(() => {})
         }
-    }, [showAdd, showTransfer, bookSearch])
+    }, [showAdd, showTransfer, productSearch])
 
-    const filtered = inventory.filter(i =>
-        i.book.title.toLowerCase().includes(search.toLowerCase()) ||
-        i.book.author.toLowerCase().includes(search.toLowerCase()) ||
-        i.warehouse.name.toLowerCase().includes(search.toLowerCase())
-    )
+    const productTypes = useMemo(() => {
+        const types = new Set<string>()
+        inventory.forEach(i => {
+            if (i.book) types.add('BOOK')
+            else if (i.extraProduct?.category) types.add(i.extraProduct.category.toUpperCase())
+        })
+        return Array.from(types).sort()
+    }, [inventory])
+
+    const filtered = inventory.filter(i => {
+        const title = i.book?.title || i.extraProduct?.name || ''
+        const author = i.book?.author || ''
+        
+        const isBook = !!i.book
+        const category = isBook ? 'BOOK' : (i.extraProduct?.category?.toUpperCase() || 'ACCESSORY')
+        
+        const matchType = typeFilter === 'ALL' || category === typeFilter
+        const matchSearch = title.toLowerCase().includes(search.toLowerCase()) ||
+               author.toLowerCase().includes(search.toLowerCase()) ||
+               i.warehouse.name.toLowerCase().includes(search.toLowerCase())
+               
+        return matchType && matchSearch
+    })
 
     // Statistiques
     const totalQty = inventory.reduce((s, i) => s + i.quantity, 0)
-    const totalBooks = new Set(inventory.map(i => i.book.id)).size
+    const totalProducts = new Set(inventory.map(i => i.book?.id || i.extraProduct?.id)).size
     const warehouseCount = new Set(inventory.map(i => i.warehouse.id)).size
+
+    const openEditModal = (item: InventoryItem) => {
+        const isBook = !!item.book
+        setEditForm({
+            inventoryId: item.id,
+            productId: (isBook ? item.book?.id : item.extraProduct?.id) || '',
+            productType: isBook ? 'BOOK' : 'ACCESSORY',
+            warehouseId: item.warehouse.id,
+            currentQuantity: item.quantity,
+            newQuantity: item.quantity,
+            note: ''
+        })
+        setEditError('')
+        setShowEdit(true)
+    }
+
+    const submitEdit = async () => {
+        const difference = Number(editForm.newQuantity) - Number(editForm.currentQuantity);
+        if (difference === 0) {
+            setShowEdit(false)
+            return
+        }
+        setEditSaving(true)
+        setEditError('')
+        const payload = {
+            ...(editForm.productType === 'BOOK' ? { bookId: editForm.productId } : { extraProductId: editForm.productId }),
+            warehouseId: editForm.warehouseId,
+            quantity: difference,
+            type: 'ADJUSTMENT',
+            note: editForm.note || 'Ajustement manuel'
+        }
+        const res = await fetch('/api/admin/inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        setEditSaving(false)
+        if (res.ok) {
+            setShowEdit(false)
+            load()
+        } else {
+            const d = await res.json()
+            setEditError(d.error || 'Erreur lors de la modification')
+        }
+    }
 
     const submitAdd = async () => {
         setAddError('')
-        if (!addForm.bookId || !addForm.warehouseId || !addForm.quantity) {
+        if (!addForm.productId || !addForm.warehouseId || !addForm.quantity) {
             setAddError('Tous les champs obligatoires doivent être remplis')
             return
         }
         setAddSaving(true)
+        const payload = {
+            ...(addForm.productType === 'BOOK' ? { bookId: addForm.productId } : { extraProductId: addForm.productId }),
+            warehouseId: addForm.warehouseId,
+            quantity: Number(addForm.quantity),
+            note: addForm.note,
+            type: addForm.type
+        }
         const res = await fetch('/api/admin/inventory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...addForm, quantity: Number(addForm.quantity) }),
+            body: JSON.stringify(payload),
         })
         setAddSaving(false)
-        if (res.ok) { setShowAdd(false); setAddForm({ bookId: '', warehouseId: '', quantity: '', note: '', type: 'ENTRANCE' }); load() }
+        if (res.ok) { setShowAdd(false); setAddForm({ productId: '', productType: 'BOOK', warehouseId: '', quantity: '', note: '', type: 'ENTRANCE' }); load() }
         else { const d = await res.json(); setAddError(d.error || 'Erreur') }
     }
 
     const submitTransfer = async () => {
         setTfError('')
-        if (!tfForm.bookId || !tfForm.fromWarehouseId || !tfForm.toWarehouseId || !tfForm.quantity) {
+        if (!tfForm.productId || !tfForm.fromWarehouseId || !tfForm.toWarehouseId || !tfForm.quantity) {
             setTfError('Tous les champs sont requis')
             return
         }
         setTfSaving(true)
+        const payload = {
+            ...(tfForm.productType === 'BOOK' ? { bookId: tfForm.productId } : { extraProductId: tfForm.productId }),
+            fromWarehouseId: tfForm.fromWarehouseId,
+            toWarehouseId: tfForm.toWarehouseId,
+            quantity: Number(tfForm.quantity),
+            note: tfForm.note
+        }
         const res = await fetch('/api/admin/inventory/transfer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...tfForm, quantity: Number(tfForm.quantity) }),
+            body: JSON.stringify(payload),
         })
         setTfSaving(false)
-        if (res.ok) { setShowTransfer(false); setTfForm({ bookId: '', fromWarehouseId: '', toWarehouseId: '', quantity: '', note: '' }); load() }
+        if (res.ok) { setShowTransfer(false); setTfForm({ productId: '', productType: 'BOOK', fromWarehouseId: '', toWarehouseId: '', quantity: '', note: '' }); load() }
         else { const d = await res.json(); setTfError(d.error || 'Erreur') }
     }
 
@@ -136,7 +221,7 @@ export default function InventoryPage() {
             <div className="grid grid-cols-3 gap-4 mb-6">
                 {[
                     { label: 'Total unités', value: totalQty, icon: TrendingUp, color: 'text-amber-600 bg-amber-50' },
-                    { label: 'Titres suivis', value: totalBooks, icon: Package, color: 'text-blue-600 bg-blue-50' },
+                    { label: 'Produits suivis', value: totalProducts, icon: Package, color: 'text-blue-600 bg-blue-50' },
                     { label: 'Entrepôts actifs', value: warehouseCount, icon: Warehouse, color: 'text-green-600 bg-green-50' },
                 ].map(s => (
                     <div key={s.label} className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
@@ -163,6 +248,14 @@ export default function InventoryPage() {
                     />
                 </div>
                 <select
+                    value={typeFilter}
+                    onChange={e => setTypeFilter(e.target.value)}
+                    className="px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 bg-white text-sm font-medium"
+                >
+                    <option value="ALL">Tous les produits</option>
+                    {productTypes.map(t => <option key={t} value={t}>{t === 'BOOK' ? 'Livres' : t === 'ACCESSORY' ? 'Accessoires' : t === 'GAME' ? 'Jeux' : t}</option>)}
+                </select>
+                <select
                     value={warehouseFilter}
                     onChange={e => setWarehouseFilter(e.target.value)}
                     className="px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 bg-white text-sm font-medium"
@@ -180,31 +273,42 @@ export default function InventoryPage() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-slate-100 bg-slate-50">
-                                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Livre</th>
+                                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Produit</th>
                                 <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Entrepôt</th>
                                 <th className="text-center px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Quantité</th>
-                                <th className="text-center px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Stock Book</th>
+                                <th className="text-center px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Stock Global</th>
+                                <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {filtered.length === 0 ? (
-                                <tr><td colSpan={4} className="text-center py-12 text-slate-400">Aucun résultat</td></tr>
-                            ) : filtered.map(item => (
+                                {filtered.length === 0 ? (
+                                <tr><td colSpan={5} className="text-center py-12 text-slate-400">Aucun résultat</td></tr>
+                            ) : filtered.map(item => {
+                                const isBook = !!item.book
+                                const title = item.book?.title || item.extraProduct?.name || ''
+                                const subtitle = item.book?.author || item.extraProduct?.category || ''
+                                const image = item.book?.image || item.extraProduct?.image || ''
+                                const globalStock = item.book?.stock || item.extraProduct?.stock || 0
+
+                                return (
                                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-12 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
-                                                {item.book.image ? (
-                                                    <Image src={item.book.image} alt={item.book.title} width={40} height={48} className="w-full h-full object-cover" />
+                                            <div className="w-10 h-12 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 relative">
+                                                {image ? (
+                                                    <Image src={image} alt={title} width={40} height={48} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
                                                         <Package className="w-4 h-4 text-slate-300" />
                                                     </div>
                                                 )}
+                                                {!isBook && (
+                                                    <div className="absolute top-0 right-0 bg-purple-500 text-white text-[8px] font-bold px-1 rounded-bl">ACC</div>
+                                                )}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900 text-sm line-clamp-1">{item.book.title}</p>
-                                                <p className="text-xs text-slate-500">{item.book.author}</p>
+                                                <p className="font-bold text-slate-900 text-sm line-clamp-1">{title}</p>
+                                                <p className="text-xs text-slate-500">{subtitle}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -223,10 +327,15 @@ export default function InventoryPage() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        <span className="text-sm text-slate-500 font-medium">{item.book.stock}</span>
+                                        <span className="text-sm text-slate-500 font-medium">{globalStock}</span>
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <button onClick={() => openEditModal(item)} className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors">
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
                                     </td>
                                 </tr>
-                            ))}
+                            )})}
                         </tbody>
                     </table>
                 </div>
@@ -240,11 +349,18 @@ export default function InventoryPage() {
                         {addError && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-2 mb-4">{addError}</p>}
                         <div className="space-y-3">
                             <div>
-                                <label className="text-sm font-bold text-slate-700 mb-1 block">Rechercher un livre</label>
-                                <input value={bookSearch} onChange={e => setBookSearch(e.target.value)} placeholder="Titre du livre..." className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm mb-1" />
-                                <select value={addForm.bookId} onChange={e => setAddForm(f => ({ ...f, bookId: e.target.value }))} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm">
-                                    <option value="">Sélectionner un livre</option>
-                                    {books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+                                <label className="text-sm font-bold text-slate-700 mb-1 block">Rechercher un produit</label>
+                                <input value={productSearch} onChange={e => setProductSearch(e.target.value)} placeholder="Titre ou nom..." className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm mb-1" />
+                                <select 
+                                    value={`${addForm.productType}-${addForm.productId}`} 
+                                    onChange={e => {
+                                        const [type, id] = e.target.value.split('-')
+                                        setAddForm(f => ({ ...f, productId: id, productType: type }))
+                                    }} 
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm"
+                                >
+                                    <option value="-">Sélectionner un produit</option>
+                                    {products.map(p => <option key={p.id} value={`${p.type}-${p.id}`}>{p.type === 'ACCESSORY' ? '[Acc] ' : ''}{p.title}</option>)}
                                 </select>
                             </div>
                             <div>
@@ -293,11 +409,18 @@ export default function InventoryPage() {
                         {tfError && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-2 mb-4">{tfError}</p>}
                         <div className="space-y-3">
                             <div>
-                                <label className="text-sm font-bold text-slate-700 mb-1 block">Livre</label>
-                                <input value={bookSearch} onChange={e => setBookSearch(e.target.value)} placeholder="Rechercher..." className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm mb-1" />
-                                <select value={tfForm.bookId} onChange={e => setTfForm(f => ({ ...f, bookId: e.target.value }))} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm">
-                                    <option value="">Sélectionner un livre</option>
-                                    {books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
+                                <label className="text-sm font-bold text-slate-700 mb-1 block">Produit</label>
+                                <input value={productSearch} onChange={e => setProductSearch(e.target.value)} placeholder="Titre ou nom..." className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm mb-1" />
+                                <select 
+                                    value={`${tfForm.productType}-${tfForm.productId}`} 
+                                    onChange={e => {
+                                        const [type, id] = e.target.value.split('-')
+                                        setTfForm(f => ({ ...f, productId: id, productType: type }))
+                                    }} 
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm"
+                                >
+                                    <option value="-">Sélectionner un produit</option>
+                                    {products.map(p => <option key={p.id} value={`${p.type}-${p.id}`}>{p.type === 'ACCESSORY' ? '[Acc] ' : ''}{p.title}</option>)}
                                 </select>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -330,6 +453,41 @@ export default function InventoryPage() {
                                 {tfSaving ? 'Transfert...' : 'Confirmer le transfert'}
                             </button>
                             <button onClick={() => setShowTransfer(false)} className="px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Modification (Ajustement direct) */}
+            {showEdit && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-sm p-6">
+                        <h2 className="text-xl font-black text-slate-900 mb-1">Modifier le stock</h2>
+                        <p className="text-sm text-slate-500 mb-4">Ajustement pour cet entrepôt</p>
+                        {editError && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-2 mb-4">{editError}</p>}
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 mb-1 block">Quantité Actuelle</label>
+                                <input type="number" disabled value={editForm.currentQuantity} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm cursor-not-allowed" />
+                            </div>
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 mb-1 block">Nouvelle Quantité</label>
+                                <input type="number" min="0" value={editForm.newQuantity} onChange={e => setEditForm(f => ({ ...f, newQuantity: Number(e.target.value) }))} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm" />
+                            </div>
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 mb-1 block">Note (optionnel)</label>
+                                <input value={editForm.note} onChange={e => setEditForm(f => ({ ...f, note: e.target.value }))} placeholder="ex: Inventaire manuel, produit endommagé..." className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 text-sm" />
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={submitEdit} disabled={editSaving} className="flex-1 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors disabled:opacity-50">
+                                {editSaving ? 'Enregistrement...' : 'Enregistrer'}
+                            </button>
+                            <button onClick={() => setShowEdit(false)} className="px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors">
                                 Annuler
                             </button>
                         </div>
