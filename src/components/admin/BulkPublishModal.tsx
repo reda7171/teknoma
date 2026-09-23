@@ -42,7 +42,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     const [previewBook, setPreviewBook] = useState<Book | null>(null)
     const pauseRef = useRef(false)
     const stopRef = useRef(false)
-    // Capture auto: livre en cours de capture créative
+    const [customUploadBase64, setCustomUploadBase64] = useState<string | null>(null)
     const [captureBook, setCaptureBook] = useState<Book | null>(null)
     const captureResolveRef = useRef<((url: string) => void) | null>(null)
 
@@ -58,6 +58,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     useEffect(() => {
         if (isOpen) {
             resetState()
+            setCustomUploadBase64(null)
         }
     }, [isOpen])
 
@@ -108,7 +109,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
 
             const book = books[i]
             setCurrentIndex(i)
-            updateStatus(book.id, 'running')
+            updateStatus(book.id, 'running', 'Démarrage...')
 
             try {
                 const isPack = book.productType === 'PACK' || book.category === 'PACK'
@@ -117,16 +118,26 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                 const payloadId = isPack ? { packId: book.id } : (isExtra ? { extraId: book.id } : { bookId: book.id })
 
                 // Générer la créative en background avant de publier
-                let customImageBase64: string | undefined
+                let finalImageBase64: string | undefined
+                
                 if (format === 'post' || format === 'story') {
-                    updateStatus(book.id, 'running', 'Génération de la créative...')
-                    const capturedData = await captureCreative(book)
-                    if (capturedData && capturedData.startsWith('data:')) {
-                        customImageBase64 = capturedData  // base64 → serveur le sauvegarde
+                    if (customUploadBase64) {
+                        updateStatus(book.id, 'running', '1 - Préparation de l\'image personnalisée...')
+                        finalImageBase64 = customUploadBase64
+                        await sleep(800) // Small visual delay
+                    } else {
+                        updateStatus(book.id, 'running', '1 - Génération de "Post créatif"...')
+                        const capturedData = await captureCreative(book)
+                        if (capturedData && capturedData.startsWith('data:')) {
+                            finalImageBase64 = capturedData  // base64 → serveur le sauvegarde
+                        } else {
+                            updateStatus(book.id, 'running', '⚠️ Échec génération image, utilisation cover par défaut...')
+                            await sleep(1000)
+                        }
                     }
                 }
 
-                updateStatus(book.id, 'running', 'Publication en cours...')
+                updateStatus(book.id, 'running', '2 - Publication sur les réseaux...')
                 const res = await fetch('/api/n8n/publish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -136,12 +147,12 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                         platform,
                         useDescription: 'short',
                         scheduleAt: null,
-                        ...(customImageBase64 ? { customImageBase64 } : {})
+                        ...(finalImageBase64 ? { customImageBase64: finalImageBase64 } : {})
                     })
                 })
                 const data = await res.json()
                 if (data.success) {
-                    updateStatus(book.id, 'success', 'Publié avec succès')
+                    updateStatus(book.id, 'success', '✅ Publié avec succès')
                 } else {
                     updateStatus(book.id, 'error', data.error || 'Erreur n8n')
                 }
@@ -151,6 +162,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
 
             // Délai entre chaque publication (sauf dernier)
             if (i < books.length - 1 && !stopRef.current) {
+                updateStatus(book.id, 'success', '✅ Terminé. Attente...')
                 await sleep(delaySeconds * 1000)
             }
         }
@@ -170,6 +182,16 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
         setIsPaused(false)
         setIsRunning(false)
         setCurrentIndex(-1)
+    }
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onloadend = () => {
+            setCustomUploadBase64(reader.result as string)
+        }
+        reader.readAsDataURL(file)
     }
 
     const successCount = statuses.filter(s => s.status === 'success').length
@@ -217,7 +239,10 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 {(['post', 'story', 'video', 'short'] as const).map(f => (
                                     <button
                                         key={f}
-                                        onClick={() => setFormat(f)}
+                                        onClick={() => {
+                                            setFormat(f)
+                                            if (f !== 'post' && f !== 'story') setCustomUploadBase64(null)
+                                        }}
                                         className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all ${format === f ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                     >
                                         {f === 'post' ? 'Post créatif' : f === 'story' ? 'Story créative' : f === 'video' ? 'Shorts / Vidéo' : 'Desc. courte'}
@@ -225,6 +250,31 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 ))}
                             </div>
                         </div>
+                        
+                        {(format === 'post' || format === 'story') && (
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <label className="block text-xs font-black text-gray-700 uppercase tracking-widest mb-2">Image personnalisée (Optionnel)</label>
+                                <p className="text-xs text-gray-500 mb-3">Si vous avez téléchargé une image depuis "Créative Publicitaire", vous pouvez l'importer ici pour ne pas utiliser la génération automatique par défaut.</p>
+                                
+                                <div className="flex items-center gap-4">
+                                    <label className="cursor-pointer bg-white px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors">
+                                        Importer une image
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                                    </label>
+                                    {customUploadBase64 && (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded border border-gray-200 overflow-hidden bg-white">
+                                                <img src={customUploadBase64} alt="Upload" className="w-full h-full object-cover" />
+                                            </div>
+                                            <button onClick={() => setCustomUploadBase64(null)} className="text-[10px] font-bold text-red-500 hover:underline">
+                                                Retirer
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
                                 Délai entre publications : <span className="text-black">{delaySeconds}s</span>
@@ -321,8 +371,10 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold text-gray-900 truncate">{book.title}</p>
                                     <p className="text-xs text-gray-500 truncate">{book.author}</p>
-                                    {status?.status === 'error' && status.message && (
-                                        <p className="text-[10px] text-red-500 font-bold mt-1 leading-tight whitespace-normal">{status.message}</p>
+                                    {status?.message && (
+                                        <p className={`text-[10px] font-bold mt-1 leading-tight whitespace-normal ${status.status === 'error' ? 'text-red-500' : status.status === 'success' ? 'text-green-500' : 'text-amber-500'}`}>
+                                            {status.message}
+                                        </p>
                                     )}
                                 </div>
                                 {/* Statut & Actions */}
