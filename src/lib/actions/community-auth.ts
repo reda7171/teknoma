@@ -255,6 +255,16 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
             } catch (e) {
                 console.error('Telegram notification error:', e)
             }
+
+            // Inscription automatique à la newsletter pour les nouveaux inscrits OAuth
+            try {
+                await prisma.newsletterSubscriber.create({
+                    data: { email: user.email }
+                })
+            } catch (e) {
+                console.error('Error adding new OAuth user to newsletter:', e)
+            }
+
             await createSession(user.id)
             return { success: true, redirect: '/community?registered=true' }
         }
@@ -272,6 +282,20 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
             })
         } catch (e) {
             console.error('Error recording login history:', e)
+        }
+
+        // Inscription à la newsletter (Automatique pour Google/OAuth)
+        try {
+            const existingSub = await prisma.newsletterSubscriber.findUnique({
+                where: { email: user.email }
+            })
+            if (!existingSub) {
+                await prisma.newsletterSubscriber.create({
+                    data: { email: user.email }
+                })
+            }
+        } catch (e) {
+            console.error('Error adding OAuth user to newsletter:', e)
         }
 
         await createSession(user.id)

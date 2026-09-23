@@ -255,8 +255,8 @@ export default function B2BPage() {
                             <div>
                                 <Mail className="w-8 h-8 mx-auto mb-3 text-pixio-yellow" />
                                 <div className="font-bold">Email</div>
-                                <a href="mailto:b2b@riwaya.store" className="text-gray-300 hover:text-pixio-yellow transition-colors">
-                                    b2b@riwaya.store
+                                <a href="mailto:contact@riwaya.store" className="text-gray-300 hover:text-pixio-yellow transition-colors">
+                                    contact@riwaya.store
                                 </a>
                             </div>
                             <div>

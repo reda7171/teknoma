@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         })
 
         if (!isNow) {
-            console.log(`[Planning API] Post sauvegardé pour plus tard: ${scheduleDate.toISOString()}`)
+            void(`[Planning API] Post sauvegardé pour plus tard: ${scheduleDate.toISOString()}`)
             return NextResponse.json({ success: true, post, message: 'Programmé pour plus tard' })
         }
 
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Envoyer à n8n avec timeout
-        console.log(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${payload.batch.length} items`)
+        void(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${payload.batch.length} items`)
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
                 signal: controller.signal
             })
             n8nStatus = `${n8nRes.status} ${n8nRes.statusText}`
-            console.log(`[Planning API] Réponse n8n: ${n8nStatus}`)
+            void(`[Planning API] Réponse n8n: ${n8nStatus}`)
         } catch (err: any) {
             n8nError = err.message
             console.error(`[Planning API] Erreur fetch n8n: ${err.message}`)

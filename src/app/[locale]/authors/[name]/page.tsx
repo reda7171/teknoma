@@ -210,11 +210,11 @@ export default async function AuthorPage({
 
                                     {isAuth && (
                                         <Link
-                                            href={`/admin/authors?search=${encodeURIComponent(authorName)}`}
+                                            href={`/admin/authors/edit/${encodeURIComponent(authorName)}`}
                                             className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors border border-indigo-100"
                                         >
                                             <Edit className="w-3 h-3" />
-                                            Modifier
+                                            Éditer
                                         </Link>
                                     )}
                                 </div>

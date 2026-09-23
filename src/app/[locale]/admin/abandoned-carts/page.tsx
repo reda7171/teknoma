@@ -3,6 +3,7 @@ import { Link } from '@/i18n/routing'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { MessagesSquare, ShoppingCart, User, Phone, Trash2, Mail } from 'lucide-react'
+import NotificationCenterButton from '@/components/admin/NotificationCenterButton'
 
 // Utilitaire pour formater le panier
 function formatCartItems(cartDataStr: string) {
@@ -40,11 +41,23 @@ export default async function AbandonedCartsPage() {
                     </p>
                 </div>
                 
-                <div className="px-8 py-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 shadow-sm">
-                    <ShoppingCart className="w-4 h-4 text-red-600" />
-                    <span className="font-black text-[11px] text-red-900 uppercase tracking-widest">
-                        {abandonedCarts.length} Paniers à relancer
-                    </span>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <NotificationCenterButton 
+                        orders={abandonedCarts.map(cart => ({
+                            id: cart.id,
+                            fullName: cart.fullName || 'Client Inconnu',
+                            phone: cart.phone || '',
+                            email: cart.email || '',
+                            status: 'ABANDONED_CART'
+                        }))}
+                        statusLabels={{ ABANDONED_CART: 'Panier Abandonné' }}
+                    />
+                    <div className="px-8 py-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 shadow-sm w-full sm:w-auto justify-center">
+                        <ShoppingCart className="w-4 h-4 text-red-600" />
+                        <span className="font-black text-[11px] text-red-900 uppercase tracking-widest">
+                            {abandonedCarts.length} Paniers à relancer
+                        </span>
+                    </div>
                 </div>
             </div>
 

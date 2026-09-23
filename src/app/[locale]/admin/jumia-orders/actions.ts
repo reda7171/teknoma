@@ -396,9 +396,9 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
             order_id: orderId // Certaines versions de l'API Jumia utilisent underscore
         }
         
-        console.log('[PRINT LABELS] Order ID:', orderId)
-        console.log('[PRINT LABELS] Items found:', items.length, JSON.stringify(items.slice(0, 2)))
-        console.log('[PRINT LABELS] Payload:', JSON.stringify(payload))
+        void('[PRINT LABELS] Order ID:', orderId)
+        void('[PRINT LABELS] Items found:', items.length, JSON.stringify(items.slice(0, 2)))
+        void('[PRINT LABELS] Payload:', JSON.stringify(payload))
         
         const response = await jumia.printLabels(payload)
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_LABEL', status: 'SUCCESS' } }).catch(() => {})

@@ -63,6 +63,19 @@ model SiteSettings {
   @@map("site_settings")
 }
 
+model EmailTemplate {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  subject     String
+  body        String   @db.Text
+  description String?  @db.VarChar(500)
+  isHtml      Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@map("email_templates")
+}
+
 model User {
   id                   String         @id @default(uuid())
   email                String         @unique
@@ -1449,3 +1462,11 @@ model PushCampaign {
   @@map("push_campaigns")
 }
 
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_subscribers")
+}

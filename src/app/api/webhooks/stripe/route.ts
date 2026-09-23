@@ -46,13 +46,13 @@ export async function POST(req: Request) {
                             status: 'CONFIRMED', // ou 'PAID' selon la logique métier
                         }
                     })
-                    console.log(`Order ${orderId} marked as CONFIRMED via Stripe webhook.`)
+                    void(`Order ${orderId} marked as CONFIRMED via Stripe webhook.`)
                 }
                 break
             
             // Add other event types as needed
             default:
-                console.log(`Unhandled event type ${event.type}`)
+                void(`Unhandled event type ${event.type}`)
         }
 
         return NextResponse.json({ received: true })

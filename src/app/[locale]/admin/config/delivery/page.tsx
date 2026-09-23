@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import DeliveryConfigForm from './DeliveryConfigForm'
 import ShippingCompaniesClient from './ShippingCompaniesClient'
 import { Truck, Package } from 'lucide-react'
+import TestWithYouConnectionButton from '@/components/admin/TestWithYouConnectionButton'
 
 export const metadata = {
     title: 'Logistique & Livraison | Admin Riwaya',
@@ -36,6 +37,9 @@ export default async function DeliveryConfigPage() {
                     <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
                         Configuration de la livraison et des transporteurs
                     </p>
+                </div>
+                <div>
+                    <TestWithYouConnectionButton />
                 </div>
             </div>
 

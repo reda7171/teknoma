@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { updateMultipleSettings } from '@/lib/actions/site-settings'
 import { Save, Loader2, Instagram, Facebook, Twitter, Linkedin, Phone, Mail, MapPin, Image as ImageIcon, Trash2, ShoppingBag, Youtube, AtSign, Link, MessageSquare, Users } from 'lucide-react'
 import GoogleReviewsEmailManager from './GoogleReviewsEmailManager'
+import { getEmailTemplates } from '@/lib/actions/email-templates'
 
 interface SettingsFormProps {
     initialSettings: Record<string, string>
@@ -14,9 +15,15 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [origin, setOrigin] = useState('')
+    const [templates, setTemplates] = useState<{ id: string; name: string }[]>([])
 
     useEffect(() => {
         setOrigin(window.location.origin)
+        getEmailTemplates().then(res => {
+            if (res.success && res.data) {
+                setTemplates(res.data)
+            }
+        })
     }, [])
 
     const handleChange = (key: string, value: string) => {
@@ -404,6 +411,74 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
                             Le client ne pourra pas passer commande si le total est inférieur à ce montant. (0 = pas de minimum)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Configuration des Emails */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-8">
+                <h2 className="text-2xl font-black text-black mb-6 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                        <Mail className="w-5 h-5 text-white" />
+                    </div>
+                    Configuration des Emails
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Confirmation de Commande
+                        </label>
+                        <select
+                            value={settings.email_template_order_confirmation || ''}
+                            onChange={(e) => handleChange('email_template_order_confirmation', e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                        >
+                            <option value="">-- Par défaut (Non configuré) --</option>
+                            {templates.map(t => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Template envoyé automatiquement après une commande confirmée.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Commande Expédiée
+                        </label>
+                        <select
+                            value={settings.email_template_order_shipped || ''}
+                            onChange={(e) => handleChange('email_template_order_shipped', e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                        >
+                            <option value="">-- Par défaut (Non configuré) --</option>
+                            {templates.map(t => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Template envoyé lorsque la commande est marquée comme expédiée.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Envoi de Code Coupon
+                        </label>
+                        <select
+                            value={settings.email_template_coupon || ''}
+                            onChange={(e) => handleChange('email_template_coupon', e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
+                        >
+                            <option value="">-- Par défaut (Non configuré) --</option>
+                            {templates.map(t => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Template utilisé pour envoyer un code promotionnel.
                         </p>
                     </div>
                 </div>

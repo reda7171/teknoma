@@ -52,7 +52,8 @@ import {
     Calendar,
     Wallet,
     Network,
-    Bell
+    Bell,
+    Mail
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -192,6 +193,7 @@ export default function AdminLayout({
             children: [
                 { name: 'Campagnes & Offres', href: `/${lang}/admin/marketing`, icon: Sparkles },
                 { name: 'Notifications Push', href: `/${lang}/admin/push-campaigns`, icon: Bell },
+                { name: 'Mailing / Newsletters', href: `/${lang}/admin/mailing`, icon: Mail },
                 { name: 'Codes Promo', href: `/${lang}/admin/coupons`, icon: Ticket },
                 { name: 'Affiliation', href: `/${lang}/admin/affiliates`, icon: Share2 },
                 { name: 'Cartes Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },
@@ -502,7 +504,7 @@ export default function AdminLayout({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold text-slate-900 truncate">Administrateur</p>
-                                <p className="text-[10px] text-slate-500 font-medium truncate">admin@riwaya.store</p>
+                                <p className="text-[10px] text-slate-500 font-medium truncate">contact@riwaya.store</p>
                             </div>
                         </div>
 

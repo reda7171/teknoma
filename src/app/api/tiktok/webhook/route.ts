@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
     try {
         // TikTok Webhooks expect a 200 OK response quickly.
         const body = await req.json();
-        console.log('TikTok Webhook received:', body);
+        void('TikTok Webhook received:', body);
 
         // TODO: Handle specific TikTok webhook events here (e.g. video upload success)
         

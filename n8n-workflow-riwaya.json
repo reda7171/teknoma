@@ -71,7 +71,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ 'https://graph.facebook.com/v19.0/' + ($json.facebook_page_id || '869754449565702') + '/photos' }}",
+        "url": "={{ 'https://graph.facebook.com/v19.0/' + ($json.facebook_page_id || '869754449565702') + ($json.isVideo ? '/videos' : '/photos') }}",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -82,23 +82,8 @@
           ]
         },
         "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "url",
-              "value": "={{ encodeURI($json.image) }}"
-            },
-            {
-              "name": "message",
-              "value": "={{ $json.caption }}"
-            },
-            {
-              "name": "published",
-              "value": "true"
-            }
-          ]
-        },
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.isVideo ? { file_url: encodeURI($json.image), description: $json.caption, published: true } : { url: encodeURI($json.image), message: $json.caption, published: true } }}",
         "options": {}
       },
       "id": "facebook-post",
@@ -176,19 +161,8 @@
           ]
         },
         "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "image_url",
-              "value": "={{ encodeURI($json.image) }}"
-            },
-            {
-              "name": "caption",
-              "value": "={{ $json.caption }}"
-            }
-          ]
-        },
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.isVideo ? { video_url: encodeURI($json.image), caption: $json.caption, media_type: 'REELS' } : { image_url: encodeURI($json.image), caption: $json.caption } }}",
         "options": {}
       },
       "id": "instagram-container",
@@ -398,7 +372,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ Object.assign({ media_type: $json.image ? 'IMAGE' : 'TEXT', text: $json.caption }, $json.image ? { image_url: encodeURI($json.image) } : {}) }}",
+        "jsonBody": "={{ Object.assign({ media_type: $json.image ? ($json.isVideo ? 'VIDEO' : 'IMAGE') : 'TEXT', text: $json.caption ? ($json.caption.length > 500 ? $json.caption.substring(0, 497) + '...' : $json.caption) : '' }, $json.image ? ($json.isVideo ? { video_url: encodeURI($json.image) } : { image_url: encodeURI($json.image) }) : {}) }}",
         "options": {}
       },
       "id": "threads-container",
@@ -550,25 +524,16 @@
           },
           "conditions": [
             {
-              "id": "cond-pin",
-              "leftValue": "={{ $json.platform }}",
-              "rightValue": "pinterest",
+              "id": "cond-pin-safe",
+              "leftValue": "={{ ($json.platform === 'pinterest' || $json.platform === 'all') && !$json.isVideo }}",
+              "rightValue": true,
               "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "cond-pin-all",
-              "leftValue": "={{ $json.platform }}",
-              "rightValue": "all",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
+                "type": "boolean",
+                "operation": "true"
               }
             }
           ],
-          "combinator": "or"
+          "combinator": "and"
         },
         "options": {}
       },
@@ -610,6 +575,84 @@
       "position": [
         720,
         940
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-li",
+              "leftValue": "={{ $json.platform }}",
+              "rightValue": "linkedin",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-li-all",
+              "leftValue": "={{ $json.platform }}",
+              "rightValue": "all",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "if-linkedin",
+      "name": "LinkedIn?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.linkedin_access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Restli-Protocol-Version",
+              "value": "2.0.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ author: 'urn:li:organization:' + $json.linkedin_organization_id, lifecycleState: 'PUBLISHED', specificContent: { 'com.linkedin.ugc.ShareContent': { shareCommentary: { text: $json.caption }, shareMediaCategory: $json.image ? 'IMAGE' : 'NONE', media: $json.image ? [{ status: 'READY', description: { text: $json.title || '' }, media: $json.image, title: { text: $json.title || 'Riwaya' } }] : [] } }, visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' } }) }}",
+        "options": {}
+      },
+      "id": "post-linkedin",
+      "name": "Post LinkedIn",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        1100
       ],
       "continueOnFail": true,
       "onError": "continueErrorOutput"
@@ -802,6 +845,11 @@
             "node": "Pinterest?",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "LinkedIn?",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -833,11 +881,16 @@
             "node": "Pinterest?",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "LinkedIn?",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
-    "R�ponse Programm�": {
+    "Réponse Programmé": {
       "main": [
         [
           {
@@ -872,6 +925,29 @@
       ]
     },
     "Post Pinterest": {
+      "main": [
+        [
+          {
+            "node": "Réponse OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn?": {
+      "main": [
+        [
+          {
+            "node": "Post LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Post LinkedIn": {
       "main": [
         [
           {

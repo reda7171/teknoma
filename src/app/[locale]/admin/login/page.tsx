@@ -127,7 +127,7 @@ export default function LoginPage() {
                                         name="email"
                                         required
                                         className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="admin@riwaya.store"
+                                        placeholder="contact@riwaya.store"
                                     />
                                 </div>
                             </div>

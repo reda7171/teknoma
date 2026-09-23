@@ -715,11 +715,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                                 href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
                                                                                 locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
-                                                                                title={book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title}
+                                                                                title={book.title}
                                                                             >
-                                                                                {(book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title).length > 12 
-                                                                                    ? (book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title).substring(0, 12) + '...'
-                                                                                    : (book.language === 'fr' && book.titleFr ? book.titleFr : book.language === 'en' && book.titleEn ? book.titleEn : book.title)}
+                                                                                {book.title.length > 12 
+                                                                                    ? book.title.substring(0, 12) + '...'
+                                                                                    : book.title}
                                                                             </Link>
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}

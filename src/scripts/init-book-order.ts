@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Initializing displayOrder for all books...')
+  void('Initializing displayOrder for all books...')
   const books = await prisma.book.findMany({
     orderBy: { createdAt: 'desc' }
   })
@@ -14,7 +14,7 @@ async function main() {
       data: { displayOrder: i }
     })
   }
-  console.log(`Done! ${books.length} books updated.`)
+  void(`Done! ${books.length} books updated.`)
 }
 
 main()

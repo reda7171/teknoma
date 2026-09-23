@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste } from 'lucide-react'
 import { createPack, type PackInput } from '@/lib/actions/packs'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
@@ -267,6 +267,72 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         { key: 'en' as const, label: 'English', flag: '🇬🇧' },
     ]
 
+    const copyChatGptPrompt = () => {
+        const packName = name || nameFr || nameEn || 'Nom du pack inconnu'
+
+        const prompt = `Act as a professional bookseller. I am adding a book pack to my online store.
+Pack Name: ${packName}
+
+Please provide the following information in JSON format (so I can easily copy-paste or read it):
+{
+  "name_ar": "Pack Name in Arabic",
+  "name_fr": "Pack Name in French",
+  "name_en": "Pack Name in English",
+  "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
+  "description_fr": "Short engaging description in French (max 3 paragraphs)",
+  "description_en": "Short engaging description in English (max 3 paragraphs)",
+  "jumiaHighlights": "Key highlights of the pack (bullet points)",
+  "jumiaPackageContent": "What's in the box? (e.g., list of books in the pack)"
+}
+Ensure the descriptions are catchy, SEO-friendly, and professional.`
+
+        navigator.clipboard.writeText(prompt)
+        alert('Prompt ChatGPT copié dans le presse-papier !')
+    }
+
+    const pasteChatGptResponse = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text) {
+                alert('Presse-papier vide')
+                return
+            }
+            
+            const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
+            let data
+            try {
+                data = JSON.parse(jsonStr)
+            } catch (e) {
+                alert('Le contenu du presse-papier n\'est pas un JSON valide.')
+                return
+            }
+
+            // Controlled inputs (state variables)
+            if (data.name_ar) setName(data.name_ar)
+            if (data.name_fr) setNameFr(data.name_fr)
+            if (data.name_en) setNameEn(data.name_en)
+            if (data.description_ar) setDescription(data.description_ar)
+            if (data.description_fr) setDescriptionFr(data.description_fr)
+            if (data.description_en) setDescriptionEn(data.description_en)
+
+            const setInput = (name: string, value: string) => {
+                if (value) {
+                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement
+                    if (el) el.value = value
+                }
+            }
+
+            // Uncontrolled inputs
+            setInput('jumiaHighlights', data.jumiaHighlights)
+            setInput('jumiaPackageContent', data.jumiaPackageContent)
+
+            alert('Champs remplis avec succès !')
+        } catch (err) {
+            console.error(err)
+            alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
+        }
+    }
+
     return (
         <div>
             {/* Header */}
@@ -292,9 +358,29 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
                         )}
                     </div>
                 </div>
-                <p className="mt-2 text-sm text-gray-600">
-                    Créez une offre groupée de livres
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                    <p className="text-sm text-gray-600">
+                        Créez une offre groupée de livres
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={copyChatGptPrompt}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-medium text-sm"
+                        >
+                            <Bot className="w-5 h-5" />
+                            Prompt ChatGPT
+                        </button>
+                        <button
+                            type="button"
+                            onClick={pasteChatGptResponse}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium text-sm"
+                        >
+                            <ClipboardPaste className="w-5 h-5" />
+                            Coller réponse
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {error && (

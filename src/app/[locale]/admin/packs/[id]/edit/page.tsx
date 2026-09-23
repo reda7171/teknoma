@@ -13,8 +13,6 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
         getSetting('contact_whatsapp')
     ])
 
-    // Debug temporaire
-    console.log('[EditPackPage] id:', id, '| result:', JSON.stringify(packResult))
 
     if (!packResult.success || !packResult.data) {
         notFound()

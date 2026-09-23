@@ -81,7 +81,7 @@ export async function POST(req: Request) {
                         where: { id: orderId },
                         data: { status: 'CONFIRMED' },
                     })
-                    console.log(`Order ${orderId} marked as CONFIRMED via PayPal webhook.`)
+                    void(`Order ${orderId} marked as CONFIRMED via PayPal webhook.`)
                 }
                 break
             }
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
                         where: { id: orderId },
                         data: { status: 'CANCELLED' },
                     })
-                    console.log(`Order ${orderId} marked as CANCELLED via PayPal webhook.`)
+                    void(`Order ${orderId} marked as CANCELLED via PayPal webhook.`)
                 }
                 break
             }
@@ -107,13 +107,13 @@ export async function POST(req: Request) {
                         where: { id: orderId },
                         data: { status: 'REFUNDED' },
                     })
-                    console.log(`Order ${orderId} marked as REFUNDED via PayPal webhook.`)
+                    void(`Order ${orderId} marked as REFUNDED via PayPal webhook.`)
                 }
                 break
             }
 
             default:
-                console.log(`Unhandled PayPal event type: ${eventType}`)
+                void(`Unhandled PayPal event type: ${eventType}`)
         }
 
         return NextResponse.json({ received: true })

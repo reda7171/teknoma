@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     if (mode && token) {
         if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-            console.log('[FB WEBHOOK] Verified successfully')
+            void('[FB WEBHOOK] Verified successfully')
             // Meta attend impérativement le challenge en texte brut (text/plain)
             return new Response(challenge, { 
                 status: 200,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
         
-        console.log('[FB WEBHOOK] Received event:', JSON.stringify(body, null, 2))
+        void('[FB WEBHOOK] Received event:', JSON.stringify(body, null, 2))
 
         // Ici vous pouvez traiter les commentaires Instagram, les messages Messenger, etc.
         // Exemple: body.entry[0].changes[0].value...

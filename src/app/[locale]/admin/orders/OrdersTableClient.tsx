@@ -2,9 +2,37 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus } from 'lucide-react'
+import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus, MessageCircle, Mail } from 'lucide-react'
 import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
+
+const getNotificationLinks = (order: any) => {
+    const trackingLink = `https://riwaya.store/fr/track/${order.id}`
+    let text = ''
+    
+    switch (order.status) {
+        case 'PENDING':
+            text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
+            break
+        case 'CONFIRMED':
+            text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
+            break
+        case 'SHIPPED':
+            text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Lien : ${trackingLink}`
+            break
+        case 'DELIVERED':
+            text = `Bonjour ${order.fullName}, votre commande a été livrée ! Bonne lecture et n'hésitez pas à nous laisser un avis.`
+            break
+        default:
+            text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Riwaya : ${trackingLink}`
+    }
+
+    const phone = order.phone.replace(/^0+/, '').replace(/\s+/g, '')
+    const waLink = `https://wa.me/212${phone}?text=${encodeURIComponent(text)}`
+    const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent('Suivi de votre commande Riwaya')}&body=${encodeURIComponent(text)}` : null
+
+    return { waLink, mailLink }
+}
 
 interface OrderItem {
     id: string
@@ -19,6 +47,7 @@ interface Order {
     id: string
     createdAt: Date
     fullName: string
+    email?: string | null
     phone: string
     city: string
     total: number
@@ -363,14 +392,33 @@ export default function OrdersTableClient({
                                         </select>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right flex items-center justify-end gap-2">
-                                        <a
-                                            href={`https://wa.me/212${order.phone.replace(/^0+/, '')}?text=Bonjour ${order.fullName}, votre commande a bien été reçue sur Riwaya.`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-green-600 hover:text-green-900 font-bold text-sm bg-green-50 px-3 py-1 rounded-lg transition-colors"
-                                        >
-                                            <span className="text-sm">💬</span> WhatsApp
-                                        </a>
+                                        <div className="flex items-center gap-1">
+                                            {(() => {
+                                                const links = getNotificationLinks(order)
+                                                return (
+                                                    <>
+                                                        <a
+                                                            href={links.waLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            title="Notifier par WhatsApp"
+                                                            className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+                                                        >
+                                                            <MessageCircle className="w-4 h-4" />
+                                                        </a>
+                                                        {links.mailLink && (
+                                                            <a
+                                                                href={links.mailLink}
+                                                                title="Notifier par Email"
+                                                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                                                            >
+                                                                <Mail className="w-4 h-4" />
+                                                            </a>
+                                                        )}
+                                                    </>
+                                                )
+                                            })()}
+                                        </div>
                                         <Link
                                             href={`/${locale}/admin/orders/${order.id}`}
                                             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 font-bold text-sm bg-blue-50 px-3 py-1 rounded-lg transition-colors"

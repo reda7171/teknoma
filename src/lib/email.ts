@@ -1,11 +1,11 @@
 import nodemailer from 'nodemailer'
 
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'mail.ardi.ma',
     port: parseInt(process.env.SMTP_PORT || '465'),
     secure: true,
     auth: {
-        user: process.env.SMTP_USER || 'admin@riwaya.store',
+        user: process.env.SMTP_USER || 'contact@riwaya.store',
         pass: process.env.SMTP_PASS || 'admin123',
     },
 })
@@ -51,7 +51,7 @@ export async function sendOrderConfirmation(order: any) {
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya" <admin@riwaya.store>',
+            from: '"Riwaya" <contact@riwaya.store>',
             to: order.email,
             subject: `Confirmation de commande #${order.id.slice(0, 8)}`,
             html,
@@ -100,7 +100,7 @@ export async function sendOrderStatusUpdate(order: any, status: string) {
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya" <admin@riwaya.store>',
+            from: '"Riwaya" <contact@riwaya.store>',
             to: order.email,
             subject: `Mise à jour commande #${order.id.slice(0, 8)}: ${status}`,
             html,
@@ -131,7 +131,7 @@ export async function sendSellerBookApproved(book: any) {
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya Marketplace" <admin@riwaya.store>',
+            from: '"Riwaya Marketplace" <contact@riwaya.store>',
             to: seller.email,
             subject: `Votre livre "${book.title}" est maintenant en ligne !`,
             html,
@@ -160,7 +160,7 @@ export async function sendSellerBookRejected(book: any, reason: string = '') {
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya Marketplace" <admin@riwaya.store>',
+            from: '"Riwaya Marketplace" <contact@riwaya.store>',
             to: seller.email,
             subject: `Information concernant votre livre "${book.title}"`,
             html,
