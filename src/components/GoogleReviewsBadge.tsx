@@ -7,16 +7,12 @@ export default function GoogleReviewsBadge() {
     <>
       <div 
         id="___ratingbadge_0" 
+        className="fixed left-0 z-[2147483647] bottom-[70px] md:bottom-0 pointer-events-none"
         style={{ 
           minHeight: '60px', 
           minWidth: '120px',
           width: '180px',
           height: '72px',
-          position: 'fixed', 
-          bottom: '0px', 
-          left: '0px', 
-          zIndex: 2147483647, 
-          pointerEvents: 'none',
           // Forcer la réservation d'espace dès le début pour éviter CLS (score 0.182)
           contain: 'layout',
           willChange: 'transform',
