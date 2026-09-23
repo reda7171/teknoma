@@ -6,13 +6,15 @@ import { MessageSquare, X, MessageCircle, Mail, Filter } from 'lucide-react'
 const getNotificationLinks = (order: any) => {
     const trackingLink = `https://riwaya.store/fr/track/${order.id}`
     let text = ''
+    let subject = 'Suivi de votre commande Riwaya'
     
     switch (order.status) {
         case 'PENDING':
             text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
             break
         case 'ABANDONED_CART':
-            text = `Bonjour ${order.fullName}, nous avons remarqué que vous n'avez pas terminé votre commande sur Riwaya. Avez-vous besoin d'aide avec un livre ou le paiement à la livraison ?`
+            subject = `Finalisez votre commande et profitez de -20 DHS offerts ! 🎁`
+            text = `Bonjour ${order.fullName},\n\nNous avons remarqué que vous n'avez pas terminé votre commande sur Riwaya.\n\nPour vous remercier de votre visite et vous encourager dans votre lecture, nous vous offrons une remise exceptionnelle de -20 DHS sur votre panier !\n\nAvez-vous besoin d'aide avec un livre ou le paiement à la livraison ? N'hésitez pas à nous répondre.\n\nL'équipe Riwaya.`
             break
         case 'CONFIRMED':
             text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
@@ -35,7 +37,7 @@ const getNotificationLinks = (order: any) => {
 
     const phone = order.phone.replace(/^0+/, '').replace(/\s+/g, '')
     const waLink = `https://wa.me/212${phone}?text=${encodeURIComponent(text)}`
-    const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent('Suivi de votre commande Riwaya')}&body=${encodeURIComponent(text)}` : null
+    const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}` : null
 
     return { waLink, mailLink, text }
 }
