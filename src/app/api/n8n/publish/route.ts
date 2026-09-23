@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
                     await mkdir(uploadDir, { recursive: true })
                     await writeFile(path.default.join(uploadDir, fileName), buffer)
                     const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
-                    resolvedCustomImageUrl = `${pubUrl}/uploads/creatives/${fileName}`
+                    resolvedCustomImageUrl = `${pubUrl}/api/uploads/creatives/${fileName}`
                 }
             } catch (e) {
                 console.error('[N8N PUBLISH] Base64 save error:', e)
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
                 const path = await import('path');
                 const { copyFile, mkdir } = await import('fs/promises');
                 
-                const localPath = path.default.join(process.cwd(), 'public', decodeURIComponent(urlObj.pathname));
+                const localPath = path.default.join(process.cwd(), 'public', decodeURIComponent(urlObj.pathname).replace('/api/uploads/', '/uploads/'));
                 const ext = path.default.extname(localPath) || '.jpg';
                 const safeFileName = `safe_${Date.now()}_${Math.random().toString(36).substring(7)}${ext}`;
                 const safeUploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives');
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
                 await mkdir(safeUploadDir, { recursive: true });
                 await copyFile(localPath, path.default.join(safeUploadDir, safeFileName));
                 
-                imageUrl = `${urlObj.origin}/uploads/creatives/${safeFileName}`;
+                imageUrl = `${urlObj.origin}/api/uploads/creatives/${safeFileName}`;
                 void('[N8N PUBLISH] Created safe ASCII image copy:', imageUrl);
             } catch (e) {
                 console.error('[N8N PUBLISH] Failed to create safe ASCII image copy:', e);
