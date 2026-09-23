@@ -44,7 +44,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [offset, setOffset] = useState({ x: 0, y: 0 })
     // Quel élément est en mode édition (double-clic requis)
     const [editing, setEditing] = useState<string | null>(null)
-    const [imageScale, setImageScale] = useState(1.1)
+    const [imageScale, setImageScale] = useState(1)
     const [imageRotation, setImageRotation] = useState(0)
     const [logoScale, setLogoScale] = useState(3)
     const [showLogo, setShowLogo] = useState(true)
@@ -134,7 +134,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         if (!isOpen) {
             setTheme('dark') // reset
             setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: -60 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 }, socials: { x: 0, y: 0 } })
-            setImageScale(1.1)
+            setImageScale(1)
             setImageRotation(0)
             setLogoScale(3)
             setShowFreeDelivery(false)
@@ -598,9 +598,12 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         {showLogo && <img src="/logo.png" alt="Riwaya" crossOrigin="anonymous" className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
                     </div>
                     <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30`}>
-                        <div className="relative w-full max-w-[200px] mx-auto">
+                        <div 
+                            className={`relative w-full ${format === 'story' ? 'max-w-[220px]' : 'max-w-[200px]'} mx-auto`}
+                            style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)` }}
+                        >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={(() => { const img = normalizeImage(book.image); return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img })() || '/book-placeholder.png'} alt={book.title} crossOrigin="anonymous" className="w-full h-auto object-cover rounded shadow-2xl" style={{ transform: `scale(${imageScale})`, opacity: imageOpacity }} />
+                            <img src={(() => { const img = normalizeImage(book.image); return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img })() || '/book-placeholder.png'} alt={book.title} crossOrigin="anonymous" className="relative w-full h-auto object-cover rounded shadow-2xl" style={{ boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none', transform: `scale(${imageScale}) rotate(${imageRotation}deg)`, opacity: imageOpacity }} />
                         </div>
                     </div>
                     {showPrice && (
