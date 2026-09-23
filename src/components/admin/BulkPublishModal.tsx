@@ -156,6 +156,36 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                 }
 
                 updateStatus(book.id, 'running', '2 - Publication sur les réseaux...')
+                
+                let customImageUrl = undefined;
+                if (finalImageBase64) {
+                    try {
+                        const arr = finalImageBase64.split(',')
+                        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
+                        const bstr = atob(arr[1])
+                        let n = bstr.length
+                        const u8arr = new Uint8Array(n)
+                        while (n--) {
+                            u8arr[n] = bstr.charCodeAt(n)
+                        }
+                        const blob = new Blob([u8arr], { type: mime })
+                        const file = new File([blob], `creative_bulk_${book.id}.png`, { type: mime })
+
+                        const formData = new FormData()
+                        formData.append('file', file)
+                        const uploadRes = await fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        const uploadData = await uploadRes.json()
+                        if (uploadData.success) {
+                            customImageUrl = uploadData.url
+                        }
+                    } catch (e) {
+                        console.error('Erreur upload custom image', e)
+                    }
+                }
+
                 const res = await fetch('/api/n8n/publish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -165,7 +195,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                         platform,
                         useDescription: 'short',
                         scheduleAt: null,
-                        ...(finalImageBase64 ? { customImageBase64: finalImageBase64 } : {})
+                        ...(customImageUrl ? { customImageUrl } : {})
                     })
                 })
                 const data = await res.json()
