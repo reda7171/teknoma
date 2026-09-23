@@ -3,6 +3,19 @@ import { join } from 'path'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 
+// Headers CORS pour permettre à Instagram/Facebook de télécharger les images
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+    'Access-Control-Allow-Headers': '*',
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'X-Robots-Tag': 'noindex',
+}
+
+export async function OPTIONS() {
+    return new NextResponse(null, { status: 204, headers: CORS_HEADERS })
+}
+
 export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
     const pathArray = params.path || []
     
@@ -31,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
         return new NextResponse(fileBuffer, {
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=31536000, immutable'
+                ...CORS_HEADERS,
             }
         })
     } catch (e) {
