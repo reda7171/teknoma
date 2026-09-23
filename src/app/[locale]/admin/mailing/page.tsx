@@ -18,6 +18,7 @@ export default function MailingPage() {
     const [subject, setSubject] = useState('')
     const [htmlContent, setHtmlContent] = useState('')
     const [audience, setAudience] = useState('TEST_ONLY')
+    const [targetedEmails, setTargetedEmails] = useState('')
     const [isSending, setIsSending] = useState(false)
     const [result, setResult] = useState<any>(null)
 
@@ -73,6 +74,11 @@ export default function MailingPage() {
             toast.error('Veuillez remplir l\'objet et le contenu du mail.')
             return
         }
+        
+        if (audience === 'TARGETED_CLIENTS' && !targetedEmails.trim()) {
+            toast.error('Veuillez saisir au moins une adresse e-mail.')
+            return
+        }
 
         if (audience === 'ALL_CUSTOMERS') {
             const confirm = window.confirm("Êtes-vous sûr de vouloir envoyer cet e-mail à TOUS les clients ayant une adresse e-mail ?")
@@ -88,7 +94,8 @@ export default function MailingPage() {
                 body: JSON.stringify({
                     subject,
                     html: htmlContent,
-                    audience
+                    audience,
+                    targetedEmails: audience === 'TARGETED_CLIENTS' ? targetedEmails : undefined
                 })
             })
 
@@ -287,6 +294,32 @@ export default function MailingPage() {
                                         <div>
                                             <p className="font-medium text-slate-800">Inscrits Newsletter</p>
                                             <p className="text-xs text-slate-500">Personnes inscrites depuis le footer.</p>
+                                        </div>
+                                    </label>
+                                    <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                                        <input 
+                                            type="radio" 
+                                            name="audience" 
+                                            value="TARGETED_CLIENTS"
+                                            checked={audience === 'TARGETED_CLIENTS'}
+                                            onChange={(e) => setAudience(e.target.value)}
+                                            className="mt-1 text-pixio-yellow focus:ring-pixio-yellow"
+                                        />
+                                        <div className="w-full">
+                                            <p className="font-medium text-slate-800">Clients ciblés</p>
+                                            <p className="text-xs text-slate-500 mb-2">Entrez des adresses e-mails manuellement.</p>
+                                            
+                                            {audience === 'TARGETED_CLIENTS' && (
+                                                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                                                    <textarea 
+                                                        value={targetedEmails}
+                                                        onChange={(e) => setTargetedEmails(e.target.value)}
+                                                        placeholder="email1@test.com, email2@test.com..."
+                                                        className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-pixio-yellow focus:border-pixio-yellow transition-colors"
+                                                        rows={3}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     </label>
                                 </div>
