@@ -499,7 +499,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         {c('hero_title_part2', t('hero.TitlePart2'))}
                       </span>
                     </h1>
-                    <p className={`text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
+                    <p className={`hidden md:block text-lg md:text-xl text-gray-500 max-w-xl font-medium tracking-tight mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
                       {c('hero_description', t('hero.Description'))}
                     </p>
 
