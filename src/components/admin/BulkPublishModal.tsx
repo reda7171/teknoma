@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { X, Play, Pause, CheckCircle, XCircle, Clock, Send, Loader2, FileText, Eye } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { X, Play, Pause, CheckCircle, XCircle, Clock, Send, Loader2, FileText, Eye, EyeOff, ZoomIn } from 'lucide-react'
 import { normalizeImage } from '@/lib/utils'
 import BookCreativeModal from './BookCreativeModal'
 import VideoStudioModal from './VideoStudioModal'
@@ -45,6 +45,10 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     const [customUploadBase64, setCustomUploadBase64] = useState<string | null>(null)
     const [captureBook, setCaptureBook] = useState<Book | null>(null)
     const captureResolveRef = useRef<((url: string) => void) | null>(null)
+    // Step aperçu avant publication
+    const [showPreviewStep, setShowPreviewStep] = useState(true)
+    const [previewStepData, setPreviewStepData] = useState<{ book: Book; imageBase64: string } | null>(null)
+    const previewStepResolveRef = useRef<((approved: boolean) => void) | null>(null)
 
     const resetState = () => {
         setStatuses([])
@@ -124,15 +128,29 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     if (customUploadBase64) {
                         updateStatus(book.id, 'running', '1 - Préparation de l\'image personnalisée...')
                         finalImageBase64 = customUploadBase64
-                        await sleep(800) // Small visual delay
+                        await sleep(400)
                     } else {
                         updateStatus(book.id, 'running', '1 - Génération de "Post créatif"...')
                         const capturedData = await captureCreative(book)
                         if (capturedData && capturedData.startsWith('data:')) {
-                            finalImageBase64 = capturedData  // base64 → serveur le sauvegarde
+                            finalImageBase64 = capturedData
                         } else {
                             updateStatus(book.id, 'running', '⚠️ Échec génération image, utilisation cover par défaut...')
                             await sleep(1000)
+                        }
+                    }
+
+                    // Step aperçu : montrer l'image avant de publier (si activé)
+                    if (showPreviewStep && finalImageBase64) {
+                        updateStatus(book.id, 'running', '⏸️ En attente de votre approbation...')
+                        const approved = await new Promise<boolean>((resolve) => {
+                            previewStepResolveRef.current = resolve
+                            setPreviewStepData({ book, imageBase64: finalImageBase64! })
+                        })
+                        setPreviewStepData(null)
+                        if (!approved) {
+                            updateStatus(book.id, 'error', '🚫 Ignoré par l\'admin')
+                            continue
                         }
                     }
                 }
@@ -182,6 +200,21 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
         setIsPaused(false)
         setIsRunning(false)
         setCurrentIndex(-1)
+    }
+
+    // Résoudre le step aperçu
+    const handlePreviewApprove = () => {
+        if (previewStepResolveRef.current) {
+            previewStepResolveRef.current(true)
+            previewStepResolveRef.current = null
+        }
+    }
+
+    const handlePreviewSkip = () => {
+        if (previewStepResolveRef.current) {
+            previewStepResolveRef.current(false)
+            previewStepResolveRef.current = null
+        }
     }
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,6 +307,20 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 </div>
                             </div>
                         )}
+
+                        {/* Toggle aperçu avant publication */}
+                        <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <div>
+                                <p className="text-xs font-black text-gray-700 uppercase tracking-widest">Aperçu avant publication</p>
+                                <p className="text-xs text-gray-500 mt-0.5">Valider chaque image avant de publier</p>
+                            </div>
+                            <button
+                                onClick={() => setShowPreviewStep(p => !p)}
+                                className={`relative w-12 h-6 rounded-full transition-colors ${showPreviewStep ? 'bg-black' : 'bg-gray-200'}`}
+                            >
+                                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${showPreviewStep ? 'left-7' : 'left-1'}`} />
+                            </button>
+                        </div>
 
                         <div>
                             <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
@@ -469,7 +516,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                 />
             )}
 
-            {/* Capture auto hors-\u00e9cran pour la publication en boucle */}
+            {/* Capture auto hors-écran pour la publication en boucle */}
             {captureBook && (format === 'post' || format === 'story') && (
                 <BookCreativeModal
                     isOpen={true}
@@ -478,6 +525,45 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     format={format === 'story' ? 'story' : 'post'}
                     onAutoCapture={handleCaptureReady}
                 />
+            )}
+
+            {/* Popup aperçu avant publication */}
+            {previewStepData && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+                        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-base font-black text-gray-900">Aperçu avant publication</h3>
+                                <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[260px]">{previewStepData.book.title}</p>
+                            </div>
+                            <ZoomIn className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div className="p-6">
+                            <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-lg bg-gray-50">
+                                <img
+                                    src={previewStepData.imageBase64}
+                                    alt="Aperçu"
+                                    className="w-full object-contain max-h-72"
+                                />
+                            </div>
+                            <p className="text-center text-xs text-gray-500 mt-3">Cette image sera publiée sur les réseaux sociaux.</p>
+                        </div>
+                        <div className="px-6 pb-6 flex gap-3">
+                            <button
+                                onClick={handlePreviewSkip}
+                                className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-sm font-black text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-all uppercase tracking-widest"
+                            >
+                                Ignorer
+                            </button>
+                            <button
+                                onClick={handlePreviewApprove}
+                                className="flex-1 py-3 rounded-2xl bg-black text-white text-sm font-black hover:bg-gray-900 transition-all uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95"
+                            >
+                                Publier
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     )
