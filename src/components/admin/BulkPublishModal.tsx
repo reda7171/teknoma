@@ -528,43 +528,100 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
             )}
 
             {/* Popup aperçu avant publication */}
-            {previewStepData && (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
-                        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-base font-black text-gray-900">Aperçu avant publication</h3>
-                                <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[260px]">{previewStepData.book.title}</p>
+            {previewStepData && (() => {
+                const book = previewStepData.book
+                const price = book.price
+                const oldPrice = Math.round(price * 1.3)
+
+                // Labels des plateformes
+                const platformLabels: Record<string, { label: string; color: string }> = {
+                    facebook: { label: 'Facebook', color: 'bg-blue-600' },
+                    instagram: { label: 'Instagram', color: 'bg-pink-500' },
+                    tiktok: { label: 'TikTok', color: 'bg-black' },
+                    threads: { label: 'Threads', color: 'bg-gray-800' },
+                    pinterest: { label: 'Pinterest', color: 'bg-red-600' },
+                }
+                const activePlatforms: string[] = platform === 'all' || platform === 'both'
+                    ? (platform === 'both' ? ['facebook', 'instagram'] : ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest'])
+                    : [platform]
+
+                return (
+                    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+
+                            {/* Header */}
+                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-base font-black text-gray-900">Aperçu avant publication</h3>
+                                    <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[260px]">{book.title}</p>
+                                </div>
+                                <ZoomIn className="w-5 h-5 text-gray-400" />
                             </div>
-                            <ZoomIn className="w-5 h-5 text-gray-400" />
-                        </div>
-                        <div className="p-6">
-                            <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-lg bg-gray-50">
-                                <img
-                                    src={previewStepData.imageBase64}
-                                    alt="Aperçu"
-                                    className="w-full object-contain max-h-72"
-                                />
+
+                            {/* Image */}
+                            <div className="px-6 pt-5">
+                                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-lg bg-gray-50">
+                                    <img
+                                        src={previewStepData.imageBase64}
+                                        alt="Aperçu"
+                                        className="w-full object-contain max-h-64"
+                                    />
+                                </div>
                             </div>
-                            <p className="text-center text-xs text-gray-500 mt-3">Cette image sera publiée sur les réseaux sociaux.</p>
-                        </div>
-                        <div className="px-6 pb-6 flex gap-3">
-                            <button
-                                onClick={handlePreviewSkip}
-                                className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-sm font-black text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-all uppercase tracking-widest"
-                            >
-                                Ignorer
-                            </button>
-                            <button
-                                onClick={handlePreviewApprove}
-                                className="flex-1 py-3 rounded-2xl bg-black text-white text-sm font-black hover:bg-gray-900 transition-all uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95"
-                            >
-                                Publier
-                            </button>
+
+                            {/* Infos : prix + plateformes */}
+                            <div className="px-6 py-4 space-y-3">
+                                {/* Prix */}
+                                <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3">
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Prix affiché</p>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-2xl font-black text-gray-900">{price} <span className="text-base">DH</span></span>
+                                            <span className="text-sm font-bold text-gray-400 line-through">{oldPrice} DH</span>
+                                            <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                                -{Math.round(100 - (price / oldPrice) * 100)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-2xl">📚</div>
+                                </div>
+
+                                {/* Plateformes cibles */}
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sera publié sur</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {activePlatforms.map(p => {
+                                            const meta = platformLabels[p]
+                                            if (!meta) return null
+                                            return (
+                                                <span key={p} className={`${meta.color} text-white text-[10px] font-bold px-3 py-1 rounded-full`}>
+                                                    {meta.label}
+                                                </span>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="px-6 pb-6 flex gap-3">
+                                <button
+                                    onClick={handlePreviewSkip}
+                                    className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-sm font-black text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-all uppercase tracking-widest"
+                                >
+                                    Ignorer
+                                </button>
+                                <button
+                                    onClick={handlePreviewApprove}
+                                    className="flex-1 py-3 rounded-2xl bg-black text-white text-sm font-black hover:bg-gray-900 transition-all uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95"
+                                >
+                                    Publier
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            })()}
         </div>
     )
 }
