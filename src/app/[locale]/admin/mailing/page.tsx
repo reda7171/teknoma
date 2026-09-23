@@ -35,10 +35,10 @@ export default function MailingPage() {
         if (activeTab === 'send' && templates.length === 0) {
             fetchTemplates()
         }
-        if (activeTab === 'list' && customers.length === 0 && subscribers.length === 0) {
+        if ((activeTab === 'list' || audience === 'TARGETED_CLIENTS') && customers.length === 0 && subscribers.length === 0 && !isLoadingList) {
             fetchLists()
         }
-    }, [activeTab])
+    }, [activeTab, audience])
 
     const fetchTemplates = async () => {
         try {
@@ -310,14 +310,55 @@ export default function MailingPage() {
                                             <p className="text-xs text-slate-500 mb-2">Entrez des adresses e-mails manuellement.</p>
                                             
                                             {audience === 'TARGETED_CLIENTS' && (
-                                                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                                                <div className="mt-2 space-y-3" onClick={(e) => e.stopPropagation()}>
                                                     <textarea 
                                                         value={targetedEmails}
                                                         onChange={(e) => setTargetedEmails(e.target.value)}
                                                         placeholder="email1@test.com, email2@test.com..."
                                                         className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-pixio-yellow focus:border-pixio-yellow transition-colors"
-                                                        rows={3}
+                                                        rows={2}
                                                     />
+                                                    
+                                                    <div className="border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+                                                        <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                                                            Ou sélectionner parmi la base :
+                                                        </div>
+                                                        <div className="max-h-48 overflow-y-auto p-2 space-y-1 bg-white">
+                                                            {isLoadingList ? (
+                                                                <p className="text-xs text-slate-500 text-center py-4">Chargement des contacts...</p>
+                                                            ) : (
+                                                                <>
+                                                                    {[...customers, ...subscribers].filter(u => u.email).map((user, idx) => {
+                                                                        const isSelected = targetedEmails.includes(user.email)
+                                                                        return (
+                                                                            <label key={idx} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors">
+                                                                                <input 
+                                                                                    type="checkbox"
+                                                                                    checked={isSelected}
+                                                                                    onChange={(e) => {
+                                                                                        let currentEmails = targetedEmails.split(',').map(e => e.trim()).filter(e => e)
+                                                                                        if (e.target.checked) {
+                                                                                            if (!currentEmails.includes(user.email)) currentEmails.push(user.email)
+                                                                                        } else {
+                                                                                            currentEmails = currentEmails.filter(e => e !== user.email)
+                                                                                        }
+                                                                                        setTargetedEmails(currentEmails.join(', '))
+                                                                                    }}
+                                                                                    className="text-pixio-yellow focus:ring-pixio-yellow rounded border-slate-300"
+                                                                                />
+                                                                                <span className="text-sm text-slate-700 truncate w-full">
+                                                                                    {user.fullName ? `${user.fullName} (${user.email})` : user.email}
+                                                                                </span>
+                                                                            </label>
+                                                                        )
+                                                                    })}
+                                                                    {[...customers, ...subscribers].length === 0 && (
+                                                                        <p className="text-xs text-slate-500 text-center py-4">Aucun contact trouvé.</p>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
