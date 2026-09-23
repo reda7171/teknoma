@@ -95,26 +95,46 @@ export async function POST(req: NextRequest) {
         
         baseUrl = baseUrl.replace(/\/$/, '');
 
-        // Si base64 fourni, sauvegarder le fichier côté serveur pour obtenir une URL publique
+        // Si base64 fourni, uploader sur Imgur pour avoir une URL publique accessible par Meta
         let resolvedCustomImageUrl = customImageUrl
         if (customImageBase64 && customImageBase64.startsWith('data:image')) {
             try {
-                const { writeFile, mkdir } = await import('fs/promises')
-                const path = await import('path')
-                const { randomBytes } = await import('crypto')
                 const matches = customImageBase64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
                 if (matches) {
-                    const ext = matches[1].includes('png') ? 'png' : 'jpg'
-                    const buffer = Buffer.from(matches[2], 'base64')
-                    const fileName = `creative_${randomBytes(8).toString('hex')}.${ext}`
-                    const uploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives')
-                    await mkdir(uploadDir, { recursive: true })
-                    await writeFile(path.default.join(uploadDir, fileName), buffer)
-                    const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
-                    resolvedCustomImageUrl = `${pubUrl}/api/uploads/creatives/${fileName}`
+                    const base64Data = matches[2]
+                    
+                    // Upload vers Imgur (API anonyme, pas besoin de compte)
+                    const imgurRes = await fetch('https://api.imgur.com/3/image', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Client-ID 546c25a59c58ad7', // Client ID public Imgur
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ image: base64Data, type: 'base64' })
+                    })
+                    
+                    if (imgurRes.ok) {
+                        const imgurData = await imgurRes.json()
+                        resolvedCustomImageUrl = imgurData?.data?.link
+                        console.log('[N8N PUBLISH] Image uploadée sur Imgur:', resolvedCustomImageUrl)
+                    } else {
+                        console.error('[N8N PUBLISH] Imgur upload failed:', await imgurRes.text())
+                        // Fallback: sauvegarde locale
+                        const { writeFile, mkdir } = await import('fs/promises')
+                        const path = await import('path')
+                        const { randomBytes } = await import('crypto')
+                        const ext = matches[1].includes('png') ? 'png' : 'jpg'
+                        const buffer = Buffer.from(base64Data, 'base64')
+                        const fileName = `creative_${randomBytes(8).toString('hex')}.${ext}`
+                        const uploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives')
+                        await mkdir(uploadDir, { recursive: true })
+                        await writeFile(path.default.join(uploadDir, fileName), buffer)
+                        const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+                        resolvedCustomImageUrl = `${pubUrl}/api/uploads/creatives/${fileName}`
+                    }
                 }
             } catch (e) {
-                console.error('[N8N PUBLISH] Base64 save error:', e)
+                console.error('[N8N PUBLISH] Base64 upload error:', e)
             }
         }
 
