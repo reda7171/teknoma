@@ -11,6 +11,9 @@ const getNotificationLinks = (order: any) => {
         case 'PENDING':
             text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
             break
+        case 'ABANDONED_CART':
+            text = `Bonjour ${order.fullName}, nous avons remarqué que vous n'avez pas terminé votre commande sur Riwaya. Avez-vous besoin d'aide avec un livre ou le paiement à la livraison ?`
+            break
         case 'CONFIRMED':
             text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
             break
