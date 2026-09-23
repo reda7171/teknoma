@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         const queryToken = searchParams.get('token')
         
         const body = await req.json()
-        console.log('[TELEGRAM WEBHOOK] Incoming Body:', JSON.stringify(body))
+        void('[TELEGRAM WEBHOOK] Incoming Body:', JSON.stringify(body))
         
         // Récupérer le token depuis la DB
         const tokenSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } })
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             currentCallbackId = callbackId
             const { escapeHtml } = await import('@/lib/telegram')
             
-            console.log(`[TELEGRAM CALLBACK] Received ID: ${callbackId}, Data: ${data}`)
+            void(`[TELEGRAM CALLBACK] Received ID: ${callbackId}, Data: ${data}`)
 
             // ─── Bouton Ping (Session) ───────────────────────────────────────
             if (data && data.startsWith('ping:')) {
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
                 const orderId = parts[1]
                 const newStatus = parts[2]
                 
-                console.log(`[TELEGRAM STATUS] Updating order ${orderId} to status: ${newStatus}`)
+                void(`[TELEGRAM STATUS] Updating order ${orderId} to status: ${newStatus}`)
 
                 if (!STATUS_LABELS[newStatus]) {
                     console.warn(`[TELEGRAM] Status label not found for: ${newStatus}`)
@@ -208,7 +208,7 @@ export async function POST(req: Request) {
                         })
                     })
 
-                    console.log(`[TELEGRAM] Order ${orderId} successfully updated to ${newStatus}`)
+                    void(`[TELEGRAM] Order ${orderId} successfully updated to ${newStatus}`)
                     const label = STATUS_LABELS[newStatus]
                     await answerCallbackQuery(callbackId, `✅ Statut : ${label}`, token)
 
@@ -1565,7 +1565,7 @@ export async function POST(req: Request) {
             const rawText = body.message.text.trim()
             const text = rawText.toUpperCase()
             const chatId = body.message.chat.id
-            console.log(`[TELEGRAM MESSAGE] Received from ${chatId}: ${text}`)
+            void(`[TELEGRAM MESSAGE] Received from ${chatId}: ${text}`)
 
             if (text.startsWith('/CMD') || text === 'CMD' || text.startsWith('/HELP') || text === 'HELP') {
                 const helpText = `📘 <b>Riwaya Bot — Commandes disponibles</b>\n\n` +
@@ -1746,7 +1746,7 @@ export async function POST(req: Request) {
                 }
             }
             else if (text.startsWith('/GENERER') || text === 'GENERER' || text.startsWith('/MARKETING')) {
-                console.log(`[TELEGRAM] Command /GENERER received from chat ${chatId}`)
+                void(`[TELEGRAM] Command /GENERER received from chat ${chatId}`)
                 
                 // Envoyer un accusé de réception immédiat
                 await sendTelegramMessage(`🔍 Recherche de créatives sur le serveur...`, chatId.toString(), token)
@@ -1756,11 +1756,11 @@ export async function POST(req: Request) {
                     
                     // 1. Scanner le disque (Priorité car l'utilisateur dit qu'elles sont là)
                     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'books')
-                    console.log(`[TELEGRAM] Scanning directory: ${uploadDir}`)
+                    void(`[TELEGRAM] Scanning directory: ${uploadDir}`)
                     
                     try {
                         const files = await fs.readdir(uploadDir)
-                        console.log(`[TELEGRAM] Found ${files.length} total files in directory`)
+                        void(`[TELEGRAM] Found ${files.length} total files in directory`)
                         
                         const filteredFiles = files.filter(f => 
                             f.toLowerCase().startsWith('creative_') || 
@@ -1772,7 +1772,7 @@ export async function POST(req: Request) {
                         // Mélanger aléatoirement pour ne pas toujours afficher les mêmes
                         const marketingFiles = filteredFiles.sort(() => 0.5 - Math.random()).slice(0, 10)
 
-                        console.log(`[TELEGRAM] Filtered ${marketingFiles.length} marketing files:`, marketingFiles)
+                        void(`[TELEGRAM] Filtered ${marketingFiles.length} marketing files:`, marketingFiles)
 
                         if (marketingFiles.length > 0) {
                             creatives = marketingFiles.map(file => ({
@@ -1784,7 +1784,7 @@ export async function POST(req: Request) {
                         console.error('[TELEGRAM] Disk scan error:', fsErr)
                     }
 
-                    console.log(`[TELEGRAM] Final creatives list size: ${creatives.length}`)
+                    void(`[TELEGRAM] Final creatives list size: ${creatives.length}`)
 
                     // 2. Tenter la DB si le disque n'a rien donné
                     if (creatives.length === 0) {
@@ -1840,9 +1840,9 @@ export async function POST(req: Request) {
                         ]
                     }
 
-                    console.log(`[TELEGRAM] Sending final menu to ${chatId}`)
+                    void(`[TELEGRAM] Sending final menu to ${chatId}`)
                     const result = await sendTelegramMessage(`🚀 <b>Marketing Riwaya</b>\n\nChoisissez une créative ci-dessus pour la publier :`, chatId.toString(), token, replyMarkup)
-                    console.log(`[TELEGRAM] Final menu send result:`, result ? 'SUCCESS' : 'FAILED')
+                    void(`[TELEGRAM] Final menu send result:`, result ? 'SUCCESS' : 'FAILED')
                 } catch (error: any) {
                     console.error('[TELEGRAM ERROR] /GENERER failed:', error)
                     await sendTelegramMessage(`❌ Erreur lors du scan : ${error.message}`, chatId.toString(), token)

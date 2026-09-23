@@ -45,7 +45,7 @@ export async function POST(req: Request) {
             return new NextResponse('ACTION=POSTAUTH', { status: 200, headers: { 'Content-Type': 'text/plain' } })
         } else {
             // Payment failed or declined
-            console.log(`CMI Payment failed for order ${orderId}: ${params['ErrMsg']}`)
+            void(`CMI Payment failed for order ${orderId}: ${params['ErrMsg']}`)
             // Do not update order to CONFIRMED. Let it be PENDING_PAYMENT or update to FAILED (if we had such status).
             // Return ACK to stop CMI from retrying
             return new NextResponse('APPROVED', { status: 200, headers: { 'Content-Type': 'text/plain' } })

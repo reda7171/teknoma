@@ -42,7 +42,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
                 }
                 
                 fs.writeFileSync(filePath, buffer);
-                console.log(`[Auto-Recovery] Image téléchargée pour EXIF depuis riwaya.store: ${book.image}`);
+                void(`[Auto-Recovery] Image téléchargée pour EXIF depuis riwaya.store: ${book.image}`);
             } catch (dlError) {
                 return NextResponse.json({ success: false, error: 'Fichier image introuvable sur le disque (local et prod)' }, { status: 404 })
             }

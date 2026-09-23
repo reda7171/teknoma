@@ -635,6 +635,7 @@ export async function bulkSyncDeliveries() {
         const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
 
         const updatedOrders: any[] = []
+        let syncErrors: string[] = []
         const BATCH_SIZE = 50
 
         const withYouOrders = activeOrders.filter(o => {
@@ -717,8 +718,9 @@ export async function bulkSyncDeliveries() {
                             }
                         }
                     }
-                } catch (error) {
+                } catch (error: any) {
                     console.error('Erreur sync bulk WithYou:', error)
+                    syncErrors.push(`WithYou: ${error.message}`)
                 }
             }
         }
@@ -795,7 +797,7 @@ export async function bulkSyncDeliveries() {
         }
 
         revalidatePath('/admin/orders')
-        return { success: true, updatedCount: updatedOrders.length, updatedOrders }
+        return { success: true, updatedCount: updatedOrders.length, updatedOrders, errors: syncErrors.length > 0 ? syncErrors : undefined }
     } catch (error: any) {
         return { success: false, error: error.message || 'Erreur inconnue' }
     }
@@ -828,7 +830,7 @@ export async function updateOrderItems(orderId: string, items: {
         // Si la commande n'a pas un statut qui a décrémenté le stock, on n'impacte pas le stock
         // Habituellement, toute commande non annulée a décrémenté le stock à la création.
         // Si elle est "RETURNED" ou "CANCELED" ou "CANCELLED", le stock a déjà été réintégré.
-        const isCanceledOrReturned = order.status === 'CANCELLED' || order.status === 'CANCELLED' || order.status === 'RETURNED'
+        const isCanceledOrReturned = (order.status as string) === 'CANCELLED' || order.status === 'RETURNED'
         const impactsStock = !isCanceledOrReturned
 
         let newSubtotal = 0

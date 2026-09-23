@@ -3,7 +3,8 @@ import { getAllSettings } from '@/lib/actions/site-settings'
 import { redirect } from 'next/navigation'
 import SiteSettingsForm from '@/components/admin/SiteSettingsForm'
 import AdvancedSettingsForm from '@/components/admin/AdvancedSettingsForm'
-import { Settings, Zap } from 'lucide-react'
+import { Settings, Zap, Mail } from 'lucide-react'
+import EmailTemplatesTab from '@/components/admin/EmailTemplatesTab'
 
 export const metadata = {
     title: 'Paramètres du Site | Admin Riwaya',
@@ -22,7 +23,7 @@ export default async function AdminSettingsPage({
     }
 
     const sp = await searchParams
-    const activeTab = sp?.tab === 'advanced' ? 'advanced' : 'general'
+    const activeTab = sp?.tab === 'advanced' ? 'advanced' : sp?.tab === 'templates' ? 'templates' : 'general'
     const settings = await getAllSettings()
 
     return (
@@ -57,6 +58,16 @@ export default async function AdminSettingsPage({
                             Général
                         </a>
                         <a
+                            href="?tab=templates"
+                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors ${activeTab === 'templates'
+                                ? 'border-black text-black bg-white'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            <Mail className="w-4 h-4" />
+                            Templates d'Emails
+                        </a>
+                        <a
                             href="?tab=advanced"
                             className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors ${activeTab === 'advanced'
                                 ? 'border-black text-black bg-white'
@@ -72,6 +83,8 @@ export default async function AdminSettingsPage({
                 {/* Contenu de l'onglet actif */}
                 {activeTab === 'general' ? (
                     <SiteSettingsForm initialSettings={settings} />
+                ) : activeTab === 'templates' ? (
+                    <EmailTemplatesTab />
                 ) : (
                     <AdvancedSettingsForm initialSettings={settings} />
                 )}

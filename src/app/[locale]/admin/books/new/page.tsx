@@ -3,12 +3,18 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Bot, ClipboardPaste } from 'lucide-react'
 import { createBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import type { CategoryTree } from '@/lib/constants/categories'
 import ImageInput from '@/components/admin/ImageInput'
+
+interface WarehouseStock {
+    warehouseId: string
+    name: string
+    quantity: number
+}
 
 function BookFormContent() {
     const router = useRouter()
@@ -36,6 +42,7 @@ function BookFormContent() {
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>(validLang)
     const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
+    const [warehouseStocks, setWarehouseStocks] = useState<WarehouseStock[]>([])
     const mainCategories = Object.keys(categoryTree)
 
     useEffect(() => {
@@ -47,6 +54,9 @@ function BookFormContent() {
         }).catch(console.error)
         getCategoryTree().then(tree => {
             setCategoryTree(tree)
+        }).catch(console.error)
+        fetch('/api/admin/warehouses').then(res => res.json()).then(data => {
+            setWarehouseStocks(data.map((w: any) => ({ warehouseId: w.id, name: w.name, quantity: 0 })))
         }).catch(console.error)
     }, [])
 
@@ -125,7 +135,23 @@ function BookFormContent() {
 
         const result = await createBook(input)
 
-        if (result.success) {
+        if (result.success && result.bookId) {
+            // Créer les entrées de stock pour chaque entrepôt
+            for (const ws of warehouseStocks) {
+                if (ws.quantity > 0) {
+                    await fetch('/api/admin/inventory', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            bookId: result.bookId,
+                            warehouseId: ws.warehouseId,
+                            quantity: ws.quantity,
+                            note: 'Stock initial'
+                        })
+                    })
+                }
+            }
+
             router.push('/admin/books')
             router.refresh()
         } else {
@@ -134,21 +160,123 @@ function BookFormContent() {
         }
     }
 
+    const copyChatGptPrompt = () => {
+        const titleAr = (document.querySelector('input[name="title_ar"]') as HTMLInputElement)?.value || ''
+        const titleFr = (document.querySelector('input[name="title_fr"]') as HTMLInputElement)?.value || ''
+        const titleEn = (document.querySelector('input[name="title_en"]') as HTMLInputElement)?.value || ''
+        const author = (document.querySelector('input[name="author"]') as HTMLInputElement)?.value || ''
+
+        const title = titleAr || titleFr || titleEn || 'Titre inconnu'
+        const auth = author || 'Auteur inconnu'
+
+        const prompt = `Act as a professional bookseller. I am adding a book to my online store.
+Title: ${title}
+Author: ${auth}
+
+Please provide the following information in JSON format (so I can easily copy-paste or read it):
+{
+  "title_ar": "Title in Arabic",
+  "title_fr": "Title in French",
+  "title_en": "Title in English",
+  "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
+  "description_fr": "Short engaging description in French (max 3 paragraphs)",
+  "description_en": "Short engaging description in English (max 3 paragraphs)",
+  "longDescription_ar": "Detailed description in Arabic",
+  "longDescription_fr": "Detailed description in French",
+  "longDescription_en": "Detailed description in English",
+  "category": "Main category of the book",
+  "subCategory": "Sub-category",
+  "seoKeywords": "Comma-separated SEO keywords (ar, fr, en)",
+  "jumiaHighlights": "Key highlights of the book (bullet points)",
+  "jumiaPackageContent": "What's in the box? (e.g., 1 x Book)"
+}
+Ensure the descriptions are catchy, SEO-friendly, and professional.`
+
+        navigator.clipboard.writeText(prompt)
+        alert('Prompt ChatGPT copié dans le presse-papier !')
+    }
+
+    const pasteChatGptResponse = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text) {
+                alert('Presse-papier vide')
+                return
+            }
+            
+            const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
+            let data
+            try {
+                data = JSON.parse(jsonStr)
+            } catch (e) {
+                alert('Le contenu du presse-papier n\'est pas un JSON valide.')
+                return
+            }
+
+            const setInput = (name: string, value: string) => {
+                if (value) {
+                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement
+                    if (el) el.value = value
+                }
+            }
+
+            setInput('title_ar', data.title_ar)
+            setInput('title_fr', data.title_fr)
+            setInput('title_en', data.title_en)
+            setInput('description_ar', data.description_ar)
+            setInput('description_fr', data.description_fr)
+            setInput('description_en', data.description_en)
+            setInput('longDescription_ar', data.longDescription_ar)
+            setInput('longDescription_fr', data.longDescription_fr)
+            setInput('longDescription_en', data.longDescription_en)
+            setInput('category', data.category)
+            setInput('subCategory', data.subCategory)
+            setInput('seoKeywords', data.seoKeywords)
+            setInput('jumiaHighlights', data.jumiaHighlights)
+            setInput('jumiaPackageContent', data.jumiaPackageContent)
+
+            alert('Champs remplis avec succès !')
+        } catch (err) {
+            console.error(err)
+            alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
+        }
+    }
+
     return (
         <div>
             {/* Header */}
-            <div className="mb-8">
-                <Link
-                    href="/admin/books"
-                    className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
-                >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Retour à la liste
-                </Link>
-                <h1 className="text-3xl font-bold text-gray-900">Ajouter un livre</h1>
-                <p className="mt-2 text-sm text-gray-600">
-                    Remplissez les informations du nouveau livre
-                </p>
+            <div className="mb-8 flex justify-between items-start">
+                <div>
+                    <Link
+                        href="/admin/books"
+                        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Retour à la liste
+                    </Link>
+                    <h1 className="text-3xl font-bold text-gray-900">Ajouter un livre</h1>
+                    <p className="mt-2 text-sm text-gray-600">
+                        Remplissez les informations du nouveau livre
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={copyChatGptPrompt}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-medium text-sm w-full sm:w-auto"
+                    >
+                        <Bot className="w-4 h-4" />
+                        Prompt ChatGPT
+                    </button>
+                    <button
+                        type="button"
+                        onClick={pasteChatGptResponse}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium text-sm w-full sm:w-auto"
+                    >
+                        <ClipboardPaste className="w-4 h-4" />
+                        Coller réponse
+                    </button>
+                </div>
             </div>
 
             {/* Error Message */}
@@ -406,20 +534,30 @@ function BookFormContent() {
                         </div>
                     </div>
 
-                    {/* Stock */}
-                    <div>
-                        <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-2">
-                            Stock <span className="text-red-500">*</span>
+                    {/* Stock (Géré par entrepôts) */}
+                    <div className="col-span-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Stock par entrepôt <span className="text-gray-400 font-normal">(Total: {warehouseStocks.reduce((a, b) => a + b.quantity, 0)})</span>
                         </label>
-                        <input
-                            type="number"
-                            id="stock"
-                            name="stock"
-                            required
-                            min="0"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="50"
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {warehouseStocks.map((ws, index) => (
+                                <div key={ws.warehouseId} className="flex flex-col gap-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                    <span className="text-sm font-medium text-gray-700 truncate">{ws.name}</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={ws.quantity}
+                                        onChange={(e) => {
+                                            const newStocks = [...warehouseStocks]
+                                            newStocks[index].quantity = parseInt(e.target.value) || 0
+                                            setWarehouseStocks(newStocks)
+                                        }}
+                                        className="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <input type="hidden" name="stock" value={warehouseStocks.reduce((a, b) => a + b.quantity, 0)} />
                     </div>
 
                     {/* Catégorie et Sous-catégorie */}

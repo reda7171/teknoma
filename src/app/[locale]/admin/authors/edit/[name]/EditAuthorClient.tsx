@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit2, Upload, Loader2, Sparkles, Check, Download } from 'lucide-react'
+import { Edit2, Upload, Loader2, Sparkles, Check, Download, Bot, ClipboardPaste } from 'lucide-react'
 import { upsertAuthorProfile } from '@/lib/actions/admin-authors'
 import { uploadAuthorImage } from '@/lib/actions/upload'
 import { useUIStore } from '@/store/ui'
@@ -164,6 +164,53 @@ export default function EditAuthorClient({ authorName, initialProfile }: { autho
         setIsFetchingOpenLib(false);
     };
 
+    const copyChatGptPrompt = () => {
+        const prompt = `Génère les informations pour l'auteur "${editingAuthor.name}".
+Renvoie UNIQUEMENT un objet JSON valide, sans markdown, sans autre texte, avec cette structure exacte :
+{
+  "bio": "Biographie professionnelle et captivante (3 à 4 phrases)",
+  "nationality": "Nationalité (un seul mot)",
+  "birthYear": "Année de naissance",
+  "quote": "Une citation marquante de l'auteur",
+  "genres": "Genres littéraires (séparés par des virgules)"
+}`
+        navigator.clipboard.writeText(prompt)
+        alert('Prompt ChatGPT copié dans le presse-papier !')
+    }
+
+    const pasteChatGptResponse = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text) {
+                alert('Presse-papier vide')
+                return
+            }
+            
+            const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
+            let data
+            try {
+                data = JSON.parse(jsonStr)
+            } catch (e) {
+                alert('Le contenu du presse-papier n\'est pas un JSON valide.')
+                return
+            }
+
+            setEditingAuthor(prev => ({
+                ...prev,
+                bio: data.bio || prev.bio,
+                nationality: data.nationality || prev.nationality,
+                birthYear: data.birthYear || prev.birthYear,
+                quote: data.quote || prev.quote,
+                genres: data.genres || prev.genres
+            }))
+
+            alert('Champs remplis avec succès !')
+        } catch (err) {
+            console.error(err)
+            alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
+        }
+    }
+
     return (
         <form onSubmit={handleSave} className="p-8 md:p-12 space-y-8 md:space-y-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-50 p-6 rounded-[2rem] border border-gray-100 mb-8 shadow-inner">
@@ -180,6 +227,31 @@ export default function EditAuthorClient({ authorName, initialProfile }: { autho
                     {isFetchingOpenLib ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Importer les données
                 </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-purple-50 p-6 rounded-[2rem] border border-purple-100 mb-8 shadow-inner">
+                <div>
+                    <h3 className="font-black text-sm text-purple-900">Assistant ChatGPT</h3>
+                    <p className="text-[10px] text-purple-600 font-bold uppercase tracking-widest mt-1">Générez bio, citation et genres avec l'IA</p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                    <button
+                        type="button"
+                        onClick={copyChatGptPrompt}
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-purple-700 transition-all active:scale-95 shadow-md w-full sm:w-auto"
+                    >
+                        <Bot className="w-4 h-4" />
+                        Prompt ChatGPT
+                    </button>
+                    <button
+                        type="button"
+                        onClick={pasteChatGptResponse}
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-700 transition-all active:scale-95 shadow-md w-full sm:w-auto"
+                    >
+                        <ClipboardPaste className="w-4 h-4" />
+                        Coller réponse
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">

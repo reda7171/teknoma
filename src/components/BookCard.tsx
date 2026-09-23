@@ -55,7 +55,7 @@ export default function BookCard({
     const { openCart, showNotification } = useUIStore()
     const [isAdded, setIsAdded] = useState(false)
 
-    const displayTitle = locale === 'fr' && titleFr ? titleFr : locale === 'en' && titleEn ? titleEn : title;
+    const displayTitle = title;
     // Générer l'URL avec le slug dynamique
     const bookUrl = generateBookUrl({ id, title, titleFr, titleEn }, locale);
 

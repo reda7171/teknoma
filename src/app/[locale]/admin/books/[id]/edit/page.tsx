@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Languages, Warehouse } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Languages, Warehouse, Bot, ClipboardPaste } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia } from '@/lib/actions/jumia'
@@ -149,16 +149,16 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setSeoKeywordsState((result.data as any).seoKeywords || '')
                 
                 if (result.data.sellerSku) {
-                    console.log('Checking Jumia link for SKU:', result.data.sellerSku);
+                    void('Checking Jumia link for SKU:', result.data.sellerSku);
                     checkJumiaLinkBySkuExact(result.data.sellerSku, (result.data as any).jumiaProductSid).then(linked => {
-                        console.log('Jumia link check result:', linked);
+                        void('Jumia link check result:', linked);
                         setIsLinked(linked)
                     }).catch(err => {
                         console.error('Error checking Jumia link:', err);
                         setIsLinked(false)
                     })
                 } else {
-                    console.log('No sellerSku for this book');
+                    void('No sellerSku for this book');
                     setIsLinked(false)
                 }
 
@@ -504,6 +504,91 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         )
     }
 
+    const copyChatGptPrompt = () => {
+        const titleAr = (document.querySelector('input[name="title_ar"]') as HTMLInputElement)?.value || ''
+        const titleFr = (document.querySelector('input[name="title_fr"]') as HTMLInputElement)?.value || ''
+        const titleEn = (document.querySelector('input[name="title_en"]') as HTMLInputElement)?.value || ''
+        const author = selectedAuthor
+
+        const title = titleAr || titleFr || titleEn || 'Titre inconnu'
+        const auth = author || 'Auteur inconnu'
+
+        const prompt = `Act as a professional bookseller. I am updating a book in my online store.
+Title: ${title}
+Author: ${auth}
+
+Please provide the following information in JSON format (so I can easily copy-paste or read it):
+{
+  "title_ar": "Title in Arabic",
+  "title_fr": "Title in French",
+  "title_en": "Title in English",
+  "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
+  "description_fr": "Short engaging description in French (max 3 paragraphs)",
+  "description_en": "Short engaging description in English (max 3 paragraphs)",
+  "longDescription_ar": "Detailed description in Arabic",
+  "longDescription_fr": "Detailed description in French",
+  "longDescription_en": "Detailed description in English",
+  "category": "Main category of the book",
+  "subCategory": "Sub-category",
+  "seoKeywords": "Comma-separated SEO keywords (ar, fr, en)",
+  "jumiaHighlights": "Key highlights of the book (bullet points)",
+  "jumiaPackageContent": "What's in the box? (e.g., 1 x Book)"
+}
+Ensure the descriptions are catchy, SEO-friendly, and professional.`
+
+        navigator.clipboard.writeText(prompt)
+        alert('Prompt ChatGPT copié dans le presse-papier !')
+    }
+
+    const pasteChatGptResponse = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text) {
+                alert('Presse-papier vide')
+                return
+            }
+            
+            const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
+            let data
+            try {
+                data = JSON.parse(jsonStr)
+            } catch (e) {
+                alert('Le contenu du presse-papier n\'est pas un JSON valide.')
+                return
+            }
+
+            const setInput = (name: string, value: string) => {
+                if (value) {
+                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement
+                    if (el) el.value = value
+                }
+            }
+
+            // Uncontrolled inputs
+            setInput('title_ar', data.title_ar)
+            setInput('title_fr', data.title_fr)
+            setInput('title_en', data.title_en)
+            setInput('category', data.category)
+            setInput('subCategory', data.subCategory)
+            setInput('seoKeywords', data.seoKeywords)
+            setInput('jumiaHighlights', data.jumiaHighlights)
+            setInput('jumiaPackageContent', data.jumiaPackageContent)
+
+            // Controlled inputs (state variables)
+            if (data.description_ar) setDescription(data.description_ar)
+            if (data.description_fr) setDescriptionFr(data.description_fr)
+            if (data.description_en) setDescriptionEn(data.description_en)
+            if (data.longDescription_ar) setLongDescription(data.longDescription_ar)
+            if (data.longDescription_fr) setLongDescriptionFr(data.longDescription_fr)
+            if (data.longDescription_en) setLongDescriptionEn(data.longDescription_en)
+
+            alert('Champs remplis avec succès !')
+        } catch (err) {
+            console.error(err)
+            alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
+        }
+    }
+
     return (
         <div>
             {/* Header */}
@@ -536,15 +621,33 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                             Modifiez les informations du livre "{book.title}"
                         </p>
                     </div>
-                    <a
-                        href={`/${resolvedParams.locale}/books/${bookId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
-                    >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Voir sur le site
-                    </a>
+                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={copyChatGptPrompt}
+                            className="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-purple-700 transition-colors shadow-sm"
+                        >
+                            <Bot className="w-4 h-4 mr-2" />
+                            Prompt ChatGPT
+                        </button>
+                        <button
+                            type="button"
+                            onClick={pasteChatGptResponse}
+                            className="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors shadow-sm"
+                        >
+                            <ClipboardPaste className="w-4 h-4 mr-2" />
+                            Coller réponse
+                        </button>
+                        <a
+                            href={`/${resolvedParams.locale}/books/${bookId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                        >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Voir sur le site
+                        </a>
+                    </div>
                 </div>
             </div>
 

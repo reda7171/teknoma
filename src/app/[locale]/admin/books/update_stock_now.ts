@@ -14,7 +14,7 @@ async function main() {
     const content = fs.readFileSync(filePath, 'utf-8')
     const lines = content.split(/\r?\n/)
     
-    console.log(`Traitement de ${lines.length - 1} lignes...`)
+    void(`Traitement de ${lines.length - 1} lignes...`)
 
     let updated = 0
     let failed = 0
@@ -61,9 +61,9 @@ async function main() {
         }
     }
 
-    console.log(`Terminé !`)
-    console.log(`Mis à jour: ${updated}`)
-    console.log(`Échecs: ${failed}`)
+    void(`Terminé !`)
+    void(`Mis à jour: ${updated}`)
+    void(`Échecs: ${failed}`)
 }
 
 main()

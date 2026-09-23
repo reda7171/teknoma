@@ -9,7 +9,7 @@ export default async function ContactPage() {
 
     // Récupérer les paramètres du site
     const settings = await getAllSettings()
-    const email = settings.contact_email || 'admin@riwaya.store'
+    const email = settings.contact_email || 'contact@riwaya.store'
     const phone = settings.contact_phone || '+212 702-220575'
     const address = settings.contact_address || 'Rabat, Maroc'
 

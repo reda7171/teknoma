@@ -24,7 +24,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
     const { id, locale } = await params
     const t = await getTranslations('BlogList') // Utiliser BlogList ou similaire
     const currentUser = await getCommunityUser()
-    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'admin@riwaya.com'
+    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'contact@riwaya.store'
 
     const user = await prisma.user.findUnique({
         where: { id },

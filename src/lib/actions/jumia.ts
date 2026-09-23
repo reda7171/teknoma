@@ -947,7 +947,7 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
             }
         }
 
-        console.log("Background syncing stock to Jumia for:", updates);
+        void("Background syncing stock to Jumia for:", updates);
         if (updates.length > 0) {
             await jumia.updateProductsStock(updates);
         }

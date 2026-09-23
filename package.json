@@ -42,6 +42,7 @@
     "framer-motion": "^13.4.0",
     "fuse.js": "^7.1.0",
     "google-auth-library": "^11.0.2",
+    "hostinger-mail-api-sdk": "^1.19.2",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",

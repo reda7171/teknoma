@@ -25,8 +25,8 @@ class WithYouService {
 
     constructor() {
         this.config = {
-            key: process.env.WITHYOU_API_KEY || '3c8c2c6fc979f962ca746c63a740afb3',
-            token: process.env.WITHYOU_API_TOKEN || 'b245c32a148ccf8c5a4c6d04b78c12080d819f17c379d7553ead04665dc3b6f0'
+            key: process.env.WITHYOU_API_KEY || '6ce75dfde8bf10be41b5e0a7109e77ca',
+            token: process.env.WITHYOU_API_TOKEN || '365062ce0f2131a681e52bc0b90586fe348881ac21ad1af64f5c43b2cb4e7f04'
         }
     }
 
@@ -62,7 +62,6 @@ class WithYouService {
                 })
                 url += `?${params.toString()}`
             } else {
-                // Pour POST, on utilise JSON par défaut comme dans la doc
                 fetchOptions.headers = {
                     ...fetchOptions.headers,
                     'Content-Type': 'application/json'
@@ -70,12 +69,12 @@ class WithYouService {
                 fetchOptions.body = JSON.stringify(bodyData)
             }
 
-            console.log(`[WithYou] ${method} ${url}`)
+            void(`[WithYou] ${method} ${url}`)
 
             const response = await fetch(url, fetchOptions)
             const bodyText = await response.text()
             
-            console.log(`[WithYou] Response status: ${response.status}`)
+            void(`[WithYou] Response status: ${response.status}`)
             
             let parsed
             try {
@@ -109,7 +108,7 @@ class WithYouService {
     async getCities() {
         try {
             const res = await this.request('/getville', {}, 'GET')
-            console.log('[WithYou] Raw cities response type:', typeof res)
+            // console.log('[WithYou] Raw cities response type:', typeof res)
             
             let cityList: string[] = []
 

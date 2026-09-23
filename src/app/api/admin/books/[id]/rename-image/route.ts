@@ -57,7 +57,7 @@ export async function POST(
                 }
                 
                 fs.writeFileSync(absolutePath, buffer);
-                console.log(`[Auto-Recovery] Image téléchargée depuis riwaya.store: ${imageUrl}`);
+                void(`[Auto-Recovery] Image téléchargée depuis riwaya.store: ${imageUrl}`);
             } catch (dlError) {
                 return NextResponse.json({ success: false, error: 'Fichier introuvable localement et sur riwaya.store' }, { status: 404 })
             }

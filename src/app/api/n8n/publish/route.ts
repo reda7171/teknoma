@@ -41,9 +41,9 @@ export async function POST(req: NextRequest) {
         let itemType: 'BOOK' | 'PACK' | 'OTHER' = 'OTHER';
 
         if (bookId) {
-            console.log('[N8N PUBLISH] Searching for bookId:', bookId)
+            void('[N8N PUBLISH] Searching for bookId:', bookId)
             item = await prisma.book.findUnique({ where: { id: bookId } })
-            console.log('[N8N PUBLISH] Found item:', !!item)
+            void('[N8N PUBLISH] Found item:', !!item)
             itemType = 'BOOK';
         } else if (packId) {
             item = await prisma.pack.findUnique({ where: { id: packId } })
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
             itemType = 'PACK';
         }
 
-        console.log('[N8N PUBLISH] Final item status:', { bookId, packId, extraId, found: !!item, customImageUrl: !!customImageUrl })
+        void('[N8N PUBLISH] Final item status:', { bookId, packId, extraId, found: !!item, customImageUrl: !!customImageUrl })
 
         // Si pas de livre/pack/extra et pas d'image custom, on arrête
         if (!item && !customImageUrl) {
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
                 await copyFile(localPath, path.default.join(safeUploadDir, safeFileName));
                 
                 imageUrl = `${urlObj.origin}/uploads/creatives/${safeFileName}`;
-                console.log('[N8N PUBLISH] Created safe ASCII image copy:', imageUrl);
+                void('[N8N PUBLISH] Created safe ASCII image copy:', imageUrl);
             } catch (e) {
                 console.error('[N8N PUBLISH] Failed to create safe ASCII image copy:', e);
                 // Fallback: Encoder les caractères non-ASCII
@@ -231,7 +231,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Envoyer au webhook n8n
-        console.log('[N8N PUBLISH] Sending payload to:', N8N_WEBHOOK_URL);
+        void('[N8N PUBLISH] Sending payload to:', N8N_WEBHOOK_URL);
         
         // Timeout de 60 secondes (n8n publie sur les réseaux sociaux, ça prend du temps)
         const controller = new AbortController();

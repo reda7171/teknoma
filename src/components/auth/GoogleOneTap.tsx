@@ -36,7 +36,7 @@ function GoogleOneTapInner() {
     useGoogleOneTapLogin({
         onSuccess: handleSuccess,
         onError: () => {
-            console.log('Google One Tap Error')
+            void('Google One Tap Error')
         },
         auto_select: false,
         use_fedcm_for_prompt: true,

@@ -22,6 +22,10 @@ export default function BulkSyncDeliveryButton() {
             if (data.success) {
                 setUpdatedOrders(data.updatedOrders || [])
                 setShowModal(true)
+                const errorsText = data.errors?.join('\n')
+                if (errorsText) {
+                    setTimeout(() => alert(`Attention, des erreurs sont survenues :\n${errorsText}`), 500)
+                }
                 router.refresh()
             } else {
                 alert(`Erreur: ${data.error}`)

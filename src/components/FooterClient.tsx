@@ -48,11 +48,28 @@ const PinterestIcon = ({ className }: { className?: string }) => (
 function NewsletterForm({ t }: { t: any }) {
     const [email, setEmail] = useState('')
     const [subscribed, setSubscribed] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!email.trim()) return
-        setSubscribed(true)
+        if (!email.trim() || isLoading) return
+        
+        setIsLoading(true)
+        try {
+            const res = await fetch('/api/newsletter/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            
+            if (res.ok) {
+                setSubscribed(true)
+            }
+        } catch (error) {
+            console.error('Newsletter error:', error)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     if (subscribed) {
@@ -74,13 +91,15 @@ function NewsletterForm({ t }: { t: any }) {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
                     required
-                    className="bg-gray-900 border-none rounded-2xl px-4 py-3 text-xs focus:ring-1 focus:ring-white outline-none w-full font-bold text-white placeholder-gray-600"
+                    disabled={isLoading}
+                    className="bg-gray-900 border-none rounded-2xl px-4 py-3 text-xs focus:ring-1 focus:ring-white outline-none w-full font-bold text-white placeholder-gray-600 disabled:opacity-50"
                 />
                 <button
                     type="submit"
-                    className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase shadow-lg hover:bg-gray-200 transition-all active:scale-95 shrink-0"
+                    disabled={isLoading}
+                    className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase shadow-lg hover:bg-gray-200 transition-all active:scale-95 shrink-0 disabled:opacity-50"
                 >
-                    {t('Join')}
+                    {isLoading ? '...' : t('Join')}
                 </button>
             </form>
         </>
