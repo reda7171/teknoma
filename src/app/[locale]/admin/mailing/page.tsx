@@ -19,6 +19,7 @@ export default function MailingPage() {
     const [htmlContent, setHtmlContent] = useState('')
     const [audience, setAudience] = useState('TEST_ONLY')
     const [targetedEmails, setTargetedEmails] = useState('')
+    const [isHtmlMode, setIsHtmlMode] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const [result, setResult] = useState<any>(null)
 
@@ -120,6 +121,9 @@ export default function MailingPage() {
             if (template) {
                 setSubject(template.subject || '')
                 setHtmlContent(template.body || '')
+                if (template.body?.includes('style="')) {
+                    setIsHtmlMode(true)
+                }
             }
         }
     }
@@ -212,11 +216,26 @@ export default function MailingPage() {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-sm font-semibold text-slate-700">
                                     Contenu de l'e-mail
                                 </label>
-                                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                                <button 
+                                    onClick={() => setIsHtmlMode(!isHtmlMode)}
+                                    className="text-xs font-medium text-pixio-yellow hover:underline"
+                                >
+                                    {isHtmlMode ? 'Passer à l\'éditeur visuel' : 'Passer à l\'éditeur de code HTML'}
+                                </button>
+                            </div>
+                            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                                {isHtmlMode ? (
+                                    <textarea 
+                                        value={htmlContent}
+                                        onChange={(e) => setHtmlContent(e.target.value)}
+                                        className="w-full h-64 p-4 font-mono text-sm bg-slate-900 text-slate-300 focus:outline-none"
+                                        placeholder="<h1>Votre code HTML ici</h1>"
+                                    />
+                                ) : (
                                     <ReactQuill 
                                         theme="snow"
                                         value={htmlContent}
@@ -234,7 +253,7 @@ export default function MailingPage() {
                                             ],
                                         }}
                                     />
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
