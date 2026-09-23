@@ -39,6 +39,13 @@ export async function POST(req: Request) {
                 select: { email: true }
             });
             recipients = subscribers.map(sub => ({ email: sub.email, fullName: 'Abonné(e)' }));
+        } else if (audience === 'TARGETED_CLIENTS') {
+            const { targetedEmails } = body;
+            if (!targetedEmails || targetedEmails.trim() === '') {
+                return NextResponse.json({ error: 'Aucun email fourni pour les clients ciblés' }, { status: 400 });
+            }
+            const emails = targetedEmails.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
+            recipients = emails.map((email: string) => ({ email, fullName: 'Client' }));
         } else {
             return NextResponse.json({ error: 'Invalid audience' }, { status: 400 });
         }

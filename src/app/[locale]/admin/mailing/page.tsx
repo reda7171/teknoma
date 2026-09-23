@@ -18,6 +18,8 @@ export default function MailingPage() {
     const [subject, setSubject] = useState('')
     const [htmlContent, setHtmlContent] = useState('')
     const [audience, setAudience] = useState('TEST_ONLY')
+    const [targetedEmails, setTargetedEmails] = useState('')
+    const [isHtmlMode, setIsHtmlMode] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const [result, setResult] = useState<any>(null)
 
@@ -34,10 +36,10 @@ export default function MailingPage() {
         if (activeTab === 'send' && templates.length === 0) {
             fetchTemplates()
         }
-        if (activeTab === 'list' && customers.length === 0 && subscribers.length === 0) {
+        if ((activeTab === 'list' || audience === 'TARGETED_CLIENTS') && customers.length === 0 && subscribers.length === 0 && !isLoadingList) {
             fetchLists()
         }
-    }, [activeTab])
+    }, [activeTab, audience])
 
     const fetchTemplates = async () => {
         try {
@@ -73,6 +75,11 @@ export default function MailingPage() {
             toast.error('Veuillez remplir l\'objet et le contenu du mail.')
             return
         }
+        
+        if (audience === 'TARGETED_CLIENTS' && !targetedEmails.trim()) {
+            toast.error('Veuillez saisir au moins une adresse e-mail.')
+            return
+        }
 
         if (audience === 'ALL_CUSTOMERS') {
             const confirm = window.confirm("Êtes-vous sûr de vouloir envoyer cet e-mail à TOUS les clients ayant une adresse e-mail ?")
@@ -88,7 +95,8 @@ export default function MailingPage() {
                 body: JSON.stringify({
                     subject,
                     html: htmlContent,
-                    audience
+                    audience,
+                    targetedEmails: audience === 'TARGETED_CLIENTS' ? targetedEmails : undefined
                 })
             })
 
@@ -113,6 +121,9 @@ export default function MailingPage() {
             if (template) {
                 setSubject(template.subject || '')
                 setHtmlContent(template.body || '')
+                if (template.body?.includes('style="')) {
+                    setIsHtmlMode(true)
+                }
             }
         }
     }
@@ -205,11 +216,26 @@ export default function MailingPage() {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-sm font-semibold text-slate-700">
                                     Contenu de l'e-mail
                                 </label>
-                                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                                <button 
+                                    onClick={() => setIsHtmlMode(!isHtmlMode)}
+                                    className="text-xs font-medium text-pixio-yellow hover:underline"
+                                >
+                                    {isHtmlMode ? 'Passer à l\'éditeur visuel' : 'Passer à l\'éditeur de code HTML'}
+                                </button>
+                            </div>
+                            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                                {isHtmlMode ? (
+                                    <textarea 
+                                        value={htmlContent}
+                                        onChange={(e) => setHtmlContent(e.target.value)}
+                                        className="w-full h-64 p-4 font-mono text-sm bg-slate-900 text-slate-300 focus:outline-none"
+                                        placeholder="<h1>Votre code HTML ici</h1>"
+                                    />
+                                ) : (
                                     <ReactQuill 
                                         theme="snow"
                                         value={htmlContent}
@@ -227,7 +253,7 @@ export default function MailingPage() {
                                             ],
                                         }}
                                     />
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -287,6 +313,73 @@ export default function MailingPage() {
                                         <div>
                                             <p className="font-medium text-slate-800">Inscrits Newsletter</p>
                                             <p className="text-xs text-slate-500">Personnes inscrites depuis le footer.</p>
+                                        </div>
+                                    </label>
+                                    <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                                        <input 
+                                            type="radio" 
+                                            name="audience" 
+                                            value="TARGETED_CLIENTS"
+                                            checked={audience === 'TARGETED_CLIENTS'}
+                                            onChange={(e) => setAudience(e.target.value)}
+                                            className="mt-1 text-pixio-yellow focus:ring-pixio-yellow"
+                                        />
+                                        <div className="w-full">
+                                            <p className="font-medium text-slate-800">Clients ciblés</p>
+                                            <p className="text-xs text-slate-500 mb-2">Entrez des adresses e-mails manuellement.</p>
+                                            
+                                            {audience === 'TARGETED_CLIENTS' && (
+                                                <div className="mt-2 space-y-3" onClick={(e) => e.stopPropagation()}>
+                                                    <textarea 
+                                                        value={targetedEmails}
+                                                        onChange={(e) => setTargetedEmails(e.target.value)}
+                                                        placeholder="email1@test.com, email2@test.com..."
+                                                        className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-pixio-yellow focus:border-pixio-yellow transition-colors"
+                                                        rows={2}
+                                                    />
+                                                    
+                                                    <div className="border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+                                                        <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                                                            Ou sélectionner parmi la base :
+                                                        </div>
+                                                        <div className="max-h-48 overflow-y-auto p-2 space-y-1 bg-white">
+                                                            {isLoadingList ? (
+                                                                <p className="text-xs text-slate-500 text-center py-4">Chargement des contacts...</p>
+                                                            ) : (
+                                                                <>
+                                                                    {[...customers, ...subscribers].filter(u => u.email).map((user, idx) => {
+                                                                        const isSelected = targetedEmails.includes(user.email)
+                                                                        return (
+                                                                            <label key={idx} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors">
+                                                                                <input 
+                                                                                    type="checkbox"
+                                                                                    checked={isSelected}
+                                                                                    onChange={(e) => {
+                                                                                        let currentEmails = targetedEmails.split(',').map(e => e.trim()).filter(e => e)
+                                                                                        if (e.target.checked) {
+                                                                                            if (!currentEmails.includes(user.email)) currentEmails.push(user.email)
+                                                                                        } else {
+                                                                                            currentEmails = currentEmails.filter(e => e !== user.email)
+                                                                                        }
+                                                                                        setTargetedEmails(currentEmails.join(', '))
+                                                                                    }}
+                                                                                    className="text-pixio-yellow focus:ring-pixio-yellow rounded border-slate-300"
+                                                                                />
+                                                                                <span className="text-sm text-slate-700 truncate w-full">
+                                                                                    {user.fullName ? `${user.fullName} (${user.email})` : user.email}
+                                                                                </span>
+                                                                            </label>
+                                                                        )
+                                                                    })}
+                                                                    {[...customers, ...subscribers].length === 0 && (
+                                                                        <p className="text-xs text-slate-500 text-center py-4">Aucun contact trouvé.</p>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </label>
                                 </div>

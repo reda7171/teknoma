@@ -114,12 +114,27 @@ export default async function AdminOrdersPage(props: {
         select: { id: true, title: true, amount: true, date: true, description: true }
     })
 
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000)
+    const abandonedCartsRaw = await prisma.abandonedCart.findMany({
+        where: { status: 'PENDING', updatedAt: { lte: tenMinutesAgo } },
+        orderBy: { updatedAt: 'desc' }
+    })
+    
+    const abandonedCarts = abandonedCartsRaw.map(cart => ({
+        id: cart.id,
+        fullName: cart.fullName || 'Client Inconnu',
+        phone: cart.phone || '',
+        email: cart.email || '',
+        status: 'ABANDONED_CART'
+    }))
+
     return (
         <OrdersPageClient 
             orders={orders as any}
+            abandonedCarts={abandonedCarts}
             locale={locale}
             statusColors={statusColors}
-            statusLabels={statusLabels}
+            statusLabels={{ ...statusLabels, ABANDONED_CART: 'Paniers Abandonnés' }}
             currentStatus={searchParams.status}
             stats={stats}
             shippingCompanies={companies}
