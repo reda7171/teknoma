@@ -578,13 +578,17 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
     const currentTheme = themes[theme]
 
-    // Mode invisible pour la capture en boucle (pas de modal plein écran)
+    // Mode visible pour la capture en boucle (autocapture en direct)
     if (onAutoCapture) {
         return (
-            <div className="fixed" style={{ left: '-9999px', top: 0, width: format === 'story' ? '360px' : '500px', pointerEvents: 'none', zIndex: 0 }}>
+            <div className="fixed inset-0 z-[400] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-none">
+                <div className="text-white font-black uppercase tracking-widest text-sm mb-6 flex items-center gap-3">
+                    <Sparkles className="w-5 h-5 animate-pulse text-amber-400" />
+                    Génération en cours...
+                </div>
                 <div
                     ref={posterRef}
-                    className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col`}
+                    className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col shadow-2xl rounded-2xl transform scale-75 md:scale-90`}
                     style={{ aspectRatio: format === 'story' ? '9/16' : '1/1' }}
                 >
                     {bgImage && <div className="absolute inset-0 z-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', opacity: bgOpacity }} />}
