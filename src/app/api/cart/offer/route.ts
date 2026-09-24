@@ -57,7 +57,7 @@ export async function POST(req: Request) {
             const actionText = status === 'ACCEPTED' ? 'accepté' : 'refusé'
             
             await sendTelegramMessage(
-                `${emoji} <b>Offre ${action}</b>\n\nLe client a <b>${actionText}</b> l'offre de réduction de <b>${offer.discountAmount} Dhs</b>.\n🔑 <b>Session:</b> <code>${offer.sessionId}</code>`
+                `${emoji} <b>Offre ${action}</b>\n\nLe client a <b>${actionText}</b> l'offre de réduction de <b>${offer.discount} Dhs</b>.\n🔑 <b>Session:</b> <code>${offer.sessionId}</code>`
             )
         } catch (tgError) {
             console.error('Erreur notification telegram offre:', tgError)

@@ -1470,3 +1470,16 @@ model NewsletterSubscriber {
 
   @@map("newsletter_subscribers")
 }
+
+model InstantOffer {
+  id        String   @id @default(uuid())
+  sessionId String   @db.VarChar(255)
+  discount  Float
+  status    String   @default("PENDING") @db.VarChar(50) // PENDING, ACCEPTED, REJECTED
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([status])
+  @@map("instant_offers")
+}
