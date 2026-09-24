@@ -680,7 +680,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                             ref={provided.innerRef}
                                             className="bg-white divide-y divide-gray-200"
                                         >
-                                            {orderedBooks.map((book, index) => (
+                                            {orderedBooks.map((book, index) => {
+                                                const displayTitle = book.title || book.titleFr || book.titleEn || 'Sans titre'
+                                                return (
                                                 <Draggable key={book.id} draggableId={book.id} index={index}>
                                                     {(provided, snapshot) => (
                                                         <tr 
@@ -704,7 +706,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     <div className="h-12 w-10 flex-shrink-0">
                                                                         <img
                                                                             src={normalizeImage(book.image)}
-                                                                            alt={book.title}
+                                                                            alt={displayTitle}
                                                                             className="w-full h-full object-cover rounded"
                                                                             onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                                                                         />
@@ -715,11 +717,11 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                                 href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
                                                                                 locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
-                                                                                title={book.title}
+                                                                                title={displayTitle}
                                                                             >
-                                                                                {book.title.length > 12 
-                                                                                    ? book.title.substring(0, 12) + '...'
-                                                                                    : book.title}
+                                                                                {displayTitle.length > 12 
+                                                                                    ? displayTitle.substring(0, 12) + '...'
+                                                                                    : displayTitle}
                                                                             </Link>
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
@@ -1023,7 +1025,8 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                         </tr>
                                                     )}
                                                 </Draggable>
-                                            ))}
+                                                )
+                                            })}
                                             {provided.placeholder}
                                         </tbody>
                                     )}
@@ -1034,7 +1037,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
 
                     {viewMode === 'kanban' && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 p-4">
-                            {orderedBooks.map(book => (
+                            {orderedBooks.map(book => {
+                                const displayTitle = book.title || book.titleFr || book.titleEn || 'Sans titre'
+                                return (
                                 <div key={book.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3 relative group">
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 p-1 rounded-lg shadow-sm backdrop-blur-sm">
                                         <button onClick={() => handleToggleStatus(book.id, book.active)} className={`p-1.5 rounded-md ${book.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`} title={book.active ? 'Désactiver' : 'Activer'}>
@@ -1048,13 +1053,13 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         </button>
                                     </div>
                                     <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100">
-                                        <img src={normalizeImage(book.image)} alt={book.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} />
+                                        <img src={normalizeImage(book.image)} alt={displayTitle} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} />
                                     </div>
                                     <div className="flex-1 flex flex-col">
                                         <Link 
                                             href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
                                         >
-                                            <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight hover:text-blue-600 hover:underline transition-colors">{book.title}</h3>
+                                            <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight hover:text-blue-600 hover:underline transition-colors">{displayTitle}</h3>
                                         </Link>
                                         <p className="text-xs text-gray-500 mt-1 truncate">
                                             {book.author}
@@ -1068,7 +1073,8 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     )}
 
