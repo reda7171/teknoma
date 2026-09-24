@@ -6,9 +6,10 @@ interface TiltImageProps {
     src: string;
     alt: string;
     className?: string;
+    priority?: boolean;
 }
 
-export default function TiltImage({ src, alt, className }: TiltImageProps) {
+export default function TiltImage({ src, alt, className, priority = false }: TiltImageProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const [style, setStyle] = useState({});
 
@@ -44,7 +45,7 @@ export default function TiltImage({ src, alt, className }: TiltImageProps) {
             className="w-full h-full relative overflow-hidden rounded-[2rem] shadow-xl group"
         >
             <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 mix-blend-overlay"></div>
-            <ImageWithFallback src={src} alt={alt} className={className} />
+            <ImageWithFallback src={src} alt={alt} className={className} priority={priority} />
         </div>
     );
 }
