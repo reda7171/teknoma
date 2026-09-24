@@ -19,9 +19,9 @@ const PAGES_PER_BOOK = 280
 const PAGES_PER_HOUR = 30
 
 const rankConfig = [
-    { medal: '🥇', ring: 'ring-2 ring-yellow-300', cardBg: 'bg-gradient-to-br from-yellow-50 to-amber-50/40 border-yellow-200', avatarRing: 'ring-4 ring-yellow-200', rankBg: 'text-5xl sm:text-6xl drop-shadow-lg', w: 'w-16 h-16 sm:w-20 sm:h-20' },
-    { medal: '🥈', ring: 'ring-2 ring-slate-300', cardBg: 'bg-gradient-to-br from-slate-50 to-gray-50/40 border-slate-200', avatarRing: 'ring-2 ring-slate-200', rankBg: 'text-4xl sm:text-5xl drop-shadow-md', w: 'w-12 h-12 sm:w-14 sm:h-14' },
-    { medal: '🥉', ring: 'ring-2 ring-amber-400', cardBg: 'bg-gradient-to-br from-amber-50 to-orange-50/40 border-amber-200', avatarRing: 'ring-2 ring-amber-200', rankBg: 'text-4xl sm:text-5xl drop-shadow-md', w: 'w-12 h-12 sm:w-14 sm:h-14' },
+    { medal: '🥇', ring: 'ring-2 ring-yellow-300', cardBg: 'bg-gradient-to-br from-yellow-50 to-amber-50/40 border-yellow-200', avatarRing: 'ring-4 ring-yellow-200', rankBg: 'text-6xl sm:text-7xl drop-shadow-lg', w: 'w-16 h-16 sm:w-20 sm:h-20' },
+    { medal: '🥈', ring: 'ring-2 ring-slate-300', cardBg: 'bg-gradient-to-br from-slate-50 to-gray-50/40 border-slate-200', avatarRing: 'ring-2 ring-slate-200', rankBg: 'text-5xl sm:text-6xl drop-shadow-md', w: 'w-12 h-12 sm:w-14 sm:h-14' },
+    { medal: '🥉', ring: 'ring-2 ring-amber-400', cardBg: 'bg-gradient-to-br from-amber-50 to-orange-50/40 border-amber-200', avatarRing: 'ring-2 ring-amber-200', rankBg: 'text-5xl sm:text-6xl drop-shadow-md', w: 'w-12 h-12 sm:w-14 sm:h-14' },
 ]
 
 export default async function HomeLeaderboard({ topReaders }: { topReaders: Reader[] }) {
@@ -68,7 +68,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                     >
                                         <div className="flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
                                             {/* Rang */}
-                                            <div className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center font-black flex-shrink-0 ${cfg.rankBg}`}>
+                                            <div className={`w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center font-black flex-shrink-0 ${cfg.rankBg}`}>
                                                 {cfg.medal ?? reader.rank}
                                             </div>
 
