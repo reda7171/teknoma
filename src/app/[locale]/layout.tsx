@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Cairo } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
@@ -46,10 +45,11 @@ const tajawal = localFont({
   preload: false, // Chargé uniquement pour RTL — pas besoin de précharger
 });
 
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
+const cairo = localFont({
+  src: "../../fonts/Cairo-VariableFont.ttf",
+  variable: "--font-cairo",
   display: 'swap',
-  variable: '--font-cairo',
+  preload: false,
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
