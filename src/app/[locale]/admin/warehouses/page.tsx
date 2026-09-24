@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Warehouse, Plus, Edit2, ToggleLeft, ToggleRight, Package, Save, X, Trash2 } from 'lucide-react'
+import { Warehouse, Plus, Edit2, ToggleLeft, ToggleRight, Package, Save, X, Trash2, RotateCcw } from 'lucide-react'
 
 interface WarehouseData {
     id: string
@@ -67,6 +67,16 @@ export default function WarehousesPage() {
         await fetch(`/api/admin/warehouses/${w.id}`, {
             method: 'DELETE',
         })
+        load()
+    }
+
+    const resetStock = async (w: WarehouseData) => {
+        if (!confirm(`Voulez-vous vraiment remettre à zéro (0) TOUT le stock de l'entrepôt "${w.name}" ? Cette action est irréversible !`)) return
+        setLoading(true)
+        await fetch(`/api/admin/warehouses/${w.id}/reset-stock`, {
+            method: 'POST',
+        })
+        alert(`Le stock de l'entrepôt "${w.name}" a été réinitialisé avec succès.`)
         load()
     }
 
@@ -167,13 +177,20 @@ export default function WarehousesPage() {
                                     href={`/fr/admin/inventory?warehouseId=${w.id}`}
                                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors ml-auto"
                                 >
-                                    <Package className="w-3 h-3" /> Voir le stock
+                                    <Package className="w-3 h-3" /> Voir
                                 </a>
+                                <button
+                                    onClick={() => resetStock(w)}
+                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors ml-2"
+                                    title="Remettre le stock à zéro"
+                                >
+                                    <RotateCcw className="w-3 h-3" /> RAZ
+                                </button>
                                 <button
                                     onClick={() => deleteWarehouse(w)}
                                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors ml-2"
                                 >
-                                    <Trash2 className="w-3 h-3" /> Supprimer
+                                    <Trash2 className="w-3 h-3" />
                                 </button>
                             </div>
                         </div>
