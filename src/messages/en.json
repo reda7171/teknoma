@@ -705,7 +705,8 @@
     "SoldBy": "Sold by",
     "NoBooksFound": "No books found",
     "NoBooksDesc": "This author hasn't published any books on our platform yet.",
-    "SellerRating": "Seller rating"
+    "SellerRating": "Seller rating",
+    "Views": "{count} views"
   },
   "Cart": {
     "Title": "Your Cart",

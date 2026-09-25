@@ -36,6 +36,14 @@ export default function InstantOfferPopup() {
         return () => clearInterval(interval)
     }, [sessionId])
 
+    useEffect(() => {
+        if (offer && (!discount || discount < offer.discount)) {
+            const audio = new Audio('/notification.mp3')
+            audio.play().catch(e => console.error('Audio play failed:', e))
+        }
+    }, [offer, discount])
+
+
     const handleAccept = async () => {
         if (!offer) return
         try {

@@ -21,6 +21,11 @@ export default function InventoryPage() {
     const [search, setSearch] = useState('')
     const [warehouseFilter, setWarehouseFilter] = useState('warehouse-principal-001')
     const [typeFilter, setTypeFilter] = useState('BOOK')
+    const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory')
+
+    // Commandes impactant cet entrepôt
+    const [orders, setOrders] = useState<any[]>([])
+    const [ordersLoading, setOrdersLoading] = useState(false)
 
     // Modal ajout stock
     const [showAdd, setShowAdd] = useState(false)
@@ -57,7 +62,18 @@ export default function InventoryPage() {
         setLoading(false)
     }, [warehouseFilter])
 
+    // Charger les commandes (EXIT movements) pour l'entrepôt
+    const loadOrders = useCallback(async () => {
+        if (!warehouseFilter) return
+        setOrdersLoading(true)
+        const res = await fetch(`/api/admin/inventory/warehouse-orders?warehouseId=${warehouseFilter}`)
+        const data = await res.json()
+        setOrders(Array.isArray(data) ? data : [])
+        setOrdersLoading(false)
+    }, [warehouseFilter])
+
     useEffect(() => { load() }, [load])
+    useEffect(() => { if (activeTab === 'orders') loadOrders() }, [activeTab, loadOrders])
 
     // Chargement des produits pour le select
     useEffect(() => {
@@ -265,10 +281,81 @@ export default function InventoryPage() {
                 </select>
             </div>
 
-            {/* Table */}
-            {loading ? (
-                <div className="text-center py-20 text-slate-400">Chargement...</div>
+            {/* Tabs */}
+            <div className="flex gap-1 mb-6 bg-slate-100 rounded-xl p-1 w-fit">
+                <button
+                    onClick={() => setActiveTab('inventory')}
+                    className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+                        activeTab === 'inventory' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                    Inventaire
+                </button>
+                <button
+                    onClick={() => setActiveTab('orders')}
+                    className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+                        activeTab === 'orders' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                    Historique Commandes
+                </button>
+            </div>
+
+            {activeTab === 'orders' ? (
+                <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                    {ordersLoading ? (
+                        <div className="text-center py-20 text-slate-400">Chargement...</div>
+                    ) : orders.length === 0 ? (
+                        <div className="text-center py-20 text-slate-400">Aucune commande pour cet entrepôt</div>
+                    ) : (
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-slate-100 bg-slate-50">
+                                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Date</th>
+                                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Produit</th>
+                                    <th className="text-center px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Qté sortie</th>
+                                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Référence</th>
+                                    <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {orders.map((m: any) => (
+                                    <tr key={m.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
+                                            {new Date(m.createdAt).toLocaleDateString('fr-FR')}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="font-bold text-slate-900 text-sm">{m.book?.title || m.extraProduct?.name || '—'}</div>
+                                            <div className="text-xs text-slate-400">{m.book?.author || ''}</div>
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-red-50 text-red-600">
+                                                -{m.quantity}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-xs text-slate-500 max-w-xs truncate">{m.note || '—'}</td>
+                                        <td className="px-4 py-3 text-right">
+                                            {m.note && m.note.match(/[0-9a-f]{8}-[0-9a-f]{4}/i) && (
+                                                <a
+                                                    href={`/fr/admin/orders/${m.note.match(/[0-9a-f-]{36}/i)?.[0]}`}
+                                                    className="text-xs font-bold text-blue-600 hover:underline"
+                                                    target="_blank"
+                                                >
+                                                    Voir commande
+                                                </a>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
             ) : (
+                <>
+                {loading ? (
+                    <div className="text-center py-20 text-slate-400">Chargement...</div>
+                ) : (
                 <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
                     <table className="w-full">
                         <thead>
@@ -339,6 +426,8 @@ export default function InventoryPage() {
                         </tbody>
                     </table>
                 </div>
+                )}
+                </>
             )}
 
             {/* Modal Ajouter Stock */}

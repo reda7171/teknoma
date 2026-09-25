@@ -50,6 +50,7 @@ const cairo = localFont({
   variable: "--font-cairo",
   display: 'swap',
   preload: false,
+  adjustFontFallback: false,
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {

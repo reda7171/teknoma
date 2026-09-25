@@ -14,6 +14,7 @@ export async function getReservations() {
                     select: {
                         title: true,
                         image: true,
+                        author: true,
                     }
                 }
             },

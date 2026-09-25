@@ -706,7 +706,8 @@
     "SoldBy": "البائع",
     "NoBooksFound": "لم يتم العثور على كتب",
     "NoBooksDesc": "هذا الكاتب لم ينشر أي كتب على منصتنا بعد.",
-    "SellerRating": "تقييم البائع"
+    "SellerRating": "تقييم البائع",
+    "Views": "{count} مشاهدة"
   },
   "Cart": {
     "Title": "سلتك",

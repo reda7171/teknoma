@@ -16,15 +16,13 @@ export default function JumiaOrdersClient() {
     const [hasNextPage, setHasNextPage] = useState(false)
     const [stats, setStats] = useState<any>(null)
     const [cancelingId, setCancelingId] = useState<string | null>(null)
-    const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null)
     const [packingId, setPackingId] = useState<string | null>(null)
-    const [confirmPackId, setConfirmPackId] = useState<string | null>(null)
     const [printingId, setPrintingId] = useState<string | null>(null)
     const [printInvoiceId, setPrintInvoiceId] = useState<string | null>(null)
     const [readyId, setReadyId] = useState<string | null>(null)
-    const [confirmReadyId, setConfirmReadyId] = useState<string | null>(null)
     const [restoreStockId, setRestoreStockId] = useState<string | null>(null)
     const [syncingStock, setSyncingStock] = useState(false)
+    const [confirmAction, setConfirmAction] = useState<{ action: 'PACK' | 'READY_TO_SHIP' | 'CANCEL', orderId: string, orderNumber: string } | null>(null)
     
     // Order items details state
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
@@ -95,12 +93,7 @@ export default function JumiaOrdersClient() {
     }
 
     const handleCancelOrder = async (orderId: string) => {
-        if (confirmCancelId !== orderId) {
-            setConfirmCancelId(orderId)
-            setTimeout(() => setConfirmCancelId(null), 3000) // Reset after 3s
-            return
-        }
-        setConfirmCancelId(null)
+        setConfirmAction(null)
         setCancelingId(orderId)
         setErrorMsg(null)
         setSuccessMsg(null)
@@ -134,13 +127,7 @@ export default function JumiaOrdersClient() {
     }
 
     const handlePackOrder = async (orderId: string) => {
-        if (confirmPackId !== orderId) {
-            setConfirmPackId(orderId)
-            setTimeout(() => setConfirmPackId(null), 3000)
-            return
-        }
-        
-        setConfirmPackId(null)
+        setConfirmAction(null)
         setPackingId(orderId)
         setErrorMsg(null)
         setSuccessMsg(null)
@@ -343,13 +330,7 @@ export default function JumiaOrdersClient() {
     }
 
     const handleReadyToShipOrder = async (orderId: string) => {
-        if (confirmReadyId !== orderId) {
-            setConfirmReadyId(orderId)
-            setTimeout(() => setConfirmReadyId(null), 3000)
-            return
-        }
-        
-        setConfirmReadyId(null)
+        setConfirmAction(null)
         setReadyId(orderId)
         setErrorMsg(null)
         setSuccessMsg(null)
@@ -564,55 +545,37 @@ export default function JumiaOrdersClient() {
                                                                 {currentStatus === 'pending' && (
                                                                     <>
                                                                         <button 
-                                                                            onClick={() => handlePackOrder(order.id)}
-                                                                            disabled={packingId === order.id}
-                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
-                                                                                confirmPackId === order.id
-                                                                                ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-md'
-                                                                                : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                                                                            }`}
+                                                                            onClick={() => setConfirmAction({ action: 'PACK', orderId: order.id || order.number || order.OrderId || order.OrderNumber, orderNumber: order.number || order.OrderId || order.OrderNumber || 'N/A' })}
+                                                                            disabled={packingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-orange-100 text-orange-700 hover:bg-orange-200`}
                                                                         >
-                                                                            {packingId === order.id ? (
+                                                                            {packingId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
                                                                                 <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
-                                                                            ) : confirmPackId === order.id ? (
-                                                                                'Confirmer ?'
                                                                             ) : (
                                                                                 <><Package className="w-3 h-3" /> Préparer</>
                                                                             )}
                                                                         </button>
                                                                         
                                                                         <button 
-                                                                            onClick={() => handleReadyToShipOrder(order.number || order.OrderId || order.OrderNumber)}
+                                                                            onClick={() => setConfirmAction({ action: 'READY_TO_SHIP', orderId: order.number || order.OrderId || order.OrderNumber, orderNumber: order.number || order.OrderId || order.OrderNumber || 'N/A' })}
                                                                             disabled={readyId === (order.number || order.OrderId || order.OrderNumber)}
-                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
-                                                                                confirmReadyId === (order.number || order.OrderId || order.OrderNumber)
-                                                                                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                                                                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                                                            }`}
+                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-100 text-blue-700 hover:bg-blue-200`}
                                                                             title="Une fois préparée (Packed), validez l'expédition"
                                                                         >
                                                                             {readyId === (order.number || order.OrderId || order.OrderNumber) ? (
                                                                                 <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
-                                                                            ) : confirmReadyId === (order.number || order.OrderId || order.OrderNumber) ? (
-                                                                                'Confirmer ?'
                                                                             ) : (
                                                                                 <><Send className="w-3 h-3" /> Expédier</>
                                                                             )}
                                                                         </button>
                                                                         
                                                                         <button 
-                                                                            onClick={() => handleCancelOrder(order.id || order.number || order.OrderId || order.OrderNumber)}
+                                                                            onClick={() => setConfirmAction({ action: 'CANCEL', orderId: order.id || order.number || order.OrderId || order.OrderNumber, orderNumber: order.number || order.OrderId || order.OrderNumber || 'N/A' })}
                                                                             disabled={cancelingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
-                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full ${
-                                                                                confirmCancelId === (order.id || order.number || order.OrderId || order.OrderNumber)
-                                                                                ? 'bg-red-600 text-white hover:bg-red-700 shadow-md'
-                                                                                : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                                                            }`}
+                                                                            className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-red-50 text-red-600 hover:bg-red-100`}
                                                                         >
                                                                             {cancelingId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
                                                                                 <><RefreshCw className="w-3 h-3 animate-spin" /> ...</>
-                                                                            ) : confirmCancelId === (order.id || order.number || order.OrderId || order.OrderNumber) ? (
-                                                                                'Confirmer ?'
                                                                             ) : (
                                                                                 <><XCircle className="w-3 h-3" /> Annuler</>
                                                                             )}
@@ -796,6 +759,41 @@ export default function JumiaOrdersClient() {
                         </div>
                     </div>
             </div>
+            
+            {/* Modal de confirmation */}
+            {confirmAction && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl shadow-xl max-w-sm w-full p-6 text-center space-y-6">
+                        <div className="mx-auto w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center">
+                            <AlertCircle className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black text-slate-800">Confirmer l'action</h3>
+                            <p className="text-sm text-slate-500 mt-2">
+                                Êtes-vous sûr de vouloir {confirmAction.action === 'PACK' ? 'préparer' : confirmAction.action === 'READY_TO_SHIP' ? 'expédier' : 'annuler'} la commande <strong className="text-slate-900">{confirmAction.orderNumber}</strong> ?
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3 w-full">
+                            <button 
+                                onClick={() => setConfirmAction(null)}
+                                className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                            >
+                                Non, retour
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    if (confirmAction.action === 'PACK') handlePackOrder(confirmAction.orderId)
+                                    if (confirmAction.action === 'READY_TO_SHIP') handleReadyToShipOrder(confirmAction.orderId)
+                                    if (confirmAction.action === 'CANCEL') handleCancelOrder(confirmAction.orderId)
+                                }}
+                                className="flex-1 py-3 px-4 bg-orange-600 text-white font-bold rounded-xl hover:bg-orange-700 transition-colors shadow-md shadow-orange-500/20"
+                            >
+                                Oui, confirmer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

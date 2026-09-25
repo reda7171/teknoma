@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         const queryToken = searchParams.get('token')
         
         const body = await req.json()
-        void('[TELEGRAM WEBHOOK] Incoming Body:', JSON.stringify(body))
+        console.log('[TELEGRAM WEBHOOK] Incoming Body:', JSON.stringify(body))
         
         // Récupérer le token depuis la DB
         const tokenSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } })
@@ -1772,7 +1772,7 @@ export async function POST(req: Request) {
                         // Mélanger aléatoirement pour ne pas toujours afficher les mêmes
                         const marketingFiles = filteredFiles.sort(() => 0.5 - Math.random()).slice(0, 10)
 
-                        void(`[TELEGRAM] Filtered ${marketingFiles.length} marketing files:`, marketingFiles)
+                        console.log(`[TELEGRAM] Filtered ${marketingFiles.length} marketing files:`, marketingFiles)
 
                         if (marketingFiles.length > 0) {
                             creatives = marketingFiles.map(file => ({
@@ -1842,7 +1842,7 @@ export async function POST(req: Request) {
 
                     void(`[TELEGRAM] Sending final menu to ${chatId}`)
                     const result = await sendTelegramMessage(`🚀 <b>Marketing Riwaya</b>\n\nChoisissez une créative ci-dessus pour la publier :`, chatId.toString(), token, replyMarkup)
-                    void(`[TELEGRAM] Final menu send result:`, result ? 'SUCCESS' : 'FAILED')
+                    console.log(`[TELEGRAM] Final menu send result:`, result ? 'SUCCESS' : 'FAILED')
                 } catch (error: any) {
                     console.error('[TELEGRAM ERROR] /GENERER failed:', error)
                     await sendTelegramMessage(`❌ Erreur lors du scan : ${error.message}`, chatId.toString(), token)
@@ -1881,6 +1881,49 @@ export async function POST(req: Request) {
                     })
                     const textMessage = `📊 <b>Alerte Stock Critique (< 3)</b> :\n\n${list}`
                     await sendTelegramMessage(textMessage, chatId.toString(), token, { inline_keyboard: keyboard })
+                }
+            }
+            else if (text.startsWith('/VPS')) {
+                try {
+                    const os = await import('os')
+                    const { exec } = await import('child_process')
+                    const { promisify } = await import('util')
+                    const execAsync = promisify(exec)
+
+                    const totalMem = os.totalmem()
+                    const freeMem = os.freemem()
+                    const usedMem = totalMem - freeMem
+                    const memUsagePercent = ((usedMem / totalMem) * 100).toFixed(2)
+
+                    const totalMemGB = (totalMem / 1024 / 1024 / 1024).toFixed(2)
+                    const usedMemGB = (usedMem / 1024 / 1024 / 1024).toFixed(2)
+
+                    const loadAvg = os.loadavg()
+                    const cpus = os.cpus().length
+
+                    const uptime = os.uptime()
+                    const uptimeDays = Math.floor(uptime / 86400)
+                    const uptimeHours = Math.floor((uptime % 86400) / 3600)
+
+                    let diskUsage = 'Non disponible'
+                    try {
+                        if (os.platform() !== 'win32') {
+                            const { stdout } = await execAsync("df -h / | awk 'NR==2 {print $5}'")
+                            diskUsage = stdout.trim()
+                        }
+                    } catch (e) {}
+
+                    const hostname = os.hostname()
+
+                    const messageText = `🖥️ <b>Statut du Serveur VPS (${hostname})</b>\n\n` +
+                        `<b>CPU</b>\n- Coeurs : ${cpus}\n- Charge (1m, 5m, 15m) : ${loadAvg.map((n: number) => n.toFixed(2)).join(', ')}\n\n` +
+                        `<b>Mémoire (RAM)</b>\n- Utilisée : ${usedMemGB} Go / ${totalMemGB} Go\n- Pourcentage : ${memUsagePercent}%\n\n` +
+                        `<b>Disque</b>\n- Utilisation (/) : ${diskUsage}\n\n` +
+                        `<b>Système</b>\n- Uptime : ${uptimeDays}j ${uptimeHours}h\n- OS : ${os.type()} ${os.release()}`
+
+                    await sendTelegramMessage(messageText, chatId.toString(), token)
+                } catch (e) {
+                    await sendTelegramMessage(`❌ Erreur lors de la récupération du statut VPS.`, chatId.toString(), token)
                 }
             }
             else if (text.startsWith('/SETSTOCK')) {

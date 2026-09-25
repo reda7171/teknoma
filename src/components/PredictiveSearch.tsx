@@ -188,7 +188,7 @@ export default function PredictiveSearch() {
 
             {/* Dropdown Results - Style Pixio */}
             {isOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 w-[120%] min-w-[320px] md:min-w-[500px] mt-4 bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="absolute top-full inset-x-0 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-[120%] sm:min-w-[500px] mt-4 bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
 
                     {/* Suggestions si query vide */}
                     {query.length === 0 && (

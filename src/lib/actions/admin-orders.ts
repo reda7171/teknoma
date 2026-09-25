@@ -291,6 +291,16 @@ export async function getOrderById(orderId: string) {
                                 image: true,
                                 price: true,
                                 costPrice: true,
+                                stockMovements: {
+                                    where: {
+                                        type: 'EXIT',
+                                        note: { contains: orderId }
+                                    },
+                                    include: {
+                                        fromWarehouse: { select: { id: true, name: true } }
+                                    },
+                                    take: 1
+                                }
                             }
                         },
                         pack: {

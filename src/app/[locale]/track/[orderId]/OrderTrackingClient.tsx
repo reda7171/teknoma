@@ -1,7 +1,9 @@
 'use client'
 
-import { Package, Truck, CheckCircle2, Clock, MapPin, ChevronLeft, XCircle } from 'lucide-react'
+import { Package, Truck, CheckCircle2, Clock, MapPin, ChevronLeft, ChevronRight, XCircle, ShoppingBag } from 'lucide-react'
 import Link from 'next/link'
+import ImageWithFallback from '@/components/ImageWithFallback'
+import { normalizeImage } from '@/lib/utils'
 
 interface OrderTrackingClientProps {
     order: any
@@ -10,7 +12,121 @@ interface OrderTrackingClientProps {
 }
 
 export default function OrderTrackingClient({ order, shippingCompany, locale }: OrderTrackingClientProps) {
-    // Determine current step index
+    const t = {
+        fr: {
+            backToStore: "Retour à la boutique",
+            trackingTitle: "Suivi de commande",
+            order: "Commande",
+            placedOn: "Passée le",
+            cancelled: "Commande Annulée",
+            cancelledDesc: "Cette commande a été annulée.",
+            returned: "Commande Retournée",
+            returnedDesc: "Cette commande a été retournée.",
+            steps: {
+                PENDING: "Commande Reçue",
+                CONFIRMED: "En Préparation",
+                SHIPPED: "Expédiée",
+                DELIVERED: "Livrée"
+            },
+            shippingCompany: "Transporteur",
+            trackingNumber: "N° de Suivi",
+            trackOnSite: "Suivre sur leur site",
+            orderDetails: "Détails des articles",
+            quantity: "Qté",
+            subtotal: "Sous-total",
+            shipping: "Livraison",
+            discount: "Remise",
+            total: "Total",
+            needHelp: "Besoin d'aide avec votre commande ?",
+            contactUs: "Contactez-nous",
+            dhs: "Dhs"
+        },
+        ar: {
+            backToStore: "العودة إلى المتجر",
+            trackingTitle: "تتبع الطلب",
+            order: "طلب",
+            placedOn: "تم في",
+            cancelled: "تم إلغاء الطلب",
+            cancelledDesc: "تم إلغاء هذا الطلب.",
+            returned: "تم إرجاع الطلب",
+            returnedDesc: "تم إرجاع هذا الطلب.",
+            steps: {
+                PENDING: "تم الاستلام",
+                CONFIRMED: "قيد التحضير",
+                SHIPPED: "تم الشحن",
+                DELIVERED: "تم التوصيل"
+            },
+            shippingCompany: "شركة الشحن",
+            trackingNumber: "رقم التتبع",
+            trackOnSite: "تتبع على الموقع",
+            orderDetails: "تفاصيل المنتجات",
+            quantity: "الكمية",
+            subtotal: "المجموع الفرعي",
+            shipping: "التوصيل",
+            discount: "تخفيض",
+            total: "المجموع الكلي",
+            needHelp: "تحتاج إلى مساعدة في طلبك؟",
+            contactUs: "اتصل بنا",
+            dhs: "درهم"
+        },
+        en: {
+            backToStore: "Back to store",
+            trackingTitle: "Order Tracking",
+            order: "Order",
+            placedOn: "Placed on",
+            cancelled: "Order Cancelled",
+            cancelledDesc: "This order has been cancelled.",
+            returned: "Order Returned",
+            returnedDesc: "This order has been returned.",
+            steps: {
+                PENDING: "Received",
+                CONFIRMED: "In Prep",
+                SHIPPED: "Shipped",
+                DELIVERED: "Delivered"
+            },
+            shippingCompany: "Carrier",
+            trackingNumber: "Tracking No",
+            trackOnSite: "Track on site",
+            orderDetails: "Order details",
+            quantity: "Qty",
+            subtotal: "Subtotal",
+            shipping: "Shipping",
+            discount: "Discount",
+            total: "Total",
+            needHelp: "Need help with your order?",
+            contactUs: "Contact us",
+            dhs: "Dhs"
+        }
+    }[locale as 'fr' | 'ar' | 'en'] || {
+        backToStore: "Retour à la boutique",
+        trackingTitle: "Suivi de commande",
+        order: "Commande",
+        placedOn: "Passée le",
+        cancelled: "Commande Annulée",
+        cancelledDesc: "Cette commande a été annulée.",
+        returned: "Commande Retournée",
+        returnedDesc: "Cette commande a été retournée.",
+        steps: {
+            PENDING: "Commande Reçue",
+            CONFIRMED: "En Préparation",
+            SHIPPED: "Expédiée",
+            DELIVERED: "Livrée"
+        },
+        shippingCompany: "Transporteur",
+        trackingNumber: "N° de Suivi",
+        trackOnSite: "Suivre sur leur site",
+        orderDetails: "Détails des articles",
+        quantity: "Qté",
+        subtotal: "Sous-total",
+        shipping: "Livraison",
+        discount: "Remise",
+        total: "Total",
+        needHelp: "Besoin d'aide avec votre commande ?",
+        contactUs: "Contactez-nous",
+        dhs: "Dhs"
+    }
+
+    const isRtl = locale === 'ar'
     const statusOrder = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED']
     const currentIndex = statusOrder.indexOf(order.status)
     const isCancelled = order.status === 'CANCELLED'
@@ -27,57 +143,63 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
     }
 
     const steps = [
-        { id: 'PENDING', title: 'Commande Reçue', icon: Clock },
-        { id: 'CONFIRMED', title: 'En Préparation', icon: Package },
-        { id: 'SHIPPED', title: 'Expédiée', icon: Truck },
-        { id: 'DELIVERED', title: 'Livrée', icon: CheckCircle2 },
+        { id: 'PENDING', title: t.steps.PENDING, icon: Clock },
+        { id: 'CONFIRMED', title: t.steps.CONFIRMED, icon: Package },
+        { id: 'SHIPPED', title: t.steps.SHIPPED, icon: Truck },
+        { id: 'DELIVERED', title: t.steps.DELIVERED, icon: CheckCircle2 },
     ]
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto space-y-8">
+        <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
                 
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <Link href={`/${locale}`} className="text-gray-500 hover:text-gray-700 flex items-center gap-2">
-                        <ChevronLeft className="w-5 h-5" />
-                        Retour à la boutique
+                <div className="relative flex items-center justify-center py-4 mb-4">
+                    <Link 
+                        href={`/${locale}`} 
+                        className={`absolute ${isRtl ? 'right-0' : 'left-0'} text-gray-500 hover:text-gray-900 flex items-center gap-1 sm:gap-2 font-medium transition-colors`}
+                    >
+                        {isRtl ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+                        <span className="hidden sm:inline">{t.backToStore}</span>
+                        <span className="sm:hidden text-sm">Retour</span>
                     </Link>
-                    <img src="/logo.png" alt="Riwaya" className="h-8" />
+                    <img src="/logo.png" alt="Riwaya" className="h-12 sm:h-16 w-auto object-contain" />
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-black"></div>
+                <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100/60 p-6 sm:p-10 relative overflow-hidden backdrop-blur-xl">
+                    {/* Decorative gradient top bar */}
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
                     
-                    <div className="mb-10">
-                        <h1 className="text-2xl font-black text-gray-900">Suivi de commande</h1>
-                        <p className="text-gray-500 mt-2">
-                            Commande <span className="font-mono font-bold text-gray-900">#{order.id.split('-')[0].toUpperCase()}</span>
+                    <div className="mb-10 text-center sm:text-start">
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.trackingTitle}</h1>
+                        <p className="text-gray-500 mt-2 text-sm sm:text-base">
+                            {t.order} <span className="font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md">#{order.id.split('-')[0].toUpperCase()}</span>
                             {' • '}
-                            Passée le {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                            {t.placedOn} {new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
                         </p>
                     </div>
 
                     {/* Alert for Cancelled/Returned */}
                     {(isCancelled || isReturned) && (
-                        <div className="mb-8 p-4 bg-red-50 text-red-800 rounded-xl border border-red-100 flex items-center gap-3">
-                            <XCircle className="w-6 h-6 text-red-600" />
+                        <div className="mb-8 p-5 bg-red-50/80 text-red-800 rounded-2xl border border-red-100 flex items-center gap-4">
+                            <XCircle className="w-8 h-8 text-red-500 shrink-0" />
                             <div>
-                                <p className="font-bold">
-                                    {isCancelled ? 'Commande Annulée' : 'Commande Retournée'}
-                                </p>
-                                <p className="text-sm">Cette commande a été {isCancelled ? 'annulée' : 'retournée'}.</p>
+                                <p className="font-black text-lg">{isCancelled ? t.cancelled : t.returned}</p>
+                                <p className="text-sm text-red-700/80 mt-1">{isCancelled ? t.cancelledDesc : t.returnedDesc}</p>
                             </div>
                         </div>
                     )}
 
                     {/* Progress Bar */}
                     {!isCancelled && !isReturned && (
-                        <div className="relative mb-16 mt-8">
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="relative mb-12 sm:mb-16 mt-8 hidden sm:block">
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                 <div 
-                                    className="h-full bg-black transition-all duration-500 ease-in-out"
-                                    style={{ width: `${(Math.max(0, currentIndex) / (steps.length - 1)) * 100}%` }}
+                                    className={`h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-1000 ease-in-out ${isRtl ? 'origin-right' : 'origin-left'}`}
+                                    style={{ 
+                                        width: `${(Math.max(0, currentIndex) / (steps.length - 1)) * 100}%`,
+                                        transform: isRtl ? 'scaleX(-1)' : 'none'
+                                    }}
                                 ></div>
                             </div>
                             
@@ -88,15 +210,19 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                     
                                     return (
                                         <div key={step.id} className="flex flex-col items-center">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-colors duration-300 ${
-                                                status === 'completed' ? 'bg-black text-white' :
-                                                status === 'current' ? 'bg-white border-2 border-black text-black' :
-                                                'bg-white border-2 border-gray-200 text-gray-300'
+                                            <div className={`relative w-12 h-12 rounded-full flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${
+                                                status === 'completed' ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-blue-500/30' :
+                                                status === 'current' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/40 ring-4 ring-indigo-600/30 ring-offset-2' :
+                                                'bg-white border-2 border-gray-100 text-gray-300'
                                             }`}>
-                                                <Icon className="w-5 h-5" />
+                                                {status === 'current' && (
+                                                    <span className="absolute inset-0 rounded-full animate-ping bg-indigo-500 opacity-75"></span>
+                                                )}
+                                                <Icon className="w-5 h-5 relative z-10" />
                                             </div>
-                                            <p className={`mt-3 text-xs font-bold uppercase tracking-wider ${
-                                                status === 'inactive' ? 'text-gray-400' : 'text-gray-900'
+                                            <p className={`mt-4 text-[10px] sm:text-xs font-black uppercase tracking-widest ${
+                                                status === 'inactive' ? 'text-gray-300' : 
+                                                status === 'current' ? 'text-indigo-600 animate-pulse' : 'text-gray-900'
                                             }`}>
                                                 {step.title}
                                             </p>
@@ -107,64 +233,104 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                         </div>
                     )}
 
+                    {/* Mobile Progress List (Visible only on small screens) */}
+                    {!isCancelled && !isReturned && (
+                        <div className="sm:hidden mb-10 space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                            {steps.map((step, index) => {
+                                const status = getStepStatus(index)
+                                const Icon = step.icon
+                                
+                                return (
+                                    <div key={step.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                        <div className={`relative flex items-center justify-center w-10 h-10 rounded-full z-10 shrink-0 shadow-sm ${
+                                            status === 'completed' ? 'border-2 border-indigo-600 text-indigo-600 bg-indigo-50' :
+                                            status === 'current' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40 ring-4 ring-indigo-600/30' :
+                                            'border-2 border-gray-200 text-gray-300 bg-white'
+                                        } ${isRtl ? 'ml-4' : 'mr-4'}`}>
+                                            {status === 'current' && (
+                                                <span className="absolute inset-0 rounded-full animate-ping bg-indigo-500 opacity-75"></span>
+                                            )}
+                                            <Icon className="w-4 h-4 relative z-10" />
+                                        </div>
+                                        <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border ${status === 'current' ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-100 bg-white'} shadow-sm transition-colors`}>
+                                            <h3 className={`font-black text-xs uppercase tracking-widest ${
+                                                status === 'inactive' ? 'text-gray-400' : 
+                                                status === 'current' ? 'text-indigo-600 animate-pulse' : 'text-gray-900'
+                                            }`}>{step.title}</h3>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+
                     {/* Shipping Info */}
                     {shippingCompany && order.trackingID && (
-                        <div className="bg-gray-50 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6 justify-between border border-gray-100">
-                            <div className="flex items-center gap-4">
+                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-[1.5rem] p-5 sm:p-6 mb-10 flex flex-col sm:flex-row items-center gap-6 justify-between border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
                                 {shippingCompany.logo ? (
-                                    <img src={shippingCompany.logo} alt={shippingCompany.name} className="h-10 object-contain" />
+                                    <div className="w-14 h-14 bg-white rounded-xl shadow-sm border border-gray-100 p-2 shrink-0 flex items-center justify-center">
+                                        <img src={shippingCompany.logo} alt={shippingCompany.name} className="max-w-full max-h-full object-contain" />
+                                    </div>
                                 ) : (
-                                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                                        <Truck className="w-6 h-6 text-gray-500" />
+                                    <div className="w-14 h-14 bg-gray-100 rounded-xl shrink-0 flex items-center justify-center">
+                                        <Truck className="w-6 h-6 text-gray-400" />
                                     </div>
                                 )}
-                                <div>
-                                    <p className="text-sm text-gray-500 font-medium">Transporteur</p>
-                                    <p className="font-bold text-gray-900">{shippingCompany.name}</p>
+                                <div className="flex-1">
+                                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{t.shippingCompany}</p>
+                                    <p className="font-black text-gray-900 text-lg">{shippingCompany.name}</p>
                                 </div>
                             </div>
                             
-                            <div className="text-left sm:text-right">
-                                <p className="text-sm text-gray-500 font-medium">N° de Suivi</p>
-                                <p className="font-mono font-bold text-gray-900 bg-white px-3 py-1 rounded border border-gray-200 mt-1 inline-block">
-                                    {order.trackingID}
-                                </p>
+                            <div className="flex flex-col sm:items-end w-full sm:w-auto gap-2">
+                                <div>
+                                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">{t.trackingNumber}</p>
+                                    <p className="font-mono font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100/50 inline-block">
+                                        {order.trackingID}
+                                    </p>
+                                </div>
+                                {shippingCompany.trackingUrl && (
+                                    <a 
+                                        href={shippingCompany.trackingUrl.replace('{trackingID}', order.trackingID)} 
+                                        target="_blank" 
+                                        rel="noreferrer"
+                                        className="mt-2 w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-black text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md shadow-black/10"
+                                    >
+                                        {t.trackOnSite}
+                                    </a>
+                                )}
                             </div>
-                            
-                            {shippingCompany.trackingUrl && (
-                                <a 
-                                    href={shippingCompany.trackingUrl.replace('{trackingID}', order.trackingID)} 
-                                    target="_blank" 
-                                    rel="noreferrer"
-                                    className="bg-black text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-900 transition-colors whitespace-nowrap"
-                                >
-                                    Suivre sur leur site
-                                </a>
-                            )}
                         </div>
                     )}
 
                     {/* Order Items */}
-                    <div className="border-t border-gray-100 pt-8">
-                        <h3 className="font-bold text-gray-900 mb-6 uppercase tracking-wider text-sm">Détails des articles</h3>
-                        <div className="space-y-4">
+                    <div className="pt-2">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+                                <ShoppingBag className="w-4 h-4" />
+                            </div>
+                            <h3 className="font-black text-gray-900 uppercase tracking-widest text-sm">{t.orderDetails}</h3>
+                        </div>
+                        
+                        <div className="space-y-3">
                             {order.items.map((item: any) => (
-                                <div key={item.id} className="flex items-center gap-4 py-2">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                                <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-gray-200">
+                                    <div className="w-16 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 shadow-inner">
                                         {(item.book?.image || item.pack?.image) ? (
-                                            <img src={item.book?.image || item.pack?.image} alt="Produit" className="w-full h-full object-cover" />
+                                            <ImageWithFallback src={normalizeImage(item.book?.image || item.pack?.image)} alt="Produit" fallback="/placeholder.png" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
                                                 <Package className="w-6 h-6" />
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="font-bold text-gray-900 line-clamp-1">{item.book?.title || item.pack?.name || 'Produit'}</p>
-                                        <p className="text-sm text-gray-500">Quantité: {item.quantity}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-gray-900 leading-snug truncate">{item.book?.title || item.pack?.name || 'Produit'}</p>
+                                        <p className="text-xs text-gray-500 font-medium mt-1 bg-gray-100 inline-block px-2 py-0.5 rounded-md">{t.quantity}: {item.quantity}</p>
                                     </div>
-                                    <div className="font-black text-gray-900">
-                                        {(item.price * item.quantity).toFixed(2)} Dhs
+                                    <div className="font-black text-gray-900 whitespace-nowrap">
+                                        {(item.price * item.quantity).toFixed(2)} <span className="text-xs text-gray-500 font-bold">{t.dhs}</span>
                                     </div>
                                 </div>
                             ))}
@@ -172,34 +338,39 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                     </div>
 
                     {/* Totals */}
-                    <div className="border-t border-gray-100 pt-6 mt-6">
-                        <div className="flex justify-between text-sm mb-2">
-                            <span className="text-gray-500">Sous-total</span>
-                            <span className="font-medium">{(order.subtotal || order.total - order.shippingFees + order.discount).toFixed(2)} Dhs</span>
-                        </div>
-                        <div className="flex justify-between text-sm mb-2">
-                            <span className="text-gray-500">Livraison</span>
-                            <span className="font-medium">{order.shippingFees.toFixed(2)} Dhs</span>
-                        </div>
-                        {order.discount > 0 && (
-                            <div className="flex justify-between text-sm mb-4 text-green-600">
-                                <span>Remise</span>
-                                <span className="font-medium">-{order.discount.toFixed(2)} Dhs</span>
+                    <div className="mt-8 bg-gray-50/80 rounded-[1.5rem] p-6 border border-gray-100">
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-500 font-medium">{t.subtotal}</span>
+                                <span className="font-bold text-gray-900">{(order.subtotal || order.total - order.shippingFees + order.discount).toFixed(2)} {t.dhs}</span>
                             </div>
-                        )}
-                        <div className="flex justify-between text-lg font-black text-gray-900 pt-4 border-t border-gray-100">
-                            <span>Total</span>
-                            <span>{order.total.toFixed(2)} Dhs</span>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-500 font-medium">{t.shipping}</span>
+                                <span className="font-bold text-gray-900">{order.shippingFees.toFixed(2)} {t.dhs}</span>
+                            </div>
+                            {order.discount > 0 && (
+                                <div className="flex justify-between text-sm text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg -mx-3">
+                                    <span className="font-bold">{t.discount}</span>
+                                    <span className="font-black">-{order.discount.toFixed(2)} {t.dhs}</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-between items-end pt-5 mt-5 border-t border-gray-200">
+                            <span className="text-sm font-bold text-gray-900 uppercase tracking-widest">{t.total}</span>
+                            <div className="text-right">
+                                <span className="text-3xl font-black text-gray-900">{order.total.toFixed(2)}</span>
+                                <span className="text-sm font-bold text-gray-500 ml-1">{t.dhs}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 {/* Need help? */}
-                <div className="text-center">
+                <div className="text-center pb-8">
                     <p className="text-sm text-gray-500">
-                        Besoin d'aide avec votre commande ?{' '}
-                        <a href="mailto:contact@riwaya.store" className="font-bold text-black hover:underline">
-                            Contactez-nous
+                        {t.needHelp}{' '}
+                        <a href="mailto:contact@riwaya.store" className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+                            {t.contactUs}
                         </a>
                     </p>
                 </div>

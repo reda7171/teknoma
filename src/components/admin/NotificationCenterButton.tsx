@@ -3,36 +3,111 @@
 import { useState } from 'react'
 import { MessageSquare, X, MessageCircle, Mail, Filter } from 'lucide-react'
 
-const getNotificationLinks = (order: any) => {
-    const trackingLink = `https://riwaya.store/fr/track/${order.id}`
+const getNotificationLinks = (order: any, lang: 'fr' | 'ar' | 'en' = 'fr', filterType?: string) => {
+    const trackingLink = `https://riwaya.store/${lang}/track/${order.id}`
     let text = ''
     let subject = 'Suivi de votre commande Riwaya'
     
-    switch (order.status) {
-        case 'PENDING':
-            text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
-            break
-        case 'ABANDONED_CART':
-            subject = `Finalisez votre commande et profitez de -20 DHS offerts ! 🎁`
-            text = `Bonjour ${order.fullName},\n\nNous avons remarqué que vous n'avez pas terminé votre commande sur Riwaya.\n\nPour vous remercier de votre visite et vous encourager dans votre lecture, nous vous offrons une remise exceptionnelle de -20 DHS sur votre panier !\n\nAvez-vous besoin d'aide avec un livre ou le paiement à la livraison ? N'hésitez pas à nous répondre.\n\nL'équipe Riwaya.`
-            break
-        case 'CONFIRMED':
-            text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
-            break
-        case 'SHIPPED':
-            text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Lien : ${trackingLink}`
-            break
-        case 'DELIVERED':
-            text = `Bonjour ${order.fullName}, votre commande a été livrée ! Bonne lecture et n'hésitez pas à nous laisser un avis.`
-            break
-        case 'RETURNED':
-            text = `Bonjour ${order.fullName}, nous vous informons que votre commande a été marquée comme retournée.`
-            break
-        case 'CANCELLED':
-            text = `Bonjour ${order.fullName}, votre commande a été annulée. Si c'est une erreur, n'hésitez pas à nous contacter.`
-            break
-        default:
-            text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Riwaya : ${trackingLink}`
+    const isEncouragement = filterType === 'ENCOURAGEMENT' && order.status === 'DELIVERED'
+
+    if (lang === 'fr') {
+        if (isEncouragement) {
+            subject = 'Merci pour votre confiance ! Cadeau exclusif 🎁'
+            text = `Bonjour ${order.fullName},\n\nNous espérons que vous avez apprécié votre dernière lecture avec Riwaya ! 📚\n\nPour vous remercier de votre confiance, nous vous offrons le code promo exclusif : *REVIENS20*\n\nUtilisez-le lors de votre prochaine commande pour profiter d'une réduction spéciale. N'hésitez pas à jeter un œil à nos nouveautés !\n\nL'équipe Riwaya.`
+        } else {
+        switch (order.status) {
+            case 'PENDING':
+                text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
+                break
+            case 'ABANDONED_CART':
+                subject = `Finalisez votre commande et profitez de -20 DHS offerts ! 🎁`
+                text = `Bonjour ${order.fullName},\n\nNous avons remarqué que vous n'avez pas terminé votre commande sur Riwaya.\n\nPour vous remercier de votre visite et vous encourager dans votre lecture, nous vous offrons une remise exceptionnelle de -20 DHS sur votre panier !\n\nAvez-vous besoin d'aide avec un livre ou le paiement à la livraison ? N'hésitez pas à nous répondre.\n\nL'équipe Riwaya.`
+                break
+            case 'CONFIRMED':
+                text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
+                break
+            case 'SHIPPED':
+                text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Lien : ${trackingLink}`
+                break
+            case 'DELIVERED':
+                text = `Bonjour ${order.fullName}, votre commande a été livrée ! Bonne lecture et n'hésitez pas à nous laisser un avis.`
+                break
+            case 'RETURNED':
+                text = `Bonjour ${order.fullName}, nous vous informons que votre commande a été marquée comme retournée.`
+                break
+            case 'CANCELLED':
+                text = `Bonjour ${order.fullName}, votre commande a été annulée. Si c'est une erreur, n'hésitez pas à nous contacter.`
+                break
+            default:
+                text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Riwaya : ${trackingLink}`
+        }
+        }
+    } else if (lang === 'ar') {
+        subject = 'تتبع طلبك من رواية'
+        if (isEncouragement) {
+            subject = 'شكراً لثقتكم! هدية حصرية 🎁'
+            text = `مرحباً ${order.fullName}،\n\nنأمل أن تكونوا قد استمتعتم بقراءتكم الأخيرة مع رواية! 📚\n\nلشكركم على ثقتكم، نقدم لكم كود الخصم الحصري: *REVIENS20*\n\nاستخدموه في طلبكم القادم للاستفادة من تخفيض خاص. لا تترددوا في الاطلاع على جديدنا!\n\nفريق رواية.`
+        } else {
+        switch (order.status) {
+            case 'PENDING':
+                text = `مرحباً ${order.fullName}، لقد توصلنا بطلبك على رواية! يمكنك تتبع حالته هنا: ${trackingLink}`
+                break
+            case 'ABANDONED_CART':
+                subject = `أكمل طلبك واستفد من خصم 20 درهم! 🎁`
+                text = `مرحباً ${order.fullName}،\n\nلاحظنا أنك لم تكمل طلبك على رواية.\n\nلشكرك على زيارتك وتشجيعك على القراءة، نقدم لك خصماً استثنائياً بقيمة 20 درهم على سلتك!\n\nهل تحتاج إلى مساعدة بخصوص كتاب أو الدفع عند الاستلام؟ لا تتردد في الرد علينا.\n\nفريق رواية.`
+                break
+            case 'CONFIRMED':
+                text = `مرحباً ${order.fullName}، تم تأكيد طلبك وهو قيد التحضير. التتبع: ${trackingLink}`
+                break
+            case 'SHIPPED':
+                text = `خبر سار ${order.fullName}، تم شحن طلبك${order.shippingCompanyName ? ` مع ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (تتبع: ${order.trackingID})` : ''}! الرابط: ${trackingLink}`
+                break
+            case 'DELIVERED':
+                text = `مرحباً ${order.fullName}، تم توصيل طلبك! قراءة ممتعة ولا تتردد في ترك تقييم.`
+                break
+            case 'RETURNED':
+                text = `مرحباً ${order.fullName}، نعلمك أنه تم تمييز طلبك كمرتجع.`
+                break
+            case 'CANCELLED':
+                text = `مرحباً ${order.fullName}، تم إلغاء طلبك. إذا كان هذا خطأ، لا تتردد في الاتصال بنا.`
+                break
+            default:
+                text = `مرحباً ${order.fullName}، إليك رابط تتبع طلبك من رواية: ${trackingLink}`
+        }
+        }
+    } else if (lang === 'en') {
+        subject = 'Track your Riwaya order'
+        if (isEncouragement) {
+            subject = 'Thank you for your trust! Exclusive gift 🎁'
+            text = `Hello ${order.fullName},\n\nWe hope you enjoyed your recent read with Riwaya! 📚\n\nTo thank you for your trust, we are offering you an exclusive promo code: *REVIENS20*\n\nUse it on your next order to enjoy a special discount. Feel free to check out our new arrivals!\n\nThe Riwaya team.`
+        } else {
+        switch (order.status) {
+            case 'PENDING':
+                text = `Hello ${order.fullName}, we have received your order on Riwaya! You can track its progress here: ${trackingLink}`
+                break
+            case 'ABANDONED_CART':
+                subject = `Complete your order and get 20 DHS off! 🎁`
+                text = `Hello ${order.fullName},\n\nWe noticed you didn't complete your order on Riwaya.\n\nTo thank you for your visit and encourage your reading, we are offering you an exceptional discount of 20 DHS on your cart!\n\nDo you need help with a book or cash on delivery? Don't hesitate to reply.\n\nThe Riwaya team.`
+                break
+            case 'CONFIRMED':
+                text = `Hello ${order.fullName}, your Riwaya order is confirmed and being prepared. Tracking: ${trackingLink}`
+                break
+            case 'SHIPPED':
+                text = `Good news ${order.fullName}, your order has been shipped${order.shippingCompanyName ? ` with ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Tracking: ${order.trackingID})` : ''}! Link: ${trackingLink}`
+                break
+            case 'DELIVERED':
+                text = `Hello ${order.fullName}, your order has been delivered! Happy reading and feel free to leave a review.`
+                break
+            case 'RETURNED':
+                text = `Hello ${order.fullName}, we inform you that your order has been marked as returned.`
+                break
+            case 'CANCELLED':
+                text = `Hello ${order.fullName}, your order has been cancelled. If this is a mistake, please contact us.`
+                break
+            default:
+                text = `Hello ${order.fullName}, here is the tracking link for your Riwaya order: ${trackingLink}`
+        }
+        }
     }
 
     const phone = order.phone.replace(/^0+/, '').replace(/\s+/g, '')
@@ -45,10 +120,13 @@ const getNotificationLinks = (order: any) => {
 export default function NotificationCenterButton({ orders, statusLabels }: { orders: any[], statusLabels: any }) {
     const [showModal, setShowModal] = useState(false)
     const [filterStatus, setFilterStatus] = useState<string>('ALL')
+    const [notificationLang, setNotificationLang] = useState<'fr' | 'ar' | 'en'>('fr')
 
     const filteredOrders = filterStatus === 'ALL' 
         ? orders 
-        : orders.filter(o => o.status === filterStatus)
+        : filterStatus === 'ENCOURAGEMENT'
+            ? orders.filter(o => o.status === 'DELIVERED')
+            : orders.filter(o => o.status === filterStatus)
 
     return (
         <>
@@ -77,19 +155,52 @@ export default function NotificationCenterButton({ orders, statusLabels }: { ord
                                     </p>
                                 </div>
                             </div>
-                            <button onClick={() => setShowModal(false)} className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                {filteredOrders.length > 0 && (
+                                    <button 
+                                        onClick={() => {
+                                            if (confirm(`Attention : Votre navigateur risque de bloquer l'ouverture de multiples onglets. Veuillez autoriser les pop-ups pour ce site.\n\nVoulez-vous ouvrir WhatsApp pour ces ${filteredOrders.length} clients ?`)) {
+                                                filteredOrders.forEach((order: any) => {
+                                                    const { waLink } = getNotificationLinks(order, notificationLang, filterStatus)
+                                                    window.open(waLink, '_blank')
+                                                })
+                                            }
+                                        }}
+                                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm"
+                                    >
+                                        <MessageCircle className="w-4 h-4" />
+                                        <span>Envoyer à tous</span>
+                                    </button>
+                                )}
+                                <select
+                                    value={notificationLang}
+                                    onChange={(e) => setNotificationLang(e.target.value as 'fr' | 'ar' | 'en')}
+                                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
+                                >
+                                    <option value="fr">🇫🇷 Français</option>
+                                    <option value="ar">🇲🇦 العربية</option>
+                                    <option value="en">🇬🇧 English</option>
+                                </select>
+                                <button onClick={() => setShowModal(false)} className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
                         
                         {/* Filters */}
-                        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center gap-2 overflow-x-auto">
+                        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex flex-wrap items-center gap-2">
                             <Filter className="w-4 h-4 text-gray-400 mr-2" />
                             <button 
                                 onClick={() => setFilterStatus('ALL')}
                                 className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${filterStatus === 'ALL' ? 'bg-black text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
                             >
                                 Toutes
+                            </button>
+                            <button 
+                                onClick={() => setFilterStatus('ENCOURAGEMENT')}
+                                className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${filterStatus === 'ENCOURAGEMENT' ? 'bg-pink-600 text-white shadow-md shadow-pink-500/20' : 'bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100'}`}
+                            >
+                                🎁 Encouragement
                             </button>
                             {Object.entries(statusLabels).map(([key, label]) => (
                                 <button 
@@ -107,7 +218,7 @@ export default function NotificationCenterButton({ orders, statusLabels }: { ord
                             {filteredOrders.length > 0 ? (
                                 <div className="space-y-4">
                                     {filteredOrders.map((order: any, idx: number) => {
-                                        const { waLink, mailLink, text } = getNotificationLinks(order)
+                                        const { waLink, mailLink, text } = getNotificationLinks(order, notificationLang, filterStatus)
                                         return (
                                             <div key={idx} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4 hover:border-green-200 transition-colors">
                                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

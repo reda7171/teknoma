@@ -42,6 +42,7 @@ interface HeaderProps {
         digital?: boolean
         packs?: boolean
         deposerListe?: boolean
+        threeForFour?: boolean
     }
     megaMenu?: any[]
     siteLogo?: string | null
@@ -65,6 +66,16 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
     }
 
     const pathname = usePathname()
+    const showSearch = (!pathname.includes('/mon-enfant') &&
+        !pathname.includes('/cle-usb') &&
+        !pathname.includes('/community/login') &&
+        !pathname.includes('/community/register') &&
+        !pathname.includes('/community/profile/edit') &&
+        !pathname.includes('/community/market') &&
+        !pathname.includes('/cart') &&
+        !pathname.includes('/blog/') &&
+        !pathname.includes('/checkout') &&
+        !pathname.includes('/books/'))
     const locale = useLocale()
     const t = useTranslations('Navigation')
     const tCat = useTranslations('Categories')
@@ -500,17 +511,19 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 <div className="scale-90 origin-right rtl:origin-left">
                                     <UserDropdown user={user} features={features} />
                                 </div>
-                                <button
-                                    onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                                    aria-label="Recherche mobile"
-                                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
-                                >
-                                    {mobileSearchOpen ? (
-                                        <X className="w-6 h-6 text-black" />
-                                    ) : (
-                                        <Search className="w-6 h-6 text-black" />
-                                    )}
-                                </button>
+                                {showSearch && (
+                                    <button
+                                        onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                                        aria-label="Recherche mobile"
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors"
+                                    >
+                                        {mobileSearchOpen ? (
+                                            <X className="w-6 h-6 text-black" />
+                                        ) : (
+                                            <Search className="w-6 h-6 text-black" />
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -527,11 +540,11 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 />
             )}
             <div
-                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full md:w-96 bg-white z-[150] transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                     }`}
                 suppressHydrationWarning
             >
-                <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-100">
                     <span className={`text-2xl font-black tracking-tighter flex items-center cursor-pointer group ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
                         {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
                             <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
@@ -549,7 +562,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                         <X className="w-6 h-6 text-black" />
                     </button>
                 </div>
-                <div className="overflow-y-auto h-[calc(100vh-73px)] pb-24">
+                <div className="flex-1 overflow-y-auto pb-24 overscroll-contain">
                     <nav className="flex flex-col space-y-3 p-4" suppressHydrationWarning>
                         {/* Mobile Actions First */}
                         <div className="pb-4 mb-2 border-b border-gray-100">
@@ -712,16 +725,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             {/* Spacer pour compenser le header fixe (h-20 = 80px) */}
             <div className="h-20" />
             {/* Barre de recherche - hors du header fixe, défile avec la page */}
-            {(!pathname.includes('/mon-enfant') &&
-                !pathname.includes('/cle-usb') &&
-                !pathname.includes('/community/login') &&
-                !pathname.includes('/community/register') &&
-                !pathname.includes('/community/profile/edit') &&
-                !pathname.includes('/community/market') &&
-                !pathname.includes('/cart') &&
-                !pathname.includes('/blog/') &&
-                !pathname.includes('/checkout') &&
-                !pathname.includes('/books/')) && (
+            {showSearch && (
                     <div className={`${mobileSearchOpen ? 'block' : 'hidden'} md:block py-3 bg-[#FDFBF7] shadow-sm`} suppressHydrationWarning>
                         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                             <div className="max-w-3xl mx-auto">

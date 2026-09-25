@@ -57,18 +57,18 @@ export default async function PacksPage({ params }: { params: Promise<{ locale: 
             <Header />
 
             {/* Page Header */}
-            <div className="bg-pixio-beige pt-20 pb-20">
+            <div className="bg-pixio-beige py-12 md:py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-black">
                     {/* Breadcrumbs */}
-                    <div className="flex items-center justify-center gap-4 text-xs md:text-sm font-black uppercase tracking-[0.2em] text-gray-400 mb-8">
-                        <Link href="/" className="hover:text-black transition-colors">{tNav('Home')}</Link>
+                    <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-[10px] md:text-sm font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-gray-400 mb-6 md:mb-8">
+                        <Link href="/" className="hover:text-black transition-colors whitespace-nowrap">{tNav('Home')}</Link>
                         <span className="text-gray-200">/</span>
-                        <span className="text-black">{t('Title')}</span>
+                        <span className="text-black whitespace-nowrap">{t('Title')}</span>
                     </div>
-                    <h1 className="text-6xl font-black mb-6 tracking-tighter">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-6 tracking-tighter">
                         {t('Title')}<span className="text-gray-300">.</span>
                     </h1>
-                    <p className="text-gray-500 font-bold uppercase tracking-[0.25em] text-sm md:text-base max-w-xl mx-auto leading-loose">
+                    <p className="text-gray-500 font-bold uppercase tracking-[0.15em] md:tracking-[0.25em] text-xs md:text-base max-w-xl mx-auto leading-relaxed md:leading-loose">
                         {t('Subtitle')}
                     </p>
                 </div>

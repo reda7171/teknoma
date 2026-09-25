@@ -29,6 +29,14 @@ export default function ReserveBookButton({ bookId }: { bookId: string }) {
         e.preventDefault()
         if (!whatsapp) return
 
+        const cleanPhone = whatsapp.replace(/\s/g, '')
+        const phoneRegex = /^(0[67]\d{8}|\+212[67]\d{8})$/
+        
+        if (!phoneRegex.test(cleanPhone)) {
+            showNotification(locale === 'ar' ? 'رقم الهاتف غير صالح' : locale === 'en' ? 'Invalid phone number' : 'Numéro de téléphone invalide', 'error')
+            return
+        }
+
         setLoading(true)
         try {
             const res = await fetch('/api/books/reserve', {

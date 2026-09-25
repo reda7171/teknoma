@@ -15,6 +15,7 @@ interface Book {
     image: string
     category: string | null
     productType?: string
+    description?: string | null
 }
 
 interface BulkPublishModalProps {
@@ -49,6 +50,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     const [showPreviewStep, setShowPreviewStep] = useState(true)
     const [previewStepData, setPreviewStepData] = useState<{ book: Book; imageBase64: string } | null>(null)
     const previewStepResolveRef = useRef<((approved: boolean) => void) | null>(null)
+    const [previewLang, setPreviewLang] = useState<'fr' | 'ar' | 'en'>('fr')
 
     const resetState = () => {
         setStatuses([])
@@ -577,10 +579,10 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
 
                 return (
                     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+                        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
 
                             {/* Header */}
-                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
                                 <div>
                                     <h3 className="text-base font-black text-gray-900">Aperçu avant publication</h3>
                                     <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[260px]">{book.title}</p>
@@ -588,62 +590,94 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 <ZoomIn className="w-5 h-5 text-gray-400" />
                             </div>
 
-                            {/* Image */}
-                            <div className="px-6 pt-5">
-                                <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-lg bg-gray-50">
-                                    <img
-                                        src={previewStepData.imageBase64}
-                                        alt="Aperçu"
-                                        className="w-full object-contain max-h-64"
-                                    />
+                            {/* Scrollable content */}
+                            <div className="overflow-y-auto flex-1">
+                                {/* Image */}
+                                <div className="px-4 sm:px-6 pt-4 sm:pt-5">
+                                    <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-lg bg-gray-50 flex items-center justify-center">
+                                        <img
+                                            src={previewStepData.imageBase64}
+                                            alt="Aperçu"
+                                            className="w-full object-contain max-h-[40vh] sm:max-h-64"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Infos : prix + plateformes */}
-                            <div className="px-6 py-4 space-y-3">
-                                {/* Prix */}
-                                <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3">
-                                    <div className="flex-1">
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Prix affiché</p>
-                                        <div className="flex items-baseline gap-2">
-                                            <span className="text-2xl font-black text-gray-900">{price} <span className="text-base">DH</span></span>
-                                            <span className="text-sm font-bold text-gray-400 line-through">{oldPrice} DH</span>
-                                            <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                                                -{Math.round(100 - (price / oldPrice) * 100)}%
-                                            </span>
+                                {/* Caption Preview */}
+                                <div className="px-4 sm:px-6 pt-4">
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Légende de la publication</p>
+                                        <div className="flex bg-gray-100 rounded-lg p-0.5 gap-1">
+                                            {(['fr', 'ar', 'en'] as const).map(lang => (
+                                                <button
+                                                    key={lang}
+                                                    onClick={() => setPreviewLang(lang)}
+                                                    className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase transition-colors ${previewLang === lang ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:bg-gray-200'}`}
+                                                >
+                                                    {lang}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-                                    <div className="text-2xl">📚</div>
+                                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 max-h-24 overflow-y-auto shadow-inner">
+                                        <p className={`text-xs text-gray-700 whitespace-pre-wrap font-medium leading-relaxed ${previewLang === 'ar' ? 'text-right' : ''}`} dir={previewLang === 'ar' ? 'rtl' : 'ltr'}>
+                                            {(() => {
+                                                const descSnippet = book.description ? book.description.slice(0, 120) + '...' : book.title
+                                                const link = `https://riwaya.store/${previewLang}/books/${book.id}`
+                                                if (previewLang === 'fr') return `${descSnippet}\n\n📖 Lien pour commander : ${link}\n💰 Prix : ${price} DH\n🚚 Paiement à la livraison + Livraison rapide !\n\n#riwaya #رواية #lecture #livre #maroc`
+                                                if (previewLang === 'ar') return `${descSnippet}\n\n📖 رابط الطلب : ${link}\n💰 الثمن : ${price} درهم\n🚚 الدفع عند الاستلام + توصيل سريع!\n\n#رواية #riwaya #كتاب #المغرب #قراءة`
+                                                return `${descSnippet}\n\n📖 Order link : ${link}\n💰 Price : ${price} MAD\n🚚 Cash on delivery + Fast shipping!\n\n#riwaya #رواية #books #reading #morocco`
+                                            })()}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                {/* Plateformes cibles */}
-                                <div>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sera publié sur</p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {activePlatforms.map(p => {
-                                            const meta = platformLabels[p]
-                                            if (!meta) return null
-                                            return (
-                                                <span key={p} className={`${meta.color} text-white text-[10px] font-bold px-3 py-1 rounded-full`}>
-                                                    {meta.label}
+                                {/* Infos : prix + plateformes */}
+                                <div className="px-4 sm:px-6 py-4 space-y-3">
+                                    {/* Prix */}
+                                    <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3">
+                                        <div className="flex-1">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Prix affiché</p>
+                                            <div className="flex items-baseline gap-2 flex-wrap">
+                                                <span className="text-xl sm:text-2xl font-black text-gray-900">{price} <span className="text-sm sm:text-base">DH</span></span>
+                                                <span className="text-xs sm:text-sm font-bold text-gray-400 line-through">{oldPrice} DH</span>
+                                                <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                                    -{Math.round(100 - (price / oldPrice) * 100)}%
                                                 </span>
-                                            )
-                                        })}
+                                            </div>
+                                        </div>
+                                        <div className="text-2xl">📚</div>
+                                    </div>
+
+                                    {/* Plateformes cibles */}
+                                    <div>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Sera publié sur</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {activePlatforms.map(p => {
+                                                const meta = platformLabels[p]
+                                                if (!meta) return null
+                                                return (
+                                                    <span key={p} className={`${meta.color} text-white text-[10px] font-bold px-3 py-1 rounded-full`}>
+                                                        {meta.label}
+                                                    </span>
+                                                )
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="px-6 pb-6 flex gap-3">
+                            <div className="px-4 sm:px-6 py-4 sm:pb-6 flex gap-3 border-t border-gray-100 flex-shrink-0">
                                 <button
                                     onClick={handlePreviewSkip}
-                                    className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-sm font-black text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-all uppercase tracking-widest"
+                                    className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-xs sm:text-sm font-black text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-all uppercase tracking-widest"
                                 >
                                     Ignorer
                                 </button>
                                 <button
                                     onClick={handlePreviewApprove}
-                                    className="flex-1 py-3 rounded-2xl bg-black text-white text-sm font-black hover:bg-gray-900 transition-all uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95"
+                                    className="flex-1 py-3 rounded-2xl bg-black text-white text-xs sm:text-sm font-black hover:bg-gray-900 transition-all uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95"
                                 >
                                     Publier
                                 </button>

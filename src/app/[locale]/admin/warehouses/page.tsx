@@ -10,6 +10,7 @@ interface WarehouseData {
     active: boolean
     createdAt: string
     _count?: { stocks: number }
+    movementsFrom?: { id: string }[]
 }
 
 export default function WarehousesPage() {
@@ -80,32 +81,69 @@ export default function WarehousesPage() {
         load()
     }
 
+    // Totaux globaux
+    const totalRefs = warehouses.reduce((s, w) => s + (w._count?.stocks ?? 0), 0)
+    const totalOrders = warehouses.reduce((s, w) => s + (w.movementsFrom?.length ?? 0), 0)
+    const activeCount = warehouses.filter(w => w.active).length
+
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            {/* En-tête */}
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-6 max-w-7xl mx-auto space-y-8">
+
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                        <Warehouse className="w-5 h-5 text-amber-600" />
+                    <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center shadow-sm">
+                        <Warehouse className="w-6 h-6 text-amber-600" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-black text-slate-900">Entrepôts</h1>
-                        <p className="text-sm text-slate-500">{warehouses.length} entrepôt(s)</p>
+                        <p className="text-sm text-slate-500">{warehouses.length} entrepôt(s) configuré(s)</p>
                     </div>
                 </div>
                 <button
                     onClick={() => { setShowForm(true); setEditId(null); setForm({ name: '', location: '' }) }}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-sm"
                 >
                     <Plus className="w-4 h-4" /> Nouvel entrepôt
                 </button>
             </div>
 
+            {/* Bannière de stats globales */}
+            <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <ToggleRight className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Actifs</p>
+                        <p className="text-2xl font-black text-slate-900">{activeCount}</p>
+                    </div>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <Package className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Références totales</p>
+                        <p className="text-2xl font-black text-slate-900">{totalRefs}</p>
+                    </div>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <RotateCcw className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Sorties stock</p>
+                        <p className="text-2xl font-black text-slate-900">{totalOrders}</p>
+                    </div>
+                </div>
+            </div>
+
             {/* Formulaire */}
             {showForm && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                     <h2 className="text-lg font-black text-slate-900 mb-4">
-                        {editId ? 'Modifier' : 'Nouvel entrepôt'}
+                        {editId ? 'Modifier l\'entrepôt' : 'Nouvel entrepôt'}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
@@ -138,63 +176,100 @@ export default function WarehousesPage() {
                 </div>
             )}
 
-            {/* Liste */}
+            {/* Grille entrepôts */}
             {loading ? (
                 <div className="text-center py-20 text-slate-400">Chargement...</div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {warehouses.map(w => (
-                        <div key={w.id} className={`bg-white rounded-2xl border p-6 transition-all ${w.active ? 'border-slate-200 hover:border-amber-200' : 'border-dashed border-slate-200 opacity-60'}`}>
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${w.active ? 'bg-amber-100' : 'bg-slate-100'}`}>
-                                        <Package className={`w-5 h-5 ${w.active ? 'text-amber-600' : 'text-slate-400'}`} />
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {warehouses.map(w => {
+                        const orderCount = w.movementsFrom?.length ?? 0
+                        const refCount = w._count?.stocks ?? 0
+                        return (
+                            <div key={w.id} className={`bg-white rounded-2xl border transition-all flex flex-col ${w.active ? 'border-slate-200 hover:border-amber-300 hover:shadow-md' : 'border-dashed border-slate-200 opacity-55'}`}>
+                                {/* Header carte */}
+                                <div className="p-5 flex items-start justify-between border-b border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${w.active ? 'bg-amber-100' : 'bg-slate-100'}`}>
+                                            <Warehouse className={`w-6 h-6 ${w.active ? 'text-amber-600' : 'text-slate-400'}`} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-black text-slate-900 text-base">{w.name}</h3>
+                                            <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                                                <span>📍</span> {w.location || 'Adresse non définie'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-black text-slate-900">{w.name}</h3>
-                                        <p className="text-sm text-slate-500">{w.location || 'Adresse non définie'}</p>
+                                    <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider flex-shrink-0 ${w.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        {w.active ? 'Actif' : 'Inactif'}
+                                    </span>
+                                </div>
+
+                                {/* Stats */}
+                                <div className="px-5 py-4 grid grid-cols-2 gap-3">
+                                    <div className="bg-amber-50 rounded-xl p-3 text-center">
+                                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Références</p>
+                                        <p className="text-2xl font-black text-amber-700 mt-0.5">{refCount}</p>
+                                    </div>
+                                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sorties</p>
+                                        <p className="text-2xl font-black text-slate-700 mt-0.5">{orderCount}</p>
                                     </div>
                                 </div>
-                                <span className={`text-xs px-2 py-1 rounded-full font-bold ${w.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                                    {w.active ? 'Actif' : 'Inactif'}
-                                </span>
+
+                                {/* Barre de capacité */}
+                                {totalOrders > 0 && (
+                                    <div className="px-5 pb-4">
+                                        <div className="flex justify-between text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-widest">
+                                            <span>Contribution</span>
+                                            <span>{totalOrders > 0 ? Math.round((orderCount / totalOrders) * 100) : 0}%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-amber-400 rounded-full transition-all"
+                                                style={{ width: `${totalOrders > 0 ? (orderCount / totalOrders) * 100 : 0}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Actions */}
+                                <div className="px-5 py-4 border-t border-slate-100 mt-auto flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => { setEditId(w.id); setForm({ name: w.name, location: w.location || '' }); setShowForm(true) }}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                                    >
+                                        <Edit2 className="w-3 h-3" /> Modifier
+                                    </button>
+                                    <button
+                                        onClick={() => toggleActive(w)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                                    >
+                                        {w.active ? <ToggleRight className="w-3 h-3 text-green-600" /> : <ToggleLeft className="w-3 h-3" />}
+                                        {w.active ? 'Désactiver' : 'Activer'}
+                                    </button>
+                                    <a
+                                        href={`/fr/admin/inventory?warehouseId=${w.id}`}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors ml-auto"
+                                    >
+                                        <Package className="w-3 h-3" /> Inventaire
+                                    </a>
+                                    <button
+                                        onClick={() => resetStock(w)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                                        title="Remettre le stock à zéro"
+                                    >
+                                        <RotateCcw className="w-3 h-3" /> RAZ
+                                    </button>
+                                    <button
+                                        onClick={() => deleteWarehouse(w)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                                    >
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
+                                </div>
                             </div>
-                            <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
-                                <button
-                                    onClick={() => { setEditId(w.id); setForm({ name: w.name, location: w.location || '' }); setShowForm(true) }}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
-                                >
-                                    <Edit2 className="w-3 h-3" /> Modifier
-                                </button>
-                                <button
-                                    onClick={() => toggleActive(w)}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
-                                >
-                                    {w.active ? <ToggleRight className="w-3 h-3 text-green-600" /> : <ToggleLeft className="w-3 h-3" />}
-                                    {w.active ? 'Désactiver' : 'Activer'}
-                                </button>
-                                <a
-                                    href={`/fr/admin/inventory?warehouseId=${w.id}`}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors ml-auto"
-                                >
-                                    <Package className="w-3 h-3" /> Voir
-                                </a>
-                                <button
-                                    onClick={() => resetStock(w)}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors ml-2"
-                                    title="Remettre le stock à zéro"
-                                >
-                                    <RotateCcw className="w-3 h-3" /> RAZ
-                                </button>
-                                <button
-                                    onClick={() => deleteWarehouse(w)}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors ml-2"
-                                >
-                                    <Trash2 className="w-3 h-3" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             )}
         </div>

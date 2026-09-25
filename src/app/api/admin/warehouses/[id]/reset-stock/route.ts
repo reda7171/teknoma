@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getUserFromSession } from '@/lib/auth'
+import { verifyAdmin } from '@/lib/actions/auth'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const user = await getUserFromSession()
-        if (!user || user.role !== 'ADMIN') {
+        try {
+            await verifyAdmin()
+        } catch {
             return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
         }
 

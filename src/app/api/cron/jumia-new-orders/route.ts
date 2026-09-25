@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { JumiaAPI } from '@/lib/jumia-api'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request) {
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
         }
 
         const now = new Date()
-        const lastCheckDate = new Date(now.getTime() - 24 * 60 * 60 * 1000) // Look back 24 hours to catch delayed orders
+        const lastCheckDate = new Date(now.getTime() - 72 * 60 * 60 * 1000) // Look back 3 days to catch delayed orders
         
         // Format pour l'API Jumia Vendor (attendu : YYYY-MM-DD HH:MM:SS ou ISO 8601)
         // L'utilisation d'une date sans fuseau horaire explicite provoque un décalage de 1h avec Jumia (GMT+1).
@@ -80,12 +80,12 @@ export async function GET(req: Request) {
                     
                     itemsText = `\n\n📦 <b>Articles de la commande (${allItems.length})</b>\n\n`
                     for (const item of allItems) {
-                        const productName = item.product?.name || item.name || item.productName || 'Article inconnu'
+                        const productName = escapeHtml(item.product?.name || item.name || item.productName || 'Article inconnu')
                         const quantity = item.quantity || 1
                         const price = item.price?.value || item.price || item.unitPrice || '0'
-                        const itemSellerSku = item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku || 'N/A'
-                        const status = item.status || order.status || 'N/A'
-                        const tracking = item.trackingCode || item.trackingNumber || 'En attente'
+                        const itemSellerSku = escapeHtml(item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku || 'N/A')
+                        const status = escapeHtml(item.status || order.status || 'N/A')
+                        const tracking = escapeHtml(item.trackingCode || item.trackingNumber || 'En attente')
                         
                         itemsText += `🔸 <b>Produit:</b> ${quantity}x ${productName}\n`
                         itemsText += `🏷 <b>SKU Vendeur:</b> ${itemSellerSku}\n`
@@ -134,7 +134,7 @@ export async function GET(req: Request) {
                 console.error("Erreur récupération image/items Jumia", err)
             }
 
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${orderId}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} درهم</b>\n📝 Statut: <b>${order.status}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}${itemsText}`
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} درهم</b>\n📝 Statut: <b>${escapeHtml(order.status || 'N/A')}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}${itemsText}`
             
             const replyMarkup = {
                 inline_keyboard: [

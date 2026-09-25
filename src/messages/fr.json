@@ -686,7 +686,8 @@
     "SoldBy": "Vendu par",
     "NoBooksFound": "Aucun livre trouvé",
     "NoBooksDesc": "Cet auteur n'a pas encore de livres publiés sur notre plateforme.",
-    "SellerRating": "Note du vendeur"
+    "SellerRating": "Note du vendeur",
+    "Views": "{count} vues"
   },
   "Cart": {
     "Title": "Votre Panier",

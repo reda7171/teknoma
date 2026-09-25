@@ -626,7 +626,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <p className="text-gray-500 font-bold text-sm uppercase tracking-wider">{c('bestsellers_soon', t('BestSellers.Soon'))}</p>
                 </ScrollReveal>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
                   {bestSellerBooks.map((book: any, idx: number) => (
                     <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
                       <BookCard {...book} priority={idx < 4} />

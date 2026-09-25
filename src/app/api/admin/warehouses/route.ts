@@ -9,7 +9,16 @@ export async function GET() {
         return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const warehouses = await prisma.warehouse.findMany({ orderBy: { name: 'asc' } })
+    const warehouses = await prisma.warehouse.findMany({
+        orderBy: { name: 'asc' },
+        include: {
+            _count: { select: { stocks: true } },
+            movementsFrom: {
+                where: { type: 'EXIT' },
+                select: { id: true }
+            }
+        }
+    })
     return NextResponse.json(warehouses)
 }
 

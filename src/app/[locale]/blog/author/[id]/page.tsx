@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function BlogAuthorPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
     const { id, locale } = await params
     const t = await getTranslations('BlogList') // Utiliser BlogList ou similaire
+    const tBlog = await getTranslations('Blog')
     const currentUser = await getCommunityUser()
     const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'contact@riwaya.store'
 
@@ -260,7 +261,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                                             )}
                                             <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
                                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-900 transition-colors">
-                                                    Lire l'article
+                                                    {tBlog('ReadArticle')}
                                                 </span>
                                                 <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-600 transition-colors">
                                                     <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white -rotate-45 group-hover:rotate-0 transition-all" />

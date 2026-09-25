@@ -16,12 +16,20 @@ interface Reservation {
     book: {
         title: string
         image: string | null
+        author: string
     }
 }
 
 export default function ReservationsClient({ initialReservations }: { initialReservations: any[] }) {
     const [reservations, setReservations] = useState<Reservation[]>(initialReservations)
     const [isLoading, setIsLoading] = useState<string | null>(null)
+    const [openWhatsAppDropdown, setOpenWhatsAppDropdown] = useState<string | null>(null)
+    const [searchTerm, setSearchTerm] = useState('')
+
+    const filteredReservations = reservations.filter(res => {
+        const searchLower = searchTerm.toLowerCase()
+        return res.book.title.toLowerCase().includes(searchLower) || (res.book.author || '').toLowerCase().includes(searchLower)
+    })
 
     const handleStatusChange = async (id: string, newStatus: string) => {
         setIsLoading(id)
@@ -54,7 +62,18 @@ export default function ReservationsClient({ initialReservations }: { initialRes
     }
 
     return (
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="space-y-6">
+            <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+                <input
+                    type="text"
+                    placeholder="Rechercher par livre ou auteur..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full max-w-md px-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
@@ -67,14 +86,14 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {reservations.length === 0 ? (
+                        {filteredReservations.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-gray-500 font-medium">
                                     Aucune réservation trouvée
                                 </td>
                             </tr>
                         ) : (
-                            reservations.map((res) => (
+                            filteredReservations.map((res) => (
                                 <tr key={res.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
@@ -92,7 +111,10 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                                                     <span className="text-gray-400 text-xs">No img</span>
                                                 </div>
                                             )}
-                                            <span className="font-bold text-gray-900 line-clamp-2 max-w-xs">{res.book.title}</span>
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-900 line-clamp-2 max-w-xs">{res.book.title}</span>
+                                                <span className="text-sm text-gray-500 line-clamp-1">{res.book.author}</span>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -123,15 +145,49 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right space-x-2">
-                                        <a
-                                            href={`https://wa.me/${res.whatsapp.replace(/\D/g, '')}?text=Bonjour, nous vous contactons concernant votre réservation pour le livre "${res.book.title}" sur Riwaya.`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center justify-center p-2 text-green-600 hover:bg-green-50 rounded-xl transition-colors"
-                                            title="Contacter sur WhatsApp"
-                                        >
-                                            <MessageCircle className="w-5 h-5" />
-                                        </a>
+                                        <div className="relative inline-block text-left">
+                                            <button
+                                                onClick={() => setOpenWhatsAppDropdown(openWhatsAppDropdown === res.id ? null : res.id)}
+                                                className="inline-flex items-center justify-center p-2 text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                                                title="Contacter sur WhatsApp"
+                                            >
+                                                <MessageCircle className="w-5 h-5" />
+                                            </button>
+
+                                            {openWhatsAppDropdown === res.id && (
+                                                <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
+                                                    <div className="py-1">
+                                                        <a
+                                                            href={`https://wa.me/${res.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Bonjour, le livre "${res.book.title}" que vous avez réservé sur Riwaya est maintenant disponible ! Profitez de notre offre spéciale : 4 livres pour 160 DHS seulement.`)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                                            onClick={() => setOpenWhatsAppDropdown(null)}
+                                                        >
+                                                            🇫🇷 Français
+                                                        </a>
+                                                        <a
+                                                            href={`https://wa.me/${res.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`مرحباً، الكتاب "${res.book.title}" الذي قمت بحجزه على رواية متوفر الآن! استفد من عرضنا الخاص: 4 كتب بـ 160 درهم فقط.`)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                                            onClick={() => setOpenWhatsAppDropdown(null)}
+                                                        >
+                                                            🇲🇦 العربية
+                                                        </a>
+                                                        <a
+                                                            href={`https://wa.me/${res.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hello, the book "${res.book.title}" you reserved on Riwaya is now available! Take advantage of our special offer: 4 books for only 160 DHS.`)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                                                            onClick={() => setOpenWhatsAppDropdown(null)}
+                                                        >
+                                                            🇬🇧 English
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
 
                                         {res.status === 'PENDING' && (
                                             <button
@@ -159,6 +215,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
     )
 }
