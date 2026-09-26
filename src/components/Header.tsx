@@ -233,7 +233,18 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                     <div className="flex items-center justify-between h-20">
                         {/* Logo - Dynamique ou Style Pixio */}
-                        <Link href="/" className="flex items-center gap-2 group shrink-0 lg:ltr:mr-8 lg:rtl:ml-8 xl:ltr:mr-16 xl:rtl:ml-16" dir="ltr">
+                        <Link 
+                            href="/" 
+                            onClick={(e) => {
+                                const path = window.location.pathname;
+                                if (path === '/' || path === '/fr' || path === '/ar' || path === '/en') {
+                                    e.preventDefault();
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            }}
+                            className="flex items-center gap-2 group shrink-0 lg:ltr:mr-8 lg:rtl:ml-8 xl:ltr:mr-16 xl:rtl:ml-16" 
+                            dir="ltr"
+                        >
                             {siteLogo ? (
                                 <div className="relative group-hover:scale-105 transition-transform duration-300">
                                     <Image
@@ -540,7 +551,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 />
             )}
             <div
-                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-full md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                     }`}
                 suppressHydrationWarning
             >
@@ -720,7 +731,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             <CartDrawer isOpen={isCartOpen} onClose={closeCart} is3For4Active={features.threeForFour === true} />
 
             {/* Mobile Bottom Navigation */}
-            <MobileBottomNav onMenuClick={() => setMobileMenuOpen(true)} />
+            <MobileBottomNav onMenuClick={() => setMobileMenuOpen(prev => !prev)} />
 
             {/* Spacer pour compenser le header fixe (h-20 = 80px) */}
             <div className="h-20" />

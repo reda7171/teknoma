@@ -681,7 +681,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                             className="bg-white divide-y divide-gray-200"
                                         >
                                             {orderedBooks.map((book, index) => {
-                                                const displayTitle = book.title || book.titleFr || book.titleEn || 'Sans titre'
+                                                const displayTitle = book.language === 'fr' ? (book.titleFr || book.title || book.titleEn || 'Sans titre') : book.language === 'en' ? (book.titleEn || book.title || book.titleFr || 'Sans titre') : (book.title || book.titleFr || book.titleEn || 'Sans titre')
                                                 return (
                                                 <Draggable key={book.id} draggableId={book.id} index={index}>
                                                     {(provided, snapshot) => (
@@ -1038,7 +1038,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                     {viewMode === 'kanban' && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 p-4">
                             {orderedBooks.map(book => {
-                                const displayTitle = book.title || book.titleFr || book.titleEn || 'Sans titre'
+                                const displayTitle = book.language === 'fr' ? (book.titleFr || book.title || book.titleEn || 'Sans titre') : book.language === 'en' ? (book.titleEn || book.title || book.titleFr || 'Sans titre') : (book.title || book.titleFr || book.titleEn || 'Sans titre')
                                 return (
                                 <div key={book.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3 relative group">
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 p-1 rounded-lg shadow-sm backdrop-blur-sm">

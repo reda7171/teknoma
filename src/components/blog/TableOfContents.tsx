@@ -26,6 +26,16 @@ export default function TableOfContents({ language = 'fr' }: { language?: string
             level: elem.tagName === 'H2' ? 2 : 3
         })).filter(h => h.id && h.text)
 
+        // Ajouter "À propos de l'auteur" au sommaire si présent et visible
+        const authorBioElem = document.getElementById('author-bio-mobile');
+        if (authorBioElem && window.getComputedStyle(authorBioElem).display !== 'none') {
+            newHeadings.push({
+                id: 'author-bio-mobile',
+                text: t('AboutAuthor'),
+                level: 2
+            });
+        }
+
         setHeadings(newHeadings)
 
         if (newHeadings.length === 0) return;

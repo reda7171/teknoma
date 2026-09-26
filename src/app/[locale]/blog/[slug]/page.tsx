@@ -531,7 +531,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                         {/* === Bio Auteur (Mobile Uniquement) === */}
                         {(post.authorName || post.author) && (
-                            <Link href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="lg:hidden mt-10 md:mt-16 p-5 md:p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <Link id="author-bio-mobile" href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="lg:hidden mt-10 md:mt-16 p-5 md:p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
                                 
                                 <div className="relative z-10 flex items-start gap-4">
@@ -685,7 +685,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                             {/* Bio Auteur (Desktop) */}
                             {(post.authorName || post.author) && (
-                                <Link href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                                <Link id="author-bio-desktop" href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
                                     <p className="relative z-10 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5">{t('AboutAuthor')}</p>
                                     
