@@ -517,6 +517,10 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 Title: ${title}
 Author: ${auth}
 
+CRITICAL INSTRUCTION FOR TITLES:
+For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
+Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
+
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {
   "title_ar": "Title in Arabic",
@@ -730,7 +734,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                             type="text"
                             id="title"
                             name="title_ar"
-                            required={bookLanguage === 'ar'}
                             defaultValue={book.title}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -739,7 +742,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         <input
                             type="text"
                             name="title_fr"
-                            required={bookLanguage === 'fr'}
                             defaultValue={book.titleFr || ''}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -748,7 +750,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         <input
                             type="text"
                             name="title_en"
-                            required={bookLanguage === 'en'}
                             defaultValue={book.titleEn || ''}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1238,7 +1239,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         </div>
                         <textarea
                             name="description_ar"
-                            required={bookLanguage === 'ar'}
                             rows={4}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
@@ -1248,7 +1248,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         />
                         <textarea
                             name="description_fr"
-                            required={bookLanguage === 'fr'}
                             rows={4}
                             value={descriptionFr}
                             onChange={(e) => setDescriptionFr(e.target.value)}
@@ -1258,7 +1257,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         />
                         <textarea
                             name="description_en"
-                            required={bookLanguage === 'en'}
                             rows={4}
                             value={descriptionEn}
                             onChange={(e) => setDescriptionEn(e.target.value)}

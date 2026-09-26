@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Bot, ClipboardPaste } from 'lucide-react'
+import { ArrowLeft, Save, Bot, ClipboardPaste, Loader2 } from 'lucide-react'
 import { createBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { getCategoryTree } from '@/lib/actions/category-tree'
+import { publishBooksToJumia } from '@/lib/actions/jumia'
 import type { CategoryTree } from '@/lib/constants/categories'
 import ImageInput from '@/components/admin/ImageInput'
 
@@ -31,6 +32,11 @@ function BookFormContent() {
     else if (rawLang.startsWith('fr')) validLang = 'fr'
 
     const [loading, setLoading] = useState(false)
+    const [closeAfterSave, setCloseAfterSave] = useState(false)
+    const [showJumiaModal, setShowJumiaModal] = useState(false)
+    const [savedBookId, setSavedBookId] = useState<string | null>(null)
+    const [pushToJumiaChoice, setPushToJumiaChoice] = useState<'yes' | 'no'>('yes')
+    const [isPushingJumia, setIsPushingJumia] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [lots, setLots] = useState<any[]>([])
     const [selectedCost, setSelectedCost] = useState<string>('0')
@@ -116,6 +122,12 @@ function BookFormContent() {
             description: formData.get('description_ar') as string,
             descriptionFr: formData.get('description_fr') as string || undefined,
             descriptionEn: formData.get('description_en') as string || undefined,
+            longDescription: formData.get('longDescription_ar') as string || undefined,
+            longDescriptionFr: formData.get('longDescription_fr') as string || undefined,
+            longDescriptionEn: formData.get('longDescription_en') as string || undefined,
+            seoKeywords: formData.get('seoKeywords') as string || undefined,
+            jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
+            jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
             isbn: formData.get('isbn') as string || undefined,
             price: parseFloat(formData.get('price') as string),
             costPrice: parseFloat(formData.get('costPrice') as string) || 0,
@@ -135,7 +147,7 @@ function BookFormContent() {
 
         const result = await createBook(input)
 
-        if (result.success && result.bookId) {
+        if (result.success) {
             // Créer les entrées de stock pour chaque entrepôt
             for (const ws of warehouseStocks) {
                 if (ws.quantity > 0) {
@@ -152,12 +164,43 @@ function BookFormContent() {
                 }
             }
 
-            router.push('/admin/books')
-            router.refresh()
+            // Show Jumia popup instead of routing immediately
+            setSavedBookId(result.bookId)
+            setShowJumiaModal(true)
+            
         } else {
             setError(result.error)
             setLoading(false)
         }
+    }
+
+    const handleJumiaConfirm = async () => {
+        if (!savedBookId) return;
+
+        if (pushToJumiaChoice === 'yes') {
+            setIsPushingJumia(true);
+            try {
+                const res = await publishBooksToJumia([savedBookId]);
+                if (res.success) {
+                    alert(res.message || 'Livre publié avec succès sur Jumia');
+                } else {
+                    alert(res.message || 'Erreur lors de la publication');
+                }
+            } catch (err: any) {
+                alert(err.message || 'Erreur lors de la publication');
+            } finally {
+                setIsPushingJumia(false);
+            }
+        }
+
+        // Proceed to route
+        setShowJumiaModal(false);
+        if (closeAfterSave) {
+            router.push('/admin/books');
+        } else {
+            router.push(`/admin/books/${savedBookId}/edit`);
+        }
+        router.refresh();
     }
 
     const copyChatGptPrompt = () => {
@@ -173,8 +216,13 @@ function BookFormContent() {
 Title: ${title}
 Author: ${auth}
 
+CRITICAL INSTRUCTION FOR TITLES:
+For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
+Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
+
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {
+  "author": "Author Name",
   "title_ar": "Title in Arabic",
   "title_fr": "Title in French",
   "title_en": "Title in English",
@@ -223,6 +271,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
             setInput('title_ar', data.title_ar)
             setInput('title_fr', data.title_fr)
             setInput('title_en', data.title_en)
+            if (data.author) {
+                setInput('author', data.author)
+                setSelectedAuthor(data.author)
+            }
             setInput('description_ar', data.description_ar)
             setInput('description_fr', data.description_fr)
             setInput('description_en', data.description_en)
@@ -330,7 +382,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         <input
                             type="text"
                             name="title_ar"
-                            required={bookLanguage === 'ar'}
                             defaultValue={validLang === 'ar' ? prefillTitle : ''}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -339,7 +390,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         <input
                             type="text"
                             name="title_fr"
-                            required={bookLanguage === 'fr'}
                             defaultValue={validLang === 'fr' ? prefillTitle : ''}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -348,7 +398,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         <input
                             type="text"
                             name="title_en"
-                            required={bookLanguage === 'en'}
                             defaultValue={validLang === 'en' ? prefillTitle : ''}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -694,7 +743,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         </label>
                         <textarea
                             name="description_ar"
-                            required={bookLanguage === 'ar'}
                             defaultValue={validLang === 'ar' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
@@ -703,7 +751,6 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         />
                         <textarea
                             name="description_fr"
-                            required={bookLanguage === 'fr'}
                             defaultValue={validLang === 'fr' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
@@ -712,12 +759,40 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                         />
                         <textarea
                             name="description_en"
-                            required={bookLanguage === 'en'}
                             defaultValue={validLang === 'en' ? prefillDescription : ''}
                             rows={4}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Description détaillée du livre en anglais..."
+                        />
+                    </div>
+
+                    {/* Description longue */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Description longue
+                            <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du livre)</span>
+                        </label>
+                        <textarea
+                            name="longDescription_ar"
+                            rows={8}
+                            style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en arabe..."
+                        />
+                        <textarea
+                            name="longDescription_fr"
+                            rows={8}
+                            style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en français..."
+                        />
+                        <textarea
+                            name="longDescription_en"
+                            rows={8}
+                            style={{ display: currentLang === 'en' ? 'block' : 'none' }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Detailed description, author biography, book context in english..."
                         />
                     </div>
 
@@ -736,8 +811,56 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                     </div>
                 </div>
 
+                {/* SEO Keywords */}
+                <div className="mt-6">
+                    <label htmlFor="seoKeywords" className="block text-sm font-medium text-gray-700 mb-2">
+                        Mots-clés SEO (Séparés par des virgules)
+                    </label>
+                    <textarea
+                        id="seoKeywords"
+                        name="seoKeywords"
+                        rows={3}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ex: roman policier, agatha christie, meurtre mystère..."
+                    />
+                </div>
+
+                {/* Jumia Highlights */}
+                <div className="mt-6">
+                    <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700 mb-2">
+                        Highlights Jumia (Description courte HTML)
+                    </label>
+                    <textarea
+                        id="jumiaHighlights"
+                        name="jumiaHighlights"
+                        rows={3}
+                        placeholder="<ul><li>Titre: ...</li><li>Auteur: ...</li></ul>"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="mt-1 text-sm text-gray-500">
+                        Laisser vide pour utiliser la valeur par défaut. Recommandé : une liste HTML <code>&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code>
+                    </p>
+                </div>
+
+                {/* Jumia Package Content */}
+                <div className="mt-6">
+                    <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700 mb-2">
+                        Contenu du colis Jumia (What's in the box)
+                    </label>
+                    <input
+                        type="text"
+                        id="jumiaPackageContent"
+                        name="jumiaPackageContent"
+                        placeholder="1 x Livre"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="mt-1 text-sm text-gray-500">
+                        Exemple: "1 x Livre" ou "1 x Livre avec marque-page". Laisser vide pour la valeur par défaut.
+                    </p>
+                </div>
+
                 {/* Actions */}
-                <div className="mt-6 flex items-center justify-end gap-4">
+                <div className="mt-6 flex items-center justify-end gap-3">
                     <Link
                         href="/admin/books"
                         className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
@@ -747,13 +870,71 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                     <button
                         type="submit"
                         disabled={loading}
+                        onClick={() => setCloseAfterSave(false)}
                         className="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Save className="w-5 h-5 mr-2" />
-                        {loading ? 'Enregistrement...' : 'Enregistrer'}
+                        {loading && !closeAfterSave ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+                        {loading && !closeAfterSave ? 'Enregistrement...' : 'Enregistrer'}
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        onClick={() => setCloseAfterSave(true)}
+                        className="inline-flex items-center px-6 py-2 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading && closeAfterSave ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+                        {loading && closeAfterSave ? 'Enregistrement...' : 'Enregistrer et Fermer'}
                     </button>
                 </div>
             </form>
+
+            {/* Jumia Push Modal */}
+            {showJumiaModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="p-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Livre enregistré avec succès</h3>
+                            <p className="text-gray-600 mb-6">Voulez-vous publier ce livre sur Jumia maintenant ?</p>
+                            
+                            <div className="space-y-4 mb-6">
+                                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input 
+                                        type="radio" 
+                                        name="pushJumia" 
+                                        value="yes" 
+                                        checked={pushToJumiaChoice === 'yes'}
+                                        onChange={() => setPushToJumiaChoice('yes')}
+                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                    />
+                                    <span className="ml-3 font-medium text-gray-900">Oui, publier sur Jumia</span>
+                                </label>
+                                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input 
+                                        type="radio" 
+                                        name="pushJumia" 
+                                        value="no" 
+                                        checked={pushToJumiaChoice === 'no'}
+                                        onChange={() => setPushToJumiaChoice('no')}
+                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                    />
+                                    <span className="ml-3 font-medium text-gray-900">Non, plus tard</span>
+                                </label>
+                            </div>
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={handleJumiaConfirm}
+                                    disabled={isPushingJumia}
+                                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                                    {isPushingJumia ? 'Publication en cours...' : 'Valider'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

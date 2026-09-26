@@ -15,7 +15,7 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
     const pathname = usePathname()
     const t = useTranslations('Navigation')
-    const { openCart } = useUIStore()
+    const { toggleCart } = useUIStore()
     const totalItems = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0))
     const [mounted, setMounted] = useState(false)
     const [isCartAnimating, setIsCartAnimating] = useState(false)
@@ -33,20 +33,19 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
     const navItems = [
         { href: '/', icon: Home, label: t('Home') },
         { href: '/books', icon: BookOpen, label: t('Books') },
-        { href: '/packs', icon: Package, label: t('Packs') },
     ]
 
     return (
         <>
             <nav
                 aria-label="Navigation principale"
-                className="md:hidden fixed bottom-0 left-0 right-0 z-[120]"
+                className="md:hidden fixed bottom-4 left-4 right-4 z-[160] rounded-3xl"
                 style={{
                     background: 'rgba(255,255,255,0.92)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
-                    borderTop: '1px solid rgba(0,0,0,0.07)',
-                    boxShadow: '0 -4px 24px rgba(0,0,0,0.08)',
+                    border: '1px solid rgba(0,0,0,0.07)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                     paddingBottom: 'env(safe-area-inset-bottom)',
                 }}
             >
@@ -101,7 +100,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
                     {/* Panier */}
                     <button
-                        onClick={openCart}
+                        onClick={toggleCart}
                         aria-label={`${t('Cart')}${mounted && totalItems > 0 ? ` (${totalItems})` : ''}`}
                         className="flex flex-col flex-1 items-center justify-center gap-1 py-2 touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}

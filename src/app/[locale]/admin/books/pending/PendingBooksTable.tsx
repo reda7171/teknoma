@@ -123,7 +123,7 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
                                             )}
                                         </div>
                                         <div>
-                                            <div className="font-medium text-gray-900 line-clamp-1">{book.title}</div>
+                                            <div className="font-medium text-gray-900 line-clamp-1">{book.language === 'fr' ? (book.titleFr || book.title || book.titleEn) : book.language === 'en' ? (book.titleEn || book.title || book.titleFr) : (book.title || book.titleFr || book.titleEn)}</div>
                                             <div className="text-sm text-gray-500 line-clamp-1">{book.author}</div>
                                         </div>
                                     </div>
