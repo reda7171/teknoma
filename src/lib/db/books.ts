@@ -16,6 +16,7 @@ export interface BookFilters {
     author?: string
     inStock?: boolean
     usedOnly?: boolean
+    newArrivals?: boolean
     page?: number
     limit?: number
 }
@@ -83,7 +84,9 @@ export async function getBooks(filters?: BookFilters) {
         if (filters?.search) {
             let books = await prisma.book.findMany({
                 where,
-                orderBy: [
+                orderBy: filters?.newArrivals ? [
+                    { createdAt: 'desc' }
+                ] : [
                     { displayOrder: 'asc' },
                     { createdAt: 'desc' }
                 ],
@@ -113,7 +116,9 @@ export async function getBooks(filters?: BookFilters) {
         if (filters?.inStock) {
             return await prisma.book.findMany({
                 where,
-                orderBy: [
+                orderBy: filters?.newArrivals ? [
+                    { createdAt: 'desc' }
+                ] : [
                     { displayOrder: 'asc' },
                     { createdAt: 'desc' }
                 ],
@@ -134,7 +139,9 @@ export async function getBooks(filters?: BookFilters) {
             // On a besoin de livres en stock
             const inStockBooks = await prisma.book.findMany({
                 where: inStockWhere,
-                orderBy: [
+                orderBy: filters?.newArrivals ? [
+                    { createdAt: 'desc' }
+                ] : [
                     { displayOrder: 'asc' },
                     { createdAt: 'desc' }
                 ],
@@ -148,7 +155,9 @@ export async function getBooks(filters?: BookFilters) {
                 const remainingLimit = limit - books.length
                 const outOfStockBooks = await prisma.book.findMany({
                     where: outOfStockWhere,
-                    orderBy: [
+                    orderBy: filters?.newArrivals ? [
+                        { createdAt: 'desc' }
+                    ] : [
                         { displayOrder: 'asc' },
                         { createdAt: 'desc' }
                     ],
@@ -162,7 +171,9 @@ export async function getBooks(filters?: BookFilters) {
             const outOfStockSkip = skip - inStockCount
             books = await prisma.book.findMany({
                 where: outOfStockWhere,
-                orderBy: [
+                orderBy: filters?.newArrivals ? [
+                    { createdAt: 'desc' }
+                ] : [
                     { displayOrder: 'asc' },
                     { createdAt: 'desc' }
                 ],
