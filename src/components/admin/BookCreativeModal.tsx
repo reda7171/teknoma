@@ -204,12 +204,20 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             try {
                 const originals = await patchImagesBase64(posterRef.current)
                 await new Promise(r => setTimeout(r, 500))
-                const dataUrl = await htmlToImage.toPng(posterRef.current, { quality: 1, pixelRatio: 2, cacheBust: false })
+                
+                let dataUrl: string;
+                try {
+                    dataUrl = await htmlToImage.toPng(posterRef.current, { quality: 1, pixelRatio: 2, cacheBust: false })
+                } catch (e) {
+                    console.warn('[AutoCapture] First attempt failed, retrying with skipFonts: true', e);
+                    dataUrl = await htmlToImage.toPng(posterRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: true })
+                }
+                
                 restoreImages(originals)
                 // Retourner le base64 directement — le serveur le sauvegardera
                 onAutoCapture(dataUrl)
             } catch (e) {
-                console.error('[AutoCapture] Error:', e)
+                console.error('[AutoCapture] Fatal Error:', e)
                 onAutoCapture('')
             }
         }
@@ -235,7 +243,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             });
         } catch (err: any) {
             console.warn("Base64 conversion fallback:", err?.message || err);
-            return url;
+            // Fallback to a transparent 1x1 pixel so htmlToImage doesn't crash on 404s or CORS
+            return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         }
     }
 
@@ -595,7 +604,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     {!bgImage && (<><div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)' }} /><div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%)' }} /></>)}
                     <div className="pt-8 px-8 flex justify-between items-start z-10">
                         <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}><p className={`text-[10px] font-black tracking-[0.2em] uppercase ${currentTheme.text} opacity-90`}>{editableTexts.badge}</p></div>
-                        {showLogo && <img src="/logo.png" alt="Riwaya" crossOrigin="anonymous" className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
+                        {showLogo && <img src="/logo.png" alt="Riwaya" onError={(e) => { e.currentTarget.style.display = 'none'; }} className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
                     </div>
                     <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30`}>
                         <div 
@@ -603,7 +612,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)` }}
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={(() => { const img = normalizeImage(book.image); return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img })() || '/book-placeholder.png'} alt={book.title} crossOrigin="anonymous" className="relative w-full h-auto object-cover rounded shadow-2xl" style={{ boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none', transform: `scale(${imageScale}) rotate(${imageRotation}deg)`, opacity: imageOpacity }} />
+                            <img src={(() => { const img = normalizeImage(book.image); return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img })() || '/book-placeholder.png'} alt={book.title} onError={(e) => { e.currentTarget.src = '/book-placeholder.png'; }} className="relative w-full h-auto object-cover rounded shadow-2xl" style={{ boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none', transform: `scale(${imageScale}) rotate(${imageRotation}deg)`, opacity: imageOpacity }} />
                         </div>
                     </div>
                     {showPrice && (
