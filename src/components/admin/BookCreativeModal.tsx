@@ -243,8 +243,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             });
         } catch (err: any) {
             console.warn("Base64 conversion fallback:", err?.message || err);
-            // Fallback to a transparent 1x1 pixel so htmlToImage doesn't crash on 404s or CORS
-            return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+            // Fallback to a placeholder image so htmlToImage doesn't crash, and we see something instead of a blank space
+            return '/book-placeholder.png';
         }
     }
 
@@ -255,7 +255,14 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             const original = img.src
             originals.push({ el: img, src: original })
             const b64 = await toBase64(original)
-            img.src = b64
+            
+            await new Promise((resolve) => {
+                const imgCopy = new Image();
+                imgCopy.onload = resolve;
+                imgCopy.onerror = resolve;
+                imgCopy.src = b64;
+            });
+            img.src = b64;
         }))
         return originals
     }
@@ -612,7 +619,14 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)` }}
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={(() => { const img = normalizeImage(book.image); return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img })() || '/book-placeholder.png'} alt={book.title} onError={(e) => { e.currentTarget.src = '/book-placeholder.png'; }} className="relative w-full h-auto object-cover rounded shadow-2xl" style={{ boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none', transform: `scale(${imageScale}) rotate(${imageRotation}deg)`, opacity: imageOpacity }} />
+                            <img src={(() => { 
+                                let img = normalizeImage(book.image);
+                                // Strip production domain so local images load correctly in localhost
+                                if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+                                    img = img.replace('https://www.riwaya.store', '');
+                                }
+                                return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img || '/book-placeholder.png';
+                            })()} alt={book.title} onError={(e) => { e.currentTarget.src = '/book-placeholder.png'; }} className="relative w-full h-auto object-cover rounded shadow-2xl" style={{ boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none', transform: `scale(${imageScale}) rotate(${imageRotation}deg)`, opacity: imageOpacity }} />
                         </div>
                     </div>
                     {showPrice && (
