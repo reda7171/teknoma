@@ -621,8 +621,8 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={(() => { 
                                 let img = normalizeImage(book.image);
-                                // Strip production domain so local images load correctly in localhost
-                                if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+                                // Strip production domain so local images load correctly in any local environment
+                                if (process.env.NODE_ENV !== 'production') {
                                     img = img.replace('https://www.riwaya.store', '');
                                 }
                                 return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img || '/book-placeholder.png';
