@@ -58,6 +58,7 @@ interface SearchParams {
     inStock?: string
     author?: string
     usedOnly?: string
+    newArrivals?: string
 }
 
 export default async function BooksPage({
@@ -86,6 +87,7 @@ export default async function BooksPage({
         language: params.language,
         inStock: params.inStock === undefined ? true : params.inStock === 'true',
         usedOnly: params.usedOnly === 'true',
+        newArrivals: params.newArrivals === 'true',
         author: params.author,
     };
 
@@ -192,6 +194,7 @@ export default async function BooksPage({
                                         language: params.language,
                                         inStock: params.inStock === undefined ? true : params.inStock === 'true',
                                         usedOnly: params.usedOnly === 'true',
+                                        newArrivals: params.newArrivals === 'true',
                                         author: params.author,
                                         page: 1,
                                         limit: 12

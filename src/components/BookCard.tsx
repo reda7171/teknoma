@@ -11,7 +11,7 @@ import { fbPixelEvents } from '@/lib/facebook-pixel'
 import WishlistButton from '@/components/WishlistButton'
 import AddToReadingListButton from '@/components/AddToReadingListButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
-import { generateBookUrl } from '@/lib/i18n-utils'
+import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 
 interface BookCardProps {
     id: string
@@ -55,9 +55,9 @@ export default function BookCard({
     const { openCart, showNotification } = useUIStore()
     const [isAdded, setIsAdded] = useState(false)
 
-    const displayTitle = title;
+    const displayTitle = getLocalizedTitle({ title, titleFr, titleEn, language }, locale);
     // Générer l'URL avec le slug dynamique
-    const bookUrl = generateBookUrl({ id, title, titleFr, titleEn }, locale);
+    const bookUrl = generateBookUrl({ id, title, titleFr, titleEn, language }, locale);
 
     return (
         <div className={`group relative bg-white rounded-3xl overflow-hidden transition-all duration-500 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-2xl h-full flex flex-col ${isFeatured ? 'scale-105 z-10 border-black shadow-xl' : ''}`}>

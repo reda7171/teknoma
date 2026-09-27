@@ -458,6 +458,8 @@ export default function BookFilters({
                             </label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
+                                    { id: 'created-desc', label: 'Date (Nouveau)' },
+                                    { id: 'created-asc', label: 'Date (Ancien)' },
                                     { id: 'price-asc', label: 'Prix Croissant' },
                                     { id: 'price-desc', label: 'Prix Décroissant' },
                                     { id: 'stock-asc', label: 'Stock Faible' },

@@ -61,6 +61,7 @@ interface BooksFiltersProps {
         language?: string
         inStock?: string
         usedOnly?: string
+        newArrivals?: string
         author?: string
     }
     categoryTree: Record<string, string[]>
@@ -101,27 +102,6 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
         router.push(`/books?${newParams.toString()}`)
     }
 
-    const handleInStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.checked
-        const newParams = new URLSearchParams()
-        if (params.search) newParams.set('search', params.search)
-        if (params.category) newParams.set('category', params.category)
-        if (params.language) newParams.set('language', params.language)
-        if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
-        newParams.set('inStock', value ? 'true' : 'false')
-        router.push(`/books?${newParams.toString()}`)
-    }
-
-    const handleUsedOnlyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.checked
-        const newParams = new URLSearchParams()
-        if (params.search) newParams.set('search', params.search)
-        if (params.category) newParams.set('category', params.category)
-        if (params.language) newParams.set('language', params.language)
-        if (params.inStock) newParams.set('inStock', params.inStock)
-        newParams.set('usedOnly', value ? 'true' : 'false')
-        router.push(`/books?${newParams.toString()}`)
-    }
 
     const [openSections, setOpenSections] = useState({
         langs: true,
@@ -236,39 +216,70 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                 />
             </div>
 
-            <div className="mb-4">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center">
-                        <input 
-                            type="checkbox" 
-                            className="sr-only peer"
-                            checked={params.inStock === undefined ? true : params.inStock === 'true'}
-                            onChange={handleInStockChange}
-                        />
-                        <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                    </div>
-                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 group-hover:text-black transition-colors">
+            {/* Quick Filters */}
+            <div className="mb-6 space-y-2">
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams()
+                            if (params.search) newParams.set('search', params.search)
+                            if (params.category) newParams.set('category', params.category)
+                            if (params.language) newParams.set('language', params.language)
+                            if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
+                            if (params.newArrivals) newParams.set('newArrivals', params.newArrivals)
+                            newParams.set('inStock', params.inStock === 'false' ? 'true' : 'false')
+                            router.push(`/books?${newParams.toString()}`)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                            params.inStock === undefined || params.inStock === 'true'
+                            ? 'bg-black text-white border-black shadow-md' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        }`}
+                    >
                         {tCommon('Available')}
-                    </span>
-                </label>
-            </div>
-
-            {/* Occasion / Used Only */}
-            <div className="mb-6">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative flex items-center">
-                        <input 
-                            type="checkbox" 
-                            className="sr-only peer"
-                            checked={params.usedOnly === 'true'}
-                            onChange={handleUsedOnlyChange}
-                        />
-                        <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                    </div>
-                    <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-amber-600 group-hover:text-amber-800 transition-colors">
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams()
+                            if (params.search) newParams.set('search', params.search)
+                            if (params.category) newParams.set('category', params.category)
+                            if (params.language) newParams.set('language', params.language)
+                            if (params.inStock) newParams.set('inStock', params.inStock)
+                            if (params.newArrivals) newParams.set('newArrivals', params.newArrivals)
+                            newParams.set('usedOnly', params.usedOnly === 'true' ? 'false' : 'true')
+                            router.push(`/books?${newParams.toString()}`)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                            params.usedOnly === 'true'
+                            ? 'bg-amber-100 text-amber-700 border-amber-200 shadow-md' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        }`}
+                    >
                         {tCommon('UsedBook') || "Livre d'occasion"}
-                    </span>
-                </label>
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams()
+                            if (params.search) newParams.set('search', params.search)
+                            if (params.category) newParams.set('category', params.category)
+                            if (params.language) newParams.set('language', params.language)
+                            if (params.inStock) newParams.set('inStock', params.inStock)
+                            if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
+                            newParams.set('newArrivals', (params as any).newArrivals === 'true' ? 'false' : 'true')
+                            router.push(`/books?${newParams.toString()}`)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-1 ${
+                            (params as any).newArrivals === 'true'
+                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200 shadow-md' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        }`}
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Nouveau arrivage
+                    </button>
+                </div>
             </div>
 
             {/* Categories */}
@@ -396,7 +407,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             </div>
 
             {/* Active Filters */}
-            {(params.category || params.subCategory || params.search || params.language || params.inStock || params.usedOnly) && (
+            {(params.category || params.subCategory || params.search || params.language || params.inStock || params.usedOnly || (params as any).newArrivals) && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
@@ -445,14 +456,14 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             <span className="hidden sm:inline">{t('Filters')}</span>
-                            {(params.category || params.subCategory || params.language || params.author || params.inStock || params.usedOnly) && (
+                            {(params.category || params.subCategory || params.language || params.author || params.inStock || params.usedOnly || (params as any).newArrivals) && (
                                 <span className="w-2 h-2 rounded-full bg-red-500" />
                             )}
                         </button>
                     </div>
 
                     {/* Active Chips Horizontal Scroll */}
-                    {(params.category || params.subCategory || params.language || params.search || params.author || params.inStock) && (
+                    {(params.category || params.subCategory || params.language || params.search || params.author || params.inStock || params.usedOnly || (params as any).newArrivals) && (
                         <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
                             {params.category && (
                                 <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
@@ -508,7 +519,43 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                             ...(params.search ? { search: params.search } : {}),
                                             ...(params.language ? { language: params.language } : {}),
                                             ...(params.author ? { author: params.author } : {}),
+                                            ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
+                                            ...(params.newArrivals ? { newArrivals: params.newArrivals } : {}),
                                             inStock: 'false'
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {params.usedOnly === 'true' && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-amber-600 text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {tCommon('UsedBook') || "Livre d'occasion"}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {}),
+                                            ...(params.newArrivals ? { newArrivals: params.newArrivals } : {})
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {params.newArrivals === 'true' && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-emerald-600 text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    Nouveau arrivage
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {}),
+                                            ...(params.usedOnly ? { usedOnly: params.usedOnly } : {})
                                         }).toString()}`} 
                                         scroll={false}
                                         className="opacity-50"

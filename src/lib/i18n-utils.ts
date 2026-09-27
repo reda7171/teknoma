@@ -1,8 +1,15 @@
 export function getLocalizedTitle(book: any, locale?: string): string {
     if (!book) return '';
-    // Le client a demandé d'afficher TOUJOURS le titre dans la langue par défaut du livre 
-    // (qui est stockée dans la colonne 'title'), peu importe la langue du site.
-    // Si 'title' est vide (ex: livre ajouté uniquement en anglais), on fallback
+    
+    // Always display the title in the book's original language, regardless of the site locale.
+    if (book.language) {
+        const lang = book.language.toLowerCase();
+        if ((lang === 'en' || lang === 'english') && book.titleEn) return book.titleEn;
+        if ((lang === 'fr' || lang === 'french' || lang === 'français') && book.titleFr) return book.titleFr;
+        if ((lang === 'ar' || lang === 'arabic' || lang === 'arabe') && book.title) return book.title;
+    }
+    
+    // Fallback: prioritize the default title (Arabic), then French, then English.
     return book.title || book.titleFr || book.titleEn || '';
 }
 

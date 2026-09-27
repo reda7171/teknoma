@@ -210,7 +210,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const stockValue = stockProducts.reduce((sum, p) => sum + ((p.costPrice || 0) * (p.stock || 0)), 0)
 
     // Manual sorting
-    if (sortParam === 'price-asc') allProducts.sort((a, b) => a.price - b.price)
+    if (sortParam === 'created-asc') allProducts.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime())
+    else if (sortParam === 'created-desc') allProducts.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+    else if (sortParam === 'price-asc') allProducts.sort((a, b) => a.price - b.price)
     else if (sortParam === 'price-desc') allProducts.sort((a, b) => b.price - a.price)
     else if (sortParam === 'stock-asc') allProducts.sort((a, b) => a.stock - b.stock)
     else if (sortParam === 'stock-desc') allProducts.sort((a, b) => b.stock - a.stock)
