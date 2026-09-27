@@ -604,7 +604,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 </div>
                 <div
                     ref={posterRef}
-                    className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col shadow-2xl rounded-2xl transform scale-75 md:scale-90`}
+                    className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col`}
                     style={{ aspectRatio: format === 'story' ? '9/16' : '1/1' }}
                 >
                     {bgImage && <div className="absolute inset-0 z-0" style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', opacity: bgOpacity }} />}
