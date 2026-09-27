@@ -143,11 +143,11 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     }
 
                     // Step aperçu : montrer l'image avant de publier (si activé)
-                    if (showPreviewStep && finalImageBase64) {
+                    if (showPreviewStep) {
                         updateStatus(book.id, 'running', '⏸️ En attente de votre approbation...')
                         const approved = await new Promise<boolean>((resolve) => {
                             previewStepResolveRef.current = resolve
-                            setPreviewStepData({ book, imageBase64: finalImageBase64! })
+                            setPreviewStepData({ book, imageBase64: finalImageBase64 || book.image })
                         })
                         setPreviewStepData(null)
                         if (!approved) {
@@ -598,6 +598,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                         <img
                                             src={previewStepData.imageBase64}
                                             alt="Aperçu"
+                                            onError={(e) => { e.currentTarget.src = '/book-placeholder.png'; }}
                                             className="w-full object-contain max-h-[40vh] sm:max-h-64"
                                         />
                                     </div>
