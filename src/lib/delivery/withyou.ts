@@ -169,7 +169,41 @@ class WithYouService {
      * Obtenir le statut des colis
      */
     async getStatus(trackingIDs: string[]) {
-        return this.request('/getstatus', { data: trackingIDs }, 'POST')
+        const validIDs = trackingIDs.filter(id => id && id.trim() !== '');
+        
+        if (validIDs.length === 0) {
+            // Avoid calling the API with an empty array which returns 403
+            return { status: 'success', data: [] };
+        }
+        
+        try {
+            return await this.request('/getstatus', { data: validIDs }, 'POST')
+        } catch (error: any) {
+            // Handle the specific "Acces refuse" which usually means invalid tracking code or empty array
+            if (error.message && error.message.includes('Acces refuse')) {
+                
+                // If we sent a batch, one invalid ID causes the whole batch to fail. Fallback to one-by-one.
+                if (validIDs.length > 1) {
+                    console.warn(`[WithYou] Batch failed with Acces refuse. Retrying one by one...`);
+                    const results: any[] = [];
+                    for (const id of validIDs) {
+                        try {
+                            const res = await this.request('/getstatus', { data: [id] }, 'POST');
+                            if (res.data && Array.isArray(res.data)) {
+                                results.push(...res.data);
+                            }
+                        } catch (e: any) {
+                            // ignore single invalid ID
+                        }
+                    }
+                    return { status: 'success', data: results };
+                }
+
+                console.warn(`[WithYou] Le code de suivi n'a pas été trouvé ou n'appartient pas au compte. (${validIDs.join(', ')})`);
+                return { status: 'success', data: [] };
+            }
+            throw error;
+        }
     }
 }
 
