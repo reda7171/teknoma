@@ -319,7 +319,7 @@ export async function getOrderById(orderId: string) {
 
         return order
     } catch (error) {
-        console.error('Erreur lors de la récupération de la commande:', error)
+        console.error('Erreur lors de la récupération de la commande:', orderId, error)
         return null
     }
 }
