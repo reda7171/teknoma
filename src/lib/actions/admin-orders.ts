@@ -686,7 +686,7 @@ export async function bulkSyncDeliveries() {
 
                         if (trackingID && extStatus) {
                             const orderToUpdate = batch.find(o => o.trackingID === trackingID)
-                            if (orderToUpdate && orderToUpdate.deliveryStatus !== extStatus) {
+                            if (orderToUpdate) {
                                 let newInternalStatus = orderToUpdate.status
                                 const statusLower = extStatus.toLowerCase()
 
@@ -696,7 +696,13 @@ export async function bulkSyncDeliveries() {
                                     newInternalStatus = 'RETURNED'
                                 } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
                                     newInternalStatus = 'CANCELLED'
+                                } else if (statusLower.includes('expedi') || statusLower.includes('shipped') || statusLower.includes('ramass')) {
+                                    newInternalStatus = 'SHIPPED'
+                                } else if (statusLower.includes('transit') || statusLower.includes('chemin')) {
+                                    newInternalStatus = 'IN_TRANSIT'
                                 }
+
+                                if (orderToUpdate.deliveryStatus !== extStatus || orderToUpdate.status !== newInternalStatus) {
 
                                 // Mettre à jour en base le "deliveryStatus"
                                 await prisma.order.update({
@@ -725,6 +731,7 @@ export async function bulkSyncDeliveries() {
                                     city: orderToUpdate.city,
                                     company: 'WithYou'
                                 })
+                                }
                             }
                         }
                     }
