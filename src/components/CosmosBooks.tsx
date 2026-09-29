@@ -56,7 +56,7 @@ export default function CosmosBooks({
             <div className="relative w-28 sm:w-32 md:w-36 lg:w-44 aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border border-white/20 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-300">
               {failedImages.has(book.id) ? (
                 <div className="w-full h-full bg-gray-50 flex items-center justify-center p-4 text-center">
-                  <span className="text-xs font-black text-gray-400 line-clamp-3">{book.title}</span>
+                  <span className="text-xs font-black text-gray-700 line-clamp-3">{book.title}</span>
                 </div>
               ) : (
                 <Image

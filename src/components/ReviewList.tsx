@@ -19,7 +19,7 @@ export default function ReviewList({ reviews }: { reviews: Review[] }) {
     if (reviews.length === 0) {
         return (
             <div className="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-                <p className="text-gray-400 font-bold italic">{t('NoReviews')}</p>
+                <p className="text-gray-700 font-bold italic">{t('NoReviews')}</p>
             </div>
         )
     }
@@ -39,7 +39,7 @@ export default function ReviewList({ reviews }: { reviews: Review[] }) {
                             </div>
                             <div className="min-w-0">
                                 <h4 className="font-black text-gray-900 leading-none truncate">{review.fullName}</h4>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase mt-1 flex flex-wrap items-center gap-1">
+                                <p className="text-[10px] font-bold text-gray-600 uppercase mt-1 flex flex-wrap items-center gap-1">
                                     {new Date(review.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : (locale === 'fr' ? 'fr-FR' : 'en-US'))}
                                     {review.city && <span className="truncate">• {review.city}</span>}
                                 </p>
