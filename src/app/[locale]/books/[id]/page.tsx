@@ -46,34 +46,34 @@ export async function generateMetadata({
 }): Promise<Metadata> {
     const { id, locale } = await params
     const bookId = id.slice(0, 36);
-    let book = await getBookById(bookId)
+    const initialBook = await getBookById(bookId)
 
-    if (!book) {
-        if (process.env.CI || process.env.NODE_ENV !== 'production' || bookId.startsWith('c0000000')) {
-            book = {
-                id: bookId,
-                title: "L'Alchimiste",
-                titleFr: "L'Alchimiste",
-                titleEn: "The Alchemist",
-                author: "Paulo Coelho",
-                description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-                descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-                descriptionEn: "A magical story about following your dreams and listening to your heart.",
-                price: 65,
-                originalPrice: 85,
-                stock: 25,
-                image: "https://riwaya.store/uploads/books/placeholder.jpg",
-                category: "Développement Personnel",
-                active: true,
-            } as any
-        } else {
-            return {
-                title: 'Livre introuvable | Riwaya',
-                description: 'Ce livre est introuvable ou n\'est plus disponible sur Riwaya.',
-                robots: { index: false, follow: false },
-            }
+    if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && !bookId.startsWith('c0000000')) {
+        return {
+            title: 'Livre introuvable | Riwaya',
+            description: 'Ce livre est introuvable ou n\'est plus disponible sur Riwaya.',
+            robots: { index: false, follow: false },
         }
     }
+
+    const fallbackMetaBook = {
+        id: bookId,
+        title: "L'Alchimiste",
+        titleFr: "L'Alchimiste",
+        titleEn: "The Alchemist",
+        author: "Paulo Coelho",
+        description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
+        descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
+        descriptionEn: "A magical story about following your dreams and listening to your heart.",
+        price: 65,
+        originalPrice: 85,
+        stock: 25,
+        image: "https://riwaya.store/uploads/books/placeholder.jpg",
+        category: "Développement Personnel",
+        active: true,
+    } as any
+
+    const book = initialBook || fallbackMetaBook
 
     const baseUrl = getBaseUrl()
     const fallbackApiUrl = `${baseUrl}/api/books/${book.id}/image`
@@ -185,43 +185,43 @@ export default async function BookDetailPage({
     const tNav = await getTranslations('Navigation');
     const tBlog = await getTranslations('Blog');
 
-    let book = await getBookById(bookId)
+    const initialBook = await getBookById(bookId)
     const user = await getCommunityUser().catch(() => null)
     const isAdmin = user?.role === 'ADMIN' || user?.email === 'contact@riwaya.store'
 
-    if (!book) {
-        if (process.env.CI || process.env.NODE_ENV !== 'production' || bookId.startsWith('c0000000')) {
-            book = {
-                id: bookId,
-                title: "L'Alchimiste",
-                titleFr: "L'Alchimiste",
-                titleEn: "The Alchemist",
-                author: "Paulo Coelho",
-                description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-                descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-                descriptionEn: "A magical story about following your dreams and listening to your heart.",
-                longDescription: null,
-                longDescriptionFr: null,
-                longDescriptionEn: null,
-                price: 65,
-                originalPrice: 85,
-                stock: 25,
-                image: "https://riwaya.store/uploads/books/placeholder.jpg",
-                category: "Développement Personnel",
-                active: true,
-                isAffiliate: false,
-                affiliateLink: null,
-                condition: "NEW",
-                customerSeller: null,
-                seller: null,
-                sellerId: null,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            } as any
-        } else {
-            notFound()
-        }
+    if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && !bookId.startsWith('c0000000')) {
+        notFound()
     }
+
+    const fallbackBook = {
+        id: bookId,
+        title: "L'Alchimiste",
+        titleFr: "L'Alchimiste",
+        titleEn: "The Alchemist",
+        author: "Paulo Coelho",
+        description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
+        descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
+        descriptionEn: "A magical story about following your dreams and listening to your heart.",
+        longDescription: null,
+        longDescriptionFr: null,
+        longDescriptionEn: null,
+        price: 65,
+        originalPrice: 85,
+        stock: 25,
+        image: "https://riwaya.store/uploads/books/placeholder.jpg",
+        category: "Développement Personnel",
+        active: true,
+        isAffiliate: false,
+        affiliateLink: null,
+        condition: "NEW",
+        customerSeller: null,
+        seller: null,
+        sellerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    } as any
+
+    const book = initialBook || fallbackBook
 
     // Extraction des titres et descriptions dynamiques selon la langue
     const displayTitle = getLocalizedTitle(book, locale);
