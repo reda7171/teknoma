@@ -10,6 +10,11 @@ jobs:
   lighthouse-audit:
     name: Lighthouse A11y, SEO & Contrast Check
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      NEXT_TELEMETRY_DISABLED: 1
+      OUTPUT_STANDALONE: "false"
 
     services:
       mysql:
@@ -26,6 +31,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Create .env for CI
+        run: |
+          echo "DATABASE_URL=mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db" >> .env
+          echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env
+          echo "NEXT_TELEMETRY_DISABLED=1" >> .env
+          echo "OUTPUT_STANDALONE=false" >> .env
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
