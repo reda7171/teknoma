@@ -91,7 +91,23 @@ jobs:
             fuser -k 3000/tcp 2>/dev/null || true
             exit 1
           fi
-          echo "SEO routes valid: sitemap.xml and robots.txt both returned HTTP 200"
+          echo "Checking sample book route..."
+          BOOK_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000/fr/books/c0000000-0000-0000-0000-000000000001)
+          if [ "$BOOK_STATUS" != "200" ]; then
+            echo "Error: sample book route returned HTTP $BOOK_STATUS"
+            kill -9 $SERVER_PID 2>/dev/null || true
+            fuser -k 3000/tcp 2>/dev/null || true
+            exit 1
+          fi
+          echo "Checking packs route..."
+          PACKS_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000/fr/packs)
+          if [ "$PACKS_STATUS" != "200" ]; then
+            echo "Error: packs route returned HTTP $PACKS_STATUS"
+            kill -9 $SERVER_PID 2>/dev/null || true
+            fuser -k 3000/tcp 2>/dev/null || true
+            exit 1
+          fi
+          echo "All audited routes verified with HTTP 200"
           kill -9 $SERVER_PID 2>/dev/null || true
           fuser -k 3000/tcp 2>/dev/null || true
           pkill -f "next" 2>/dev/null || true

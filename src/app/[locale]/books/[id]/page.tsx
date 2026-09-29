@@ -51,6 +51,8 @@ export async function generateMetadata({
     if (!book) {
         return {
             title: 'Livre introuvable | Riwaya',
+            description: 'Ce livre est introuvable ou n\'est plus disponible sur Riwaya.',
+            robots: { index: false, follow: false },
         }
     }
 

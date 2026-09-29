@@ -23,7 +23,21 @@ async function main() {
     const bookId = 'c0000000-0000-0000-0000-000000000001'
     const book = await prisma.book.upsert({
         where: { id: bookId },
-        update: {},
+        update: {
+            title: "L'Alchimiste",
+            titleFr: "L'Alchimiste",
+            titleEn: "The Alchemist",
+            author: "Paulo Coelho",
+            description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
+            descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
+            descriptionEn: "A magical story about following your dreams and listening to your heart.",
+            price: 65,
+            originalPrice: 85,
+            stock: 25,
+            image: "https://riwaya.store/uploads/books/placeholder.jpg",
+            category: "Développement Personnel",
+            active: true,
+        },
         create: {
             id: bookId,
             title: "L'Alchimiste",
