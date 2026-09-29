@@ -37,8 +37,10 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
                 isFreeDelivery: pack.isFreeDelivery,
                 shippingFees: pack.shippingFees,
                 sellerSku: pack.sellerSku || '',
+                jumiaHighlights: (pack as any).jumiaHighlights || '',
+                jumiaPackageContent: (pack as any).jumiaPackageContent || '',
                 selectedBookIds
-            }}
+            } as any}
             books={books}
             whatsappPhone={whatsappPhone || undefined}
         />

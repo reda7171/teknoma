@@ -53,6 +53,12 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     const [description, setDescription] = useState('')
     const [descriptionFr, setDescriptionFr] = useState('')
     const [descriptionEn, setDescriptionEn] = useState('')
+    const [jumiaHighlightsAr, setJumiaHighlightsAr] = useState('')
+    const [jumiaHighlightsFr, setJumiaHighlightsFr] = useState('')
+    const [jumiaHighlightsEn, setJumiaHighlightsEn] = useState('')
+    const [jumiaPackageContentAr, setJumiaPackageContentAr] = useState('')
+    const [jumiaPackageContentFr, setJumiaPackageContentFr] = useState('')
+    const [jumiaPackageContentEn, setJumiaPackageContentEn] = useState('')
     const [isTranslating, setIsTranslating] = useState(false)
     const [translateMsg, setTranslateMsg] = useState<string | null>(null)
     const [isGeneratingHighlights, setIsGeneratingHighlights] = useState(false)
@@ -140,14 +146,22 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         const packName = currentLang === 'ar' ? name : currentLang === 'fr' ? (nameFr || name) : (nameEn || name);
         if (!packName) return alert('Veuillez saisir un nom pour le pack');
         
-        const el = document.getElementById('jumiaHighlights') as HTMLTextAreaElement;
-        let textToImprove = el?.value?.trim();
+        const currentVal = (currentLang === 'ar' ? jumiaHighlightsAr : currentLang === 'fr' ? jumiaHighlightsFr : jumiaHighlightsEn).trim();
         
-        if (!textToImprove) {
+        if (!currentVal) {
             const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
             const lis = selectedBooksData.map(b => `<li>${b.title}</li>`).join('');
-            textToImprove = `<ul><li>Titre: ${packName}</li><li>Contient:</li>${lis}</ul>`;
-            el.value = textToImprove;
+            let defaultText = '';
+            if (currentLang === 'ar') {
+                defaultText = `<ul><li>العنوان: ${packName}</li><li>النوع: باقة كتب</li>${lis ? `<li>الكتب المتضمنة:</li>${lis}` : ''}</ul>`;
+                setJumiaHighlightsAr(defaultText);
+            } else if (currentLang === 'en') {
+                defaultText = `<ul><li>Title: ${packName}</li><li>Type: Book Pack</li>${lis ? `<li>Included books:</li>${lis}` : ''}</ul>`;
+                setJumiaHighlightsEn(defaultText);
+            } else {
+                defaultText = `<ul><li>Titre: ${packName}</li><li>Type: Pack de Livres</li>${lis ? `<li>Contient:</li>${lis}` : ''}</ul>`;
+                setJumiaHighlightsFr(defaultText);
+            }
             return;
         }
         
@@ -156,11 +170,13 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             const res = await fetch('/api/admin/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode: 'texts', texts: [textToImprove], targetLang: 'FR' })
+                body: JSON.stringify({ mode: 'texts', texts: [currentVal], targetLang: currentLang === 'ar' ? 'AR' : currentLang === 'en' ? 'EN' : 'FR' })
             });
             const data = await res.json();
             if (data.success && data.translations && data.translations[0]) {
-                if (el) el.value = data.translations[0];
+                if (currentLang === 'ar') setJumiaHighlightsAr(data.translations[0]);
+                else if (currentLang === 'en') setJumiaHighlightsEn(data.translations[0]);
+                else setJumiaHighlightsFr(data.translations[0]);
             } else if (data.error) {
                 alert('Erreur DeepL: ' + data.error);
             }
@@ -176,13 +192,23 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         const packName = currentLang === 'ar' ? name : currentLang === 'fr' ? (nameFr || name) : (nameEn || name);
         if (!packName) return alert('Veuillez saisir un nom pour le pack');
         
-        const el = document.getElementById('jumiaPackageContent') as HTMLInputElement;
-        let textToImprove = el?.value?.trim();
+        const currentVal = (currentLang === 'ar' ? jumiaPackageContentAr : currentLang === 'fr' ? jumiaPackageContentFr : jumiaPackageContentEn).trim();
         
-        if (!textToImprove) {
+        if (!currentVal) {
             const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
             const booksTitles = selectedBooksData.map(b => b.title).join(', ');
-            textToImprove = `1 x Pack de livres : ${packName} (${booksTitles})`;
+            let defaultText = '';
+            if (currentLang === 'ar') {
+                defaultText = `1 x باقة كتب : ${packName}${booksTitles ? ` (${booksTitles})` : ''}`;
+                setJumiaPackageContentAr(defaultText);
+            } else if (currentLang === 'en') {
+                defaultText = `1 x Book pack : ${packName}${booksTitles ? ` (${booksTitles})` : ''}`;
+                setJumiaPackageContentEn(defaultText);
+            } else {
+                defaultText = `1 x Pack de livres : ${packName}${booksTitles ? ` (${booksTitles})` : ''}`;
+                setJumiaPackageContentFr(defaultText);
+            }
+            return;
         }
         
         setIsGeneratingContent(true);
@@ -190,11 +216,13 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             const res = await fetch('/api/admin/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode: 'texts', texts: [textToImprove], targetLang: 'FR' })
+                body: JSON.stringify({ mode: 'texts', texts: [currentVal], targetLang: currentLang === 'ar' ? 'AR' : currentLang === 'en' ? 'EN' : 'FR' })
             });
             const data = await res.json();
             if (data.success && data.translations && data.translations[0]) {
-                if (el) el.value = data.translations[0];
+                if (currentLang === 'ar') setJumiaPackageContentAr(data.translations[0]);
+                else if (currentLang === 'en') setJumiaPackageContentEn(data.translations[0]);
+                else setJumiaPackageContentFr(data.translations[0]);
             } else if (data.error) {
                 alert('Erreur DeepL: ' + data.error);
             }
@@ -233,8 +261,8 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             shippingFees: isFreeDelivery ? 0 : shippingFees,
             bookIds: selectedBooks,
             sellerSku: formData.get('sellerSku') as string || undefined,
-            jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
-            jumiaPackageContent: formData.get('jumiaPackageContent') as string || undefined,
+            jumiaHighlights: (currentLang === 'fr' ? jumiaHighlightsFr : currentLang === 'ar' ? jumiaHighlightsAr : jumiaHighlightsEn) || jumiaHighlightsFr || jumiaHighlightsAr || jumiaHighlightsEn || (formData.get('jumiaHighlights') as string) || undefined,
+            jumiaPackageContent: (currentLang === 'fr' ? jumiaPackageContentFr : currentLang === 'ar' ? jumiaPackageContentAr : jumiaPackageContentEn) || jumiaPackageContentFr || jumiaPackageContentAr || jumiaPackageContentEn || (formData.get('jumiaPackageContent') as string) || undefined,
         }
 
         const result = await createPack(input)
@@ -255,14 +283,21 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             book.author.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesAvailability = onlyAvailable ? (book.active && book.stock > 0) : true
-        const matchesAuthor = filterAuthor === 'ALL' || book.author === filterAuthor
+        const matchesAuthor = filterAuthor === 'ALL' || book.author?.trim() === filterAuthor
         const matchesCategory = filterCategory === 'ALL' || (book.category || 'Non catégorisé') === filterCategory
         const matchesLanguage = filterLanguage === 'ALL' || (book.language || 'fr') === filterLanguage
         
         return matchesSearch && matchesAvailability && matchesAuthor && matchesCategory && matchesLanguage
     })
 
-    const authors = Array.from(new Set(books.map(b => b.author))).sort()
+    const authors = Array.from(new Set(books.map(b => b.author?.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+    const authorBookCounts = books.reduce((acc, b) => {
+        const author = b.author?.trim()
+        if (author) {
+            acc[author] = (acc[author] || 0) + 1
+        }
+        return acc
+    }, {} as Record<string, number>)
     const categories = Array.from(new Set(books.map(b => b.category || 'Non catégorisé'))).sort()
     const languages = Array.from(new Set(books.map(b => b.language || 'fr'))).sort()
 
@@ -281,22 +316,30 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
 
     const copyChatGptPrompt = () => {
         const packName = name || nameFr || nameEn || 'Nom du pack inconnu'
+        const selectedTitles = selectedBooksData.map(b => b.title).join(', ')
 
-        const prompt = `Act as a professional bookseller. I am adding a book pack to my online store.
+        const prompt = `Act as an expert e-commerce copywriter & bookseller for Jumia marketplace.
 Pack Name: ${packName}
+${selectedTitles ? `Books Included in this Pack (${selectedBooksData.length}): ${selectedTitles}` : ''}
 
-Please provide the following information in JSON format (so I can easily copy-paste or read it):
+Please provide the following information in strict JSON format:
 {
-  "name_ar": "Pack Name in Arabic",
-  "name_fr": "Pack Name in French",
-  "name_en": "Pack Name in English",
-  "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
-  "description_fr": "Short engaging description in French (max 3 paragraphs)",
-  "description_en": "Short engaging description in English (max 3 paragraphs)",
-  "jumiaHighlights": "Key highlights of the pack (bullet points)",
-  "jumiaPackageContent": "What's in the box? (e.g., list of books in the pack)"
+  "name_ar": "اسم الحزمة باللغة العربية (جذاب وواضح)",
+  "name_fr": "Nom du pack en français (accrocheur et clair)",
+  "name_en": "Pack name in English (catchy and professional)",
+  "description_ar": "وصف جذاب للحزمة بالعربية (فقرتين إلى 3 فقرات تشجع على القراءة)",
+  "description_fr": "Description engageante du pack en français (2 à 3 paragraphes)",
+  "description_en": "Engaging pack description in English (2-3 paragraphs)",
+  "jumiaHighlights_ar": "<ul><li>العنوان: [اسم الحزمة بالعربية]</li><li>النوع: باقة كتب</li>${selectedTitles ? `<li>الكتب: ${selectedTitles}</li>` : ''}</ul>",
+  "jumiaHighlights_fr": "<ul><li>Titre: [Nom du pack en français]</li><li>Type: Pack de Livres</li>${selectedTitles ? `<li>Contient: ${selectedTitles}</li>` : ''}</ul>",
+  "jumiaHighlights_en": "<ul><li>Title: [Pack name in English]</li><li>Type: Book Pack</li>${selectedTitles ? `<li>Contains: ${selectedTitles}</li>` : ''}</ul>",
+  "jumiaPackageContent_ar": "1 x باقة كتب : [اسم الحزمة بالعربية]",
+  "jumiaPackageContent_fr": "1 x Pack de livres : [Nom du pack en français]",
+  "jumiaPackageContent_en": "1 x Book pack : [Pack name in English]",
+  "jumiaHighlights": "<ul><li>Titre: [Nom du pack en français]</li><li>Type: Pack de Livres</li>${selectedTitles ? `<li>Contient: ${selectedTitles}</li>` : ''}</ul>",
+  "jumiaPackageContent": "1 x Pack de livres : [Nom du pack en français]"
 }
-Ensure the descriptions are catchy, SEO-friendly, and professional.`
+Ensure all descriptions and highlights are formatted properly. HTML in highlights must use clean <ul> and <li> tags.`
 
         navigator.clipboard.writeText(prompt)
         alert('Prompt ChatGPT copié dans le presse-papier !')
@@ -310,8 +353,20 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                 return
             }
             
-            const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
-            let data
+            // Extraction robuste du JSON (gère le code markdown ```json ... ``` ou texte autour)
+            let jsonStr = text.trim()
+            const matchCodeBlock = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+            if (matchCodeBlock) {
+                jsonStr = matchCodeBlock[1].trim()
+            } else {
+                const firstBrace = text.indexOf('{')
+                const lastBrace = text.lastIndexOf('}')
+                if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                    jsonStr = text.substring(firstBrace, lastBrace + 1)
+                }
+            }
+
+            let data: any
             try {
                 data = JSON.parse(jsonStr)
             } catch (e) {
@@ -319,26 +374,39 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                 return
             }
 
-            // Controlled inputs (state variables)
-            if (data.name_ar) setName(data.name_ar)
-            if (data.name_fr) setNameFr(data.name_fr)
-            if (data.name_en) setNameEn(data.name_en)
-            if (data.description_ar) setDescription(data.description_ar)
-            if (data.description_fr) setDescriptionFr(data.description_fr)
-            if (data.description_en) setDescriptionEn(data.description_en)
+            // Noms
+            const nAr = data.name_ar || data.nameAr || data.title_ar || data.titleAr
+            const nFr = data.name_fr || data.nameFr || data.title_fr || data.titleFr
+            const nEn = data.name_en || data.nameEn || data.title_en || data.titleEn
+            if (nAr) setName(nAr)
+            if (nFr) setNameFr(nFr)
+            if (nEn) setNameEn(nEn)
 
-            const setInput = (name: string, value: string) => {
-                if (value) {
-                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement
-                    if (el) el.value = value
-                }
-            }
+            // Descriptions
+            const dAr = data.description_ar || data.descriptionAr
+            const dFr = data.description_fr || data.descriptionFr
+            const dEn = data.description_en || data.descriptionEn
+            if (dAr) setDescription(dAr)
+            if (dFr) setDescriptionFr(dFr)
+            if (dEn) setDescriptionEn(dEn)
 
-            // Uncontrolled inputs
-            setInput('jumiaHighlights', data.jumiaHighlights)
-            setInput('jumiaPackageContent', data.jumiaPackageContent)
+            // Multilingual Jumia Highlights
+            const hAr = data.jumiaHighlights_ar || data.jumia_highlights_ar || data.highlights_ar || data.highlightsAr || (data.jumiaHighlights && /[\u0600-\u06FF]/.test(data.jumiaHighlights) ? data.jumiaHighlights : '')
+            const hFr = data.jumiaHighlights_fr || data.jumia_highlights_fr || data.highlights_fr || data.highlightsFr || data.jumiaHighlights || data.highlights || ''
+            const hEn = data.jumiaHighlights_en || data.jumia_highlights_en || data.highlights_en || data.highlightsEn || ''
+            if (hAr) setJumiaHighlightsAr(hAr)
+            if (hFr) setJumiaHighlightsFr(hFr)
+            if (hEn) setJumiaHighlightsEn(hEn)
 
-            alert('Champs remplis avec succès !')
+            // Multilingual Jumia Package Content
+            const cAr = data.jumiaPackageContent_ar || data.jumia_package_content_ar || data.package_content_ar || data.packageContentAr || (data.jumiaPackageContent && /[\u0600-\u06FF]/.test(data.jumiaPackageContent) ? data.jumiaPackageContent : '')
+            const cFr = data.jumiaPackageContent_fr || data.jumia_package_content_fr || data.package_content_fr || data.packageContentFr || data.jumiaPackageContent || data.package_content || ''
+            const cEn = data.jumiaPackageContent_en || data.jumia_package_content_en || data.package_content_en || data.packageContentEn || ''
+            if (cAr) setJumiaPackageContentAr(cAr)
+            if (cFr) setJumiaPackageContentFr(cFr)
+            if (cEn) setJumiaPackageContentEn(cEn)
+
+            alert('Champs et données Jumia remplis avec succès pour toutes les langues !')
         } catch (err) {
             console.error(err)
             alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
@@ -654,7 +722,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                             <div className="mt-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <label htmlFor="jumiaHighlights" className="block text-sm font-medium text-gray-700">
-                                        Highlights Jumia (Description courte HTML)
+                                        Highlights Jumia (Description courte HTML) {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'}
                                     </label>
                                     <button type="button" onClick={generateHighlightsAI} disabled={isGeneratingHighlights} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
                                         {isGeneratingHighlights ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL'}
@@ -664,8 +732,17 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                                     id="jumiaHighlights"
                                     name="jumiaHighlights"
                                     rows={3}
-                                    placeholder={`<ul><li>Titre: ${name}</li><li>Type: Pack de Livres</li></ul>`}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir={currentLang === 'ar' ? 'rtl' : 'ltr'}
+                                    value={currentLang === 'ar' ? jumiaHighlightsAr : currentLang === 'fr' ? jumiaHighlightsFr : jumiaHighlightsEn}
+                                    onChange={e => {
+                                        if (currentLang === 'ar') setJumiaHighlightsAr(e.target.value)
+                                        else if (currentLang === 'fr') setJumiaHighlightsFr(e.target.value)
+                                        else setJumiaHighlightsEn(e.target.value)
+                                    }}
+                                    placeholder={currentLang === 'ar' 
+                                        ? `<ul><li>العنوان: ${name || 'اسم الحزمة'}</li><li>النوع: باقة كتب</li></ul>`
+                                        : `<ul><li>Titre: ${nameFr || name || 'Nom du pack'}</li><li>Type: Pack de Livres</li></ul>`}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs"
                                 />
                                 <p className="mt-1 text-sm text-gray-500">
                                     Laisser vide pour utiliser la valeur par défaut. Recommandé : une liste HTML.
@@ -676,7 +753,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                             <div className="mt-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <label htmlFor="jumiaPackageContent" className="block text-sm font-medium text-gray-700">
-                                        Contenu du colis Jumia (What's in the box)
+                                        Contenu du colis Jumia (What's in the box) {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'}
                                     </label>
                                     <button type="button" onClick={generateContentAI} disabled={isGeneratingContent} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
                                         {isGeneratingContent ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL'}
@@ -686,8 +763,17 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                                     type="text"
                                     id="jumiaPackageContent"
                                     name="jumiaPackageContent"
-                                    placeholder={`1 x Pack de livres : ${name}`}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir={currentLang === 'ar' ? 'rtl' : 'ltr'}
+                                    value={currentLang === 'ar' ? jumiaPackageContentAr : currentLang === 'fr' ? jumiaPackageContentFr : jumiaPackageContentEn}
+                                    onChange={e => {
+                                        if (currentLang === 'ar') setJumiaPackageContentAr(e.target.value)
+                                        else if (currentLang === 'fr') setJumiaPackageContentFr(e.target.value)
+                                        else setJumiaPackageContentEn(e.target.value)
+                                    }}
+                                    placeholder={currentLang === 'ar' 
+                                        ? `1 x باقة كتب : ${name || 'اسم الحزمة'}`
+                                        : `1 x Pack de livres : ${nameFr || name || 'Nom du pack'}`}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                 />
                                 <p className="mt-1 text-sm text-gray-500">
                                     Exemple: "3 x Livres". Laisser vide pour la valeur par défaut.
@@ -730,8 +816,8 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                             <select value={filterAuthor} onChange={e => setFilterAuthor(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
-                                <option value="ALL">Tous les auteurs</option>
-                                {authors.map(a => <option key={a} value={a}>{a}</option>)}
+                                <option value="ALL">Tous les auteurs ({books.length})</option>
+                                {authors.map(a => <option key={a} value={a}>{a} ({authorBookCounts[a] || 0})</option>)}
                             </select>
                             <select value={filterLanguage} onChange={e => setFilterLanguage(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
                                 <option value="ALL">Toutes les langues</option>

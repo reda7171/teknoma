@@ -9,6 +9,7 @@ import * as htmlToImage from 'html-to-image'
 interface CatalogImageModalProps {
     isOpen: boolean
     onClose: () => void
+    onSelect?: (url: string) => void
 }
 
 const BG_COLORS = [
@@ -19,7 +20,7 @@ const BG_COLORS = [
     { name: 'Minimal', color: '#f8fafc', text: '#111827' },
 ]
 
-export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModalProps) {
+export default function CatalogImageModal({ isOpen, onClose, onSelect }: CatalogImageModalProps) {
     const [isGenerating, setIsGenerating] = useState(false)
     const [allBooks, setAllBooks] = useState<any[]>([])
     const [currentChunkIdx, setCurrentChunkIdx] = useState(0)

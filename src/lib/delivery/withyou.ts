@@ -3,6 +3,8 @@
  * Basé sur la documentation documentation_withyou_livraison
  */
 
+import { MOROCCO_CITIES, WITHYOU_CITIES } from '@/lib/constants/cities'
+
 const BASE_URL = 'https://new.withyou.ma/api-rest'
 
 interface WithYouConfig {
@@ -21,21 +23,33 @@ interface WithYouPackageData {
 }
 
 class WithYouService {
-    private config: WithYouConfig
+    private async getCredentials(): Promise<WithYouConfig> {
+        let key = process.env.WITHYOU_API_KEY
+        let token = process.env.WITHYOU_API_TOKEN
 
-    constructor() {
-        this.config = {
-            key: process.env.WITHYOU_API_KEY || '6ce75dfde8bf10be41b5e0a7109e77ca',
-            token: process.env.WITHYOU_API_TOKEN || '365062ce0f2131a681e52bc0b90586fe348881ac21ad1af64f5c43b2cb4e7f04'
+        try {
+            const { getSetting } = await import('@/lib/actions/site-settings')
+            const dbKey = (await getSetting('delivery_api_key')) || (await getSetting('withyou_api_key'))
+            const dbToken = (await getSetting('delivery_api_token')) || (await getSetting('withyou_api_token'))
+            if (dbKey) key = dbKey
+            if (dbToken) token = dbToken
+        } catch {
+            // ignore siteSettings fetch failure
+        }
+
+        return {
+            key: key || '6ce75dfde8bf10be41b5e0a7109e77ca',
+            token: token || '365062ce0f2131a681e52bc0b90586fe348881ac21ad1af64f5c43b2cb4e7f04'
         }
     }
 
     private async request(endpoint: string, data: any = {}, method: 'POST' | 'GET' = 'POST') {
+        const creds = await this.getCredentials()
         let url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`
 
         const bodyData: any = {
-            key: this.config.key,
-            token: this.config.token,
+            key: creds.key,
+            token: creds.token,
             ...data
         }
 
@@ -46,7 +60,8 @@ class WithYouService {
             const fetchOptions: RequestInit = {
                 method,
                 headers: { 
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 signal: controller.signal
             }
@@ -62,19 +77,11 @@ class WithYouService {
                 })
                 url += `?${params.toString()}`
             } else {
-                fetchOptions.headers = {
-                    ...fetchOptions.headers,
-                    'Content-Type': 'application/json'
-                }
                 fetchOptions.body = JSON.stringify(bodyData)
             }
 
-            void(`[WithYou] ${method} ${url}`)
-
             const response = await fetch(url, fetchOptions)
             const bodyText = await response.text()
-            
-            void(`[WithYou] Response status: ${response.status}`)
             
             let parsed
             try {
@@ -87,7 +94,6 @@ class WithYouService {
             }
 
             if (!response.ok) {
-                console.error(`[WithYou] ❌ API Error (${response.status}):`, bodyText)
                 throw new Error(`Erreur API WithYou [${endpoint}]: ${parsed?.message || response.statusText}`)
             }
 
@@ -105,10 +111,10 @@ class WithYouService {
     /**
      * Liste des villes
      */
-    async getCities() {
+    async getCities(): Promise<string[]> {
         try {
-            const res = await this.request('/getville', {}, 'GET')
-            // console.log('[WithYou] Raw cities response type:', typeof res)
+            // L'API WithYou attend la clé et le token dans le corps JSON via POST
+            const res = await this.request('/getville', {}, 'POST')
             
             let cityList: string[] = []
 
@@ -119,27 +125,14 @@ class WithYouService {
             }
 
             // Filtrer les doublons et les valeurs vides
-            cityList = Array.from(new Set(cityList.filter(v => v && typeof v === 'string')))
+            cityList = Array.from(new Set(cityList.filter((v: any) => v && typeof v === 'string')))
 
             if (cityList.length > 0) return cityList
 
-            // Fallback si l'API ne renvoie rien
-            return [
-                "Casablanca", "Rabat", "Marrakech", "Fes", "Tangier", "Agadir", "Meknes", "Oujda", "Kenitra", "Tetouan",
-                "Safi", "Mohammedia", "Khouribga", "El Jadida", "Beni Mellal", "Nador", "Taza", "Settat", "Berrechid",
-                "Khemisset", "Inezgane", "Ksar El Kebir", "Larache", "Guelmim", "Berkane", "Khenifra", "Sidi Kacem",
-                "Sidi Slimane", "Errachidia", "Taroudant", "Ouarzazate", "Tiznit", "Youssoufia", "Ben Guerir", "Tan-Tan",
-                "Ouazzane", "Guercif", "Dakhla", "Laayoune", "Oulad Teima", "Sidi Ifni"
-            ]
-        } catch (error) {
-            console.error('[WithYou] Error fetching cities:', error)
-            return [
-                "Casablanca", "Rabat", "Marrakech", "Fes", "Tangier", "Agadir", "Meknes", "Oujda", "Kenitra", "Tetouan",
-                "Safi", "Mohammedia", "Khouribga", "El Jadida", "Beni Mellal", "Nador", "Taza", "Settat", "Berrechid",
-                "Khemisset", "Inezgane", "Ksar El Kebir", "Larache", "Guelmim", "Berkane", "Khenifra", "Sidi Kacem",
-                "Sidi Slimane", "Errachidia", "Taroudant", "Ouarzazate", "Tiznit", "Youssoufia", "Ben Guerir", "Tan-Tan",
-                "Ouazzane", "Guercif", "Dakhla", "Laayoune", "Oulad Teima", "Sidi Ifni"
-            ]
+            return [...WITHYOU_CITIES]
+        } catch (error: any) {
+            // En cas d'accès refusé ou offline, renvoyer la liste officielle des villes WithYou
+            return [...WITHYOU_CITIES]
         }
     }
 
@@ -148,7 +141,14 @@ class WithYouService {
      */
     async createPackage(data: WithYouPackageData | WithYouPackageData[]) {
         const payload = Array.isArray(data) ? data : [data]
-        return this.request('/savecolis', { data: payload })
+        try {
+            return await this.request('/savecolis', { data: payload }, 'POST')
+        } catch (error: any) {
+            if (error?.message?.includes('Acces refuse')) {
+                throw new Error('Accès refusé par WithYou (401/403). Veuillez vérifier vos identifiants WITHYOU_API_KEY et WITHYOU_API_TOKEN dans la configuration.')
+            }
+            throw error
+        }
     }
 
     /**
