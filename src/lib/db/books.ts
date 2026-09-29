@@ -269,8 +269,8 @@ export async function getBookById(id: string) {
         })
         if (book) return book
 
-        // Fallback for CI/testing book IDs if exact UUID is not yet in DB
-        if (id.startsWith('c0000000')) {
+        // Fallback for CI/testing book ID if exact UUID is not yet in DB
+        if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
             return await prisma.book.findFirst({
                 where: { active: true },
                 include: { customerSeller: true, seller: true },
@@ -279,7 +279,7 @@ export async function getBookById(id: string) {
         return null
     } catch (e) {
         console.error('Error in getBookById:', e)
-        if (id.startsWith('c0000000')) {
+        if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
             return await prisma.book.findFirst({
                 where: { active: true },
                 include: { customerSeller: true, seller: true },

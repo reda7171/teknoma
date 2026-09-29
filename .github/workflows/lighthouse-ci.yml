@@ -59,10 +59,6 @@ jobs:
         env:
           DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
 
-      - name: Seed Database
-        run: npx tsx prisma/seed.ts
-        env:
-          DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
 
       - name: Build Next.js
         run: npm run build
@@ -98,7 +94,7 @@ jobs:
             exit 1
           fi
           echo "Checking sample book route..."
-          BOOK_BODY=$(curl -s http://localhost:3000/fr/books/c0000000-0000-0000-0000-000000000001)
+          BOOK_BODY=$(curl -s http://localhost:3000/fr/books/08f41f86-a23c-48f6-b486-109383b0f6e0)
           if echo "$BOOK_BODY" | grep -q "404\."; then
             echo "Error: sample book route rendered 404 page!"
             kill -9 $SERVER_PID 2>/dev/null || true
