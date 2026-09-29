@@ -389,7 +389,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     const isDeposer = item.href.includes('/deposer-liste')
 
                                     const vibrantBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : isDeposer ? 'bg-green-500' : 'bg-blue-500'
-                                    const vibrantText = isKids ? 'text-pink-500' : isDigital ? 'text-amber-500' : isJournal ? 'text-black' : isDeposer ? 'text-green-500' : 'text-blue-500'
+                                    const vibrantText = isKids ? 'text-pink-700' : isDigital ? 'text-amber-800' : isJournal ? 'text-black' : isDeposer ? 'text-emerald-700' : 'text-blue-700'
                                     const vibrantBorder = isKids ? 'border-pink-500/20 hover:border-pink-500' : isDigital ? 'border-amber-400/20 hover:border-amber-400' : isJournal ? 'border-gray-200 hover:border-black' : isDeposer ? 'border-green-500/20 hover:border-green-500' : 'border-blue-500/20 hover:border-blue-500'
 
                                     const finalBg = isJournal ? 'bg-[#FDFBF7]' : vibrantBg
@@ -447,10 +447,10 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 if (item.href === '/books') {
                                     return (
                                         <div key={item.href} className="relative group/books inline-block">
-                                            <Link href="/books" className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive ? 'bg-blue-500 text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]' : 'bg-white text-blue-500 border-blue-500/20 hover:border-blue-500 hover:bg-blue-500 hover:text-black shadow-sm'}`}>
+                                            <Link href="/books" className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive ? 'bg-blue-500 text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]' : 'bg-white text-blue-700 border-blue-500/20 hover:border-blue-500 hover:bg-blue-500 hover:text-black shadow-sm'}`}>
                                                 <span>{item.label}</span>
                                                 <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/books:rotate-180" />
-                                                <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : 'bg-blue-500'}`} />
+                                                <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : 'bg-blue-700'}`} />
                                             </Link>
                                             
                                             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-blue-100 opacity-0 invisible group-hover/books:opacity-100 group-hover/books:visible group-hover/books:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
@@ -641,7 +641,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                             const isDeposer = item.href.includes('/deposer-liste')
 
                             const vibrantBg = isKids ? 'bg-pink-50' : isDigital ? 'bg-amber-50' : isJournal ? 'bg-[#FDFBF7]' : isDeposer ? 'bg-green-50' : 'bg-blue-50'
-                            const vibrantText = isKids ? 'text-pink-600' : isDigital ? 'text-amber-600' : isJournal ? 'text-black' : isDeposer ? 'text-green-600' : 'text-blue-600'
+                            const vibrantText = isKids ? 'text-pink-800' : isDigital ? 'text-amber-900' : isJournal ? 'text-black' : isDeposer ? 'text-emerald-800' : 'text-blue-800'
                             const vibrantActiveBg = isKids ? 'bg-pink-500' : isDigital ? 'bg-amber-400' : isJournal ? 'bg-black' : isDeposer ? 'bg-green-500' : 'bg-blue-500'
                             const vibrantActiveText = isJournal ? 'text-white' : 'text-white'
 
