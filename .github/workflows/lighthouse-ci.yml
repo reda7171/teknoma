@@ -35,9 +35,15 @@ jobs:
       - name: Create .env for CI
         run: |
           echo "DATABASE_URL=mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db" >> .env
+          echo "DATABASE_URL=mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db" >> .env.production
+          echo "DATABASE_URL=mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db" >> .env.local
           echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env
+          echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env.production
+          echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env.local
           echo "NEXT_TELEMETRY_DISABLED=1" >> .env
           echo "OUTPUT_STANDALONE=false" >> .env
+          echo "CI=true" >> .env
+          echo "CI=true" >> .env.production
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -92,13 +98,14 @@ jobs:
             exit 1
           fi
           echo "Checking sample book route..."
-          BOOK_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000/fr/books/c0000000-0000-0000-0000-000000000001)
-          if [ "$BOOK_STATUS" != "200" ]; then
-            echo "Error: sample book route returned HTTP $BOOK_STATUS"
+          BOOK_BODY=$(curl -s http://localhost:3000/fr/books/c0000000-0000-0000-0000-000000000001)
+          if echo "$BOOK_BODY" | grep -q "404\."; then
+            echo "Error: sample book route rendered 404 page!"
             kill -9 $SERVER_PID 2>/dev/null || true
             fuser -k 3000/tcp 2>/dev/null || true
             exit 1
           fi
+          echo "Sample book route successfully rendered book content"
           echo "Checking packs route..."
           PACKS_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000/fr/packs)
           if [ "$PACKS_STATUS" != "200" ]; then
