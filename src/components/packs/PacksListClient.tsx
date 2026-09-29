@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import PackCard from '@/components/PackCard'
-import { Package, Sparkles } from 'lucide-react'
+import { Package, Sparkles, ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import CustomPackBuilder from './CustomPackBuilder'
 
@@ -11,10 +11,13 @@ interface PacksListClientProps {
     availableBooks: any[]
 }
 
+const ITEMS_PER_PAGE = 9
+
 export default function PacksListClient({ packs, availableBooks }: PacksListClientProps) {
     const t = useTranslations('PacksPage')
     const tCommon = useTranslations('Common')
     const [filterAvailable, setFilterAvailable] = useState(false)
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
 
     const filteredPacks = useMemo(() => {
         if (!filterAvailable) return packs
@@ -25,6 +28,15 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
             return pack.books.some((pb: any) => pb.book.stock > 0)
         })
     }, [packs, filterAvailable])
+
+    // Reset pagination when filter changes
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE)
+    }, [filterAvailable])
+
+    const displayedPacks = useMemo(() => {
+        return filteredPacks.slice(0, visibleCount)
+    }, [filteredPacks, visibleCount])
 
     if (packs.length === 0) {
         return (
@@ -91,11 +103,12 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {filteredPacks.length > 0 ? (
-                    filteredPacks.map((pack) => (
+                {displayedPacks.length > 0 ? (
+                    displayedPacks.map((pack, idx) => (
                         <PackCard
                             key={pack.id}
                             {...pack}
+                            priority={idx < 3}
                             books={pack.books.map((pb: any) => ({
                                 book: {
                                     ...pb.book,
@@ -106,12 +119,31 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                     ))
                 ) : (
                     <div className="col-span-full text-center py-20 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
-                        <Package className="w-16 h-16 text-gray-200 mx-auto mb-6" />
+                        <Package className="w-16 h-16 text-gray-400 mx-auto mb-6" />
                         <h3 className="text-2xl font-black text-black mb-4">Aucun pack disponible</h3>
-                        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Veuillez modifier vos filtres</p>
+                        <p className="text-gray-600 font-bold uppercase tracking-widest text-xs">Veuillez modifier vos filtres</p>
                     </div>
                 )}
             </div>
+
+            {/* Pagination / Load More */}
+            {filteredPacks.length > visibleCount && (
+                <div className="flex flex-col items-center justify-center mt-16 gap-3">
+                    <button
+                        onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_PAGE)}
+                        className="flex items-center gap-3 px-8 py-4 rounded-full font-black text-sm md:text-base uppercase tracking-widest bg-black text-white hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    >
+                        <span>{tCommon('ShowMore')}</span>
+                        <ChevronDown className="w-4 h-4 animate-bounce" />
+                        <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">
+                            +{Math.min(ITEMS_PER_PAGE, filteredPacks.length - visibleCount)}
+                        </span>
+                    </button>
+                    <p className="text-xs font-bold text-gray-600 uppercase tracking-widest">
+                        {displayedPacks.length} / {filteredPacks.length}
+                    </p>
+                </div>
+            )}
         </>
     )
 }

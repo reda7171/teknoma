@@ -22,6 +22,7 @@ interface PackCardProps {
     originalPrice?: number | null
     image: string | null
     shippingFees?: number
+    priority?: boolean
     books: Array<{
         book: {
             id: string
@@ -43,6 +44,7 @@ export default function PackCard({
     image,
     books,
     shippingFees,
+    priority = false,
 }: PackCardProps) {
     const t = useTranslations('Packs')
     const tCommon = useTranslations('Common')
@@ -102,6 +104,8 @@ export default function PackCard({
                             src={image}
                             alt={`Pack ${displayName} - Riwaya Selection`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            priority={priority}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-pixio-yellow/30 p-8">
@@ -112,6 +116,7 @@ export default function PackCard({
                                             src={pb.book.image}
                                             alt={`${pb.book.title} - Inclus dans le pack ${displayName}`}
                                             className="w-full h-full object-cover"
+                                            sizes="80px"
                                         />
                                     </div>
                                 ))}
