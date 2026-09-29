@@ -10,6 +10,11 @@ jobs:
   lighthouse-audit:
     name: Lighthouse A11y, SEO & Contrast Check
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      NEXT_TELEMETRY_DISABLED: 1
+      OUTPUT_STANDALONE: "false"
 
     services:
       mysql:
@@ -26,6 +31,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Create .env for CI
+        run: |
+          echo "DATABASE_URL=mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db" >> .env
+          echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env
+          echo "NEXT_TELEMETRY_DISABLED=1" >> .env
+          echo "OUTPUT_STANDALONE=false" >> .env
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,27 +67,35 @@ jobs:
 
       - name: Verify Sitemap & Robots.txt
         run: |
-          npx next start -p 3000 &
+          ./node_modules/.bin/next start -p 3000 &
           SERVER_PID=$!
-          until curl -s http://localhost:3000/fr > /dev/null 2>&1; do
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/fr > /dev/null 2>&1; then
+              break
+            fi
             sleep 1
           done
           echo "Checking sitemap.xml..."
           SITEMAP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000/sitemap.xml)
           if [ "$SITEMAP_STATUS" != "200" ]; then
             echo "Error: sitemap.xml returned HTTP $SITEMAP_STATUS"
-            kill $SERVER_PID
+            kill -9 $SERVER_PID 2>/dev/null || true
+            fuser -k 3000/tcp 2>/dev/null || true
             exit 1
           fi
           echo "Checking robots.txt..."
           ROBOTS_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000/robots.txt)
           if [ "$ROBOTS_STATUS" != "200" ]; then
             echo "Error: robots.txt returned HTTP $ROBOTS_STATUS"
-            kill $SERVER_PID
+            kill -9 $SERVER_PID 2>/dev/null || true
+            fuser -k 3000/tcp 2>/dev/null || true
             exit 1
           fi
           echo "SEO routes valid: sitemap.xml and robots.txt both returned HTTP 200"
-          kill $SERVER_PID
+          kill -9 $SERVER_PID 2>/dev/null || true
+          fuser -k 3000/tcp 2>/dev/null || true
+          pkill -f "next" 2>/dev/null || true
+          sleep 3
 
       - name: Run Lighthouse CI Audit
         uses: treosh/lighthouse-ci-action@v12

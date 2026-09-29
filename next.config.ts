@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
     },
     optimizeCss: true, // Réduit le CSS critique en pré-rendrant les styles
   },
-  output: 'standalone',
+  output: process.env.OUTPUT_STANDALONE === 'false' ? undefined : 'standalone',
   poweredByHeader: false,
   compress: false, // Désactivé : Nginx s'en occupe (évite le memory leak Gzip de Node.js)
   images: {
