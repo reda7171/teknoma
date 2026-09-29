@@ -121,7 +121,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                 onTouchStart={onTouchStartEvent}
                 onTouchMove={onTouchMoveEvent}
                 onTouchEnd={onTouchEndEvent}
-                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[110] transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
+                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[110] transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
             >
                 <div className="flex flex-col h-full">

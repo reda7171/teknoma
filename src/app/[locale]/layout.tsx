@@ -21,7 +21,7 @@ const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 import UtmTracker from '@/components/UtmTracker'
 import DelayedScripts from '@/components/DelayedScripts'
-import GoogleReviewsBadge from '@/components/GoogleReviewsBadge'
+
 const AuthModal = dynamic(() => import('@/components/auth/AuthModal'))
 
 
@@ -45,11 +45,12 @@ const tajawal = localFont({
   preload: false, // Chargé uniquement pour RTL — pas besoin de précharger
 });
 
-const cairo = localFont({
-  src: "../../fonts/Cairo-VariableFont.ttf",
+import { Cairo } from 'next/font/google';
+
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
   variable: "--font-cairo",
   display: 'swap',
-  preload: false,
   adjustFontFallback: false,
 });
 
@@ -487,7 +488,7 @@ export default async function LocaleLayout({
   const googleSearchConsoleId = googleSearchConsoleIdRaw || googleSearchConsoleIdFallback;
 
   return (
-    <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no">
+    <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no" data-scroll-behavior="smooth">
       <head>
 
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
@@ -632,10 +633,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </DelayedScripts>
         </NextIntlClientProvider>
 
-        {/* Google Customer Reviews Badge */}
-        <DelayedScripts>
-          <GoogleReviewsBadge />
-        </DelayedScripts>
+
       </body>
     </html>
   );

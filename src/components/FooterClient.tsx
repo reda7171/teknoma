@@ -289,7 +289,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-3 opacity-60 hover:opacity-100 transition-opacity mt-4 md:mt-0">
+                    <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-3 transition-opacity mt-4 md:mt-0">
                         {/* Visa */}
                         {paymentSettings?.stripe && (
                             <div className="h-7 px-2.5 bg-white rounded flex items-center justify-center cursor-default" title="Visa">
@@ -317,25 +317,25 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         {/* CMI */}
                         {paymentSettings?.cmi && (
                             <div className="h-7 px-2.5 bg-white rounded flex items-center cursor-default" title="CMI">
-                                <span className="text-[10px] font-black text-[#004B87] tracking-widest">CMI</span>
+                                <span className="text-[10px] font-black text-[#003865] tracking-widest">CMI</span>
                             </div>
                         )}
                         {/* COD */}
                         {paymentSettings?.cod && (
                             <div className="h-7 px-2.5 bg-white rounded flex items-center gap-1.5 cursor-default" title="Cash on Delivery">
-                                <svg className="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <svg className="w-4 h-4 text-emerald-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                     <path d="M17 9V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2m2 4h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm7-5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
                                 </svg>
-                                <span className="text-[10px] font-black text-emerald-700 tracking-widest">COD</span>
+                                <span className="text-[10px] font-black text-emerald-800 tracking-widest">COD</span>
                             </div>
                         )}
                         {/* Bank Transfer */}
                         {paymentSettings?.bank && (
                             <div className="h-7 px-2.5 bg-white rounded flex items-center gap-1.5 cursor-default" title="Virement Bancaire">
-                                <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <svg className="w-4 h-4 text-blue-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                     <path d="M3 10h18M3 14h18M12 3L3 10v11h18V10L12 3z" />
                                 </svg>
-                                <span className="text-[10px] font-black text-blue-700 tracking-widest">BANK</span>
+                                <span className="text-[10px] font-black text-blue-900 tracking-widest">BANK</span>
                             </div>
                         )}
                     </div>

@@ -303,7 +303,10 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 if (item.isCategoryMenu) {
                                     return (
                                         <div key="categories" className="relative group/category">
-                                            <button className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative flex items-center gap-1.5 ${isActive ? 'text-black' : 'text-gray-900 hover:text-black'}`}>
+                                            <button 
+                                                className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative flex items-center gap-1.5 px-3 py-2 -mx-3 ${isActive ? 'text-black' : 'text-gray-900 hover:text-black'}`}
+                                                aria-label={item.label}
+                                            >
                                                 <LayoutGrid className="w-4 h-4" />
                                                 <span>{item.label}</span>
                                                 <ChevronDown className="w-4 h-4 transition-transform group-hover/category:rotate-180" />
@@ -395,7 +398,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     if (isKids) {
                                         return (
                                             <div key={item.href} className="relative group/kids inline-block">
-                                                <div
+                                                <Link
+                                                    href={item.href}
                                                     className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive
                                                             ? `${vibrantBg} text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]`
                                                             : `bg-white ${vibrantText} ${vibrantBorder} hover:${vibrantBg} hover:text-black shadow-sm`
@@ -404,7 +408,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                     <span>{item.label}</span>
                                                     <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/kids:rotate-180" />
                                                     <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : vibrantBg}`} />
-                                                </div>
+                                                </Link>
                                                 
                                                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-pink-100 opacity-0 invisible group-hover/kids:opacity-100 group-hover/kids:visible group-hover/kids:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
                                                     <Link href="/mon-enfant" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors border-b border-pink-50 flex items-center gap-2">
@@ -443,11 +447,11 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 if (item.href === '/books') {
                                     return (
                                         <div key={item.href} className="relative group/books inline-block">
-                                            <div className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive ? 'bg-blue-500 text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]' : 'bg-white text-blue-500 border-blue-500/20 hover:border-blue-500 hover:bg-blue-500 hover:text-black shadow-sm'}`}>
+                                            <Link href="/books" className={`font-black text-[11px] rtl:text-sm uppercase tracking-widest rtl:tracking-normal whitespace-nowrap shrink-0 transition-all px-5 py-2.5 rounded-[2rem] border-2 flex items-center gap-2 cursor-pointer ${isActive ? 'bg-blue-500 text-black border-transparent shadow-[0_10px_20px_rgba(0,0,0,0.15)]' : 'bg-white text-blue-500 border-blue-500/20 hover:border-blue-500 hover:bg-blue-500 hover:text-black shadow-sm'}`}>
                                                 <span>{item.label}</span>
                                                 <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/books:rotate-180" />
                                                 <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : 'bg-blue-500'}`} />
-                                            </div>
+                                            </Link>
                                             
                                             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-blue-100 opacity-0 invisible group-hover/books:opacity-100 group-hover/books:visible group-hover/books:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
                                                 <Link href="/books" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors border-b border-blue-50 flex items-center gap-2">
@@ -467,7 +471,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative group flex items-center gap-1.5 ${isActive ? 'text-black border-b-2 border-black pb-1' : 'text-gray-900 hover:text-black'}`}
+                                        className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative group flex items-center gap-1.5 px-3 py-2 -mx-3 rounded-lg ${isActive ? 'text-black' : 'text-gray-900 hover:text-black hover:bg-gray-50'}`}
                                     >
                                         {getIconForUrl(item.href, "w-4 h-4")}
                                         <span>{item.label}</span>
@@ -551,7 +555,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 />
             )}
             <div
-                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
                 suppressHydrationWarning
             >
