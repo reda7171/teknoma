@@ -336,6 +336,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     alternates: {
       canonical: `${siteUrl}/${locale}`,
       languages: {
+        'fr': `${siteUrl}/fr`,
+        'ar': `${siteUrl}/ar`,
+        'en': `${siteUrl}/en`,
         'fr-MA': `${siteUrl}/fr`,
         'ar-MA': `${siteUrl}/ar`,
         'en-MA': `${siteUrl}/en`,

@@ -422,6 +422,28 @@ export async function publishPacksToJumia(packIds: string[]) {
                 ? Math.min(...pack.books.map(b => b.book.stock))
                 : 0;
 
+            // Vérification et fallback de l'image principale pour Jumia (évite le rejet 404 si image locale)
+            let primaryImageUrl = pack.image ? (pack.image.startsWith('/') ? `https://riwaya.store${pack.image}` : pack.image) : '';
+            if (primaryImageUrl) {
+                try {
+                    const imgCheck = await fetch(primaryImageUrl, { method: 'HEAD' });
+                    if (!imgCheck.ok) {
+                        const firstBookImg = pack.books?.[0]?.book?.image;
+                        if (firstBookImg) {
+                            primaryImageUrl = firstBookImg.startsWith('/') ? `https://riwaya.store${firstBookImg}` : firstBookImg;
+                        }
+                    }
+                } catch {
+                    const firstBookImg = pack.books?.[0]?.book?.image;
+                    if (firstBookImg) {
+                        primaryImageUrl = firstBookImg.startsWith('/') ? `https://riwaya.store${firstBookImg}` : firstBookImg;
+                    }
+                }
+            } else if (pack.books?.[0]?.book?.image) {
+                const firstBookImg = pack.books[0].book.image;
+                primaryImageUrl = firstBookImg.startsWith('/') ? `https://riwaya.store${firstBookImg}` : firstBookImg;
+            }
+
             const payload: any = {
                 name: {
                     value: baseName,
@@ -448,8 +470,8 @@ export async function publishPacksToJumia(packIds: string[]) {
                     code: 1000203,
                     name: "Bestselling Books"
                 },
-                images: pack.image ? [{
-                    url: pack.image.startsWith('/') ? `https://riwaya.store${pack.image}` : pack.image,
+                images: primaryImageUrl ? [{
+                    url: primaryImageUrl,
                     primary: true
                 }] : [],
                 price: {
@@ -586,6 +608,9 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
             const baseName = (titleFr && /[a-zA-Z]/.test(titleFr)) ? titleFr : `Accessory - ${accessory.sellerSku || accessory.id.substring(0, 8)}`;
             const baseDesc = (descFr && /[a-zA-Z]/.test(descFr)) ? descFr : `Quality accessory - ${accessory.sellerSku || accessory.id.substring(0, 8)}`;
 
+            const accessoryImages = Array.isArray(accessory.images) ? (accessory.images as string[]) : [];
+            const primaryAccImg = accessory.image || (accessoryImages.length > 0 ? accessoryImages[0] : null);
+
             const payload: any = {
                 name: {
                     value: baseName.padEnd(15, ' ').substring(0, 60),
@@ -610,11 +635,8 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
                     code: 1000570, // Generic category for accessories/stationery, fallback
                     name: "Stationery & Office"
                 },
-                images: accessory.image ? [{
-                    url: accessory.image.startsWith('/') ? `https://riwaya.store${accessory.image}` : accessory.image,
-                    primary: true
-                }] : (accessory.images && accessory.images.length > 0) ? [{
-                    url: accessory.images[0].startsWith('/') ? `https://riwaya.store${accessory.images[0]}` : accessory.images[0],
+                images: primaryAccImg ? [{
+                    url: primaryAccImg.startsWith('/') ? `https://riwaya.store${primaryAccImg}` : primaryAccImg,
                     primary: true
                 }] : [],
                 price: {

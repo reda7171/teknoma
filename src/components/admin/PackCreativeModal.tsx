@@ -22,9 +22,12 @@ interface PackCreativeModalProps {
         name: string
         description?: string
         price: number
+        image?: string
         isFreeDelivery?: boolean
+        shippingFees?: number
         books: Book[]
         whatsappNumber?: string
+        [key: string]: any
     } | null
     format?: 'post' | 'story'
     onImageGenerated?: (url: string) => void
@@ -39,7 +42,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     const [isGeneratingDescFR, setIsGeneratingDescFR] = useState(false)
     const [isGeneratingDescAR, setIsGeneratingDescAR] = useState(false)
     const [isPublishing, setIsPublishing] = useState(false)
-    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'pinterest' | 'all'>('all')
+    const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'threads' | 'pinterest' | 'all'>('all')
     const [scheduleAt, setScheduleAt] = useState('')
     const [caption, setCaption] = useState('')
 
@@ -1164,11 +1167,21 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         >
                                             <img
                                                 src={(() => {
-                                                    const img = normalizeImage(book.image);
-                                                    if (img && img.startsWith('http') && !img.includes(typeof window !== 'undefined' ? window.location.host : '')) {
-                                                        return `/api/proxy/image?url=${encodeURIComponent(img)}`;
+                                                    const raw = book.image;
+                                                    if (!raw) return '/book-placeholder.png';
+                                                    if (raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
+                                                    // Si chemin local /uploads/..., garder le chemin relatif pour éviter les blocages CORS
+                                                    if (raw.startsWith('/')) return raw;
+                                                    // Si URL absolue du même domaine riwaya.store, convertir en chemin relatif
+                                                    if (raw.includes('riwaya.store/')) {
+                                                        const parts = raw.split('riwaya.store');
+                                                        return parts[1] || raw;
                                                     }
-                                                    return img || '/book-placeholder.png';
+                                                    // Si URL externe, passer par le proxy pour contourner CORS
+                                                    if (raw.startsWith('http')) {
+                                                        return `/api/proxy/image?url=${encodeURIComponent(raw)}`;
+                                                    }
+                                                    return normalizeImage(raw);
                                                 })()}
                                                 alt={book.title}
                                                 crossOrigin="anonymous"

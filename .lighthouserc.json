@@ -6,13 +6,18 @@
       "startServerReadyTimeout": 60000,
       "url": [
         "http://localhost:3000/fr",
-        "http://localhost:3000/fr/packs"
+        "http://localhost:3000/fr/packs",
+        "http://localhost:3000/fr/books/c0000000-0000-0000-0000-000000000001",
+        "http://localhost:3000/ar",
+        "http://localhost:3000/en"
       ],
       "numberOfRuns": 2
     },
     "assert": {
       "assertions": {
         "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "categories:seo": ["error", { "minScore": 0.9 }],
+        "server-response-time": ["warn", { "maxNumericValue": 2000 }],
         "color-contrast": "error"
       }
     },

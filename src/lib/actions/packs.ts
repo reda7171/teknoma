@@ -117,6 +117,7 @@ export async function getPackById(id: string) {
                                 title: true,
                                 author: true,
                                 price: true,
+                                image: true,
                             }
                         }
                     }
