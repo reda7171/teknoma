@@ -50,10 +50,10 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                     className={`flex items-center gap-3 px-6 py-4 rounded-full font-black text-sm md:text-base uppercase tracking-widest transition-all whitespace-nowrap shadow-xl ${
                         filterAvailable 
                             ? 'bg-black text-white' 
-                            : 'bg-white text-gray-400 hover:text-black'
+                            : 'bg-white text-gray-700 hover:text-black'
                     }`}
                 >
-                    <div className={`w-3 h-3 rounded-full ${filterAvailable ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+                    <div className={`w-3 h-3 rounded-full ${filterAvailable ? 'bg-green-400' : 'bg-gray-400'}`}></div>
                     {tCommon('Available')}
                 </button>
             </div>
@@ -66,7 +66,7 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-black">{t('Benefits.HighSavings.Title')}</h3>
-                        <p className="text-sm md:text-base font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.HighSavings.Desc')}</p>
+                        <p className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest leading-loose">{t('Benefits.HighSavings.Desc')}</p>
                     </div>
                 </div>
                 <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
@@ -75,7 +75,7 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-black">{t('Benefits.CuratedMix.Title')}</h3>
-                        <p className="text-sm md:text-base font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.CuratedMix.Desc')}</p>
+                        <p className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest leading-loose">{t('Benefits.CuratedMix.Desc')}</p>
                     </div>
                 </div>
                 <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
@@ -84,7 +84,7 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-black">{t('Benefits.ExpressPack.Title')}</h3>
-                        <p className="text-sm md:text-base font-bold text-gray-500 uppercase tracking-widest leading-loose">{t('Benefits.ExpressPack.Desc')}</p>
+                        <p className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest leading-loose">{t('Benefits.ExpressPack.Desc')}</p>
                     </div>
                 </div>
             </div>

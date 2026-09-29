@@ -303,18 +303,18 @@ export default async function PackDetailPage({
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-40 md:pb-32">
                     {/* Breadcrumb */}
-                    <div className="flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-300 mb-12">
+                    <div className="flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-700 mb-12">
                         <Link href="/" className="hover:text-black transition-colors">{tNav('Home')}</Link>
-                        <span className="text-gray-200">/</span>
+                        <span className="text-gray-400">/</span>
                         <Link href="/packs" className="hover:text-black transition-colors">{tNav('Packs')}</Link>
-                        <span className="text-gray-200">/</span>
+                        <span className="text-gray-400">/</span>
                         <span className="text-black">{pack.name}</span>
                     </div>
 
                     <div className="flex justify-between items-center mb-12">
                         <Link
                             href="/packs"
-                            className="inline-flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400 hover:text-black group transition-colors"
+                            className="inline-flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-700 hover:text-black group transition-colors"
                         >
                             <ArrowLeft className="w-3 h-3 rtl:rotate-180 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
                             <span>{t('BackToBundles')}</span>

@@ -17,6 +17,7 @@ interface Book {
     price: number
     image?: string
     category?: string | null
+    language?: string
     active: boolean
     stock: number
 }
@@ -38,6 +39,9 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     const [shippingFees, setShippingFees] = useState(30)
     const [searchQuery, setSearchQuery] = useState('')
     const [onlyAvailable, setOnlyAvailable] = useState(true)
+    const [filterAuthor, setFilterAuthor] = useState('ALL')
+    const [filterCategory, setFilterCategory] = useState('ALL')
+    const [filterLanguage, setFilterLanguage] = useState('ALL')
     const [isCatalogOpen, setIsCatalogOpen] = useState(false)
     const [packImage, setPackImage] = useState<string | undefined>(undefined)
 
@@ -251,8 +255,16 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             book.author.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesAvailability = onlyAvailable ? (book.active && book.stock > 0) : true
-        return matchesSearch && matchesAvailability
+        const matchesAuthor = filterAuthor === 'ALL' || book.author === filterAuthor
+        const matchesCategory = filterCategory === 'ALL' || (book.category || 'Non catégorisé') === filterCategory
+        const matchesLanguage = filterLanguage === 'ALL' || (book.language || 'fr') === filterLanguage
+        
+        return matchesSearch && matchesAvailability && matchesAuthor && matchesCategory && matchesLanguage
     })
+
+    const authors = Array.from(new Set(books.map(b => b.author))).sort()
+    const categories = Array.from(new Set(books.map(b => b.category || 'Non catégorisé'))).sort()
+    const languages = Array.from(new Set(books.map(b => b.language || 'fr'))).sort()
 
     const groupedBooks = filteredBooks.reduce((acc, book) => {
         const category = book.category || 'Non catégorisé'
@@ -711,6 +723,20 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                                 onChange={e => setSearchQuery(e.target.value)}
                                 className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                             />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
+                                <option value="ALL">Toutes les catégories</option>
+                                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                            <select value={filterAuthor} onChange={e => setFilterAuthor(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
+                                <option value="ALL">Tous les auteurs</option>
+                                {authors.map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                            <select value={filterLanguage} onChange={e => setFilterLanguage(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
+                                <option value="ALL">Toutes les langues</option>
+                                {languages.map(l => <option key={l} value={l}>{l === 'ar' ? 'Arabe' : l === 'fr' ? 'Français' : l === 'en' ? 'Anglais' : l}</option>)}
+                            </select>
                         </div>
                         <div className="max-h-96 overflow-y-auto pr-2">
                             {Object.entries(groupedBooks).length === 0 ? (

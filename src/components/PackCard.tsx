@@ -125,13 +125,13 @@ export default function PackCard({
             <div className="p-8">
                 <Link href={`/packs/${id}`}>
                     <div className="flex flex-col items-center text-center mb-6">
-                        <span className="text-xs rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-400 mb-2">{t('Exclusive')}</span>
+                        <span className="text-xs rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-600 mb-2">{t('Exclusive')}</span>
                         <h3 className="text-3xl md:text-2xl font-black text-black tracking-tighter mb-2 group-hover:translate-y-1 transition-transform">
                             {displayName}
                         </h3>
                         <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-100 shadow-sm">
                             <Sparkles className="w-3 h-3 text-yellow-500" />
-                            <span className="text-xs font-black black uppercase tracking-widest rtl:tracking-normal">{books.length} {t('Includes')}</span>
+                            <span className="text-xs font-black text-black uppercase tracking-widest rtl:tracking-normal">{books.length} {t('Includes')}</span>
                         </div>
                     </div>
                 </Link>
@@ -140,15 +140,15 @@ export default function PackCard({
                 <div className="bg-white rounded-[1.5rem] p-6 border border-gray-50 shadow-sm space-y-4">
                     {hasDiscount && (
                         <div className="flex items-center justify-between text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal">
-                            <span className="text-gray-400">{t('RegularPrice')}</span>
-                            <span className="text-gray-300 line-through">{totalOriginalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                            <span className="text-gray-600">{t('RegularPrice')}</span>
+                            <span className="text-gray-500 line-through">{totalOriginalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                         </div>
                     )}
 
                     <div className="flex items-center justify-between">
                         <span className="text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-black">{t('PackPrice')}</span>
                         <span className="text-4xl md:text-3xl font-black text-black tracking-tighter">
-                            {displayPrice} <span className="text-xs font-black text-gray-400 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                            {displayPrice} <span className="text-xs font-black text-gray-600 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                         </span>
                     </div>
 

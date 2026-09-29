@@ -66,7 +66,6 @@ export default async function Image(props: { params: Promise<{ name: string, loc
                 backgroundColor: '#FFFBEB', // amber-50
                 borderRadius: '50%',
                 opacity: 0.5,
-                zIndex: 0,
             }} />
             
             <div style={{
@@ -78,7 +77,6 @@ export default async function Image(props: { params: Promise<{ name: string, loc
                 backgroundColor: '#F8FAFC', // slate-50
                 borderRadius: '50%',
                 opacity: 0.8,
-                zIndex: 0,
             }} />
 
             <div style={{
@@ -93,7 +91,6 @@ export default async function Image(props: { params: Promise<{ name: string, loc
               textTransform: 'uppercase',
               letterSpacing: '2px',
               marginBottom: '30px',
-              zIndex: 1,
             }}>
               Riwaya.store
             </div>
@@ -106,7 +103,6 @@ export default async function Image(props: { params: Promise<{ name: string, loc
               textAlign: 'center', 
               marginBottom: '20px',
               lineHeight: 1.2,
-              zIndex: 1,
               maxWidth: '900px',
             }}>
               {authorName}
@@ -118,7 +114,6 @@ export default async function Image(props: { params: Promise<{ name: string, loc
               color: '#64748B', 
               marginBottom: '40px', 
               textAlign: 'center',
-              zIndex: 1,
             }}>
               {label}
             </p>
@@ -135,7 +130,6 @@ export default async function Image(props: { params: Promise<{ name: string, loc
               fontSize: 28,
               fontFamily: '"Noto Sans Arabic"',
               fontWeight: 700,
-              zIndex: 1,
             }}>
               {booksLabel}
             </div>

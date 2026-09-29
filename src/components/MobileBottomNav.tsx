@@ -83,14 +83,14 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                     <Icon
                                         className="relative z-10 w-[18px] h-[18px] transition-all duration-200"
                                         style={{
-                                            color: isActive ? '#fff' : '#9ca3af',
+                                            color: isActive ? '#fff' : '#374151',
                                             strokeWidth: isActive ? 2.5 : 2,
                                         }}
                                     />
                                 </span>
                                 <span
                                     className="text-xs font-bold transition-all duration-200"
-                                    style={{ color: isActive ? '#000' : '#9ca3af' }}
+                                    style={{ color: isActive ? '#000' : '#374151' }}
                                 >
                                     {item.label}
                                 </span>
@@ -116,7 +116,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                             <ShoppingCart
                                 className="w-[18px] h-[18px] transition-all duration-200"
                                 style={{
-                                    color: isCartAnimating ? '#2563eb' : '#9ca3af',
+                                    color: isCartAnimating ? '#2563eb' : '#374151',
                                     strokeWidth: 2,
                                     transform: isCartAnimating ? 'rotate(-10deg) scale(1.15)' : 'none',
                                     transition: 'transform 0.3s, color 0.2s',
@@ -138,7 +138,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                 </span>
                             )}
                         </span>
-                        <span className="text-xs font-bold" style={{ color: '#9ca3af' }}>
+                        <span className="text-xs font-bold" style={{ color: '#374151' }}>
                             {t('Cart')}
                         </span>
                     </button>
@@ -155,9 +155,9 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                             className="flex items-center justify-center rounded-2xl"
                             style={{ width: 44, height: 32 }}
                         >
-                            <AlignJustify className="w-[18px] h-[18px]" style={{ color: '#9ca3af', strokeWidth: 2 }} />
+                            <AlignJustify className="w-[18px] h-[18px]" style={{ color: '#374151', strokeWidth: 2 }} />
                         </span>
-                        <span className="text-xs font-bold" style={{ color: '#9ca3af' }}>
+                        <span className="text-xs font-bold" style={{ color: '#374151' }}>
                             {t('Menu')}
                         </span>
                     </button>

@@ -401,7 +401,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                             return (
                                             <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                                 {book.image ? (
-                                                    <img src={(book.image?.startsWith('uploads/') || book.image?.startsWith('/uploads/')) ? (book.image.startsWith('/') ? book.image : '/' + book.image) : normalizeImage(book.image)} onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} style={{ width: `${previewWidth}px`, height: `${previewHeight}px`, objectFit: 'cover', borderRadius: config.format === 'post' ? '40px' : '60px', marginBottom: config.format === 'post' ? '20px' : '32px', border: `${config.format === 'post' ? '12px' : '18px'} solid white`, boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }} />
+                                                    <img src={(book.image?.startsWith('uploads/') || book.image?.startsWith('/uploads/')) ? (book.image.startsWith('/') ? book.image : '/' + book.image) : normalizeImage(book.image)} onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} loading="eager" style={{ width: `${previewWidth}px`, height: `${previewHeight}px`, objectFit: 'cover', borderRadius: config.format === 'post' ? '40px' : '60px', marginBottom: config.format === 'post' ? '20px' : '32px', border: `${config.format === 'post' ? '12px' : '18px'} solid white`, boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }} />
                                                 ) : (
                                                     <div style={{ width: `${previewWidth}px`, height: `${previewHeight}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6', borderRadius: config.format === 'post' ? '40px' : '60px', marginBottom: config.format === 'post' ? '20px' : '32px', border: `${config.format === 'post' ? '12px' : '18px'} solid white` }}>
                                                         <BookIcon style={{ width: '80px', height: '80px', color: '#9ca3af' }} />
@@ -439,7 +439,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
             </div>
 
             {/* REAL CAPTURE AREA */}
-            <div style={{ position: 'absolute', top: '-40000px', left: '-40000px', opacity: 0, pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, zIndex: -100, pointerEvents: 'none', height: 0, overflow: 'hidden' }}>
                 {chunkedBooks.map((chunk, chunkIdx) => {
                     const isPost = config.format === 'post';
                     const cols = isPost && config.booksPerPage <= 4 ? 2 : config.columns;
@@ -500,7 +500,7 @@ export default function CatalogImageModal({ isOpen, onClose }: CatalogImageModal
                                     return (
                                         <div key={idx} style={{ width: `${cellWidth}px`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             {book.image ? (
-                                                <img src={(book.image?.startsWith('uploads/') || book.image?.startsWith('/uploads/')) ? (book.image.startsWith('/') ? book.image : '/' + book.image) : normalizeImage(book.image)} onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} style={{ width: '100%', height: `${Math.floor(cellWidth * 1.5)}px`, objectFit: 'cover', borderRadius: isPost ? '25px' : '40px', backgroundColor: '#fff', border: `${isPost ? '8px' : '12px'} solid white`, boxShadow: '0 20px 40px rgba(0,0,0,0.2)', marginBottom: isPost ? '12px' : '20px' }} />
+                                                <img src={(book.image?.startsWith('uploads/') || book.image?.startsWith('/uploads/')) ? (book.image.startsWith('/') ? book.image : '/' + book.image) : normalizeImage(book.image)} onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} loading="eager" style={{ width: '100%', height: `${Math.floor(cellWidth * 1.5)}px`, objectFit: 'cover', borderRadius: isPost ? '25px' : '40px', backgroundColor: '#fff', border: `${isPost ? '8px' : '12px'} solid white`, boxShadow: '0 20px 40px rgba(0,0,0,0.2)', marginBottom: isPost ? '12px' : '20px' }} />
                                             ) : (
                                                 <div style={{ width: '100%', height: `${Math.floor(cellWidth * 1.5)}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6', borderRadius: isPost ? '25px' : '40px', border: `${isPost ? '8px' : '12px'} solid white`, boxShadow: '0 20px 40px rgba(0,0,0,0.2)', marginBottom: isPost ? '12px' : '20px' }}>
                                                     <BookIcon style={{ width: isPost ? '80px' : '140px', height: isPost ? '80px' : '140px', color: '#9ca3af' }} />

@@ -180,7 +180,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                 <div className="bg-pixio-cream/50 rounded-[2.5rem] p-10 mb-8 border border-gray-50">
                     {priceData.hasDiscount && (
                         <div className="flex items-center gap-6 mb-4">
-                            <span className="text-gray-300 text-xl line-through font-black tracking-tighter">
+                            <span className="text-gray-500 text-xl line-through font-black tracking-tighter">
                                 {priceData.totalOriginalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}
                             </span>
                             <span className="text-black font-black bg-pixio-yellow px-4 py-2 rounded-xl text-[10px] rtl:text-xs uppercase tracking-widest rtl:tracking-normal">
@@ -192,21 +192,21 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                         <span className="text-7xl font-black text-black tracking-tighter leading-none">
                             {parseFloat(priceData.displayPrice) + (addUpsell ? 25 : 0)}
                         </span>
-                        <span className="text-2xl text-gray-300 font-black uppercase tracking-widest">
+                        <span className="text-2xl text-gray-600 font-black uppercase tracking-widest">
                             {locale === 'ar' ? 'درهم' : 'MAD'}
                         </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4">
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-700 uppercase tracking-widest">
                                 {locale === 'ar' ? 'شامل للضرائب' : locale === 'en' ? 'Taxes Included' : 'Taxes incluses'}
                             </p>
                         </div>
-                        <span className="hidden sm:inline text-gray-300">•</span>
+                        <span className="hidden sm:inline text-gray-400">•</span>
                         <div className="flex items-center gap-2">
                             <Package className="w-4 h-4 text-blue-500" />
-                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-500 uppercase tracking-widest">
+                            <p className="text-[9px] rtl:text-xs rtl:tracking-normal font-black text-gray-700 uppercase tracking-widest">
                                 {locale === 'ar' ? 'الدفع عند الاستلام' : locale === 'en' ? 'Cash on Delivery' : 'Paiement à la livraison'}
                             </p>
                         </div>
@@ -288,7 +288,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <Link href={`/books/${pb.book.id}`} className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal hover:underline cursor-pointer block w-fit ${isMissing ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-black'}`}>
+                                                <Link href={`/books/${pb.book.id}`} className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal hover:underline cursor-pointer block w-fit ${isMissing ? 'text-red-500 hover:text-red-600' : 'text-gray-700 hover:text-black'}`}>
                                                     {pb.book.title}
                                                 </Link>
                                             )}
