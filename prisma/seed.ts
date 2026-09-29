@@ -19,39 +19,32 @@ async function main() {
         },
     })
 
-    // 2. Sample Book for SEO & Tests
-    const bookId = 'c0000000-0000-0000-0000-000000000001'
+    // 2. Real Sample Book for SEO & Tests
+    const bookId = '08f41f86-a23c-48f6-b486-109383b0f6e0'
     const book = await prisma.book.upsert({
         where: { id: bookId },
         update: {
-            title: "L'Alchimiste",
-            titleFr: "L'Alchimiste",
-            titleEn: "The Alchemist",
-            author: "Paulo Coelho",
-            description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-            descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-            descriptionEn: "A magical story about following your dreams and listening to your heart.",
-            price: 65,
-            originalPrice: 85,
-            stock: 25,
-            image: "https://riwaya.store/uploads/books/placeholder.jpg",
-            category: "Développement Personnel",
+            title: "اول مرة اتدبر القران",
+            titleFr: "اول مرة اتدبر القران",
+            titleEn: "First Time I Ponder the Quran",
+            author: "عادل محمد خليل",
+            category: "القرآن وعلومه",
             active: true,
         },
         create: {
             id: bookId,
-            title: "L'Alchimiste",
-            titleFr: "L'Alchimiste",
-            titleEn: "The Alchemist",
-            author: "Paulo Coelho",
-            description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-            descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-            descriptionEn: "A magical story about following your dreams and listening to your heart.",
+            title: "اول مرة اتدبر القران",
+            titleFr: "اول مرة اتدبر القران",
+            titleEn: "First Time I Ponder the Quran",
+            author: "عادل محمد خليل",
+            description: "كتاب مميز وميسر يساعد القارئ على تدبر آيات القرآن الكريم وفهم مقاصد السور وتطبيقها في الحياة اليومية.",
+            descriptionFr: "Un livre remarquable et accessible qui aide le lecteur à méditer sur les versets du Saint Coran.",
+            descriptionEn: "An inspiring book helping readers reflect upon the Holy Quran and understand its deeper meanings.",
             price: 65,
             originalPrice: 85,
             stock: 25,
             image: "https://riwaya.store/uploads/books/placeholder.jpg",
-            category: "Développement Personnel",
+            category: "القرآن وعلومه",
             active: true,
         },
     })

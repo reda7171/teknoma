@@ -48,7 +48,7 @@ export async function generateMetadata({
     const bookId = id.slice(0, 36);
     const initialBook = await getBookById(bookId)
 
-    if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && !bookId.startsWith('c0000000')) {
+    if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && bookId !== '08f41f86-a23c-48f6-b486-109383b0f6e0') {
         return {
             title: 'Livre introuvable | Riwaya',
             description: 'Ce livre est introuvable ou n\'est plus disponible sur Riwaya.',
@@ -58,18 +58,18 @@ export async function generateMetadata({
 
     const fallbackMetaBook = {
         id: bookId,
-        title: "L'Alchimiste",
-        titleFr: "L'Alchimiste",
-        titleEn: "The Alchemist",
-        author: "Paulo Coelho",
-        description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-        descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-        descriptionEn: "A magical story about following your dreams and listening to your heart.",
+        title: "اول مرة اتدبر القران",
+        titleFr: "اول مرة اتدبر القران",
+        titleEn: "First Time I Ponder the Quran",
+        author: "عادل محمد خليل",
+        description: "كتاب مميز وميسر يساعد القارئ على تدبر آيات القرآن الكريم وفهم مقاصد السور وتطبيقها في الحياة اليومية.",
+        descriptionFr: "Un livre remarquable et accessible qui aide le lecteur à méditer sur les versets du Saint Coran.",
+        descriptionEn: "An inspiring book helping readers reflect upon the Holy Quran and understand its deeper meanings.",
         price: 65,
         originalPrice: 85,
         stock: 25,
         image: "https://riwaya.store/uploads/books/placeholder.jpg",
-        category: "Développement Personnel",
+        category: "القرآن وعلومه",
         active: true,
     } as any
 
@@ -189,19 +189,19 @@ export default async function BookDetailPage({
     const user = await getCommunityUser().catch(() => null)
     const isAdmin = user?.role === 'ADMIN' || user?.email === 'contact@riwaya.store'
 
-    if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && !bookId.startsWith('c0000000')) {
+    if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && bookId !== '08f41f86-a23c-48f6-b486-109383b0f6e0') {
         notFound()
     }
 
     const fallbackBook = {
         id: bookId,
-        title: "L'Alchimiste",
-        titleFr: "L'Alchimiste",
-        titleEn: "The Alchemist",
-        author: "Paulo Coelho",
-        description: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-        descriptionFr: "Un chef-d'œuvre de la littérature universelle racontant l'histoire de Santiago, un jeune berger andalou qui part à la recherche d'un trésor enfoui près des pyramides d'Égypte.",
-        descriptionEn: "A magical story about following your dreams and listening to your heart.",
+        title: "اول مرة اتدبر القران",
+        titleFr: "اول مرة اتدبر القران",
+        titleEn: "First Time I Ponder the Quran",
+        author: "عادل محمد خليل",
+        description: "كتاب مميز وميسر يساعد القارئ على تدبر آيات القرآن الكريم وفهم مقاصد السور وتطبيقها في الحياة اليومية.",
+        descriptionFr: "Un livre remarquable et accessible qui aide le lecteur à méditer sur les versets du Saint Coran.",
+        descriptionEn: "An inspiring book helping readers reflect upon the Holy Quran and understand its deeper meanings.",
         longDescription: null,
         longDescriptionFr: null,
         longDescriptionEn: null,
@@ -209,7 +209,7 @@ export default async function BookDetailPage({
         originalPrice: 85,
         stock: 25,
         image: "https://riwaya.store/uploads/books/placeholder.jpg",
-        category: "Développement Personnel",
+        category: "القرآن وعلومه",
         active: true,
         isAffiliate: false,
         affiliateLink: null,
