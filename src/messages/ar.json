@@ -39,7 +39,8 @@
     "Sub": "تسجيل مجاني عبر حساب Google",
     "Pages": "صفحة",
     "Hours": "ساعة",
-    "Challenge": "تحدي"
+    "Challenge": "تحدي",
+    "ActiveReaders": "{count}+ قارئ نشط هذا الشهر"
   },
   "Seller": {
     "Sidebar": {
@@ -576,6 +577,8 @@
     "AddToReadingListTitle": "إضافة إلى قائمة القراءة",
     "AddToList": "إضافة إلى قائمتي",
     "RefineSearch": "تصفية البحث",
+    "NewArrival": "الجديد",
+    "ViewResults": "عرض {count} نتيجة",
     "ShowMore": "+ عرض المزيد",
     "ShowLess": "- عرض أقل",
     "CustomPackCTA": {
@@ -1441,7 +1444,7 @@
         "Community": "التبادل المجتمعي",
         "SellBook": "بيع كتاب",
         "UsedBooks": "كتب مستعملة",
-        "BoardGames": "ألعاب لوحية"
+        "BoardGames": "ألعاب"
       },
       "AllFormats": "جميع الأجهزة",
       "stats": {
@@ -1533,7 +1536,7 @@
     "SeeAll": "رؤية الكل",
     "Categories": {
       "FURNITURE": "اللوازم المكتبية",
-      "BOARD_GAME": "ألعاب لوحية",
+      "BOARD_GAME": "ألعاب",
       "BOOKMARK": "علامات الكتب",
       "LIBRARY": "مكتبات",
       "USB": "مفاتيح USB",

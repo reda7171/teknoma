@@ -256,6 +256,14 @@ export async function getAllOrders() {
                                 name: true,
                                 price: true,
                             }
+                        },
+                        extraProduct: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                                price: true,
+                            }
                         }
                     }
                 }
@@ -310,6 +318,28 @@ export async function getOrderById(orderId: string) {
                                 description: true,
                                 price: true,
                                 costPrice: true,
+                                image: true,
+                            }
+                        },
+                        extraProduct: {
+                            select: {
+                                id: true,
+                                name: true,
+                                description: true,
+                                price: true,
+                                costPrice: true,
+                                image: true,
+                                category: true,
+                                stockMovements: {
+                                    where: {
+                                        type: 'EXIT',
+                                        note: { contains: orderId }
+                                    },
+                                    include: {
+                                        fromWarehouse: { select: { id: true, name: true } }
+                                    },
+                                    take: 1
+                                }
                             }
                         }
                     }
@@ -827,7 +857,7 @@ export async function bulkSyncDeliveries() {
  */
 export async function updateOrderItems(orderId: string, items: {
     id?: string;
-    type: 'BOOK' | 'PACK';
+    type: 'BOOK' | 'PACK' | 'ACCESSORY';
     productId: string;
     quantity: number;
     price: number;
@@ -874,6 +904,11 @@ export async function updateOrderItems(orderId: string, items: {
                                     data: { stock: { increment: oldItem.quantity } }
                                 })
                             }
+                        } else if (oldItem.type === 'ACCESSORY' && oldItem.extraProductId) {
+                            await tx.extraProduct.update({
+                                where: { id: oldItem.extraProductId },
+                                data: { stock: { increment: oldItem.quantity } }
+                            })
                         }
                     }
                     await tx.orderItem.delete({ where: { id: oldItem.id } })
@@ -894,6 +929,11 @@ export async function updateOrderItems(orderId: string, items: {
                                     data: { stock: { decrement: diff } }
                                 })
                             }
+                        } else if (oldItem.type === 'ACCESSORY' && oldItem.extraProductId) {
+                            await tx.extraProduct.update({
+                                where: { id: oldItem.extraProductId },
+                                data: { stock: { decrement: diff } }
+                            })
                         }
                     }
 
@@ -938,6 +978,17 @@ export async function updateOrderItems(orderId: string, items: {
                             }
                         }
                     }
+                } else if (newItem.type === 'ACCESSORY') {
+                    const accessory = await tx.extraProduct.findUnique({ where: { id: newItem.productId } })
+                    if (accessory) {
+                        costPrice = accessory.costPrice
+                        if (impactsStock) {
+                            await tx.extraProduct.update({
+                                where: { id: newItem.productId },
+                                data: { stock: { decrement: newItem.quantity } }
+                            })
+                        }
+                    }
                 }
 
                 newSubtotal += newItem.price * newItem.quantity
@@ -950,7 +1001,8 @@ export async function updateOrderItems(orderId: string, items: {
                         price: newItem.price,
                         costPrice: costPrice,
                         bookId: newItem.type === 'BOOK' ? newItem.productId : null,
-                        packId: newItem.type === 'PACK' ? newItem.productId : null
+                        packId: newItem.type === 'PACK' ? newItem.productId : null,
+                        extraProductId: newItem.type === 'ACCESSORY' ? newItem.productId : null
                     }
                 })
             }
@@ -1024,9 +1076,16 @@ export async function searchProductsForOrder(query: string) {
             select: { id: true, name: true, price: true, image: true }
         })
 
+        const accessories = await prisma.extraProduct.findMany({
+            where: { name: { contains: query } },
+            take: 8,
+            select: { id: true, name: true, price: true, image: true, stock: true }
+        })
+
         const results = [
             ...books.map(b => ({ type: 'BOOK' as const, id: b.id, title: b.title, price: b.price, image: b.image, stock: b.stock })),
-            ...packs.map(p => ({ type: 'PACK' as const, id: p.id, title: p.name, price: p.price, image: p.image, stock: 999 })) // on simule un stock infini pour les packs pour l'instant
+            ...packs.map(p => ({ type: 'PACK' as const, id: p.id, title: p.name, price: p.price, image: p.image, stock: 999 })), // on simule un stock infini pour les packs pour l'instant
+            ...accessories.map(a => ({ type: 'ACCESSORY' as const, id: a.id, title: a.name, price: a.price, image: a.image, stock: a.stock }))
         ]
 
         return results

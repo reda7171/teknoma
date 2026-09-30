@@ -41,6 +41,7 @@ interface OrderItem {
     costPrice?: number
     book?: { title: string }
     pack?: { name: string }
+    extraProduct?: { name: string }
 }
 
 interface Order {

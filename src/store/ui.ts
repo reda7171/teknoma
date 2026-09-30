@@ -5,6 +5,11 @@ interface UIStore {
     openCart: () => void
     closeCart: () => void
     toggleCart: () => void
+    isMobileMenuOpen: boolean
+    openMobileMenu: () => void
+    closeMobileMenu: () => void
+    toggleMobileMenu: () => void
+    setMobileMenuOpen: (open: boolean | ((prev: boolean) => boolean)) => void
     isAuthModalOpen: boolean
     openAuthModal: () => void
     closeAuthModal: () => void
@@ -20,9 +25,26 @@ interface UIStore {
 
 export const useUIStore = create<UIStore>((set) => ({
     isCartOpen: false,
-    openCart: () => set({ isCartOpen: true }),
+    openCart: () => set({ isCartOpen: true, isMobileMenuOpen: false }),
     closeCart: () => set({ isCartOpen: false }),
-    toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
+    toggleCart: () => set((state) => ({
+        isCartOpen: !state.isCartOpen,
+        isMobileMenuOpen: false
+    })),
+    isMobileMenuOpen: false,
+    openMobileMenu: () => set({ isMobileMenuOpen: true, isCartOpen: false }),
+    closeMobileMenu: () => set({ isMobileMenuOpen: false }),
+    toggleMobileMenu: () => set((state) => ({
+        isMobileMenuOpen: !state.isMobileMenuOpen,
+        isCartOpen: false
+    })),
+    setMobileMenuOpen: (open) => set((state) => {
+        const nextValue = typeof open === 'function' ? open(state.isMobileMenuOpen) : open
+        return {
+            isMobileMenuOpen: nextValue,
+            isCartOpen: nextValue ? false : state.isCartOpen
+        }
+    }),
     isAuthModalOpen: false,
     openAuthModal: () => set({ isAuthModalOpen: true }),
     closeAuthModal: () => set({ isAuthModalOpen: false }),
@@ -37,3 +59,4 @@ export const useUIStore = create<UIStore>((set) => ({
     },
     hideNotification: () => set({ notification: null }),
 }))
+

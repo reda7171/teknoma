@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { FileText, X, Printer, LayoutList, Type, Loader2, ImageIcon, Book as BookIcon, Filter, Palette, Grid3X3, Globe } from 'lucide-react'
 import { getAllBooksForCatalog } from '@/lib/actions/books'
 import { normalizeImage } from '@/lib/utils'
+import { getLocalizedTitle } from '@/lib/i18n-utils'
 
 interface CatalogModalProps {
     isOpen: boolean
@@ -325,14 +326,14 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 >
                                     <div className="w-[35%] h-full flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
                                         {book.image ? (
-                                            <img src={normalizeImage(book.image)} alt={book.title} className="h-full w-full object-contain" />
+                                            <img src={normalizeImage(book.image)} alt={getLocalizedTitle(book)} className="h-full w-full object-contain" />
                                         ) : (
                                             <div className="catalog-print-area"><ImageIcon className="w-8 h-8 text-gray-200 lucide" /></div>
                                         )}
                                     </div>
                                     <div className="flex-1 flex flex-col py-1 overflow-hidden h-full">
                                         <div className="flex-1 overflow-hidden">
-                                            <h3 className="text-sm font-black text-gray-900 uppercase line-clamp-2 mb-1">{book.title}</h3>
+                                            <h3 className="text-sm font-black text-gray-900 uppercase line-clamp-2 mb-1">{getLocalizedTitle(book)}</h3>
                                             <p className="text-[10px] text-blue-600 font-bold truncate mb-2">{book.author}</p>
                                             <p className="text-[9px] text-gray-400 line-clamp-3 leading-relaxed italic">{book.description || "Sélectionné par nos soins."}</p>
                                         </div>

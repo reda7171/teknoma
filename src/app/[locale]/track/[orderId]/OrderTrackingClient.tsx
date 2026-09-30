@@ -317,8 +317,8 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                             {order.items.map((item: any) => (
                                 <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-gray-200">
                                     <div className="w-16 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 shadow-inner">
-                                        {(item.book?.image || item.pack?.image) ? (
-                                            <ImageWithFallback src={normalizeImage(item.book?.image || item.pack?.image)} alt="Produit" fallback="/placeholder.png" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+                                        {(item.book?.image || item.pack?.image || item.extraProduct?.image) ? (
+                                            <ImageWithFallback src={normalizeImage(item.book?.image || item.pack?.image || item.extraProduct?.image)} alt="Produit" fallback="/placeholder.png" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-300">
                                                 <Package className="w-6 h-6" />
@@ -326,7 +326,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-gray-900 leading-snug truncate">{item.book?.title || item.pack?.name || 'Produit'}</p>
+                                        <p className="font-bold text-gray-900 leading-snug truncate">{item.book?.title || item.pack?.name || item.extraProduct?.name || 'Produit'}</p>
                                         <p className="text-xs text-gray-500 font-medium mt-1 bg-gray-100 inline-block px-2 py-0.5 rounded-md">{t.quantity}: {item.quantity}</p>
                                     </div>
                                     <div className="font-black text-gray-900 whitespace-nowrap">

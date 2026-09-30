@@ -558,10 +558,14 @@ export async function getAllBooksForCatalog() {
             select: {
                 id: true,
                 title: true,
+                titleFr: true,
+                titleEn: true,
                 author: true,
                 price: true,
                 image: true,
                 description: true,
+                descriptionFr: true,
+                descriptionEn: true,
                 category: true,
                 language: true,
             }

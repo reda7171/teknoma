@@ -39,7 +39,8 @@
     "Sub": "Free · Sign in with Google",
     "Pages": "pages",
     "Hours": "h",
-    "Challenge": "Challenge"
+    "Challenge": "Challenge",
+    "ActiveReaders": "{count}+ active readers this month"
   },
   "Seller": {
     "Sidebar": {
@@ -576,6 +577,8 @@
     "AddToReadingListTitle": "Add to my reading list",
     "AddToList": "Add to my list",
     "RefineSearch": "Refine search",
+    "NewArrival": "New arrival",
+    "ViewResults": "View {count} results",
     "ShowMore": "+ Show more",
     "ShowLess": "- Show less",
     "CustomPackCTA": {
