@@ -7,7 +7,9 @@ import Image from 'next/image'
 import { ArrowLeft, ShoppingCart, Truck, Shield, Package, CheckCircle2, Briefcase, HelpCircle, Heart, Star, Sparkles } from 'lucide-react'
 import AddToCartButton from '@/components/AddToCartButton'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
+import StickyBottomActions from '@/components/StickyBottomActions'
 import FournitureMediaClient from '@/components/FournitureMediaClient'
+import ScrollDownIndicator from '@/components/ScrollDownIndicator'
 import { getSetting } from '@/lib/actions/site-settings'
 import { getTranslations } from 'next-intl/server'
 
@@ -86,8 +88,9 @@ export default async function ProductDetailPage({
     return (
         <div className="min-h-screen bg-[#FAFAF9]">
             <HeaderWithUser />
+            <ScrollDownIndicator />
 
-            <div className="max-w-6xl mx-auto px-4 py-12 pb-32">
+            <div className="max-w-6xl mx-auto px-4 py-12 pb-64 md:pb-24">
                 {/* Bouton Retour */}
                 <Link
                     href="/fourniture-bureau"
@@ -169,34 +172,27 @@ export default async function ProductDetailPage({
 
                         {/* Boutons d'achat */}
                         <div className="space-y-4">
-                            {product.stock > 0 ? (
-                                <>
-                                    <WhatsAppOrderButton
-                                        title={product.name}
-                                        price={product.price}
-                                        phone={whatsappPhone || undefined}
-                                        type="accessory"
-                                        className="!rounded-2xl"
-                                    />
-                                    <AddToCartButton
-                                        product={{
-                                            id: product.id,
-                                            title: product.name,
-                                            price: product.price,
-                                            image: product.image ?? '',
-                                            type: 'ACCESSORY'
-                                        }}
-                                        className="w-full !py-6 text-xs uppercase tracking-[0.2em] font-black !rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300"
-                                    />
-                                </>
-                            ) : (
-                                <button
-                                    disabled
-                                    className="w-full py-4 bg-slate-100 text-slate-400 text-xs font-black uppercase tracking-widest rounded-2xl cursor-not-allowed text-center"
-                                >
-                                    {tAccessory('OutOfStock')}
-                                </button>
-                            )}
+                            <StickyBottomActions>
+                                <WhatsAppOrderButton
+                                    title={product.name}
+                                    price={product.price}
+                                    phone={whatsappPhone || undefined}
+                                    type="accessory"
+                                    className="!rounded-2xl"
+                                    disabled={product.stock === 0}
+                                />
+                                <AddToCartButton
+                                    product={{
+                                        id: product.id,
+                                        title: product.name,
+                                        price: product.price,
+                                        image: product.image ?? '',
+                                        type: 'ACCESSORY'
+                                    }}
+                                    className="w-full !py-4 md:!py-5 text-xs uppercase tracking-[0.2em] font-black !rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300"
+                                    disabled={product.stock === 0}
+                                />
+                            </StickyBottomActions>
                         </div>
 
                         {/* Description principale */}

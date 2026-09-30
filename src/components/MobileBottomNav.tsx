@@ -9,13 +9,22 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
 interface MobileBottomNavProps {
-    onMenuClick: () => void
+    onMenuClick?: () => void
 }
 
 export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
     const pathname = usePathname()
     const t = useTranslations('Navigation')
-    const { toggleCart } = useUIStore()
+    const {
+        isCartOpen,
+        openCart,
+        closeCart,
+        toggleCart,
+        isMobileMenuOpen,
+        openMobileMenu,
+        closeMobileMenu,
+        toggleMobileMenu
+    } = useUIStore()
     const totalItems = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0))
     const [mounted, setMounted] = useState(false)
     const [isCartAnimating, setIsCartAnimating] = useState(false)
@@ -34,6 +43,38 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
         { href: '/', icon: Home, label: t('Home') },
         { href: '/books', icon: BookOpen, label: t('Books') },
     ]
+
+    const handleCartClick = () => {
+        if (isMobileMenuOpen) {
+            // Fermer le menu en premier avant d'ouvrir le panier
+            closeMobileMenu()
+            setTimeout(() => {
+                openCart()
+            }, 250)
+        } else {
+            toggleCart()
+        }
+    }
+
+    const handleMenuClick = () => {
+        if (isCartOpen) {
+            // Fermer le panier en premier avant d'ouvrir le menu
+            closeCart()
+            setTimeout(() => {
+                if (onMenuClick) {
+                    onMenuClick()
+                } else {
+                    openMobileMenu()
+                }
+            }, 250)
+        } else {
+            if (onMenuClick) {
+                onMenuClick()
+            } else {
+                toggleMobileMenu()
+            }
+        }
+    }
 
     return (
         <>
@@ -100,8 +141,9 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
                     {/* Panier */}
                     <button
-                        onClick={toggleCart}
+                        onClick={handleCartClick}
                         aria-label={`${t('Cart')}${mounted && totalItems > 0 ? ` (${totalItems})` : ''}`}
+                        aria-expanded={isCartOpen}
                         className="flex flex-col flex-1 items-center justify-center gap-1 py-2 touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
@@ -145,9 +187,9 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
                     {/* Menu */}
                     <button
-                        onClick={onMenuClick}
+                        onClick={handleMenuClick}
                         aria-label={t('Menu')}
-                        aria-expanded={false}
+                        aria-expanded={isMobileMenuOpen}
                         className="flex flex-col flex-1 items-center justify-center gap-1 py-2 touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                     >

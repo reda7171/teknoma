@@ -34,6 +34,7 @@ import TestimonialsTabs from '@/components/home/TestimonialsTabs'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 import PredictiveSearch from '@/components/PredictiveSearch'
+import ScrollDownIndicator from '@/components/ScrollDownIndicator'
 
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 
@@ -367,6 +368,7 @@ export default async function BookDetailPage({
 
 
                 <Header />
+                <ScrollDownIndicator />
 
                 <BookSubNav 
                     bookTitle={book.title}
@@ -375,7 +377,7 @@ export default async function BookDetailPage({
                     backLabel={tBook('BackToSelection') || 'Retour à la sélection'}
                 />
 
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-40">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-64 md:pb-40">
                     <div className="mb-6 md:mb-10">
                         <PredictiveSearch />
                     </div>
@@ -691,14 +693,13 @@ export default async function BookDetailPage({
                                         </a>
                                     ) : (
                                         <>
-                                            {book.stock > 0 && (
-                                                <WhatsAppOrderButton
+                                            <WhatsAppOrderButton
                                                     title={displayTitle}
                                                     price={book.price}
                                                     phone={whatsappPhone || undefined}
                                                     type="book"
+                                                    disabled={book.stock === 0}
                                                 />
-                                            )}
                                                 <AddToCartButton
                                                 product={{
                                                     id: book.id,

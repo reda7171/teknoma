@@ -81,7 +81,7 @@ export default function InstantOfferPopup() {
     if (discount && discount >= offer.discount) return null // Already applied
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             {showConfetti && <Confetti recycle={false} numberOfPieces={300} />}
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in duration-300">
                 <button aria-label="Fermer" 

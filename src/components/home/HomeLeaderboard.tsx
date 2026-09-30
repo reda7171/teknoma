@@ -159,7 +159,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                             <div className="flex items-center gap-1.5 text-slate-600">
                                 <BookOpen className="w-3.5 h-3.5 text-emerald-500" />
                                 <p className="text-xs font-bold">
-                                    <span className="font-black text-slate-900">{top3.length}+</span> lecteurs actifs ce mois
+                                    {t('ActiveReaders', { count: top3.length })}
                                 </p>
                             </div>
                         </div>

@@ -43,11 +43,6 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
 
     return (
         <div className="w-full max-w-md">
-            <div className="text-center mb-10">
-                <h1 className="text-4xl font-black text-black tracking-tighter mb-2">{t('RegisterTitle')}</h1>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">{t('RegisterSubtitle')}</p>
-            </div>
-
             <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-black/5 border border-gray-100">
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">

@@ -28,7 +28,8 @@ export default async function OrderTrackingPage(props: {
             items: {
                 include: {
                     book: { select: { title: true, image: true, author: true } },
-                    pack: { select: { name: true, image: true } }
+                    pack: { select: { name: true, image: true } },
+                    extraProduct: { select: { name: true, image: true } }
                 }
             },
             statusHistory: {

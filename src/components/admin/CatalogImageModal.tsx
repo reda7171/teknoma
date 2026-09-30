@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { X, Download, ImageIcon, Loader2, Type, Palette, LayoutGrid, Book as BookIcon, CheckCircle2, Globe } from 'lucide-react'
 import { getAllBooksForCatalog } from '@/lib/actions/books'
 import { normalizeImage } from '@/lib/utils'
+import { getLocalizedTitle } from '@/lib/i18n-utils'
 import * as htmlToImage from 'html-to-image'
 
 interface CatalogImageModalProps {
@@ -399,6 +400,8 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                             const previewCols = config.format === 'post' && config.booksPerPage <= 4 ? 2 : config.columns
                                             const previewWidth = Math.floor(((config.format === 'post' ? 1080 : 1200) - (previewCols - 1) * (config.format === 'post' ? 30 : 48)) / previewCols)
                                             const previewHeight = Math.floor(previewWidth * 1.5)
+                                            const bookTitle = getLocalizedTitle(book)
+                                            const isArabic = book.language === 'ar' || (!book.language && /[\u0600-\u06FF]/.test(bookTitle))
                                             return (
                                             <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                                 {book.image ? (
@@ -408,7 +411,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                                         <BookIcon style={{ width: '80px', height: '80px', color: '#9ca3af' }} />
                                                     </div>
                                                 )}
-                                                <p dir="auto" className="font-black text-center mb-4 leading-tight" style={{ color: config.textColor, fontSize: config.format === 'post' ? '24px' : '30px' }}>{book.title}</p>
+                                                <p dir="auto" className="font-black text-center mb-4 leading-tight" style={{ color: config.textColor, fontSize: config.format === 'post' ? '24px' : '30px', direction: isArabic ? 'rtl' : 'ltr' }}>{bookTitle}</p>
                                                 {config.showPrice && (
                                                     <div className="px-8 py-2 rounded-full font-black text-white" style={{ backgroundColor: config.primaryColor, fontSize: config.format === 'post' ? '20px' : '24px' }}>{book.price} درهم</div>
                                                 )}
@@ -498,6 +501,8 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                             <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: isPost ? '40px' : '140px 60px', justifyContent: 'center' }}>
                                 {(chunk.books || []).map((book: any, idx: number) => {
                                     const cellWidth = Math.floor((innerWidth - (cols - 1) * gapX) / cols)
+                                    const bookTitle = getLocalizedTitle(book)
+                                    const isArabic = book.language === 'ar' || (!book.language && /[\u0600-\u06FF]/.test(bookTitle))
                                     return (
                                         <div key={idx} style={{ width: `${cellWidth}px`, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             {book.image ? (
@@ -516,7 +521,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                                     textAlign: 'center',
                                                     width: '100%',
                                                     lineHeight: '1.2',
-                                                    direction: 'rtl',
+                                                    direction: isArabic ? 'rtl' : 'ltr',
                                                     paddingBottom: isPost ? '20px' : '30px',
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
@@ -524,7 +529,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                                     WebkitLineClamp: 2,
                                                     WebkitBoxOrient: 'vertical'
                                                 }}>
-                                                    {book.title}
+                                                    {bookTitle}
                                                 </h3>
                                                 {config.showPrice && (
                                                     <div style={{ 

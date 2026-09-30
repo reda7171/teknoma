@@ -111,10 +111,10 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                                 <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl hover:bg-gray-50/50 transition-colors">
                                     <div className="flex items-center gap-4 flex-grow">
                                         <div className="w-16 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-100 shadow-sm">
-                                            {(item.book?.image || item.digitalProduct?.image) && (
+                                            {(item.book?.image || item.extraProduct?.image || item.pack?.image || item.digitalProduct?.image) && (
                                                 <img
-                                                    src={item.book?.image || item.digitalProduct?.image}
-                                                    alt={item.book?.title || item.digitalProduct?.title}
+                                                    src={item.book?.image || item.extraProduct?.image || item.pack?.image || item.digitalProduct?.image}
+                                                    alt={item.book?.title || item.extraProduct?.name || item.pack?.name || item.digitalProduct?.title}
                                                     className="w-full h-full object-cover"
                                                 />
                                             )}
@@ -122,7 +122,7 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                                         <div className="flex-grow">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h4 className="font-black text-sm text-black line-clamp-1">
-                                                    {item.book?.title || item.pack?.name || item.digitalProduct?.title || 'Article'}
+                                                    {item.book?.title || item.extraProduct?.name || item.pack?.name || item.digitalProduct?.title || 'Article'}
                                                 </h4>
                                                 {item.type === 'DIGITAL' && (
                                                     <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase tracking-widest rounded-md shrink-0">

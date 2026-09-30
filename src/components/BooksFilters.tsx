@@ -140,7 +140,23 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                 </div>
             )}
 
-            {/* LANGUE EN PREMIER — filtre prioritaire */}
+            {/* Search — affiché en premier sur mobile */}
+            {isMobile && (
+                <div className="mb-2">
+                    <label className="flex items-center gap-2 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 mb-4 ml-1">
+                        <Search className="w-3 h-3" />
+                        {tCommon('Search') || 'Rechercher'}
+                    </label>
+                    <SearchInput
+                        currentSearch={params.search || ''}
+                        onChange={handleSearchChange}
+                        placeholder={tCommon('SearchPlaceholder') || "Titre, auteur, description..."}
+                    />
+                </div>
+            )}
+
+            {/* LANGUE — filtre prioritaire */}
+
             <div>
                 <button 
                     onClick={() => toggleSection('langs')}
@@ -277,7 +293,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         }`}
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Nouveau arrivage
+                        {tCommon('NewArrival')}
                     </button>
                 </div>
             </div>
@@ -547,7 +563,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                             )}
                             {params.newArrivals === 'true' && (
                                 <div className="flex-shrink-0 px-3 py-1.5 bg-emerald-600 text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
-                                    Nouveau arrivage
+                                    {tCommon('NewArrival')}
                                     <Link 
                                         href={`/books?${new URLSearchParams({
                                             ...(params.category ? { category: params.category } : {}),
@@ -569,37 +585,31 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
 
             {/* Mobile Drawer (Modal) */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-[60] lg:hidden flex items-center justify-center p-4">
-                    <div 
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
+            <div className="fixed inset-0 z-[170] lg:hidden flex items-end sm:items-center justify-center p-4 pb-[5.5rem] sm:pb-4">
+                <div 
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+                <div className="relative w-full max-w-sm max-h-[80vh] bg-white rounded-3xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
+                    <button 
                         onClick={() => setIsMobileMenuOpen(false)}
-                    />
-                    <div className="relative w-full max-w-sm max-h-[85vh] bg-white rounded-3xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
-                        <div className="flex items-center justify-between p-5 border-b border-gray-100 shrink-0">
-                            <div>
-                                <h2 className="text-lg font-black text-gray-900 tracking-tight">{t('Filters')}</h2>
-                                <p className="text-[10px] rtl:text-sm rtl:tracking-normal text-gray-400 font-bold uppercase tracking-widest mt-0.5">{tCommon('RefineSearch')}</p>
-                            </div>
-                            <button 
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                            >
-                                <X className="w-6 h-6 text-gray-900" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-5 no-scrollbar">
-                            <FilterContent isMobile />
-                        </div>
-                        <div className="p-5 border-t border-gray-100 bg-gray-50/50 shrink-0 rounded-b-3xl">
-                            <button
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-black/10 active:scale-95 transition-all"
-                            >
-                                Voir les {totalCount} résultats
-                            </button>
-                        </div>
+                        className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <div className="flex-1 overflow-y-auto p-5 pt-10 no-scrollbar">
+                        <FilterContent isMobile />
+                    </div>
+                    <div className="p-5 border-t border-gray-100 bg-gray-50/50 shrink-0 rounded-b-3xl">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-black/10 active:scale-95 transition-all"
+                        >
+                            {tCommon('ViewResults', { count: totalCount })}
+                        </button>
                     </div>
                 </div>
+            </div>
             )}
         </>
     )

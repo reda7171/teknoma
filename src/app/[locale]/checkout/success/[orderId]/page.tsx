@@ -78,11 +78,11 @@ export default async function OrderSuccessPage({
                                     {order.items.map((item: any) => (
                                         <div key={item.id} className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                                             <div className="flex items-center gap-4">
-                                                {item.book?.image || item.pack?.image || item.digitalProduct?.image ? (
+                                                {item.book?.image || item.pack?.image || item.extraProduct?.image || item.digitalProduct?.image ? (
                                                     <div className="w-12 h-16 relative rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                                                         <img 
-                                                            src={item.book?.image || item.pack?.image || item.digitalProduct?.image} 
-                                                            alt={item.book?.title || item.pack?.name || item.digitalProduct?.title}
+                                                            src={item.book?.image || item.pack?.image || item.extraProduct?.image || item.digitalProduct?.image} 
+                                                            alt={item.book?.title || item.pack?.name || item.extraProduct?.name || item.digitalProduct?.title}
                                                             className="object-cover w-full h-full"
                                                         />
                                                     </div>
@@ -92,7 +92,7 @@ export default async function OrderSuccessPage({
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="text-base font-bold text-gray-900 line-clamp-1">{item.book?.title || item.pack?.name || item.digitalProduct?.title}</p>
+                                                    <p className="text-base font-bold text-gray-900 line-clamp-1">{item.book?.title || item.pack?.name || item.extraProduct?.name || item.digitalProduct?.title}</p>
                                                     <p className="text-sm font-bold text-gray-400">Quantité : {item.quantity}</p>
                                                 </div>
                                             </div>

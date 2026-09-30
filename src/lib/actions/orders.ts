@@ -458,7 +458,9 @@ export async function getOrderById(orderId: string) {
                 items: {
                     include: {
                         book: true,
-                        pack: true
+                        pack: true,
+                        extraProduct: true,
+                        digitalProduct: true
                     }
                 }
             }

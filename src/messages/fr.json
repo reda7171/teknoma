@@ -11,7 +11,8 @@
     "Sub": "Connexion gratuite via Google",
     "Pages": "pages",
     "Hours": "h",
-    "Challenge": "Challenge"
+    "Challenge": "Challenge",
+    "ActiveReaders": "{count}+ lecteurs actifs ce mois"
   },
   "Seller": {
     "Sidebar": {
@@ -556,6 +557,8 @@
     "AddToReadingListTitle": "Ajouter à ma liste de lecture",
     "AddToList": "Ajouter à ma liste",
     "RefineSearch": "Affiner la recherche",
+    "NewArrival": "Nouveau arrivage",
+    "ViewResults": "Voir les {count} résultats",
     "ShowMore": "+ Afficher plus",
     "ShowLess": "- Afficher moins",
     "CustomPackCTA": {

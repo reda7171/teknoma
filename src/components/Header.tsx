@@ -79,11 +79,24 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
     const locale = useLocale()
     const t = useTranslations('Navigation')
     const tCat = useTranslations('Categories')
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-    const { isCartOpen, openCart, closeCart } = useUIStore()
+    const {
+        isCartOpen,
+        openCart,
+        closeCart,
+        isMobileMenuOpen,
+        openMobileMenu,
+        closeMobileMenu,
+        setMobileMenuOpen
+    } = useUIStore()
     const totalItems = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0))
     const [mounted, setMounted] = useState(false)
+
+    // Fermer le menu mobile et la recherche lors des changements de page
+    useEffect(() => {
+        closeMobileMenu()
+        setMobileSearchOpen(false)
+    }, [pathname, closeMobileMenu])
 
     // Éviter les problèmes d'hydratation
     useEffect(() => {
@@ -513,7 +526,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 </button>
                                 <UserDropdown user={user} features={features} />
                                 <button
-                                    onClick={() => setMobileMenuOpen(true)}
+                                    onClick={openMobileMenu}
                                     className="w-10 h-10 border-2 border-transparent hover:bg-gray-50 rounded-full flex 2xl:hidden items-center justify-center transition-all ml-2 rtl:ml-0 rtl:mr-2"
                                     aria-label="Menu principal"
                                 >
@@ -548,14 +561,14 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             </header>
 
             {/* Global Menu Drawer (Mobile & Desktop) */}
-            {mobileMenuOpen && (
+            {isMobileMenuOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-[140] transition-opacity"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={closeMobileMenu}
                 />
             )}
             <div
-                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${mobileMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${isMobileMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
                 suppressHydrationWarning
             >
@@ -570,7 +583,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                         <span className="ml-1 rtl:ml-0 rtl:mr-1 inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 5 : 7) * 100}ms` }}>🇲🇦</span>
                     </span>
                     <button
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={closeMobileMenu}
                         aria-label="Fermer le menu"
                         className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
                     >
@@ -712,7 +725,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                 ? 'text-black bg-gray-50'
                                                 : 'text-gray-900 hover:bg-gray-50'
                                         }`}
-                                    onClick={() => setMobileMenuOpen(false)}
+                                    onClick={closeMobileMenu}
                                 >
                                     <div className="flex justify-between items-center w-full">
                                         <span className={`flex items-center gap-2 ${isSpecial ? 'uppercase tracking-widest rtl:tracking-normal text-[11px] rtl:text-sm font-black' : ''}`}>
@@ -735,7 +748,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             <CartDrawer isOpen={isCartOpen} onClose={closeCart} is3For4Active={features.threeForFour === true} />
 
             {/* Mobile Bottom Navigation */}
-            <MobileBottomNav onMenuClick={() => setMobileMenuOpen(prev => !prev)} />
+            <MobileBottomNav />
 
             {/* Spacer pour compenser le header fixe (h-20 = 80px) */}
             <div className="h-20" />

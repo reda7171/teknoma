@@ -22,7 +22,7 @@ export default function OrderItemsEditor({
 }) {
     const [items, setItems] = useState<any[]>(initialItems.map(item => ({
         ...item,
-        productId: item.type === 'BOOK' ? item.bookId : item.packId,
+        productId: item.type === 'BOOK' ? item.bookId : item.type === 'ACCESSORY' ? item.extraProductId : item.packId,
         isNew: false
     })))
     
@@ -66,6 +66,7 @@ export default function OrderItemsEditor({
                 price: product.price,
                 book: product.type === 'BOOK' ? product : null,
                 pack: product.type === 'PACK' ? product : null,
+                extraProduct: product.type === 'ACCESSORY' ? product : null,
                 isNew: true
             }])
         }
@@ -116,7 +117,7 @@ export default function OrderItemsEditor({
     // Calculs
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     const costSubtotal = items.reduce((sum, item) => {
-        const cost = item.costPrice || item.book?.costPrice || item.pack?.costPrice || 0
+        const cost = item.costPrice || item.book?.costPrice || item.pack?.costPrice || item.extraProduct?.costPrice || 0
         return sum + (cost * item.quantity)
     }, 0)
     const total = subtotal + shippingFees - discount
@@ -124,7 +125,7 @@ export default function OrderItemsEditor({
     const hasChanges = JSON.stringify(
         items.map(i => ({ id: i.isNew ? undefined : i.id, q: i.quantity, p: i.productId }))
     ) !== JSON.stringify(
-        initialItems.map(i => ({ id: i.id, q: i.quantity, p: i.type === 'BOOK' ? i.bookId : i.packId }))
+        initialItems.map(i => ({ id: i.id, q: i.quantity, p: i.type === 'BOOK' ? i.bookId : i.type === 'ACCESSORY' ? i.extraProductId : i.packId }))
     )
 
     return (
@@ -148,14 +149,20 @@ export default function OrderItemsEditor({
 
             <div className="divide-y divide-gray-100">
                 {items.map((item, index) => {
-                    const product = item.book || item.pack
+                    const product = item.book || item.pack || item.extraProduct
+                    const editLink = item.type === 'ACCESSORY'
+                        ? `/${locale}/admin/accessories/${product?.id}`
+                        : item.type === 'PACK'
+                            ? `/${locale}/admin/packs/${product?.id}/edit`
+                            : `/${locale}/admin/books/${product?.id}/edit`
+
                     return (
                         <div key={item.id || `new-${index}`} className="p-6 flex gap-4 relative group">
-                            <Link href={`/${locale}/admin/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}/edit`} target="_blank" className="relative w-16 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 hover:ring-2 hover:ring-blue-500 transition-all block">
+                            <Link href={editLink} target="_blank" className="relative w-16 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 hover:ring-2 hover:ring-blue-500 transition-all block">
                                 {product?.image ? (
                                     <ImageWithFallback
                                         src={product.image}
-                                        alt="Produit"
+                                        alt={product?.title || product?.name || 'Produit'}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
@@ -168,7 +175,7 @@ export default function OrderItemsEditor({
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start gap-4">
                                     <Link 
-                                        href={`/${locale}/admin/${item.type === 'PACK' ? 'packs' : 'books'}/${product?.id}/edit`}
+                                        href={editLink}
                                         className="font-bold text-gray-900 line-clamp-2 hover:text-blue-600"
                                         target="_blank"
                                     >
@@ -186,11 +193,11 @@ export default function OrderItemsEditor({
                                 </div>
 
                                 {/* Entrepôt source */}
-                                {item.book?.stockMovements?.[0]?.fromWarehouse && (
+                                {(item.book?.stockMovements?.[0]?.fromWarehouse || item.extraProduct?.stockMovements?.[0]?.fromWarehouse) && (
                                     <div className="mt-1.5">
                                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                                            {item.book.stockMovements[0].fromWarehouse.name}
+                                            {(item.book?.stockMovements?.[0]?.fromWarehouse || item.extraProduct?.stockMovements?.[0]?.fromWarehouse)?.name}
                                         </span>
                                     </div>
                                 )}
@@ -238,7 +245,7 @@ export default function OrderItemsEditor({
                         <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input 
                             type="text"
-                            placeholder="Rechercher un livre ou pack à ajouter..."
+                            placeholder="Rechercher un livre, jeu ou pack à ajouter..."
                             value={searchQuery}
                             onChange={handleSearch}
                             className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -262,7 +269,7 @@ export default function OrderItemsEditor({
                                         <p className="text-sm font-bold text-gray-900 truncate">{res.title}</p>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className="text-xs font-medium bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-                                                {res.type === 'PACK' ? 'Pack' : 'Livre'}
+                                                {res.type === 'PACK' ? 'Pack' : res.type === 'ACCESSORY' ? 'Jeu / Accessoire' : 'Livre'}
                                             </span>
                                             <span className="text-xs text-gray-500">{res.price} درهم</span>
                                         </div>
