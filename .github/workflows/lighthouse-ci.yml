@@ -1,4 +1,4 @@
-name: Lighthouse CI Accessibility, SEO & Contrast
+name: Lighthouse CI Performance, Accessibility, SEO & Contrast
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   lighthouse-audit:
-    name: Lighthouse A11y, SEO & Contrast Check
+    name: Lighthouse Performance, A11y, SEO & Contrast Check
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
@@ -111,6 +111,11 @@ jobs:
             exit 1
           fi
           echo "All audited routes verified with HTTP 200"
+          echo "Checking performance latency (TTFB)..."
+          HOME_TIME=$(curl -o /dev/null -s -w "%{time_total}" http://localhost:3000/fr)
+          echo "Home route response time: ${HOME_TIME}s"
+          BOOK_TIME=$(curl -o /dev/null -s -w "%{time_total}" http://localhost:3000/fr/books/08f41f86-a23c-48f6-b486-109383b0f6e0)
+          echo "Book detail route response time: ${BOOK_TIME}s"
           kill -9 $SERVER_PID 2>/dev/null || true
           fuser -k 3000/tcp 2>/dev/null || true
           pkill -f "next" 2>/dev/null || true
