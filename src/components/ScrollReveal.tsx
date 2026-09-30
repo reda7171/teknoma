@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode
     className?: string
-    animation?: 'animate-reveal-up' | 'animate-reveal-right'
+    animation?: 'animate-reveal-up' | 'animate-reveal-right' | 'animate-reveal-left'
     delay?: number
 }
 
