@@ -6,6 +6,7 @@ import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtS
 import { useTranslations, useLocale } from 'next-intl';
 import Script from 'next/script'
 import PushSubscribeButton from '@/components/PushSubscribeButton'
+import GoogleReviewsBadge from '@/components/GoogleReviewsBadge'
 
 interface FooterProps {
     features?: {
@@ -119,27 +120,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
 
     return (
         <footer id="main-footer" className="bg-black text-white relative">
-            <Script src="https://apis.google.com/js/platform.js?onload=renderBadge" strategy="lazyOnload" />
-            <Script id="google-customer-reviews-badge" strategy="lazyOnload" dangerouslySetInnerHTML={{
-                __html: `
-                    window.renderBadge = function() {
-                        var ratingBadgeContainer = document.createElement("div");
-                        ratingBadgeContainer.style.minHeight = "60px";
-                        ratingBadgeContainer.style.minWidth = "120px";
-                        ratingBadgeContainer.style.position = "fixed";
-                        ratingBadgeContainer.style.bottom = "0";
-                        ratingBadgeContainer.style.left = "0";
-                        ratingBadgeContainer.style.zIndex = "2147483647";
-                        document.body.appendChild(ratingBadgeContainer);
-                        window.gapi.load('ratingbadge', function() {
-                            window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                                "merchant_id": 5826844744,
-                                "position": "BOTTOM_LEFT"
-                            });
-                        });
-                    }
-                `
-            }} />
+            <GoogleReviewsBadge />
 
             {/* Top Bar with Back to Top */}
             <div className="bg-black border-b border-white/5 h-16 w-full flex items-center ltr:justify-end rtl:justify-start px-4 sm:px-6 lg:px-8">
