@@ -106,7 +106,7 @@ export async function GET(req: Request) {
                                 })
                                 if (pack) {
                                     for (const packBook of pack.books) {
-                                        await prisma.book.update({
+                                        await prisma.book.updateMany({
                                             where: { id: packBook.bookId },
                                             data: { stock: { decrement: quantity } }
                                         })

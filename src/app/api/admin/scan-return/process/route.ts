@@ -55,14 +55,14 @@ export async function POST(request: Request) {
             // 3. Impact stock
             for (const item of order.items) {
                 if (item.type === 'BOOK' && item.bookId) {
-                    await tx.book.update({
+                    await tx.book.updateMany({
                         where: { id: item.bookId },
                         data: { stock: { increment: item.quantity } }
                     })
                 } else if (item.type === 'PACK' && item.packId && item.pack) {
                     // Update stock for all books in the pack
                     for (const packBook of item.pack.books) {
-                        await tx.book.update({
+                        await tx.book.updateMany({
                             where: { id: packBook.bookId },
                             data: { stock: { increment: item.quantity } }
                         })

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus, MessageCircle, Mail } from 'lucide-react'
+import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus, MessageCircle, Mail, Truck } from 'lucide-react'
 import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
@@ -32,6 +32,23 @@ const getNotificationLinks = (order: any) => {
     const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent('Suivi de votre commande Riwaya')}&body=${encodeURIComponent(text)}` : null
 
     return { waLink, mailLink }
+}
+
+const getCompanyReturnWaLink = (order: any) => {
+    const companyName = order.shippingCompanyName || 'Société de livraison'
+    const daysSince = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+    const formattedDate = new Date(order.createdAt).toLocaleDateString('fr-FR')
+    const trackingText = order.trackingID ? `N° Suivi : ${order.trackingID}` : `Commande #${order.id.slice(0, 8)}`
+    
+    const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande Riwaya :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSince} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci de votre collaboration.\nL'équipe Riwaya.`
+    
+    if (order.shippingCompanySupportPhone) {
+        let clean = order.shippingCompanySupportPhone.replace(/\D/g, '')
+        if (clean.startsWith('0')) clean = '212' + clean.slice(1)
+        else if (!clean.startsWith('212')) clean = '212' + clean
+        return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`
+    }
+    return `https://wa.me/?text=${encodeURIComponent(message)}`
 }
 
 interface OrderItem {
@@ -379,25 +396,49 @@ export default function OrdersTableClient({
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <select aria-label="Champ de sélection"
-                                            value={order.status}
-                                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                                            className={`px-3 py-1 appearance-none text-xs leading-5 font-bold rounded-full border-0 cursor-pointer outline-none focus:ring-2 focus:ring-black transition-colors ${statusColors[order.status as keyof typeof statusColors]}`}
-                                            title="Changer le statut"
-                                        >
-                                            {Object.entries(statusLabels).map(([val, label]) => (
-                                                <option key={val} value={val} className="bg-white text-black font-medium">
-                                                    {label}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        {(() => {
+                                            const isOldReturn = order.status === 'RETURNED' && (Date.now() - new Date(order.createdAt).getTime()) >= 7 * 24 * 60 * 60 * 1000
+                                            return (
+                                                <div className="flex flex-col">
+                                                    <select aria-label="Champ de sélection"
+                                                        value={order.status}
+                                                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                                        className={`px-3 py-1 appearance-none text-xs leading-5 font-bold rounded-full border-0 cursor-pointer outline-none focus:ring-2 focus:ring-black transition-colors ${statusColors[order.status as keyof typeof statusColors]}`}
+                                                        title="Changer le statut"
+                                                    >
+                                                        {Object.entries(statusLabels).map(([val, label]) => (
+                                                            <option key={val} value={val} className="bg-white text-black font-medium">
+                                                                {label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    {isOldReturn && (
+                                                        <span className="block text-[9px] font-black text-amber-800 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded text-center mt-1">
+                                                            ⚠️ Retour &gt; 7j
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right flex items-center justify-end gap-2">
                                         <div className="flex items-center gap-1">
                                             {(() => {
                                                 const links = getNotificationLinks(order)
+                                                const isOldReturn = order.status === 'RETURNED' && (Date.now() - new Date(order.createdAt).getTime()) >= 7 * 24 * 60 * 60 * 1000
                                                 return (
                                                     <>
+                                                        {isOldReturn && (
+                                                            <a
+                                                                href={getCompanyReturnWaLink(order)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                title={`Relancer la société de livraison sur WhatsApp (${order.shippingCompanyName || 'Livreur'})`}
+                                                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition-colors"
+                                                            >
+                                                                <Truck className="w-4 h-4" />
+                                                            </a>
+                                                        )}
                                                         <a
                                                             href={links.waLink}
                                                             target="_blank"

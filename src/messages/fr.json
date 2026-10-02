@@ -1970,5 +1970,16 @@
       "USBCapacity": "64 Go",
       "RiwayaWarranty": "Garantie qualité Riwaya"
     }
+  },
+  "ReturnReminders": {
+    "Title": "Rappels de retours avec les sociétés de livraison",
+    "BadgeOverdue": "Retours en attente (> 7 jours)",
+    "Subtitle": "Ces commandes sont marquées en retour depuis plus d'une semaine. Relancez le transporteur pour récupérer vos colis.",
+    "DaysAgo": "Il y a {days}j",
+    "WhatsAppCompany": "WhatsApp {company}",
+    "OrderDetails": "Détails de la commande",
+    "ShowList": "Voir les {count} colis",
+    "HideList": "Masquer la liste",
+    "NoOverdueReturns": "Aucun retour en attente (> 7 jours)"
   }
 }

@@ -142,7 +142,11 @@ class WithYouService {
     async createPackage(data: WithYouPackageData | WithYouPackageData[]) {
         const payload = Array.isArray(data) ? data : [data]
         try {
-            return await this.request('/savecolis', { data: payload }, 'POST')
+            const res = await this.request('/savecolis', { data: payload }, 'POST')
+            if (res && typeof res === 'object' && res.status === 'error') {
+                throw new Error(res.message || 'Erreur WithYou')
+            }
+            return res
         } catch (error: any) {
             if (error?.message?.includes('Acces refuse')) {
                 throw new Error('Accès refusé par WithYou (401/403). Veuillez vérifier vos identifiants WITHYOU_API_KEY et WITHYOU_API_TOKEN dans la configuration.')
@@ -177,29 +181,13 @@ class WithYouService {
         }
         
         try {
-            return await this.request('/getstatus', { data: validIDs }, 'POST')
+            const res = await this.request('/getstatus', { data: validIDs }, 'POST')
+            if (res && typeof res === 'object' && res.status === 'error') {
+                throw new Error(res.message || 'Erreur WithYou')
+            }
+            return res
         } catch (error: any) {
-            // Handle the specific "Acces refuse" which usually means invalid tracking code or empty array
             if (error.message && error.message.includes('Acces refuse')) {
-                
-                // If we sent a batch, one invalid ID causes the whole batch to fail. Fallback to one-by-one.
-                if (validIDs.length > 1) {
-                    console.warn(`[WithYou] Batch failed with Acces refuse. Retrying one by one...`);
-                    const results: any[] = [];
-                    for (const id of validIDs) {
-                        try {
-                            const res = await this.request('/getstatus', { data: [id] }, 'POST');
-                            if (res.data && Array.isArray(res.data)) {
-                                results.push(...res.data);
-                            }
-                        } catch (e: any) {
-                            // ignore single invalid ID
-                        }
-                    }
-                    return { status: 'success', data: results };
-                }
-
-                console.warn(`[WithYou] Le code de suivi n'a pas été trouvé ou n'appartient pas au compte. (${validIDs.join(', ')})`);
                 return { status: 'success', data: [] };
             }
             throw error;
