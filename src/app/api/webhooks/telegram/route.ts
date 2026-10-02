@@ -120,7 +120,7 @@ export async function POST(req: Request) {
                 const bookId = parts[1]
 
                 if (bookId) {
-                    await prisma.book.update({
+                    await prisma.book.updateMany({
                         where: { id: bookId },
                         data: { stock: 0 }
                     })
@@ -173,18 +173,18 @@ export async function POST(req: Request) {
                         if (isNowReturned && !wasAlreadyRestored) {
                             for (const item of existingOrder.items) {
                                 if (item.type === 'BOOK' && item.bookId) {
-                                    await tx.book.update({
+                                    await tx.book.updateMany({
                                         where: { id: item.bookId },
                                         data: { stock: { increment: item.quantity } }
                                     })
                                 } else if (item.type === 'ACCESSORY' && item.extraProductId) {
-                                    await tx.extraProduct.update({
+                                    await tx.extraProduct.updateMany({
                                         where: { id: item.extraProductId },
                                         data: { stock: { increment: item.quantity } }
                                     })
                                 } else if (item.type === 'PACK' && item.pack) {
                                     for (const packBook of item.pack.books) {
-                                        await tx.book.update({
+                                        await tx.book.updateMany({
                                             where: { id: packBook.bookId },
                                             data: { stock: { increment: item.quantity } }
                                         })

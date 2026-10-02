@@ -270,7 +270,7 @@ async function reintegrateJumiaOrderStock(items: any[], orderId: string, reason:
         for (const book of books) {
             const qty = skuQuantities[book.sellerSku!]
             if (!qty) continue
-            await prisma.book.update({
+            await prisma.book.updateMany({
                 where: { id: book.id },
                 data: { stock: { increment: qty } }
             })

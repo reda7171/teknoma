@@ -78,18 +78,18 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
             if (isNowReturned && !wasAlreadyRestored) {
                 for (const item of order.items) {
                     if (item.type === 'BOOK' && item.bookId) {
-                        await tx.book.update({
+                        await tx.book.updateMany({
                             where: { id: item.bookId },
                             data: { stock: { increment: item.quantity } }
                         })
                     } else if (item.type === 'ACCESSORY' && item.extraProductId) {
-                        await tx.extraProduct.update({
+                        await tx.extraProduct.updateMany({
                             where: { id: item.extraProductId },
                             data: { stock: { increment: item.quantity } }
                         })
                     } else if (item.type === 'PACK' && item.pack) {
                         for (const packBook of item.pack.books) {
-                            await tx.book.update({
+                            await tx.book.updateMany({
                                 where: { id: packBook.bookId },
                                 data: { stock: { increment: item.quantity } }
                             })
@@ -381,10 +381,16 @@ export async function syncOrderToWithYou(orderId: string) {
         }
 
         // Créer le colis sur WithYou
-        const response = await withyouService.createPackage(packageData)
+        let trackingID = order.id
+        let syncWarning: string | null = null
 
-        // On suppose que la réponse renvoie un succès. Si pas de trackingID clair, on utilise l'ID de la commande comme référence
-        const trackingID = response?.data?.[0]?.trackingID || response?.trackingID || order.id
+        try {
+            const response = await withyouService.createPackage(packageData)
+            trackingID = response?.tracking_number || response?.data?.[0]?.trackingID || response?.trackingID || order.id
+        } catch (apiErr: any) {
+            console.warn('[WithYou] API error in syncOrderToWithYou:', apiErr.message)
+            syncWarning = apiErr.message
+        }
 
         // Mettre à jour la commande locale
         await prisma.order.update({
@@ -403,7 +409,9 @@ export async function syncOrderToWithYou(orderId: string) {
         return {
             success: true,
             trackingID: trackingID,
-            message: 'Commande envoyée à WithYou avec succès'
+            message: syncWarning 
+                ? `Commande assignée à WithYou (Attention: ${syncWarning})`
+                : 'Commande envoyée à WithYou avec succès'
         }
     } catch (error: any) {
         console.error('Erreur Sync WithYou:', error)
@@ -436,8 +444,8 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
         if (!company) throw new Error('Société de livraison introuvable')
 
         let trackingID = order.id
-
         const compName = company.name.toLowerCase()
+        let syncWarning: string | null = null
 
         if (compName.includes('withyou')) {
             const packageData = {
@@ -450,8 +458,13 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
                 observation: `Commande Riwaya #${order.id.slice(0, 8)}`
             }
 
-            const response = await withyouService.createPackage(packageData)
-            trackingID = response?.tracking_number || response?.data?.[0]?.trackingID || response?.trackingID || order.id
+            try {
+                const response = await withyouService.createPackage(packageData)
+                trackingID = response?.tracking_number || response?.data?.[0]?.trackingID || response?.trackingID || order.id
+            } catch (apiErr: any) {
+                console.warn('[WithYou] API sync warning:', apiErr.message)
+                syncWarning = apiErr.message
+            }
         } else if (compName.includes('olivraison')) {
             const token = company.apiKey || (await prisma.siteSettings.findUnique({ where: { key: 'olivraison_api_key' } }))?.value
             if (!token) throw new Error("Clé API Olivraison manquante")
@@ -517,7 +530,9 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
         return {
             success: true,
             trackingID: trackingID,
-            message: `Commande envoyée à ${company.name} avec succès`
+            message: syncWarning 
+                ? `Commande assignée à ${company.name} (Attention: ${syncWarning})`
+                : `Commande envoyée à ${company.name} avec succès`
         }
     } catch (error: any) {
         console.error('Erreur Sync Livraison:', error)
@@ -892,20 +907,20 @@ export async function updateOrderItems(orderId: string, items: {
                     // Item supprimé
                     if (impactsStock) {
                         if (oldItem.type === 'BOOK' && oldItem.bookId) {
-                            await tx.book.update({
+                            await tx.book.updateMany({
                                 where: { id: oldItem.bookId },
                                 data: { stock: { increment: oldItem.quantity } }
                             })
                         } else if (oldItem.type === 'PACK' && oldItem.packId) {
                             const packBooks = await tx.packBook.findMany({ where: { packId: oldItem.packId } })
                             for (const pb of packBooks) {
-                                await tx.book.update({
+                                await tx.book.updateMany({
                                     where: { id: pb.bookId },
                                     data: { stock: { increment: oldItem.quantity } }
                                 })
                             }
                         } else if (oldItem.type === 'ACCESSORY' && oldItem.extraProductId) {
-                            await tx.extraProduct.update({
+                            await tx.extraProduct.updateMany({
                                 where: { id: oldItem.extraProductId },
                                 data: { stock: { increment: oldItem.quantity } }
                             })
@@ -917,20 +932,20 @@ export async function updateOrderItems(orderId: string, items: {
                     const diff = newItem.quantity - oldItem.quantity
                     if (diff !== 0 && impactsStock) {
                         if (oldItem.type === 'BOOK' && oldItem.bookId) {
-                            await tx.book.update({
+                            await tx.book.updateMany({
                                 where: { id: oldItem.bookId },
                                 data: { stock: { decrement: diff } }
                             })
                         } else if (oldItem.type === 'PACK' && oldItem.packId) {
                             const packBooks = await tx.packBook.findMany({ where: { packId: oldItem.packId } })
                             for (const pb of packBooks) {
-                                await tx.book.update({
+                                await tx.book.updateMany({
                                     where: { id: pb.bookId },
                                     data: { stock: { decrement: diff } }
                                 })
                             }
                         } else if (oldItem.type === 'ACCESSORY' && oldItem.extraProductId) {
-                            await tx.extraProduct.update({
+                            await tx.extraProduct.updateMany({
                                 where: { id: oldItem.extraProductId },
                                 data: { stock: { decrement: diff } }
                             })
@@ -958,7 +973,7 @@ export async function updateOrderItems(orderId: string, items: {
                     if (book) {
                         costPrice = book.costPrice
                         if (impactsStock) {
-                            await tx.book.update({
+                            await tx.book.updateMany({
                                 where: { id: newItem.productId },
                                 data: { stock: { decrement: newItem.quantity } }
                             })
@@ -971,7 +986,7 @@ export async function updateOrderItems(orderId: string, items: {
                         if (impactsStock) {
                             const packBooks = await tx.packBook.findMany({ where: { packId: newItem.productId } })
                             for (const pb of packBooks) {
-                                await tx.book.update({
+                                await tx.book.updateMany({
                                     where: { id: pb.bookId },
                                     data: { stock: { decrement: newItem.quantity } }
                                 })
@@ -983,7 +998,7 @@ export async function updateOrderItems(orderId: string, items: {
                     if (accessory) {
                         costPrice = accessory.costPrice
                         if (impactsStock) {
-                            await tx.extraProduct.update({
+                            await tx.extraProduct.updateMany({
                                 where: { id: newItem.productId },
                                 data: { stock: { decrement: newItem.quantity } }
                             })

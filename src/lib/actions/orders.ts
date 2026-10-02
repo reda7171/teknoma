@@ -305,16 +305,16 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             await Promise.all(data.items.map(async (item) => {
                 if (item.type === 'BOOK') {
                     impactedBookIds.push(item.productId)
-                    const updatedBook = await tx.book.update({
+                    await tx.book.updateMany({
                         where: { id: item.productId },
                         data: { stock: { decrement: item.quantity } }
                     })
-                    
-                    if (updatedBook.stock < 3) {
+                    const updatedBook = await tx.book.findUnique({ where: { id: item.productId } })
+                    if (updatedBook && updatedBook.stock < 3) {
                         lowStockAlerts.push({ id: updatedBook.id, title: updatedBook.title, stock: updatedBook.stock })
                     }
                 } else if (item.type === 'ACCESSORY') {
-                    await tx.extraProduct.update({
+                    await tx.extraProduct.updateMany({
                         where: { id: item.productId },
                         data: { stock: { decrement: item.quantity } }
                     })
@@ -330,7 +330,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                                 bookIdToDecrement = replacedBooks[packBook.bookId].id
                             }
                             impactedBookIds.push(bookIdToDecrement)
-                            await tx.book.update({
+                            await tx.book.updateMany({
                                 where: { id: bookIdToDecrement },
                                 data: { stock: { decrement: item.quantity } }
                             })

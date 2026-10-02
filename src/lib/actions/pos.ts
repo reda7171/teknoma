@@ -98,7 +98,7 @@ export async function createPOSOrder(data: {
     for (const item of data.items) {
       if (item.type === 'BOOK') {
         impactedBookIds.push(item.id);
-        await prisma.book.update({
+        await prisma.book.updateMany({
           where: { id: item.id },
           data: { stock: { decrement: item.quantity } },
         });
@@ -111,14 +111,14 @@ export async function createPOSOrder(data: {
         if (pack) {
           for (const pb of pack.books) {
             impactedBookIds.push(pb.bookId);
-            await prisma.book.update({
+            await prisma.book.updateMany({
               where: { id: pb.bookId },
               data: { stock: { decrement: item.quantity } },
             });
           }
         }
       } else if (item.type === 'ACCESSORY') {
-        await prisma.extraProduct.update({
+        await prisma.extraProduct.updateMany({
           where: { id: item.id },
           data: { stock: { decrement: item.quantity } },
         });

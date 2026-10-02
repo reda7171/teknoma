@@ -2056,5 +2056,16 @@
       "USBCapacity": "64 Go",
       "RiwayaWarranty": "ضمان جودة رواية"
     }
+  },
+  "ReturnReminders": {
+    "Title": "تذكير بالمرتجعات مع شركات التوصيل",
+    "BadgeOverdue": "مرتجعات معلقة (> 7 أيام)",
+    "Subtitle": "هذه الطلبات مسجلة كمرتجع منذ أكثر من أسبوع. تواصل مع شركة التوصيل لاسترداد الطرود.",
+    "DaysAgo": "منذ {days} يوم",
+    "WhatsAppCompany": "واتساب {company}",
+    "OrderDetails": "تفاصيل الطلب",
+    "ShowList": "عرض الطرود ({count})",
+    "HideList": "إخفاء القائمة",
+    "NoOverdueReturns": "لا توجد مرتجعات معلقة (> 7 أيام)"
   }
 }

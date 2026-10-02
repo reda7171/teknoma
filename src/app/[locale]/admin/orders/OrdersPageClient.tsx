@@ -9,6 +9,7 @@ import BulkSyncDeliveryButton from '@/components/admin/BulkSyncDeliveryButton'
 import ScanRetourButton from '@/components/admin/ScanRetourButton'
 import AdminOrdersEvolutionChart from '@/components/admin/AdminOrdersEvolutionChart'
 import NotificationCenterButton from '@/components/admin/NotificationCenterButton'
+import ReturnRemindersBanner from '@/components/admin/ReturnRemindersBanner'
 
 interface OrdersPageClientProps {
     orders: any[]
@@ -84,6 +85,9 @@ export default function OrdersPageClient({
                     <ExportOrdersButton orders={orders} />
                 </div>
             </div>
+
+            {/* Rappels des retours > 7 jours */}
+            <ReturnRemindersBanner locale={locale} />
 
             {/* Statistiques (Cartes) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

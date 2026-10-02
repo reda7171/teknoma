@@ -11,14 +11,16 @@ export function cn(...inputs: ClassValue[]) {
  * @returns L'image normalisÃ©e ou le placeholder
  */
 export function normalizeImage(raw: string | null | undefined): string {
-    const img = raw?.trim() || ''
+    let img = raw?.trim() || ''
     if (!img) return '/book-placeholder.png'
     
+    // Si l'URL pointe vers riwaya.store/uploads/, la ramener en chemin local pour next/image
+    if (img.includes('riwaya.store/uploads/')) {
+        img = img.replace(/^https?:\/\/(www\.)?riwaya\.store/, '')
+    }
+
     if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
-        const path = img.startsWith('/') ? img : '/' + img;
-        // Toujours utiliser l'URL absolue pour que next/image fasse une requête HTTP
-        // au lieu d'essayer de lire le fichier local (évite les erreurs 400 et de permissions)
-        return `https://www.riwaya.store${path}`;
+        return img.startsWith('/') ? img : '/' + img;
     }
 
     // DÃ©jÃ  une URL ou dÃ©jÃ  formatÃ©

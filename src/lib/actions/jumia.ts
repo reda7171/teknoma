@@ -180,7 +180,7 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
         if (result?.feedId) {
             // Update local DB instantly to match what we sent
             for (const book of books) {
-                await prisma.book.update({
+                await prisma.book.updateMany({
                     where: { id: book.id },
                     data: { jumiaStock: book.stock }
                 })
@@ -946,7 +946,7 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
                     qcStatus = client?.qc?.status || 'UNKNOWN'
 
                     if (sid) {
-                        await prisma.book.update({
+                        await prisma.book.updateMany({
                             where: { id: book.id },
                             data: { jumiaProductSid: sid, jumiaQcStatus: qcStatus }
                         })
@@ -1018,7 +1018,7 @@ export async function deactivatePackOnJumia(packId: string) {
         ])
 
         if (response?.feedId || response?.SuccessResponse) {
-            await prisma.pack.update({
+            await prisma.pack.updateMany({
                 where: { id: packId },
                 data: { isSyncedWithJumia: false }
             })

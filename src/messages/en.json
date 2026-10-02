@@ -2059,5 +2059,16 @@
       "USBCapacity": "64 Go",
       "RiwayaWarranty": "Riwaya quality guarantee"
     }
+  },
+  "ReturnReminders": {
+    "Title": "Delivery Company Return Reminders",
+    "BadgeOverdue": "Pending Returns (> 7 days)",
+    "Subtitle": "These orders have been marked as returned for more than a week. Contact the delivery company to recover your packages.",
+    "DaysAgo": "{days}d ago",
+    "WhatsAppCompany": "WhatsApp {company}",
+    "OrderDetails": "Order Details",
+    "ShowList": "View {count} packages",
+    "HideList": "Hide list",
+    "NoOverdueReturns": "No pending returns (> 7 days)"
   }
 }
