@@ -381,7 +381,7 @@ export async function POST(req: Request) {
                             let hasMore = true
                             let nextToken: string | undefined = undefined
                             while (hasMore) {
-                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                const response: any = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
                                 if (!response) break;
                                 const orders = response?.orders || response?.data?.orders || []
                                 allOrders.push(...orders)
@@ -419,7 +419,7 @@ export async function POST(req: Request) {
                             let hasMore = true
                             let nextToken: string | undefined = undefined
                             while (hasMore) {
-                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                const response: any = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
                                 if (!response) break;
                                 const orders = response?.orders || response?.data?.orders || []
                                 allOrders.push(...orders)
@@ -510,7 +510,7 @@ export async function POST(req: Request) {
                             let hasMore = true
                             let nextToken: string | undefined = undefined
                             while (hasMore) {
-                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                const response: any = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
                                 if (!response) break;
                                 const orders = response?.orders || response?.data?.orders || []
                                 allJumiaOrders.push(...orders)
@@ -1465,7 +1465,7 @@ export async function POST(req: Request) {
                             let hasMore = true
                             let nextToken: string | undefined = undefined
                             while (hasMore) {
-                                const response = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
+                                const response: any = await jumia.getOrders(100, nextToken, undefined, q.start, q.end).catch(() => null)
                                 if (!response) break;
                                 const orders = response?.orders || response?.data?.orders || []
                                 allOrders.push(...orders)
