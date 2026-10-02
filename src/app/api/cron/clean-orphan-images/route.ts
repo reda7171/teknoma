@@ -134,25 +134,25 @@ export async function cleanOrphanImages() {
     const posts = await prisma.post.findMany({
         where: {
             OR: [
-                { image: { contains: '/uploads/' } },
-                { image: { startsWith: 'uploads/' } }
+                { coverImage: { contains: '/uploads/' } },
+                { coverImage: { startsWith: 'uploads/' } }
             ]
         },
-        select: { id: true, title: true, image: true }
+        select: { id: true, title: true, coverImage: true }
     })
 
     for (const post of posts) {
-        if (isOrphanLocalImage(post.image)) {
+        if (isOrphanLocalImage(post.coverImage)) {
             await prisma.post.updateMany({
                 where: { id: post.id },
-                data: { image: '/placeholder.png' }
+                data: { coverImage: '/placeholder.png' }
             })
             cleanedPosts++
             details.push({
                 type: 'POST',
                 id: post.id,
                 name: post.title,
-                orphanUrl: post.image || ''
+                orphanUrl: post.coverImage || ''
             })
         }
     }
