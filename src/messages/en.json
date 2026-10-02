@@ -2070,5 +2070,11 @@
     "ShowList": "View {count} packages",
     "HideList": "Hide list",
     "NoOverdueReturns": "No pending returns (> 7 days)"
+  },
+  "CleanImages": {
+    "Title": "Orphan Images Cleanup",
+    "Desc": "Fixes non-existent image URLs in the database",
+    "Run": "Clean now",
+    "Success": "Images cleaned successfully"
   }
 }

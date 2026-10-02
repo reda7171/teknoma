@@ -1603,7 +1603,8 @@ export async function POST(req: Request) {
                     `Alerte pending → <code>/api/cron/pending-alert</code>\n` +
                     `Rapport Jumia hebdo → <code>/api/cron/weekly-jumia-report</code>\n` +
                     `Alerte retours → <code>/api/cron/jumia-returns-alert</code>\n` +
-                    `Sync commandes Jumia → <code>/api/cron/jumia</code>\n\n` +
+                    `Sync commandes Jumia → <code>/api/cron/jumia</code>\n` +
+                    `Nettoyage images orphelines → <code>/api/cron/clean-orphan-images</code> ou <code>/cleanimages</code>\n\n` +
                     `<b>📥 Export</b>\n` +
                     `CSV commandes Jumia → <code>/api/admin/jumia/export</code>\n\n` +
                     `<i>💡 Toutes les commandes sont insensibles à la casse</i>`
@@ -2029,6 +2030,24 @@ export async function POST(req: Request) {
                 } else {
                     const lines = criticalBooks.map(b => `📖 ${b.title} → <b>${b.stock}</b>${b.stock === 0 ? ' ⛔' : ''}`).join('\n')
                     await sendTelegramMessage(`⚠️ <b>${criticalBooks.length} livres stock critique</b>\n\n${lines}`, chatId.toString(), token)
+                }
+            }
+            else if (text.startsWith('/CLEANIMAGES') || text === 'CLEANIMAGES') {
+                try {
+                    const { cleanOrphanImages } = await import('@/app/api/cron/clean-orphan-images/route')
+                    const result = await cleanOrphanImages()
+                    await sendTelegramMessage(
+                        `🧹 <b>Nettoyage terminé</b>\n\n` +
+                        `• Livres: <b>${result.cleaned.books}</b>\n` +
+                        `• Packs: <b>${result.cleaned.packs}</b>\n` +
+                        `• Accessoires: <b>${result.cleaned.accessories}</b>\n` +
+                        `• Blog: <b>${result.cleaned.posts}</b>\n` +
+                        `• <b>Total corrigé: ${result.cleaned.total}</b>`,
+                        chatId.toString(),
+                        token
+                    )
+                } catch (e: any) {
+                    await sendTelegramMessage(`❌ Erreur nettoyage: ${e.message}`, chatId.toString(), token)
                 }
             }
             else if (text.startsWith('/AVIS') || text === 'AVIS') {

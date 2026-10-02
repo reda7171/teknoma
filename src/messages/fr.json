@@ -1981,5 +1981,11 @@
     "ShowList": "Voir les {count} colis",
     "HideList": "Masquer la liste",
     "NoOverdueReturns": "Aucun retour en attente (> 7 jours)"
+  },
+  "CleanImages": {
+    "Title": "Nettoyage des images orphelines",
+    "Desc": "Corrige les URLs d'images inexistantes dans la base de données",
+    "Run": "Nettoyer maintenant",
+    "Success": "Images nettoyées avec succès"
   }
 }
