@@ -1981,5 +1981,25 @@
     "ShowList": "Voir les {count} colis",
     "HideList": "Masquer la liste",
     "NoOverdueReturns": "Aucun retour en attente (> 7 jours)"
+  },
+  "CleanImages": {
+    "Title": "Nettoyage des images orphelines",
+    "Desc": "Corrige les URLs d'images inexistantes dans la base de données",
+    "Run": "Nettoyer maintenant",
+    "Success": "Images nettoyées avec succès"
+  },
+  "OrderInvoice": {
+    "Title": "Facturation & Reste à payer",
+    "InvoiceNumber": "N° Facture",
+    "InvoiceDate": "Date de facture",
+    "Total": "Total Commande",
+    "Paid": "Acompte réglé",
+    "Remaining": "Reste à payer",
+    "PaidInFull": "Soldé / Réglé",
+    "Partial": "Acompte versé",
+    "Unpaid": "À encaisser (COD)",
+    "EditInvoice": "Gérer la facture & le reste",
+    "Print": "Imprimer la facture",
+    "Share": "Envoyer via WhatsApp"
   }
 }

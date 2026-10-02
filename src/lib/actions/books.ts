@@ -665,11 +665,9 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
 
 export async function incrementBookViews(id: string, userSession: string = 'Visiteur Anonyme') {
     try {
-        // @ts-ignore - views column is recently added
-        const book = await prisma.book.update({
+        await prisma.book.updateMany({
             where: { id },
-            data: { views: { increment: 1 } },
-            select: { id: true, views: true, title: true, stock: true }
+            data: { views: { increment: 1 } }
         })
         
 

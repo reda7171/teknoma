@@ -11,6 +11,8 @@ import DeliverySyncButton from '@/components/admin/DeliverySyncButton'
 import OrderEditModal from '@/components/admin/OrderEditModal'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 import OrderItemsEditor from '@/components/admin/OrderItemsEditor'
+import OrderInvoiceModal from '@/components/admin/OrderInvoiceModal'
+import { Receipt, CheckCircle2, AlertCircle } from 'lucide-react'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 
@@ -31,6 +33,12 @@ export default async function OrderDetailsPage({
     if (!order) {
         notFound()
     }
+
+    const paidAmount = Number((order as any).paidAmount) || (order.isPaid ? Number(order.total) : 0)
+    const remainingAmount = (order as any).remainingAmount !== null && (order as any).remainingAmount !== undefined
+        ? Number((order as any).remainingAmount)
+        : (order.isPaid ? 0 : Math.max(0, Number(order.total) - paidAmount))
+    const isFullyPaid = order.isPaid || remainingAmount <= 0
 
     let shippingCompany = null
     if (order.shippingCompany) {
@@ -62,7 +70,8 @@ export default async function OrderDetailsPage({
                         Commande <span className="text-blue-600">#{order.id.slice(0, 8)}</span>
                     </h1>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                    <OrderInvoiceModal order={order} locale={locale} />
                     <DeleteOrderButton orderId={order.id} />
                     <OrderEditModal order={{
                         id: order.id,
@@ -101,8 +110,75 @@ export default async function OrderDetailsPage({
                     )}
                 </div>
 
-                {/* Sidebar: Customer Info */}
+                {/* Sidebar */}
                 <div className="space-y-6">
+                    {/* Facturation & Reste à payer */}
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Receipt className="w-5 h-5 text-emerald-600" />
+                                Facturation & Reste
+                            </h2>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                                isFullyPaid 
+                                    ? 'bg-emerald-100 text-emerald-800' 
+                                    : paidAmount > 0 
+                                        ? 'bg-amber-100 text-amber-800' 
+                                        : 'bg-red-100 text-red-800'
+                            }`}>
+                                {isFullyPaid ? 'Soldé' : (paidAmount > 0 ? 'Acompte' : 'Non Réglé')}
+                            </span>
+                        </div>
+
+                        <div className="space-y-3 divide-y divide-gray-100 text-sm">
+                            {(order as any).invoiceNumber && (
+                                <div className="flex justify-between items-center pt-2">
+                                    <span className="text-gray-500 font-medium">N° Facture</span>
+                                    <span className="font-mono font-bold text-gray-900 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
+                                        {(order as any).invoiceNumber}
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between items-center pt-2">
+                                <span className="text-gray-500 font-medium">Total Commande</span>
+                                <span className="font-bold text-gray-900">{order.total.toFixed(2)} DH</span>
+                            </div>
+
+                            <div className="flex justify-between items-center pt-2">
+                                <span className="text-gray-500 font-medium">Montant Réglé (Acompte)</span>
+                                <span className="font-bold text-emerald-600">+{paidAmount.toFixed(2)} DH</span>
+                            </div>
+
+                            <div className="pt-3">
+                                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                                    remainingAmount > 0 
+                                        ? 'bg-red-50 border-red-200 text-red-950' 
+                                        : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                                }`}>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider font-black opacity-80">Reste à encaisser</p>
+                                        <p className="text-xl font-black">{remainingAmount.toFixed(2)} DH</p>
+                                    </div>
+                                    {remainingAmount > 0 ? (
+                                        <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
+                                    ) : (
+                                        <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-gray-100">
+                            <OrderInvoiceModal 
+                                order={order} 
+                                locale={locale} 
+                                triggerText="Éditer la facture & le reste"
+                                triggerClassName="w-full justify-center flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition shadow-sm text-sm"
+                            />
+                        </div>
+                    </div>
+
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                             <User className="w-5 h-5 text-gray-400" />

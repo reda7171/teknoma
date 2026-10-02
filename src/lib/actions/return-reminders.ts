@@ -92,8 +92,10 @@ export async function getPendingReturnReminders(): Promise<ReturnReminder[]> {
                 whatsappMessage: message
             }
         })
-    } catch (error) {
-        console.error('Error fetching return reminders:', error)
+    } catch (error: any) {
+        if (!error?.message?.includes('Non autorisé')) {
+            console.error('Error fetching return reminders:', error)
+        }
         return []
     }
 }

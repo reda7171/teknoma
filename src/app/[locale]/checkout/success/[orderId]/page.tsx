@@ -1,7 +1,7 @@
 import { getOrderById } from '@/lib/actions/orders'
 import Header from '@/components/HeaderWithUser'
 import Link from 'next/link'
-import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, FileText } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
@@ -137,13 +137,31 @@ export default async function OrderSuccessPage({
                             </div>
                         </div>
 
-                        <Link
-                            href="/"
-                            className="inline-flex items-center justify-center gap-3 md:gap-4 px-8 py-4 md:px-12 md:py-6 bg-black text-white font-black text-xs sm:text-sm uppercase tracking-[0.3em] rounded-full hover:bg-gray-800 transition-all shadow-2xl hover:shadow-black/20 group"
-                        >
-                            <span>{t('BackHome')}</span>
-                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                        </Link>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                            <a
+                                href={`/api/orders/${order.id}/invoice?print=1`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold text-xs sm:text-sm rounded-full transition-all border border-gray-200"
+                            >
+                                <FileText className="w-4 h-4 text-blue-600" />
+                                <span>Télécharger la Facture (PDF)</span>
+                            </a>
+                            <Link
+                                href={`/track/${order.id}`}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-full transition-all shadow-lg shadow-blue-500/20"
+                            >
+                                <Truck className="w-4 h-4" />
+                                <span>Suivre ma commande</span>
+                            </Link>
+                            <Link
+                                href="/"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20 group"
+                            >
+                                <span>{t('BackHome')}</span>
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

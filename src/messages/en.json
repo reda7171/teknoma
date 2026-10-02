@@ -2070,5 +2070,25 @@
     "ShowList": "View {count} packages",
     "HideList": "Hide list",
     "NoOverdueReturns": "No pending returns (> 7 days)"
+  },
+  "CleanImages": {
+    "Title": "Orphan Images Cleanup",
+    "Desc": "Fixes non-existent image URLs in the database",
+    "Run": "Clean now",
+    "Success": "Images cleaned successfully"
+  },
+  "OrderInvoice": {
+    "Title": "Billing & Balance Due",
+    "InvoiceNumber": "Invoice #",
+    "InvoiceDate": "Invoice date",
+    "Total": "Order Total",
+    "Paid": "Amount Paid",
+    "Remaining": "Remaining Balance",
+    "PaidInFull": "Paid in Full",
+    "Partial": "Partially Paid",
+    "Unpaid": "Due on Delivery (COD)",
+    "EditInvoice": "Manage Invoice & Balance",
+    "Print": "Print Invoice",
+    "Share": "Share via WhatsApp"
   }
 }

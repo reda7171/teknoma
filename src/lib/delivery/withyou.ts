@@ -187,8 +187,9 @@ class WithYouService {
             }
             return res
         } catch (error: any) {
-            if (error.message && error.message.includes('Acces refuse')) {
-                return { status: 'success', data: [] };
+            const msg = error.message || ''
+            if (msg.includes('Acces refuse') || msg.includes('fetch failed') || msg.includes('ENOTFOUND') || msg.includes('ETIMEDOUT')) {
+                return { status: 'offline', data: [] };
             }
             throw error;
         }

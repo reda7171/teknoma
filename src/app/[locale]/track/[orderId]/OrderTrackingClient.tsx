@@ -1,9 +1,10 @@
 'use client'
 
-import { Package, Truck, CheckCircle2, Clock, MapPin, ChevronLeft, ChevronRight, XCircle, ShoppingBag } from 'lucide-react'
+import { Package, Truck, CheckCircle2, Clock, MapPin, ChevronLeft, ChevronRight, XCircle, ShoppingBag, FileText } from 'lucide-react'
 import Link from 'next/link'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { normalizeImage } from '@/lib/utils'
+import { downloadOrderInvoicePdf } from '@/lib/utils/invoiceGenerator'
 
 interface OrderTrackingClientProps {
     order: any
@@ -39,7 +40,10 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
             total: "Total",
             needHelp: "Besoin d'aide avec votre commande ?",
             contactUs: "Contactez-nous",
-            dhs: "Dhs"
+            dhs: "Dhs",
+            downloadInvoice: "Télécharger la Facture (PDF)",
+            paid: "Acompte Réglé",
+            remainingBalance: "Reste à payer (Livraison)"
         },
         ar: {
             backToStore: "العودة إلى المتجر",
@@ -67,7 +71,10 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
             total: "المجموع الكلي",
             needHelp: "تحتاج إلى مساعدة في طلبك؟",
             contactUs: "اتصل بنا",
-            dhs: "درهم"
+            dhs: "درهم",
+            downloadInvoice: "تحميل الفاتورة (PDF)",
+            paid: "المبلغ المدفوع",
+            remainingBalance: "المتبقي للدفع عند الاستلام"
         },
         en: {
             backToStore: "Back to store",
@@ -95,7 +102,10 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
             total: "Total",
             needHelp: "Need help with your order?",
             contactUs: "Contact us",
-            dhs: "Dhs"
+            dhs: "Dhs",
+            downloadInvoice: "Download Invoice (PDF)",
+            paid: "Amount Paid",
+            remainingBalance: "Remaining Due (COD)"
         }
     }[locale as 'fr' | 'ar' | 'en'] || {
         backToStore: "Retour à la boutique",
@@ -123,7 +133,10 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
         total: "Total",
         needHelp: "Besoin d'aide avec votre commande ?",
         contactUs: "Contactez-nous",
-        dhs: "Dhs"
+        dhs: "Dhs",
+        downloadInvoice: "Télécharger la Facture (PDF)",
+        paid: "Acompte Réglé",
+        remainingBalance: "Reste à payer (Livraison)"
     }
 
     const isRtl = locale === 'ar'
@@ -131,6 +144,15 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
     const currentIndex = statusOrder.indexOf(order.status)
     const isCancelled = order.status === 'CANCELLED'
     const isReturned = order.status === 'RETURNED'
+
+    const paidAmount = Number(order.paidAmount) || (order.isPaid ? Number(order.total) : 0)
+    const remainingAmount = order.remainingAmount !== null && order.remainingAmount !== undefined
+        ? Number(order.remainingAmount)
+        : (order.isPaid ? 0 : Math.max(0, Number(order.total) - paidAmount))
+
+    const handleDownloadInvoice = () => {
+        downloadOrderInvoicePdf(order, locale)
+    }
 
     const getStepStatus = (stepIndex: number) => {
         if (isCancelled || isReturned) {
@@ -170,13 +192,24 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                     {/* Decorative gradient top bar */}
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
                     
-                    <div className="mb-10 text-center sm:text-start">
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.trackingTitle}</h1>
-                        <p className="text-gray-500 mt-2 text-sm sm:text-base">
-                            {t.order} <span className="font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md">#{order.id.split('-')[0].toUpperCase()}</span>
-                            {' • '}
-                            {t.placedOn} {new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
-                        </p>
+                    <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="text-center sm:text-start">
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.trackingTitle}</h1>
+                            <p className="text-gray-500 mt-2 text-sm sm:text-base">
+                                {t.order} <span className="font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md">#{order.id.split('-')[0].toUpperCase()}</span>
+                                {' • '}
+                                {t.placedOn} {new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleDownloadInvoice}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/10 text-sm transition-all self-center sm:self-auto shrink-0"
+                            title={t.downloadInvoice}
+                        >
+                            <FileText className="w-4 h-4" />
+                            <span>{t.downloadInvoice}</span>
+                        </button>
                     </div>
 
                     {/* Alert for Cancelled/Returned */}
@@ -361,6 +394,34 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                 <span className="text-3xl font-black text-gray-900">{order.total.toFixed(2)}</span>
                                 <span className="text-sm font-bold text-gray-500 ml-1">{t.dhs}</span>
                             </div>
+                        </div>
+
+                        {/* Breakdown: Acompte & Reste à payer */}
+                        <div className="mt-4 pt-4 border-t border-gray-200/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div className="p-3 bg-white rounded-xl border border-gray-100 flex items-center justify-between">
+                                <span className="text-gray-500 font-bold">{t.paid}</span>
+                                <span className="font-black text-emerald-600 text-sm">+{paidAmount.toFixed(2)} {t.dhs}</span>
+                            </div>
+                            <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                                remainingAmount > 0 
+                                    ? 'bg-amber-50/80 border-amber-200/70 text-amber-950' 
+                                    : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                            }`}>
+                                <span className="font-bold">{t.remainingBalance}</span>
+                                <span className="font-black text-sm">{remainingAmount.toFixed(2)} {t.dhs}</span>
+                            </div>
+                        </div>
+
+                        {/* Bottom Action Button */}
+                        <div className="mt-5 pt-4 border-t border-gray-200 flex justify-center">
+                            <button
+                                type="button"
+                                onClick={handleDownloadInvoice}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-bold rounded-xl border border-gray-200 shadow-sm transition-all text-sm"
+                            >
+                                <FileText className="w-4 h-4 text-blue-600" />
+                                <span>{t.downloadInvoice}</span>
+                            </button>
                         </div>
                     </div>
                 </div>

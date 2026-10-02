@@ -385,6 +385,10 @@ model Order {
   expenseId        String?
   isPaid           Boolean              @default(false)
   invoiceNumber    String?              @db.VarChar(100)
+  paidAmount       Float                @default(0)
+  remainingAmount  Float?
+  invoiceDate      DateTime?
+  invoiceNotes     String?              @db.Text
   posSessionId     String?
   utmSource        String?              @db.VarChar(100)
   utmMedium        String?              @db.VarChar(100)
