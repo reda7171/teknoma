@@ -33,7 +33,9 @@ export default function SetPixelView({ id, title, price, category }: SetPixelVie
             setSessionId(currentSessionId)
         }
 
-        incrementBookViews(id, currentSessionId).catch(console.error)
+        if (category !== 'Pack') {
+            incrementBookViews(id, currentSessionId).catch(() => {})
+        }
     }, [id, title, price, category, sessionId, setSessionId])
 
     return null

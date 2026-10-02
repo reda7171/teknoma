@@ -36,13 +36,8 @@ export default function ImageWithFallback({
                 priority={priority}
                 onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {
-                        target.src = `https://riwaya.store${new URL(target.src).pathname}`;
-                        target.srcset = '';
-                    } else {
-                        target.src = fallback;
-                        target.srcset = '';
-                    }
+                    target.src = fallback;
+                    target.srcset = '';
                 }}
             />
             <noscript>
