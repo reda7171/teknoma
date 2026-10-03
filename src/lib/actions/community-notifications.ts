@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 
 interface CreateNotificationParams {
     userId: string
-    type: 'EXCHANGE_REQUEST' | 'EXCHANGE_ACCEPTED' | 'EXCHANGE_REJECTED' | 'NEW_MESSAGE' | 'EXCHANGE_COMPLETED' | 'RATING_RECEIVED'
+    type: 'EXCHANGE_REQUEST' | 'EXCHANGE_ACCEPTED' | 'EXCHANGE_REJECTED' | 'NEW_MESSAGE' | 'EXCHANGE_COMPLETED' | 'RATING_RECEIVED' | 'SYSTEM'
     title: string
     message: string
     link?: string

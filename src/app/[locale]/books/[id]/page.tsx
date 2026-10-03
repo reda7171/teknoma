@@ -69,7 +69,7 @@ export async function generateMetadata({
         price: 65,
         originalPrice: 85,
         stock: 25,
-        image: "https://riwaya.store/uploads/books/placeholder.jpg",
+        image: "/uploads/books/placeholder.jpg",
         category: "القرآن وعلومه",
         active: true,
     } as any
@@ -209,7 +209,7 @@ export default async function BookDetailPage({
         price: 65,
         originalPrice: 85,
         stock: 25,
-        image: "https://riwaya.store/uploads/books/placeholder.jpg",
+        image: "/uploads/books/placeholder.jpg",
         category: "القرآن وعلومه",
         active: true,
         isAffiliate: false,

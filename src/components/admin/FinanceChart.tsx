@@ -15,9 +15,9 @@ const AccessibleTooltip = Tooltip as any;
 
 export default function FinanceChart({ data }: { data: any[] }) {
     return (
-        <div className="h-[400px] w-full bg-white p-6 md:p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 mt-6">
+        <div className="h-[400px] w-full min-w-0 bg-white p-6 md:p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 mt-6">
             <h2 className="text-2xl font-black mb-8 px-4 tracking-tight">Évolution Financière</h2>
-            <ResponsiveContainer width="100%" height="85%">
+            <ResponsiveContainer width="100%" height="85%" minWidth={0}>
                 <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -56,7 +56,7 @@ export default function FinanceChart({ data }: { data: any[] }) {
                             fontWeight: 'bold',
                             fontSize: '14px'
                         }}
-                        formatter={(value: number) => [`${Math.round(value)} درهم`]}
+                        formatter={((value: any) => [`${Math.round(value || 0)} درهم`]) as any}
                     />
                     <Legend 
                         iconType="circle" 

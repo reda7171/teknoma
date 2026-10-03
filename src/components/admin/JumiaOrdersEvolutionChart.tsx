@@ -46,8 +46,8 @@ export default function JumiaOrdersEvolutionChart({ data }: ChartProps) {
     return (
         <div className="bg-white p-6 rounded-[2rem] border border-orange-100 shadow-sm">
             <h3 className="text-lg font-black text-slate-900 tracking-tight mb-6">Évolution des Commandes</h3>
-            <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <defs>
                             <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">

@@ -27,8 +27,8 @@ export class JumiaAPI {
         const instance = new JumiaAPI(email, apiKey, env || 'sandbox')
         try {
             await instance.refreshAccessToken()
-        } catch (error) {
-            console.error('Failed to initialize Jumia API (network or auth error):', error)
+        } catch (error: any) {
+            console.warn('Jumia API indisponible (réseau/auth):', error?.message || error)
             return null
         }
         return instance
@@ -244,10 +244,6 @@ export class JumiaAPI {
         const payload: any = { products }
         if (shopId) payload.shopId = shopId
         return this.request('/feeds/products/update', 'POST', payload)
-    }
-
-    async updateProductsStatus(products: any[]) {
-        return this.request('/feeds/products/status', 'POST', { products })
     }
 
     // --- Endpoints Produits (Catalog) ---
