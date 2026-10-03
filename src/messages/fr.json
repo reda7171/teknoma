@@ -2001,5 +2001,14 @@
     "EditInvoice": "Gérer la facture & le reste",
     "Print": "Imprimer la facture",
     "Share": "Envoyer via WhatsApp"
+  },
+  "OpenGraph": {
+    "Currency": "DH",
+    "CashOnDelivery": "Paiement à la livraison",
+    "FastDelivery": "Livraison rapide au Maroc",
+    "InStock": "En stock",
+    "OutOfStock": "Rupture de stock",
+    "Savings": "Économisez",
+    "PackOf": "Pack de {count} livres"
   }
 }

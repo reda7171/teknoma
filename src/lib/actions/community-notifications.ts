@@ -1,12 +1,13 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { NotificationType } from '@prisma/client'
 import { getCommunityUser } from './community-auth'
 import { revalidatePath } from 'next/cache'
 
 interface CreateNotificationParams {
     userId: string
-    type: 'EXCHANGE_REQUEST' | 'EXCHANGE_ACCEPTED' | 'EXCHANGE_REJECTED' | 'NEW_MESSAGE' | 'EXCHANGE_COMPLETED' | 'RATING_RECEIVED' | 'SYSTEM'
+    type: NotificationType | 'EXCHANGE_REQUEST' | 'EXCHANGE_ACCEPTED' | 'EXCHANGE_REJECTED' | 'NEW_MESSAGE' | 'EXCHANGE_COMPLETED' | 'RATING_RECEIVED' | 'SYSTEM'
     title: string
     message: string
     link?: string
@@ -20,7 +21,7 @@ export async function createNotification(params: CreateNotificationParams) {
         const notification = await prisma.notification.create({
             data: {
                 userId: params.userId,
-                type: params.type,
+                type: params.type as NotificationType,
                 title: params.title,
                 message: params.message,
                 link: params.link
