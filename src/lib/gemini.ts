@@ -7,7 +7,7 @@ export async function getGeminiModel() {
   if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
   const genAI = new GoogleGenerativeAI(apiKey);
   return genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
+    model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
     systemInstruction: `Tu es l'assistant intelligent de Riwaya, une librairie en ligne au Maroc.
     Tes réponses doivent être chaleureuses, utiles et professionnelles.
     

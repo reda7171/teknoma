@@ -146,6 +146,37 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
         ],
       },
+      // Headers anti-indexation SEO pour l'administration et ses APIs
+      {
+        source: '/:locale/admin/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
+        source: '/:locale/admin',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
+        source: '/admin/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
+        source: '/admin',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
+        source: '/api/admin/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
       ...(process.env.NODE_ENV === 'production' ? [
         // Headers pour les assets statiques (images, polices, CSS, JS) — immutable cache
         {
@@ -239,12 +270,7 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [],
       afterFiles: [],
-      fallback: process.env.NODE_ENV === 'development' ? [
-        {
-          source: '/uploads/:path*',
-          destination: 'https://riwaya.store/uploads/:path*',
-        },
-      ] : [],
+      fallback: [],
     }
   },
 

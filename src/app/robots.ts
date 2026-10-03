@@ -11,8 +11,11 @@ export default function robots(): MetadataRoute.Robots {
                 allow: '/',
                 disallow: [
                     '/admin',
+                    '/admin/*',
                     '/*/admin',
+                    '/*/admin/*',
                     '/api',
+                    '/api/*',
                     '/checkout',
                     '/*/checkout',
                     '/cart',
@@ -28,8 +31,11 @@ export default function robots(): MetadataRoute.Robots {
                 allow: '/',
                 disallow: [
                     '/admin',
+                    '/admin/*',
                     '/*/admin',
+                    '/*/admin/*',
                     '/api',
+                    '/api/*',
                     '/checkout',
                     '/*/checkout',
                     '/cart',

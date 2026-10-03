@@ -97,8 +97,8 @@ export default function DashboardAnalytics() {
                         <TrendingUp size={20} className="text-primary" />
                         Chiffre d'affaires mensuel
                     </h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[300px] w-full min-w-0">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <LineChart data={data.monthlyRevenue}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />
@@ -120,8 +120,8 @@ export default function DashboardAnalytics() {
                         <Package size={20} className="text-secondary" />
                         Ventes par Catégorie
                     </h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[300px] w-full min-w-0">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
                                 <Pie
                                     data={data.categoryRevenue}
@@ -153,8 +153,8 @@ export default function DashboardAnalytics() {
                         <MapPin size={20} className="text-orange-600" />
                         Évolution des ventes par ville
                     </h3>
-                    <div className="h-[250px] md:h-[400px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[250px] md:h-[400px] w-full min-w-0">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={data.cityRevenue}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#666' }} />

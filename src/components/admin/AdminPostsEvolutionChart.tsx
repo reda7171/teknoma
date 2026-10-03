@@ -61,8 +61,8 @@ export default function AdminPostsEvolutionChart({ data }: ChartProps) {
     return (
         <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
             <h3 className="text-lg font-black text-black tracking-tight mb-6">Évolution par Langue</h3>
-            <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                         <XAxis 

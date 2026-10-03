@@ -48,8 +48,8 @@ export default function AdminFollowUpChart({ orders }: { orders: OrderType[] }) 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h3 className="font-bold text-gray-900 mb-4 text-lg">Statistiques de Relances (Taux de Couverture)</h3>
-            <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[250px] min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <PieChart>
                         <Pie
                             data={data}
@@ -68,11 +68,11 @@ export default function AdminFollowUpChart({ orders }: { orders: OrderType[] }) 
                         <Tooltip 
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
                             itemStyle={{ color: '#111827', fontWeight: 600 }}
-                            formatter={(value: number, name: string, props: any) => {
+                            formatter={((value: any, name: any) => {
                                 const total = orders.length
-                                const percent = ((value / total) * 100).toFixed(0)
-                                return [`${value} commandes (${percent}%)`, name]
-                            }}
+                                const percent = total > 0 ? (((value || 0) / total) * 100).toFixed(0) : '0'
+                                return [`${value || 0} commandes (${percent}%)`, name]
+                            }) as any}
                         />
                         <Legend 
                             verticalAlign="bottom" 

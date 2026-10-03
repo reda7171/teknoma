@@ -53,6 +53,13 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
     const filePath = join(process.cwd(), 'public', 'uploads', ...pathArray)
     
     if (!existsSync(filePath)) {
+        const placeholderPath = join(process.cwd(), 'public', 'book-placeholder.png')
+        if (existsSync(placeholderPath)) {
+            const buf = await readFile(placeholderPath)
+            return new NextResponse(buf, {
+                headers: { 'Content-Type': 'image/png', ...CORS_HEADERS }
+            })
+        }
         return new NextResponse('Not found', { status: 404 })
     }
     

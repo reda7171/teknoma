@@ -3,6 +3,7 @@ import { AlertTriangle, Package, TrendingUp, DollarSign, ShoppingCart, ArrowUp }
 import SupplierOrderExport from '@/components/admin/SupplierOrderExport'
 import CopyTitlesButton from '@/components/admin/CopyTitlesButton'
 import Link from 'next/link'
+import { normalizeImage } from '@/lib/utils'
 
 export const metadata = {
   title: 'Commande Fournisseur | Admin Riwaya',
@@ -212,7 +213,7 @@ export default async function SupplierOrderPage({
                   <div className="w-12 h-16 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm">
                     {book.image && (
                       <img
-                        src={book.image.startsWith('data:') || book.image.startsWith('http') ? book.image : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store/uploads/${book.id}` : `/uploads/${book.id}`)}
+                        src={normalizeImage(book.image)}
                         alt={book.title}
                         className="w-full h-full object-cover"
                       />
@@ -324,7 +325,7 @@ export default async function SupplierOrderPage({
                         <div className="w-9 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                           {book.image && (
                             <img
-                              src={book.image.startsWith('data:') || book.image.startsWith('http') ? book.image : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store/uploads/${book.id}` : `/uploads/${book.id}`)}
+                              src={normalizeImage(book.image)}
                               alt={book.title}
                               className="w-full h-full object-cover"
                             />

@@ -92,12 +92,13 @@ export async function GET(req: NextRequest) {
                 }))
             }
 
-            // Fire & forget — pas d'await, pas de timeout bloquant
+            // Fire & forget — avec timeout pour éviter les fuites de connexion
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).catch(e => console.error(`[CRON] post ${post.id} n8n error:`, e))
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(8000)
+            }).catch(e => console.warn(`[CRON] post ${post.id} n8n webhook unreachable:`, e?.message || 'timeout'))
         }
 
         return NextResponse.json({

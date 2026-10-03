@@ -45,8 +45,8 @@ export default function BlogDynamicContent({ html }: { html: string }) {
                             const keys = config.datasets.map((ds: any) => ds.label)
 
                             return (
-                                <div key={i} className="my-8 h-80 w-full bg-white p-4 rounded-xl shadow-sm border border-gray-100 not-prose">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                <div key={i} className="my-8 h-80 w-full min-w-0 bg-white p-4 rounded-xl shadow-sm border border-gray-100 not-prose">
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                         <BarChart data={data}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} />

@@ -148,8 +148,8 @@ export default function AnalyticsClient() {
                         ))}
                     </div>
                 </div>
-                <div className="h-[350px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[350px] w-full min-w-0">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                         <LineChart data={revenueData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                             <XAxis dataKey="date" stroke="#999" style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }} />
@@ -225,8 +225,8 @@ export default function AnalyticsClient() {
                         <h2 className="text-2xl font-black text-black tracking-tighter">Flux Commandes</h2>
                         <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Répartition par statut logistique</p>
                     </div>
-                    <div className="flex-1 flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height={300}>
+                    <div className="flex-1 flex items-center justify-center min-w-0 w-full">
+                        <ResponsiveContainer width="100%" height={300} minWidth={0}>
                             <PieChart>
                                 <Pie
                                     data={statusDist}
@@ -263,8 +263,8 @@ export default function AnalyticsClient() {
                             <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Performance des badges produits</p>
                         </div>
                     </div>
-                    <div className="h-[350px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[350px] min-w-0 w-full">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={badgeStats}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                                 <XAxis dataKey="name" stroke="#999" style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }} />
