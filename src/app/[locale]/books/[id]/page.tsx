@@ -143,23 +143,58 @@ export async function generateMetadata({
     
     keywords = [...keywords, ...baseKeywords]
 
+    const ogTitle = locale === 'ar'
+        ? `كتاب "${localizedTitle}" — ${book.price} درهم | مكتبة رواية`
+        : locale === 'en'
+            ? `"${localizedTitle}" by ${book.author} — ${book.price} MAD | Riwaya`
+            : `"${localizedTitle}" de ${book.author} — ${book.price} DH (COD) | Riwaya`
+
+    const ogDescription = locale === 'ar'
+        ? `⚡ السعر: ${book.price} درهم مغربي. الدفع عند الاستلام وتوصيل سريع لكافة المدن المغربية. ${localizedDescriptionText ? localizedDescriptionText.slice(0, 100) + '...' : ''}`
+        : locale === 'en'
+            ? `⚡ Price: ${book.price} MAD. Cash on Delivery & fast shipping across Morocco. ${localizedDescriptionText ? localizedDescriptionText.slice(0, 100) + '...' : ''}`
+            : `⚡ Prix: ${book.price} DH. Paiement à la livraison (COD) partout au Maroc. ${localizedDescriptionText ? localizedDescriptionText.slice(0, 100) + '...' : ''}`
+
+    const dynamicOgImageUrl = `${baseUrl}/${locale}/books/${id}/opengraph-image`
+
     return {
         title: siteTitle,
         description: description,
         keywords: keywords,
         openGraph: {
-            title: siteTitle,
-            description: description,
-            images: [imageUrl],
-            type: 'book',
+            title: ogTitle,
+            description: ogDescription,
+            images: [
+                {
+                    url: dynamicOgImageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: `${localizedTitle} - ${book.price} DH`,
+                },
+                {
+                    url: imageUrl,
+                    width: 800,
+                    height: 800,
+                    alt: localizedTitle,
+                }
+            ],
+            type: 'website',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
             url: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,
         },
         twitter: {
             card: 'summary_large_image',
-            title: siteTitle,
-            description: description,
-            images: [imageUrl],
+            title: ogTitle,
+            description: ogDescription,
+            images: [dynamicOgImageUrl],
+        },
+        other: {
+            'product:price:amount': `${book.price}`,
+            'product:price:currency': 'MAD',
+            'product:availability': book.stock > 0 ? 'in stock' : 'out of stock',
+            'product:condition': 'new',
+            'og:price:amount': `${book.price}`,
+            'og:price:currency': 'MAD',
         },
         alternates: {
             canonical: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,

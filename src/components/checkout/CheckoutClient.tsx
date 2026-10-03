@@ -15,6 +15,7 @@ import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { getActiveGifts } from '@/lib/actions/gifts'
 import { getWithYouCities } from '@/lib/actions/delivery'
 import { calculate3For4Discount } from '@/lib/utils'
+import { trackPurchase } from '@/lib/tracking'
 
 interface CheckoutForm {
     fullName: string
@@ -263,7 +264,22 @@ export default function CheckoutClient({
             })
 
             if (result.success) {
-                // Facebook Pixel: Purchase
+                // Suivi des conversions : Google Analytics 4 & Meta Pixel
+                trackPurchase({
+                    id: result.orderId,
+                    total: finalTotal,
+                    shippingFee: shippingFee,
+                    paymentMethod: data.paymentMethod,
+                    items: items.map(item => ({
+                        id: item.id,
+                        title: item.title,
+                        price: Number(item.price),
+                        quantity: item.quantity,
+                        category: item.type,
+                    }))
+                })
+
+                // Facebook Pixel legacy event
                 fbPixelEvents.purchase({
                     id: result.orderId,
                     total: finalTotal,

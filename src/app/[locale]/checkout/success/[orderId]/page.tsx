@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
 import GoogleReviewsOptIn from '@/components/GoogleReviewsOptIn'
+import TrackPurchaseOrder from '@/components/checkout/TrackPurchaseOrder'
 
 export default async function OrderSuccessPage({
     params,
@@ -37,6 +38,7 @@ export default async function OrderSuccessPage({
                 estimatedDeliveryDate={estimatedDeliveryDateStr} 
                 products={products} 
             />
+            <TrackPurchaseOrder order={order} />
             <Header />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 pb-24 md:pb-32">

@@ -2087,5 +2087,14 @@
     "EditInvoice": "تعديل الفاتورة والمتبقي",
     "Print": "طباعة الفاتورة",
     "Share": "إرسال عبر واتساب"
+  },
+  "OpenGraph": {
+    "Currency": "درهم",
+    "CashOnDelivery": "الدفع عند الاستلام",
+    "FastDelivery": "توصيل سريع لكافة المدن المغربية",
+    "InStock": "متوفر الآن",
+    "OutOfStock": "غير متوفر",
+    "Savings": "وفر",
+    "PackOf": "باقة من {count} كتب"
   }
 }

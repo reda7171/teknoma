@@ -36,7 +36,7 @@ interface Props {
         hasDiscount: boolean
         savings: number
         savingsPercent: number
-        displayPrice: string
+        displayPrice: string | number
     }
 }
 
@@ -190,7 +190,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                     )}
                     <div className="flex items-baseline gap-3">
                         <span className="text-7xl font-black text-black tracking-tighter leading-none">
-                            {parseFloat(priceData.displayPrice) + (addUpsell ? 25 : 0)}
+                            {parseFloat(String(priceData.displayPrice)) + (addUpsell ? 25 : 0)}
                         </span>
                         <span className="text-2xl text-gray-600 font-black uppercase tracking-widest">
                             {locale === 'ar' ? 'درهم' : 'MAD'}

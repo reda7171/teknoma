@@ -2090,5 +2090,14 @@
     "EditInvoice": "Manage Invoice & Balance",
     "Print": "Print Invoice",
     "Share": "Share via WhatsApp"
+  },
+  "OpenGraph": {
+    "Currency": "MAD",
+    "CashOnDelivery": "Cash on Delivery",
+    "FastDelivery": "Fast shipping across Morocco",
+    "InStock": "In stock",
+    "OutOfStock": "Out of stock",
+    "Savings": "Save",
+    "PackOf": "Bundle of {count} books"
   }
 }

@@ -86,11 +86,21 @@ export async function GET() {
         for (const pack of packs) {
             const locale = 'fr' // Par défaut on utilise la version fr pour les packs
             const productUrl = `${baseUrl}/${locale}/packs/${pack.id}`
-            const imageUrl = pack.image || pack.books[0]?.book.image || `${baseUrl}/logo.png`
-            const availability = 'in_stock'
+            const imageUrl = pack.image ? (pack.image.startsWith('http') ? pack.image : `${baseUrl}${pack.image.startsWith('/') ? '' : '/'}${pack.image}`) : (pack.books[0]?.book.image ? (pack.books[0].book.image.startsWith('http') ? pack.books[0].book.image : `${baseUrl}${pack.books[0].book.image.startsWith('/') ? '' : '/'}${pack.books[0].book.image}`) : `${baseUrl}/logo.png`)
+            const allInStock = pack.books.length > 0 && pack.books.every(pb => (pb.book?.stock ?? 0) > 0)
+            const availability = allInStock ? 'in_stock' : 'out_of_stock'
             const condition = 'new'
-            const title = `Pack: ${pack.name}`
+            const title = `Pack ${pack.name} (${pack.books.length} Livres)`
             const description = pack.description || `Pack de livres contenant ${pack.books.length} livres: ${pack.books.map(b => b.book.title).join(', ')}`
+
+            const totalOriginalPrice = Math.round(
+                pack.originalPrice || pack.books.reduce((acc, pb) => acc + (pb.book?.price || 0), 0)
+            )
+            const displayPrice = Math.round(pack.price)
+            const hasDiscount = totalOriginalPrice > displayPrice
+            const regularPrice = hasDiscount ? totalOriginalPrice : displayPrice
+            const salePrice = hasDiscount ? displayPrice : null
+            const shippingFee = displayPrice >= 300 ? 0 : 35
             
             xml += `    <item>\n`
             xml += `      <g:id>PACK-${escapeXml(pack.id)}</g:id>\n`
@@ -100,10 +110,20 @@ export async function GET() {
             xml += `      <g:image_link>${escapeXml(imageUrl)}</g:image_link>\n`
             xml += `      <g:condition>${condition}</g:condition>\n`
             xml += `      <g:availability>${availability}</g:availability>\n`
-            xml += `      <g:price>${Number(pack.price).toFixed(2)} MAD</g:price>\n`
+            xml += `      <g:price>${regularPrice.toFixed(2)} MAD</g:price>\n`
+            if (salePrice !== null) {
+                xml += `      <g:sale_price>${salePrice.toFixed(2)} MAD</g:sale_price>\n`
+            }
             xml += `      <g:brand>Riwaya</g:brand>\n`
             xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
-            xml += `      <g:product_type>Packs de livres</g:product_type>\n`
+            xml += `      <g:is_bundle>yes</g:is_bundle>\n`
+            xml += `      <g:google_product_category>778</g:google_product_category>\n`
+            xml += `      <g:product_type>Livres &gt; Packs de livres</g:product_type>\n`
+            xml += `      <g:shipping>\n`
+            xml += `        <g:country>MA</g:country>\n`
+            xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
+            xml += `        <g:price>${shippingFee.toFixed(2)} MAD</g:price>\n`
+            xml += `      </g:shipping>\n`
 
             if (coupons && coupons.length > 0) {
                 for (const coupon of coupons) {

@@ -58,23 +58,53 @@ export async function generateMetadata({
         'librairie en ligne maroc',
     ]
 
+    const ogTitle = locale === 'ar'
+        ? `باقة "${pack.name}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة رواية`
+        : locale === 'en'
+            ? `Pack "${pack.name}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | Riwaya`
+            : `Pack "${pack.name}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | Riwaya`
+
+    const ogDescription = locale === 'ar'
+        ? `⚡ السعر: ${displayPrice} درهم مغربي ${hasDiscount ? `عوض ${totalOriginalPrice} درهم` : ''}. باقة من ${pack.books.length} كتب مختارة مع الدفع عند الاستلام والتوصيل السريع بالمغرب.`
+        : locale === 'en'
+            ? `⚡ Price: ${displayPrice} MAD ${hasDiscount ? `instead of ${totalOriginalPrice} MAD` : ''}. Bundle of ${pack.books.length} books with Cash on Delivery across Morocco.`
+            : `⚡ Prix: ${displayPrice} DH ${hasDiscount ? `au lieu de ${totalOriginalPrice} DH` : ''}. Pack de ${pack.books.length} livres avec Paiement à la livraison (COD) partout au Maroc.`
+
+    const dynamicOgImageUrl = `${baseUrl}/${locale}/packs/${pack.id}/opengraph-image`
+
     return {
         title: `${pack.name} - Pack de ${pack.books.length} Livres | Riwaya`,
         description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} درهم). ` : ''}Prix: ${displayPrice} درهم. Livraison rapide au Maroc.`,
         keywords,
         openGraph: {
-            title: hasDiscount ? `${pack.name} - Économisez ${savingsPercent}%` : `${pack.name}`,
-            description: pack.description?.slice(0, 160) || `Pack de ${pack.books.length} livres sélectionnés.${hasDiscount ? ` ${savings} درهم d'économie.` : ''}`,
-            images: imageUrl ? [imageUrl] : [],
+            title: ogTitle,
+            description: ogDescription,
+            images: [
+                {
+                    url: dynamicOgImageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: `${pack.name} - ${displayPrice} DH`,
+                },
+                ...(imageUrl ? [{ url: imageUrl, width: 800, height: 800, alt: pack.name }] : []),
+            ],
             type: 'website',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
             url: `${baseUrl}/${locale}/packs/${pack.id}`,
         },
         twitter: {
             card: 'summary_large_image',
-            title: hasDiscount ? `${pack.name} - ${savingsPercent}% de réduction` : `${pack.name}`,
-            description: `Pack de ${pack.books.length} livres à ${displayPrice} درهم${hasDiscount ? ` au lieu de ${totalOriginalPrice} درهم` : ''}`,
-            images: imageUrl ? [imageUrl] : [],
+            title: ogTitle,
+            description: ogDescription,
+            images: [dynamicOgImageUrl],
+        },
+        other: {
+            'product:price:amount': `${displayPrice}`,
+            'product:price:currency': 'MAD',
+            'product:availability': 'in stock',
+            'product:condition': 'new',
+            'og:price:amount': `${displayPrice}`,
+            'og:price:currency': 'MAD',
         },
         alternates: {
             canonical: `/${locale}/packs/${pack.id}`,
@@ -119,7 +149,7 @@ export default async function PackDetailPage({
     const hasDiscount = savings > 0 && savingsPercent > 0
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-    const jsonLd = [
+    const jsonLd: Record<string, any>[] = [
         {
             '@context': 'https://schema.org',
             '@type': 'Product',
@@ -387,7 +417,7 @@ export default async function PackDetailPage({
                                         hasDiscount,
                                         savings,
                                         savingsPercent,
-                                        displayPrice
+                                        displayPrice: String(displayPrice)
                                     }}
                                 />
 
