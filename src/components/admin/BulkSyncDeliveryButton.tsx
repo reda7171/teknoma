@@ -10,6 +10,7 @@ export default function BulkSyncDeliveryButton() {
     const [loading, setLoading] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [updatedOrders, setUpdatedOrders] = useState<any[]>([])
+    const [inspectedCount, setInspectedCount] = useState(0)
     const router = useRouter()
 
     const handleSync = async () => {
@@ -21,6 +22,7 @@ export default function BulkSyncDeliveryButton() {
 
             if (data.success) {
                 setUpdatedOrders(data.updatedOrders || [])
+                setInspectedCount(data.inspectedCount || 0)
                 setShowModal(true)
                 const errorsText = data.errors?.join('\n')
                 if (errorsText) {
@@ -62,9 +64,9 @@ export default function BulkSyncDeliveryButton() {
                                     <CheckCircle2 className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-gray-900">Synchronisation réussie</h3>
+                                    <h3 className="text-xl font-black text-gray-900">Synchronisation terminée</h3>
                                     <p className="text-sm text-gray-500 font-medium">
-                                        {updatedOrders.length} commande(s) mise(s) à jour
+                                        {inspectedCount} colis vérifié(s), {updatedOrders.length} commande(s) mise(s) à jour
                                     </p>
                                 </div>
                             </div>

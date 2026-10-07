@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
 import { withyouService } from '@/lib/delivery/withyou'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 
 import { OrderStatus } from '@prisma/client'
 
@@ -564,6 +564,28 @@ export async function bulkDeleteOrders(orderIds: string[]) {
             }
         }
 
+        // Conserver les informations avant la suppression en cascade des articles.
+        const ordersToDelete = await prisma.order.findMany({
+            where: { id: { in: orderIds } },
+            select: {
+                id: true,
+                fullName: true,
+                total: true,
+                items: {
+                    select: {
+                        type: true,
+                        quantity: true,
+                        price: true,
+                        book: { select: { title: true, sellerSku: true } },
+                        pack: { select: { name: true, sellerSku: true } },
+                        gift: { select: { name: true } },
+                        digitalProduct: { select: { title: true } },
+                        extraProduct: { select: { name: true, sellerSku: true } }
+                    }
+                }
+            }
+        })
+
         // Supprimer les commandes (les items et l'historique de statut seront supprimés via Cascade ou manuellement si nécessaire)
         // Note: Dans le schéma, OrderItem et OrderStatusHistory doivent avoir onDelete: Cascade sur orderId
         await prisma.order.deleteMany({
@@ -581,8 +603,53 @@ export async function bulkDeleteOrders(orderIds: string[]) {
             details: `Suppression groupée de ${orderIds.length} commandes`
         })
 
-        const formattedIds = orderIds.map(id => `\`${id.slice(0, 8)}\``).join('\n- ')
-        sendTelegramMessage(`🗑️ *Suppression Massive*\n\n${orderIds.length} commandes ont été supprimées par l'administrateur.\n\n*Commandes :*\n- ${formattedIds}\n\n🕒 ${new Date().toLocaleString('fr-FR')}`).catch(console.error)
+        const detailLines: string[] = []
+        for (const order of ordersToDelete) {
+            detailLines.push(
+                `\n🧾 <b>Commande #${escapeHtml(order.id.slice(0, 8).toUpperCase())}</b>`,
+                `👤 ${escapeHtml(order.fullName)}`,
+                `💰 Total : <b>${order.total.toFixed(2)} MAD</b>`,
+                `📦 Articles (${order.items.length}) :`
+            )
+
+            if (order.items.length === 0) {
+                detailLines.push('  • Aucun article enregistré')
+                continue
+            }
+
+            for (const item of order.items) {
+                const name = item.book?.title
+                    || item.pack?.name
+                    || item.extraProduct?.name
+                    || item.digitalProduct?.title
+                    || item.gift?.name
+                    || 'Article inconnu'
+                const sellerSku = item.book?.sellerSku || item.pack?.sellerSku || item.extraProduct?.sellerSku
+                const skuText = sellerSku ? ` | SKU : <code>${escapeHtml(sellerSku)}</code>` : ''
+                const lineTotal = item.price * item.quantity
+                detailLines.push(
+                    `  • <b>${item.quantity}× ${escapeHtml(name)}</b>${skuText}\n` +
+                    `    Type : ${escapeHtml(item.type)} | ${item.price.toFixed(2)} MAD/u | Total : ${lineTotal.toFixed(2)} MAD`
+                )
+            }
+        }
+
+        const header = `🗑️ <b>Suppression Massive</b>\n\n${ordersToDelete.length} commande(s) supprimée(s) par l’administrateur.\n`
+        const footer = `\n🕒 ${new Date().toLocaleString('fr-FR')}`
+        const telegramMessages: string[] = []
+        let currentMessage = header
+
+        for (const line of detailLines) {
+            if (`${currentMessage}\n${line}${footer}`.length > 3800) {
+                telegramMessages.push(`${currentMessage}${footer}`)
+                currentMessage = `${header}\n${line}`
+            } else {
+                currentMessage += `\n${line}`
+            }
+        }
+        telegramMessages.push(`${currentMessage}${footer}`)
+
+        Promise.all(telegramMessages.map(message => sendTelegramMessage(message))).catch(console.error)
 
         return {
             success: true,
@@ -690,7 +757,8 @@ export async function bulkSyncDeliveries() {
         const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
 
         const updatedOrders: any[] = []
-        let syncErrors: string[] = []
+        const syncErrors: string[] = []
+        let inspectedCount = 0
         const BATCH_SIZE = 50
 
         const withYouOrders = activeOrders.filter(o => {
@@ -717,10 +785,21 @@ export async function bulkSyncDeliveries() {
                         statusArray = res
                     } else if (res?.data && Array.isArray(res.data)) {
                         statusArray = res.data
+                    } else if (res?.data?.data && Array.isArray(res.data.data)) {
+                        statusArray = res.data.data
+                    } else if (res?.result && Array.isArray(res.result)) {
+                        statusArray = res.result
+                    } else if (res?.colis && Array.isArray(res.colis)) {
+                        statusArray = res.colis
+                    }
+
+                    if (statusArray.length === 0) {
+                        syncErrors.push(`WithYou: aucun statut retourné pour ${trackingIds.length} colis`)
                     }
 
                     for (const item of statusArray) {
-                        const trackingID = item.id || item.trackingID || item.trackingId || item.code_tracking
+                        const rawTrackingID = item.code_tracking || item.codetracking || item.trackingID || item.trackingId || item.numero || item.id
+                        const trackingID = rawTrackingID == null ? '' : String(rawTrackingID).trim()
                         const extStatusRaw = item.status || item.statut
                         let extStatus = ''
                         if (typeof extStatusRaw === 'object' && extStatusRaw !== null) {
@@ -730,8 +809,9 @@ export async function bulkSyncDeliveries() {
                         }
 
                         if (trackingID && extStatus) {
-                            const orderToUpdate = batch.find(o => o.trackingID === trackingID)
+                            const orderToUpdate = batch.find(o => String(o.trackingID).trim() === trackingID)
                             if (orderToUpdate) {
+                                inspectedCount++
                                 let newInternalStatus = orderToUpdate.status
                                 const statusLower = extStatus.toLowerCase()
 
@@ -803,6 +883,7 @@ export async function bulkSyncDeliveries() {
 
                     if (res.ok) {
                         const data = await res.json()
+                        inspectedCount++
                         const extStatusRaw = data.status
                         let extStatus = ''
                         if (typeof extStatusRaw === 'object' && extStatusRaw !== null) {
@@ -851,15 +932,33 @@ export async function bulkSyncDeliveries() {
                                 company: 'Olivraison'
                             })
                         }
+                    } else {
+                        syncErrors.push(`Olivraison ${order.trackingID}: HTTP ${res.status}`)
                     }
                 } catch (err) {
                     console.error('Erreur API Olivraison', err)
+                    syncErrors.push(`Olivraison ${order.trackingID}: API inaccessible`)
                 }
             }
         }
 
         revalidatePath('/admin/orders')
-        return { success: true, updatedCount: updatedOrders.length, updatedOrders, errors: syncErrors.length > 0 ? syncErrors : undefined }
+        if (syncErrors.length > 0 && inspectedCount === 0 && updatedOrders.length === 0) {
+            return {
+                success: false,
+                error: syncErrors.join('\n'),
+                updatedCount: 0,
+                updatedOrders: []
+            }
+        }
+
+        return {
+            success: true,
+            updatedCount: updatedOrders.length,
+            inspectedCount,
+            updatedOrders,
+            errors: syncErrors.length > 0 ? syncErrors : undefined
+        }
     } catch (error: any) {
         return { success: false, error: error.message || 'Erreur inconnue' }
     }

@@ -24,23 +24,33 @@ interface WithYouPackageData {
 
 class WithYouService {
     private async getCredentials(): Promise<WithYouConfig> {
-        let key = process.env.WITHYOU_API_KEY
-        let token = process.env.WITHYOU_API_TOKEN
+        const envKey = process.env.WITHYOU_API_KEY?.trim()
+        const envToken = process.env.WITHYOU_API_TOKEN?.trim()
+        let key = envKey
+        let token = envToken
 
         try {
             const { getSetting } = await import('@/lib/actions/site-settings')
-            const dbKey = (await getSetting('delivery_api_key')) || (await getSetting('withyou_api_key'))
-            const dbToken = (await getSetting('delivery_api_token')) || (await getSetting('withyou_api_token'))
-            if (dbKey) key = dbKey
-            if (dbToken) token = dbToken
+            const [withYouKey, withYouToken, legacyKey, legacyToken] = await Promise.all([
+                getSetting('withyou_api_key'),
+                getSetting('withyou_api_token'),
+                getSetting('delivery_api_key'),
+                getSetting('delivery_api_token')
+            ])
+
+            // Ne jamais mélanger une ancienne clé générique avec un token WithYou
+            // actuel. Les réglages dédiés sont prioritaires, puis l'environnement.
+            key = withYouKey?.trim() || envKey || legacyKey?.trim()
+            token = withYouToken?.trim() || envToken || legacyToken?.trim()
         } catch {
             // ignore siteSettings fetch failure
         }
 
-        return {
-            key: key || '6ce75dfde8bf10be41b5e0a7109e77ca',
-            token: token || '365062ce0f2131a681e52bc0b90586fe348881ac21ad1af64f5c43b2cb4e7f04'
+        if (!key || !token) {
+            throw new Error('Identifiants WithYou incomplets. Configurez WITHYOU_API_KEY et WITHYOU_API_TOKEN.')
         }
+
+        return { key, token }
     }
 
     private async request(endpoint: string, data: any = {}, method: 'POST' | 'GET' = 'POST') {
@@ -159,7 +169,11 @@ class WithYouService {
      * Modifier statut
      */
     async updateStatus(codetracking: string, status: string) {
-        return this.request('/updatstatus', { codetracking, status }, 'POST')
+        const response = await this.request('/updatstatus', { codetracking, status }, 'POST')
+        if (!response || typeof response !== 'object' || String(response.code) !== '200' || response.status !== 'success') {
+            throw new Error(response?.message || `WithYou n'a pas confirmé la modification du statut ${codetracking}`)
+        }
+        return response
     }
 
     /**
@@ -185,13 +199,51 @@ class WithYouService {
             if (res && typeof res === 'object' && res.status === 'error') {
                 throw new Error(res.message || 'Erreur WithYou')
             }
-            return res
+
+            const bulkItems = Array.isArray(res)
+                ? res
+                : Array.isArray(res?.data)
+                    ? res.data
+                    : Array.isArray(res?.data?.data)
+                        ? res.data.data
+                        : Array.isArray(res?.result)
+                            ? res.result
+                            : Array.isArray(res?.colis)
+                                ? res.colis
+                                : []
+
+            if (bulkItems.length > 0) return { status: 'success', data: bulkItems }
+
+            // Certaines versions de l'API WithYou n'acceptent pas le tableau
+            // `data` et attendent un unique `codetracking` par requête.
+            const individualItems: any[] = []
+            for (const codetracking of validIDs) {
+                const single = await this.request('/getstatus', { codetracking }, 'POST')
+                const candidates = Array.isArray(single)
+                    ? single
+                    : Array.isArray(single?.data)
+                        ? single.data
+                        : single?.data && typeof single.data === 'object'
+                            ? [single.data]
+                            : single && typeof single === 'object' && (single.code_tracking || single.codetracking || single.trackingID || single.statut)
+                                ? [single]
+                                : []
+
+                for (const candidate of candidates) {
+                    individualItems.push({ ...candidate, codetracking: candidate.codetracking || candidate.code_tracking || codetracking })
+                }
+            }
+
+            return { status: 'success', data: individualItems }
         } catch (error: any) {
             const msg = error.message || ''
-            if (msg.includes('Acces refuse') || msg.includes('fetch failed') || msg.includes('ENOTFOUND') || msg.includes('ETIMEDOUT')) {
-                return { status: 'offline', data: [] };
+            if (msg.includes('Acces refuse')) {
+                throw new Error('Accès refusé par WithYou. Vérifiez la clé et le token API.')
             }
-            throw error;
+            if (msg.includes('fetch failed') || msg.includes('ENOTFOUND') || msg.includes('ETIMEDOUT')) {
+                throw new Error('API WithYou indisponible ou inaccessible.')
+            }
+            throw error
         }
     }
 }

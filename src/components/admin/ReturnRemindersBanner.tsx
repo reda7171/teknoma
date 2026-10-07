@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { RotateCcw, MessageCircle, Truck, ExternalLink, ChevronDown, ChevronUp, AlertTriangle, Phone, Check } from 'lucide-react'
-import { getPendingReturnReminders, updateShippingCompanySupportPhone, ReturnReminder } from '@/lib/actions/return-reminders'
+import { RotateCcw, MessageCircle, Truck, ChevronDown, ChevronUp, Phone, Check } from 'lucide-react'
+import { getPendingReturnReminders, updateReturnRecoveryStatus, updateShippingCompanySupportPhone, ReturnReminder } from '@/lib/actions/return-reminders'
 import Link from 'next/link'
 
 interface Props {
@@ -16,6 +16,7 @@ export default function ReturnRemindersBanner({ locale }: Props) {
     const [editingPhoneId, setEditingPhoneId] = useState<string | null>(null)
     const [phoneInput, setPhoneInput] = useState('')
     const [savingPhone, setSavingPhone] = useState(false)
+    const [savingRecoveryId, setSavingRecoveryId] = useState<string | null>(null)
 
     useEffect(() => {
         getPendingReturnReminders()
@@ -31,17 +32,33 @@ export default function ReturnRemindersBanner({ locale }: Props) {
     const isAr = locale === 'ar'
     const isEn = locale === 'en'
 
+    const pendingCount = reminders.filter(reminder => reminder.isRecovered !== true).length
+
     const t = {
         title: isAr ? 'تذكير بالمرتجعات مع شركات التوصيل' : isEn ? 'Delivery Company Return Reminders' : 'Rappels de retours avec les sociétés de livraison',
         subtitle: isAr ? 'هذه الطلبات مسجلة كمرتجع منذ أكثر من أسبوع. تواصل مع شركة التوصيل لاسترداد الطرود.' : isEn ? 'These orders have been marked as returned for more than a week. Contact the delivery company to recover your packages.' : "Ces commandes sont marquées en retour depuis plus d'une semaine. Relancez le transporteur pour récupérer vos colis ou obtenir un état des lieux.",
-        badge: isAr ? `${reminders.length} مرتجعات معلقة` : isEn ? `${reminders.length} pending returns` : `${reminders.length} ${reminders.length > 1 ? 'Retours en attente' : 'Retour en attente'}`,
+        badge: isAr ? `${pendingCount} مرتجعات معلقة` : isEn ? `${pendingCount} pending returns` : `${pendingCount} ${pendingCount > 1 ? 'Retours en attente' : 'Retour en attente'}`,
         overdueTag: isAr ? '> 7 أيام بعد الطلب' : isEn ? '> 7 days after order' : '> 7 jours après commande',
         showBtn: (count: number) => isAr ? `عرض ${count} طرود` : isEn ? `View ${count} packages` : `Voir les ${count} colis`,
         hideBtn: isAr ? 'إخفاء القائمة' : isEn ? 'Hide list' : 'Masquer la liste',
         daysAgo: (days: number) => isAr ? `منذ ${days} يوم` : isEn ? `${days}d ago` : `Il y a ${days}j`,
         amount: isAr ? 'المبلغ :' : isEn ? 'Amount:' : 'Montant :',
         orderDetails: isAr ? 'تفاصيل الطلب ←' : isEn ? 'Order details →' : 'Détails de la commande →',
-        waBtn: (comp: string) => `WhatsApp ${comp}`
+        waBtn: (comp: string) => `WhatsApp ${comp}`,
+        recoveredQuestion: isAr ? 'هل تم استلام الطرد من شركة التوصيل؟' : isEn ? 'Recovered from the delivery company?' : 'Colis récupéré auprès du transporteur ?',
+        recoveredYes: isAr ? 'نعم، تم الاستلام' : isEn ? 'Yes, recovered' : 'Oui, récupéré',
+        recoveredNo: isAr ? 'لا، لا يزال معلقاً' : isEn ? 'No, still pending' : 'Non, toujours en attente'
+    }
+
+    const handleRecoveryChange = async (orderId: string, isRecovered: boolean) => {
+        setSavingRecoveryId(orderId)
+        const result = await updateReturnRecoveryStatus(orderId, isRecovered)
+        if (result.success) {
+            setReminders(previous => previous.map(reminder =>
+                reminder.id === orderId ? { ...reminder, isRecovered } : reminder
+            ))
+        }
+        setSavingRecoveryId(null)
     }
 
     const handleSavePhone = async (companyId: string) => {
@@ -109,7 +126,7 @@ export default function ReturnRemindersBanner({ locale }: Props) {
                 <div className="mt-5 pt-5 border-t border-amber-200/80 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                         {reminders.map(order => (
-                            <div key={order.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col justify-between hover:border-amber-400 transition-all">
+                            <div key={order.id} className={`bg-white border rounded-2xl p-4 shadow-sm flex flex-col justify-between transition-all ${order.isRecovered ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-amber-400'}`}>
                                 <div>
                                     <div className="flex items-center justify-between gap-2 mb-2">
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-slate-100 text-slate-800">
@@ -135,6 +152,34 @@ export default function ReturnRemindersBanner({ locale }: Props) {
                                 </div>
 
                                 <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                                    <fieldset disabled={savingRecoveryId === order.id} className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 disabled:opacity-60">
+                                        <legend className="px-1 text-[10px] font-black uppercase tracking-wide text-slate-600">
+                                            {t.recoveredQuestion}
+                                        </legend>
+                                        <div className="mt-1 grid grid-cols-1 gap-1.5">
+                                            <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-xs font-bold transition-colors ${order.isRecovered === true ? 'border-emerald-400 bg-emerald-100 text-emerald-800' : 'border-slate-200 bg-white text-slate-600'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name={`return-recovered-${order.id}`}
+                                                    checked={order.isRecovered === true}
+                                                    onChange={() => handleRecoveryChange(order.id, true)}
+                                                    className="accent-emerald-600"
+                                                />
+                                                {t.recoveredYes}
+                                            </label>
+                                            <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-xs font-bold transition-colors ${order.isRecovered === false ? 'border-amber-400 bg-amber-100 text-amber-900' : 'border-slate-200 bg-white text-slate-600'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name={`return-recovered-${order.id}`}
+                                                    checked={order.isRecovered === false}
+                                                    onChange={() => handleRecoveryChange(order.id, false)}
+                                                    className="accent-amber-600"
+                                                />
+                                                {t.recoveredNo}
+                                            </label>
+                                        </div>
+                                    </fieldset>
+
                                     {order.shippingCompanyPhone ? (
                                         <a
                                             href={order.whatsappLink}

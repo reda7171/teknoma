@@ -6,6 +6,15 @@ import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus, MessageCircle,
 import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
+const ADMIN_TIME_ZONE = 'Africa/Casablanca'
+
+const formatAdminDate = (value: Date | string) => new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: ADMIN_TIME_ZONE
+}).format(new Date(value))
+
 const getNotificationLinks = (order: any) => {
     const trackingLink = `https://riwaya.store/fr/track/${order.id}`
     let text = ''
@@ -37,7 +46,7 @@ const getNotificationLinks = (order: any) => {
 const getCompanyReturnWaLink = (order: any) => {
     const companyName = order.shippingCompanyName || 'Société de livraison'
     const daysSince = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-    const formattedDate = new Date(order.createdAt).toLocaleDateString('fr-FR')
+    const formattedDate = formatAdminDate(order.createdAt)
     const trackingText = order.trackingID ? `N° Suivi : ${order.trackingID}` : `Commande #${order.id.slice(0, 8)}`
     
     const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande Riwaya :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSince} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci de votre collaboration.\nL'équipe Riwaya.`
@@ -64,6 +73,7 @@ interface OrderItem {
 interface Order {
     id: string
     createdAt: Date
+    createdAtFormatted: string
     fullName: string
     email?: string | null
     phone: string
@@ -295,7 +305,7 @@ export default function OrdersTableClient({
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors">{new Date(order.createdAt).toLocaleString('fr-FR')}</div>
+                                            <div className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors">{order.createdAtFormatted}</div>
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4 max-w-[150px] truncate" title={order.fullName || ''}>
@@ -504,7 +514,7 @@ export default function OrdersTableClient({
                                         (inv.description && inv.description.toLowerCase().includes(invoiceSearch.toLowerCase()))
                                     ).map(inv => (
                                         <option key={inv.id} value={inv.id}>
-                                            {inv.title} {inv.description ? `- ${inv.description} ` : ''}- {new Date(inv.date).toLocaleDateString('fr-FR')} ({inv.amount} درهم)
+                                            {inv.title} {inv.description ? `- ${inv.description} ` : ''}- {formatAdminDate(inv.date)} ({inv.amount} درهم)
                                         </option>
                                     ))}
                                 </select>

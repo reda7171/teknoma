@@ -17,6 +17,7 @@ export interface ReturnReminder {
     shippingCompanyPhone: string | null
     whatsappLink: string
     whatsappMessage: string
+    isRecovered: boolean | null
 }
 
 /**
@@ -27,7 +28,7 @@ export async function getPendingReturnReminders(): Promise<ReturnReminder[]> {
         await verifyAdmin()
         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
-        const [orders, companies] = await Promise.all([
+        const [orders, companies, recoverySetting] = await Promise.all([
             prisma.order.findMany({
                 where: {
                     status: 'RETURNED',
@@ -45,8 +46,16 @@ export async function getPendingReturnReminders(): Promise<ReturnReminder[]> {
                     shippingCompany: true
                 }
             }),
-            prisma.shippingCompany.findMany()
+            prisma.shippingCompany.findMany(),
+            prisma.siteSettings.findUnique({ where: { key: 'return_recovery_statuses' } })
         ])
+
+        let recoveryStatuses: Record<string, boolean> = {}
+        try {
+            recoveryStatuses = recoverySetting?.value ? JSON.parse(recoverySetting.value) : {}
+        } catch {
+            recoveryStatuses = {}
+        }
 
         const companyMap = new Map(companies.map(c => [c.id, c]))
 
@@ -89,14 +98,39 @@ export async function getPendingReturnReminders(): Promise<ReturnReminder[]> {
                 shippingCompanyName: companyName,
                 shippingCompanyPhone: companyPhone,
                 whatsappLink: waLink,
-                whatsappMessage: message
+                whatsappMessage: message,
+                isRecovered: typeof recoveryStatuses[order.id] === 'boolean' ? recoveryStatuses[order.id] : null
             }
         })
-    } catch (error: any) {
-        if (!error?.message?.includes('Non autorisé')) {
+    } catch (error: unknown) {
+        if (!(error instanceof Error) || !error.message.includes('Non autorisé')) {
             console.error('Error fetching return reminders:', error)
         }
         return []
+    }
+}
+
+/** Enregistre si le colis retourné a été physiquement récupéré auprès du transporteur. */
+export async function updateReturnRecoveryStatus(orderId: string, isRecovered: boolean) {
+    try {
+        await verifyAdmin()
+        const setting = await prisma.siteSettings.findUnique({ where: { key: 'return_recovery_statuses' } })
+        let statuses: Record<string, boolean> = {}
+        try {
+            statuses = setting?.value ? JSON.parse(setting.value) : {}
+        } catch {
+            statuses = {}
+        }
+
+        statuses[orderId] = isRecovered
+        await prisma.siteSettings.upsert({
+            where: { key: 'return_recovery_statuses' },
+            update: { value: JSON.stringify(statuses) },
+            create: { key: 'return_recovery_statuses', value: JSON.stringify(statuses) }
+        })
+        return { success: true }
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' }
     }
 }
 
@@ -111,7 +145,7 @@ export async function updateShippingCompanySupportPhone(companyId: string, phone
             data: { supportPhone: phone }
         })
         return { success: true }
-    } catch (e: any) {
-        return { success: false, error: e.message }
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' }
     }
 }
