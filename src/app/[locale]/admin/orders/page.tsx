@@ -10,6 +10,17 @@ import { Prisma } from '@prisma/client'
 import OrdersTableClient from './OrdersTableClient'
 import OrdersPageClient from './OrdersPageClient'
 
+const adminDateTimeFormatter = new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Africa/Casablanca'
+})
+
 async function getOrders(status?: string, role?: string | null, userId?: string | null) {
     let where: Prisma.OrderWhereInput = status ? { status: status as any } : {}
     if (role === 'SELLER' && userId) {
@@ -42,6 +53,9 @@ async function getOrders(status?: string, role?: string | null, userId?: string 
 
     return orders.map(order => ({
         ...order,
+        // Préformaté une seule fois côté serveur : le navigateur affiche cette
+        // chaîne telle quelle et ne peut plus produire un fuseau différent.
+        createdAtFormatted: adminDateTimeFormatter.format(order.createdAt),
         shippingCompanyName: order.shippingCompany ? companyMap.get(order.shippingCompany)?.name || order.shippingCompany : null,
         shippingCompanySupportPhone: order.shippingCompany ? companyMap.get(order.shippingCompany)?.supportPhone || null : null,
         shippingCompanyLogo: order.shippingCompany ? companyMap.get(order.shippingCompany)?.logo || null : null,

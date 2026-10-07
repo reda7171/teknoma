@@ -595,6 +595,68 @@ export async function POST(req: Request) {
                         } catch (err: any) {
                             await sendTelegramMessage(`❌ Impossible de contacter l'API: ${err.message}`, message?.chat?.id.toString(), token)
                         }
+                    } else if (action === 'sync_order_stock') {
+                        const orderInternalId = data.split(':').slice(2).join(':')
+                        await answerCallbackQuery(callbackId, '🔄 Synchronisation des articles commandés...', token)
+                        try {
+                            const { JumiaAPI } = await import('@/lib/jumia-api')
+                            const jumia = await JumiaAPI.getInstance()
+                            if (!jumia) throw new Error('Jumia non configuré')
+
+                            const response = await jumia.getOrderItems(orderInternalId)
+                            const containers = Array.isArray(response)
+                                ? response
+                                : response?.data && Array.isArray(response.data)
+                                    ? response.data
+                                    : [response?.data || response]
+                            const items = containers.flatMap((container: any) => {
+                                if (Array.isArray(container)) return container
+                                return container?.orderItems || container?.items || container?.data?.orderItems || container?.data?.items || []
+                            })
+                            const sellerSkus = Array.from(new Set(items.map((item: any) =>
+                                item.product?.sellerSku || item.Sku || item.sellerSku || item.SellerSku || item.sku || item.shopSku
+                            ).filter(Boolean))) as string[]
+
+                            if (sellerSkus.length === 0) throw new Error('Aucun SKU trouvé dans cette commande')
+
+                            const updates: Array<{ sellerSku: string; id?: string; stock: number }> = []
+                            for (const sellerSku of sellerSkus) {
+                                const [book, extraProduct, pack, productResponse] = await Promise.all([
+                                    prisma.book.findUnique({ where: { sellerSku }, select: { stock: true } }),
+                                    prisma.extraProduct.findUnique({ where: { sellerSku }, select: { stock: true } }),
+                                    prisma.pack.findUnique({
+                                        where: { sellerSku },
+                                        include: { books: { include: { book: { select: { stock: true } } } } }
+                                    }),
+                                    jumia.getProducts({ sellerSku })
+                                ])
+                                const packStock = pack?.books.length
+                                    ? Math.min(...pack.books.map(packBook => packBook.book.stock))
+                                    : undefined
+                                const stock = book?.stock ?? extraProduct?.stock ?? packStock
+                                if (typeof stock !== 'number') continue
+
+                                const product = productResponse?.products?.[0]
+                                    || productResponse?.data?.products?.[0]
+                                    || productResponse?.data?.[0]
+                                    || productResponse?.[0]
+                                updates.push({ sellerSku, id: product?.id, stock })
+                            }
+
+                            if (updates.length === 0) throw new Error('Aucun SKU de la commande n’est lié à un produit Riwaya')
+
+                            await jumia.updateProductsStock(updates)
+                            const details = updates
+                                .map(update => `• <code>${escapeHtml(update.sellerSku)}</code> → stock <b>${update.stock}</b>`)
+                                .join('\n')
+                            await sendTelegramMessage(
+                                `✅ <b>Stock Jumia synchronisé</b>\n\n${details}\n\nSeuls les articles de cette commande ont été modifiés.`,
+                                message?.chat?.id.toString(),
+                                token
+                            )
+                        } catch (err: any) {
+                            await sendTelegramMessage(`❌ Erreur de synchronisation ciblée: ${escapeHtml(err.message)}`, message?.chat?.id.toString(), token)
+                        }
                     } else if (action === 'sync_stock') {
                         await answerCallbackQuery(callbackId, '🔄 Synchronisation en cours, cela peut prendre un moment...', token)
                         try {
@@ -608,6 +670,8 @@ export async function POST(req: Request) {
                         } catch (err: any) {
                             await sendTelegramMessage(`❌ Erreur: ${err.message}`, message?.chat?.id.toString(), token)
                         }
+                    } else if (action === 'skip_sync') {
+                        await answerCallbackQuery(callbackId, 'Stock non synchronisé.', token)
                     }
                 } catch (err: any) {
                     await answerCallbackQuery(callbackId, `❌ Erreur: ${err.message}`, token)

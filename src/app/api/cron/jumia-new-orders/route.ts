@@ -3,6 +3,33 @@ import { JumiaAPI } from '@/lib/jumia-api'
 import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 import { prisma } from '@/lib/prisma'
 
+function extractOrderItems(response: any): any[] {
+    if (!response) return []
+
+    const containers = Array.isArray(response)
+        ? response
+        : response.data && Array.isArray(response.data)
+            ? response.data
+            : [response.data || response]
+
+    return containers.flatMap((container: any) => {
+        if (Array.isArray(container)) return container
+        if (Array.isArray(container?.orderItems)) return container.orderItems
+        if (Array.isArray(container?.items)) return container.items
+        if (Array.isArray(container?.data?.orderItems)) return container.data.orderItems
+        if (Array.isArray(container?.data?.items)) return container.data.items
+        return []
+    })
+}
+
+function formatAmount(value: unknown): string {
+    const amount = typeof value === 'object' && value !== null && 'value' in value
+        ? (value as { value: unknown }).value
+        : value
+    const parsed = Number.parseFloat(String(amount ?? 0))
+    return Number.isFinite(parsed) ? parsed.toFixed(2) : '0.00'
+}
+
 export async function GET(req: Request) {
     try {
         const url = new URL(req.url)
@@ -54,25 +81,17 @@ export async function GET(req: Request) {
             let imageUrl: string | undefined = undefined
             
             const orderId = order.number || order.orderNumber;
+            const orderInternalId = String(order.id || orderId)
+            const syncTargets: Array<{ sellerSku: string; stock: number }> = []
             
             let itemsText = ""
             try {
                 // L'API Jumia nécessite l'ID interne (UUID) pour récupérer les items, pas le numéro public
-                const internalId = order.id || orderId
-                const itemsResponse = await jumia.getOrderItems(internalId)
+                const itemsResponse = await jumia.getOrderItems(orderInternalId)
                 
-                let allItems: any[] = []
-                
-                // itemsResponse est un tableau de packages, chaque package contient orderItems
-                if (Array.isArray(itemsResponse) && itemsResponse.length > 0) {
-                    for (const pkg of itemsResponse) {
-                        const items = pkg.orderItems || []
-                        allItems = allItems.concat(items)
-                    }
-                } else {
-                    // Fallback si la structure est différente
-                    allItems = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
-                }
+                // Jumia renvoie selon le cas des packages `orderItems` ou un
+                // conteneur `items`, comme celui consommé par la page admin.
+                const allItems = extractOrderItems(itemsResponse)
                 
                 if (allItems.length > 0) {
                     const firstItem = allItems[0]
@@ -80,20 +99,27 @@ export async function GET(req: Request) {
                     
                     itemsText = `\n\n📦 <b>Articles de la commande (${allItems.length})</b>\n\n`
                     for (const item of allItems) {
-                        const productName = escapeHtml(item.product?.name || item.name || item.productName || 'Article inconnu')
+                        const rawProductName = item.product?.name || item.Name || item.name || item.productName || 'Article inconnu'
+                        const productName = escapeHtml(String(rawProductName))
                         const quantity = item.quantity || 1
-                        const price = item.price?.value || item.price || item.unitPrice || '0'
-                        const itemSellerSku = escapeHtml(item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku || 'N/A')
-                        const status = escapeHtml(item.status || order.status || 'N/A')
-                        const tracking = escapeHtml(item.trackingCode || item.trackingNumber || 'En attente')
-                        
-                        itemsText += `🔸 <b>Produit:</b> ${quantity}x ${productName}\n`
+                        const price = formatAmount(item.itemPriceLocal ?? item.Price ?? item.price ?? item.unitPrice)
+                        const rawSellerSku = item.product?.sellerSku || item.Sku || item.sellerSku || item.SellerSku || item.sku || item.shopSku || 'N/A'
+                        const itemSellerSku = escapeHtml(String(rawSellerSku))
+                        const status = escapeHtml(String(item.status || item.Status || order.status || 'N/A'))
+                        const rawTracking = item.trackingNumber || item.TrackingCode || item.trackingCode
+                        const tracking = rawTracking ? escapeHtml(String(rawTracking)) : 'Non expédié'
+                        const productUrl = item.ProductUrl || `https://www.jumia.ma/catalog/?q=${encodeURIComponent(String(rawSellerSku))}`
+                        const trackingUrl = item.trackingUrl || (rawTracking
+                            ? `https://packagetracker-services.jumia.com/#/MA/en/package/tracking/${encodeURIComponent(String(rawTracking))}`
+                            : undefined)
+
+                        itemsText += `🔸 <b>Produit:</b> ${quantity}x <a href="${escapeHtml(productUrl)}">${productName}</a>\n`
                         itemsText += `🏷 <b>SKU Vendeur:</b> ${itemSellerSku}\n`
                         itemsText += `📝 <b>Statut:</b> ${status}\n`
                         itemsText += `💰 <b>Prix:</b> ${price} درهم\n`
-                        itemsText += `🚚 <b>Tracking:</b> ${tracking}\n\n`
+                        itemsText += `🚚 <b>Tracking:</b> ${trackingUrl ? `<a href="${escapeHtml(trackingUrl)}">${tracking}</a>` : tracking}\n\n`
 
-                        const sellerSku = item.product?.sellerSku || item.sellerSku || item.sku || item.shopSku
+                        const sellerSku = item.product?.sellerSku || item.Sku || item.sellerSku || item.SellerSku || item.sku || item.shopSku
                         if (sellerSku) {
                             try {
                                 await prisma.book.updateMany({
@@ -127,6 +153,50 @@ export async function GET(req: Request) {
                             } catch (e) {
                                 console.error("Failed to decrement local stock for Jumia order", e)
                             }
+
+                            try {
+                                const [jumiaStockResponse, book, extraProduct, pack] = await Promise.all([
+                                    jumia.getCatalogStock({ sellerSku: String(sellerSku), size: 10 }),
+                                    prisma.book.findUnique({
+                                        where: { sellerSku: String(sellerSku) },
+                                        select: { stock: true }
+                                    }),
+                                    prisma.extraProduct.findUnique({
+                                        where: { sellerSku: String(sellerSku) },
+                                        select: { stock: true }
+                                    }),
+                                    prisma.pack.findUnique({
+                                        where: { sellerSku: String(sellerSku) },
+                                        include: { books: { include: { book: { select: { stock: true } } } } }
+                                    })
+                                ])
+
+                                const jumiaStockItems = jumiaStockResponse?.products || jumiaStockResponse?.data?.products || []
+                                const jumiaStockItem = jumiaStockItems.find((stockItem: any) => stockItem.sellerSku === sellerSku)
+                                    || jumiaStockItems[0]
+                                const jumiaStock = jumiaStockItem?.globalStock ?? jumiaStockItem?.stock ?? 'Indisponible'
+                                const packStock = pack?.books.length
+                                    ? Math.min(...pack.books.map(packBook => packBook.book.stock))
+                                    : undefined
+                                const riwayaStock = book?.stock ?? extraProduct?.stock ?? packStock ?? 'Produit non lié'
+
+                                if (typeof riwayaStock === 'number') {
+                                    syncTargets.push({ sellerSku: String(sellerSku), stock: riwayaStock })
+                                }
+
+                                itemsText += `📊 <b>Stock Jumia:</b> ${escapeHtml(String(jumiaStock))}\n`
+                                if (typeof riwayaStock === 'number') {
+                                    itemsText += `🏪 <b>Stock Riwaya avant:</b> ${riwayaStock + Number(quantity)}\n`
+                                    itemsText += `🏪 <b>Stock Riwaya après:</b> ${riwayaStock}\n\n`
+                                } else {
+                                    itemsText += `🏪 <b>Stock Riwaya:</b> ${escapeHtml(String(riwayaStock))}\n\n`
+                                }
+                            } catch (stockError) {
+                                console.error("Erreur récupération stocks Jumia/Riwaya", stockError)
+                                itemsText += `📊 <b>Stocks:</b> information indisponible\n\n`
+                            }
+                        } else {
+                            itemsText += `📊 <b>Stocks:</b> SKU absent, comparaison impossible\n\n`
                         }
                     }
                 }
@@ -134,7 +204,11 @@ export async function GET(req: Request) {
                 console.error("Erreur récupération image/items Jumia", err)
             }
 
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n💰 Total: <b>${parseFloat(amount).toFixed(2)} درهم</b>\n📝 Statut: <b>${escapeHtml(order.status || 'N/A')}</b>\n📅 Date: ${new Date(order.createdAt).toLocaleString('fr-FR')}${itemsText}`
+            const customerName = `${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}`.trim() || 'Client Jumia'
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n📅 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}\n👤 Client: <b>${escapeHtml(customerName)}</b>\n📝 Statut: <b>${escapeHtml(order.status || order.Status || 'N/A')}</b>\n💰 Total: <b>${formatAmount(amount)} درهم</b>${itemsText}\n🔄 <b>Voulez-vous synchroniser le stock Riwaya vers Jumia ?</b>`
+            const syncButtonLabel = syncTargets.length === 1
+                ? `✅ Oui, mettre à ${syncTargets[0].stock}`
+                : '✅ Oui, synchroniser ces articles'
             
             const replyMarkup = {
                 inline_keyboard: [
@@ -143,7 +217,8 @@ export async function GET(req: Request) {
                         { text: '❌ Annuler', callback_data: `jumia_cancel:${orderId}` }
                     ],
                     [
-                        { text: '🔄 synch stock RIWAYA', callback_data: 'jumia:sync_stock' }
+                        { text: syncButtonLabel, callback_data: `jumia:sync_order_stock:${orderInternalId}` },
+                        { text: '❌ Non', callback_data: 'jumia:skip_sync' }
                     ]
                 ]
             }

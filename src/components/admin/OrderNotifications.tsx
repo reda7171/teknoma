@@ -92,30 +92,29 @@ export default function OrderNotifications() {
         }
     }, [])
 
-    // SSE connexion
+    // Polling court : évite les connexions SSE multiples et les réponses
+    // interrompues qui faisaient planter le runtime WASM de Next.js.
     useEffect(() => {
         // Demander permission notification navigateur (si disponible)
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission()
         }
 
-        let es: EventSource
-        let reconnectTimer: ReturnType<typeof setTimeout>
+        let cancelled = false
+        let lastPollAt = new Date().toISOString()
 
-        function connect() {
-            es = new EventSource('/api/admin/notifications/stream')
+        const poll = async () => {
+            try {
+                const response = await fetch(`/api/admin/notifications/stream?since=${encodeURIComponent(lastPollAt)}`, {
+                    cache: 'no-store'
+                })
+                if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                const payload = await response.json()
+                if (cancelled) return
+                lastPollAt = payload.now
+                setConnected(true)
 
-            es.onopen = () => setConnected(true)
-            es.onerror = () => {
-                setConnected(false)
-                es.close()
-                // Reconnexion après 10s
-                reconnectTimer = setTimeout(connect, 10000)
-            }
-
-            es.onmessage = (e) => {
-                try {
-                    const data = JSON.parse(e.data)
+                for (const data of payload.events || []) {
                     if (data.type === 'new_orders' && data.orders?.length > 0) {
                         const newOrders = data.orders.map((o: any) => ({ ...o, type: 'order' }))
                         setNotifications(prev => {
@@ -181,14 +180,17 @@ export default function OrderNotifications() {
                             return [...fresh, ...prev].slice(0, 20)
                         })
                     }
-                } catch {}
+                }
+            } catch {
+                if (!cancelled) setConnected(false)
             }
         }
 
-        connect()
+        void poll()
+        const timer = setInterval(() => void poll(), 15000)
         return () => {
-            es?.close()
-            clearTimeout(reconnectTimer)
+            cancelled = true
+            clearInterval(timer)
         }
     }, [playSound, sendBrowserNotif])
 
