@@ -712,7 +712,7 @@ export async function syncDeliveryStatus(orderId: string) {
         const compName = company.name.toLowerCase()
 
         if (compName.includes('withyou')) {
-            const res = await withyouService.getStatus([order.trackingID])
+            const res: any = await withyouService.getStatus([order.trackingID])
             if (Array.isArray(res) && res.length > 0) {
                 newStatus = res[0].status || newStatus
             } else if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
@@ -835,7 +835,7 @@ export async function bulkSyncDeliveries() {
                 if (trackingIds.length === 0) continue
 
                 try {
-                    const res = await withyouService.getStatus(trackingIds)
+                    const res: any = await withyouService.getStatus(trackingIds)
                     let statusArray: any[] = []
 
                     if (Array.isArray(res)) {

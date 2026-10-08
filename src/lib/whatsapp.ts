@@ -95,15 +95,15 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
         const statusLabel = status === 'SHIPPED' ? '🚚 Commande Expédiée' : status === 'DELIVERED' ? '✅ Commande Livrée' : `Statut: ${status}`
         const telegramText = `📱 *Notification WhatsApp Client*\n\n${statusLabel}\n🆔 \`#${orderId.slice(0, 8)}\`\n👤 ${fullName}\n📞 \`+${cleanPhone}\`${trackingID ? `\n🏷️ Suivi : \`${trackingID}\`` : ''}\n\n${webhookSent ? '✅ *Message envoyé automatiquement via passerelle*' : 'ℹ️ *Cliquer ci-dessous pour ouvrir WhatsApp* :'}`
 
-        await sendTelegramMessage(telegramText, {
-            reply_markup: {
-                inline_keyboard: [
-                    [
-                        { text: '💬 Ouvrir WhatsApp Client', url: waLink }
-                    ]
+        const keyboard = {
+            inline_keyboard: [
+                [
+                    { text: '💬 Ouvrir WhatsApp Client', url: waLink }
                 ]
-            }
-        }).catch(() => null)
+            ]
+        }
+
+        await sendTelegramMessage(telegramText, undefined, undefined, keyboard).catch(() => null)
 
         return { success: true, webhookSent, waLink }
     } catch (error: any) {
