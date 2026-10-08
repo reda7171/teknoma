@@ -21,8 +21,7 @@ const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 import UtmTracker from '@/components/UtmTracker'
 import DelayedScripts from '@/components/DelayedScripts'
-
-const AuthModal = dynamic(() => import('@/components/auth/AuthModal'))
+import AuthModalLoader from '@/components/auth/AuthModalLoader'
 
 
 const outfit = localFont({
@@ -495,21 +494,6 @@ export default async function LocaleLayout({
       <head>
 
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
-        <Script
-          id="gtm-script"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `setTimeout(function(){
-(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MSD75KHT');
-}, 3500);`
-          }}
-        />
-        {/* End Google Tag Manager */}
-        <AdSense publisherId={adsenseId || ''} isEnabled={adsenseEnabled === 'true'} />
         {googleSearchConsoleId && (
           <meta name="google-site-verification" content={googleSearchConsoleId} />
         )}
@@ -626,9 +610,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
           <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
-          <AuthModal />
+          <AuthModalLoader />
           <DelayedScripts>
             <Suspense fallback={null}>
+              <Script
+                id="gtm-script"
+                strategy="lazyOnload"
+                dangerouslySetInnerHTML={{
+                  __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MSD75KHT');`
+                }}
+              />
+              <AdSense publisherId={adsenseId || ''} isEnabled={adsenseEnabled === 'true'} />
               <PixelTracker />
               <FacebookPixel pixelId={fbPixelId} />
               <GoogleAnalytics gaId={googleAnalyticsId || ''} />

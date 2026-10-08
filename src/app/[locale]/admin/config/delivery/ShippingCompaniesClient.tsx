@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { Plus, Edit2, Trash2, Check, X, Upload, Image as ImageIcon, Search, Phone, Eye, EyeOff } from 'lucide-react'
 import { createShippingCompany, updateShippingCompany, deleteShippingCompany, setDefaultShippingCompany } from '@/lib/actions/shipping-companies'
 
-const EMPTY_FORM = { name: '', logo: '', apiKey: '', apiUrl: '', supportPhone: '', isActive: true }
+const EMPTY_FORM = { name: '', logo: '', apiKey: '', apiToken: '', apiUrl: '', supportPhone: '', isActive: true }
 
 export default function ShippingCompaniesClient({ initialCompanies, initialDefaultId }: { initialCompanies: any[], initialDefaultId: string | null }) {
     const [companies, setCompanies] = useState(initialCompanies)
@@ -17,11 +17,12 @@ export default function ShippingCompaniesClient({ initialCompanies, initialDefau
     const [logoPreview, setLogoPreview] = useState<string>('')
     const [uploading, setUploading] = useState(false)
     const [showApiKey, setShowApiKey] = useState(false)
+    const [showApiToken, setShowApiToken] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleEdit = (comp: any) => {
         setCurrentCompany(comp)
-        setFormData({ name: comp.name, logo: comp.logo || '', apiKey: comp.apiKey || '', apiUrl: comp.apiUrl || '', supportPhone: comp.supportPhone || '', isActive: comp.isActive })
+        setFormData({ name: comp.name, logo: comp.logo || '', apiKey: comp.apiKey || '', apiToken: comp.apiToken || '', apiUrl: comp.apiUrl || '', supportPhone: comp.supportPhone || '', isActive: comp.isActive })
         setLogoPreview(comp.logo || '')
         setIsEditing(true)
     }
@@ -173,6 +174,27 @@ export default function ShippingCompaniesClient({ initialCompanies, initialDefau
                                     </button>
                                 </div>
                             </div>
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Token API</label>
+                                <div className="relative">
+                                    <input
+                                        type={showApiToken ? 'text' : 'password'}
+                                        value={formData.apiToken}
+                                        onChange={e => setFormData({ ...formData, apiToken: e.target.value })}
+                                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-100 bg-gray-50 outline-none placeholder-gray-300"
+                                        placeholder="••••••••••••••••"
+                                        autoComplete="new-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowApiToken(!showApiToken)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                                        aria-label={showApiToken ? 'Masquer le token API' : 'Afficher le token API'}
+                                    >
+                                        {showApiToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -253,6 +275,7 @@ export default function ShippingCompaniesClient({ initialCompanies, initialDefau
                             <div className="space-y-1.5 mb-5">
                                 <p className="text-xs text-gray-600"><span className="font-bold">Chiffre d'Affaire:</span> <span className="text-green-600 font-black">{comp.revenue ? comp.revenue.toFixed(2) : '0.00'} درهم</span></p>
                                 <p className="text-xs text-gray-600"><span className="font-bold">API Key:</span> {comp.apiKey ? '••••••••' : <span className="text-gray-300">Non défini</span>}</p>
+                                <p className="text-xs text-gray-600"><span className="font-bold">API Token:</span> {comp.apiToken ? '••••••••' : <span className="text-gray-300">Non défini</span>}</p>
                                 <p className="text-xs text-gray-600"><span className="font-bold">Support:</span> {comp.supportPhone || <span className="text-gray-300">Non défini</span>}</p>
                             </div>
 

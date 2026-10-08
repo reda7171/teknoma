@@ -10,8 +10,8 @@ if (process.env.NODE_ENV === 'development') {
 
 const withPWA = withPWAInit({
   dest: 'public',
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
+  cacheOnFrontEndNav: false,
+  aggressiveFrontEndNavCaching: false,
   reloadOnOnline: true,
   disable: process.env.NODE_ENV === 'development', // Désactivé en dev pour éviter les conflits
   workboxOptions: {
@@ -29,9 +29,14 @@ const withPWA = withPWAInit({
           },
         },
       },
-      // Network First pour les pages
+      // Network First uniquement pour les navigations publiques. Les pages admin,
+      // API et assets Next ne doivent jamais être mélangés entre deux déploiements.
       {
-        urlPattern: /^https?.*/,
+        urlPattern: ({ request, url }) =>
+          request.mode === 'navigate' &&
+          !url.pathname.startsWith('/api/') &&
+          !url.pathname.startsWith('/_next/') &&
+          !url.pathname.split('/').includes('admin'),
         handler: 'NetworkFirst',
         options: {
           cacheName: 'riwaya-pages',

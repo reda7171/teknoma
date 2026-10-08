@@ -1,56 +1,22 @@
-'use client'
-
-import Script from 'next/script'
-
 export default function GoogleReviewsBadge() {
   return (
-    <>
-      <div 
-        id="___ratingbadge_0" 
-        className="fixed left-0 z-[2147483647] bottom-[70px] md:bottom-0 pointer-events-none"
-        style={{ 
-          minHeight: '60px', 
-          minWidth: '120px',
-          width: '180px',
-          height: '72px',
-          // Forcer la réservation d'espace dès le début pour éviter CLS (score 0.182)
-          contain: 'layout',
-          willChange: 'transform',
-        }}
+    <a
+      href="https://www.google.com/maps/place/Riwaya/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Consulter les avis clients Riwaya sur Google"
+      className="fixed left-3 bottom-[84px] md:bottom-3 z-50 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900 shadow-lg transition-transform hover:-translate-y-0.5"
+    >
+      <span
         aria-hidden="true"
-      />
-      <Script 
-        id="merchantWidgetScript" 
-        src="https://www.gstatic.com/shopping/merchant/merchantwidget.js" 
-        strategy="lazyOnload" 
-        onLoad={() => {
-          if (typeof window !== 'undefined' && (window as any).merchantwidget) {
-            (window as any).merchantwidget.start({
-              merchant_id: 5826844744,
-              position: 'BOTTOM_LEFT',
-              region: 'MA'
-            });
-            const interval = setInterval(() => {
-              // Google génère un ID aléatoire ou utilise merchantwidgetiframe
-              const iframe = document.querySelector('iframe#merchantwidgetiframe, iframe[src*="merchantverse"], #___ratingbadge_0 iframe');
-              if (iframe) {
-                if (!iframe.hasAttribute('title')) {
-                  iframe.setAttribute('title', 'Avis clients Google');
-                }
-                // Activer les clics une fois chargé
-                const badge = document.getElementById('___ratingbadge_0');
-                if (badge) {
-                  badge.style.pointerEvents = 'auto';
-                }
-                clearInterval(interval);
-              }
-            }, 100);
-
-            // Cleanup de sécurité après 10s
-            setTimeout(() => clearInterval(interval), 10000);
-          }
-        }} 
-      />
-    </>
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-black shadow-sm ring-1 ring-gray-100"
+      >
+        <span className="text-blue-600">G</span>
+      </span>
+      <span className="flex flex-col leading-tight">
+        <span className="text-[11px] font-bold">Avis clients</span>
+        <span className="text-xs font-black text-blue-600">Voir sur Google</span>
+      </span>
+    </a>
   )
 }

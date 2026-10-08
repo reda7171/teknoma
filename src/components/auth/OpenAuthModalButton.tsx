@@ -31,7 +31,7 @@ export default function OpenAuthModalButton({ label, sub }: Props) {
                 </span>
                 {label}
             </button>
-            <p className="text-slate-400 text-xs font-medium text-center md:text-left">{sub}</p>
+            <p className="text-slate-600 text-xs font-semibold text-center md:text-left">{sub}</p>
         </div>
     )
 }

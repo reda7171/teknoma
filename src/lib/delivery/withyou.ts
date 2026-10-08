@@ -121,10 +121,14 @@ class WithYouService {
     /**
      * Liste des villes
      */
-    async getCities(): Promise<string[]> {
+    async getCities(options: { fallback?: boolean } = {}): Promise<string[]> {
+        const { fallback = true } = options
         try {
             // L'API WithYou attend la clé et le token dans le corps JSON via POST
-            const res = await this.request('/getville', {}, 'POST')
+            const res = await this.request('/getvilles', {}, 'POST')
+            if (res && typeof res === 'object' && (res.status === 'error' || res.erreur)) {
+                throw new Error(res.message || 'Erreur WithYou')
+            }
             
             let cityList: string[] = []
 
@@ -139,10 +143,16 @@ class WithYouService {
 
             if (cityList.length > 0) return cityList
 
-            return [...WITHYOU_CITIES]
+            if (fallback) return [...WITHYOU_CITIES]
+            throw new Error("L'API WithYou n'a retourné aucune ville.")
         } catch (error: any) {
             // En cas d'accès refusé ou offline, renvoyer la liste officielle des villes WithYou
-            return [...WITHYOU_CITIES]
+            if (fallback) return [...WITHYOU_CITIES]
+            const message = String(error?.message || '')
+            if (message.toLowerCase().includes('acces refuse') || message.toLowerCase().includes('accès refusé')) {
+                throw new Error('Accès refusé par WithYou. Vérifiez la clé et le token API réellement utilisés.')
+            }
+            throw error
         }
     }
 
@@ -187,63 +197,64 @@ class WithYouService {
      * Obtenir le statut des colis
      */
     async getStatus(trackingIDs: string[]) {
-        const validIDs = trackingIDs.filter(id => id && id.trim() !== '');
+        const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val.trim());
+        const validIDs = trackingIDs
+            .map(id => String(id || '').trim())
+            .filter(id => id.length > 0 && !isUuid(id));
         
         if (validIDs.length === 0) {
-            // Avoid calling the API with an empty array which returns 403
             return { status: 'success', data: [] };
         }
         
         try {
+            // L'API WithYou attend un tableau de chaînes: { key, token, data: [codetracking1, codetracking2] }
             const res = await this.request('/getstatus', { data: validIDs }, 'POST')
             if (res && typeof res === 'object' && res.status === 'error') {
                 throw new Error(res.message || 'Erreur WithYou')
             }
 
-            const bulkItems = Array.isArray(res)
-                ? res
-                : Array.isArray(res?.data)
-                    ? res.data
-                    : Array.isArray(res?.data?.data)
-                        ? res.data.data
-                        : Array.isArray(res?.result)
-                            ? res.result
-                            : Array.isArray(res?.colis)
-                                ? res.colis
-                                : []
-
-            if (bulkItems.length > 0) return { status: 'success', data: bulkItems }
-
-            // Certaines versions de l'API WithYou n'acceptent pas le tableau
-            // `data` et attendent un unique `codetracking` par requête.
+            const bulkItems = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : []
+            if (bulkItems.length > 0) {
+                const mapped = bulkItems.map((item: any) => ({
+                    id: item.id || item.code_tracking || item.codetracking || item.trackingID,
+                    codetracking: item.id || item.code_tracking || item.codetracking || item.trackingID,
+                    statut: item.statut || item.status,
+                    status: item.statut || item.status,
+                    message: item.message
+                }))
+                return { status: 'success', data: mapped }
+            }
+            return { status: 'success', data: [] }
+        } catch (error: any) {
+            // Si un des tracking codes est rejeté en lot (403), interroger un par un
             const individualItems: any[] = []
             for (const codetracking of validIDs) {
-                const single = await this.request('/getstatus', { codetracking }, 'POST')
-                const candidates = Array.isArray(single)
-                    ? single
-                    : Array.isArray(single?.data)
-                        ? single.data
-                        : single?.data && typeof single.data === 'object'
-                            ? [single.data]
-                            : single && typeof single === 'object' && (single.code_tracking || single.codetracking || single.trackingID || single.statut)
-                                ? [single]
-                                : []
-
-                for (const candidate of candidates) {
-                    individualItems.push({ ...candidate, codetracking: candidate.codetracking || candidate.code_tracking || codetracking })
+                try {
+                    const single = await this.request('/getstatus', { data: [codetracking] }, 'POST')
+                    const candidates = Array.isArray(single) ? single : Array.isArray(single?.data) ? single.data : []
+                    for (const candidate of candidates) {
+                        individualItems.push({
+                            id: candidate.id || candidate.code_tracking || candidate.codetracking || codetracking,
+                            codetracking: candidate.id || candidate.code_tracking || candidate.codetracking || codetracking,
+                            statut: candidate.statut || candidate.status,
+                            status: candidate.statut || candidate.status,
+                            message: candidate.message
+                        })
+                    }
+                } catch {
+                    // Ignorer ce code invalide individuellement
                 }
             }
 
-            return { status: 'success', data: individualItems }
-        } catch (error: any) {
-            const msg = error.message || ''
-            if (msg.includes('Acces refuse')) {
-                throw new Error('Accès refusé par WithYou. Vérifiez la clé et le token API.')
+            if (individualItems.length > 0) {
+                return { status: 'success', data: individualItems }
             }
+
+            const msg = error?.message || ''
             if (msg.includes('fetch failed') || msg.includes('ENOTFOUND') || msg.includes('ETIMEDOUT')) {
                 throw new Error('API WithYou indisponible ou inaccessible.')
             }
-            throw error
+            return { status: 'success', data: [] }
         }
     }
 }

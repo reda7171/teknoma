@@ -35,7 +35,7 @@ import { getPrimaryImage } from '@/lib/utils/image'
 import { getCommunityUser, getTopReaders } from '@/lib/actions/community-auth'
 import CatalogDownload from '@/components/home/CatalogDownload'
 import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
-import GoogleOneTap from '@/components/auth/GoogleOneTap'
+import GoogleOneTapLoader from '@/components/auth/GoogleOneTapLoader'
 import SeoCategoriesSection from '@/components/SeoCategoriesSection'
 import { prisma } from '@/lib/prisma'
 
@@ -1402,6 +1402,6 @@ async function GoogleOneTapWrapper() {
   const { prisma } = await import('@/lib/prisma');
   const googleEnabledSetting = await prisma.siteSettings.findUnique({ where: { key: 'auth_google_enabled' } });
   if (googleEnabledSetting?.value === 'false') return null;
-  return <GoogleOneTap />;
+  return <GoogleOneTapLoader />;
 }
 

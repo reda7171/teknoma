@@ -10,6 +10,9 @@ import { Prisma } from '@prisma/client'
 import OrdersTableClient from './OrdersTableClient'
 import OrdersPageClient from './OrdersPageClient'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const adminDateTimeFormatter = new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
     month: '2-digit',

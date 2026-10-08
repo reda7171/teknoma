@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { RefreshCcw, Loader2, X, CheckCircle2 } from 'lucide-react'
+import { RefreshCcw, Loader2, X, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { bulkSyncDeliveries } from '@/lib/actions/admin-orders'
@@ -11,31 +11,39 @@ export default function BulkSyncDeliveryButton() {
     const [showModal, setShowModal] = useState(false)
     const [updatedOrders, setUpdatedOrders] = useState<any[]>([])
     const [inspectedCount, setInspectedCount] = useState(0)
+    const [syncErrors, setSyncErrors] = useState<string[]>([])
     const router = useRouter()
 
     const handleSync = async () => {
-        if (!confirm('Voulez-vous synchroniser le statut de toutes les livraisons en cours ?')) return
-
         setLoading(true)
+        setSyncErrors([])
         try {
             const data = await bulkSyncDeliveries()
 
             if (data.success) {
                 setUpdatedOrders(data.updatedOrders || [])
                 setInspectedCount(data.inspectedCount || 0)
+                setSyncErrors(data.errors || [])
                 setShowModal(true)
-                const errorsText = data.errors?.join('\n')
-                if (errorsText) {
-                    setTimeout(() => alert(`Attention, des erreurs sont survenues :\n${errorsText}`), 500)
-                }
                 router.refresh()
             } else {
-                alert(`Erreur: ${data.error}`)
+                setSyncErrors([data.error || 'Erreur lors de la synchronisation'])
+                setShowModal(true)
             }
-        } catch (error) {
-            alert('Une erreur est survenue lors de la synchronisation.')
+        } catch (error: any) {
+            setSyncErrors([error?.message || 'Une erreur est survenue lors de la synchronisation.'])
+            setShowModal(true)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleCloseModal = () => {
+        setShowModal(false)
+        if (updatedOrders.length > 0) {
+            window.location.reload()
+        } else {
+            router.refresh()
         }
     }
 
@@ -64,18 +72,32 @@ export default function BulkSyncDeliveryButton() {
                                     <CheckCircle2 className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-gray-900">Synchronisation terminée</h3>
+                                    <h3 className="text-xl font-black text-gray-900">Synchronisation des livraisons</h3>
                                     <p className="text-sm text-gray-500 font-medium">
                                         {inspectedCount} colis vérifié(s), {updatedOrders.length} commande(s) mise(s) à jour
                                     </p>
                                 </div>
                             </div>
-                            <button onClick={() => setShowModal(false)} className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
+                            <button onClick={handleCloseModal} className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         
                         <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
+                            {syncErrors.length > 0 && (
+                                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 text-xs">
+                                    <div className="flex items-center gap-2 font-bold mb-2 text-amber-800">
+                                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                                        <span>Alertes transporteur ({syncErrors.length})</span>
+                                    </div>
+                                    <ul className="list-disc pl-5 space-y-1 text-amber-700">
+                                        {syncErrors.map((err, i) => (
+                                            <li key={i}>{err}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
                             {updatedOrders.length > 0 ? (
                                 <div className="space-y-3">
                                     {updatedOrders.map((order: any, idx: number) => (
@@ -105,7 +127,7 @@ export default function BulkSyncDeliveryButton() {
                         
                         <div className="p-4 border-t border-gray-100 flex justify-end">
                             <button 
-                                onClick={() => setShowModal(false)}
+                                onClick={handleCloseModal}
                                 className="px-6 py-2 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-colors"
                             >
                                 Fermer

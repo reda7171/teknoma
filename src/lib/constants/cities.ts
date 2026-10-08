@@ -126,3 +126,77 @@ export const MOROCCO_CITIES = [
 export type MoroccoCity = typeof MOROCCO_CITIES[number]
 export type WithYouCity = typeof WITHYOU_CITIES[number]
 
+export const ARABIC_TO_LATIN_CITIES: Record<string, string> = {
+    'الناظور': 'Nador',
+    'الدار البيضاء': 'Casablanca',
+    'الرباط': 'Rabat',
+    'طنجة': 'Tanger',
+    'فاس': 'Fes',
+    'مكناس': 'Meknes',
+    'مراكش': 'Marrakech',
+    'أكادير': 'Agadir',
+    'اكادير': 'Agadir',
+    'سلا': 'Salé',
+    'تمارة': 'Temara',
+    'القنيطرة': 'Kénitra',
+    'وجدة': 'Oujda',
+    'تطوان': 'Tétouan',
+    'آسفي': 'Safi',
+    'اسفي': 'Safi',
+    'سطات': 'Settat',
+    'برشيد': 'Berrechid',
+    'بوسكورة': 'Bouskoura',
+    'المحمدية': 'Mohammedia',
+    'خريبكة': 'Khouribga',
+    'بني ملال': 'Béni Mellal',
+    'كلميم': 'guelmim',
+    'العيون': 'Laâyoune',
+    'الداخلة': 'Dakhla',
+    'الصويرة': 'Essaouira',
+    'ورزازات': 'Ouarzazate',
+    'تازة': 'Taza',
+    'الخميسات': 'Khemisset',
+    'تيفلت': 'Tiflet',
+    'سيدي قاسم': 'Sidi Kacem',
+    'سيدي سليمان': 'Sidi Slimane',
+    'الصخيرات': 'Skhirate',
+    'تارودانت': 'Taroudant',
+    'العرائش': 'Larache',
+    'شفشاون': 'Chefchaouen',
+    'بركان': 'Berkane',
+    'تاوريرت': 'Taourirt',
+    'عين عودة': 'Ain El Aouda',
+    'عين عتيق': 'Ain Attig',
+    'بوزنيقة': 'Bouznika',
+    'مديونة': 'Mediouna',
+    'بن سليمان': 'Ben Slimane',
+    'دار بوعزة': 'Dar Bouazza',
+    'عين حرودة': 'Ain Harrouda',
+    'النواصر': 'NOUACER',
+    'الرحمة': 'Errahma',
+    'قلعة السراغنة': 'El Kelaa des Sraghna'
+}
+
+export function normalizeCityForCarrier(city: string): string {
+    if (!city) return 'Casablanca'
+    const trimmed = city.trim()
+    
+    // 1. Traduction Arabe directe
+    if (ARABIC_TO_LATIN_CITIES[trimmed]) {
+        return ARABIC_TO_LATIN_CITIES[trimmed]
+    }
+
+    // 2. Recherche partielle Arabe
+    for (const [arCity, frCity] of Object.entries(ARABIC_TO_LATIN_CITIES)) {
+        if (trimmed.includes(arCity)) return frCity
+    }
+
+    // 3. Correspondance exacte ou sans accent parmi WITHYOU_CITIES
+    const normalizeStr = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()
+    const targetNorm = normalizeStr(trimmed)
+    const match = WITHYOU_CITIES.find(c => normalizeStr(c) === targetNorm)
+    if (match) return match
+
+    return trimmed
+}
+

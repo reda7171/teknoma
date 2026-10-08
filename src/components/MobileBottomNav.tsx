@@ -1,12 +1,11 @@
 'use client'
 
 import { Link, usePathname } from '@/i18n/routing'
-import { Home, BookOpen, Package, ShoppingCart, AlignJustify } from 'lucide-react'
+import { Home, BookOpen, ShoppingCart, AlignJustify } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 
 interface MobileBottomNavProps {
     onMenuClick?: () => void
@@ -115,11 +114,7 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                     }}
                                 >
                                     {isActive && (
-                                        <motion.div
-                                            layoutId="mobileNavIndicator"
-                                            className="absolute inset-0 bg-black rounded-2xl"
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                        />
+                                        <div className="absolute inset-0 bg-black rounded-2xl transition-transform duration-300 ease-out" />
                                     )}
                                     <Icon
                                         className="relative z-10 w-[18px] h-[18px] transition-all duration-200"
