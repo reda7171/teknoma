@@ -316,9 +316,17 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const jumiaStats = await getJumiaStats()
 
     // Timeout-wrapped remote stats to prevent slow loading
+    const emptyJumiaStats = {
+        total: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0, failed: 0,
+        revenue: 0, currentMonthOrders: 0, previousMonthOrders: 0,
+        currentMonthRevenue: 0, previousMonthRevenue: 0, currentMonthAverageOrder: 0,
+        currentMonthCanceled: 0, currentMonthReturned: 0, currentMonthCancellationRate: 0,
+        todayOrders: 0, ordersMonthlyChange: 0, revenueMonthlyChange: 0,
+        evolutionData: [], recentOrders: []
+    }
     const jumiaRemoteStats = await Promise.race([
-        getJumiaRemoteStats().catch(() => ({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0, recentOrders: [] })),
-        new Promise<any>((resolve) => setTimeout(() => resolve({ total: 0, pending: 0, shipped: 0, delivered: 0, revenue: 0, recentOrders: [] }), 3000))
+        getJumiaRemoteStats().then(data => data || emptyJumiaStats).catch(() => emptyJumiaStats),
+        new Promise<typeof emptyJumiaStats>((resolve) => setTimeout(() => resolve(emptyJumiaStats), 3000))
     ])
 
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
@@ -353,6 +361,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'En Attente (Jumia)', value: jumiaRemoteStats?.pending || 0, iconName: 'Clock', color: 'yellow', roles: ['ADMIN'] },
         { name: 'Expédiées (Jumia)', value: jumiaRemoteStats?.shipped || 0, iconName: 'Truck', color: 'cyan', roles: ['ADMIN'] },
         { name: 'Livrées (Jumia)', value: jumiaRemoteStats?.delivered || 0, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN'] },
+        { name: 'CA Jumia (période)', value: `${jumiaRemoteStats.revenue.toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'orange', roles: ['ADMIN'] },
+        { name: 'CA mensuel Jumia', value: `${jumiaRemoteStats.currentMonthRevenue.toFixed(0)} ${currency}`, iconName: 'DollarSign', color: 'emerald', roles: ['ADMIN'], trend: jumiaRemoteStats.revenueMonthlyChange },
+        { name: 'Cmd ce mois (Jumia)', value: jumiaRemoteStats.currentMonthOrders, iconName: 'CalendarDays', color: 'orange', roles: ['ADMIN'], trend: jumiaRemoteStats.ordersMonthlyChange },
+        { name: "Cmd aujourd'hui (Jumia)", value: jumiaRemoteStats.todayOrders, iconName: 'ShoppingCart', color: 'teal', roles: ['ADMIN'] },
+        { name: 'Panier moyen Jumia', value: `${jumiaRemoteStats.currentMonthAverageOrder.toFixed(0)} ${currency}`, iconName: 'ShoppingBag', color: 'rose', roles: ['ADMIN'] },
+        { name: 'Annulées ce mois (Jumia)', value: jumiaRemoteStats.currentMonthCanceled, iconName: 'XOctagon', color: 'red', roles: ['ADMIN'] },
+        { name: 'Retours ce mois (Jumia)', value: jumiaRemoteStats.currentMonthReturned, iconName: 'RefreshCw', color: 'rose', roles: ['ADMIN'] },
+        { name: 'Taux annulation Jumia', value: `${jumiaRemoteStats.currentMonthCancellationRate.toFixed(1)}%`, iconName: 'BarChart2', color: 'gray', roles: ['ADMIN'] },
     ].filter(card => card.roles.includes(role || 'ADMIN'))
 
 

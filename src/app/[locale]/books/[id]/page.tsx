@@ -23,7 +23,7 @@ import StickyBottomActions from '@/components/StickyBottomActions'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/actions/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
-import { getPostsByBookId, getPublishedPosts } from '@/lib/actions/blog'
+import { getPostsByBookId } from '@/lib/actions/blog'
 import Image from 'next/image'
 import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react'
 import BookSubNav from '@/components/BookSubNav'
@@ -39,6 +39,32 @@ import ScrollDownIndicator from '@/components/ScrollDownIndicator'
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 
 export const revalidate = 3600; // Cache d'une heure pour le SEO et la vitesse
+
+function plainText(value?: string | null) {
+    return (value || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function normalizedText(value?: string | null) {
+    return plainText(value)
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .trim()
+        .toLocaleLowerCase('und')
+}
+
+function conciseText(value: string, maxLength = 260) {
+    const text = plainText(value)
+    if (text.length <= maxLength) return text
+    const shortened = text.slice(0, maxLength + 1)
+    const boundary = shortened.lastIndexOf(' ')
+    return `${shortened.slice(0, boundary > 160 ? boundary : maxLength).trim()}…`
+}
 
 export async function generateMetadata({
     params,
@@ -97,7 +123,7 @@ export async function generateMetadata({
             book.author,
             `${localizedTitle} ${book.author}`,
             `شراء كتاب ${localizedTitle}`,
-            `كتاب ${book.category}`,
+            ...(book.category ? [`كتاب ${book.category}`] : []),
             `كتب ${book.author}`,
             'مكتبة في الرباط',
             'مكتبة f rabat',
@@ -115,7 +141,7 @@ export async function generateMetadata({
             book.author,
             `${localizedTitle} ${book.author}`,
             `buy ${localizedTitle} morocco`,
-            `${book.category} books`,
+            ...(book.category ? [`${book.category} books`] : []),
             `${book.author} books`,
             'bookstore in rabat',
             'bookstore in casablanca',
@@ -130,7 +156,7 @@ export async function generateMetadata({
             book.author,
             `${localizedTitle} ${book.author}`,
             `acheter ${localizedTitle} maroc`,
-            `livre ${book.category}`,
+            ...(book.category ? [`livre ${book.category}`] : []),
             `${book.author} livres`,
             'librairie à rabat',
             'librairie rabat',
@@ -265,7 +291,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, la note et les recommandations issues des commandes réelles
-    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, latestPostsData, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
         getBookReviews(bookId).catch(() => []),
         getBookAverageRating(bookId).catch(() => ({ average: 5, count: 0 })),
         book.category ? getCategoryConfigByName(book.category).catch(() => null) : Promise.resolve(null),
@@ -280,19 +306,13 @@ export default async function BookDetailPage({
         getSetting('adsense_publisher_id').then(v => v || '').catch(() => ''),
         getSetting('adsense_slot_sidebar').then(v => v || '').catch(() => ''),
         getAuthorProfile(book.author).catch(() => null),
-        getPublishedPosts(1, 3, undefined, locale).catch(() => ({ posts: [], total: 0 })),
         getApprovedAudioTestimonials().catch(() => ({ success: true, testimonials: [] })),
         getApprovedImageTestimonials().catch(() => ({ success: true, testimonials: [] }))
     ])
 
-    const relatedPosts = [...relatedPostsRaw];
-    const relatedPostIds = new Set(relatedPosts.map((p: any) => p.id));
-    
-    for (const post of latestPostsData.posts) {
-        if (!relatedPostIds.has(post.id) && relatedPosts.length < 3) {
-            relatedPosts.push(post);
-        }
-    }
+    // Un article n'est affiché que s'il est explicitement relié au livre dans l'admin.
+    // Le précédent fallback ajoutait les derniers articles, même sans rapport avec le produit.
+    const relatedPosts = relatedPostsRaw.slice(0, 3)
 
     const { average: averageRating, count: reviewCount } = ratingData
 
@@ -314,6 +334,18 @@ export default async function BookDetailPage({
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const normalizedImage = normalizeImage(book.image)
     const imageUrl = normalizedImage.startsWith('http') ? normalizedImage : normalizedImage.startsWith('data:') ? normalizedImage : `${baseUrl}${normalizedImage}`
+
+    const shortDescription = plainText(displayDescription)
+    const longDescription = plainText(displayLongDescription)
+    const shortNormalized = normalizedText(shortDescription)
+    const longNormalized = normalizedText(longDescription)
+    const summaryParagraphs = longNormalized && longNormalized !== shortNormalized
+        ? longNormalized.includes(shortNormalized) && shortNormalized.length > 40
+            ? [longDescription]
+            : shortNormalized.includes(longNormalized) && longNormalized.length > 40
+                ? [shortDescription]
+                : [shortDescription, longDescription].filter(Boolean)
+        : [shortDescription].filter(Boolean)
 
     const jsonLd: any[] = [];
 
@@ -343,18 +375,40 @@ export default async function BookDetailPage({
             ]
         });
 
+    const faqTitle = displayTitle || book.title
+    const faqDescription = conciseText(shortDescription || longDescription, 280)
+    const faqAuthorBio = authorProfile?.bio ? conciseText(authorProfile.bio, 280) : ''
+    const categoryLabel = book.category?.trim()
     const faqQuestions = [
         {
-            question: locale === 'ar' ? `لماذا يجب عليك قراءة كتاب ${book.title}؟` : locale === 'en' ? `Why should you read ${book.title}?` : `Pourquoi devriez-vous lire ${book.title} ?`,
-            answer: locale === 'ar' ? `كتاب ${book.title} للكاتب ${book.author} هو من أفضل الكتب في تصنيف ${book.category}. يقدم رؤية فريدة وقيمة لا غنى عنها للقراء.` : locale === 'en' ? `${book.title} by ${book.author} is one of the best books in the ${book.category} category. It offers unique insights for readers.` : `${book.title} de ${book.author} est l'un des meilleurs livres de la catégorie ${book.category}. Il offre une perspective unique et incontournable.`
+            question: locale === 'ar' ? `ما موضوع كتاب ${faqTitle}؟` : locale === 'en' ? `What is ${faqTitle} about?` : `De quoi parle ${faqTitle} ?`,
+            answer: faqDescription || (locale === 'ar'
+                ? `كتاب ${faqTitle} من تأليف ${book.author}${categoryLabel ? ` وينتمي إلى تصنيف ${categoryLabel}` : ''}.`
+                : locale === 'en'
+                    ? `${faqTitle} is written by ${book.author}${categoryLabel ? ` and belongs to the ${categoryLabel} category` : ''}.`
+                    : `${faqTitle} est un livre de ${book.author}${categoryLabel ? ` classé dans la catégorie ${categoryLabel}` : ''}.`)
         },
         {
-            question: locale === 'ar' ? `من هو مؤلف كتاب ${book.title}؟` : locale === 'en' ? `Who is the author of ${book.title}?` : `Qui est l'auteur de ${book.title} ?`,
-            answer: locale === 'ar' ? `مؤلف هذا الكتاب هو ${book.author}، وهو كاتب معروف بأسلوبه المتميز.` : locale === 'en' ? `The author of this book is ${book.author}, known for their distinct style.` : `L'auteur de ce livre est ${book.author}, connu pour son style distinctif.`
+            question: locale === 'ar' ? `من هو مؤلف كتاب ${faqTitle}؟` : locale === 'en' ? `Who wrote ${faqTitle}?` : `Qui a écrit ${faqTitle} ?`,
+            answer: faqAuthorBio || (locale === 'ar'
+                ? `مؤلف كتاب ${faqTitle} هو ${book.author}.`
+                : locale === 'en'
+                    ? `${faqTitle} was written by ${book.author}.`
+                    : `${faqTitle} a été écrit par ${book.author}.`)
         },
         {
-            question: locale === 'ar' ? `هل كتاب ${book.title} متوفر للبيع في المغرب؟` : locale === 'en' ? `Is ${book.title} available for sale in Morocco?` : `Le livre ${book.title} est-il disponible au Maroc ?`,
-            answer: locale === 'ar' ? `نعم، كتاب ${book.title} متوفر للبيع في المغرب عبر مكتبة رواية، مع توصيل سريع لجميع المدن مثل الرباط والدار البيضاء.` : locale === 'en' ? `Yes, ${book.title} is available for sale in Morocco through Riwaya Library, with fast delivery to all cities like Rabat and Casablanca.` : `Oui, ${book.title} est disponible au Maroc via la Librairie Riwaya, avec livraison rapide vers toutes les villes comme Rabat et Casablanca.`
+            question: locale === 'ar' ? `هل كتاب ${faqTitle} متوفر للبيع في المغرب؟` : locale === 'en' ? `Is ${faqTitle} available in Morocco?` : `Le livre ${faqTitle} est-il disponible au Maroc ?`,
+            answer: book.stock > 0
+                ? locale === 'ar'
+                    ? `نعم، كتاب ${faqTitle} متوفر حالياً لدى مكتبة رواية مع التوصيل إلى مختلف مدن المغرب.`
+                    : locale === 'en'
+                        ? `Yes, ${faqTitle} is currently in stock at Riwaya, with delivery across Morocco.`
+                        : `Oui, ${faqTitle} est actuellement en stock chez Riwaya, avec livraison partout au Maroc.`
+                : locale === 'ar'
+                    ? `كتاب ${faqTitle} غير متوفر حالياً. يمكن طلب إشعار عند عودته إلى المخزون.`
+                    : locale === 'en'
+                        ? `${faqTitle} is currently out of stock. You can request a notification when it becomes available again.`
+                        : `${faqTitle} est actuellement en rupture de stock. Vous pouvez demander à être averti lors de son retour.`
         }
     ]
 
@@ -492,9 +546,11 @@ export default async function BookDetailPage({
                                     <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-lg sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-2">
                                         {book.author}
                                     </Link>
-                                    <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
-                                        {authorProfile?.bio || (locale === 'ar' ? `كاتب متميز قدم العديد من الأعمال الرائعة التي أثرت المكتبة العربية.` : locale === 'en' ? `An outstanding author who has contributed many remarkable works.` : `Un auteur exceptionnel qui a contribué à de nombreuses œuvres remarquables.`)}
-                                    </p>
+                                    {authorProfile?.bio && (
+                                        <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
+                                            {authorProfile.bio}
+                                        </p>
+                                    )}
                                     <Link 
                                         href={`/authors/${encodeURIComponent(book.author)}`}
                                         className="inline-flex items-center gap-1.5 text-[9px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
@@ -831,10 +887,11 @@ export default async function BookDetailPage({
                                         <h2 className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
                                     </div>
                                     <div className="text-sm font-bold text-gray-500 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
-                                        <p>{displayDescription}</p>
-                                        {book.longDescription && (
-                                            <p className="text-gray-600 font-medium normal-case tracking-normal mt-4">{book.longDescription}</p>
-                                        )}
+                                        {summaryParagraphs.map((paragraph, index) => (
+                                            <p key={`${book.id}-summary-${index}`} className={index > 0 ? 'text-gray-600 font-medium normal-case tracking-normal mt-4' : undefined}>
+                                                {paragraph}
+                                            </p>
+                                        ))}
                                     </div>
                                 </div>
 

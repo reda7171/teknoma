@@ -111,9 +111,12 @@ export async function getJumiaStats() {
     if (!jumia) return null
     
     try {
-        const threeMonthsAgo = new Date()
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 2)
-        const createdAfter = threeMonthsAgo.toISOString().split('T')[0]
+        const now = new Date()
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+        const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        const statsPeriodStart = new Date(now.getFullYear(), now.getMonth() - 2, 1)
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const createdAfter = statsPeriodStart.toISOString().split('T')[0]
         
         const tomorrow = new Date()
         tomorrow.setDate(tomorrow.getDate() + 1)
@@ -130,18 +133,32 @@ export async function getJumiaStats() {
         let canceled = 0
         let failed = 0
         let revenue = 0
+        let currentMonthOrders = 0
+        let previousMonthOrders = 0
+        let currentMonthRevenue = 0
+        let previousMonthRevenue = 0
+        let todayOrders = 0
+        let currentMonthCanceled = 0
+        let currentMonthReturned = 0
         
         const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
         
         orders.forEach((o: any) => {
             const st = (o.status || o.Status || o.Statuses?.[0] || '').toUpperCase()
             
+            const createdAtValue = o.createdAt || o.CreatedAt || o.created_at
+            const createdAt = createdAtValue ? new Date(createdAtValue) : null
+            const isCurrentMonth = Boolean(createdAt && !Number.isNaN(createdAt.getTime()) && createdAt >= currentMonthStart)
+            const isPreviousMonth = Boolean(createdAt && !Number.isNaN(createdAt.getTime()) && createdAt >= previousMonthStart && createdAt < currentMonthStart)
+            const isToday = Boolean(createdAt && !Number.isNaN(createdAt.getTime()) && createdAt >= todayStart)
+
             if (st === 'FAILED') {
                 failed++
                 return
             }
             if (st === 'CANCELED' || st === 'CANCELLED') {
                 canceled++
+                if (isCurrentMonth) currentMonthCanceled++
                 return
             }
             
@@ -149,6 +166,10 @@ export async function getJumiaStats() {
             if (st === 'PENDING') pending++
             else if (st === 'READY_TO_SHIP' || st === 'READY-TO-SHIP' || st === 'SHIPPED') shipped++
             else if (st === 'DELIVERED') delivered++
+            if (isCurrentMonth) currentMonthOrders++
+            if (isPreviousMonth) previousMonthOrders++
+            if (isToday) todayOrders++
+            if (isCurrentMonth && st === 'RETURNED') currentMonthReturned++
             
             const price = parseFloat(o.totalAmountLocal?.value || o.Price || o.GrandTotal || '0')
             
@@ -157,12 +178,13 @@ export async function getJumiaStats() {
             
             if (isValidRevenue) {
                 revenue += price
+                if (isCurrentMonth) currentMonthRevenue += price
+                if (isPreviousMonth) previousMonthRevenue += price
             }
 
             // Timeline evolution based on createdAt
-            const createdAt = o.createdAt || o.CreatedAt || o.created_at
-            if (createdAt) {
-                const dateStr = createdAt.split('T')[0] // YYYY-MM-DD
+            if (createdAtValue) {
+                const dateStr = createdAtValue.split('T')[0] // YYYY-MM-DD
                 if (!evolutionMap[dateStr]) {
                     evolutionMap[dateStr] = { date: dateStr, count: 0, revenue: 0 }
                 }
@@ -176,6 +198,15 @@ export async function getJumiaStats() {
         const evolutionData = Object.values(evolutionMap).sort((a, b) => a.date.localeCompare(b.date))
         
         const recentOrders = orders.slice(0, 3)
+        const currentMonthAverageOrder = currentMonthOrders > 0 ? currentMonthRevenue / currentMonthOrders : 0
+        const currentMonthCancellationRate = currentMonthOrders + currentMonthCanceled > 0
+            ? (currentMonthCanceled / (currentMonthOrders + currentMonthCanceled)) * 100
+            : 0
+
+        const percentageChange = (current: number, previous: number) => {
+            if (previous === 0) return current === 0 ? 0 : null
+            return ((current - previous) / previous) * 100
+        }
 
         return {
             total,
@@ -185,6 +216,17 @@ export async function getJumiaStats() {
             canceled,
             failed,
             revenue,
+            currentMonthOrders,
+            previousMonthOrders,
+            currentMonthRevenue,
+            previousMonthRevenue,
+            currentMonthAverageOrder,
+            currentMonthCanceled,
+            currentMonthReturned,
+            currentMonthCancellationRate,
+            todayOrders,
+            ordersMonthlyChange: percentageChange(currentMonthOrders, previousMonthOrders),
+            revenueMonthlyChange: percentageChange(currentMonthRevenue, previousMonthRevenue),
             evolutionData,
             recentOrders
         }

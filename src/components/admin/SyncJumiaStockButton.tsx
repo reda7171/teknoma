@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { RefreshCw, CheckCircle, AlertCircle } from 'lucide-react'
-import { syncBooksStockToJumia } from '@/lib/actions/jumia'
 
 export default function SyncJumiaStockButton() {
     const [loading, setLoading] = useState(false)
@@ -12,8 +11,9 @@ export default function SyncJumiaStockButton() {
         setLoading(true)
         setStatus(null)
         try {
-            const res = await syncBooksStockToJumia()
-            setStatus({ message: res.message, type: res.success ? 'success' : 'error' })
+            const res = await fetch('/api/admin/jumia/sync-stock', { method: 'POST' })
+            const data = await res.json()
+            setStatus({ message: data.message, type: data.success ? 'success' : 'error' })
             setTimeout(() => setStatus(null), 5000)
         } catch (error) {
             setStatus({ message: 'Erreur lors de la synchronisation', type: 'error' })
@@ -22,6 +22,7 @@ export default function SyncJumiaStockButton() {
             setLoading(false)
         }
     }
+
 
     return (
         <div className="relative">
