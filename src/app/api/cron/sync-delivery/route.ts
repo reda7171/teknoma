@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withyouService } from '@/lib/delivery/withyou'
+import { revalidatePath } from 'next/cache'
+import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 // Maximum number of tracking IDs to sync at once
 const BATCH_SIZE = 50
@@ -8,21 +10,25 @@ const BATCH_SIZE = 50
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
-        const secret = searchParams.get('secret')
+        const secret = searchParams.get('secret') || searchParams.get('token')
+        const authHeader = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+        const expectedSecret = (process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026').replace(/^["']|["']$/g, '')
         
         // Security check
-        if (secret !== process.env.CRON_SECRET) {
+        if (secret !== expectedSecret && authHeader !== expectedSecret) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Fetch orders that are shipped but not yet in a final state
+        // Fetch orders with tracking numbers that are not finalized
         const activeOrders = await prisma.order.findMany({
             where: {
                 trackingID: { not: null },
-                status: {
-                    notIn: ['DELIVERED', 'RETURNED', 'CANCELLED']
-                },
-                shippingCompany: { not: null }
+                shippingCompany: { not: null },
+                OR: [
+                    { status: { notIn: ['DELIVERED'] } },
+                    { deliveryStatus: null },
+                    { deliveryStatus: { notIn: ['Livrer', 'Livre', 'Livré', 'DELIVERED'] } }
+                ]
             }
         })
 
@@ -31,10 +37,10 @@ export async function GET(request: Request) {
                 data: {
                     jobName: "sync-delivery",
                     status: "SUCCESS",
-                    message: "Aucune commande active à synchroniser",
+                    message: "Aucune commande à synchroniser",
                 }
             })
-            return NextResponse.json({ success: true, message: 'No active orders to sync', updatedCount: 0 })
+            return NextResponse.json({ success: true, message: 'No orders to sync', updatedCount: 0 })
         }
 
         const companies = await prisma.shippingCompany.findMany({
@@ -46,7 +52,8 @@ export async function GET(request: Request) {
         const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
         
         let updatedCount = 0
-        const errors = []
+        let inspectedCount = 0
+        const errors: string[] = []
 
         const withYouOrders = activeOrders.filter(o => {
             const name = companyMap.get(o.shippingCompany!)
@@ -58,15 +65,18 @@ export async function GET(request: Request) {
             return name && name.includes('olivraison')
         })
 
+        const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test((val || '').trim())
+
         // Handle WithYou Bulk Sync
         if (withYouOrders.length > 0) {
             for (let i = 0; i < withYouOrders.length; i += BATCH_SIZE) {
                 const batch = withYouOrders.slice(i, i + BATCH_SIZE)
-                const trackingIds = batch.map(o => o.trackingID!).filter(Boolean)
+                const trackingIds = batch.map(o => o.trackingID!).filter(id => Boolean(id) && !isUuid(id))
+                if (trackingIds.length === 0) continue
                 
                 try {
                     const res = await withyouService.getStatus(trackingIds)
-                    let statusArray = []
+                    let statusArray: any[] = []
                     
                     if (Array.isArray(res)) {
                         statusArray = res
@@ -75,38 +85,63 @@ export async function GET(request: Request) {
                     }
                     
                     for (const item of statusArray) {
-                        const trackingID = item.trackingID || item.trackingId || item.code_tracking
-                        const extStatus = item.status || item.statut
+                        const rawTrackingID = item.id || item.code_tracking || item.codetracking || item.trackingID || item.trackingId || item.numero
+                        const trackingID = rawTrackingID == null ? '' : String(rawTrackingID).trim()
+                        const extStatusRaw = item.status || item.statut
+                        let extStatus = ''
+                        if (typeof extStatusRaw === 'object' && extStatusRaw !== null) {
+                            extStatus = extStatusRaw.code || extStatusRaw.label || extStatusRaw.statut || JSON.stringify(extStatusRaw)
+                        } else {
+                            extStatus = String(extStatusRaw || '').trim()
+                        }
                         
                         if (trackingID && extStatus) {
-                            const orderToUpdate = batch.find(o => o.trackingID === trackingID)
-                            if (orderToUpdate && orderToUpdate.deliveryStatus !== extStatus) {
+                            const orderToUpdate = batch.find(o => String(o.trackingID).trim() === trackingID)
+                            if (orderToUpdate) {
+                                inspectedCount++
                                 let newInternalStatus = orderToUpdate.status
                                 const statusLower = extStatus.toLowerCase()
                                 
                                 if (statusLower.includes('livr') || statusLower.includes('delivered')) {
                                     newInternalStatus = 'DELIVERED'
-                                } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
+                                } else if (statusLower.includes('retour') || statusLower.includes('returned') || statusLower.includes('refus')) {
                                     newInternalStatus = 'RETURNED'
-                                } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
+                                } else if (statusLower.includes('annul') || statusLower.includes('cancel') || statusLower.includes('interess')) {
                                     newInternalStatus = 'CANCELLED'
+                                } else if (statusLower.includes('expedi') || statusLower.includes('shipped') || (statusLower.includes('ramass') && !statusLower.includes('attente'))) {
+                                    newInternalStatus = 'SHIPPED'
+                                } else if (statusLower.includes('transit') || statusLower.includes('chemin') || statusLower.includes('report') || statusLower.includes('programm') || statusLower.includes('reponse') || statusLower.includes('injoignable')) {
+                                    newInternalStatus = 'IN_TRANSIT'
                                 }
 
-                                await prisma.order.update({
-                                    where: { id: orderToUpdate.id },
-                                    data: {
-                                        deliveryStatus: extStatus,
-                                        deliverySyncAt: new Date(),
-                                        status: newInternalStatus
+                                if (orderToUpdate.deliveryStatus !== extStatus || orderToUpdate.status !== newInternalStatus) {
+                                    await prisma.order.update({
+                                        where: { id: orderToUpdate.id },
+                                        data: {
+                                            deliveryStatus: extStatus,
+                                            deliverySyncAt: new Date(),
+                                            status: newInternalStatus
+                                        }
+                                    })
+                                    updatedCount++
+
+                                    if (newInternalStatus !== orderToUpdate.status && (newInternalStatus === 'SHIPPED' || newInternalStatus === 'DELIVERED')) {
+                                        sendWhatsAppNotification({
+                                            orderId: orderToUpdate.id,
+                                            fullName: orderToUpdate.fullName,
+                                            phone: orderToUpdate.phone,
+                                            status: newInternalStatus,
+                                            trackingID: trackingID,
+                                            shippingCompanyName: 'WithYou'
+                                        }).catch(console.error)
                                     }
-                                })
-                                updatedCount++
+                                }
                             }
                         }
                     }
-                } catch (error) {
+                } catch (error: any) {
                     console.error('Erreur sync bulk WithYou:', error)
-                    errors.push('WithYou bulk sync failed')
+                    errors.push(`WithYou: ${error.message}`)
                 }
             }
         }
@@ -127,6 +162,7 @@ export async function GET(request: Request) {
                     
                     if (res.ok) {
                         const data = await res.json()
+                        inspectedCount++
                         const extStatus = data.status
                         if (extStatus && extStatus !== order.deliveryStatus) {
                             let newInternalStatus = order.status
@@ -151,24 +187,34 @@ export async function GET(request: Request) {
                             updatedCount++
                         }
                     }
-                } catch (err) {
+                } catch (err: any) {
                     console.error('Erreur API Olivraison', err)
+                    errors.push(`Olivraison: ${err.message}`)
                 }
             }
+        }
+
+        if (updatedCount > 0) {
+            revalidatePath('/[locale]/admin/orders', 'page')
+            revalidatePath('/fr/admin/orders')
+            revalidatePath('/ar/admin/orders')
+            revalidatePath('/en/admin/orders')
+            revalidatePath('/admin/orders')
         }
 
         await prisma.cronLog.create({
             data: {
                 jobName: "sync-delivery",
                 status: errors.length > 0 ? "WARNING" : "SUCCESS",
-                message: `Synchronisation de livraison terminée. ${updatedCount} commandes mises à jour.`,
-                details: { updatedCount, errors: errors.length > 0 ? errors : undefined }
+                message: `CRON WithYou terminé: ${inspectedCount} colis vérifiés, ${updatedCount} commandes mises à jour.`,
+                details: { inspectedCount, updatedCount, errors: errors.length > 0 ? errors : undefined }
             }
         })
 
         return NextResponse.json({ 
             success: true, 
             message: `Sync complete`, 
+            inspectedCount,
             updatedCount,
             errors: errors.length > 0 ? errors : undefined
         })
