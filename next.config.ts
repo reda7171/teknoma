@@ -209,6 +209,27 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Preserve existing blog links after normalizing legacy slugs containing spaces.
+      {
+        source: '/blog/Top Marketing Books for Entrepreneurs',
+        destination: '/blog/top-marketing-books-for-entrepreneurs',
+        permanent: true,
+      },
+      {
+        source: '/:locale/blog/Top Marketing Books for Entrepreneurs',
+        destination: '/:locale/blog/top-marketing-books-for-entrepreneurs',
+        permanent: true,
+      },
+      {
+        source: '/blog/Best Personal Finance Books',
+        destination: '/blog/best-personal-finance-books',
+        permanent: true,
+      },
+      {
+        source: '/:locale/blog/Best Personal Finance Books',
+        destination: '/:locale/blog/best-personal-finance-books',
+        permanent: true,
+      },
       {
         source: '/shop/cart',
         destination: '/cart',

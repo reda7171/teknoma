@@ -1,4 +1,4 @@
-import { getBookById, getBooks, getPopularBooks } from '@/lib/db/books'
+import { getBookById, getBooks, getCustomersAlsoLikedBooks } from '@/lib/db/books'
 import { getAuthorProfile } from '@/lib/db/authors'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
@@ -264,12 +264,12 @@ export default async function BookDetailPage({
     const displayDescription = getLocalizedDescription(book, locale);
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
-    // Récupérer les avis, note moyenne, citation et livres populaires pour cross-sell
-    const [reviews, ratingData, categoryConfig, popularBooksForCrossSell, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, latestPostsData, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
+    // Récupérer les avis, la note et les recommandations issues des commandes réelles
+    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, latestPostsData, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
         getBookReviews(bookId).catch(() => []),
         getBookAverageRating(bookId).catch(() => ({ average: 5, count: 0 })),
         book.category ? getCategoryConfigByName(book.category).catch(() => null) : Promise.resolve(null),
-        getPopularBooks(6).catch(() => []),
+        getCustomersAlsoLikedBooks(bookId, 4).catch(() => []),
         getSetting('contact_whatsapp').catch(() => null),
         getSetting('announcement_bar_enabled').catch(() => null),
         getSetting('announcement_bar_message').catch(() => null),
@@ -304,9 +304,11 @@ export default async function BookDetailPage({
         .filter((b) => b.id !== book.id)
         .slice(0, 4)
 
-    // Souvent achetés ensemble (cross-sell)
-    const frequentlyBoughtTogether = popularBooksForCrossSell
-        .filter((b) => b.id !== book.id && !filteredSimilarBooks.some((sim) => sim.id === b.id))
+    // Recommandations comportementales, complétées par la catégorie si nécessaire.
+    const customersAlsoLiked = [...coPurchasedBooks, ...filteredSimilarBooks]
+        .filter((candidate, index, books) =>
+            candidate.id !== book.id && books.findIndex(item => item.id === candidate.id) === index
+        )
         .slice(0, 2)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
@@ -766,12 +768,25 @@ export default async function BookDetailPage({
                                 )}
                             </div>
 
-                            {/* Frequently Bought Together (Upsell/Cross-sell) */}
-                            {frequentlyBoughtTogether.length > 0 && (
+                            {/* Recommandations basées sur les achats réels */}
+                            {customersAlsoLiked.length > 0 && (
                                 <div className="mt-6 md:mt-12 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                                    <h2 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-6">{tBook('FrequentlyBoughtTogether')}</h2>
+                                    <h2 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black mb-2">
+                                        {locale === 'ar'
+                                            ? 'العملاء الذين اشتروا هذا الكتاب أعجبهم أيضاً'
+                                            : locale === 'en'
+                                                ? 'Customers who bought this book also liked'
+                                                : 'Les clients ayant acheté ce livre ont aussi aimé'}
+                                    </h2>
+                                    <p className="text-xs font-medium text-gray-500 mb-6">
+                                        {locale === 'ar'
+                                            ? 'اقتراحات مستوحاة من اختيارات قرّائنا.'
+                                            : locale === 'en'
+                                                ? 'Suggestions inspired by our readers’ choices.'
+                                                : 'Des suggestions inspirées des choix de nos lecteurs.'}
+                                    </p>
                                     <div className="flex flex-col gap-3 sm:gap-4">
-                                        {frequentlyBoughtTogether.map(fbBook => {
+                                        {customersAlsoLiked.map(fbBook => {
                                             const fbDisplayTitle = getLocalizedTitle(fbBook, locale);
                                             const fbBookUrl = generateBookUrl(fbBook, locale);
                                             return (

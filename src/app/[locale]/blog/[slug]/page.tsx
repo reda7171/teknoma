@@ -314,9 +314,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4 md:pt-6 md:pb-6">
                     {/* Call to action vers le livre lié à l'article */}
                     {linkedBook && (
-                        <div className="mb-4 sm:mb-6 bg-white/95 backdrop-blur-md border border-amber-200/90 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all">
+                        <div className="mb-4 sm:mb-6 bg-white/95 backdrop-blur-md border border-amber-200/90 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all overflow-hidden">
                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-                                <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto text-center md:text-start rtl:md:text-right">
+                                <div className="w-full md:flex-1 min-w-0 flex flex-col md:flex-row items-center gap-4 text-center md:text-start rtl:md:text-right">
                                     {/* Cover en grande taille seule sur la 1ère ligne en mobile */}
                                     <div className="relative w-36 h-52 sm:w-44 sm:h-64 md:w-16 md:h-24 shrink-0 rounded-2xl md:rounded-xl overflow-hidden shadow-lg md:shadow bg-slate-50 border border-slate-100 mx-auto md:mx-0">
                                         <Image
@@ -331,20 +331,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     {/* Informations sous la cover en mobile */}
                                     <div className="flex-1 min-w-0 flex flex-col items-center md:items-start w-full">
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 mb-1.5">
-                                            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                                            {locale === 'ar' ? 'الكتاب موضوع هذا المقال' : locale === 'en' ? 'Book featured in this article' : 'Livre présenté dans cet article'}
+                                            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                            <span className="truncate">
+                                                {locale === 'ar' ? 'الكتاب موضوع هذا المقال' : locale === 'en' ? 'Book featured in this article' : 'Livre présenté dans cet article'}
+                                            </span>
                                         </div>
-                                        <h3 className="text-lg sm:text-xl font-black text-slate-900 line-clamp-2 md:truncate">
+                                        <h3 className="text-lg sm:text-xl font-black text-slate-900 line-clamp-2 w-full">
                                             {linkedBook.title}
                                         </h3>
-                                        <p className="text-xs sm:text-sm text-slate-500 font-bold truncate mt-0.5">
+                                        <p className="text-xs sm:text-sm text-slate-500 font-bold truncate mt-0.5 w-full">
                                             {linkedBook.author}
                                         </p>
-                                        <div className="flex items-center justify-center md:justify-start gap-2.5 mt-2">
-                                            <span className="text-base sm:text-lg font-black text-slate-900">
+                                        <div className="flex items-center justify-center md:justify-start gap-2.5 mt-2 flex-wrap">
+                                            <span className="text-base sm:text-lg font-black text-slate-900 whitespace-nowrap">
                                                 {linkedBook.price} {locale === 'ar' ? 'درهم' : 'DH'}
                                             </span>
-                                            <span className="text-[11px] sm:text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md font-bold">
+                                            <span className="text-[11px] sm:text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md font-bold whitespace-nowrap">
                                                 {locale === 'ar' ? 'متوفر • الدفع عند الاستلام' : 'En stock • COD'}
                                             </span>
                                         </div>
@@ -353,13 +355,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <div className="w-full md:w-auto shrink-0 flex items-center justify-center md:justify-end">
                                     <Link
                                         href={generateBookUrl(linkedBook, locale)}
-                                        className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                                        className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all whitespace-nowrap shrink-0"
                                     >
-                                        <ShoppingBag className="w-4 h-4 text-amber-400" />
+                                        <ShoppingBag className="w-4 h-4 text-amber-400 shrink-0" />
                                         <span>
                                             {locale === 'ar' ? 'اطلب نسختك الآن' : locale === 'en' ? 'Order your copy' : 'Commander le livre'}
                                         </span>
-                                        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                                        <ArrowRight className="w-4 h-4 rtl:rotate-180 shrink-0" />
                                     </Link>
                                 </div>
                             </div>
