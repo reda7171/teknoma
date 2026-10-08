@@ -7,6 +7,7 @@ import { createAuditLog } from './audit'
 import { withyouService } from '@/lib/delivery/withyou'
 import { normalizeCityForCarrier } from '@/lib/constants/cities'
 import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
+import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 import { OrderStatus } from '@prisma/client'
 
@@ -127,6 +128,17 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
         if (status === 'RETURNED') {
             const msg = `📦 *Retour Commande*\n\n🆔 \`${orderId.slice(0, 8)}\`\n👤 ${order.fullName}\n📱 ${order.phone}\n💰 ${order.total} درهم\n📍 ${order.city}${stockNote}`
             sendTelegramMessage(msg).catch(console.error)
+        }
+
+        // Notification WhatsApp client automatique si Expédié ou Livré
+        if (status === 'SHIPPED' || status === 'DELIVERED') {
+            sendWhatsAppNotification({
+                orderId,
+                fullName: order.fullName,
+                phone: order.phone,
+                status,
+                trackingID: order.trackingID
+            }).catch(console.error)
         }
 
         return {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withyouService } from '@/lib/delivery/withyou'
 import { revalidatePath } from 'next/cache'
+import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 // Maximum number of tracking IDs to sync at once
 const BATCH_SIZE = 50
@@ -123,6 +124,17 @@ export async function GET(request: Request) {
                                         }
                                     })
                                     updatedCount++
+
+                                    if (newInternalStatus !== orderToUpdate.status && (newInternalStatus === 'SHIPPED' || newInternalStatus === 'DELIVERED')) {
+                                        sendWhatsAppNotification({
+                                            orderId: orderToUpdate.id,
+                                            fullName: orderToUpdate.fullName,
+                                            phone: orderToUpdate.phone,
+                                            status: newInternalStatus,
+                                            trackingID: trackingID,
+                                            shippingCompanyName: 'WithYou'
+                                        }).catch(console.error)
+                                    }
                                 }
                             }
                         }
