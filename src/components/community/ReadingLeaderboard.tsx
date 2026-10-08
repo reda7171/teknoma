@@ -51,7 +51,13 @@ export default function ReadingLeaderboard({ topReaders }: { topReaders: Reader[
                         
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 overflow-hidden relative flex-shrink-0 border-2 border-white shadow-sm">
                             {reader.image ? (
-                                <Image src={reader.image} alt={reader.name || 'User'} fill className="object-cover" />
+                                <Image
+                                    src={reader.image}
+                                    alt={reader.name || 'User'}
+                                    fill
+                                    sizes="(max-width: 639px) 40px, 48px"
+                                    className="object-cover"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-600 font-black text-lg">
                                     {reader.name ? reader.name.charAt(0).toUpperCase() : 'U'}

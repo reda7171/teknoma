@@ -95,7 +95,8 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
                         return <Image 
                             src={finalImage} 
                             alt={testimonial.customerName} 
-                            fill 
+                            fill
+                            sizes="40px"
                             className="object-cover" 
                             unoptimized={process.env.NODE_ENV === 'development'} 
                             onError={(e) => {

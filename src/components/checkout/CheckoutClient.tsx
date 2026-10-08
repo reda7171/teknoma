@@ -39,7 +39,7 @@ export default function CheckoutClient({
     is3For4Active?: boolean;
 }) {
     const router = useRouter()
-    const { items, getTotalPrice, clearCart, discount: instantOfferDiscount } = useCartStore()
+    const { items, getTotalPrice, clearCart, discount: instantOfferDiscount, sessionId } = useCartStore()
     const { showNotification } = useUIStore()
     const [mounted, setMounted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -86,6 +86,7 @@ export default function CheckoutClient({
                     fullName: data.fullName,
                     paymentMethod: data.paymentMethod,
                     selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
+                    sessionId,
                     items,
                     total: finalTotal
                 })

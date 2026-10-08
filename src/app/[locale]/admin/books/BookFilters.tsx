@@ -11,6 +11,7 @@ interface ActiveFilters {
     lang: string;
     sort: string;
     jumia: string;
+    condition: string;
     category?: string;
     subCategory?: string;
 }
@@ -60,6 +61,7 @@ export default function BookFilters({
         if (newFilters.lang) params.set('lang', newFilters.lang)
         if (newFilters.sort) params.set('sort', newFilters.sort)
         if (newFilters.jumia) params.set('jumia', newFilters.jumia)
+        if (newFilters.condition) params.set('condition', newFilters.condition)
         if (newFilters.category) params.set('category', newFilters.category)
         if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
         
@@ -215,6 +217,33 @@ export default function BookFilters({
                                         </button>
                                     )
                                 })}
+                            </div>
+                        </div>
+
+                        {/* État du livre */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Package className="w-3 h-3" />
+                                État du livre
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: '', label: 'Tous' },
+                                    { id: 'new', label: 'Livres neufs' },
+                                    { id: 'old', label: "Livres d’occasion" }
+                                ].map(filter => (
+                                    <button
+                                        key={filter.id}
+                                        onClick={() => handleApplyFilters({ condition: filter.id })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            activeFilters.condition === filter.id
+                                                ? 'bg-emerald-600 text-white'
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 

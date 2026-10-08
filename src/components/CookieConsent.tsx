@@ -2,27 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { X, Cookie, ShieldCheck, Settings2 } from 'lucide-react'
+import { X, Cookie, Settings2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 
 export default function CookieConsent() {
-    const [isVisible, setIsVisible] = useState(false)
     const t = useTranslations('CookieConsent')
     const pathname = usePathname()
+    const isAdminPage = pathname?.split('/').some(segment => segment === 'admin')
+    const [isVisible, setIsVisible] = useState(!isAdminPage)
 
     useEffect(() => {
         const consent = localStorage.getItem('cookie-consent')
-        // Robust check for admin pages (handles /admin, /fr/admin, /ar/admin etc)
-        const isAdminPage = pathname?.split('/').some(segment => segment === 'admin')
-
-        if (!consent && !isAdminPage) {
-            const timer = setTimeout(() => {
-                setIsVisible(true)
-            }, 1500) // Slight delay for better UX
-            return () => clearTimeout(timer)
-        }
-    }, [pathname])
+        setIsVisible(!consent && !isAdminPage)
+    }, [isAdminPage])
 
     const handleAccept = () => {
         localStorage.setItem('cookie-consent', 'accepted')

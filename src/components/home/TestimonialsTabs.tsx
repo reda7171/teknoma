@@ -3,13 +3,27 @@
 import { useState } from 'react'
 import AudioTestimonial from '@/components/AudioTestimonial'
 import ScrollReveal from '@/components/ScrollReveal'
-import { Headphones, ImageIcon, MessageSquareText } from 'lucide-react'
-import Image from 'next/image'
+import { Headphones, ImageIcon } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 
+interface AudioTestimonialData {
+    id: string
+    customerName: string
+    audioUrl: string
+    avatarUrl?: string | null
+    duration?: number | null
+    createdAt: Date
+}
+
+interface ImageTestimonialData {
+    id: string
+    customerName: string
+    imageUrl?: string | null
+}
+
 interface TestimonialsTabsProps {
-    audioTestimonials: any[]
-    imageTestimonials: any[]
+    audioTestimonials: AudioTestimonialData[]
+    imageTestimonials: ImageTestimonialData[]
     locale: string
 }
 
@@ -19,6 +33,10 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
     )
 
     if (audioTestimonials.length === 0 && imageTestimonials.length === 0) return null
+
+    const visibleAudioTestimonials = audioTestimonials.slice(0, 8)
+    const visibleImageTestimonials = imageTestimonials.slice(0, 8)
+    const marqueeTestimonials = [...visibleImageTestimonials, ...visibleImageTestimonials]
 
     return (
         <div className="w-full flex flex-col items-center">
@@ -46,7 +64,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
             <div className="w-full min-h-[400px]">
                 {activeTab === 'audio' && audioTestimonials.length > 0 && (
                     <div className="flex flex-wrap justify-center gap-8 animate-in fade-in zoom-in-95 duration-500">
-                        {audioTestimonials.map((testimonial: any, idx: number) => (
+                        {visibleAudioTestimonials.map((testimonial, idx) => (
                             <ScrollReveal key={testimonial.id} delay={idx * 150} animation="animate-reveal-up">
                                 <AudioTestimonial testimonial={testimonial} />
                             </ScrollReveal>
@@ -57,7 +75,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                 {activeTab === 'image' && imageTestimonials.length > 0 && (
                     <div className="w-full overflow-hidden pb-8 pt-4 animate-in fade-in zoom-in-95 duration-500 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
                         <div className="flex w-max animate-marquee hover:[animation-play-state:paused] gap-6 px-4">
-                            {[...imageTestimonials, ...imageTestimonials, ...imageTestimonials, ...imageTestimonials].map((testimonial: any, idx: number) => {
+                            {marqueeTestimonials.map((testimonial, idx) => {
                                 const normalizedImg = testimonial.imageUrl?.trim() || '';
                                 const finalImage = normalizedImg.startsWith('http') || normalizedImg.startsWith('data:') 
                                     ? normalizedImg 
@@ -85,13 +103,12 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-white font-black text-base italic mb-1 drop-shadow-md">{testimonial.customerName}</p>
-                                                    <div className="flex text-yellow-400 drop-shadow-md">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <svg key={i} className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
-                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                            </svg>
-                                                        ))}
-                                                    </div>
+                                                    <span
+                                                        className="text-sm leading-none tracking-tight text-yellow-400 drop-shadow-md"
+                                                        aria-label="5 étoiles sur 5"
+                                                    >
+                                                        ★★★★★
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

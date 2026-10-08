@@ -182,7 +182,7 @@ function Stat({ value, label, color, tooltip }: { value: string | number; label:
     return (
         <div className={`group relative flex flex-col items-center px-3 sm:px-4 py-2 sm:py-2.5 ${colors[color]} border rounded-xl min-w-[50px] flex-1 sm:flex-none cursor-help hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-md`}>
             <span className="font-black text-sm sm:text-base leading-none">{value}</span>
-            <span className="text-[10px] font-bold uppercase mt-1.5 opacity-70">{label}</span>
+            <span className="text-[10px] font-extrabold uppercase mt-1.5">{label}</span>
 
             {tooltip && (
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300 pointer-events-none z-10 w-max">

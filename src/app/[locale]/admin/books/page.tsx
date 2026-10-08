@@ -14,7 +14,7 @@ import BookFilters from './BookFilters'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import { getAdminRole, getAdminUser } from '@/lib/actions/auth'
 
-export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, category?: string, subCategory?: string }> }) {
+export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
@@ -24,6 +24,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const langParam = params.lang || ''
     const sortParam = params.sort || ''
     const jumiaParam = params.jumia || ''
+    const conditionParam = params.condition || ''
     const categoryParam = params.category || ''
     const subCategoryParam = params.subCategory || ''
 
@@ -203,6 +204,15 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         })))
     }
 
+    // NEW = livre neuf. GOOD et USED sont regroupés comme livres d’occasion.
+    // Les packs et accessoires sont considérés comme neufs et sont donc exclus
+    // du filtre « Livres d’occasion ».
+    if (conditionParam === 'new') {
+        allProducts = allProducts.filter(product => product.productType !== 'BOOK' || product.condition === 'NEW')
+    } else if (conditionParam === 'old') {
+        allProducts = allProducts.filter(product => product.productType === 'BOOK' && ['GOOD', 'USED'].includes(product.condition))
+    }
+
     const totalBooks = allProducts.length
     const activeBooks = allProducts.filter(b => b.active).length
     const stockProducts = productTypes.includes('all') ? allProducts.filter(p => p.productType === 'BOOK') : allProducts
@@ -240,6 +250,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         lang: langParam,
         sort: sortParam,
         jumia: jumiaParam,
+        condition: conditionParam,
         category: categoryParam,
         subCategory: subCategoryParam
     }

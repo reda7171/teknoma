@@ -10,7 +10,7 @@ export async function POST(req: Request) {
         if (!limiter.success) return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 })
 
         const body = await req.json()
-        const { id, phone, email, fullName, items, total, paymentMethod, selectedBank } = body
+        const { id, phone, email, fullName, items, total, paymentMethod, selectedBank, sessionId } = body
 
         if (!items || items.length === 0) {
             return NextResponse.json({ success: true }) // Pas d'abandon si panier vide
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
         const safeFullName = fullName ? sanitizeInput(fullName as string) : ''
         const safePhone = phone ? sanitizeInput(phone as string) : null
         const safeEmail = email ? sanitizeInput(email as string) : null
+        const safeSessionId = sessionId ? sanitizeInput(sessionId as string) : null
 
         const cartData = JSON.stringify(items)
 
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
                             `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
                             `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
                             `📧 *Email:* ${safeEmail || 'Non renseigné'}\n` +
+                            `${safeSessionId ? `🔑 <b>Session ID:</b> <code>${safeSessionId}</code>\n` : ''}` +
                             `💳 *Paiement:* ${paymentInfo}\n` +
                             `💰 *Total:* ${total} DH\n` +
                             `\n_Contact ou mode de paiement mis à jour en temps réel._`;
@@ -92,6 +94,7 @@ export async function POST(req: Request) {
             const message = `🛒 *Début de Checkout (À Chaud)*\n\n` +
                 `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
                 `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
+                `${safeSessionId ? `🔑 <b>Session ID:</b> <code>${safeSessionId}</code>\n` : ''}` +
                 `💳 *Paiement:* ${paymentInfo}\n` +
                 `💰 *Total:* ${total} DH\n` +
                 `📦 *Articles:* ${items.length}\n` +

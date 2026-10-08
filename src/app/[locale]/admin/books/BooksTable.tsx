@@ -45,6 +45,7 @@ interface ActiveFilters {
     type: string;
     lang: string;
     sort: string;
+    condition: string;
 }
 
 export default function BooksTable({ books, pageNumber, totalProviderPages, activeFilters, limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, activeFilters: ActiveFilters, limit?: number }) {
@@ -207,6 +208,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
             if (activeFilters.type) params.set('type', activeFilters.type)
             if (activeFilters.lang) params.set('lang', activeFilters.lang)
             if (activeFilters.sort) params.set('sort', activeFilters.sort)
+            if (activeFilters.condition) params.set('condition', activeFilters.condition)
 
             const res = await fetch(`/api/admin/books/export-excel?${params.toString()}`)
             if (!res.ok) throw new Error('Export échoué')
@@ -417,6 +419,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         if (activeFilters.type) params.set('type', activeFilters.type)
         if (activeFilters.lang) params.set('lang', activeFilters.lang)
         if (activeFilters.sort) params.set('sort', activeFilters.sort)
+        if (activeFilters.condition) params.set('condition', activeFilters.condition)
         if (newLimit || limit !== 20) params.set('limit', (newLimit || limit).toString())
         params.set('page', page.toString())
         return `${pathname}?${params.toString()}`
@@ -433,6 +436,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         if (activeFilters.status) params.set('status', activeFilters.status)
         if (activeFilters.type) params.set('type', activeFilters.type)
         if (activeFilters.lang) params.set('lang', activeFilters.lang)
+        if (activeFilters.condition) params.set('condition', activeFilters.condition)
         params.set('sort', newSort)
         params.set('limit', limit.toString())
         params.set('page', '1')
@@ -714,7 +718,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     <div className="ml-4">
                                                                         <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
                                                                             <Link 
-                                                                                href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
+                                                                                href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`}
                                                                                 locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
                                                                                 title={displayTitle}
@@ -998,7 +1002,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                                             <Edit3 className="w-4 h-4 text-emerald-500" /> Modification rapide
                                                                                         </button>
                                                                                         <Link
-                                                                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
+                                                                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`}
                                                                                             onClick={() => setOpenDropdown(null)}
                                                                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                                                                                         >
@@ -1045,7 +1049,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         <button onClick={() => handleToggleStatus(book.id, book.active)} className={`p-1.5 rounded-md ${book.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`} title={book.active ? 'Désactiver' : 'Activer'}>
                                             {book.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                                         </button>
-                                        <Link aria-label="Modifier" href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
+                                        <Link aria-label="Modifier" href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
                                             <Edit className="w-3.5 h-3.5" />
                                         </Link>
                                         <button onClick={() => handleDelete(book.id, book.title)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md">
@@ -1057,7 +1061,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                     </div>
                                     <div className="flex-1 flex flex-col">
                                         <Link 
-                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}) }).toString()}`}
+                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`}
                                         >
                                             <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight hover:text-blue-600 hover:underline transition-colors">{displayTitle}</h3>
                                         </Link>

@@ -7,7 +7,7 @@ export async function testWithYouConnection() {
     try {
         await verifyAdmin()
         // Try to fetch cities as a lightweight test
-        const cities = await withyouService.getCities()
+        const cities = await withyouService.getCities({ fallback: false })
         if (cities && cities.length > 0) {
             return { success: true, message: `Connexion réussie ! API fonctionnelle (${cities.length} villes récupérées).` }
         }

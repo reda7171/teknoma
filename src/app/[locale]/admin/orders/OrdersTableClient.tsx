@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus, MessageCircle, Mail, Truck } from 'lucide-react'
 import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
@@ -116,9 +116,14 @@ export default function OrdersTableClient({
     deliveryInvoices = []
 }: OrdersTableClientProps) {
     const router = useRouter()
+    const [localOrders, setLocalOrders] = useState<Order[]>(orders)
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
     const [syncingId, setSyncingId] = useState<string | null>(null)
+
+    useEffect(() => {
+        setLocalOrders(orders)
+    }, [orders])
     
     // Modal state for Invoice Selection
     const [showInvoiceModal, setShowInvoiceModal] = useState(false)
@@ -131,6 +136,11 @@ export default function OrdersTableClient({
         try {
             const res = await syncDeliveryStatus(id)
             if (res.success) {
+                setLocalOrders(prev => prev.map(o => o.id === id ? {
+                    ...o,
+                    deliveryStatus: res.status ?? o.deliveryStatus,
+                    status: (res.internalStatus as any) ?? o.status
+                } : o))
                 router.refresh()
             } else {
                 alert(res.error || 'Erreur lors de la synchronisation')
@@ -147,6 +157,10 @@ export default function OrdersTableClient({
         try {
             const res = await updateOrderStatus(orderId, newStatus as any)
             if (res.success) {
+                setLocalOrders(prev => prev.map(o => o.id === orderId ? {
+                    ...o,
+                    status: newStatus
+                } : o))
                 router.refresh()
             } else {
                 alert(res.error || 'Erreur lors de la mise à jour')
@@ -175,6 +189,10 @@ export default function OrdersTableClient({
             if (res.success) {
                 setShowInvoiceModal(false)
                 setSelectedOrderForInvoice(null)
+                setLocalOrders(prev => prev.map(o => o.id === orderId ? {
+                    ...o,
+                    isPaid: newPaidStatus
+                } : o))
                 router.refresh()
             } else {
                 alert(res.error || 'Erreur lors de la mise à jour')
@@ -184,7 +202,7 @@ export default function OrdersTableClient({
         }
     }
 
-    const filteredOrders = orders.filter(order => {
+    const filteredOrders = localOrders.filter(order => {
         const matchesSearch = order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.phone.includes(searchTerm) ||
             order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -220,6 +238,7 @@ export default function OrdersTableClient({
         try {
             const res = await bulkDeleteOrders(selectedIds)
             if (res.success) {
+                setLocalOrders(prev => prev.filter(o => !selectedIds.includes(o.id)))
                 setSelectedIds([])
                 router.refresh()
             } else {
@@ -237,7 +256,7 @@ export default function OrdersTableClient({
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
                 <div className="flex items-center gap-4">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                        Total: <span className="text-gray-900 font-black">{filteredOrders.length}</span> / {orders.length}
+                        Total: <span className="text-gray-900 font-black">{filteredOrders.length}</span> / {localOrders.length}
                     </p>
                     {selectedIds.length > 0 && (
                         <button

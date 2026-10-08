@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
 import { withyouService } from '@/lib/delivery/withyou'
+import { normalizeCityForCarrier } from '@/lib/constants/cities'
 import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 
 import { OrderStatus } from '@prisma/client'
@@ -104,6 +105,10 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
             }
         })
 
+        revalidatePath('/[locale]/admin/orders', 'page')
+        revalidatePath('/fr/admin/orders')
+        revalidatePath('/ar/admin/orders')
+        revalidatePath('/en/admin/orders')
         revalidatePath('/admin/orders')
         revalidatePath(`/admin/orders/${orderId}`)
 
@@ -369,14 +374,18 @@ export async function syncOrderToWithYou(orderId: string) {
         if (!order) throw new Error('Commande introuvable')
         if (order.trackingID) throw new Error('Cette commande a déjà un tracking ID')
 
+        const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '')
+        const formattedPhone = cleanPhone.startsWith('212') ? '0' + cleanPhone.slice(3) : cleanPhone
+        const normalizedCity = normalizeCityForCarrier(order.city)
+
         // Préparer les données pour WithYou
         const packageData = {
-            villedest: order.city,
+            villedest: normalizedCity,
             nomdest: order.fullName,
-            teldest: order.phone,
+            teldest: formattedPhone || order.phone,
             adressedest: order.address,
             prixcolis: order.total.toString(),
-            refcolis: order.id,
+            refcolis: `RW-${order.id.slice(0, 8)}`,
             observation: `Commande Riwaya #${order.id.slice(0, 8)}`
         }
 
@@ -448,13 +457,17 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
         let syncWarning: string | null = null
 
         if (compName.includes('withyou')) {
+            const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '')
+            const formattedPhone = cleanPhone.startsWith('212') ? '0' + cleanPhone.slice(3) : cleanPhone
+            const normalizedCity = normalizeCityForCarrier(order.city)
+
             const packageData = {
-                villedest: order.city,
+                villedest: normalizedCity,
                 nomdest: order.fullName,
-                teldest: order.phone,
+                teldest: formattedPhone || order.phone,
                 adressedest: order.address,
                 prixcolis: order.total.toString(),
-                refcolis: order.id,
+                refcolis: `RW-${order.id.slice(0, 8)}`,
                 observation: `Commande Riwaya #${order.id.slice(0, 8)}`
             }
 
@@ -710,7 +723,21 @@ export async function syncDeliveryStatus(orderId: string) {
             }
         }
 
-        if (newStatus !== order.deliveryStatus) {
+        let mappedInternalStatus = order.status
+        const sLower = (newStatus || '').toLowerCase()
+        if (sLower.includes('livr') || sLower.includes('delivered')) {
+            mappedInternalStatus = 'DELIVERED'
+        } else if (sLower.includes('retour') || sLower.includes('returned') || sLower.includes('refus')) {
+            mappedInternalStatus = 'RETURNED'
+        } else if (sLower.includes('annul') || sLower.includes('cancel') || sLower.includes('interess')) {
+            mappedInternalStatus = 'CANCELLED'
+        } else if (sLower.includes('expedi') || sLower.includes('shipped') || (sLower.includes('ramass') && !sLower.includes('attente'))) {
+            mappedInternalStatus = 'SHIPPED'
+        } else if (sLower.includes('transit') || sLower.includes('chemin') || sLower.includes('report') || sLower.includes('programm')) {
+            mappedInternalStatus = 'IN_TRANSIT'
+        }
+
+        if (newStatus !== order.deliveryStatus || mappedInternalStatus !== order.status) {
             await prisma.order.update({
                 where: { id: orderId },
                 data: {
@@ -718,9 +745,23 @@ export async function syncDeliveryStatus(orderId: string) {
                     deliverySyncAt: new Date()
                 }
             })
+
+            if (mappedInternalStatus !== order.status) {
+                await updateOrderStatus(orderId, mappedInternalStatus, {
+                    skipSyncToProvider: true,
+                    historyComment: `Statut synchronisé depuis le transporteur: ${newStatus}`
+                })
+            }
+
+            revalidatePath('/[locale]/admin/orders', 'page')
+            revalidatePath('/fr/admin/orders')
+            revalidatePath('/ar/admin/orders')
+            revalidatePath('/en/admin/orders')
             revalidatePath('/admin/orders')
+            revalidatePath(`/fr/admin/orders/${orderId}`)
+            revalidatePath(`/ar/admin/orders/${orderId}`)
             revalidatePath(`/admin/orders/${orderId}`)
-            return { success: true, status: newStatus, message: 'Statut mis à jour avec succès' }
+            return { success: true, status: newStatus, internalStatus: mappedInternalStatus, message: 'Statut mis à jour avec succès' }
         }
 
         return { success: true, status: order.deliveryStatus, message: 'Le statut est déjà à jour' }
@@ -737,10 +778,12 @@ export async function bulkSyncDeliveries() {
         const activeOrders = await prisma.order.findMany({
             where: {
                 trackingID: { not: null },
-                status: {
-                    notIn: ['DELIVERED', 'RETURNED', 'CANCELLED']
-                },
-                shippingCompany: { not: null }
+                shippingCompany: { not: null },
+                OR: [
+                    { status: { notIn: ['DELIVERED'] } },
+                    { deliveryStatus: null },
+                    { deliveryStatus: { notIn: ['Livrer', 'Livre', 'Livré', 'DELIVERED'] } }
+                ]
             }
         })
 
@@ -754,7 +797,7 @@ export async function bulkSyncDeliveries() {
             }
         })
 
-        const companyMap = new Map(companies.map(c => [c.id, c.name.toLowerCase()]))
+        const companyMap = new Map<string, string>(companies.map(c => [c.id, c.name.toLowerCase()]))
 
         const updatedOrders: any[] = []
         const syncErrors: string[] = []
@@ -775,7 +818,9 @@ export async function bulkSyncDeliveries() {
         if (withYouOrders.length > 0) {
             for (let i = 0; i < withYouOrders.length; i += BATCH_SIZE) {
                 const batch = withYouOrders.slice(i, i + BATCH_SIZE)
-                const trackingIds = batch.map(o => o.trackingID!).filter(Boolean)
+                const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val.trim());
+                const trackingIds = batch.map(o => o.trackingID!).filter(id => Boolean(id) && !isUuid(id))
+                if (trackingIds.length === 0) continue
 
                 try {
                     const res = await withyouService.getStatus(trackingIds)
@@ -817,13 +862,13 @@ export async function bulkSyncDeliveries() {
 
                                 if (statusLower.includes('livr') || statusLower.includes('delivered')) {
                                     newInternalStatus = 'DELIVERED'
-                                } else if (statusLower.includes('retour') || statusLower.includes('returned')) {
+                                } else if (statusLower.includes('retour') || statusLower.includes('returned') || statusLower.includes('refus')) {
                                     newInternalStatus = 'RETURNED'
-                                } else if (statusLower.includes('annul') || statusLower.includes('cancel')) {
+                                } else if (statusLower.includes('annul') || statusLower.includes('cancel') || statusLower.includes('interess')) {
                                     newInternalStatus = 'CANCELLED'
-                                } else if (statusLower.includes('expedi') || statusLower.includes('shipped') || statusLower.includes('ramass')) {
+                                } else if (statusLower.includes('expedi') || statusLower.includes('shipped') || (statusLower.includes('ramass') && !statusLower.includes('attente'))) {
                                     newInternalStatus = 'SHIPPED'
-                                } else if (statusLower.includes('transit') || statusLower.includes('chemin')) {
+                                } else if (statusLower.includes('transit') || statusLower.includes('chemin') || statusLower.includes('report') || statusLower.includes('programm')) {
                                     newInternalStatus = 'IN_TRANSIT'
                                 }
 
@@ -942,6 +987,10 @@ export async function bulkSyncDeliveries() {
             }
         }
 
+        revalidatePath('/[locale]/admin/orders', 'page')
+        revalidatePath('/fr/admin/orders')
+        revalidatePath('/ar/admin/orders')
+        revalidatePath('/en/admin/orders')
         revalidatePath('/admin/orders')
         if (syncErrors.length > 0 && inspectedCount === 0 && updatedOrders.length === 0) {
             return {
