@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle } from 'lucide-react'
+import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle, DollarSign, Link2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // Résolution des icônes côté client (évite de passer des classes depuis Server Components)
 const ICON_MAP: Record<string, LucideIcon> = {
     BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag,
     Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff,
-    Archive, CalendarDays, CheckCircle,
+    Archive, CalendarDays, CheckCircle, DollarSign, Link2,
 }
 
 interface StatCard {
@@ -16,6 +16,7 @@ interface StatCard {
     value: string | number
     iconName: string
     color: string
+    trend?: number | null
 }
 
 interface StatsGridControllerProps {
@@ -173,6 +174,9 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 {visibleCards.map((stat) => {
                     const Icon = ICON_MAP[stat.iconName] || BookOpen
+                    const hasTrend = typeof stat.trend === 'number' && Number.isFinite(stat.trend)
+                    const trendIsPositive = hasTrend && stat.trend! > 0
+                    const trendIsNegative = hasTrend && stat.trend! < 0
                     return (
                         <div
                             key={stat.name}
@@ -186,8 +190,18 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
                                 </div>
                             </div>
                             <div className="mt-6 pt-4 border-t border-gray-50 flex items-center gap-2">
-                                <span className="text-[10px] font-black text-emerald-500 italic">+12%</span>
-                                <span className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">vs mois dernier</span>
+                                {hasTrend ? (
+                                    <>
+                                        <span className={`text-[10px] font-black italic ${trendIsPositive ? 'text-emerald-500' : trendIsNegative ? 'text-red-500' : 'text-gray-400'}`}>
+                                            {trendIsPositive ? '+' : ''}{stat.trend!.toFixed(1)}%
+                                        </span>
+                                        <span className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">vs mois dernier</span>
+                                    </>
+                                ) : stat.trend === null ? (
+                                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-tighter">Nouveau ce mois</span>
+                                ) : (
+                                    <span className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">Données cumulées</span>
+                                )}
                             </div>
                         </div>
                     )

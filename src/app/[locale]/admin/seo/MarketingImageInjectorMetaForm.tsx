@@ -232,34 +232,49 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
     async function injectExifAll() {
         setInjectingExif('all')
         setMessage('')
-        const entries = Object.entries(edits)
-        setProgress({ current: 0, total: entries.length, label: 'Injection des métadonnées EXIF...' })
+        setProgress({ current: 0, total: filtered.length, label: 'Injection des métadonnées EXIF...' })
+        let successCount = 0
+        let errorCount = 0
         try {
-            const chunkSize = 50
-            let totalInjected = 0
-
-            for (let i = 0; i < entries.length; i += chunkSize) {
-                const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
-                const res = await fetch('/api/admin/marketing-assets/exif-inject-bulk', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ edits: chunk })
-                })
-                
-                const contentType = res.headers.get('content-type')
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error(`Erreur serveur (${res.status}): Réponse non JSON.`)
+            // Traitement 1 par 1 pour éviter le timeout 504
+            for (let i = 0; i < filtered.length; i++) {
+                const asset = filtered[i]
+                const edit = edits[asset.id]
+                if (!edit) {
+                    setProgress({ current: i + 1, total: filtered.length, label: 'Injection des métadonnées EXIF...' })
+                    continue
                 }
-
-                const data = await res.json()
-                if (res.ok && data.success) {
-                    totalInjected += data.count || Object.keys(chunk).length
-                } else {
-                    throw new Error(data.error || `Statut ${res.status}`)
+                try {
+                    const res = await fetch(`/api/admin/marketing-assets/${asset.id}/exif-inject`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: edit.title, keywords: edit.keywords })
+                    })
+                    const contentType = res.headers.get('content-type')
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await res.json()
+                        if (res.ok && data.success) {
+                            successCount++
+                            setExifSuccess(prev => new Set([...prev, asset.id]))
+                        } else {
+                            errorCount++
+                            console.error(`Erreur EXIF ${asset.name}:`, data.error || res.statusText)
+                        }
+                    } else {
+                        errorCount++
+                        console.error(`Erreur EXIF ${asset.name}: réponse non-JSON (${res.status})`)
+                    }
+                } catch (e) {
+                    errorCount++
+                    console.error(`Erreur réseau EXIF ${asset.name}:`, e)
                 }
-                setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Injection des métadonnées EXIF...' })
+                setProgress({ current: i + 1, total: filtered.length, label: 'Injection des métadonnées EXIF...' })
             }
-            setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
+            if (errorCount > 0) {
+                setMessage(`L'injection EXIF a été effectuée sur ${successCount} images ! (${errorCount} erreurs, vérifiez la console)`)
+            } else {
+                setMessage(`L'injection EXIF a été effectuée sur ${successCount} images !`)
+            }
         } catch (e: any) {
             setMessage('Erreur réseau lors de l\'injection EXIF globale: ' + e.message)
         } finally {

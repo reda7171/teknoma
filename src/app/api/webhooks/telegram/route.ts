@@ -1329,9 +1329,19 @@ export async function POST(req: Request) {
                         const { JumiaAPI } = await import('@/lib/jumia-api')
                         const jumia = await JumiaAPI.getInstance()
                         if (jumia) {
-                            // Jumia uses ISO format.
-                            const createdAfter = start.toISOString().split('T')[0]
-                            const createdBefore = end.toISOString().split('T')[0]
+                            // Jumia utilise une borne de fin exclusive. Pour aujourd'hui,
+                            // envoyer la même date en début et fin renvoie une liste vide.
+                            const formatLocalDate = (date: Date) => {
+                                const year = date.getFullYear()
+                                const month = String(date.getMonth() + 1).padStart(2, '0')
+                                const day = String(date.getDate()).padStart(2, '0')
+                                return `${year}-${month}-${day}`
+                            }
+                            const exclusiveEnd = new Date(end)
+                            exclusiveEnd.setDate(exclusiveEnd.getDate() + 1)
+                            exclusiveEnd.setHours(0, 0, 0, 0)
+                            const createdAfter = formatLocalDate(start)
+                            const createdBefore = formatLocalDate(exclusiveEnd)
 
                             // On demande jusqu'à 500 commandes pour couvrir un mois entier
                             const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
@@ -1342,13 +1352,13 @@ export async function POST(req: Request) {
                                 
                                 jumiaStats.count++
                                 
-                                const isCanceled = status === 'canceled' || status === 'failed' || status === 'returned';
+                                const isCanceled = status === 'canceled' || status === 'cancelled' || status === 'failed' || status === 'returned';
                                 if (!isCanceled) {
                                     jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
                                 }
                                 
                                 if (status === 'pending') jumiaStats.pending++
-                                else if (status === 'shipped' || status === 'ready-to-ship') jumiaStats.shipped++
+                                else if (status === 'shipped' || status === 'ready-to-ship' || status === 'ready_to_ship') jumiaStats.shipped++
                                 else if (status === 'delivered') jumiaStats.delivered++
                                 else if (isCanceled) jumiaStats.canceled++
                             }
@@ -1386,18 +1396,35 @@ export async function POST(req: Request) {
                             },
                             _count: { url: true },
                             orderBy: { _count: { url: 'desc' } },
-                            take: 3
+                            // Une même fiche peut avoir plusieurs URLs (locale, slug, query).
+                            // On récupère davantage de lignes avant de les fusionner par UUID.
+                            take: 30
                         })
-                        
-                        if (topViews.length > 0) {
+
+                        const viewsByBookId = new Map<string, number>()
+                        for (const view of topViews) {
+                            const bookId = view.url.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i)?.[0]
+                            if (bookId) {
+                                viewsByBookId.set(bookId, (viewsByBookId.get(bookId) || 0) + view._count.url)
+                            }
+                        }
+
+                        const rankedBookViews = [...viewsByBookId.entries()]
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 3)
+                        const viewedBooks = rankedBookViews.length > 0
+                            ? await prisma.book.findMany({
+                                where: { id: { in: rankedBookViews.map(([id]) => id) } },
+                                select: { id: true, title: true }
+                            })
+                            : []
+                        const titlesById = new Map(viewedBooks.map(book => [book.id, book.title]))
+
+                        if (rankedBookViews.length > 0) {
                             text += `\n\n👀 <b>LIVRES LES PLUS CONSULTÉS :</b>`
-                            for (const view of topViews) {
-                                // Extraire le titre du livre de l'URL si possible ou juste l'URL
-                                const bookId = view.url.split('/').pop()?.split('?')[0]
-                                if (bookId && bookId.length > 20) {
-                                    const book = await prisma.book.findUnique({ where: { id: bookId }, select: { title: true } })
-                                    text += `\n• ${escapeHtml(book?.title || 'Livre')} (<b>${view._count.url}</b> vues)`
-                                }
+                            for (const [bookId, viewCount] of rankedBookViews) {
+                                const title = titlesById.get(bookId)
+                                if (title) text += `\n• ${escapeHtml(title)} (<b>${viewCount}</b> vues)`
                             }
                         }
                     }

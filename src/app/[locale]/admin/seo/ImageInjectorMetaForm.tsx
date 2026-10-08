@@ -12,6 +12,7 @@ interface Book {
     imageTitle?: string
     imageKeywords?: string
     category?: string
+    language?: string
 }
 
 interface ImageInjectorMetaFormProps {
@@ -261,39 +262,48 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     async function injectExifAll() {
         setInjectingExif('all')
         setMessage('')
-        const entries = Object.entries(edits)
-        setProgress({ current: 0, total: entries.length, label: 'Injection des métadonnées EXIF...' })
+        setProgress({ current: 0, total: filtered.length, label: 'Injection des métadonnées EXIF...' })
+        let successCount = 0
+        let errorCount = 0
         try {
-            const chunkSize = 50
-            let totalInjected = 0
-            let errorCount = 0
-
-            for (let i = 0; i < entries.length; i += chunkSize) {
-                const chunk = Object.fromEntries(entries.slice(i, i + chunkSize))
-                const res = await fetch('/api/admin/books/exif-inject-bulk', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ edits: chunk })
-                })
-                
-                const contentType = res.headers.get('content-type')
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error(`Erreur serveur (${res.status}): La réponse n'est pas au format JSON. (Charge utile trop volumineuse ?)`)
+            // Traitement 1 par 1 pour éviter le timeout 504
+            for (let i = 0; i < filtered.length; i++) {
+                const book = filtered[i]
+                const edit = edits[book.id]
+                if (!edit) {
+                    setProgress({ current: i + 1, total: filtered.length, label: 'Injection des métadonnées EXIF...' })
+                    continue
                 }
-
-                const data = await res.json()
-                if (res.ok && data.success) {
-                    totalInjected += data.count || Object.keys(chunk).length
-                } else {
-                    errorCount += Object.keys(chunk).length
-                    console.error(`Erreur chunk d'injection:`, data.error || res.statusText)
+                try {
+                    const res = await fetch(`/api/admin/books/${book.id}/exif-inject`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: edit.title, keywords: edit.keywords })
+                    })
+                    const contentType = res.headers.get('content-type')
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await res.json()
+                        if (res.ok && data.success) {
+                            successCount++
+                            setExifSuccess(prev => new Set([...prev, book.id]))
+                        } else {
+                            errorCount++
+                            console.error(`Erreur EXIF ${book.title}:`, data.error || res.statusText)
+                        }
+                    } else {
+                        errorCount++
+                        console.error(`Erreur EXIF ${book.title}: réponse non-JSON (${res.status})`)
+                    }
+                } catch (e) {
+                    errorCount++
+                    console.error(`Erreur réseau EXIF ${book.title}:`, e)
                 }
-                setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Injection des métadonnées EXIF...' })
+                setProgress({ current: i + 1, total: filtered.length, label: 'Injection des métadonnées EXIF...' })
             }
             if (errorCount > 0) {
-                setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images ! (${errorCount} erreurs, vérifiez la console)`)
+                setMessage(`L'injection EXIF a été effectuée sur ${successCount} images ! (${errorCount} erreurs, vérifiez la console)`)
             } else {
-                setMessage(`L'injection EXIF a été effectuée sur ${totalInjected} images !`)
+                setMessage(`L'injection EXIF a été effectuée sur ${successCount} images !`)
             }
         } catch (e: any) {
             setMessage('Erreur réseau lors de l\'injection EXIF globale: ' + e.message)
@@ -353,24 +363,30 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
         
-        const frKeywords = "librairie en ligne maroc, acheter livres en ligne maroc, livres en ligne maroc, acheter livre maroc, vente de livres en ligne, librairie en ligne rabat, librairie en ligne casablanca, librairie en ligne maroc pas cher, livres pas cher maroc, commander livre en ligne maroc, livraison livres maroc, livres avec livraison gratuite maroc, romans en ligne maroc, acheter romans maroc, romans pas cher maroc, romans français maroc, romans arabes maroc, romans policiers maroc, romans d'amour maroc, romans historiques maroc, livres développement personnel maroc, acheter livres développement personnel, livres motivation maroc, livres psychologie maroc, livres business maroc, livres entrepreneuriat maroc, livres productivité, livres confiance en soi, acheter livre en ligne, commander livre en ligne, acheter roman en ligne, acheter livres pas cher, livre prix maroc, roman prix maroc, pack livres maroc, pack romans maroc, livres livraison gratuite, librairie livraison maroc";
-        const arKeywords = "مكتبة إلكترونية المغرب, شراء الكتب أونلاين المغرب, شراء الكتب عبر الإنترنت المغرب, شراء روايات المغرب, كتب وروايات المغرب, أفضل الكتب, أفضل الروايات, روايات عربية, روايات عالمية, كتب التنمية الذاتية, كتب تطوير الذات, كتب علم النفس, كتب الأعمال, كتب ريادة الأعمال, كتب التحفيز, كتب الإنتاجية, كتب الثقة بالنفس, كتب ورقية المغرب, شراء كتب أونلاين, توصيل الكتب في المغرب, توصيل الكتب مجانا, مكتبة إلكترونية مغربية, روايات للبيع المغرب, كتب للبيع المغرب";
-        const enKeywords = "online bookstore Morocco, online bookshop Morocco, buy books online Morocco, books online Morocco, buy books Morocco, books for sale Morocco, cheap books Morocco, affordable books Morocco, online library Morocco, book delivery Morocco, free book delivery Morocco, buy novels online Morocco, novels Morocco, fiction books Morocco, Arabic books Morocco, French books Morocco, self development books Morocco, personal development books Morocco, psychology books Morocco, business books Morocco, entrepreneurship books Morocco, productivity books, motivational books, best books to read, book store Morocco";
+        // Mots-clés FR — longue traîne géolocalisée pour battre Mylibrairie / LivreMoi / DSM
+        const frKeywords = "librairie en ligne maroc, librairie livraison maroc, acheter livre maroc, acheter livres en ligne maroc, livres en ligne maroc, commander livre en ligne maroc, livraison livres maroc, livraison livre à domicile maroc, livraison rapide livre maroc, livres pas cher maroc, livres moins cher maroc, meilleur prix livre maroc, librairie en ligne rabat, librairie en ligne casablanca, librairie en ligne tanger, librairie en ligne marrakech, librairie en ligne agadir, librairie en ligne fes, livres livraison casablanca, livres livraison rabat, livres livraison tanger, acheter roman maroc, roman pas cher maroc, roman en ligne maroc, romans français maroc, romans arabes maroc, romans policiers maroc, romans historiques maroc, romans d'amour maroc, best-sellers maroc, nouveautés livres maroc, livres développement personnel maroc, livres motivation maroc, livres psychologie maroc, livres business maroc, livres entrepreneuriat maroc, livres confiance en soi, livres bien-être maroc, livres enfants maroc, livres scolaires maroc, livres jeunesse maroc, livres manga maroc, pack livres maroc, pack romans maroc, coffret livres maroc, riwaya librairie maroc, riwaya livres, librairie riwaya, acheter livre paiement à la livraison maroc, livre cod maroc, livre cash on delivery maroc, vente livre en ligne maroc, boutique livre maroc, site livre maroc";
+
+        // Mots-clés AR — géolocalisés Maroc
+        const arKeywords = "مكتبة إلكترونية المغرب, شراء الكتب أونلاين المغرب, شراء كتب عبر الإنترنت المغرب, توصيل الكتب المغرب, توصيل كتب للمنزل المغرب, كتب بأرخص الأسعار المغرب, أفضل مكتبة إلكترونية مغربية, شراء روايات المغرب, روايات عربية للبيع المغرب, روايات عالمية للبيع المغرب, كتب التنمية الذاتية المغرب, كتب تطوير الذات, كتب علم النفس, كتب الأعمال والريادة, كتب التحفيز والإنتاجية, كتب للأطفال المغرب, كتب مدرسية المغرب, مكتبة رواية المغرب, شراء كتب بالدفع عند التسليم, كتب كاش أون ديليفري المغرب, أفضل الكتب المغرب, كتب للبيع بالمغرب, توصيل سريع للكتب المغرب, طلب كتب أونلاين المغرب, موقع بيع الكتب المغرب";
+
+        // Mots-clés EN — Morocco English book buyers
+        const enKeywords = "online bookstore Morocco, buy books online Morocco, book delivery Morocco, books delivered to your door Morocco, cheap books Morocco, best price books Morocco, fast book delivery Morocco, online library Morocco, bookshop Morocco, buy novels Morocco, fiction books Morocco, self help books Morocco, personal development books Morocco, business books Morocco, children books Morocco, school books Morocco, English books Morocco, French books Morocco, Arabic books Morocco, book store Casablanca, book store Rabat, book store Tangier, best books Morocco, new releases books Morocco, riwaya bookstore, riwaya books Morocco, book cash on delivery Morocco, COD books Morocco, order books online Morocco";
 
         books.forEach(b => {
             let baseKeywords = "";
             if (b.language === 'ar') baseKeywords = arKeywords;
             else if (b.language === 'en') baseKeywords = enKeywords;
-            else baseKeywords = frKeywords; // Default to French if 'fr' or undefined
+            else baseKeywords = frKeywords;
 
             updated[b.id] = {
                 alt: `${b.title} - ${b.author}${b.category ? ` | ${b.category}` : ''} | Librairie Riwaya Maroc`,
                 title: `Acheter "${b.title}" de ${b.author} - Livraison rapide au Maroc | Riwaya`,
-                keywords: `${b.title}, ${b.author}, livre, riwaya, acheter livre maroc${b.category ? `, ${b.category}` : ''}, ${baseKeywords}`
+                keywords: `${b.title}, ${b.author}, livre, riwaya${b.category ? `, ${b.category}` : ''}, ${baseKeywords}`
             }
         })
         setEdits(updated)
     }
+
 
     return (
         <div className="space-y-6">
