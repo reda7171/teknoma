@@ -6,20 +6,38 @@ import Script from 'next/script'
 
 declare global {
     interface Window {
-        fbq: any
-        _fbq: any
+        fbq?: (...args: unknown[]) => void
+        _fbq?: (...args: unknown[]) => void
     }
 }
 
-export const trackEvent = (eventName: string, data?: Record<string, any>) => {
+function sanitizePixelData(data?: Record<string, unknown>) {
+    if (!data) return undefined
+
+    const sanitized = { ...data }
+    if ('currency' in sanitized) {
+        const rawCurrency = String(sanitized.currency || '').trim().toUpperCase()
+        sanitized.currency = ['DH', 'DHS', 'درهم'].includes(rawCurrency)
+            ? 'MAD'
+            : /^[A-Z]{3}$/.test(rawCurrency) ? rawCurrency : 'MAD'
+    }
+    if ('value' in sanitized) {
+        const numericValue = Number(sanitized.value)
+        if (Number.isFinite(numericValue)) sanitized.value = numericValue
+        else delete sanitized.value
+    }
+    return sanitized
+}
+
+export const trackEvent = (eventName: string, data?: Record<string, unknown>) => {
     if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('track', eventName, data)
+        window.fbq('track', eventName, sanitizePixelData(data))
     }
 }
 
-export const trackCustomEvent = (eventName: string, data?: Record<string, any>) => {
+export const trackCustomEvent = (eventName: string, data?: Record<string, unknown>) => {
     if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('trackCustom', eventName, data)
+        window.fbq('trackCustom', eventName, sanitizePixelData(data))
     }
 }
 

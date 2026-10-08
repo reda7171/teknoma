@@ -63,6 +63,10 @@ scratch/
 # Public uploads (except placeholders)
 /public/uploads/*
 !/public/uploads/.gitkeep
+!/public/uploads/profiles/
+/public/uploads/profiles/*
+!/public/uploads/profiles/wikidata_*.webp
+!/public/uploads/profiles/wikimedia-attribution.json
 !/public/book-placeholder.png
 
 # Standalone build artifacts

@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { useCartStore } from '@/store/cart'
 import { Gift, X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
 import Confetti from 'react-confetti'
 
 export default function InstantOfferPopup() {
@@ -11,29 +10,48 @@ export default function InstantOfferPopup() {
     const applyDiscount = useCartStore(state => state.applyDiscount)
     const discount = useCartStore(state => state.discount)
     const [offer, setOffer] = useState<{ id: string, discount: number } | null>(null)
-    const t = useTranslations('Common')
     const [showConfetti, setShowConfetti] = useState(false)
 
     useEffect(() => {
         if (!sessionId) return
 
+        let timeoutId: ReturnType<typeof setTimeout> | undefined
+        let cancelled = false
+        let consecutiveFailures = 0
+
         const checkOffer = async () => {
+            let abortId: ReturnType<typeof setTimeout> | undefined
             try {
-                const res = await fetch(`/api/cart/offer?sessionId=${sessionId}`)
+                const controller = new AbortController()
+                abortId = setTimeout(() => controller.abort(), 8000)
+                const res = await fetch(`/api/cart/offer?sessionId=${encodeURIComponent(sessionId)}`, {
+                    cache: 'no-store',
+                    signal: controller.signal
+                })
                 if (res.ok) {
                     const data = await res.json()
-                    if (data.offer && data.offer.id) {
+                    consecutiveFailures = 0
+                    if (!cancelled && data.offer?.id) {
                         setOffer(data.offer)
                     }
+                } else {
+                    consecutiveFailures += 1
                 }
-            } catch (error) {
-                console.error('Error checking offer:', error)
+            } catch {
+                consecutiveFailures += 1
+            } finally {
+                if (abortId) clearTimeout(abortId)
+                if (!cancelled) {
+                    timeoutId = setTimeout(checkOffer, consecutiveFailures > 0 ? 60000 : 15000)
+                }
             }
         }
 
-        // Poll every 5 seconds
-        const interval = setInterval(checkOffer, 5000)
-        return () => clearInterval(interval)
+        void checkOffer()
+        return () => {
+            cancelled = true
+            if (timeoutId) clearTimeout(timeoutId)
+        }
     }, [sessionId])
 
     useEffect(() => {

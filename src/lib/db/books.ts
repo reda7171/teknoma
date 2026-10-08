@@ -355,6 +355,58 @@ export async function getPopularBooks(limit = 6) {
 }
 
 /**
+ * Livres achetés dans les mêmes commandes que le livre consulté.
+ * Seules les commandes valides sont prises en compte et aucune donnée client
+ * n'est chargée ou exposée.
+ */
+export async function getCustomersAlsoLikedBooks(bookId: string, limit = 4) {
+    return getCached(
+        `book:customers-also-liked:${bookId}:${limit}`,
+        async () => {
+            const coPurchases = await prisma.orderItem.groupBy({
+                by: ['bookId'],
+                where: {
+                    type: 'BOOK',
+                    bookId: { not: null, notIn: [bookId] },
+                    order: {
+                        status: {
+                            in: ['CONFIRMED', 'SHIPPED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED']
+                        },
+                        items: {
+                            some: { type: 'BOOK', bookId }
+                        }
+                    }
+                },
+                _sum: { quantity: true },
+                orderBy: { _sum: { quantity: 'desc' } },
+                take: limit * 2
+            })
+
+            const rankedIds = coPurchases
+                .map(item => item.bookId)
+                .filter((id): id is string => Boolean(id))
+
+            if (rankedIds.length === 0) return []
+
+            const books = await prisma.book.findMany({
+                where: {
+                    id: { in: rankedIds },
+                    active: true,
+                    stock: { gt: 0 }
+                }
+            })
+            const booksById = new Map(books.map(book => [book.id, book]))
+
+            return rankedIds
+                .map(id => booksById.get(id))
+                .filter((book): book is NonNullable<typeof book> => Boolean(book))
+                .slice(0, limit)
+        },
+        3600
+    )
+}
+
+/**
  * Récupère les livres d'occasion (déjà utilisés)
  */
 export async function getUsedBooks(limit = 6) {

@@ -26,13 +26,22 @@ export async function GET(req: Request) {
         })
 
         if (offer) {
-            return NextResponse.json({ offer })
+            return NextResponse.json({ offer }, {
+                headers: { 'Cache-Control': 'no-store' }
+            })
         }
 
-        return NextResponse.json({ offer: null })
+        return NextResponse.json({ offer: null }, {
+            headers: { 'Cache-Control': 'no-store' }
+        })
     } catch (error) {
         console.error('Erreur récupération offre:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        // Une offre instantanée est optionnelle : le panier doit continuer à
+        // fonctionner si cette table ou la base est momentanément indisponible.
+        return NextResponse.json(
+            { offer: null, unavailable: true },
+            { headers: { 'Cache-Control': 'no-store' } }
+        )
     }
 }
 

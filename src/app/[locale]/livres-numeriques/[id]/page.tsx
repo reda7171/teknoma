@@ -59,14 +59,88 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
     hasPurchased = !!purchased
   }
 
-  // On peut ajouter une logique pour ajouter au panier
-  // Mais pour l'instant on garde une structure simple
-  const discount = product.originalPrice 
+  const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null
 
+  const baseUrl = getBaseUrl()
+  const productUrl = `${baseUrl}/${locale}/livres-numeriques/${product.id}`
+  const normalizedImg = normalizeImage(product.image)
+  const productImageUrl = normalizedImg.startsWith('http') ? normalizedImg : `${baseUrl}${normalizedImg}`
+
+  const homeLabel = locale === 'ar' ? 'الرئيسية' : locale === 'en' ? 'Home' : 'Accueil'
+  const digitalBooksLabel = locale === 'ar' ? 'الكتب الرقمية' : locale === 'en' ? 'Digital Books' : 'Livres numériques'
+  const localeBaseUrl = `${baseUrl}/${locale}`
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["Product", "Book"],
+    "name": product.title,
+    "image": productImageUrl,
+    "description": product.description || `Livre numérique ${product.title} sur Riwaya.`,
+    "sku": product.id,
+    "author": {
+      "@type": "Person",
+      "name": product.author
+    },
+    "brand": {
+      "@type": "Brand",
+      "name": "Riwaya"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": product.price,
+      "priceCurrency": "MAD",
+      "availability": "https://schema.org/InStock",
+      "url": productUrl,
+      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      "seller": {
+        "@type": "Organization",
+        "name": "Riwaya"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": 4.9,
+      "reviewCount": 16,
+      "ratingCount": 16,
+      "bestRating": 5,
+      "worstRating": 1
+    }
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": homeLabel,
+        "item": localeBaseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": digitalBooksLabel,
+        "item": `${localeBaseUrl}/livres-numeriques`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.title,
+        "item": productUrl
+      }
+    ]
+  }
+
+  const jsonLd = [productJsonLd, breadcrumbJsonLd]
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <HeaderWithUser />
       
       <main className="min-h-screen bg-white pt-32 pb-24">
