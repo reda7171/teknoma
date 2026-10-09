@@ -595,6 +595,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                     </button>
                 </div>
                 <div className="flex-1 overflow-y-auto pb-24 overscroll-contain">
+                    {mounted && isMobileMenuOpen && (
                     <nav className="flex flex-col space-y-3 p-4" suppressHydrationWarning>
                         {/* Mobile Actions First */}
                         <div className="pb-4 mb-2 border-b border-gray-100">
@@ -746,6 +747,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                             <LanguageSwitcher upward={true} />
                         </div>
                     </nav>
+                    )}
                 </div>
             </div>
 

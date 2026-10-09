@@ -1357,7 +1357,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         body::-webkit-scrollbar { display: none !important; }
         body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
       `}} />
-      <main className="home-page min-h-screen bg-white overflow-x-hidden">
+      <div className="home-page min-h-screen bg-white overflow-x-hidden">
         {finalOrder.map(key => renderSection(key))}
 
         {/* CTA + AEO fusionnés */}
@@ -1397,7 +1397,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <Suspense fallback={null}>
           <GoogleOneTapWrapper />
         </Suspense>
-      </main>
+      </div>
     </>
   )
 }

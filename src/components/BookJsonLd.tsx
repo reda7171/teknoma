@@ -69,6 +69,12 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
     }
   ];
 
+  const safeImageUrl = (imageUrl && imageUrl.startsWith('http'))
+    ? imageUrl
+    : (imageUrl && imageUrl.startsWith('/'))
+      ? `${baseUrl}${imageUrl}`
+      : `${baseUrl}/images/og-books.png`;
+
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -82,13 +88,15 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         },
         "sku": book.id,
         ...(showIsbn ? { "isbn": validIsbn } : {}),
+        ...(showIsbn && validIsbn?.length === 13 ? { "gtin13": validIsbn } : {}),
+        ...(showIsbn && validIsbn?.length === 10 ? { "gtin10": validIsbn } : {}),
         "inLanguage": locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
         "publisher": {
           "@type": "Organization",
           "name": "Riwaya",
           "url": baseUrl
         },
-        "image": imageUrl,
+        "image": safeImageUrl,
         "url": bookUrl,
         ...(book.category ? { "genre": book.category } : {}),
         ...(book.numberOfPages ? { "numberOfPages": book.numberOfPages } : {}),

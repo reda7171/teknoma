@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
             // Règle générale pour TOUS les bots (y compris Google, Bing, etc.)
             {
                 userAgent: '*',
-                allow: '/',
+                allow: ['/', '/api/merchant-image', '/api/merchant-image/*'],
                 disallow: [
                     '/admin',
                     '/admin/*',
@@ -25,10 +25,10 @@ export default function robots(): MetadataRoute.Robots {
                     '/*/orders',
                 ],
             },
-            // Autorisation explicite pour Google AdSense
+            // Autorisation explicite pour Google AdSense et Googlebot
             {
-                userAgent: ['Mediapartners-Google', 'Googlebot', 'AdsBot-Google'],
-                allow: '/',
+                userAgent: ['Mediapartners-Google', 'Googlebot', 'Googlebot-Image', 'AdsBot-Google'],
+                allow: ['/', '/api/merchant-image', '/api/merchant-image/*'],
                 disallow: [
                     '/admin',
                     '/admin/*',

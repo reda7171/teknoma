@@ -219,6 +219,7 @@ export async function generateMetadata({
             'product:price:currency': 'MAD',
             'product:availability': book.stock > 0 ? 'in stock' : 'out of stock',
             'product:condition': 'new',
+            'product:retailer_item_id': book.id,
             'og:price:amount': `${book.price}`,
             'og:price:currency': 'MAD',
         },

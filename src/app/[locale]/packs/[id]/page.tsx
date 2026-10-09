@@ -103,6 +103,7 @@ export async function generateMetadata({
             'product:price:currency': 'MAD',
             'product:availability': 'in stock',
             'product:condition': 'new',
+            'product:retailer_item_id': `PACK-${pack.id}`,
             'og:price:amount': `${displayPrice}`,
             'og:price:currency': 'MAD',
         },
@@ -150,13 +151,17 @@ export default async function PackDetailPage({
 
     const baseUrl = getBaseUrl()
     const localeBaseUrl = `${baseUrl}/${locale}`
+    const packRawImage = pack.image || pack.books[0]?.book.image || '/images/og-packs.png'
+    const packImageUrl = packRawImage.startsWith('http') ? packRawImage : `${baseUrl}${packRawImage.startsWith('/') ? '' : '/'}${packRawImage}`
+
     const jsonLd: Record<string, unknown>[] = [
         {
             '@context': 'https://schema.org',
             '@type': 'Product',
             name: pack.name,
+            sku: pack.id,
             description: pack.description || `Pack de ${pack.books.length} livres sélectionné par Riwaya.`,
-            image: pack.image || pack.books[0]?.book.image,
+            image: packImageUrl,
             brand: {
                 '@type': 'Brand',
                 name: 'Riwaya',
