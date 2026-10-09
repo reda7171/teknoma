@@ -42,7 +42,7 @@ export default function CookieConsent() {
                         <h3 className="text-sm font-black uppercase tracking-[0.15em] text-black mb-1 rtl:tracking-normal">
                             {t('Title')}
                         </h3>
-                        <p className="text-xs font-medium text-gray-600 leading-relaxed max-w-3xl">
+                        <p className="hidden sm:block text-xs font-medium text-gray-600 leading-relaxed max-w-3xl">
                             {t.rich('Description', {
                                 link: (chunks) => (
                                     <Link href="/privacy" className="text-black font-bold underline underline-offset-4 decoration-1 hover:decoration-2 transition-all">

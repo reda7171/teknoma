@@ -106,6 +106,26 @@ export async function POST(req: Request) {
         await tx.stockMovement.create({
             data: { bookId, extraProductId, toWarehouseId: warehouseId, quantity: Number(quantity), type, note } as any,
         })
+
+        if (bookId) {
+            const aggregate = await tx.inventory.aggregate({
+                where: { bookId },
+                _sum: { quantity: true },
+            })
+            await tx.book.update({
+                where: { id: bookId },
+                data: { stock: aggregate._sum.quantity ?? 0 },
+            })
+        } else if (extraProductId) {
+            const aggregate = await tx.inventory.aggregate({
+                where: { extraProductId },
+                _sum: { quantity: true },
+            })
+            await tx.extraProduct.update({
+                where: { id: extraProductId },
+                data: { stock: aggregate._sum.quantity ?? 0 },
+            })
+        }
     })
 
     return NextResponse.json({ success: true })

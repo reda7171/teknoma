@@ -7,8 +7,8 @@ import {
     Monitor, Baby, Usb, UsersRound, ChevronDown, ChevronRight, LayoutGrid, Heart, Check
 } from 'lucide-react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
-import CartDrawer from './CartDrawer'
 import { useCartStore } from '@/store/cart'
 import PredictiveSearch from './PredictiveSearch'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -20,6 +20,10 @@ import { getWishlist } from '@/lib/actions/community-wishlist'
 import { getReadingList } from '@/lib/actions/reading-list'
 import { useWishlistStore } from '@/store/wishlist'
 import { useReadingListStore } from '@/store/reading-list'
+
+// The drawer is only useful after an explicit cart interaction. Keeping it out
+// of the initial header bundle avoids shipping its order UI on every page view.
+const CartDrawer = dynamic(() => import('./CartDrawer'), { ssr: false })
 
 interface HeaderProps {
     user?: {
@@ -745,7 +749,13 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 </div>
             </div>
 
-            <CartDrawer isOpen={isCartOpen} onClose={closeCart} is3For4Active={features.threeForFour === true} />
+            {isCartOpen && (
+                <CartDrawer
+                    isOpen
+                    onClose={closeCart}
+                    is3For4Active={features.threeForFour === true}
+                />
+            )}
 
             {/* Mobile Bottom Navigation */}
             <MobileBottomNav />

@@ -63,7 +63,9 @@ const nextConfig: NextConfig = {
   },
   output: process.env.OUTPUT_STANDALONE === 'false' ? undefined : 'standalone',
   poweredByHeader: false,
-  compress: false, // Désactivé : Nginx s'en occupe (évite le memory leak Gzip de Node.js)
+  // Keep Next's gzip fallback enabled. The reverse proxy can still serve
+  // Brotli/gzip, but responses must never reach visitors uncompressed.
+  compress: true,
   images: {
     unoptimized: false,
     formats: ['image/avif', 'image/webp'],

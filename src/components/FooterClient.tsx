@@ -5,6 +5,7 @@ import { Link } from '@/i18n/routing'
 import { BookOpen, Instagram, Linkedin, Facebook, Twitter, ArrowUp, Youtube, AtSign, CheckCircle } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl';
 import Script from 'next/script'
+import Image from 'next/image'
 import PushSubscribeButton from '@/components/PushSubscribeButton'
 import GoogleReviewsBadge from '@/components/GoogleReviewsBadge'
 
@@ -151,9 +152,12 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     <div className="space-y-6 col-span-2 md:col-span-1">
                         <Link href="/" className="flex items-center gap-2 group">
                             {siteLogo ? (
-                                <img
+                                <Image
                                     src={siteLogo}
                                     alt="Riwaya Logo"
+                                    width={150}
+                                    height={50}
+                                    sizes="96px"
                                     className="h-8 w-auto object-contain invert transition-transform group-hover:scale-105"
                                 />
                             ) : (

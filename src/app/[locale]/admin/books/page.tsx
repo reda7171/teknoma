@@ -28,8 +28,23 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const categoryParam = params.category || ''
     const subCategoryParam = params.subCategory || ''
 
-    const role = await getAdminRole()
-    const userId = await getAdminUser()
+    const categoryTreePromise = getCategoryTree()
+    const [role, userId, warehouses] = await Promise.all([
+        getAdminRole(),
+        getAdminUser(),
+        prisma.warehouse.findMany({
+            where: { active: true },
+            select: { id: true, name: true },
+            orderBy: { name: 'asc' },
+        }),
+    ])
+
+    const mapWarehouseStocks = (inventories: { warehouseId: string, quantity: number }[] = []) =>
+        warehouses.map(warehouse => ({
+            warehouseId: warehouse.id,
+            warehouseName: warehouse.name,
+            quantity: inventories.find(inventory => inventory.warehouseId === warehouse.id)?.quantity ?? 0,
+        }))
 
     const where: Prisma.BookWhereInput = {
         ...(role === 'SELLER' && userId ? { sellerId: userId } : {}),
@@ -89,9 +104,34 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     if (productTypes.includes('all') || productTypes.includes('book')) {
         const books = await prisma.book.findMany({
             where,
-            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } } }
+            select: {
+                id: true,
+                title: true,
+                titleFr: true,
+                titleEn: true,
+                author: true,
+                price: true,
+                costPrice: true,
+                stock: true,
+                image: true,
+                category: true,
+                subCategory: true,
+                language: true,
+                description: true,
+                longDescription: true,
+                active: true,
+                isOriginal: true,
+                sellerSku: true,
+                isSyncedWithJumia: true,
+                jumiaStock: true,
+                condition: true,
+                displayOrder: true,
+                createdAt: true,
+                inventories: { select: { warehouseId: true, quantity: true } },
+                _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } }
+            }
         })
-        allProducts.push(...books.map(b => ({ ...b, productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, jumiaStock: b.jumiaStock, hasArticle: (b._count?.posts || 0) > 0 })))
+        allProducts.push(...books.map(b => ({ ...b, warehouseStocks: mapWarehouseStocks(b.inventories), productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, jumiaStock: b.jumiaStock, hasArticle: (b._count?.posts || 0) > 0 })))
     }
 
     // 2. Fetch Packs
@@ -116,7 +156,12 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             include: {
                 books: {
                     include: {
-                        book: { select: { stock: true } }
+                        book: {
+                            select: {
+                                stock: true,
+                                inventories: { select: { warehouseId: true, quantity: true } }
+                            }
+                        }
                     }
                 },
                 _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } }
@@ -124,8 +169,18 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         })
 
         const mappedPacks = packs.map(p => {
-            const bookStocks = p.books?.map((pb: any) => pb.book?.stock ?? 0) || []
-            const packStock = bookStocks.length > 0 ? Math.min(...bookStocks) : 0
+            const componentStocks = p.books.map(pb => pb.book.stock)
+            const packStock = componentStocks.length > 0 ? Math.min(...componentStocks) : 0
+            const warehouseStocks = warehouses.map(warehouse => {
+                const quantities = p.books.map(pb =>
+                    pb.book.inventories.find(inventory => inventory.warehouseId === warehouse.id)?.quantity ?? 0
+                )
+                return {
+                    warehouseId: warehouse.id,
+                    warehouseName: warehouse.name,
+                    quantity: quantities.length > 0 ? Math.min(...quantities) : 0,
+                }
+            })
             return {
                 id: p.id,
                 title: p.name,
@@ -135,6 +190,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 price: p.price,
                 costPrice: p.costPrice || 0,
                 stock: packStock,
+                warehouseStocks,
                 image: p.image || '/book-placeholder.png',
                 category: 'PACK',
                 language: 'fr',
@@ -179,7 +235,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         
         const extras = await prisma.extraProduct.findMany({
             where: extraWhere,
-            include: { _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } } }
+            include: {
+                inventories: { select: { warehouseId: true, quantity: true } },
+                _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } } } }
+            }
         })
         allProducts.push(...extras.map(e => ({
             id: e.id,
@@ -190,6 +249,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             price: e.price,
             costPrice: e.costPrice || 0,
             stock: e.stock,
+            warehouseStocks: mapWarehouseStocks(e.inventories),
             image: e.image || '/book-placeholder.png',
             category: e.category,
             language: 'fr',
@@ -255,7 +315,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         subCategory: subCategoryParam
     }
 
-    const categoryTree = await getCategoryTree()
+    const categoryTree = await categoryTreePromise
     const mainCategories = Object.keys(categoryTree)
 
     return (

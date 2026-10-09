@@ -121,7 +121,7 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
                                                         src={(author.image || author.sampleBook?.image)!}
                                                         alt={author.author}
                                                         className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
-                                                        priority={idx < 3}
+                                                        priority={false}
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">

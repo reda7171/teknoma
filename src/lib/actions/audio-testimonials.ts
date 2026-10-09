@@ -18,12 +18,13 @@ export async function getAudioTestimonials() {
     }
 }
 
-export async function getApprovedAudioTestimonials() {
-    return getCached('testimonials:audio:approved', async () => {
+export async function getApprovedAudioTestimonials(limit?: number) {
+    return getCached(`testimonials:audio:approved:${limit ?? 'all'}`, async () => {
         try {
             const testimonials = await prisma.audioTestimonial.findMany({
                 where: { isApproved: true },
-                orderBy: { createdAt: 'desc' }
+                orderBy: { createdAt: 'desc' },
+                ...(limit ? { take: limit } : {}),
             })
             return { success: true, testimonials }
         } catch (error) {

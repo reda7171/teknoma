@@ -66,7 +66,9 @@ export default function CosmosBooks({
                   sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
                   className="object-cover"
                   onError={() => handleImageError(book.id)}
-                  priority={idx === 0}
+                  {...(idx === 0
+                    ? { preload: true }
+                    : { loading: 'eager' as const, fetchPriority: 'high' as const })}
                 />
               )}
             </div>

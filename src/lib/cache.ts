@@ -80,15 +80,19 @@ export async function getCached<T>(
     fetchFn: () => Promise<T>,
     ttlSeconds: number = 300
 ): Promise<T> {
-    const cachedFn = unstable_cache(
-        fetchFn,
-        [key],
-        {
-            revalidate: ttlSeconds,
-            tags: [key.split(':')[0]], // ex: 'setting' pour 'setting:site_url'
-        }
-    )
-    return cachedFn()
+    try {
+        const cachedFn = unstable_cache(
+            fetchFn,
+            [key],
+            {
+                revalidate: ttlSeconds,
+                tags: [key.split(':')[0]], // ex: 'setting' pour 'setting:site_url'
+            }
+        )
+        return await cachedFn()
+    } catch {
+        return await fetchFn()
+    }
 }
 
 /**

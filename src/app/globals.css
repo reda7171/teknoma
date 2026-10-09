@@ -436,3 +436,15 @@ body {
     font-size: 16px !important;
   }
 }
+
+/* La page d'accueil est longue : différer peinture et layout des sections hors écran. */
+.home-page > section:not(:first-of-type) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
+}
+
+@media screen and (max-width: 768px) {
+  .home-page > section:not(:first-of-type) {
+    contain-intrinsic-size: auto 980px;
+  }
+}

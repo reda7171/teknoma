@@ -83,6 +83,11 @@ export async function migrateSeoPagesToDb() {
 
 export async function getSeoCategories() {
   return await prisma.seoCategory.findMany({
+    include: {
+      _count: {
+        select: { books: true }
+      }
+    },
     orderBy: { createdAt: 'desc' }
   })
 }

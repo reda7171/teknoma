@@ -68,7 +68,7 @@ export default function SonicDeliveryBanner({ locale, title, subtitle, descripti
                                 src="/images/sonic_delivery.jpg" 
                                 alt="Sonic Delivery Rabat" 
                                 fill 
-                                priority
+                                priority={false}
                                 sizes="(max-width: 768px) 100vw, 380px"
                                 className="object-cover rounded-3xl shadow-2xl border-4 border-yellow-400/80 relative z-10"
                             />

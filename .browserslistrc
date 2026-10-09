@@ -1,16 +1,6 @@
-# Cibler uniquement les navigateurs modernes pour éliminer les polyfills inutiles
-# Array.prototype.at, flat, flatMap, Object.fromEntries, Object.hasOwn, trimStart, trimEnd
-# sont tous disponibles nativement dans ces versions
-
-[production]
-chrome >= 87
-firefox >= 78
-safari >= 14
-edge >= 88
-opera >= 73
-samsung >= 14
-
-[development]
-last 1 chrome version
-last 1 firefox version
-last 1 safari version
+# Socle moderne officiellement pris en charge par Next.js 16.
+chrome >= 111
+edge >= 111
+firefox >= 111
+safari >= 16.4
+ios >= 16.4

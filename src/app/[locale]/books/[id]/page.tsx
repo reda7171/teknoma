@@ -954,9 +954,11 @@ export default async function BookDetailPage({
                                     <Link href={`/authors/${encodeURIComponent(book.author)}`} className="text-base sm:text-xl font-black text-black hover:text-blue-600 transition-colors inline-block mb-1 sm:mb-2">
                                         {book.author}
                                     </Link>
-                                    <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
-                                        {authorProfile?.bio || (locale === 'ar' ? `كاتب متميز قدم العديد من الأعمال الرائعة التي أثرت المكتبة العربية.` : locale === 'en' ? `An outstanding author who has contributed many remarkable works.` : `Un auteur exceptionnel qui a contribué à de nombreuses œuvres remarquables.`)}
-                                    </p>
+                                    {authorProfile?.bio && (
+                                        <p className="text-xs sm:text-sm font-medium text-gray-500 leading-relaxed mb-3 line-clamp-3">
+                                            {authorProfile.bio}
+                                        </p>
+                                    )}
                                     <Link 
                                         href={`/authors/${encodeURIComponent(book.author)}`}
                                         className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"

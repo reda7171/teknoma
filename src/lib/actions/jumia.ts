@@ -195,6 +195,16 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
 }
 
 
+function cleanJumiaProductName(name: string): string {
+    if (!name) return ''
+    return name
+        .replace(/[|]/g, ' - ')
+        .replace(/[<>{}[\]~^\\_*+=#$@!?;"]/g, ' ')
+        .replace(/\s*-\s*-\s*/g, ' - ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
 export async function publishBooksToJumia(bookIds: string[]) {
     try {
         const jumia = await JumiaAPI.getInstance()
@@ -217,10 +227,12 @@ export async function publishBooksToJumia(bookIds: string[]) {
 
         for (const book of books) {
             const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
-            const titleAr = book.title || book.titleEn || book.titleFr || `Livre ${book.id.substring(0, 8)}`;
+            const rawTitleAr = book.title || book.titleEn || book.titleFr || `Livre ${book.id.substring(0, 8)}`;
+            const titleAr = cleanJumiaProductName(rawTitleAr).substring(0, 60).replace(/[-:,]+$/, '').trim();
 
-            let titleFr = book.titleFr || book.titleEn || `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
-            if (hasArabic(titleFr)) titleFr = `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            let rawTitleFr = book.titleFr || book.titleEn || `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            if (hasArabic(rawTitleFr)) rawTitleFr = `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            const titleFr = cleanJumiaProductName(rawTitleFr).substring(0, 60).replace(/[-:,]+$/, '').trim();
 
             const descArRaw = book.description || book.descriptionEn || book.descriptionFr || titleAr;
             let descFrRaw = book.descriptionFr || book.descriptionEn || book.longDescription || `Un excellent livre - ${book.sellerSku || book.id.substring(0, 8)}`;
@@ -274,9 +286,9 @@ export async function publishBooksToJumia(bookIds: string[]) {
                 price: {
                     currency: "MAD",
                     value: Math.ceil((book.originalPrice || book.price) * markupMultiplier),
-                    salePrice: book.originalPrice ? {
+                    salePrice: (book.originalPrice && book.originalPrice > book.price) ? {
                         value: Math.ceil(book.price * markupMultiplier),
-                        startAt: new Date().toISOString().split('T')[0],
+                        startAt: new Date(Date.now() + 86400000).toISOString().split('T')[0],
                         endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
                     } : undefined
                 },
@@ -288,11 +300,11 @@ export async function publishBooksToJumia(bookIds: string[]) {
                     },
                     {
                         name: "short_description",
-                        value: book.jumiaHighlights || `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`
+                        value: (book.jumiaHighlights || `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`).replace(/\|/g, '-')
                     },
                     {
                         name: "package_content",
-                        value: book.jumiaPackageContent || `1 x Livre : ${book.title}`
+                        value: (book.jumiaPackageContent || `1 x Livre : ${book.title}`).replace(/\|/g, '-')
                     },
                     {
                         name: "model",
@@ -395,10 +407,12 @@ export async function publishPacksToJumia(packIds: string[]) {
 
         for (const pack of packs) {
             const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
-            const titleAr = pack.name || pack.nameEn || pack.nameFr || `Pack ${pack.id.substring(0, 8)}`;
+            const rawTitleAr = pack.name || pack.nameEn || pack.nameFr || `Pack ${pack.id.substring(0, 8)}`;
+            const titleAr = cleanJumiaProductName(rawTitleAr).substring(0, 60).replace(/[-:,]+$/, '').trim();
 
-            let titleFr = pack.nameFr || pack.nameEn || `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
-            if (hasArabic(titleFr)) titleFr = `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            let rawTitleFr = pack.nameFr || pack.nameEn || `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            if (hasArabic(rawTitleFr)) rawTitleFr = `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            const titleFr = cleanJumiaProductName(rawTitleFr).substring(0, 60).replace(/[-:,]+$/, '').trim();
 
             const descArRaw = pack.description || pack.descriptionEn || pack.descriptionFr || titleAr;
             let descFrRaw = pack.descriptionFr || pack.descriptionEn || pack.description || `Un excellent pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
@@ -477,7 +491,7 @@ export async function publishPacksToJumia(packIds: string[]) {
                 price: {
                     currency: "MAD",
                     value: Math.ceil((pack.originalPrice || pack.price) * markupMultiplier),
-                    salePrice: pack.originalPrice ? {
+                    salePrice: (pack.originalPrice && pack.originalPrice > pack.price) ? {
                         value: Math.ceil(pack.price * markupMultiplier),
                         startAt: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Demain
                         endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
@@ -487,11 +501,11 @@ export async function publishPacksToJumia(packIds: string[]) {
                 attributes: [
                     {
                         name: "short_description",
-                        value: pack.jumiaHighlights || `<ul><li>Titre: ${pack.name}</li><li>Type: Pack de Livres</li></ul>`
+                        value: pack.jumiaHighlights ? pack.jumiaHighlights.replace(/\|/g, '-') : `<ul><li>Titre: ${cleanJumiaProductName(pack.name)}</li><li>Type: Pack de Livres</li></ul>`
                     },
                     {
                         name: "package_content",
-                        value: pack.jumiaPackageContent || `1 x Pack de livres : ${pack.name}`
+                        value: pack.jumiaPackageContent ? pack.jumiaPackageContent.replace(/\|/g, '-') : `1 x Pack de livres : ${cleanJumiaProductName(pack.name)}`
                     },
                     {
                         name: "model",

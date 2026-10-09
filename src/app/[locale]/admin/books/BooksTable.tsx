@@ -37,6 +37,11 @@ interface Book {
     isSyncedWithJumia?: boolean
     jumiaStock?: number | null
     hasArticle?: boolean
+    warehouseStocks?: {
+        warehouseId: string
+        warehouseName: string
+        quantity: number
+    }[]
 }
 
 interface ActiveFilters {
@@ -72,6 +77,12 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
     const [isBulkPublishOpen, setIsBulkPublishOpen] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
+
+    const getWarehouseInitial = (name: string) => {
+        const normalizedName = name.trim().toLocaleLowerCase('fr')
+        if (normalizedName.includes('principal')) return 'P'
+        return name.trim().charAt(0).toLocaleUpperCase('fr') || '?'
+    }
 
     useEffect(() => {
         setOrderedBooks(books)
@@ -711,6 +722,10 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         <img
                                                                             src={normalizeImage(book.image)}
                                                                             alt={displayTitle}
+                                                                            width={40}
+                                                                            height={48}
+                                                                            loading="lazy"
+                                                                            decoding="async"
                                                                             className="w-full h-full object-cover rounded"
                                                                             onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                                                                         />
@@ -727,14 +742,14 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                                     ? displayTitle.substring(0, 12) + '...'
                                                                                     : displayTitle}
                                                                             </Link>
+                                                                        </div>
+                                                                        <div className="text-sm text-gray-500">{book.author}</div>
+                                                                        <div className="mt-1 flex max-w-[190px] flex-wrap items-center gap-1">
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
                                                                             </span>
-                                                                        </div>
-                                                                        <div className="text-sm text-gray-500">
-                                                                            {book.author}
                                                                             {book.sellerSku && (
-                                                                                <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono bg-gray-100 text-gray-600 rounded inline-flex items-center gap-1">
+                                                                                <span className="max-w-[145px] truncate rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[9px] text-gray-600" title={`SKU: ${book.sellerSku}`}>
                                                                                     SKU: {book.sellerSku}
                                                                                 </span>
                                                                             )}
@@ -771,7 +786,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     <>{book.price} درهم</>
                                                                 )}
                                                             </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                            <td className="px-4 py-4">
                                                                 {editingId === book.id ? (
                                                                     <input
                                                                         type="number"
@@ -780,9 +795,24 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                         className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                                     />
                                                                 ) : (
-                                                                    <span className={`text-sm font-medium ${book.stock > 10 ? 'text-green-600' : book.stock > 0 ? 'text-orange-600' : 'text-red-600'}`}>
-                                                                        {book.stock} unités
-                                                                    </span>
+                                                                    <div className="min-w-[116px]">
+                                                                        <div className="flex items-center gap-1">
+                                                                            {(book.warehouseStocks || []).map(warehouse => (
+                                                                                <div
+                                                                                    key={warehouse.warehouseId}
+                                                                                    title={`${warehouse.warehouseName}: ${warehouse.quantity} unités`}
+                                                                                    aria-label={`${warehouse.warehouseName}: ${warehouse.quantity} unités`}
+                                                                                    className={`flex min-w-9 items-center justify-center gap-1 rounded-md border px-1.5 py-1 text-[10px] font-black ${warehouse.quantity > 0 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-600'}`}
+                                                                                >
+                                                                                    <span className="text-gray-500">{getWarehouseInitial(warehouse.warehouseName)}</span>
+                                                                                    <span>{warehouse.quantity}</span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        <div className={`mt-1 text-[9px] font-bold ${book.stock > 10 ? 'text-green-600' : book.stock > 0 ? 'text-orange-600' : 'text-red-600'}`}>
+                                                                            Total {book.stock}
+                                                                        </div>
+                                                                    </div>
                                                                 )}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">

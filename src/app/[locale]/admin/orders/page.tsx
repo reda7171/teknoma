@@ -41,8 +41,8 @@ async function getOrders(status?: string, role?: string | null, userId?: string 
         include: {
             items: {
                 include: {
-                    book: { select: { title: true, image: true, price: true } },
-                    pack: { select: { name: true, price: true } },
+                    book: { select: { title: true, titleFr: true, titleEn: true, image: true, price: true } },
+                    pack: { select: { name: true, nameFr: true, nameEn: true, price: true } },
                     extraProduct: { select: { name: true, image: true, price: true } }
                 }
             },

@@ -60,13 +60,25 @@ const getCompanyReturnWaLink = (order: any) => {
     return `https://wa.me/?text=${encodeURIComponent(message)}`
 }
 
+function normalizeForSearch(str: string): string {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\u064B-\u0652]/g, '')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .toLowerCase()
+        .trim()
+}
+
 interface OrderItem {
     id: string
     quantity: number
     price: number
     costPrice?: number
-    book?: { title: string }
-    pack?: { name: string }
+    book?: { title: string; titleFr?: string | null; titleEn?: string | null }
+    pack?: { name: string; nameFr?: string | null; nameEn?: string | null }
     extraProduct?: { name: string }
 }
 
@@ -101,6 +113,7 @@ interface OrdersTableClientProps {
     shippingFilter?: string
     paymentFilter?: string
     cityFilter?: string
+    productTitleFilter?: string
     deliveryInvoices?: any[]
 }
 
@@ -113,6 +126,7 @@ export default function OrdersTableClient({
     shippingFilter = '',
     paymentFilter = '',
     cityFilter = '',
+    productTitleFilter = '',
     deliveryInvoices = []
 }: OrdersTableClientProps) {
     const router = useRouter()
@@ -203,15 +217,35 @@ export default function OrdersTableClient({
     }
 
     const filteredOrders = localOrders.filter(order => {
-        const matchesSearch = order.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.phone.includes(searchTerm) ||
-            order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.city.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesShipping = shippingFilter ? order.shippingCompany === shippingFilter : true;
-        const matchesPayment = paymentFilter ? order.paymentMethod === paymentFilter : true;
-        const matchesCity = cityFilter ? order.city?.trim() === cityFilter : true;
+        const normSearch = normalizeForSearch(searchTerm)
+        const normProductFilter = normalizeForSearch(productTitleFilter)
 
-        return matchesSearch && matchesShipping && matchesPayment && matchesCity;
+        const itemTitles = (order.items || []).map(i => [
+            i.book?.title,
+            i.book?.titleFr,
+            i.book?.titleEn,
+            i.pack?.name,
+            i.pack?.nameFr,
+            i.pack?.nameEn,
+            i.extraProduct?.name
+        ].filter(Boolean).join(' ')).join(' ')
+
+        const normItemTitles = normalizeForSearch(itemTitles)
+
+        const matchesSearch = !normSearch ? true : (
+            normalizeForSearch(order.fullName).includes(normSearch) ||
+            order.phone.includes(searchTerm) ||
+            order.id.toLowerCase().includes(normSearch) ||
+            normalizeForSearch(order.city).includes(normSearch) ||
+            normItemTitles.includes(normSearch)
+        )
+
+        const matchesProductTitle = !normProductFilter ? true : normItemTitles.includes(normProductFilter)
+        const matchesShipping = shippingFilter ? order.shippingCompany === shippingFilter : true
+        const matchesPayment = paymentFilter ? order.paymentMethod === paymentFilter : true
+        const matchesCity = cityFilter ? order.city?.trim() === cityFilter : true
+
+        return matchesSearch && matchesProductTitle && matchesShipping && matchesPayment && matchesCity
     })
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -334,9 +368,12 @@ export default function OrdersTableClient({
                                     <td className="px-6 py-4 max-w-[150px] truncate text-sm text-gray-600" title={order.city || ''}>
                                         {order.city}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 max-w-[220px]">
                                         <div className="text-sm text-gray-900 font-bold">
                                             {order.items.reduce((s: number, i: any) => s + i.quantity, 0)} article{order.items.reduce((s: number, i: any) => s + i.quantity, 0) > 1 ? 's' : ''}
+                                        </div>
+                                        <div className="text-[11px] text-gray-500 truncate" title={order.items.map((i: any) => `${i.quantity}x ${i.book?.title || i.pack?.name || i.extraProduct?.name || 'Article'}`).join(', ')}>
+                                            {order.items.map((i: any) => i.book?.title || i.pack?.name || i.extraProduct?.name || 'Article').filter(Boolean).join(', ')}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">

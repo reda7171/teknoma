@@ -54,6 +54,7 @@ scratch/
 
 # Backups and temporary files
 *.sql
+!prisma/manual-migrations/*.sql
 *.tar
 *.zip
 *.gz
