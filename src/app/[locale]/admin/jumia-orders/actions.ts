@@ -90,6 +90,40 @@ export async function syncAllJumiaStock() {
     }
 }
 
+const jumiaItemsCache = new Map<string, any[]>()
+
+async function enrichJumiaOrdersWithItems(jumia: any, rawOrders: any[]) {
+    return Promise.all(
+        rawOrders.map(async (order: any) => {
+            const internalId = String(order.id || order.number || order.OrderId || order.OrderNumber || '')
+            if (!internalId) return { ...order, items: [] }
+            if (jumiaItemsCache.has(internalId)) {
+                return { ...order, items: jumiaItemsCache.get(internalId) }
+            }
+            try {
+                const itemsRes = await jumia.getOrderItems(internalId)
+                const data = Array.isArray(itemsRes) ? itemsRes[0] : itemsRes
+                const rawList = data?.orderItems || data?.items || data?.data?.orderItems || data?.data?.items || (Array.isArray(itemsRes) ? itemsRes : [])
+                const flat = Array.isArray(rawList) ? rawList : []
+                const items = flat.map((item: any) => ({
+                    id: item.id || item.orderItemId || item.uuid,
+                    name: item.product?.name || item.name || item.Name || item.productName || 'Article inconnu',
+                    sellerSku: item.product?.sellerSku || item.sellerSku || item.Sku || item.sku || '',
+                    quantity: item.quantity || 1,
+                    price: item.itemPriceLocal?.value ?? item.itemPriceLocal ?? item.price ?? 0,
+                    status: item.status || item.Status || order.status || 'N/A',
+                    imageUrl: item.product?.imageUrl || item.imageUrl || null
+                }))
+                jumiaItemsCache.set(internalId, items)
+                return { ...order, items }
+            } catch {
+                return { ...order, items: [] }
+            }
+        })
+    )
+
+}
+
 export async function getJumiaOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string) {
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
@@ -97,7 +131,7 @@ export async function getJumiaOrders(size = 100, token?: string, status?: string
     try {
         const response = await jumia.getOrders(size, token, status, createdAfter, createdBefore)
         return {
-            orders: response?.orders || response?.data?.orders || [],
+            orders: await enrichJumiaOrdersWithItems(jumia, response?.orders || response?.data?.orders || []),
             nextToken: response?.nextToken || response?.data?.nextToken || null
         }
     } catch (e: any) {

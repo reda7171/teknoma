@@ -8,9 +8,9 @@ import { createAuditLog } from './audit'
 
 // Schéma de validation pour un pack
 const PackSchema = z.object({
-    name: z.string().min(1, 'Le nom est requis'),
-    nameFr: z.string().optional(),
-    nameEn: z.string().optional(),
+    name: z.string().min(1, 'Le nom est requis').transform(val => val.replace(/\|/g, '-').replace(/\s+/g, ' ').trim()),
+    nameFr: z.string().optional().transform(val => val ? val.replace(/\|/g, '-').replace(/\s+/g, ' ').trim() : val),
+    nameEn: z.string().optional().transform(val => val ? val.replace(/\|/g, '-').replace(/\s+/g, ' ').trim() : val),
     description: z.string().optional(),
     descriptionFr: z.string().optional(),
     descriptionEn: z.string().optional(),
@@ -19,13 +19,17 @@ const PackSchema = z.object({
     image: z.string().min(1, 'L\'image est requise').optional(),
     isFreeDelivery: z.boolean().default(false),
     shippingFees: z.number().min(0).default(0),
-    bookIds: z.array(z.string().uuid()).min(1, 'Le pack doit contenir au moins un livre'),
+    bookIds: z.array(z.string().uuid()).default([]),
+    extraProductIds: z.array(z.string().uuid()).default([]),
     sellerSku: z.string().optional(),
     jumiaPackageContent: z.string().optional(),
     jumiaHighlights: z.string().optional(),
     isAffiliate: z.boolean().default(false).optional(),
     affiliateLink: z.string().optional(),
-})
+}).refine(
+    data => data.bookIds.length + data.extraProductIds.length > 0,
+    { message: 'Le pack doit contenir au moins un livre ou accessoire', path: ['bookIds'] }
+)
 
 export type PackInput = z.infer<typeof PackSchema>
 
@@ -56,7 +60,11 @@ export async function createPack(input: PackInput): Promise<PackResult> {
         const pack = await prisma.pack.create({
             data: {
                 name: validatedData.name,
+                nameFr: validatedData.nameFr,
+                nameEn: validatedData.nameEn,
                 description: validatedData.description,
+                descriptionFr: validatedData.descriptionFr,
+                descriptionEn: validatedData.descriptionEn,
                 price: validatedData.price,
                 originalPrice: validatedData.originalPrice,
                 image: validatedData.image,
@@ -72,6 +80,11 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                 books: {
                     create: validatedData.bookIds.map((bookId) => ({
                         bookId,
+                    })),
+                },
+                extraProducts: {
+                    create: validatedData.extraProductIds.map((extraProductId) => ({
+                        extraProductId,
                     })),
                 },
             },
@@ -121,7 +134,10 @@ export async function getPackById(id: string) {
                             }
                         }
                     }
-                }
+                },
+                extraProducts: {
+                    include: { extraProduct: true }
+                },
             },
         })
 
@@ -165,6 +181,9 @@ export async function updatePack(
             await tx.packBook.deleteMany({
                 where: { packId: id },
             })
+            await tx.packExtraProduct.deleteMany({
+                where: { packId: id },
+            })
 
             // Mettre à jour le pack avec les nouvelles relations
             await tx.pack.update({
@@ -189,6 +208,11 @@ export async function updatePack(
                     books: {
                         create: validatedData.bookIds.map((bookId) => ({
                             bookId,
+                        })),
+                    },
+                    extraProducts: {
+                        create: validatedData.extraProductIds.map((extraProductId) => ({
+                            extraProductId,
                         })),
                     },
                 },

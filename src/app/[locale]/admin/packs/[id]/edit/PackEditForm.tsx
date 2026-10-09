@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste, Zap, X } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
 import { publishPacksToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
@@ -21,6 +21,54 @@ interface Book {
     language?: string
     active: boolean
     stock: number
+}
+
+function normalizeSearchText(str: string): string {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\u064B-\u0652]/g, '')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function parseQuickInput(raw: string) {
+    const trimmed = raw.trim()
+    let packName = ''
+    let booksPart = ''
+
+    if (trimmed.includes('\t')) {
+        const parts = trimmed.split('\t')
+        packName = parts[0].trim()
+        booksPart = parts.slice(1).join(' ').trim()
+    } else if (trimmed.includes('\n')) {
+        const lines = trimmed.split('\n').map(l => l.trim()).filter(Boolean)
+        packName = lines[0]
+        booksPart = lines.slice(1).join(' + ')
+    } else if (trimmed.includes('|')) {
+        const parts = trimmed.split('|')
+        packName = parts[0].trim()
+        booksPart = parts.slice(1).join(' + ').trim()
+    } else if (trimmed.includes(':') && trimmed.includes('+')) {
+        const idx = trimmed.indexOf(':')
+        packName = trimmed.slice(0, idx).trim()
+        booksPart = trimmed.slice(idx + 1).trim()
+    } else if (trimmed.includes(' - ') && trimmed.includes('+')) {
+        const idx = trimmed.indexOf(' - ')
+        packName = trimmed.slice(0, idx).trim()
+        booksPart = trimmed.slice(idx + 3).trim()
+    } else if (trimmed.includes('+')) {
+        booksPart = trimmed
+    } else {
+        packName = trimmed
+    }
+
+    return { packName, booksPart }
 }
 
 interface PackEditFormProps {
@@ -103,6 +151,78 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [translateMsg, setTranslateMsg] = useState<string | null>(null)
     const [isGeneratingHighlights, setIsGeneratingHighlights] = useState(false)
     const [isGeneratingContent, setIsGeneratingContent] = useState(false)
+    const [quickInput, setQuickInput] = useState('')
+    const [quickInputResult, setQuickInputResult] = useState<{
+        packName?: string
+        matched: { token: string; title: string; id: string }[]
+        notFound: string[]
+    } | null>(null)
+
+    function handleApplyQuickInput() {
+        if (!quickInput.trim()) return
+
+        const { packName, booksPart } = parseQuickInput(quickInput)
+
+        if (packName) {
+            const clean = packName.replace(/\|/g, '-').replace(/\s+/g, ' ').trim()
+            setName(clean)
+            if (!/[\u0600-\u06FF]/.test(clean)) {
+                setNameFr(clean)
+            }
+        }
+
+        const matched: { token: string; title: string; id: string }[] = []
+        const notFound: string[] = []
+
+        if (booksPart) {
+            const tokens = booksPart.includes('+')
+                ? booksPart.split('+').map(t => t.trim()).filter(Boolean)
+                : booksPart.split(/[,;\n]/).map(t => t.trim()).filter(Boolean)
+
+            const matchedIds: string[] = []
+
+            tokens.forEach(token => {
+                const nt = normalizeSearchText(token)
+                if (!nt) return
+
+                let found = books.find(b => normalizeSearchText(b.title) === nt)
+
+                if (!found) {
+                    found = books.find(b => normalizeSearchText(b.title).startsWith(nt))
+                }
+
+                if (!found) {
+                    found = books.find(b => {
+                        const nb = normalizeSearchText(b.title)
+                        return nb.includes(nt) || nt.includes(nb)
+                    })
+                }
+
+                if (!found) {
+                    const words = nt.split(' ').filter(w => w.length > 1)
+                    if (words.length > 0) {
+                        found = books.find(b => {
+                            const nb = normalizeSearchText(`${b.title} ${b.author}`)
+                            return words.every(w => nb.includes(w))
+                        })
+                    }
+                }
+
+                if (found) {
+                    matched.push({ token, title: found.title, id: found.id })
+                    matchedIds.push(found.id)
+                } else {
+                    notFound.push(token)
+                }
+            })
+
+            if (matchedIds.length > 0) {
+                setSelectedBooks(prev => Array.from(new Set([...prev, ...matchedIds])))
+            }
+        }
+
+        setQuickInputResult({ packName, matched, notFound })
+    }
 
     function toggleBook(bookId: string) {
         setSelectedBooks(prev =>
@@ -424,7 +544,7 @@ Please provide the following information in strict JSON format:
   "jumiaHighlights": "<ul><li>Titre: [Nom du pack en français]</li><li>Type: Pack de Livres</li>${selectedTitles ? `<li>Contient: ${selectedTitles}</li>` : ''}</ul>",
   "jumiaPackageContent": "1 x Pack de livres : [Nom du pack en français]"
 }
-Ensure all descriptions and highlights are formatted properly. HTML in highlights must use clean <ul> and <li> tags.`
+Ensure all descriptions and highlights are formatted properly. Never use the vertical bar (|) in titles or descriptions (use hyphens - instead). HTML in highlights must use clean <ul> and <li> tags.`
 
         navigator.clipboard.writeText(prompt)
         alert('Prompt ChatGPT copié dans le presse-papier !')
@@ -463,9 +583,10 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
             const nAr = data.name_ar || data.nameAr || data.title_ar || data.titleAr
             const nFr = data.name_fr || data.nameFr || data.title_fr || data.titleFr
             const nEn = data.name_en || data.nameEn || data.title_en || data.titleEn
-            if (nAr) setName(nAr)
-            if (nFr) setNameFr(nFr)
-            if (nEn) setNameEn(nEn)
+            const cleanName = (val: string) => (val || '').replace(/\|/g, '-').replace(/\s+/g, ' ').trim()
+            if (nAr) setName(cleanName(nAr))
+            if (nFr) setNameFr(cleanName(nFr))
+            if (nEn) setNameEn(cleanName(nEn))
 
             // Descriptions
             const dAr = data.description_ar || data.descriptionAr
@@ -568,6 +689,119 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                     <p className="text-sm text-red-600">{error}</p>
                 </div>
             )}
+
+            {/* Saisie Rapide Pack & Livres */}
+            <div className="mb-6 bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 border border-blue-200 rounded-xl p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="p-1.5 bg-blue-600 text-white rounded-lg shadow-sm">
+                            <Zap className="w-4 h-4" />
+                        </span>
+                        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                            Saisie Rapide (Nom du Pack + Livres)
+                        </h2>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                            Auto-remplissage
+                        </span>
+                    </div>
+                    {quickInput && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setQuickInput('')
+                                setQuickInputResult(null)
+                            }}
+                            className="text-xs text-gray-500 hover:text-gray-800 flex items-center gap-1"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                            Effacer
+                        </button>
+                    )}
+                </div>
+
+                <p className="text-xs text-gray-600 mb-3">
+                    Collez ou saisissez votre ligne au format : <code className="bg-white/80 px-1.5 py-0.5 rounded text-blue-700 font-mono text-[11px] border border-blue-100">Nom du pack [TAB ou :] Livre 1 + Livre 2 + Livre 3</code>
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            value={quickInput}
+                            onChange={e => setQuickInput(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault()
+                                    handleApplyQuickInput()
+                                }
+                            }}
+                            placeholder="Ex: Pack Change Ta Vie	العادات الذرية + قوة العادات + The Mountain Is You"
+                            className="w-full px-4 py-2.5 text-sm bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner font-sans"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleApplyQuickInput}
+                        disabled={!quickInput.trim()}
+                        className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2 shrink-0"
+                    >
+                        <Zap className="w-4 h-4" />
+                        Remplir & Sélectionner
+                    </button>
+                </div>
+
+                {/* Résultat / Feedback */}
+                {quickInputResult && (
+                    <div className="mt-4 pt-3 border-t border-blue-200/60 text-xs space-y-2">
+                        {quickInputResult.packName && (
+                            <div className="flex items-center gap-2 text-gray-700">
+                                <span className="font-semibold text-gray-900">Nom appliqué :</span>
+                                <span className="px-2 py-0.5 bg-white rounded border border-gray-200 font-medium text-blue-900">
+                                    {quickInputResult.packName}
+                                </span>
+                            </div>
+                        )}
+
+                        {quickInputResult.matched.length > 0 && (
+                            <div>
+                                <span className="font-semibold text-green-800">
+                                    Livres sélectionnés ({quickInputResult.matched.length}) :
+                                </span>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {quickInputResult.matched.map(m => (
+                                        <span
+                                            key={m.id}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-900 rounded-md font-medium text-[11px] border border-green-200"
+                                        >
+                                            <CheckCircle2 className="w-3 h-3 text-green-600" />
+                                            {m.title}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {quickInputResult.notFound.length > 0 && (
+                            <div>
+                                <span className="font-semibold text-amber-800">
+                                    Non trouvés ({quickInputResult.notFound.length}) :
+                                </span>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {quickInputResult.notFound.map((token, idx) => (
+                                        <span
+                                            key={idx}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-900 rounded-md font-medium text-[11px] border border-amber-200"
+                                        >
+                                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                            {token}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {/* Left Column */}

@@ -43,6 +43,12 @@ export default async function SeoCategoriesPage() {
                         {categories.filter(c => c.isActive).length}
                     </p>
                 </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <p className="text-sm font-medium text-gray-600">Livres Affectés</p>
+                    <p className="mt-2 text-2xl font-bold text-indigo-600">
+                        {categories.reduce((acc, c: any) => acc + (c._count?.books || 0), 0)}
+                    </p>
+                </div>
             </div>
 
             {/* Table */}

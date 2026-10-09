@@ -1,6 +1,5 @@
 import { getPopularBooks, getBestSellerBooks, getBestAuthors, getUsedBooks, getFeaturedAccessories } from '@/lib/db/books'
 import { getPopularPacks } from '@/lib/db/packs'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getAllCategoryQuotes } from '@/lib/actions/categories'
 import { getRecentExchangeBooks } from '@/lib/actions/community-market'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
@@ -15,7 +14,6 @@ import TypewriterText from '@/components/TypewriterText'
 import { Link } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
 import dynamic from 'next/dynamic'
-import ReactDOM from 'react-dom'
 
 // Dynamic Imports pour les composants lourds / en dessous de la ligne de flottaison
 const TestimonialsTabs = dynamic(() => import('@/components/home/TestimonialsTabs'))
@@ -38,8 +36,42 @@ import CatalogPublicWrapper from '@/components/home/CatalogPublicWrapper'
 import GoogleOneTapLoader from '@/components/auth/GoogleOneTapLoader'
 import SeoCategoriesSection from '@/components/SeoCategoriesSection'
 import { prisma } from '@/lib/prisma'
+import { unstable_cache } from 'next/cache'
 
 export const revalidate = 3600;
+
+// The header reads the visitor session, which makes the route dynamic. Cache
+// the public homepage payload separately so it is not rebuilt from 15 database
+// queries for every anonymous request.
+const getCachedHomepageData = unstable_cache(
+  async (locale: string) => Promise.all([
+    getPopularBooks(8),
+    getPopularPacks(3),
+    prisma.siteSettings.findMany({
+      where: {
+        OR: [
+          { category: { in: ['homepage_sections', 'homepage_content'] } },
+          { key: { in: ['feature_digital_books', 'feature_exchange', 'aeo_faq_json', 'aeo_short_answer_question', 'aeo_short_answer_text'] } },
+        ],
+      },
+      select: { key: true, value: true, category: true },
+    }),
+    getBestSellerBooks(4),
+    getBestAuthors(8),
+    getUsedBooks(8),
+    import('@/lib/db/books').then(m => m.getHomepageStats()),
+    getAllCategoryQuotes(),
+    getRecentExchangeBooks(6),
+    getTopReaders(10),
+    getApprovedAudioTestimonials(8),
+    getApprovedImageTestimonials(8),
+    getRecentPosts(3, locale),
+    getFeaturedPosts(3, locale),
+    getFeaturedAccessories(4),
+  ]),
+  ['homepage-public-data-v1'],
+  { revalidate: 3600, tags: ['homepage-public-data'] }
+)
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -104,8 +136,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const [
     popularBooks,
     popularPacks,
-    homeSettings,
-    homepageContent,
+    homepageSettingRows,
     bestSellerBooks,
     bestAuthors,
     usedBooks,
@@ -116,42 +147,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     audioTestimonialsResult,
     imageTestimonialsResult,
     recentPosts,
-    featureDigitalBooks,
-    featureExchange,
-    aeoFaqJson,
-    dbAeoSnippetQ,
-    dbAeoSnippetA,
     featuredPosts,
     featuredAccessories,
-  ] = await Promise.all([
-    getPopularBooks(8),
-    getPopularPacks(3),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_sections')),
-    import('@/lib/actions/site-settings').then(m => m.getSettingsByCategory('homepage_content')),
-    getBestSellerBooks(4),
-    getBestAuthors(8),
-    getUsedBooks(8),
-    import('@/lib/db/books').then(m => m.getHomepageStats()),
-    getAllCategoryQuotes(),
-    getRecentExchangeBooks(6),
-    getTopReaders(10),
-    getApprovedAudioTestimonials(),
-    getApprovedImageTestimonials(),
-    getRecentPosts(3, locale),
-    isFeatureEnabled('feature_digital_books'),
-    isFeatureEnabled('feature_exchange'),
-    import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_faq_json')),
-    import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_question')),
-    import('@/lib/actions/site-settings').then(m => m.getSetting('aeo_short_answer_text')),
-    getFeaturedPosts(3, locale),
-    getFeaturedAccessories(4),
-  ])
+  ] = await getCachedHomepageData(locale)
 
   // Variables dérivées
   const [totalBooks, totalUsers, totalExchanges] = stats
   const audioTestimonials = audioTestimonialsResult?.testimonials || []
   const imageTestimonials = imageTestimonialsResult?.testimonials || []
   const newBooks = popularBooks.slice(0, 8)
+  const settingsByKey = Object.fromEntries(homepageSettingRows.map(setting => [setting.key, setting.value || '']))
+  const homeSettings = Object.fromEntries(
+    homepageSettingRows
+      .filter(setting => setting.category === 'homepage_sections')
+      .map(setting => [setting.key, setting.value || ''])
+  )
+  const homepageContent = Object.fromEntries(
+    homepageSettingRows
+      .filter(setting => setting.category === 'homepage_content')
+      .map(setting => [setting.key, setting.value || ''])
+  )
+  const featureDigitalBooks = settingsByKey.feature_digital_books !== 'false'
+  const featureExchange = settingsByKey.feature_exchange !== 'false'
+  const aeoFaqJson = settingsByKey.aeo_faq_json || null
+  const dbAeoSnippetQ = settingsByKey.aeo_short_answer_question || null
+  const dbAeoSnippetA = settingsByKey.aeo_short_answer_text || null
   const showSection = (key: string) => homeSettings[key] !== 'false'
 
   const c = (key: string, fallback: string): string => {
@@ -630,7 +650,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
                   {bestSellerBooks.map((book: any, idx: number) => (
                     <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
-                      <BookCard {...book} priority={idx < 4} />
+                      <BookCard {...book} priority={false} />
                     </ScrollReveal>
                   ))}
                 </div>
@@ -757,7 +777,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
                 {newBooks.map((book: any, idx: number) => (
                   <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
-                    <BookCard {...book} variant={idx === 0 ? 'featured' : 'default'} priority={true} />
+                    <BookCard {...book} variant={idx === 0 ? 'featured' : 'default'} priority={false} />
                   </ScrollReveal>
                 ))}
               </div>
@@ -1325,18 +1345,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     }
   }
 
-  // Image LCP : 1er livre populaire valide (utilisé dans CosmosBooks hero)
-  const lcpBook = popularBooks.find(book => {
-    const img = book.image ? book.image.trim() : ''
-    return img && !img.includes('book-placeholder.png') && img !== '/book-placeholder.png'
-  })
-  const lcpImageUrl = lcpBook?.image ? normalizeImage(lcpBook.image) : null
-  // Utiliser ReactDOM.preload() — garanti d'injecter fetchpriority="high" dans <head> (Next.js App Router)
-  if (lcpImageUrl) {
-    const lcpPreloadUrl = `/_next/image?url=${encodeURIComponent(lcpImageUrl)}&w=640&q=75`
-    ReactDOM.preload(lcpPreloadUrl, { as: 'image', fetchPriority: 'high' })
-  }
-
   return (
     <>
       {/* RoulettePopup removed */}
@@ -1349,7 +1357,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         body::-webkit-scrollbar { display: none !important; }
         body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
       `}} />
-      <main className="min-h-screen bg-white overflow-x-hidden">
+      <main className="home-page min-h-screen bg-white overflow-x-hidden">
         {finalOrder.map(key => renderSection(key))}
 
         {/* CTA + AEO fusionnés */}

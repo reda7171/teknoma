@@ -1,5 +1,5 @@
 // Service Worker Riwaya — Cache stratégique pour PWA
-const CACHE_NAME = 'riwaya-v1'
+const CACHE_NAME = 'riwaya-v2'
 const OFFLINE_URL = '/offline.html'
 
 // Ressources pré-cachées au moment de l'installation
@@ -44,8 +44,10 @@ self.addEventListener('fetch', (event) => {
   // Ignorer les requêtes non-GET et les extensions non-web
   if (request.method !== 'GET') return
   if (url.protocol === 'chrome-extension:') return
+  if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return // API toujours en réseau
-  if (url.pathname.startsWith('/admin/')) return // Admin toujours en réseau
+  if (url.pathname.startsWith('/_next/')) return // Chunks Next toujours gérés par le navigateur
+  if (url.pathname.split('/').includes('admin')) return // Admin localisé toujours en réseau
 
   // Images : Cache First
   if (request.destination === 'image') {

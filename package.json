@@ -96,13 +96,6 @@
     "tsx": "^4.21.0",
     "typescript": "^5"
   },
-  "browserslist": [
-    "chrome >= 109",
-    "firefox >= 110",
-    "safari >= 16.4",
-    "edge >= 109",
-    "ios >= 16.4"
-  ],
   "optionalDependencies": {
     "exiftool-vendored.exe": "^13.59.0"
   },

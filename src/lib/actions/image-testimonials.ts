@@ -112,12 +112,13 @@ export async function getImageTestimonials() {
     }
 }
 
-export async function getApprovedImageTestimonials() {
-    return getCached('testimonials:image:approved', async () => {
+export async function getApprovedImageTestimonials(limit?: number) {
+    return getCached(`testimonials:image:approved:${limit ?? 'all'}`, async () => {
         try {
             const testimonials = await prisma.imageTestimonial.findMany({
                 where: { isApproved: true },
-                orderBy: { createdAt: 'desc' }
+                orderBy: { createdAt: 'desc' },
+                ...(limit ? { take: limit } : {}),
             })
             return { success: true, testimonials }
         } catch (error: any) {

@@ -147,7 +147,13 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                                 {top3.slice(0, 3).map((r, i) => (
                                     <div key={r.id} className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white overflow-hidden relative" style={{ zIndex: 3 - i }}>
                                         {r.image ? (
-                                            <Image src={r.image} alt={r.name || ''} fill className="object-cover" />
+                                            <Image
+                                                src={r.image}
+                                                alt={r.name || ''}
+                                                fill
+                                                sizes="28px"
+                                                className="object-cover"
+                                            />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-slate-500">
                                                 {r.name?.charAt(0) ?? 'U'}

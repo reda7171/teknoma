@@ -100,6 +100,26 @@ export async function upsertStock(data: {
                 note 
             },
         })
+
+        if (bookId) {
+            const aggregate = await tx.inventory.aggregate({
+                where: { bookId },
+                _sum: { quantity: true },
+            })
+            await tx.book.update({
+                where: { id: bookId },
+                data: { stock: aggregate._sum.quantity ?? 0 },
+            })
+        } else if (extraProductId) {
+            const aggregate = await tx.inventory.aggregate({
+                where: { extraProductId },
+                _sum: { quantity: true },
+            })
+            await tx.extraProduct.update({
+                where: { id: extraProductId },
+                data: { stock: aggregate._sum.quantity ?? 0 },
+            })
+        }
     })
 }
 

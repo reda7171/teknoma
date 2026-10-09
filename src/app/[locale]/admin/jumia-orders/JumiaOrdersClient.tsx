@@ -1,9 +1,21 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText, ExternalLink } from 'lucide-react'
+import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText, ExternalLink, Search, Filter, BookOpen, X, SlidersHorizontal } from 'lucide-react'
 import { getJumiaOrders, getJumiaStats, cancelJumiaOrderFull, packJumiaOrderFull, printJumiaOrderLabelsFull, readyToShipJumiaOrderFull, printJumiaOrderInvoiceFull, restoreJumiaOrderStock, syncAllJumiaStock } from './actions'
 import JumiaOrdersEvolutionChart from '@/components/admin/JumiaOrdersEvolutionChart'
+
+function normalizeForSearch(str: string): string {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\u064B-\u0652]/g, '')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .toLowerCase()
+        .trim()
+}
 
 export default function JumiaOrdersClient() {
     const [orders, setOrders] = useState<any[]>([])
@@ -11,6 +23,9 @@ export default function JumiaOrdersClient() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null)
     const [successMsg, setSuccessMsg] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState<string>('')
+    const [searchTerm, setSearchTerm] = useState<string>('')
+    const [productTitleFilter, setProductTitleFilter] = useState<string>('')
+    const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
     const [currentToken, setCurrentToken] = useState<string | null>(null)
     const [tokenHistory, setTokenHistory] = useState<string[]>([])
     const [hasNextPage, setHasNextPage] = useState(false)
@@ -31,7 +46,7 @@ export default function JumiaOrdersClient() {
     
     const size = 50
 
-    const fetchOrders = async (status: string, token: string | undefined, isNext: boolean = false) => {
+    const fetchOrders = async (status: string, token?: string | null, isNext: boolean = false) => {
         setLoading(true)
         setErrorMsg(null)
         try {
@@ -44,7 +59,7 @@ export default function JumiaOrdersClient() {
             tomorrow.setDate(tomorrow.getDate() + 1)
             const createdBefore = tomorrow.toISOString().split('T')[0]
 
-            const response = await getJumiaOrders(size, token, status || undefined, createdAfter, createdBefore)
+            const response = await getJumiaOrders(size, token || undefined, status || undefined, createdAfter, createdBefore)
             
             setOrders(response.orders)
             setCurrentToken(response.nextToken)
@@ -91,6 +106,41 @@ export default function JumiaOrdersClient() {
         setTokenHistory([])
         fetchOrders(e.target.value, undefined)
     }
+
+    const uniqueProductTitles = React.useMemo(() => {
+        const titles = new Set<string>()
+        orders.forEach(o => {
+            (o.items || []).forEach((item: any) => {
+                if (item.name) titles.add(item.name)
+            })
+        })
+        return Array.from(titles).sort((a, b) => a.localeCompare(b))
+    }, [orders])
+
+    const filteredOrders = React.useMemo(() => {
+        return orders.filter(order => {
+            const normSearch = normalizeForSearch(searchTerm)
+            const normProduct = normalizeForSearch(productTitleFilter)
+
+            const itemNames = (order.items || []).map((i: any) => i.name).filter(Boolean).join(' ')
+            const normItemNames = normalizeForSearch(itemNames)
+
+            const customerName = `${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}`
+            const city = order.shippingAddress?.city || ''
+            const orderNumber = String(order.number || order.OrderId || order.OrderNumber || '')
+
+            const matchesSearch = !normSearch ? true : (
+                normalizeForSearch(customerName).includes(normSearch) ||
+                orderNumber.toLowerCase().includes(normSearch) ||
+                normalizeForSearch(city).includes(normSearch) ||
+                normItemNames.includes(normSearch)
+            )
+
+            const matchesProduct = !normProduct ? true : normItemNames.includes(normProduct)
+
+            return matchesSearch && matchesProduct
+        })
+    }, [orders, searchTerm, productTitleFilter])
 
     const handleCancelOrder = async (orderId: string) => {
         setConfirmAction(null)
@@ -486,6 +536,136 @@ export default function JumiaOrdersClient() {
                     </div>
                 </div>
             )}
+
+            {/* Search & Filters Panel */}
+            <div className="w-full space-y-4">
+                <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                                isFilterOpen || searchTerm || productTitleFilter || statusFilter
+                                ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                        >
+                            <Search className="w-4 h-4" />
+                            {isFilterOpen ? 'Fermer la recherche' : 'Recherche & Filtres'}
+                        </button>
+                        
+                        {(searchTerm || productTitleFilter || statusFilter) && (
+                            <button
+                                onClick={() => {
+                                    setSearchTerm('')
+                                    setProductTitleFilter('')
+                                    setStatusFilter('')
+                                    fetchOrders('', undefined)
+                                }}
+                                className="text-xs font-bold text-red-500 hover:underline flex items-center gap-1"
+                            >
+                                <X className="w-3 h-3" />
+                                Réinitialiser
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                        {filteredOrders.length} {filteredOrders.length === 1 ? 'Commande trouvée' : 'Commandes trouvées'} ({orders.length} chargées)
+                    </div>
+                </div>
+
+                {isFilterOpen && (
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xl animate-in slide-in-from-top-4 duration-300">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Recherche Rapide */}
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                    <Search className="w-3 h-3" />
+                                    Recherche rapide
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Client, N° commande, ville, titre..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all font-bold text-sm"
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setSearchTerm('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-black p-1"
+                                            title="Effacer"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Filtre Titre du Livre / Produit */}
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                    <BookOpen className="w-3 h-3" />
+                                    Titre du livre / produit
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        list="jumia-product-titles-list"
+                                        placeholder="Ex: Emotional Intelligence, Pack..."
+                                        value={productTitleFilter}
+                                        onChange={(e) => setProductTitleFilter(e.target.value)}
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all font-bold text-sm pr-9"
+                                    />
+                                    {productTitleFilter && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductTitleFilter('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-black p-1"
+                                            title="Effacer le filtre"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                    {uniqueProductTitles.length > 0 && (
+                                        <datalist id="jumia-product-titles-list">
+                                            {uniqueProductTitles.map((title) => (
+                                                <option key={title} value={title} />
+                                            ))}
+                                        </datalist>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Statut Jumia */}
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                    <Filter className="w-3 h-3" />
+                                    Statut de la commande
+                                </label>
+                                <select aria-label="Filtrer par statut"
+                                    value={statusFilter}
+                                    onChange={handleStatusChange}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all font-bold text-sm"
+                                >
+                                    <option value="">Tous les statuts</option>
+                                    <option value="PENDING">Nouvelles (En attente)</option>
+                                    <option value="READY_TO_SHIP">Prêtes à expédier</option>
+                                    <option value="SHIPPED">Expédiées (Historique)</option>
+                                    <option value="DELIVERED">Livrées (Historique)</option>
+                                    <option value="CANCELED">Annulées (Historique)</option>
+                                    <option value="RETURNED">Retournées (Historique)</option>
+                                    <option value="FAILED">Échouées (Historique)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="overflow-x-auto min-h-[400px]">
                         {loading && orders.length === 0 ? (
@@ -499,20 +679,21 @@ export default function JumiaOrdersClient() {
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">ID Jumia</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Date</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Client</th>
+                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Articles</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Statut</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 text-right">Total</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50 text-sm">
-                                    {orders.length === 0 ? (
+                                    {filteredOrders.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="p-8 text-center text-slate-400 font-medium">
+                                            <td colSpan={7} className="p-8 text-center text-slate-400 font-medium">
                                                 Aucune commande trouvée.
                                             </td>
                                         </tr>
                                     ) : (
-                                        orders.map((order: any, index: number) => (
+                                        filteredOrders.map((order: any, index: number) => (
                                             <React.Fragment key={order.id || order.OrderId || index}>
                                                 <tr className="hover:bg-slate-50/50 transition-colors group">
                                                     <td className="p-4 font-bold text-slate-900">{order.number || order.OrderId || order.OrderNumber || 'N/A'}</td>
@@ -523,6 +704,16 @@ export default function JumiaOrdersClient() {
                                                 </td>
                                                 <td className="p-4 font-medium text-slate-700">
                                                     {order.shippingAddress?.firstName || order.CustomerFirstName} {order.shippingAddress?.lastName || order.CustomerLastName}
+                                                </td>
+                                                <td className="p-4 max-w-[220px]">
+                                                    <div className="font-bold text-slate-900 text-xs">
+                                                        {order.items?.length ? `${order.items.reduce((s: number, i: any) => s + (i.quantity || 1), 0)} article(s)` : `${order.totalItems || 1} article(s)`}
+                                                    </div>
+                                                    {order.items && order.items.length > 0 && (
+                                                        <div className="text-[11px] text-slate-500 truncate" title={order.items.map((i: any) => `${i.quantity || 1}x ${i.name}`).join(', ')}>
+                                                            {order.items.map((i: any) => i.name).filter(Boolean).join(', ')}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="p-4">
                                                     <span className={`inline-flex px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full ${

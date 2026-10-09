@@ -163,7 +163,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
             const [books, packs, accessories] = await Promise.all([
                 bookIds.length > 0 ? tx.book.findMany({ where: { id: { in: bookIds } }, select: { id: true, costPrice: true, sellerId: true } }) : [],
-                packIds.length > 0 ? tx.pack.findMany({ where: { id: { in: packIds } }, select: { id: true, costPrice: true, shippingFees: true, books: true } }) : [],
+                packIds.length > 0 ? tx.pack.findMany({ where: { id: { in: packIds } }, select: { id: true, costPrice: true, shippingFees: true, books: true, extraProducts: true } }) : [],
                 accessoryIds.length > 0 ? tx.extraProduct.findMany({ where: { id: { in: accessoryIds } }, select: { id: true, costPrice: true } }) : []
             ])
 
@@ -335,6 +335,12 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                                 data: { stock: { decrement: item.quantity } }
                             })
                         }))
+                        await Promise.all(pack.extraProducts.map(packExtraProduct =>
+                            tx.extraProduct.updateMany({
+                                where: { id: packExtraProduct.extraProductId },
+                                data: { stock: { decrement: item.quantity } }
+                            })
+                        ))
                     }
                 }
             }))

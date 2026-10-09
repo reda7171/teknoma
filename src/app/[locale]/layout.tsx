@@ -6,7 +6,6 @@ import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { isFeatureEnabled, getSetting } from '@/lib/actions/site-settings';
-import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import Toaster from '@/components/Toaster';
 import Script from 'next/script';
@@ -14,13 +13,9 @@ import Script from 'next/script';
 const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'))
 const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannelButton'))
 const ChatBot = dynamic(() => import('@/components/ChatBot'))
-const PixelTracker = dynamic(() => import('@/components/PixelTracker'))
-const FacebookPixel = dynamic(() => import('@/components/FacebookPixel'))
-const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
-const AdSense = dynamic(() => import('@/components/AdSense'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 import UtmTracker from '@/components/UtmTracker'
-import DelayedScripts from '@/components/DelayedScripts'
+import DeferredMarketingScripts from '@/components/DeferredMarketingScripts'
 import AuthModalLoader from '@/components/auth/AuthModalLoader'
 
 
@@ -611,25 +606,12 @@ export default async function LocaleLayout({
           <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
           <AuthModalLoader />
-          <DelayedScripts>
-            <Suspense fallback={null}>
-              <Script
-                id="gtm-script"
-                strategy="lazyOnload"
-                dangerouslySetInnerHTML={{
-                  __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MSD75KHT');`
-                }}
-              />
-              <AdSense publisherId={adsenseId || ''} isEnabled={adsenseEnabled === 'true'} />
-              <PixelTracker />
-              <FacebookPixel pixelId={fbPixelId} />
-              <GoogleAnalytics gaId={googleAnalyticsId || ''} />
-            </Suspense>
-          </DelayedScripts>
+          <DeferredMarketingScripts
+            adsenseId={adsenseId || ''}
+            adsenseEnabled={adsenseEnabled === 'true'}
+            facebookPixelId={fbPixelId}
+            googleAnalyticsId={googleAnalyticsId || ''}
+          />
         </NextIntlClientProvider>
 
 

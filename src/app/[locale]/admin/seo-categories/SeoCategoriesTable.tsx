@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Home } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Home, BookOpen } from 'lucide-react'
 import { saveSeoCategory, deleteSeoCategory } from '@/lib/actions/seo-categories'
 
 export default function SeoCategoriesTable({ categories }: { categories: any[] }) {
@@ -36,7 +36,9 @@ export default function SeoCategoriesTable({ categories }: { categories: any[] }
 
     const filtered = categories.filter(c => 
         c.title.toLowerCase().includes(search.toLowerCase()) || 
-        c.slug.toLowerCase().includes(search.toLowerCase())
+        c.slug.toLowerCase().includes(search.toLowerCase()) ||
+        (c.keyword && c.keyword.toLowerCase().includes(search.toLowerCase())) ||
+        (c.searchQuery && c.searchQuery.toLowerCase().includes(search.toLowerCase()))
     )
 
     return (
@@ -59,6 +61,7 @@ export default function SeoCategoriesTable({ categories }: { categories: any[] }
                         <tr>
                             <th className="px-6 py-4">Catégorie</th>
                             <th className="px-6 py-4">Locale</th>
+                            <th className="px-6 py-4">Livres</th>
                             <th className="px-6 py-4">Mots-clés (Auto)</th>
                             <th className="px-6 py-4">Statut</th>
                             <th className="px-6 py-4">Page d'accueil</th>
@@ -75,6 +78,16 @@ export default function SeoCategoriesTable({ categories }: { categories: any[] }
                                 <td className="px-6 py-4">
                                     <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium uppercase">
                                         {category.locale}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                        (category._count?.books || 0) > 0 
+                                            ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                    }`}>
+                                        <BookOpen className="w-3.5 h-3.5 mr-1" />
+                                        {category._count?.books || 0}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-xs">

@@ -18,6 +18,21 @@ export default function PWAInstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
+    // Un ancien service worker de production peut rester actif sur localhost et
+    // servir des chunks Turbopack périmés. Nettoyer automatiquement en développement.
+    if (process.env.NODE_ENV !== 'production') {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations()
+          .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+          .catch(() => undefined)
+      }
+      if ('caches' in window) {
+        caches.keys()
+          .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+          .catch(() => undefined)
+      }
+    }
+
     // Vérifier si déjà installé
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)

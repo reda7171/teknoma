@@ -13,6 +13,7 @@ export async function getPacks() {
                     book: true,
                 },
             },
+            extraProducts: { include: { extraProduct: true } },
         },
         orderBy: {
             createdAt: 'desc',
@@ -31,6 +32,7 @@ export async function adminGetPacks() {
                     book: true,
                 },
             },
+            extraProducts: { include: { extraProduct: true } },
         },
         orderBy: {
             createdAt: 'desc',
@@ -50,6 +52,7 @@ export async function getPackById(id: string) {
                     book: true,
                 },
             },
+            extraProducts: { include: { extraProduct: true } },
         },
     })
 }
@@ -73,6 +76,19 @@ export async function getPopularPacks(limit = 3) {
                                     author: true,
                                     price: true,
                                     image: true,
+                                },
+                            },
+                        },
+                    },
+                    extraProducts: {
+                        include: {
+                            extraProduct: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    price: true,
+                                    image: true,
+                                    category: true,
                                 },
                             },
                         },
@@ -105,6 +121,16 @@ export async function checkPackAvailability(packId: string, quantity: number) {
                     },
                 },
             },
+            extraProducts: {
+                include: {
+                    extraProduct: {
+                        select: {
+                            stock: true,
+                            active: true,
+                        },
+                    },
+                },
+            },
         },
     })
 
@@ -119,6 +145,15 @@ export async function checkPackAvailability(packId: string, quantity: number) {
         }
         if (packBook.book.stock < quantity) {
             return { available: false, reason: 'Stock insuffisant pour un livre du pack' }
+        }
+    }
+
+    for (const packExtraProduct of pack.extraProducts) {
+        if (!packExtraProduct.extraProduct.active) {
+            return { available: false, reason: 'Un accessoire du pack n\'est plus disponible' }
+        }
+        if (packExtraProduct.extraProduct.stock < quantity) {
+            return { available: false, reason: 'Stock insuffisant pour un accessoire du pack' }
         }
     }
 

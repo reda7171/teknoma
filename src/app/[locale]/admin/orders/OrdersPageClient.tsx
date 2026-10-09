@@ -44,10 +44,22 @@ export default function OrdersPageClient({
     const [shippingFilter, setShippingFilter] = useState('')
     const [paymentFilter, setPaymentFilter] = useState('')
     const [cityFilter, setCityFilter] = useState('')
+    const [productTitleFilter, setProductTitleFilter] = useState('')
 
     const uniqueCities = useMemo(() => {
         const cities = orders.map(o => o.city?.trim()).filter(Boolean)
         return Array.from(new Set(cities)).sort()
+    }, [orders])
+    const uniqueProductTitles = useMemo(() => {
+        const titles = new Set<string>()
+        orders.forEach(o => {
+            o.items?.forEach((item: any) => {
+                if (item.book?.title) titles.add(item.book.title)
+                if (item.pack?.name) titles.add(item.pack.name)
+                if (item.extraProduct?.name) titles.add(item.extraProduct.name)
+            })
+        })
+        return Array.from(titles).sort((a, b) => a.localeCompare(b))
     }, [orders])
 
     const evolutionData = useMemo(() => {
@@ -130,6 +142,9 @@ export default function OrdersPageClient({
                     shippingCompanies={shippingCompanies}
                     activePaymentMethods={activePaymentMethods}
                     cities={uniqueCities as string[]}
+                    productTitleFilter={productTitleFilter}
+                    onProductTitleFilterChange={setProductTitleFilter}
+                    productTitles={uniqueProductTitles}
                 />
 
                 {/* Table Content */}
@@ -143,6 +158,7 @@ export default function OrdersPageClient({
                         shippingFilter={shippingFilter}
                         paymentFilter={paymentFilter}
                         cityFilter={cityFilter}
+                        productTitleFilter={productTitleFilter}
                         deliveryInvoices={deliveryInvoices}
                     />
                 </div>

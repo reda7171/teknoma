@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste, Zap, X } from 'lucide-react'
 import { createPack, type PackInput } from '@/lib/actions/packs'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
@@ -20,11 +20,60 @@ interface Book {
     language?: string
     active: boolean
     stock: number
+    itemType: 'BOOK' | 'ACCESSORY'
 }
 
 interface PackFormProps {
     books: Book[]
     whatsappPhone?: string
+}
+
+function normalizeSearchText(str: string): string {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\u064B-\u0652]/g, '')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+function parseQuickInput(raw: string) {
+    const trimmed = raw.trim()
+    let packName = ''
+    let booksPart = ''
+
+    if (trimmed.includes('\t')) {
+        const parts = trimmed.split('\t')
+        packName = parts[0].trim()
+        booksPart = parts.slice(1).join(' ').trim()
+    } else if (trimmed.includes('\n')) {
+        const lines = trimmed.split('\n').map(l => l.trim()).filter(Boolean)
+        packName = lines[0]
+        booksPart = lines.slice(1).join(' + ')
+    } else if (trimmed.includes('|')) {
+        const parts = trimmed.split('|')
+        packName = parts[0].trim()
+        booksPart = parts.slice(1).join(' + ').trim()
+    } else if (trimmed.includes(':') && trimmed.includes('+')) {
+        const idx = trimmed.indexOf(':')
+        packName = trimmed.slice(0, idx).trim()
+        booksPart = trimmed.slice(idx + 1).trim()
+    } else if (trimmed.includes(' - ') && trimmed.includes('+')) {
+        const idx = trimmed.indexOf(' - ')
+        packName = trimmed.slice(0, idx).trim()
+        booksPart = trimmed.slice(idx + 3).trim()
+    } else if (trimmed.includes('+')) {
+        booksPart = trimmed
+    } else {
+        packName = trimmed
+    }
+
+    return { packName, booksPart }
 }
 
 export default function PackForm({ books, whatsappPhone }: PackFormProps) {
@@ -44,6 +93,9 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     const [filterLanguage, setFilterLanguage] = useState('ALL')
     const [isCatalogOpen, setIsCatalogOpen] = useState(false)
     const [packImage, setPackImage] = useState<string | undefined>(undefined)
+    const [originalPrice, setOriginalPrice] = useState('')
+    const [promotionPrice, setPromotionPrice] = useState('')
+    const [sellerSku, setSellerSku] = useState('')
 
     // Champs multilingues
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
@@ -63,6 +115,78 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     const [translateMsg, setTranslateMsg] = useState<string | null>(null)
     const [isGeneratingHighlights, setIsGeneratingHighlights] = useState(false)
     const [isGeneratingContent, setIsGeneratingContent] = useState(false)
+    const [quickInput, setQuickInput] = useState('')
+    const [quickInputResult, setQuickInputResult] = useState<{
+        packName?: string
+        matched: { token: string; title: string; id: string }[]
+        notFound: string[]
+    } | null>(null)
+
+    function handleApplyQuickInput() {
+        if (!quickInput.trim()) return
+
+        const { packName, booksPart } = parseQuickInput(quickInput)
+
+        if (packName) {
+            const clean = packName.replace(/\|/g, '-').replace(/\s+/g, ' ').trim()
+            setName(clean)
+            if (!/[\u0600-\u06FF]/.test(clean)) {
+                setNameFr(clean)
+            }
+        }
+
+        const matched: { token: string; title: string; id: string }[] = []
+        const notFound: string[] = []
+
+        if (booksPart) {
+            const tokens = booksPart.includes('+')
+                ? booksPart.split('+').map(t => t.trim()).filter(Boolean)
+                : booksPart.split(/[,;\n]/).map(t => t.trim()).filter(Boolean)
+
+            const matchedIds: string[] = []
+
+            tokens.forEach(token => {
+                const nt = normalizeSearchText(token)
+                if (!nt) return
+
+                let found = books.find(b => normalizeSearchText(b.title) === nt)
+
+                if (!found) {
+                    found = books.find(b => normalizeSearchText(b.title).startsWith(nt))
+                }
+
+                if (!found) {
+                    found = books.find(b => {
+                        const nb = normalizeSearchText(b.title)
+                        return nb.includes(nt) || nt.includes(nb)
+                    })
+                }
+
+                if (!found) {
+                    const words = nt.split(' ').filter(w => w.length > 1)
+                    if (words.length > 0) {
+                        found = books.find(b => {
+                            const nb = normalizeSearchText(`${b.title} ${b.author}`)
+                            return words.every(w => nb.includes(w))
+                        })
+                    }
+                }
+
+                if (found) {
+                    matched.push({ token, title: found.title, id: found.id })
+                    matchedIds.push(found.id)
+                } else {
+                    notFound.push(token)
+                }
+            })
+
+            if (matchedIds.length > 0) {
+                setSelectedBooks(prev => Array.from(new Set([...prev, ...matchedIds])))
+            }
+        }
+
+        setQuickInputResult({ packName, matched, notFound })
+    }
 
     function toggleBook(bookId: string) {
         setSelectedBooks(prev =>
@@ -122,22 +246,27 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
 
         const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
         if (selectedBooksData.length === 0) {
-            alert('Veuillez d\'abord sélectionner au moins un livre pour ce pack.');
+            alert('Veuillez d\'abord sélectionner au moins un produit pour ce pack.');
             return;
         }
 
         const writtenByText = currentLang === 'ar' ? 'تأليف' : currentLang === 'en' ? 'written by' : 'écrit par';
-        const booksListText = selectedBooksData.map(b => `- ${b.title} (${writtenByText} ${b.author})`).join('\n');
+        const accessoryText = currentLang === 'ar' ? 'إكسسوار' : currentLang === 'en' ? 'accessory' : 'accessoire';
+        const booksListText = selectedBooksData.map(item =>
+            item.itemType === 'BOOK'
+                ? `- ${item.title} (${writtenByText} ${item.author})`
+                : `- ${item.title} (${accessoryText})`
+        ).join('\n');
         
         let generatedText = '';
         if (currentLang === 'ar') {
-            generatedText = `استفد من باقتنا الحصرية: "${packName}"!\n\nتحتوي هذه الباقة على الكتب التالية:\n${booksListText}\n\nاطلبها الآن بأفضل سعر!`;
+            generatedText = `استفد من باقتنا الحصرية: "${packName}"!\n\nتحتوي هذه الباقة على المنتجات التالية:\n${booksListText}\n\nاطلبها الآن بأفضل سعر!`;
             setDescription(generatedText);
         } else if (currentLang === 'fr') {
-            generatedText = `Profitez de notre pack exclusif : "${packName}" !\n\nCe pack contient les livres suivants :\n${booksListText}\n\nCommandez dès maintenant au meilleur prix !`;
+            generatedText = `Profitez de notre pack exclusif : "${packName}" !\n\nCe pack contient les produits suivants :\n${booksListText}\n\nCommandez dès maintenant au meilleur prix !`;
             setDescriptionFr(generatedText);
         } else {
-            generatedText = `Enjoy our exclusive pack: "${packName}"!\n\nThis pack contains the following books:\n${booksListText}\n\nOrder now at the best price!`;
+            generatedText = `Enjoy our exclusive pack: "${packName}"!\n\nThis pack contains the following products:\n${booksListText}\n\nOrder now at the best price!`;
             setDescriptionEn(generatedText);
         }
     }
@@ -240,7 +369,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         setError(null)
 
         if (selectedBooks.length === 0) {
-            setError('Veuillez sélectionner au moins un livre')
+            setError('Veuillez sélectionner au moins un produit')
             setLoading(false)
             return
         }
@@ -259,7 +388,8 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             image: formData.get('image') as string || packImage || undefined,
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
-            bookIds: selectedBooks,
+            bookIds: selectedBooksData.filter(item => item.itemType === 'BOOK').map(item => item.id),
+            extraProductIds: selectedBooksData.filter(item => item.itemType === 'ACCESSORY').map(item => item.id),
             sellerSku: formData.get('sellerSku') as string || undefined,
             jumiaHighlights: (currentLang === 'fr' ? jumiaHighlightsFr : currentLang === 'ar' ? jumiaHighlightsAr : jumiaHighlightsEn) || jumiaHighlightsFr || jumiaHighlightsAr || jumiaHighlightsEn || (formData.get('jumiaHighlights') as string) || undefined,
             jumiaPackageContent: (currentLang === 'fr' ? jumiaPackageContentFr : currentLang === 'ar' ? jumiaPackageContentAr : jumiaPackageContentEn) || jumiaPackageContentFr || jumiaPackageContentAr || jumiaPackageContentEn || (formData.get('jumiaPackageContent') as string) || undefined,
@@ -315,12 +445,21 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     ]
 
     const copyChatGptPrompt = () => {
+        if (selectedBooksData.length === 0) {
+            setError('Veuillez sélectionner au moins un produit avant de générer le prompt ChatGPT.')
+            return
+        }
+
+        setError(null)
         const packName = name || nameFr || nameEn || 'Nom du pack inconnu'
-        const selectedTitles = selectedBooksData.map(b => b.title).join(', ')
+        const selectedTitles = selectedBooksData.map(item => `${item.title} (${item.itemType === 'BOOK' ? 'Book' : 'Accessory'})`).join(', ')
 
         const prompt = `Act as an expert e-commerce copywriter & bookseller for Jumia marketplace.
 Pack Name: ${packName}
-${selectedTitles ? `Books Included in this Pack (${selectedBooksData.length}): ${selectedTitles}` : ''}
+${selectedTitles ? `Products Included in this Pack (${selectedBooksData.length}): ${selectedTitles}` : ''}
+Total retail price of all selected products: ${totalOriginalPrice} MAD.
+Suggest an attractive promotional price below the total retail price. Prices must be whole numbers in MAD.
+Generate one concise, unique Seller SKU usable on Jumia. The SKU must contain only uppercase letters, numbers and hyphens.
 
 Please provide the following information in strict JSON format:
 {
@@ -337,9 +476,12 @@ Please provide the following information in strict JSON format:
   "jumiaPackageContent_fr": "1 x Pack de livres : [Nom du pack en français]",
   "jumiaPackageContent_en": "1 x Book pack : [Pack name in English]",
   "jumiaHighlights": "<ul><li>Titre: [Nom du pack en français]</li><li>Type: Pack de Livres</li>${selectedTitles ? `<li>Contient: ${selectedTitles}</li>` : ''}</ul>",
-  "jumiaPackageContent": "1 x Pack de livres : [Nom du pack en français]"
+  "jumiaPackageContent": "1 x Pack de livres : [Nom du pack en français]",
+  "originalPrice": ${totalOriginalPrice},
+  "price": "[Prix promotionnel proposé en MAD, nombre entier inférieur à ${totalOriginalPrice}]",
+  "sellerSku": "[SKU Jumia unique, par exemple RIW-PACK-XXXX]"
 }
-Ensure all descriptions and highlights are formatted properly. HTML in highlights must use clean <ul> and <li> tags.`
+Ensure all descriptions and highlights are provided in Arabic, French and English and formatted properly. Never use the vertical bar (|) in titles or descriptions (use hyphens - instead). HTML in highlights must use clean <ul> and <li> tags.`
 
         navigator.clipboard.writeText(prompt)
         alert('Prompt ChatGPT copié dans le presse-papier !')
@@ -378,9 +520,10 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
             const nAr = data.name_ar || data.nameAr || data.title_ar || data.titleAr
             const nFr = data.name_fr || data.nameFr || data.title_fr || data.titleFr
             const nEn = data.name_en || data.nameEn || data.title_en || data.titleEn
-            if (nAr) setName(nAr)
-            if (nFr) setNameFr(nFr)
-            if (nEn) setNameEn(nEn)
+            const cleanName = (val: string) => (val || '').replace(/\|/g, '-').replace(/\s+/g, ' ').trim()
+            if (nAr) setName(cleanName(nAr))
+            if (nFr) setNameFr(cleanName(nFr))
+            if (nEn) setNameEn(cleanName(nEn))
 
             // Descriptions
             const dAr = data.description_ar || data.descriptionAr
@@ -406,6 +549,23 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
             if (cFr) setJumiaPackageContentFr(cFr)
             if (cEn) setJumiaPackageContentEn(cEn)
 
+            // Prix et SKU communs à toutes les langues
+            const parsePrice = (value: unknown) => {
+                if (typeof value === 'number' && Number.isFinite(value)) return String(Math.round(value))
+                if (typeof value !== 'string') return ''
+                const parsed = Number.parseFloat(value.replace(/[^0-9.,-]/g, '').replace(',', '.'))
+                return Number.isFinite(parsed) ? String(Math.round(parsed)) : ''
+            }
+            const pastedOriginalPrice = parsePrice(data.originalPrice ?? data.original_price ?? data.retailPrice ?? data.retail_price)
+            const pastedPromotionPrice = parsePrice(data.price ?? data.promotionPrice ?? data.promotion_price ?? data.promoPrice ?? data.promo_price)
+            const pastedSellerSku = data.sellerSku ?? data.seller_sku ?? data.sku
+
+            setOriginalPrice(pastedOriginalPrice || String(totalOriginalPrice))
+            if (pastedPromotionPrice) setPromotionPrice(pastedPromotionPrice)
+            if (typeof pastedSellerSku === 'string' && pastedSellerSku.trim()) {
+                setSellerSku(pastedSellerSku.trim().toUpperCase())
+            }
+
             alert('Champs et données Jumia remplis avec succès pour toutes les langues !')
         } catch (err) {
             console.error(err)
@@ -429,7 +589,7 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                             <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider border border-gray-200">Vide</span>
                         ) : selectedBooksData.some(b => b.stock <= 0) ? (
                             <span className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold uppercase tracking-wider border border-red-200 flex items-center gap-1">
-                                <AlertTriangle className="w-4 h-4" /> Incomplet ({selectedBooksData.filter(b => b.stock <= 0).length} livre(s) en rupture)
+                                <AlertTriangle className="w-4 h-4" /> Incomplet ({selectedBooksData.filter(b => b.stock <= 0).length} produit(s) en rupture)
                             </span>
                         ) : (
                             <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider border border-green-200 flex items-center gap-1">
@@ -440,13 +600,16 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                 </div>
                 <div className="flex items-center justify-between mt-2">
                     <p className="text-sm text-gray-600">
-                        Créez une offre groupée de livres
+                        Créez une offre groupée de livres et accessoires
                     </p>
                     <div className="flex flex-col sm:flex-row items-center gap-2">
                         <button
                             type="button"
                             onClick={copyChatGptPrompt}
-                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-medium text-sm"
+                            disabled={selectedBooksData.length === 0}
+                            aria-disabled={selectedBooksData.length === 0}
+                            title={selectedBooksData.length === 0 ? 'Sélectionnez au moins un produit' : 'Copier le prompt ChatGPT'}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-medium text-sm disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300"
                         >
                             <Bot className="w-5 h-5" />
                             Prompt ChatGPT
@@ -459,6 +622,11 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                             <ClipboardPaste className="w-5 h-5" />
                             Coller réponse
                         </button>
+                        {selectedBooksData.length === 0 && (
+                            <span className="text-xs font-medium text-amber-700 sm:ml-1">
+                                Sélectionnez au moins un produit
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -468,6 +636,119 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                     <p className="text-sm text-red-600">{error}</p>
                 </div>
             )}
+
+            {/* Saisie Rapide Pack & Livres */}
+            <div className="mb-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="p-1.5 bg-blue-600 text-white rounded-lg shadow-sm">
+                            <Zap className="w-4 h-4" />
+                        </span>
+                        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                            Saisie Rapide (Nom du Pack + Livres)
+                        </h2>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                            Auto-remplissage
+                        </span>
+                    </div>
+                    {quickInput && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setQuickInput('')
+                                setQuickInputResult(null)
+                            }}
+                            className="text-xs text-gray-500 hover:text-gray-800 flex items-center gap-1"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                            Effacer
+                        </button>
+                    )}
+                </div>
+
+                <p className="text-xs text-gray-600 mb-3">
+                    Collez ou saisissez votre ligne au format : <code className="bg-white/80 px-1.5 py-0.5 rounded text-blue-700 font-mono text-[11px] border border-blue-100">Nom du pack [TAB ou :] Livre 1 + Livre 2 + Livre 3</code>
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            value={quickInput}
+                            onChange={e => setQuickInput(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault()
+                                    handleApplyQuickInput()
+                                }
+                            }}
+                            placeholder="Ex: Pack Change Ta Vie	العادات الذرية + قوة العادات + The Mountain Is You"
+                            className="w-full px-4 py-2.5 text-sm bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner font-sans"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleApplyQuickInput}
+                        disabled={!quickInput.trim()}
+                        className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2 shrink-0"
+                    >
+                        <Zap className="w-4 h-4" />
+                        Remplir & Sélectionner
+                    </button>
+                </div>
+
+                {/* Résultat / Feedback */}
+                {quickInputResult && (
+                    <div className="mt-4 pt-3 border-t border-blue-200/60 text-xs space-y-2">
+                        {quickInputResult.packName && (
+                            <div className="flex items-center gap-2 text-gray-700">
+                                <span className="font-semibold text-gray-900">Nom appliqué :</span>
+                                <span className="px-2 py-0.5 bg-white rounded border border-gray-200 font-medium text-blue-900">
+                                    {quickInputResult.packName}
+                                </span>
+                            </div>
+                        )}
+
+                        {quickInputResult.matched.length > 0 && (
+                            <div>
+                                <span className="font-semibold text-green-800">
+                                    Livres sélectionnés ({quickInputResult.matched.length}) :
+                                </span>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {quickInputResult.matched.map(m => (
+                                        <span
+                                            key={m.id}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-900 rounded-md font-medium text-[11px] border border-green-200"
+                                        >
+                                            <CheckCircle2 className="w-3 h-3 text-green-600" />
+                                            {m.title}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {quickInputResult.notFound.length > 0 && (
+                            <div>
+                                <span className="font-semibold text-amber-800">
+                                    Non trouvés ({quickInputResult.notFound.length}) :
+                                </span>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {quickInputResult.notFound.map((token, idx) => (
+                                        <span
+                                            key={idx}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-900 rounded-md font-medium text-[11px] border border-amber-200"
+                                        >
+                                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                            {token}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {/* Left Column */}
@@ -600,6 +881,8 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                                     type="number"
                                     id="originalPrice"
                                     name="originalPrice"
+                                    value={originalPrice}
+                                    onChange={e => setOriginalPrice(e.target.value)}
                                     min="0"
                                     step="1"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -607,7 +890,7 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                                 />
                                 {selectedBooks.length > 0 && (
                                     <p className="mt-2 text-sm text-gray-600">
-                                        Prix total des livres sélectionnés: <span className="font-medium">{totalOriginalPrice} درهم</span>
+                                        Prix total des produits sélectionnés: <span className="font-medium">{totalOriginalPrice} درهم</span>
                                     </p>
                                 )}
                             </div>
@@ -621,6 +904,8 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                                     type="number"
                                     id="price"
                                     name="price"
+                                    value={promotionPrice}
+                                    onChange={e => setPromotionPrice(e.target.value)}
                                     required
                                     min="0"
                                     step="1"
@@ -639,15 +924,14 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                                         type="text"
                                         id="sellerSku"
                                         name="sellerSku"
+                                        value={sellerSku}
+                                        onChange={e => setSellerSku(e.target.value.toUpperCase())}
                                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                                         placeholder="SKU vendeur pour synchronisation"
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            const input = document.getElementById('sellerSku') as HTMLInputElement
-                                            if (input) input.value = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
-                                        }}
+                                        onClick={() => setSellerSku(`RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`)}
                                         className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                                     >
                                         Générer
@@ -787,7 +1071,7 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900">
-                                    Sélectionner les livres ({selectedBooks.length} sélectionné{selectedBooks.length > 1 ? 's' : ''})
+                                    Sélectionner les produits ({selectedBooks.length} sélectionné{selectedBooks.length > 1 ? 's' : ''})
                                 </h2>
                                 <div className="flex items-center gap-4 mt-1">
                                     <button type="button" onClick={toggleAll} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
@@ -816,7 +1100,7 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                             <select value={filterAuthor} onChange={e => setFilterAuthor(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
-                                <option value="ALL">Tous les auteurs ({books.length})</option>
+                                <option value="ALL">Tous les auteurs et types ({books.length})</option>
                                 {authors.map(a => <option key={a} value={a}>{a} ({authorBookCounts[a] || 0})</option>)}
                             </select>
                             <select value={filterLanguage} onChange={e => setFilterLanguage(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors">
@@ -826,7 +1110,7 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                         </div>
                         <div className="max-h-96 overflow-y-auto pr-2">
                             {Object.entries(groupedBooks).length === 0 ? (
-                                <p className="text-center text-gray-500 py-8">Aucun livre trouvé</p>
+                                <p className="text-center text-gray-500 py-8">Aucun produit trouvé</p>
                             ) : (
                                 Object.entries(groupedBooks).map(([category, categoryBooks]) => (
                                     <div key={category} className="mb-6 last:mb-0">
@@ -853,6 +1137,9 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                                                     <div className="ml-4 flex-1">
                                                         <p className="text-sm font-black text-gray-900 leading-tight">
                                                             {book.title}
+                                                            <span className={`ml-2 px-1.5 py-0.5 text-[8px] font-black uppercase rounded ${book.itemType === 'BOOK' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                                {book.itemType === 'BOOK' ? 'Livre' : 'Accessoire'}
+                                                            </span>
                                                             {!book.active && <span className="ml-2 px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Inactif</span>}
                                                         </p>
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
@@ -882,18 +1169,18 @@ Ensure all descriptions and highlights are formatted properly. HTML in highlight
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Résumé</h2>
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Livres sélectionnés:</span>
+                                <span className="text-gray-600">Produits sélectionnés:</span>
                                 <span className="font-medium">{selectedBooks.length}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Prix total livres:</span>
+                                <span className="text-gray-600">Prix total produits:</span>
                                 <span className="font-medium">{totalOriginalPrice} درهم</span>
                             </div>
                         </div>
 
                         {selectedBooksData.length > 0 && (
                             <div className="mb-6">
-                                <p className="text-sm font-medium text-gray-700 mb-2">Livres inclus:</p>
+                                <p className="text-sm font-medium text-gray-700 mb-2">Produits inclus:</p>
                                 <ul className="space-y-1">
                                     {selectedBooksData.map(book => (
                                         <li key={book.id} className="text-xs text-gray-600 flex justify-between border-b border-gray-50 pb-1 last:border-0 last:pb-0">
