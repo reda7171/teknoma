@@ -62,15 +62,22 @@ export async function GET() {
             xml += `      <g:brand>${escapeXml(book.author || 'Riwaya')}</g:brand>\n`
             
             const cleanIsbn = book.isbn ? book.isbn.replace(/\D/g, '') : '';
-            if (cleanIsbn && [8, 12, 13, 14].includes(cleanIsbn.length)) {
+            if (cleanIsbn && [8, 10, 12, 13, 14].includes(cleanIsbn.length)) {
                 xml += `      <g:gtin>${cleanIsbn}</g:gtin>\n`
             } else {
                 xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             }
-            
+
+            xml += `      <g:google_product_category>778</g:google_product_category>\n`
             if (book.category) {
                 xml += `      <g:product_type>${escapeXml(book.category)}</g:product_type>\n`
             }
+
+            xml += `      <g:shipping>\n`
+            xml += `        <g:country>MA</g:country>\n`
+            xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
+            xml += `        <g:price>35.00 MAD</g:price>\n`
+            xml += `      </g:shipping>\n`
 
             // Map all active promotions to every product
             if (coupons && coupons.length > 0) {

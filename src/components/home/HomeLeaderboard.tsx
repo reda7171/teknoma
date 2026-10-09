@@ -41,7 +41,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
 
                         {/* Header */}
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="inline-flex items-center gap-1.5 text-rose-600 font-black text-[10px] uppercase tracking-[0.3em] bg-white border border-rose-200 px-3 py-1.5 rounded-full shadow-sm">
+                            <div className="inline-flex items-center gap-1.5 text-rose-700 font-black text-[10px] uppercase tracking-[0.3em] bg-white border border-rose-200 px-3 py-1.5 rounded-full shadow-sm">
                                 <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
                                 {t('Badge')}
                             </div>
@@ -125,7 +125,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                     {/* ── Colonne copywriting ── */}
                     <div className="lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-start">
                         {/* Badge challenge */}
-                        <div className="inline-flex items-center gap-2 text-orange-600 font-black text-[11px] uppercase tracking-[0.2em] mb-5">
+                        <div className="inline-flex items-center gap-2 text-orange-800 font-black text-[11px] uppercase tracking-[0.2em] mb-5">
                             <Flame className="w-5 h-5 fill-orange-100" />
                             {t('Challenge') || 'Challenge'}
                         </div>
@@ -134,7 +134,7 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
                             {t('Headline')}
                         </h3>
 
-                        <p className="text-slate-500 font-medium leading-relaxed text-base md:text-lg mb-10 max-w-md">
+                        <p className="text-slate-700 font-medium leading-relaxed text-base md:text-lg mb-10 max-w-md">
                             {t('Body')}
                         </p>
 
