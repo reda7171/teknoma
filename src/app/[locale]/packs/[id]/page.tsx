@@ -195,6 +195,7 @@ export default async function PackDetailPage({
                 '@type': 'Offer',
                 priceCurrency: 'MAD',
                 price: displayPrice,
+                validFrom: new Date(pack.createdAt).toISOString().split('T')[0],
                 priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                 itemCondition: 'https://schema.org/NewCondition',
                 availability: 'https://schema.org/InStock',

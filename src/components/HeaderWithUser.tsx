@@ -3,14 +3,18 @@ import Header from './Header'
 import NotificationDropdownWrapper from './NotificationDropdownWrapper'
 import { getActiveMenuBySlug } from '@/lib/actions/menus'
 import { getSettingsByCategory } from '@/lib/actions/site-settings'
+import { getHeaderSeoCategories } from '@/lib/actions/seo-categories'
+import { getLocale } from 'next-intl/server'
 
 export default async function HeaderWithUser() {
-    const [user, menu, megaMenu, featureSettings, generalSettings] = await Promise.all([
+    const locale = await getLocale()
+    const [user, menu, megaMenu, featureSettings, generalSettings, seoCollections] = await Promise.all([
         getCommunityUser(),
         getActiveMenuBySlug('header'),
         getActiveMenuBySlug('mega-menu'),
         getSettingsByCategory('features'),
-        getSettingsByCategory('general')
+        getSettingsByCategory('general'),
+        getHeaderSeoCategories(locale),
     ])
 
     const userProps = user ? {
@@ -39,6 +43,7 @@ export default async function HeaderWithUser() {
             notificationDropdown={user ? <NotificationDropdownWrapper /> : null}
             navigation={menu?.items}
             megaMenu={megaMenu?.items}
+            seoCollections={seoCollections}
             features={features}
             siteLogo={generalSettings['site_logo'] || null}
         />

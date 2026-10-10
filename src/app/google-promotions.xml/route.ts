@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// The Riwaya product feeds target Morocco and publish every price in MAD.
+// Do not make this configurable independently: a different value causes the
+// promotion currency to disagree with both the products and the checkout.
+const MERCHANT_CURRENCY = 'MAD'
+
 function escapeXml(unsafe: string) {
     if (!unsafe) return ''
     return unsafe
@@ -18,7 +23,7 @@ export async function GET() {
         })
 
         const now = new Date()
-        const currency = process.env.GMC_CURRENCY || 'MAD'
+        const currency = MERCHANT_CURRENCY
         
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">

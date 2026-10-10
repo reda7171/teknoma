@@ -347,6 +347,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               '@type': 'Offer',
               price: book.price,
               priceCurrency: 'MAD',
+              validFrom: book.createdAt
+                ? new Date(book.createdAt).toISOString().split('T')[0]
+                : '2025-01-01',
               availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
               seller: {
                 '@id': 'https://riwaya.store/#organization',

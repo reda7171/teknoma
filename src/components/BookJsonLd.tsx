@@ -12,6 +12,7 @@ interface BookJsonLdProps {
     stock: number;
     category?: string | null;
     numberOfPages?: number | null;
+    createdAt?: Date | string;
   };
   locale: string;
   displayTitle: string;
@@ -25,6 +26,11 @@ interface BookJsonLdProps {
 export function BookJsonLd({ book, locale, displayTitle, displayDescription, imageUrl, averageRating, reviewCount, reviews = [] }: BookJsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
   const bookUrl = `${baseUrl}/${locale}/books/${book.id}`;
+  const googlePrintBooksCategory = {
+    "@type": "CategoryCode",
+    "inCodeSet": "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt",
+    "codeValue": "543543"
+  };
 
   const validIsbn = book.isbn ? book.isbn.replace(/[^0-9X]/gi, '') : null;
   const showIsbn = validIsbn && (validIsbn.length === 10 || validIsbn.length === 13);
@@ -36,6 +42,9 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
   const countVal = reviewCount > 0 ? reviewCount : Math.max(reviews.length, 14);
 
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const validFrom = book.createdAt
+    ? new Date(book.createdAt).toISOString().split('T')[0]
+    : '2025-01-01';
 
   const formattedReviews = reviews.length > 0 ? reviews.map(r => ({
     "@type": "Review",
@@ -109,11 +118,14 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "Brand",
           "name": "Riwaya"
         },
-        "category": book.category || "Livres",
+        // Use Google's canonical taxonomy for merchant listings. The shop's
+        // editorial category remains available through the `genre` property.
+        "category": googlePrintBooksCategory,
         "offers": {
           "@type": "Offer",
           "price": book.price,
           "priceCurrency": "MAD",
+          "validFrom": validFrom,
           "availability": book.stock > 0
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",

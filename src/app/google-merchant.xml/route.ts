@@ -16,6 +16,21 @@ function escapeXml(unsafe: string) {
     })
 }
 
+function merchantReturnsXml(itemCondition: 'NEW' | 'USED', baseUrl: string) {
+    return `      <g:returns>
+        <g:country>MA</g:country>
+        <g:item_condition>${itemCondition}</g:item_condition>
+        <g:window_days>3</g:window_days>
+        <g:window_type>FINITE_RETURN_WINDOW</g:window_type>
+        <g:method>BY_MAIL</g:method>
+        <g:outcome>REFUND</g:outcome>
+        <g:shipping_fee>35.00 MAD</g:shipping_fee>
+        <g:shipping_fee_type>CUSTOMER_RESPONSIBILITY</g:shipping_fee_type>
+        <g:policy_url>${baseUrl}/fr/return-policy</g:policy_url>
+      </g:returns>
+`
+}
+
 export async function GET() {
     try {
         const books = await prisma.book.findMany({
@@ -46,7 +61,9 @@ export async function GET() {
         for (const book of books) {
             const locale = book.language === 'en' || book.language === 'fr' ? book.language : 'ar'
             const productUrl = encodeURI(`${baseUrl}/${locale}${generateBookUrl(book, locale)}`)
-            const imageUrl = encodeURI(`${baseUrl}/api/merchant-image/${book.id}`)
+            // Version the URL when the generated asset changes so Google does
+            // not keep serving the former 500x500 image from its cache.
+            const imageUrl = encodeURI(`${baseUrl}/api/merchant-image/${book.id}?v=1500`)
             const availability = book.stock > 0 ? 'in_stock' : 'out_of_stock'
             const condition = book.isOriginal ? 'new' : 'used'
             
@@ -68,7 +85,7 @@ export async function GET() {
                 xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             }
 
-            xml += `      <g:google_product_category>778</g:google_product_category>\n`
+            xml += `      <g:google_product_category>543543</g:google_product_category>\n`
             if (book.category) {
                 xml += `      <g:product_type>${escapeXml(book.category)}</g:product_type>\n`
             }
@@ -78,6 +95,7 @@ export async function GET() {
             xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
             xml += `        <g:price>35.00 MAD</g:price>\n`
             xml += `      </g:shipping>\n`
+            xml += merchantReturnsXml(condition === 'new' ? 'NEW' : 'USED', baseUrl)
 
             // Map all active promotions to every product
             if (coupons && coupons.length > 0) {
@@ -93,7 +111,7 @@ export async function GET() {
         for (const pack of packs) {
             const locale = 'fr' // Par défaut on utilise la version fr pour les packs
             const productUrl = `${baseUrl}/${locale}/packs/${pack.id}`
-            const imageUrl = pack.image ? (pack.image.startsWith('http') ? pack.image : `${baseUrl}${pack.image.startsWith('/') ? '' : '/'}${pack.image}`) : (pack.books[0]?.book.image ? (pack.books[0].book.image.startsWith('http') ? pack.books[0].book.image : `${baseUrl}${pack.books[0].book.image.startsWith('/') ? '' : '/'}${pack.books[0].book.image}`) : `${baseUrl}/logo.png`)
+            const imageUrl = `${baseUrl}/api/merchant-pack-image/${pack.id}?v=1500`
             const allInStock = pack.books.length > 0 && pack.books.every(pb => (pb.book?.stock ?? 0) > 0)
             const availability = allInStock ? 'in_stock' : 'out_of_stock'
             const condition = 'new'
@@ -115,6 +133,13 @@ export async function GET() {
             xml += `      <g:description>${escapeXml(description.slice(0, 5000))}</g:description>\n`
             xml += `      <g:link>${escapeXml(productUrl)}</g:link>\n`
             xml += `      <g:image_link>${escapeXml(imageUrl)}</g:image_link>\n`
+            const additionalImages = [...new Set(pack.books
+                .filter(pb => Boolean(pb.book?.image))
+                .map(pb => `${baseUrl}/api/merchant-image/${pb.book.id}?v=1500`))]
+                .slice(0, 10)
+            for (const additionalImage of additionalImages) {
+                xml += `      <g:additional_image_link>${escapeXml(additionalImage)}</g:additional_image_link>\n`
+            }
             xml += `      <g:condition>${condition}</g:condition>\n`
             xml += `      <g:availability>${availability}</g:availability>\n`
             xml += `      <g:price>${regularPrice.toFixed(2)} MAD</g:price>\n`
@@ -124,13 +149,14 @@ export async function GET() {
             xml += `      <g:brand>Riwaya</g:brand>\n`
             xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             xml += `      <g:is_bundle>yes</g:is_bundle>\n`
-            xml += `      <g:google_product_category>778</g:google_product_category>\n`
+            xml += `      <g:google_product_category>784</g:google_product_category>\n`
             xml += `      <g:product_type>Livres &gt; Packs de livres</g:product_type>\n`
             xml += `      <g:shipping>\n`
             xml += `        <g:country>MA</g:country>\n`
             xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
             xml += `        <g:price>${shippingFee.toFixed(2)} MAD</g:price>\n`
             xml += `      </g:shipping>\n`
+            xml += merchantReturnsXml('NEW', baseUrl)
 
             if (coupons && coupons.length > 0) {
                 for (const coupon of coupons) {

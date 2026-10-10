@@ -18,11 +18,19 @@ function escapeXml(unsafe: string) {
     })
 }
 
-function normalizeImageUrl(url: string | null | undefined, baseUrl: string, fallbackUrl: string): string {
-    if (!url) return fallbackUrl
-    if (url.startsWith('http://') || url.startsWith('https://')) return url
-    if (url.startsWith('/')) return `${baseUrl}${url}`
-    return `${baseUrl}/${url}`
+function merchantReturnsXml(baseUrl: string) {
+    return `      <g:returns>
+        <g:country>MA</g:country>
+        <g:item_condition>NEW</g:item_condition>
+        <g:window_days>3</g:window_days>
+        <g:window_type>FINITE_RETURN_WINDOW</g:window_type>
+        <g:method>BY_MAIL</g:method>
+        <g:outcome>REFUND</g:outcome>
+        <g:shipping_fee>35.00 MAD</g:shipping_fee>
+        <g:shipping_fee_type>CUSTOMER_RESPONSIBILITY</g:shipping_fee_type>
+        <g:policy_url>${baseUrl}/fr/return-policy</g:policy_url>
+      </g:returns>
+`
 }
 
 export async function GET() {
@@ -58,8 +66,7 @@ export async function GET() {
 
         for (const pack of packs) {
             const productUrl = `${baseUrl}/fr/packs/${pack.id}`
-            const dynamicOgImage = `${baseUrl}/fr/packs/${pack.id}/opengraph-image`
-            const mainImage = normalizeImageUrl(pack.image, baseUrl, dynamicOgImage)
+            const mainImage = `${baseUrl}/api/merchant-pack-image/${pack.id}?v=1500`
 
             const bookListText = pack.books
                 .map(pb => `${pb.book.title} (${pb.book.author || 'Riwaya'})`)
@@ -93,15 +100,14 @@ export async function GET() {
             xml += `      <g:image_link>${escapeXml(mainImage)}</g:image_link>\n`
 
             // Images additionnelles (couvertures des livres inclus)
-            const additionalImages = pack.books
-                .map(pb => pb.book?.image)
-                .filter((img): img is string => Boolean(img))
-                .slice(0, 5)
+            const additionalImages = [...new Set(pack.books
+                .filter(pb => Boolean(pb.book?.image))
+                .map(pb => `${baseUrl}/api/merchant-image/${pb.book.id}?v=1500`))]
+                .slice(0, 10)
 
-            for (const addImg of additionalImages) {
-                const addImgUrl = normalizeImageUrl(addImg, baseUrl, '')
-                if (addImgUrl && addImgUrl !== mainImage) {
-                    xml += `      <g:additional_image_link>${escapeXml(addImgUrl)}</g:additional_image_link>\n`
+            for (const additionalImage of additionalImages) {
+                if (additionalImage !== mainImage) {
+                    xml += `      <g:additional_image_link>${escapeXml(additionalImage)}</g:additional_image_link>\n`
                 }
             }
 
@@ -116,7 +122,7 @@ export async function GET() {
             xml += `      <g:brand>Riwaya</g:brand>\n`
             xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             xml += `      <g:is_bundle>yes</g:is_bundle>\n`
-            xml += `      <g:google_product_category>778</g:google_product_category>\n` // 778 = Media > Books
+            xml += `      <g:google_product_category>784</g:google_product_category>\n` // Media > Books
             xml += `      <g:product_type>Livres &gt; Packs de livres</g:product_type>\n`
 
             // Labels personnalisés pour les campagnes Google Ads / Shopping
@@ -131,6 +137,7 @@ export async function GET() {
             xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
             xml += `        <g:price>${shippingFee.toFixed(2)} MAD</g:price>\n`
             xml += `      </g:shipping>\n`
+            xml += merchantReturnsXml(baseUrl)
 
             // Promotions applicables
             if (coupons && coupons.length > 0) {

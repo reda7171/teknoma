@@ -1688,7 +1688,9 @@
     "Section3Title": "3. Defective items",
     "Section3Desc": "If you receive a damaged book or one with a manufacturing defect, we commit to replacing it free of charge as soon as possible.",
     "Section4Title": "4. Return procedure",
-    "Section4Desc": "To initiate a return, please contact our customer service via WhatsApp or by email at contact@riwaya.store. Please include your order number and photos if the product is defective."
+    "Section4Desc": "To initiate a return, please contact our customer service via WhatsApp or by email at contact@riwaya.store. Please include your order number and photos if the product is defective.",
+    "Section5Title": "5. Return shipping costs",
+    "Section5Desc": "Return shipping is the customer's responsibility and costs <bold>35 MAD</bold>. If the item received is damaged, defective, or incorrect, Riwaya will replace it at no cost."
   },
   "ShippingPolicyPage": {
     "Title": "Shipping Policy",

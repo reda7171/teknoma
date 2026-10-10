@@ -6,14 +6,19 @@ import { z } from 'zod'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
 
+const optionalNonEmptyString = z.preprocess(
+    value => typeof value === 'string' && value.trim() === '' ? undefined : value,
+    z.string().optional()
+)
+
 // Schéma de validation pour un pack
 const PackSchema = z.object({
     name: z.string().min(1, 'Le nom est requis').transform(val => val.replace(/\|/g, '-').replace(/\s+/g, ' ').trim()),
-    nameFr: z.string().optional().transform(val => val ? val.replace(/\|/g, '-').replace(/\s+/g, ' ').trim() : val),
-    nameEn: z.string().optional().transform(val => val ? val.replace(/\|/g, '-').replace(/\s+/g, ' ').trim() : val),
+    nameFr: optionalNonEmptyString.transform(val => val?.replace(/\|/g, '-').replace(/\s+/g, ' ').trim()),
+    nameEn: optionalNonEmptyString.transform(val => val?.replace(/\|/g, '-').replace(/\s+/g, ' ').trim()),
     description: z.string().optional(),
-    descriptionFr: z.string().optional(),
-    descriptionEn: z.string().optional(),
+    descriptionFr: optionalNonEmptyString,
+    descriptionEn: optionalNonEmptyString,
     price: z.number().min(0),
     originalPrice: z.number().min(0).nullable().optional(),
     image: z.string().min(1, 'L\'image est requise').optional(),
@@ -88,6 +93,21 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                     })),
                 },
             },
+        })
+
+        await createAuditLog({
+            action: 'CREATE_PACK',
+            entity: 'PACK',
+            entityId: pack.id,
+            details: JSON.stringify({
+                name: pack.name,
+                localizedFields: {
+                    nameFr: Boolean(pack.nameFr),
+                    nameEn: Boolean(pack.nameEn),
+                    descriptionFr: Boolean(pack.descriptionFr),
+                    descriptionEn: Boolean(pack.descriptionEn),
+                },
+            }),
         })
 
         revalidatePath('/admin/packs')
@@ -175,6 +195,27 @@ export async function updatePack(
         await verifyAdmin()
         const validatedData = PackSchema.parse(input)
 
+        const existingPack = await prisma.pack.findUnique({
+            where: { id },
+            select: {
+                nameFr: true,
+                nameEn: true,
+                descriptionFr: true,
+                descriptionEn: true,
+            },
+        })
+
+        if (!existingPack) {
+            return { success: false, error: 'Pack introuvable' }
+        }
+
+        const localizedValues = {
+            nameFr: validatedData.nameFr ?? existingPack.nameFr,
+            nameEn: validatedData.nameEn ?? existingPack.nameEn,
+            descriptionFr: validatedData.descriptionFr ?? existingPack.descriptionFr,
+            descriptionEn: validatedData.descriptionEn ?? existingPack.descriptionEn,
+        }
+
         // Transaction pour éviter les états incohérents
         await prisma.$transaction(async (tx) => {
             // Supprimer les anciennes relations
@@ -190,11 +231,11 @@ export async function updatePack(
                 where: { id },
                 data: {
                     name: validatedData.name,
-                    nameFr: validatedData.nameFr,
-                    nameEn: validatedData.nameEn,
+                    nameFr: localizedValues.nameFr,
+                    nameEn: localizedValues.nameEn,
                     description: validatedData.description,
-                    descriptionFr: validatedData.descriptionFr,
-                    descriptionEn: validatedData.descriptionEn,
+                    descriptionFr: localizedValues.descriptionFr,
+                    descriptionEn: localizedValues.descriptionEn,
                     price: validatedData.price,
                     originalPrice: validatedData.originalPrice,
                     image: validatedData.image,
@@ -217,6 +258,26 @@ export async function updatePack(
                     },
                 },
             })
+        })
+
+        await createAuditLog({
+            action: 'UPDATE_PACK',
+            entity: 'PACK',
+            entityId: id,
+            details: JSON.stringify({
+                localizedFieldsPreserved: {
+                    nameFr: validatedData.nameFr === undefined && Boolean(existingPack.nameFr),
+                    nameEn: validatedData.nameEn === undefined && Boolean(existingPack.nameEn),
+                    descriptionFr: validatedData.descriptionFr === undefined && Boolean(existingPack.descriptionFr),
+                    descriptionEn: validatedData.descriptionEn === undefined && Boolean(existingPack.descriptionEn),
+                },
+                localizedFieldsSubmitted: {
+                    nameFr: validatedData.nameFr !== undefined,
+                    nameEn: validatedData.nameEn !== undefined,
+                    descriptionFr: validatedData.descriptionFr !== undefined,
+                    descriptionEn: validatedData.descriptionEn !== undefined,
+                },
+            }),
         })
 
         revalidatePath('/admin/packs')
