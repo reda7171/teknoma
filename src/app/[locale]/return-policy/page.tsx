@@ -55,6 +55,15 @@ export default async function ReturnPolicyPage() {
                                 {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
                             </p>
                         </section>
+
+                        <section className="space-y-6">
+                            <h2 className="text-black text-xl font-black flex items-center gap-4">
+                                <RefreshCcw className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section5Title')}
+                            </h2>
+                            <p className="leading-relaxed">
+                                {t.rich('Section5Desc', { bold: (chunks) => <strong>{chunks}</strong> })}
+                            </p>
+                        </section>
                     </div>
                 </div>
             </main>

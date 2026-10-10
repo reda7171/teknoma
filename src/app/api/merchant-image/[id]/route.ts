@@ -36,13 +36,14 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             imageBuffer = fs.readFileSync(imagePath);
         }
 
-        // Resize and pad to 500x500 with white background (Merchant Center requirement)
+        // Merchant Center recommends 1500x1500 or larger for the best image
+        // coverage. Keep a square white canvas so book covers are never cropped.
         const processedImage = await sharp(imageBuffer)
-            .resize(500, 500, {
+            .resize(1500, 1500, {
                 fit: 'contain',
                 background: { r: 255, g: 255, b: 255, alpha: 1 }
             })
-            .jpeg({ quality: 90 })
+            .jpeg({ quality: 92, mozjpeg: true })
             .toBuffer();
 
         return new NextResponse(processedImage, {

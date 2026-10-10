@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
             // Règle générale pour TOUS les bots (y compris Google, Bing, etc.)
             {
                 userAgent: '*',
-                allow: ['/', '/api/merchant-image', '/api/merchant-image/*'],
+                allow: ['/', '/api/merchant-image', '/api/merchant-image/*', '/api/merchant-pack-image', '/api/merchant-pack-image/*'],
                 disallow: [
                     '/admin',
                     '/admin/*',
@@ -25,22 +25,43 @@ export default function robots(): MetadataRoute.Robots {
                     '/*/orders',
                 ],
             },
-            // Autorisation explicite pour Google AdSense et Googlebot
+            // Keep Google product-page crawling unambiguous for Merchant Center.
+            // Separate groups are emitted instead of combining several agents in
+            // one block, and Google is not given the broad /api/* exclusion that
+            // could conflict with the Merchant image endpoints.
             {
-                userAgent: ['Mediapartners-Google', 'Googlebot', 'Googlebot-Image', 'AdsBot-Google'],
-                allow: ['/', '/api/merchant-image', '/api/merchant-image/*'],
+                userAgent: 'Googlebot',
+                allow: ['/', '/api/merchant-image', '/api/merchant-image/*', '/api/merchant-pack-image', '/api/merchant-pack-image/*'],
                 disallow: [
                     '/admin',
                     '/admin/*',
                     '/*/admin',
                     '/*/admin/*',
-                    '/api',
-                    '/api/*',
                     '/checkout',
                     '/*/checkout',
                     '/cart',
                     '/*/cart',
                     '/orders',
+                ],
+            },
+            {
+                userAgent: 'Googlebot-Image',
+                allow: ['/', '/uploads/', '/uploads/*', '/api/merchant-image', '/api/merchant-image/*', '/api/merchant-pack-image', '/api/merchant-pack-image/*'],
+            },
+            {
+                userAgent: ['Mediapartners-Google', 'AdsBot-Google'],
+                allow: '/',
+                disallow: [
+                    '/admin',
+                    '/admin/*',
+                    '/*/admin',
+                    '/*/admin/*',
+                    '/checkout',
+                    '/*/checkout',
+                    '/cart',
+                    '/*/cart',
+                    '/orders',
+                    '/*/orders',
                 ],
             }
         ],

@@ -1599,7 +1599,9 @@
     "Section3Title": "3. Articles défectueux",
     "Section3Desc": "Si vous recevez un livre endommagé ou présentant un défaut de fabrication, nous nous engageons à le remplacer gratuitement dans les plus brefs délais.",
     "Section4Title": "4. Procédure de retour",
-    "Section4Desc": "Pour initier un retour, veuillez contacter notre service client via WhatsApp ou par email à contact@riwaya.store. Veuillez inclure votre numéro de commande et des photos si le produit est défectueux."
+    "Section4Desc": "Pour initier un retour, veuillez contacter notre service client via WhatsApp ou par email à contact@riwaya.store. Veuillez inclure votre numéro de commande et des photos si le produit est défectueux.",
+    "Section5Title": "5. Frais de retour",
+    "Section5Desc": "Les frais d'expédition d'un retour sont à la charge du client et s'élèvent à <bold>35 MAD</bold>. Si l'article reçu est endommagé, défectueux ou incorrect, Riwaya prend en charge son remplacement sans frais."
   },
   "ShippingPolicyPage": {
     "Title": "Politique de Livraison",

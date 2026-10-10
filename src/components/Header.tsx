@@ -49,10 +49,16 @@ interface HeaderProps {
         threeForFour?: boolean
     }
     megaMenu?: any[]
+    seoCollections?: {
+        id: string
+        slug: string
+        title: string
+        h1: string
+    }[]
     siteLogo?: string | null
 }
 
-export default function Header({ user, notificationDropdown, navigation, megaMenu = [], features = {}, siteLogo = null }: HeaderProps = { user: null }) {
+export default function Header({ user, notificationDropdown, navigation, megaMenu = [], seoCollections = [], features = {}, siteLogo = null }: HeaderProps = { user: null }) {
     const getIconForUrl = (url: string, className = "w-4 h-4") => {
         if (url === '/') return <Home className={className} />
         if (url.includes('usedOnly=true')) return <Recycle className={className} />
@@ -329,6 +335,34 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                 <ChevronDown className="w-4 h-4 transition-transform group-hover/category:rotate-180" />
                                             </button>
                                             <div className="absolute top-full left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 mt-4 w-[850px] bg-white shadow-2xl shadow-black/10 rounded-2xl border border-gray-100 opacity-0 invisible group-hover/category:opacity-100 group-hover/category:visible group-hover/category:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex min-h-[450px]">
+                                                {seoCollections.length > 0 ? (
+                                                    <div className="w-full p-7">
+                                                        <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
+                                                            <div>
+                                                                <h3 className="text-xl font-black text-gray-900">
+                                                                    {locale === 'ar' ? 'استكشف مجموعاتنا' : locale === 'en' ? 'Explore our collections' : 'Explorez nos collections'}
+                                                                </h3>
+                                                                <p className="mt-1 text-xs font-medium text-gray-400">
+                                                                    {locale === 'ar' ? 'مختارات موضوعية من مكتبة رواية' : locale === 'en' ? 'Curated selections from Riwaya' : 'Sélections thématiques de la librairie Riwaya'}
+                                                                </p>
+                                                            </div>
+                                                            <LayoutGrid className="w-8 h-8 text-gray-200" />
+                                                        </div>
+                                                        <div className="grid grid-cols-3 gap-2 max-h-[340px] overflow-y-auto pr-1 rtl:pr-0 rtl:pl-1">
+                                                            {seoCollections.map(collection => (
+                                                                <Link
+                                                                    key={collection.id}
+                                                                    href={`/collection/${collection.slug}`}
+                                                                    className="group/collection flex items-center gap-3 rounded-xl border border-gray-100 px-3 py-3 text-sm font-bold text-gray-700 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                                                >
+                                                                    <span className="h-2 w-2 flex-none rounded-full bg-gray-300 transition-colors group-hover/collection:bg-blue-500" />
+                                                                    <span className="line-clamp-2">{collection.h1 || collection.title}</span>
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                <>
                                                 {/* Left Column - Main Categories */}
                                                 <div className="w-1/3 bg-gray-50/50 p-3 border-r border-gray-100 rtl:border-l rtl:border-r-0 relative z-20 rounded-l-2xl rtl:rounded-r-2xl rtl:rounded-l-none">
                                                     <ul className="space-y-1">
@@ -394,6 +428,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                         Survolez une catégorie pour découvrir toutes nos sous-catégories et trouver votre prochaine lecture.
                                                     </p>
                                                 </div>
+                                                </>
+                                                )}
                                             </div>
                                         </div>
                                     )
@@ -624,7 +660,17 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                             <ChevronDown className="w-5 h-5 transition-transform group-open/mobile-cat:rotate-180" />
                                         </summary>
                                         <div className="mt-2 pl-4 pr-2 space-y-2">
-                                            {megaMenu.map((mainCatItem: any) => {
+                                            {seoCollections.length > 0 ? seoCollections.map(collection => (
+                                                <Link
+                                                    key={collection.id}
+                                                    href={`/collection/${collection.slug}`}
+                                                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                >
+                                                    <span className="h-2 w-2 flex-none rounded-full bg-blue-400" />
+                                                    <span>{collection.h1 || collection.title}</span>
+                                                </Link>
+                                            )) : megaMenu.map((mainCatItem: any) => {
                                                 const mainCat = mainCatItem.label;
                                                 const subCats = mainCatItem.children || [];
                                                 return (

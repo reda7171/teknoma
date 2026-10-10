@@ -86,10 +86,16 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
       "@type": "Brand",
       "name": "Riwaya"
     },
+    "category": {
+      "@type": "CategoryCode",
+      "inCodeSet": "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt",
+      "codeValue": "543542"
+    },
     "offers": {
       "@type": "Offer",
       "price": product.price,
       "priceCurrency": "MAD",
+      "validFrom": new Date(product.createdAt).toISOString().split('T')[0],
       "availability": "https://schema.org/InStock",
       "url": productUrl,
       "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],

@@ -7,6 +7,7 @@ interface PackJsonLdProps {
     price: number;
     description?: string | null;
     image?: string | null;
+    createdAt?: Date | string;
     books?: Array<{ title: string; author: string }>;
   };
   locale: string;
@@ -15,6 +16,9 @@ interface PackJsonLdProps {
 
 export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: PackJsonLdProps) {
   const packUrl = `${baseUrl}/${locale}/packs/${pack.id}`;
+  const validFrom = pack.createdAt
+    ? new Date(pack.createdAt).toISOString().split('T')[0]
+    : '2025-01-01';
 
   // Description auto si absente
   const description = pack.description ||
@@ -88,11 +92,16 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
         "@type": "Brand",
         "name": "Riwaya"
       },
-      "category": locale === 'ar' ? "باقات كتب" : locale === 'en' ? "Book Packs" : "Packs de livres",
+      "category": {
+        "@type": "CategoryCode",
+        "inCodeSet": "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt",
+        "codeValue": "784"
+      },
       "offers": {
         "@type": "Offer",
         "price": pack.price,
         "priceCurrency": "MAD",
+        "validFrom": validFrom,
         "availability": "https://schema.org/InStock",
         "url": packUrl,
         "seller": {

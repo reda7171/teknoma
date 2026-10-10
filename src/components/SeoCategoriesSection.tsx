@@ -5,6 +5,27 @@ import { Link } from '@/i18n/routing'
 import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react'
 import { unstable_cache } from 'next/cache'
 
+const fallbackGradients = [
+  ['#0369A1', '#0C4A6E'],
+  ['#0F766E', '#042F2E'],
+  ['#B45309', '#78350F'],
+  ['#BE123C', '#881337'],
+  ['#334155', '#0F172A'],
+  ['#C2410C', '#7C2D12'],
+]
+
+function getGradientStyle(value: string | null | undefined, index: number) {
+  const arbitraryColors = value?.match(/from-\[(#[0-9a-fA-F]{3,8})\].*to-\[(#[0-9a-fA-F]{3,8})\]/)
+  const [from, to] = arbitraryColors
+    ? [arbitraryColors[1], arbitraryColors[2]]
+    : fallbackGradients[index % fallbackGradients.length]
+
+  return {
+    backgroundColor: from,
+    backgroundImage: `linear-gradient(135deg, ${from}, ${to})`,
+  }
+}
+
 // Mise en cache des catégories SEO et de leurs couvertures (24h)
 const getCachedHomeCategoriesWithBooks = unstable_cache(
   async (locale: string) => {
@@ -37,7 +58,7 @@ const getCachedHomeCategoriesWithBooks = unstable_cache(
       })
     )
   },
-  ['home-seo-categories-v3'],
+  ['home-seo-categories-v4'],
   { revalidate: 86400, tags: ['seo-categories'] }
 )
 
@@ -62,10 +83,11 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          {categories.map((cat) => (
+          {categories.map((cat, index) => (
             <div
               key={cat.id}
-              className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${cat.colorGradient} p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-md hover:shadow-xl transition-all duration-300 group`}
+              className="relative overflow-hidden rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-md hover:shadow-xl transition-all duration-300 group"
+              style={getGradientStyle(cat.colorGradient, index)}
             >
               {/* Text Side */}
               <div className={`flex-1 text-white z-10 ${isRtl ? 'text-right' : 'text-left'}`}>
@@ -83,7 +105,7 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
                 </p>
 
                 <Link
-                  href={`/collection/${cat.slug}` as any}
+                  href={`/collection/${cat.slug}`}
                   aria-label={`${texts.button} - ${cat.h1}`}
                   className="inline-flex items-center gap-2 bg-white text-gray-900 px-5 py-2.5 rounded-full font-black text-sm hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all shadow-md"
                 >

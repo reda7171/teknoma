@@ -147,6 +147,25 @@ export async function getHomeSeoCategories(locale: string) {
   })
 }
 
+export async function getHeaderSeoCategories(locale: string) {
+  return await prisma.seoCategory.findMany({
+    where: {
+      locale,
+      isActive: true,
+    },
+    orderBy: [
+      { displayOrder: 'asc' },
+      { title: 'asc' },
+    ],
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      h1: true,
+    },
+  })
+}
+
 export async function createSeoCategory(data: any) {
   try {
     const category = await prisma.seoCategory.create({
