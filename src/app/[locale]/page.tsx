@@ -383,6 +383,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       mainEntity: [
         {
           '@type': 'Question',
+          name: locale === 'ar' ? 'أين يمكن شراء كتب وروايات عبر الإنترنت في المغرب؟' : locale === 'en' ? 'Where to buy books online in Morocco?' : 'Où acheter des livres en ligne au Maroc ?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: locale === 'ar' ? 'منصة رواية (Riwaya.store) هي أكبر مكتبة إلكترونية في المغرب لشراء الكتب والروايات الجديدة والمستعملة مع الدفع عند الاستلام والتوصيل لكافة المدن المغربية.' : locale === 'en' ? 'Riwaya (riwaya.store) is Morocco\'s leading online bookstore to buy and exchange new and used books and novels with cash on delivery nationwide.' : 'Riwaya (riwaya.store) est la librairie en ligne de référence au Maroc pour commander des livres et romans avec livraison rapide et paiement à la réception.',
+          },
+        },
+        {
+          '@type': 'Question',
           name: locale === 'ar' ? 'ما هي أفضل وأحسن مكتبة إلكترونية في المغرب؟' : locale === 'en' ? 'What is the best online bookstore in Morocco?' : 'Quelle est la meilleure librairie en ligne au Maroc ?',
           acceptedAnswer: {
             '@type': 'Answer',

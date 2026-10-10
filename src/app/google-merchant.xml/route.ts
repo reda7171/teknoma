@@ -16,17 +16,36 @@ function escapeXml(unsafe: string) {
     })
 }
 
-function merchantReturnsXml(itemCondition: 'NEW' | 'USED', baseUrl: string) {
+const merchantExcludedBookIds = new Set([
+    // Adult dark-romance titles stay on the bookstore but are excluded from Shopping.
+    '198f0bc7-611c-4bd0-bd93-43146f0a4a0c',
+    'f102d487-c9ef-4e90-896e-2c55c666a6ee',
+])
+
+function normalizeMerchantTitle(title: string, language: string) {
+    const cleanTitle = title.replace(/\s+/g, ' ').trim()
+    if (language !== 'en') return cleanTitle
+
+    const letters = [...cleanTitle].filter(char => /[a-z]/i.test(char))
+    const uppercaseLetters = letters.filter(char => char === char.toUpperCase()).length
+    if (letters.length < 5 || uppercaseLetters / letters.length < 0.7) return cleanTitle
+
+    const minorWords = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'the', 'to', 'with'])
+    return cleanTitle.toLowerCase().split(' ').map((word, index, words) => {
+        if (index > 0 && index < words.length - 1 && minorWords.has(word)) return word
+        return word.replace(/[a-z]/i, firstLetter => firstLetter.toUpperCase())
+    }).join(' ')
+}
+
+function merchantReturnsXml(baseUrl: string) {
     return `      <g:returns>
         <g:country>MA</g:country>
-        <g:item_condition>${itemCondition}</g:item_condition>
+        <g:item_condition>DEFECTIVE_ONLY</g:item_condition>
         <g:window_days>3</g:window_days>
         <g:window_type>FINITE_RETURN_WINDOW</g:window_type>
         <g:method>BY_MAIL</g:method>
         <g:outcome>REFUND</g:outcome>
-        <g:shipping_fee>35.00 MAD</g:shipping_fee>
-        <g:shipping_fee_type>CUSTOMER_RESPONSIBILITY</g:shipping_fee_type>
-        <g:policy_url>${baseUrl}/fr/return-policy</g:policy_url>
+        <g:policy_url>${baseUrl}/fr/returns</g:policy_url>
       </g:returns>
 `
 }
@@ -34,11 +53,16 @@ function merchantReturnsXml(itemCondition: 'NEW' | 'USED', baseUrl: string) {
 export async function GET() {
     try {
         const books = await prisma.book.findMany({
-            where: { active: true }
+            where: {
+                active: true,
+                title: { not: '' },
+                image: { not: '' },
+                id: { notIn: [...merchantExcludedBookIds] },
+            }
         })
         
         const packs = await prisma.pack.findMany({
-            where: { active: true },
+            where: { active: true, name: { not: '' } },
             include: { books: { include: { book: true } } }
         })
         
@@ -59,6 +83,8 @@ export async function GET() {
         xml += `    <description>Riwaya Bookstore - The best books available.</description>\n`
 
         for (const book of books) {
+            const merchantTitle = normalizeMerchantTitle(book.title, book.language)
+            if (!merchantTitle) continue
             const locale = book.language === 'en' || book.language === 'fr' ? book.language : 'ar'
             const productUrl = encodeURI(`${baseUrl}/${locale}${generateBookUrl(book, locale)}`)
             // Version the URL when the generated asset changes so Google does
@@ -69,7 +95,7 @@ export async function GET() {
             
             xml += `    <item>\n`
             xml += `      <g:id>${escapeXml(book.id)}</g:id>\n`
-            xml += `      <g:title>${escapeXml(book.title)}</g:title>\n`
+            xml += `      <g:title>${escapeXml(merchantTitle)}</g:title>\n`
             xml += `      <g:description>${escapeXml(book.description.slice(0, 5000))}</g:description>\n`
             xml += `      <g:link>${escapeXml(productUrl)}</g:link>\n`
             xml += `      <g:image_link>${escapeXml(imageUrl)}</g:image_link>\n`
@@ -95,7 +121,7 @@ export async function GET() {
             xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
             xml += `        <g:price>35.00 MAD</g:price>\n`
             xml += `      </g:shipping>\n`
-            xml += merchantReturnsXml(condition === 'new' ? 'NEW' : 'USED', baseUrl)
+            xml += merchantReturnsXml(baseUrl)
 
             // Map all active promotions to every product
             if (coupons && coupons.length > 0) {
@@ -109,6 +135,7 @@ export async function GET() {
         
         // Ajouter les packs au catalogue Google Merchant
         for (const pack of packs) {
+            if (!pack.name.trim()) continue
             const locale = 'fr' // Par défaut on utilise la version fr pour les packs
             const productUrl = `${baseUrl}/${locale}/packs/${pack.id}`
             const imageUrl = `${baseUrl}/api/merchant-pack-image/${pack.id}?v=1500`
@@ -156,7 +183,7 @@ export async function GET() {
             xml += `        <g:service>Livraison Express COD Maroc (24-48h)</g:service>\n`
             xml += `        <g:price>${shippingFee.toFixed(2)} MAD</g:price>\n`
             xml += `      </g:shipping>\n`
-            xml += merchantReturnsXml('NEW', baseUrl)
+            xml += merchantReturnsXml(baseUrl)
 
             if (coupons && coupons.length > 0) {
                 for (const coupon of coupons) {

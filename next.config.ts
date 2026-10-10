@@ -29,22 +29,17 @@ const withPWA = withPWAInit({
           },
         },
       },
-      // Network First uniquement pour les navigations publiques. Les pages admin,
-      // API et assets Next ne doivent jamais être mélangés entre deux déploiements.
+      // Never cache HTML navigations. Cached App Router documents may contain
+      // Server Action IDs from an older Docker image after a deployment.
       {
         urlPattern: ({ request, url }) =>
           request.mode === 'navigate' &&
           !url.pathname.startsWith('/api/') &&
           !url.pathname.startsWith('/_next/') &&
           !url.pathname.split('/').includes('admin'),
-        handler: 'NetworkFirst',
+        handler: 'NetworkOnly',
         options: {
-          cacheName: 'riwaya-pages',
-          expiration: {
-            maxEntries: 100,
-            maxAgeSeconds: 60 * 60 * 24, // 24h
-          },
-          networkTimeoutSeconds: 10,
+          cacheName: 'riwaya-pages-network-only',
         },
       },
     ],
@@ -52,6 +47,8 @@ const withPWA = withPWAInit({
 })
 
 const nextConfig: NextConfig = {
+  // Detect version skew between an open browser tab and a new Docker image.
+  deploymentId: process.env.DEPLOYMENT_VERSION,
   typescript: {
     ignoreBuildErrors: true,
   },

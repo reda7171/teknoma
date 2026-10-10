@@ -21,14 +21,12 @@ function escapeXml(unsafe: string) {
 function merchantReturnsXml(baseUrl: string) {
     return `      <g:returns>
         <g:country>MA</g:country>
-        <g:item_condition>NEW</g:item_condition>
+        <g:item_condition>DEFECTIVE_ONLY</g:item_condition>
         <g:window_days>3</g:window_days>
         <g:window_type>FINITE_RETURN_WINDOW</g:window_type>
         <g:method>BY_MAIL</g:method>
         <g:outcome>REFUND</g:outcome>
-        <g:shipping_fee>35.00 MAD</g:shipping_fee>
-        <g:shipping_fee_type>CUSTOMER_RESPONSIBILITY</g:shipping_fee_type>
-        <g:policy_url>${baseUrl}/fr/return-policy</g:policy_url>
+        <g:policy_url>${baseUrl}/fr/returns</g:policy_url>
       </g:returns>
 `
 }
@@ -38,7 +36,7 @@ export async function GET() {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
 
         const packs = await prisma.pack.findMany({
-            where: { active: true },
+            where: { active: true, name: { not: '' } },
             include: {
                 books: {
                     include: {
@@ -65,6 +63,7 @@ export async function GET() {
         xml += `    <description>Catalogue officiel des packs et coffrets de livres Riwaya avec paiement à la livraison partout au Maroc.</description>\n`
 
         for (const pack of packs) {
+            if (!pack.name.trim()) continue
             const productUrl = `${baseUrl}/fr/packs/${pack.id}`
             const mainImage = `${baseUrl}/api/merchant-pack-image/${pack.id}?v=1500`
 
