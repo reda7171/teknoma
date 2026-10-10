@@ -234,6 +234,7 @@ model Warehouse {
   stocks        Inventory[]
   movementsFrom StockMovement[] @relation("FromWarehouse")
   movementsTo   StockMovement[] @relation("ToWarehouse")
+  orderItems    OrderItem[]
 
   @@map("warehouses")
 }
@@ -498,6 +499,8 @@ model OrderItem {
   order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   pack             Pack?           @relation(fields: [packId], references: [id])
   seller           User?           @relation("SellerOrderItems", fields: [sellerId], references: [id])
+  warehouseId      String?
+  warehouse        Warehouse?      @relation(fields: [warehouseId], references: [id])
 
   @@index([orderId])
   @@index([bookId])
@@ -509,6 +512,7 @@ model OrderItem {
   @@index([giftId, type])
   @@index([digitalProductId], map: "order_items_digitalProductId_fkey")
   @@index([sellerId], map: "order_items_sellerId_fkey")
+  @@index([warehouseId])
   @@map("order_items")
 }
 

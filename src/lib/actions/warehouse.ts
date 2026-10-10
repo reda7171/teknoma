@@ -192,3 +192,196 @@ export async function getStockMovements(filters?: { bookId?: string; extraProduc
         take: limit,
     })
 }
+
+
+/**
+ * Alloue et impacte le stock d'un article de commande.
+ * R�gle m�tier :
+ * 1. Impacte en priorit� l'entrep�t "Principal".
+ * 2. Si le stock est insuffisant dans "Principal", impacte un autre entrep�t ayant du stock.
+ * 3. Enregistre la d�duction d'inventaire et le mouvement de stock EXIT li� � la commande.
+ */
+export async function allocateOrderItemStock(
+    tx: any,
+    params: {
+        bookId?: string | null
+        extraProductId?: string | null
+        quantity: number
+        orderId: string
+        forcedWarehouseId?: string | null
+    }
+): Promise<{ warehouseId: string; warehouseName: string }> {
+    const { bookId, extraProductId, quantity, orderId, forcedWarehouseId } = params
+
+    if (!bookId && !extraProductId) {
+        throw new Error('Un bookId ou un extraProductId est requis pour allouer le stock')
+    }
+
+    // R�cup�rer tous les entrep�ts actifs
+    const warehouses = await tx.warehouse.findMany({
+        where: { active: true },
+        orderBy: { createdAt: 'asc' }
+    })
+
+    if (!warehouses || warehouses.length === 0) {
+        throw new Error('Aucun entrep�t actif configur�')
+    }
+
+    // Si un entrep�t pr�cis a �t� s�lectionn� manuellement par l'administrateur
+    if (forcedWarehouseId) {
+        const forced = warehouses.find((w: any) => w.id === forcedWarehouseId)
+        if (forced) {
+            await applyWarehouseStockDeduction(tx, {
+                bookId,
+                extraProductId,
+                warehouseId: forced.id,
+                quantity,
+                orderId
+            })
+            return { warehouseId: forced.id, warehouseName: forced.name }
+        }
+    }
+
+    // D�tecter l'entrep�t "Principal" (insensible � la casse / aux accents)
+    const normalize = (str: string) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    const principalWarehouse = warehouses.find((w: any) => normalize(w.name).includes('principal')) || warehouses[0]
+    const otherWarehouses = warehouses.filter((w: any) => w.id !== principalWarehouse.id)
+
+    // R�cup�rer le stock existant par entrep�t
+    const inventories = await tx.inventory.findMany({
+        where: bookId ? { bookId } : { extraProductId }
+    })
+    const stockMap = new Map<string, number>(inventories.map((inv: any) => [inv.warehouseId, inv.quantity]))
+
+    // 1. Tester en premier l'entrep�t "Principal"
+    const principalStock = stockMap.get(principalWarehouse.id) ?? 0
+    let chosenWarehouse = principalWarehouse
+
+    if (principalStock >= quantity) {
+        // "Principal" a suffisamment de stock
+        chosenWarehouse = principalWarehouse
+    } else {
+        // 2. Chercher dans les autres entrep�ts ayant le stock requis
+        const altWithFullStock = otherWarehouses.find((w: any) => (stockMap.get(w.id) ?? 0) >= quantity)
+        if (altWithFullStock) {
+            chosenWarehouse = altWithFullStock
+        } else {
+            // 3. Chercher l'entrep�t avec le stock le plus �lev� (> 0)
+            const sortedByStock = [...warehouses].sort((a: any, b: any) => (stockMap.get(b.id) ?? 0) - (stockMap.get(a.id) ?? 0))
+            const bestWarehouse = sortedByStock[0]
+            if ((stockMap.get(bestWarehouse.id) ?? 0) > 0) {
+                chosenWarehouse = bestWarehouse
+            } else {
+                // Par d�faut, imputer sur l'entrep�t Principal
+                chosenWarehouse = principalWarehouse
+            }
+        }
+    }
+
+    // D�duire le stock dans l'entrep�t choisi et enregistrer le mouvement EXIT
+    await applyWarehouseStockDeduction(tx, {
+        bookId,
+        extraProductId,
+        warehouseId: chosenWarehouse.id,
+        quantity,
+        orderId
+    })
+
+    return { warehouseId: chosenWarehouse.id, warehouseName: chosenWarehouse.name }
+}
+
+async function applyWarehouseStockDeduction(
+    tx: any,
+    params: {
+        bookId?: string | null
+        extraProductId?: string | null
+        warehouseId: string
+        quantity: number
+        orderId: string
+    }
+) {
+    const { bookId, extraProductId, warehouseId, quantity, orderId } = params
+
+    if (bookId) {
+        await tx.inventory.upsert({
+            where: { bookId_warehouseId: { bookId, warehouseId } },
+            update: { quantity: { decrement: quantity } },
+            create: { bookId, warehouseId, quantity: -quantity }
+        })
+
+        await tx.stockMovement.create({
+            data: {
+                bookId,
+                fromWarehouseId: warehouseId,
+                quantity,
+                type: 'EXIT',
+                note: `Commande #${orderId}`
+            }
+        })
+    } else if (extraProductId) {
+        await tx.inventory.upsert({
+            where: { extraProductId_warehouseId: { extraProductId, warehouseId } },
+            update: { quantity: { decrement: quantity } },
+            create: { extraProductId, warehouseId, quantity: -quantity }
+        })
+
+        await tx.stockMovement.create({
+            data: {
+                extraProductId,
+                fromWarehouseId: warehouseId,
+                quantity,
+                type: 'EXIT',
+                note: `Commande #${orderId}`
+            }
+        })
+    }
+}
+
+/**
+ * R�int�gre le stock dans un entrep�t lors d'une annulation ou d'un retour.
+ */
+export async function restoreOrderItemStock(
+    tx: any,
+    params: {
+        bookId?: string | null
+        extraProductId?: string | null
+        warehouseId?: string | null
+        quantity: number
+        orderId: string
+    }
+) {
+    const { bookId, extraProductId, warehouseId, quantity, orderId } = params
+    if (!warehouseId) return
+
+    if (bookId) {
+        await tx.inventory.upsert({
+            where: { bookId_warehouseId: { bookId, warehouseId } },
+            update: { quantity: { increment: quantity } },
+            create: { bookId, warehouseId, quantity }
+        })
+        await tx.stockMovement.create({
+            data: {
+                bookId,
+                toWarehouseId: warehouseId,
+                quantity,
+                type: 'ENTRANCE',
+                note: `Annulation/Retour Commande #${orderId}`
+            }
+        })
+    } else if (extraProductId) {
+        await tx.inventory.upsert({
+            where: { extraProductId_warehouseId: { extraProductId, warehouseId } },
+            update: { quantity: { increment: quantity } },
+            create: { extraProductId, warehouseId, quantity }
+        })
+        await tx.stockMovement.create({
+            data: {
+                extraProductId,
+                toWarehouseId: warehouseId,
+                quantity,
+                type: 'ENTRANCE',
+                note: `Annulation/Retour Commande #${orderId}`
+            }
+        })
+    }
+}

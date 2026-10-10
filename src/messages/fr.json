@@ -576,7 +576,10 @@
     "Navigation": {
       "BoardGames": "Jeux de Société",
       "KidsWorld": "Mon Enfant"
-    }
+    },
+    "WarehouseSource": "Source de quel entrep�t ?",
+    "SourceWarehouse": "Source entrep�t :",
+    "SelectWarehouse": "S�lectionner un entrep�t"
   },
   "Packs": {
     "Save": "Économisez",

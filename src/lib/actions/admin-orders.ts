@@ -10,6 +10,7 @@ import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 import { OrderStatus } from '@prisma/client'
+import { allocateOrderItemStock, restoreOrderItemStock } from '@/lib/actions/warehouse'
 
 /**
  * Mettre à jour le statut d'une commande
@@ -25,6 +26,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
             include: {
                 items: {
                     include: {
+                        warehouse: { select: { id: true, name: true, location: true } },
                         book: { select: { id: true, title: true } },
                         pack: { include: { books: true } },
                         extraProduct: { select: { id: true, name: true } }
@@ -79,6 +81,15 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
             // Réintégrer le stock si retour/annulation d'une commande qui avait décrémenté le stock
             if (isNowReturned && !wasAlreadyRestored) {
                 for (const item of order.items) {
+                    if ((item as any).warehouseId) {
+                        await restoreOrderItemStock(tx, {
+                            bookId: item.bookId,
+                            extraProductId: item.extraProductId,
+                            warehouseId: (item as any).warehouseId,
+                            quantity: item.quantity,
+                            orderId
+                        })
+                    }
                     if (item.type === 'BOOK' && item.bookId) {
                         await tx.book.updateMany({
                             where: { id: item.bookId },
@@ -1036,6 +1047,7 @@ export async function updateOrderItems(orderId: string, items: {
     productId: string;
     quantity: number;
     price: number;
+    warehouseId?: string | null;
 }[]) {
     try {
         await verifyAdmin()
@@ -1168,6 +1180,18 @@ export async function updateOrderItems(orderId: string, items: {
 
                 newSubtotal += newItem.price * newItem.quantity
 
+                let assignedWarehouseId = newItem.warehouseId || null
+                if (impactsStock && (newItem.type === 'BOOK' || newItem.type === 'ACCESSORY')) {
+                    const alloc = await allocateOrderItemStock(tx, {
+                        bookId: newItem.type === 'BOOK' ? newItem.productId : null,
+                        extraProductId: newItem.type === 'ACCESSORY' ? newItem.productId : null,
+                        quantity: newItem.quantity,
+                        orderId: order.id,
+                        forcedWarehouseId: newItem.warehouseId
+                    })
+                    assignedWarehouseId = alloc.warehouseId
+                }
+
                 await tx.orderItem.create({
                     data: {
                         orderId: order.id,
@@ -1175,6 +1199,7 @@ export async function updateOrderItems(orderId: string, items: {
                         quantity: newItem.quantity,
                         price: newItem.price,
                         costPrice: costPrice,
+                        warehouseId: assignedWarehouseId,
                         bookId: newItem.type === 'BOOK' ? newItem.productId : null,
                         packId: newItem.type === 'PACK' ? newItem.productId : null,
                         extraProductId: newItem.type === 'ACCESSORY' ? newItem.productId : null

@@ -54,6 +54,12 @@ export default async function OrderDetailsPage({
     
     const defaultCompanyId = await getSetting('DEFAULT_SHIPPING_COMPANY_ID')
 
+    const warehouses = await prisma.warehouse.findMany({
+        where: { active: true },
+        select: { id: true, name: true, location: true },
+        orderBy: { name: 'asc' }
+    })
+
     return (
         <div className="space-y-8">
             {/* Header */}

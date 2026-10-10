@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
 import { calculate3For4Discount } from '@/lib/utils'
+import { allocateOrderItemStock } from '@/lib/actions/warehouse'
+import * as crypto from 'crypto'
 
 const OrderSchema = z.object({
     fullName: z.string().min(1, 'Nom complet requis').max(100),
@@ -258,9 +260,97 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                 }
             }
 
-            // Créer la commande
+                        // G�n�rer l'ID de commande pour liaison atomique des mouvements
+            const orderId = crypto.randomUUID()
+            const impactedBookIds: string[] = []
+            const lowStockAlerts: { id: string, title: string, stock: number }[] = []
+
+            // Allocation prioritaire d'entrep�t : "Principal" en premier, sinon les autres
+            const itemsWithWarehouse: (typeof itemsWithCost[0] & { warehouseId?: string | null })[] = []
+
+            for (const item of itemsWithCost) {
+                let assignedWarehouseId: string | null = null
+
+                if (item.type === 'BOOK') {
+                    impactedBookIds.push(item.productId)
+                    const alloc = await allocateOrderItemStock(tx, {
+                        bookId: item.productId,
+                        quantity: item.quantity,
+                        orderId
+                    })
+                    assignedWarehouseId = alloc.warehouseId
+
+                    await tx.book.updateMany({
+                        where: { id: item.productId },
+                        data: { stock: { decrement: item.quantity } }
+                    })
+
+                    const updatedBook = await tx.book.findUnique({ where: { id: item.productId } })
+                    if (updatedBook && updatedBook.stock < 3) {
+                        lowStockAlerts.push({ id: updatedBook.id, title: updatedBook.title, stock: updatedBook.stock })
+                    }
+                } else if (item.type === 'ACCESSORY') {
+                    const alloc = await allocateOrderItemStock(tx, {
+                        extraProductId: item.productId,
+                        quantity: item.quantity,
+                        orderId
+                    })
+                    assignedWarehouseId = alloc.warehouseId
+
+                    await tx.extraProduct.updateMany({
+                        where: { id: item.productId },
+                        data: { stock: { decrement: item.quantity } }
+                    })
+                } else if (item.type === 'PACK') {
+                    const pack = packMap.get(item.productId)
+                    if (pack) {
+                        for (const packBook of (pack as any).books) {
+                            let bookIdToDecrement = packBook.bookId
+                            const replacedBooks = item.replacedBooks as Record<string, { id: string, title: string }> | undefined
+                            if (replacedBooks && replacedBooks[packBook.bookId]) {
+                                bookIdToDecrement = replacedBooks[packBook.bookId].id
+                            }
+                            impactedBookIds.push(bookIdToDecrement)
+                            const alloc = await allocateOrderItemStock(tx, {
+                                bookId: bookIdToDecrement,
+                                quantity: item.quantity,
+                                orderId
+                            })
+                            if (!assignedWarehouseId) {
+                                assignedWarehouseId = alloc.warehouseId
+                            }
+                            await tx.book.updateMany({
+                                where: { id: bookIdToDecrement },
+                                data: { stock: { decrement: item.quantity } }
+                            })
+                        }
+                        for (const packExtraProduct of (pack as any).extraProducts) {
+                            const alloc = await allocateOrderItemStock(tx, {
+                                extraProductId: packExtraProduct.extraProductId,
+                                quantity: item.quantity,
+                                orderId
+                            })
+                            if (!assignedWarehouseId) {
+                                assignedWarehouseId = alloc.warehouseId
+                            }
+                            await tx.extraProduct.updateMany({
+                                where: { id: packExtraProduct.extraProductId },
+                                data: { stock: { decrement: item.quantity } }
+                            })
+                        }
+                    }
+                }
+
+                itemsWithWarehouse.push({
+                    ...item,
+                    warehouseId: assignedWarehouseId
+                })
+            }
+
+            // Cr�er la commande avec le warehouseId associ� sur chaque article
             const newOrder = await (tx.order as any).create({
                 data: {
+                    id: orderId,
                     fullName: sanitizedData.fullName,
                     email: finalEmail,
                     phone: sanitizedData.phone,
@@ -280,9 +370,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                     status: ['STRIPE', 'PAYPAL', 'CMI'].includes(sanitizedData.paymentMethod || '') ? 'PENDING_PAYMENT' : 'PENDING',
                     paymentMethod: sanitizedData.items.every(item => item.type === 'DIGITAL')
                         ? 'DIGITAL_PAYMENT'
-                        : (sanitizedData.paymentMethod || 'COD'), // Use selected payment method or fallback to COD
+                        : (sanitizedData.paymentMethod || 'COD'),
                     items: {
-                        create: itemsWithCost.map(item => ({
+                        create: itemsWithWarehouse.map(item => ({
                             type: item.type,
                             bookId: item.type === 'BOOK' ? item.productId : null,
                             packId: item.type === 'PACK' ? item.productId : null,
@@ -290,6 +380,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                             digitalProductId: item.type === 'DIGITAL' ? item.productId : null,
                             extraProductId: item.type === 'ACCESSORY' ? item.productId : null,
                             sellerId: item.sellerId,
+                            warehouseId: item.warehouseId || null,
                             quantity: item.quantity,
                             price: item.price,
                             costPrice: item.costPrice
@@ -297,53 +388,6 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
                     }
                 }
             })
-
-            // Mettre à jour le stock des livres et accessoires
-            const impactedBookIds: string[] = []
-            const lowStockAlerts: { id: string, title: string, stock: number }[] = []
-
-            await Promise.all(data.items.map(async (item) => {
-                if (item.type === 'BOOK') {
-                    impactedBookIds.push(item.productId)
-                    await tx.book.updateMany({
-                        where: { id: item.productId },
-                        data: { stock: { decrement: item.quantity } }
-                    })
-                    const updatedBook = await tx.book.findUnique({ where: { id: item.productId } })
-                    if (updatedBook && updatedBook.stock < 3) {
-                        lowStockAlerts.push({ id: updatedBook.id, title: updatedBook.title, stock: updatedBook.stock })
-                    }
-                } else if (item.type === 'ACCESSORY') {
-                    await tx.extraProduct.updateMany({
-                        where: { id: item.productId },
-                        data: { stock: { decrement: item.quantity } }
-                    })
-                } else if (item.type === 'PACK') {
-                    // Decrement stock for books inside the pack (reuse packMap)
-                    const pack = packMap.get(item.productId)
-                    if (pack) {
-                        await Promise.all(pack.books.map(async (packBook) => {
-                            // If this book was replaced, decrement the replacement book instead
-                            let bookIdToDecrement = packBook.bookId
-                            const replacedBooks = item.replacedBooks as Record<string, { id: string, title: string }> | undefined
-                            if (replacedBooks && replacedBooks[packBook.bookId]) {
-                                bookIdToDecrement = replacedBooks[packBook.bookId].id
-                            }
-                            impactedBookIds.push(bookIdToDecrement)
-                            await tx.book.updateMany({
-                                where: { id: bookIdToDecrement },
-                                data: { stock: { decrement: item.quantity } }
-                            })
-                        }))
-                        await Promise.all(pack.extraProducts.map(packExtraProduct =>
-                            tx.extraProduct.updateMany({
-                                where: { id: packExtraProduct.extraProductId },
-                                data: { stock: { decrement: item.quantity } }
-                            })
-                        ))
-                    }
-                }
-            }))
 
             return { order: newOrder, lowStockAlerts, impactedBookIds }
         }, { timeout: 30000, maxWait: 15000 })
