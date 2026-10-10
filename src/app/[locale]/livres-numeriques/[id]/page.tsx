@@ -71,46 +71,24 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
   const homeLabel = locale === 'ar' ? 'الرئيسية' : locale === 'en' ? 'Home' : 'Accueil'
   const digitalBooksLabel = locale === 'ar' ? 'الكتب الرقمية' : locale === 'en' ? 'Digital Books' : 'Livres numériques'
   const localeBaseUrl = `${baseUrl}/${locale}`
-  const productJsonLd = {
+  // Keep ebooks discoverable in organic Search without exposing them as
+  // Merchant Center offers: Google Shopping doesn't accept digital books.
+  const digitalBookJsonLd = {
     "@context": "https://schema.org",
-    "@type": ["Product", "Book"],
+    "@type": "Book",
     "name": product.title,
     "image": productImageUrl,
     "description": product.description || `Livre numérique ${product.title} sur Riwaya.`,
-    "sku": product.id,
+    "url": productUrl,
+    "bookFormat": "https://schema.org/EBook",
+    "isAccessibleForFree": false,
     "author": {
       "@type": "Person",
       "name": product.author
     },
-    "brand": {
-      "@type": "Brand",
+    "publisher": {
+      "@type": "Organization",
       "name": "Riwaya"
-    },
-    "category": {
-      "@type": "CategoryCode",
-      "inCodeSet": "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt",
-      "codeValue": "543542"
-    },
-    "offers": {
-      "@type": "Offer",
-      "price": product.price,
-      "priceCurrency": "MAD",
-      "validFrom": new Date(product.createdAt).toISOString().split('T')[0],
-      "availability": "https://schema.org/InStock",
-      "url": productUrl,
-      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      "seller": {
-        "@type": "Organization",
-        "name": "Riwaya"
-      }
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": 4.9,
-      "reviewCount": 16,
-      "ratingCount": 16,
-      "bestRating": 5,
-      "worstRating": 1
     }
   }
 
@@ -139,7 +117,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
     ]
   }
 
-  const jsonLd = [productJsonLd, breadcrumbJsonLd]
+  const jsonLd = [digitalBookJsonLd, breadcrumbJsonLd]
 
   return (
     <>

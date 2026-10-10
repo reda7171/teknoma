@@ -646,13 +646,13 @@
   },
   "Returns": {
     "Title": "Return Policy",
-    "Subtitle": "Peace of Mind",
-    "Intro": "We want you to love your reading experience. Here is how we handle returns.",
+    "Subtitle": "Return conditions",
+    "Intro": "Returns are accepted for defective products only. We do not accept exchanges.",
     "Policy": {
-      "Point1": "You have 3 calendar days to report an issue.",
-      "Point2": "The item must be unused and in the same condition that you received it.",
-      "Point3": "Please contact us via the contact form or WhatsApp to initiate a return.",
-      "Point4": "Refunds are processed after inspection of the returned item."
+      "Point1": "A return is accepted only when the delivered product is defective, damaged, or incorrect.",
+      "Point2": "Report the issue within 3 calendar days of delivery and provide your order number and clear photos.",
+      "Point3": "Contact us through WhatsApp or at contact@riwaya.store before sending anything. Unauthorized returns may be refused.",
+      "Point4": "Returning a defective product is free. We do not accept exchanges. Once received and inspected, an approved return will be refunded."
     }
   },
   "Contact": {
@@ -1534,7 +1534,7 @@
     "DeliveryGuarantee": "Delivery & Warranty Morocco",
     "DeliveryGuaranteeDesc1": "Cash on Delivery (COD): Order safely. You inspect your product upon arrival and pay the exact amount in cash to our delivery partner.",
     "DeliveryGuaranteeDesc2": "Fast deadlines: We ship to all major cities in Morocco (Casablanca, Rabat, Marrakech, Tangier...) in 24 to 48 hours. For other regions, expect a maximum of 72 hours.",
-    "DeliveryGuaranteeDesc3": "Satisfaction or Exchange Guarantee: In the event of a manufacturing defect or non-conformity, you have 3 calendar days to request a free exchange.",
+    "DeliveryGuaranteeDesc3": "Free returns for defects: you have 3 calendar days to report a defective product and request a refund.",
     "YouMightAlsoLike": "You might also like...",
     "SeeAll": "See all",
     "Categories": {
@@ -1973,7 +1973,7 @@
     "DeliveryAndWarranty": "Delivery & Warranty",
     "DeliveryStep1": "<strong>Cash on Delivery (COD):</strong> Order safely. You inspect your product upon arrival and pay the exact amount in cash to our delivery partner.",
     "DeliveryStep2": "<strong>Fast delivery:</strong> We ship to all major cities in Morocco within 24 to 48 hours. For other regions, expect up to 72 hours maximum.",
-    "DeliveryStep3": "<strong>Satisfaction or Exchange Guarantee:</strong> In case of a manufacturing defect, you have 3 days to request a free exchange.",
+    "DeliveryStep3": "<strong>Free returns for defects:</strong> you have 3 calendar days to report a defective product and request a refund. Exchanges are not offered.",
     "YouMightAlsoLike": "You might also like...",
     "SeeAll": "See all",
     "Edit": "Edit product",

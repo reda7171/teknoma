@@ -120,12 +120,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
           "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
           "merchantReturnDays": 3,
           "returnMethod": "https://schema.org/ReturnByMail",
-          "returnFees": "https://schema.org/ReturnShippingFees",
-          "returnShippingFeesAmount": {
-            "@type": "MonetaryAmount",
-            "value": 35,
-            "currency": "MAD"
-          }
+          "returnFees": "https://schema.org/FreeReturn"
         },
         "shippingDetails": {
           "@type": "OfferShippingDetails",

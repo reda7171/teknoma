@@ -626,13 +626,13 @@
   },
   "Returns": {
     "Title": "Politique de Retour",
-    "Subtitle": "Tranquillité d'esprit",
-    "Intro": "Nous voulons que vous aimiez votre lecture. Voici comment nous traitons les retours.",
+    "Subtitle": "Conditions de retour",
+    "Intro": "Les retours sont acceptés uniquement pour les produits défectueux. Nous n'acceptons aucun échange.",
     "Policy": {
-      "Point1": "Vous avez 3 jours calendaires pour signaler un problème.",
-      "Point2": "L'article doit être inutilisé et dans le même état que vous l'avez reçu.",
-      "Point3": "Veuillez nous contacter via le formulaire ou WhatsApp pour initier un retour.",
-      "Point4": "Les remboursements sont traités après inspection de l'article retourné."
+      "Point1": "Un retour est accepté uniquement si le produit reçu est défectueux, endommagé ou incorrect.",
+      "Point2": "Le problème doit être signalé dans les 3 jours calendaires suivant la livraison, avec le numéro de commande et des photos claires.",
+      "Point3": "Contactez-nous via WhatsApp ou à contact@riwaya.store avant tout envoi. Un retour non autorisé pourra être refusé.",
+      "Point4": "Le retour d'un produit défectueux est gratuit. Nous n'acceptons aucun échange. Après réception et inspection, tout retour approuvé donne lieu à un remboursement."
     }
   },
   "Contact": {
@@ -1445,7 +1445,7 @@
     "DeliveryGuarantee": "Livraison & Garantie Maroc",
     "DeliveryGuaranteeDesc1": "Paiement à la Livraison (COD) : Commandez en toute sécurité. Vous inspectez votre produit à l'arrivée et réglez le montant exact en espèces auprès de notre livreur partenaire.",
     "DeliveryGuaranteeDesc2": "Délais rapides : Nous expédions dans toutes les grandes villes du Maroc (Casablanca, Rabat, Marrakech, Tanger...) en 24h à 48h. Pour les autres régions, comptez 72h maximum.",
-    "DeliveryGuaranteeDesc3": "Garantie Satisfait ou Échangé : En cas de défaut de fabrication ou de non-conformité, vous disposez de 3 jours calendaires pour demander un échange gratuit.",
+    "DeliveryGuaranteeDesc3": "Retour gratuit en cas de défaut : vous disposez de 3 jours calendaires pour signaler un produit défectueux et demander son remboursement.",
     "YouMightAlsoLike": "Vous aimerez aussi...",
     "SeeAll": "Tout voir",
     "Categories": {
@@ -1884,7 +1884,7 @@
     "DeliveryAndWarranty": "Livraison & Garantie",
     "DeliveryStep1": "<strong>Paiement à la Livraison (COD) :</strong> Commandez en toute sécurité. Vous inspectez votre produit à l'arrivée et réglez le montant exact en espèces auprès de notre livreur partenaire.",
     "DeliveryStep2": "<strong>Délais rapides :</strong> Nous expédions dans toutes les grandes villes du Maroc en 24h à 48h. Pour les autres régions, comptez 72h maximum.",
-    "DeliveryStep3": "<strong>Garantie Satisfait ou Échangé :</strong> En cas de défaut de fabrication ou de non-conformité, vous disposez de 3 jours calendaires pour demander un échange gratuit.",
+    "DeliveryStep3": "<strong>Retour gratuit en cas de défaut :</strong> vous disposez de 3 jours calendaires pour signaler un produit défectueux et demander son remboursement. Aucun échange n'est proposé.",
     "YouMightAlsoLike": "Vous aimerez aussi...",
     "SeeAll": "Tout voir",
     "Edit": "Modifier le produit",

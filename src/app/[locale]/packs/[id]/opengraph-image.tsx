@@ -118,7 +118,7 @@ export default async function PackOpengraphImage(props: {
                 fontWeight: 700,
               }}
             >
-              📚 {packBadge}
+              {packBadge}
             </div>
             {hasDiscount && (
               <div
@@ -133,7 +133,7 @@ export default async function PackOpengraphImage(props: {
                   fontWeight: 700,
                 }}
               >
-                🔥 {savingsBadge}
+                {savingsBadge}
               </div>
             )}
           </div>
@@ -263,7 +263,7 @@ export default async function PackOpengraphImage(props: {
               fontWeight: 700,
             }}
           >
-            <span>🚚 Livraison 24-48h partout au Maroc (COD)</span>
+            <span>Livraison 24-48h partout au Maroc (COD)</span>
           </div>
 
           <span

@@ -13,6 +13,8 @@ RUN npm install --legacy-peer-deps --loglevel=error
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
+ARG DEPLOYMENT_VERSION
+ENV DEPLOYMENT_VERSION=${DEPLOYMENT_VERSION}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 

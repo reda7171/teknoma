@@ -117,7 +117,17 @@ export default async function BookOpengraphImage(props: {
                 fontWeight: 700,
               }}
             >
-              ✓ {codBadge}
+              <span
+                style={{
+                  display: 'flex',
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: '#FBBF24',
+                  marginRight: '10px',
+                }}
+              />
+              {codBadge}
             </div>
             <div
               style={{
@@ -132,7 +142,7 @@ export default async function BookOpengraphImage(props: {
                 fontWeight: 700,
               }}
             >
-              🚚 {shippingBadge}
+              {shippingBadge}
             </div>
           </div>
         </div>
@@ -262,7 +272,7 @@ export default async function BookOpengraphImage(props: {
               fontWeight: 700,
             }}
           >
-            <span>⭐ {guaranteeBadge}</span>
+            <span>{guaranteeBadge}</span>
           </div>
 
           <span
