@@ -1,0 +1,66 @@
+export const locales = ['fr', 'ar', 'en'] as const
+export type Locale = (typeof locales)[number]
+
+export function isLocale(value: string): value is Locale {
+  return locales.includes(value as Locale)
+}
+
+export const copy = {
+  fr: {
+    announcement: 'Livraison offerte à partir de 300 DH au Maroc',
+    nav: ['Nouveautés', 'Sélections', 'Packs', 'Auteurs', 'Journal'],
+    heroEyebrow: 'LIBRAIRIE INDÉPENDANTE · MAROC',
+    heroTitle: 'La lecture, choisie avec soin.',
+    heroText: 'Des livres qui restent, sélectionnés pour leur voix, leur beauté et les conversations qu’ils ouvrent.',
+    primaryCta: 'Découvrir la sélection',
+    secondaryCta: 'Voir les nouveautés',
+    sectionEyebrow: 'LA SÉLECTION RIWAYA',
+    sectionTitle: 'Des livres que nous recommandons vraiment',
+    sectionText: 'Chaque titre est choisi par notre équipe, pas par un algorithme.',
+    viewAll: 'Voir toute la sélection',
+    serviceTitle: 'Une librairie marocaine, une attention particulière.',
+    services: ['Sélection éditoriale exigeante', 'Livraison partout au Maroc', 'Paiement à la réception'],
+    newsletterTitle: 'Une lettre pour mieux choisir.',
+    newsletterText: 'Nouveautés, lectures et sélections privées. Deux fois par mois, sans bruit.',
+    email: 'Votre adresse e-mail',
+    subscribe: 'Recevoir la lettre',
+  },
+  ar: {
+    announcement: 'توصيل مجاني للطلبات ابتداءً من 300 درهم داخل المغرب',
+    nav: ['وصل حديثاً', 'مختاراتنا', 'الباقات', 'الكتّاب', 'المجلة'],
+    heroEyebrow: 'مكتبة مستقلة · المغرب',
+    heroTitle: 'قراءة مختارة بعناية',
+    heroText: 'كتب تبقى في الذاكرة، نختارها لجمالها وأصالتها والأفكار التي تفتحها أمام القارئ.',
+    primaryCta: 'اكتشف المختارات',
+    secondaryCta: 'تصفح الجديد',
+    sectionEyebrow: 'مختارات رواية',
+    sectionTitle: 'كتب نوصي بها حقاً',
+    sectionText: 'كل عنوان تختاره مكتبتنا بعناية، بعيداً عن اقتراحات الخوارزميات.',
+    viewAll: 'عرض كل المختارات',
+    serviceTitle: 'مكتبة مغربية بعناية خاصة.',
+    services: ['اختيار تحريري دقيق', 'توصيل إلى جميع مدن المغرب', 'الدفع عند الاستلام'],
+    newsletterTitle: 'رسالة تساعدك على الاختيار.',
+    newsletterText: 'إصدارات جديدة، قراءات ومختارات خاصة. مرتان في الشهر، بلا إزعاج.',
+    email: 'بريدك الإلكتروني',
+    subscribe: 'اشترك في الرسالة',
+  },
+  en: {
+    announcement: 'Free delivery from 300 MAD across Morocco',
+    nav: ['New arrivals', 'Curated lists', 'Bundles', 'Authors', 'Journal'],
+    heroEyebrow: 'INDEPENDENT BOOKSHOP · MOROCCO',
+    heroTitle: 'Books, thoughtfully selected.',
+    heroText: 'Books that stay with you, chosen for their voice, their beauty and the conversations they begin.',
+    primaryCta: 'Explore the selection',
+    secondaryCta: 'See new arrivals',
+    sectionEyebrow: 'THE RIWAYA EDIT',
+    sectionTitle: 'Books we genuinely recommend',
+    sectionText: 'Every title is selected by our team, not an algorithm.',
+    viewAll: 'View the full selection',
+    serviceTitle: 'A Moroccan bookshop with a personal touch.',
+    services: ['Thoughtful editorial selection', 'Delivery across Morocco', 'Cash on delivery'],
+    newsletterTitle: 'A letter for better reading choices.',
+    newsletterText: 'New releases, reading notes and private edits. Twice a month, never noisy.',
+    email: 'Your email address',
+    subscribe: 'Join the letter',
+  },
+} as const
