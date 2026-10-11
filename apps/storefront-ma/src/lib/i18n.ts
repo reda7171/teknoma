@@ -7,7 +7,7 @@ export function isLocale(value: string): value is Locale {
 
 export const copy = {
   fr: {
-    announcement: 'Livraison offerte à partir de 300 DH au Maroc',
+    announcement: 'Livraison offerte à partir de 500 DH au Maroc',
     nav: ['Nouveautés', 'Sélections', 'Packs', 'Auteurs', 'Journal'],
     heroEyebrow: 'LIBRAIRIE INDÉPENDANTE · MAROC',
     heroTitle: 'La lecture, choisie avec soin.',
@@ -26,7 +26,7 @@ export const copy = {
     subscribe: 'Recevoir la lettre',
   },
   ar: {
-    announcement: 'توصيل مجاني للطلبات ابتداءً من 300 درهم داخل المغرب',
+    announcement: 'توصيل مجاني للطلبات ابتداءً من 500 درهم داخل المغرب',
     nav: ['وصل حديثاً', 'مختاراتنا', 'الباقات', 'الكتّاب', 'المجلة'],
     heroEyebrow: 'مكتبة مستقلة · المغرب',
     heroTitle: 'قراءة مختارة بعناية',
@@ -45,7 +45,7 @@ export const copy = {
     subscribe: 'اشترك في الرسالة',
   },
   en: {
-    announcement: 'Free delivery from 300 MAD across Morocco',
+    announcement: 'Free delivery from 500 MAD across Morocco',
     nav: ['New arrivals', 'Curated lists', 'Bundles', 'Authors', 'Journal'],
     heroEyebrow: 'INDEPENDENT BOOKSHOP · MOROCCO',
     heroTitle: 'Books, thoughtfully selected.',

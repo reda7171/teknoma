@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
+import { CartProvider } from '@/components/cart-provider'
 
 const outfit = localFont({
   src: '../../../../src/fonts/Outfit-VariableFont_wght.ttf',
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr" className={`${outfit.variable} ${tajawal.variable}`}>
-      <body>{children}</body>
+      <body><CartProvider>{children}</CartProvider></body>
     </html>
   )
 }
