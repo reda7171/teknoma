@@ -108,7 +108,7 @@ export async function getHomeCatalog(locale: Locale): Promise<CatalogBook[]> {
     }
     return payload.books.slice(0, 8).map((book) => ({
       ...book,
-      href: book.href.startsWith('http') ? book.href : `${apiBaseUrl.replace(/\/$/, '')}${book.href}`,
+      href: `/${locale}/books/${book.id}`,
     }))
   } catch {
     return fallbackBooks(locale)
