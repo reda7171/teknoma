@@ -5,9 +5,7 @@ import { getHomeCatalog } from '@/lib/catalog'
 import { copy, isLocale, locales } from '@/lib/i18n'
 import { CartLink } from '@/components/cart-controls'
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
-}
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params

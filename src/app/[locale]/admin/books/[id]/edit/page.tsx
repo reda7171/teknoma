@@ -14,6 +14,7 @@ import { getCategoryTree } from '@/lib/actions/category-tree'
 import type { CategoryTree } from '@/lib/constants/categories'
 import BookSeoScore from '@/components/admin/BookSeoScore'
 import BookMemberships from '@/components/admin/BookMemberships'
+import JumiaPushModal, { type JumiaPushLanguage } from '@/components/admin/JumiaPushModal'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
     const router = useRouter()
@@ -58,6 +59,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>('fr')
     const [isLinked, setIsLinked] = useState<boolean | null>(null)
+    const [isJumiaModalOpen, setIsJumiaModalOpen] = useState(false)
     const [closeAfterSave, setCloseAfterSave] = useState(false)
     const [isTranslating, setIsTranslating] = useState(false)
     const [translateMsg, setTranslateMsg] = useState<string | null>(null)
@@ -301,15 +303,16 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         }
     }
 
-    async function handlePushToJumia() {
+    async function handleConfirmJumiaPush(pushLang: JumiaPushLanguage) {
         if (!bookId) return
-        if (!confirm('Voulez-vous vraiment publier ce livre sur Jumia ?')) return
         
         setIsPushingJumia(true)
         try {
-            const res = await publishBooksToJumia([bookId])
+            const res = await publishBooksToJumia([bookId], pushLang)
             if (res.success) {
-                alert(res.message || 'Livre publié avec succès sur Jumia')
+                alert(res.message || 'Livre publié avec succès sur Jumia !')
+                setIsJumiaModalOpen(false)
+                await loadBook(bookId)
             } else {
                 alert(res.message || 'Erreur lors de la publication')
             }
@@ -1378,7 +1381,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
-                            onClick={handlePushToJumia}
+                            onClick={() => setIsJumiaModalOpen(true)}
                             disabled={isPushingJumia || loading || isSyncingQuantity}
                             className="inline-flex items-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                         >
@@ -1433,6 +1436,13 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                     setBookImage(url)
                     setIsMediaModalOpen(false)
                 }}
+            />
+
+            <JumiaPushModal
+                isOpen={isJumiaModalOpen}
+                onClose={() => setIsJumiaModalOpen(false)}
+                onConfirm={handleConfirmJumiaPush}
+                isLoading={isPushingJumia}
             />
         </div>
     )

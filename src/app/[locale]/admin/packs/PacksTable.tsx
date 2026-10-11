@@ -17,6 +17,8 @@ interface Pack {
     description?: string | null
     active: boolean
     isSyncedWithJumia: boolean
+    sellerSku?: string | null
+    language?: string
     createdAt?: Date | string
     books: Array<{
         book: {
@@ -251,8 +253,13 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                         >
                                             {pack.name}
                                         </Link>
-                                        <div className="text-sm text-gray-500">
-                                            {pack.books.length} livre{pack.books.length > 1 ? 's' : ''}
+                                        <div className="text-sm text-gray-500 flex items-center gap-2">
+                                            <span>{pack.books.length} livre{pack.books.length > 1 ? 's' : ''}</span>
+                                            {pack.language && (
+                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-600 border border-gray-200">
+                                                    {pack.language}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="text-[10px] text-gray-400 font-mono mt-0.5">
                                             SKU: {pack.sellerSku || pack.id}

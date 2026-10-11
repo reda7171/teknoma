@@ -150,6 +150,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (statusParam.split(',').includes('no-image')) {
             packWhere.image = { in: ['', '/book-placeholder.png'] }
         }
+        if (langParam) {
+            packWhere.language = { in: langParam.split(',') }
+        }
 
         const packs = await prisma.pack.findMany({
             where: packWhere,
@@ -193,7 +196,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 warehouseStocks,
                 image: p.image || '/book-placeholder.png',
                 category: 'PACK',
-                language: 'fr',
+                language: p.language || 'fr',
                 description: p.description || '',
                 active: p.active,
                 isOriginal: true,

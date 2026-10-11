@@ -99,6 +99,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
 
     // Champs multilingues
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
+    const [packLanguage, setPackLanguage] = useState<'ar' | 'fr' | 'en' | 'all'>('fr')
     const [name, setName] = useState('')
     const [nameFr, setNameFr] = useState('')
     const [nameEn, setNameEn] = useState('')
@@ -383,6 +384,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             description: description || undefined,
             descriptionFr: descriptionFr || undefined,
             descriptionEn: descriptionEn || undefined,
+            language: packLanguage,
             price: Math.round(parseFloat(formData.get('price') as string)),
             originalPrice: formData.get('originalPrice') ? Math.round(parseFloat(formData.get('originalPrice') as string)) : undefined,
             image: formData.get('image') as string || packImage || undefined,
@@ -871,6 +873,70 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                                     />
                                 )}
                             </div>
+
+                            {/* Langue du Pack */}
+                            <fieldset>
+                                <legend className="block text-sm font-medium text-gray-700 mb-2">
+                                    Langue du Pack
+                                </legend>
+                                <div className="flex flex-wrap gap-4">
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="all"
+                                            checked={packLanguage === 'all'}
+                                            onChange={() => {
+                                                setPackLanguage('all')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">All</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="fr"
+                                            checked={packLanguage === 'fr'}
+                                            onChange={() => {
+                                                setPackLanguage('fr')
+                                                setCurrentLang('fr')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Français</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="ar"
+                                            checked={packLanguage === 'ar'}
+                                            onChange={() => {
+                                                setPackLanguage('ar')
+                                                setCurrentLang('ar')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Arabe</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="en"
+                                            checked={packLanguage === 'en'}
+                                            onChange={() => {
+                                                setPackLanguage('en')
+                                                setCurrentLang('en')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Anglais</span>
+                                    </label>
+                                </div>
+                            </fieldset>
 
                             {/* Prix barré */}
                             <div>
