@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { featuredBooks } from '@/data/home'
+import { getHomeCatalog } from '@/lib/catalog'
 import { copy, isLocale, locales } from '@/lib/i18n'
 
 export function generateStaticParams() {
@@ -12,6 +13,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isLocale(locale)) notFound()
   const t = copy[locale]
   const rtl = locale === 'ar'
+  const books = await getHomeCatalog(locale)
 
   return (
     <div dir={rtl ? 'rtl' : 'ltr'} lang={locale}>
@@ -56,12 +58,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <p>{t.sectionText}</p>
           </div>
           <div className="book-grid">
-            {featuredBooks.map((book) => (
+            {books.map((book, index) => (
               <article className="book-card" key={book.id}>
-                <div className={`cover ${book.tone}`}><span>{book.mark}</span><i>RIWAYA</i></div>
+                <Link className="cover-link" href={book.href} aria-label={book.title}>
+                  {book.image ? (
+                    <Image
+                      className="cover-image"
+                      src={book.image}
+                      alt={book.imageAlt}
+                      fill
+                      sizes="(max-width: 560px) 46vw, (max-width: 900px) 45vw, 270px"
+                      priority={index < 2}
+                    />
+                  ) : (
+                    <div className={`cover ${['green', 'burgundy', 'gold', 'ink'][index % 4]}`}><span>{book.title.slice(0, 2)}</span><i>RIWAYA</i></div>
+                  )}
+                </Link>
                 <p className="book-author">{book.author}</p>
                 <h3>{book.title}</h3>
-                <p className="price">{book.price} MAD</p>
+                <p className="price">{book.price} MAD {book.originalPrice && book.originalPrice > book.price ? <del>{book.originalPrice} MAD</del> : null}</p>
               </article>
             ))}
           </div>
