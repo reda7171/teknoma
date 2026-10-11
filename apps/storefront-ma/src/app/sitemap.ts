@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { getEditorialArticles } from '@/data/journal'
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://riwaya.ma').replace(/\/$/, '')
 const locales = ['fr', 'ar', 'en'] as const
@@ -40,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = locales.flatMap((locale) => [
     { url: `${siteUrl}/${locale}`, lastModified: now, changeFrequency: 'daily', priority: 1 },
     { url: `${siteUrl}/${locale}/books`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${siteUrl}/${locale}/journal`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
   ])
   const bookRoutes: MetadataRoute.Sitemap = bookIds.flatMap((id) => locales.map((locale) => ({
     url: `${siteUrl}/${locale}/books/${id}`,
@@ -48,5 +50,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   })))
 
-  return [...staticRoutes, ...bookRoutes]
+  const journalRoutes: MetadataRoute.Sitemap = locales.flatMap((locale) => getEditorialArticles(locale).map((article) => ({
+    url: `${siteUrl}/${locale}/journal/${article.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  })))
+
+  return [...staticRoutes, ...bookRoutes, ...journalRoutes]
 }
