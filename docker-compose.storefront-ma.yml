@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.storefront-ma
+      args:
+        NEXT_PUBLIC_SITE_URL: https://staging.riwaya.ma
+        RIWAYA_MA_INDEXABLE: "false"
     image: riwaya-storefront-ma:staging
     container_name: riwaya_storefront_ma_staging
     restart: unless-stopped
