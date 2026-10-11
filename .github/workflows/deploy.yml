@@ -137,6 +137,9 @@ jobs:
             if [ -d "scripts" ]; then
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/backup-db.sh
               (crontab -l 2>/dev/null | grep -q "backup-db.sh") || (crontab -l 2>/dev/null; echo "0 3 * * * /var/www/riwayama/scripts/backup-db.sh >> /var/www/riwayama/backups/backup.log 2>&1") | crontab -
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/vps-clean-cache.sh
+              (crontab -l 2>/dev/null | grep -q "vps-clean-cache.sh") || (crontab -l 2>/dev/null; echo "0 4 * * * /var/www/riwayama/scripts/vps-clean-cache.sh >> /var/www/riwayama/backups/cache-clean.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "vps-status") || (crontab -l 2>/dev/null; echo "*/10 * * * * curl -s 'https://riwaya.store/api/cron/vps-status?alert_only=true' > /dev/null 2>&1") | crontab -
             fi
 
             # ─── Page 502 personnalisee ────────────────────────────────────
