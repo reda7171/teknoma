@@ -16,6 +16,8 @@ Créer un frontend distinct pour `riwaya.ma` tout en conservant :
 
 Le projet actuel doit continuer à fonctionner pendant toute la transition. Le nouveau domaine ne doit pas être un clone autonome du dépôt ni posséder une copie de la base de données.
 
+Le positionnement retenu pour le nouveau frontend est **premium, éditorial et chaleureux**. La charte détaillée est conservée dans `docs/RIWAYA_MA_PREMIUM_BRAND.md`.
+
 ## 2. Décision d’architecture
 
 ### Architecture cible
@@ -276,7 +278,7 @@ Noms de secrets recommandés, sans valeurs dans le dépôt :
 
 ### Phase 0 — préparation et sauvegarde
 
-- [ ] Valider le positionnement commercial et SEO de `riwaya.ma`.
+- [x] Valider le positionnement commercial et SEO premium de `riwaya.ma`.
 - [ ] Remplacer le mot de passe VPS exposé et configurer une clé SSH.
 - [ ] Documenter les services, domaines, sauvegardes et procédure de rollback actuels.
 - [ ] Créer une sauvegarde MySQL restaurable et tester sa restauration hors production.
