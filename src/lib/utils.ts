@@ -69,7 +69,7 @@ export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, f
  */
 export function getBaseUrl(): string {
     let url = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
-    if (url.includes('127.0.0.1') || url.includes('localhost') || url.includes('167.86.108.246')) {
+    if (url.includes('0.0.0.0') || url.includes('127.0.0.1') || url.includes('localhost') || url.includes('167.86.108.246')) {
         url = 'https://riwaya.store';
     }
     return url;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getBaseUrl } from '@/lib/utils'
 
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -20,7 +21,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         }
 
         if (image.startsWith('/')) {
-            return NextResponse.redirect(new URL(image, request.url))
+            return NextResponse.redirect(new URL(image, getBaseUrl()))
         }
 
         let base64Data = image;
