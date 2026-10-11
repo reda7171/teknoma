@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
+import { resolveStorefrontChannel } from '@/lib/sales-channel'
 
 export async function POST(req: Request) {
     try {
+        const salesChannel = resolveStorefrontChannel(req.headers)
         const ip = await getIpIdentifier()
         const limiter = await rateLimit(`abandoned_cart_post_${ip}`, { limit: 20, windowMs: 60000 })
         if (!limiter.success) return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 })
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
             if (existing) {
                 const updated = await prisma.abandonedCart.update({
                     where: { id },
-                    data: { phone: safePhone, email: safeEmail, fullName: safeFullName, cartData, total, status: 'PENDING' }
+                    data: { phone: safePhone, email: safeEmail, fullName: safeFullName, cartData, total, status: 'PENDING', salesChannel }
                 })
 
                 // Notification de mise à jour si de nouvelles informations de contact sont ajoutées
@@ -79,7 +81,8 @@ export async function POST(req: Request) {
                 fullName: safeFullName,
                 cartData,
                 total,
-                status: 'PENDING'
+                status: 'PENDING',
+                salesChannel
             }
         })
 

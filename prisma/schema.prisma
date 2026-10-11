@@ -409,6 +409,7 @@ model Order {
   utmCampaign      String?              @db.VarChar(255)
   fbclid           String?              @db.VarChar(500)
   ttclid           String?              @db.VarChar(500)
+  salesChannel     SalesChannel         @default(RIWAYA_STORE)
   items            OrderItem[]
   statusHistory    OrderStatusHistory[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
@@ -422,6 +423,7 @@ model Order {
   @@index([phone])
   @@index([email])
   @@index([status, createdAt])
+  @@index([salesChannel, createdAt])
   @@index([trackingID])
   @@index([customerId])
   @@index([sellerId], map: "orders_sellerId_fkey")
@@ -952,19 +954,21 @@ model AuthorProfile {
 }
 
 model AbandonedCart {
-  id        String   @id @default(uuid())
-  phone     String?  @db.VarChar(20)
-  email     String?  @db.VarChar(255)
-  fullName  String?  @db.VarChar(255)
-  cartData  String   @db.Text
-  total     Float
-  status    String   @default("PENDING")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String       @id @default(uuid())
+  phone        String?      @db.VarChar(20)
+  email        String?      @db.VarChar(255)
+  fullName     String?      @db.VarChar(255)
+  cartData     String       @db.Text
+  total        Float
+  status       String       @default("PENDING")
+  salesChannel SalesChannel @default(RIWAYA_STORE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   @@index([phone])
   @@index([status])
   @@index([createdAt])
+  @@index([salesChannel, createdAt])
   @@map("abandoned_carts")
 }
 
@@ -1258,6 +1262,14 @@ enum OrderStatus {
   FAILED
   RETURNED
   CANCELLED
+}
+
+enum SalesChannel {
+  RIWAYA_STORE
+  RIWAYA_MA
+  ADMIN_POS
+  MOBILE_APP
+  ADMIN_IMPORT
 }
 
 enum OrderItemType {

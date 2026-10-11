@@ -25,7 +25,7 @@ async function getStats(role: string | null, userId: string | null) {
         booksCount, packsCount, ordersCount, deliveredCount,
         pendingOrders, totalUsers, outOfStockBooks, cancelledCount, totalOrdersCount,
         shippedOrders, confirmedOrders, ordersToday, returnedCount,
-        stockValueRaw, booksNoImage, paidOrdersCount, uniqueCustomersResult
+        stockValueRaw, booksNoImage, paidOrdersCount, uniqueCustomersResult, salesChannelsRaw
     ] = await prisma.$transaction([
         prisma.book.count({ where: { active: true, ...sellerBookWhere } }),
         prisma.pack.count({ where: { active: true } }), // Packs are complicated, keep as is or filter? We'll ignore seller filter for packs count for now
@@ -46,7 +46,13 @@ async function getStats(role: string | null, userId: string | null) {
         prisma.order.count({ where: { isPaid: true, ...sellerOrderWhere } }),
         role === 'SELLER' 
             ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }) 
-            : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } })
+            : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }),
+        prisma.order.groupBy({
+            by: ['salesChannel'],
+            where: sellerOrderWhere,
+            _count: { id: true },
+            _sum: { total: true }
+        })
     ])
 
     // For totalRevenue, revenueMonth, booksSoldToday we have to sum the specific items if it's a SELLER
@@ -90,6 +96,10 @@ async function getStats(role: string | null, userId: string | null) {
     const uniqueCustomersCount = uniqueCustomersResult.length || 0
     const ltv = uniqueCustomersCount > 0 ? totalRev / uniqueCustomersCount : 0
     const netRevenue = role === 'SELLER' ? totalRev * 0.85 : totalRev // 15% commission par défaut
+    const salesChannels = Object.fromEntries(salesChannelsRaw.map(channel => [channel.salesChannel, {
+        orders: channel._count.id,
+        revenue: channel._sum.total || 0
+    }]))
 
     return {
         booksCount,
@@ -113,6 +123,7 @@ async function getStats(role: string | null, userId: string | null) {
         booksSoldToday,
         paidOrdersCount,
         ltv: role === 'SELLER' ? 0 : ltv,
+        salesChannels,
     }
 }
 
@@ -337,6 +348,10 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Livres Actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
         { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
         { name: 'Commandes', value: stats.ordersCount, iconName: 'ShoppingCart', color: 'green', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Commandes (Store)', value: stats.salesChannels.RIWAYA_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },
+        { name: 'CA (Store)', value: `${(stats.salesChannels.RIWAYA_STORE?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'blue', roles: ['ADMIN'] },
+        { name: 'Commandes (riwaya.ma)', value: stats.salesChannels.RIWAYA_MA?.orders || 0, iconName: 'ShoppingCart', color: 'teal', roles: ['ADMIN'] },
+        { name: 'CA (riwaya.ma)', value: `${(stats.salesChannels.RIWAYA_MA?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'teal', roles: ['ADMIN'] },
         { name: 'Commandes Payées', value: stats.paidOrdersCount, iconName: 'DollarSign', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
         { name: 'LTV (Client)', value: `${stats.ltv.toFixed(0)} ${currency}`, iconName: 'Users', color: 'blue', roles: ['ADMIN'] },
         { name: 'En Attente', value: stats.pendingOrders, iconName: 'Clock', color: 'yellow', roles: ['ADMIN', 'SELLER'] },

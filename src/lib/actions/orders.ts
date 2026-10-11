@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { getCommunityUser } from './community-auth'
 import { verifyAdmin, isAuthenticated } from './auth'
 import { z } from 'zod'
@@ -10,6 +10,7 @@ import { sanitizeInput } from '@/lib/security'
 import { calculate3For4Discount } from '@/lib/utils'
 import { allocateOrderItemStock } from '@/lib/actions/warehouse'
 import * as crypto from 'crypto'
+import { resolveStorefrontChannel } from '@/lib/sales-channel'
 
 const OrderSchema = z.object({
     fullName: z.string().min(1, 'Nom complet requis').max(100),
@@ -107,6 +108,8 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
     }
 
     try {
+
+        const salesChannel = resolveStorefrontChannel(await headers())
 
         // OWASP A03: Injection / Validation
         const data = OrderSchema.parse(input)
@@ -351,6 +354,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
             const newOrder = await (tx.order as any).create({
                 data: {
                     id: orderId,
+                    salesChannel,
                     fullName: sanitizedData.fullName,
                     email: finalEmail,
                     phone: sanitizedData.phone,

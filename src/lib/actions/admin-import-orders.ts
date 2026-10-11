@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import ExcelJS from 'exceljs'
 import { verifyAdmin } from './auth'
+import { SalesChannel } from '@prisma/client'
 
 export async function importOrdersFromExcel(formData: FormData) {
     try {
@@ -88,6 +89,7 @@ export async function importOrdersFromExcel(formData: FormData) {
 
             await prisma.order.create({
                 data: {
+                    salesChannel: SalesChannel.ADMIN_IMPORT,
                     fullName: fullName.toString(),
                     phone: phone.toString(),
                     city: city.toString(),

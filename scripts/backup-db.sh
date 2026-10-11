@@ -1,38 +1,51 @@
-#!/bin/bash
+#!/bin/sh
+set -eu
 
-# Configuration
-CONTAINER_NAME="riwaya_mysql"
-DB_NAME="riwaya_db"
-DB_USER="riwaya_user"
-DB_PASS="riwaya_pass"
-BACKUP_DIR="/var/www/riwayama/backups"
-DATE=$(date +"%Y-%m-%d_%H-%M-%S")
-FILENAME="backup_${DB_NAME}_${DATE}.sql"
+CONTAINER_NAME="${RIWAYA_DB_CONTAINER:-riwaya_db}"
+BACKUP_DIR="${RIWAYA_BACKUP_DIR:-/var/www/riwayama/backups}"
+DATE="$(date +'%Y-%m-%d_%H-%M-%S')"
+FILENAME="backup_riwaya_db_${DATE}.sql"
+TEMP_FILE="${BACKUP_DIR}/.${FILENAME}.part"
+FINAL_FILE="${BACKUP_DIR}/${FILENAME}"
 
-# Créer le dossier de backup s'il n'existe pas
-mkdir -p $BACKUP_DIR
+mkdir -p "$BACKUP_DIR"
+trap 'rm -f "$TEMP_FILE"' EXIT HUP INT TERM
 
-echo "🚀 Début du backup de la base de données (UTF8mb4)..."
+echo "Début de la sauvegarde MySQL..."
 
-# Exécution du mysqldump via Docker
-docker exec $CONTAINER_NAME /usr/bin/mysqldump \
-  --default-character-set=utf8mb4 \
-  -u$DB_USER \
-  -p$DB_PASS \
-  $DB_NAME > $BACKUP_DIR/$FILENAME
-
-if [ $? -eq 0 ]; then
-  echo "✅ Backup terminé avec succès : $BACKUP_DIR/$FILENAME"
-  
-  # Compresser le backup
-  gzip $BACKUP_DIR/$FILENAME
-  echo "📦 Backup compressé : $BACKUP_DIR/$FILENAME.gz"
-  
-  # 🔄 Rotation : Supprimer les backups de plus de 7 jours
-  echo "🔄 Nettoyage des anciens backups (plus de 7 jours)..."
-  find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +7 -delete
-  echo "✨ Nettoyage terminé."
-else
-  echo "❌ Erreur lors du backup"
-  exit 1
+if ! docker inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
+    echo "Erreur : conteneur MySQL introuvable : $CONTAINER_NAME" >&2
+    exit 1
 fi
+
+# Les identifiants restent dans l'environnement du conteneur et ne sont pas
+# copiés dans ce script ou affichés dans la ligne de commande de mysqldump.
+docker exec "$CONTAINER_NAME" sh -c '
+    : "${MYSQL_DATABASE:?MYSQL_DATABASE absent}"
+    : "${MYSQL_USER:?MYSQL_USER absent}"
+    : "${MYSQL_PASSWORD:?MYSQL_PASSWORD absent}"
+    MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump \
+        --default-character-set=utf8mb4 \
+        --single-transaction \
+        --quick \
+        --no-tablespaces \
+        --routines \
+        --triggers \
+        --events \
+        -u"$MYSQL_USER" \
+        "$MYSQL_DATABASE"
+' > "$TEMP_FILE"
+
+if [ ! -s "$TEMP_FILE" ]; then
+    echo "Erreur : mysqldump a produit un fichier vide" >&2
+    exit 1
+fi
+
+mv "$TEMP_FILE" "$FINAL_FILE"
+gzip -f "$FINAL_FILE"
+gzip -t "${FINAL_FILE}.gz"
+
+echo "Sauvegarde vérifiée : ${FINAL_FILE}.gz ($(wc -c < "${FINAL_FILE}.gz") octets)"
+
+# Conserver sept jours de sauvegardes compressées valides.
+find "$BACKUP_DIR" -maxdepth 1 -type f -name 'backup_*.sql.gz' -mtime +7 -delete

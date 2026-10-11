@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { resolveStorefrontChannel } from '@/lib/sales-channel'
 
 export async function POST(req: Request) {
     try {
+        const salesChannel = resolveStorefrontChannel(req.headers)
         const body = await req.json()
         const { phone, items, total } = body
 
@@ -14,6 +16,7 @@ export async function POST(req: Request) {
             where: {
                 phone,
                 status: 'PENDING',
+                salesChannel,
                 updatedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // 24h
             }
         })
@@ -23,7 +26,8 @@ export async function POST(req: Request) {
                 where: { id: recentCart.id },
                 data: {
                     cartData: JSON.stringify(items),
-                    total
+                    total,
+                    salesChannel
                 }
             })
         } else {
@@ -31,7 +35,8 @@ export async function POST(req: Request) {
                 data: {
                     phone,
                     cartData: JSON.stringify(items),
-                    total
+                    total,
+                    salesChannel
                 }
             })
         }
