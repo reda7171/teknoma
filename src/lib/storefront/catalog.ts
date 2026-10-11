@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { getBaseUrl, normalizeImage } from '@/lib/utils'
+import { getBaseUrl } from '@/lib/utils'
 import type { Prisma } from '@prisma/client'
 
 export type StorefrontLocale = 'fr' | 'ar' | 'en'
@@ -9,11 +9,6 @@ function localizedTitle(book: { title: string; titleFr: string | null; titleEn: 
     if (locale === 'fr') return book.titleFr || book.title
     if (locale === 'en') return book.titleEn || book.title
     return book.title
-}
-
-function absoluteImage(image: string | null) {
-    const normalized = normalizeImage(image)
-    return normalized.startsWith('http') ? normalized : `${getBaseUrl()}${normalized}`
 }
 
 const publicBookSelect = {
@@ -53,11 +48,69 @@ function serializeBook(book: {
         price: book.price,
         originalPrice: book.originalPrice,
         inStock: book.stock > 0,
-        image: absoluteImage(book.image),
+        image: `${getBaseUrl()}/api/books/${book.id}/image`,
         imageAlt: book.imageAlt || title,
         language: book.language,
         category: book.category,
         href: `/${locale}/books/${book.id}`,
+    }
+}
+
+export async function getStorefrontBook(id: string, locale: StorefrontLocale) {
+    const book = await prisma.book.findFirst({
+        where: { id, active: true, status: 'APPROVED' },
+        select: {
+            ...publicBookSelect,
+            description: true,
+            descriptionFr: true,
+            descriptionEn: true,
+            longDescription: true,
+            longDescriptionFr: true,
+            longDescriptionEn: true,
+            isbn: true,
+            condition: true,
+            reviews: {
+                where: { isApproved: true },
+                orderBy: { createdAt: 'desc' },
+                take: 6,
+                select: { id: true, fullName: true, rating: true, comment: true, city: true },
+            },
+        },
+    })
+    if (!book) return null
+
+    const description = locale === 'fr'
+        ? book.descriptionFr || book.description
+        : locale === 'en'
+            ? book.descriptionEn || book.description
+            : book.description
+    const longDescription = locale === 'fr'
+        ? book.longDescriptionFr || book.longDescription
+        : locale === 'en'
+            ? book.longDescriptionEn || book.longDescription
+            : book.longDescription
+    const related = await prisma.book.findMany({
+        where: {
+            active: true,
+            status: 'APPROVED',
+            stock: { gt: 0 },
+            id: { not: id },
+            ...(book.category ? { category: book.category } : {}),
+        },
+        orderBy: [{ isBestSeller: 'desc' }, { createdAt: 'desc' }],
+        take: 4,
+        select: publicBookSelect,
+    })
+
+    return {
+        ...serializeBook(book, locale),
+        description,
+        longDescription,
+        isbn: book.isbn,
+        condition: book.condition,
+        reviews: book.reviews,
+        purchaseUrl: `${getBaseUrl()}/${locale}/books/${book.id}`,
+        related: related.map((item) => serializeBook(item, locale)),
     }
 }
 

@@ -24,6 +24,16 @@ export type CatalogPage = CatalogResponse & {
   pagination: { page: number; limit: number; total: number; pages: number }
 }
 
+export type BookDetail = CatalogBook & {
+  description: string
+  longDescription: string | null
+  isbn: string | null
+  condition: string
+  purchaseUrl: string
+  reviews: Array<{ id: string; fullName: string; rating: number; comment: string; city: string | null }>
+  related: CatalogBook[]
+}
+
 function fallbackBooks(locale: Locale): CatalogBook[] {
   return featuredBooks.map((book: EditorialBook) => ({
     id: book.id,
@@ -61,6 +71,23 @@ export async function getCatalog(locale: Locale, filters: Record<string, string 
   } catch {
     const books = fallbackBooks(locale)
     return { version: 1, locale, books, categories: [], pagination: { page: 1, limit: books.length, total: books.length, pages: 1 } }
+  }
+}
+
+export async function getBook(locale: Locale, id: string): Promise<BookDetail | null> {
+  const apiBaseUrl = process.env.RIWAYA_BACKEND_URL
+  if (!apiBaseUrl) return null
+  try {
+    const response = await fetch(`${apiBaseUrl.replace(/\/$/, '')}/api/storefront/v1/books/${encodeURIComponent(id)}?locale=${locale}`, {
+      next: { revalidate: 300, tags: ['storefront-catalog', `storefront-book-${id}`] },
+      signal: AbortSignal.timeout(4000),
+    })
+    if (response.status === 404 || response.status === 400) return null
+    if (!response.ok) throw new Error('book_unavailable')
+    const payload = await response.json() as { version: number; book: BookDetail }
+    return payload.book
+  } catch {
+    return null
   }
 }
 

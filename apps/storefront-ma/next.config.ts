@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'riwaya.store', pathname: '/uploads/**' },
       { protocol: 'https', hostname: 'www.riwaya.store', pathname: '/uploads/**' },
+      { protocol: 'https', hostname: 'riwaya.store', pathname: '/api/books/**' },
+      { protocol: 'https', hostname: 'www.riwaya.store', pathname: '/api/books/**' },
     ],
   },
 }
