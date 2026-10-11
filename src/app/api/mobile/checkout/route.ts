@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, SalesChannel } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -13,6 +13,7 @@ export async function POST(request: Request) {
 
     const order = await prisma.order.create({
       data: {
+        salesChannel: SalesChannel.MOBILE_APP,
         fullName,
         phone,
         address,

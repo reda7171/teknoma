@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Package, Plus, Minus, Trash2, Search, Loader2 } from 'lucide-react'
+import { Package, Plus, Minus, Trash2, Search, Loader2, Warehouse } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import Link from 'next/link'
 import { updateOrderItems, searchProductsForOrder } from '@/lib/actions/admin-orders'
@@ -10,21 +10,37 @@ import { useRouter } from 'next/navigation'
 export default function OrderItemsEditor({
     orderId,
     initialItems,
+    warehouses = [],
     locale,
     shippingFees = 0,
     discount = 0
 }: {
     orderId: string
     initialItems: any[]
+    warehouses?: { id: string; name: string; location?: string | null }[]
     locale: string
     shippingFees?: number
     discount?: number
 }) {
-    const [items, setItems] = useState<any[]>(initialItems.map(item => ({
-        ...item,
-        productId: item.type === 'BOOK' ? item.bookId : item.type === 'ACCESSORY' ? item.extraProductId : item.packId,
-        isNew: false
-    })))
+    const [items, setItems] = useState<any[]>(initialItems.map(item => {
+        const resolvedWarehouseId = item.warehouseId || item.warehouse?.id || item.book?.stockMovements?.[0]?.fromWarehouse?.id || item.extraProduct?.stockMovements?.[0]?.fromWarehouse?.id || null
+        const resolvedWarehouseName = item.warehouse?.name || item.book?.stockMovements?.[0]?.fromWarehouse?.name || item.extraProduct?.stockMovements?.[0]?.fromWarehouse?.name || null
+        return {
+            ...item,
+            productId: item.type === 'BOOK' ? item.bookId : item.type === 'ACCESSORY' ? item.extraProductId : item.packId,
+            warehouseId: resolvedWarehouseId,
+            warehouseName: resolvedWarehouseName,
+            isNew: false
+        }
+    }))
+
+    const updateItemWarehouse = (index: number, warehouseId: string) => {
+        const newItems = [...items]
+        const matched = (warehouses || []).find((w: any) => w.id === warehouseId)
+        newItems[index].warehouseId = warehouseId || null
+        newItems[index].warehouseName = matched ? matched.name : null
+        setItems(newItems)
+    }
     
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<any[]>([])
@@ -192,15 +208,31 @@ export default function OrderItemsEditor({
                                     </div>
                                 </div>
 
-                                {/* Entrepôt source */}
-                                {(item.book?.stockMovements?.[0]?.fromWarehouse || item.extraProduct?.stockMovements?.[0]?.fromWarehouse) && (
-                                    <div className="mt-1.5">
-                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                                            {(item.book?.stockMovements?.[0]?.fromWarehouse || item.extraProduct?.stockMovements?.[0]?.fromWarehouse)?.name}
+                                {/* Libell� Entrep�t source impact� */}
+                                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                                    <span className="text-xs font-semibold text-gray-600 flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-200">
+                                        <Warehouse className="w-3.5 h-3.5 text-blue-600" />
+                                        Source de quel entrep�t ?
+                                    </span>
+                                    {warehouses && warehouses.length > 0 ? (
+                                        <select
+                                            value={item.warehouseId || ''}
+                                            onChange={(e) => updateItemWarehouse(index, e.target.value)}
+                                            className="text-xs font-bold px-2.5 py-1 rounded-md bg-blue-50 text-blue-900 border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-blue-100 transition-colors"
+                                        >
+                                            <option value="">S�lectionner un entrep�t</option>
+                                            {warehouses.map((w: any) => (
+                                                <option key={w.id} value={w.id}>
+                                                    {w.name} {w.name.toLowerCase().includes('principal') ? '(Principal)' : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
+                                            {item.warehouseName || (item.warehouseId ? 'Entrep�t assign�' : 'Entrep�t Principal (par d�faut)')}
                                         </span>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
 
                                 <div className="mt-4 flex items-center justify-between">
                                     <div className="flex items-center gap-3 border border-gray-200 rounded-lg p-1 bg-gray-50">

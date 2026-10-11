@@ -596,7 +596,10 @@
     "Navigation": {
       "BoardGames": "Board Games",
       "KidsWorld": "Kids World"
-    }
+    },
+    "WarehouseSource": "Source warehouse?",
+    "SourceWarehouse": "Source warehouse:",
+    "SelectWarehouse": "Select a warehouse"
   },
   "Packs": {
     "Save": "Save",

@@ -206,7 +206,7 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {[
-                                { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client', templateKey: 'templateOrder', templateVars: '{{shortId}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}' },
+                                { id: 'notifyOrders', label: 'Nouvelles commandes', desc: 'Alertes lors d\'une commande client', templateKey: 'templateOrder', templateVars: '{{shortId}}, {{channel}}, {{fullName}}, {{source}}, {{phone}}, {{city}}, {{location}}, {{total}}, {{comment}}, {{itemsList}}, {{ip}}, {{orderUrl}}' },
                                 { id: 'notifyRegister', label: 'Nouvelles inscriptions', desc: 'Alertes lors de la création d\'un compte', templateKey: 'templateRegister', templateVars: '{{fullName}}, {{email}}, {{phone}}, {{city}}, {{location}}, {{role}}, {{ip}}, {{date}}' },
                                 { id: 'notifyCart', label: 'Ajout au panier', desc: 'Alertes quand un client remplit son panier' },
                                 { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer', templateKey: 'templateReview', templateVars: '{{fullName}}, {{rating}}, {{comment}}' },

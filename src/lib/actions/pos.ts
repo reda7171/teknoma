@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { OrderStatus, OrderItemType } from '@prisma/client';
+import { OrderStatus, OrderItemType, SalesChannel } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 export async function getCustomerByPhone(phone: string) {
@@ -65,6 +65,7 @@ export async function createPOSOrder(data: {
 
     const order = await prisma.order.create({
       data: {
+        salesChannel: SalesChannel.ADMIN_POS,
         fullName: data.fullName,
         phone: data.phone,
         address: data.address,

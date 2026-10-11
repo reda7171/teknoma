@@ -45,6 +45,7 @@ export default function OrdersPageClient({
     const [paymentFilter, setPaymentFilter] = useState('')
     const [cityFilter, setCityFilter] = useState('')
     const [productTitleFilter, setProductTitleFilter] = useState('')
+    const [salesChannelFilter, setSalesChannelFilter] = useState('')
 
     const uniqueCities = useMemo(() => {
         const cities = orders.map(o => o.city?.trim()).filter(Boolean)
@@ -145,6 +146,8 @@ export default function OrdersPageClient({
                     productTitleFilter={productTitleFilter}
                     onProductTitleFilterChange={setProductTitleFilter}
                     productTitles={uniqueProductTitles}
+                    salesChannelFilter={salesChannelFilter}
+                    onSalesChannelFilterChange={setSalesChannelFilter}
                 />
 
                 {/* Table Content */}
@@ -159,6 +162,7 @@ export default function OrdersPageClient({
                         paymentFilter={paymentFilter}
                         cityFilter={cityFilter}
                         productTitleFilter={productTitleFilter}
+                        salesChannelFilter={salesChannelFilter}
                         deliveryInvoices={deliveryInvoices}
                     />
                 </div>

@@ -92,6 +92,7 @@ interface Order {
     city: string
     total: number
     status: string
+    salesChannel: string
     trackingID?: string | null
     shippingCompany?: string | null
     shippingCompanyName?: string | null
@@ -114,6 +115,7 @@ interface OrdersTableClientProps {
     paymentFilter?: string
     cityFilter?: string
     productTitleFilter?: string
+    salesChannelFilter?: string
     deliveryInvoices?: any[]
 }
 
@@ -127,6 +129,7 @@ export default function OrdersTableClient({
     paymentFilter = '',
     cityFilter = '',
     productTitleFilter = '',
+    salesChannelFilter = '',
     deliveryInvoices = []
 }: OrdersTableClientProps) {
     const router = useRouter()
@@ -244,8 +247,9 @@ export default function OrdersTableClient({
         const matchesShipping = shippingFilter ? order.shippingCompany === shippingFilter : true
         const matchesPayment = paymentFilter ? order.paymentMethod === paymentFilter : true
         const matchesCity = cityFilter ? order.city?.trim() === cityFilter : true
+        const matchesSalesChannel = salesChannelFilter ? order.salesChannel === salesChannelFilter : true
 
-        return matchesSearch && matchesProductTitle && matchesShipping && matchesPayment && matchesCity
+        return matchesSearch && matchesProductTitle && matchesShipping && matchesPayment && matchesCity && matchesSalesChannel
     })
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -359,6 +363,17 @@ export default function OrdersTableClient({
                                                 )}
                                             </div>
                                             <div className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors">{order.createdAtFormatted}</div>
+                                            <div className="mt-1">
+                                                <span className="inline-flex rounded-md bg-gray-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-gray-600">
+                                                    {{
+                                                        RIWAYA_STORE: 'Store',
+                                                        RIWAYA_MA: 'Riwaya.ma',
+                                                        ADMIN_POS: 'POS',
+                                                        MOBILE_APP: 'Mobile',
+                                                        ADMIN_IMPORT: 'Import'
+                                                    }[order.salesChannel] || order.salesChannel}
+                                                </span>
+                                            </div>
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4 max-w-[150px] truncate" title={order.fullName || ''}>

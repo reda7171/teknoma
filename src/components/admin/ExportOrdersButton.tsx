@@ -15,7 +15,7 @@ export default function ExportOrdersButton({ orders }: ExportOrdersButtonProps) 
 
         // En-têtes
         rows.push([
-            'ID Commande', 'Date', 'Statut', 'Client', 'Téléphone',
+            'ID Commande', 'Date', 'Canal', 'Statut', 'Client', 'Téléphone',
             'Adresse', 'Ville', 'Article', 'Type', 'Quantité',
             'Prix Unitaire', 'Total Article', 'Total Commande',
             'Remise', 'Code Promo', 'Commentaire'
@@ -26,6 +26,7 @@ export default function ExportOrdersButton({ orders }: ExportOrdersButtonProps) 
                 rows.push([
                     `#${order.id.slice(0, 8)}`,
                     new Date(order.createdAt).toLocaleString('fr-FR'),
+                    order.salesChannel || 'RIWAYA_STORE',
                     order.status,
                     order.fullName,
                     order.phone,

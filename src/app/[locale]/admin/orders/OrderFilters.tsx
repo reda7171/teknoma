@@ -24,6 +24,8 @@ interface OrderFiltersProps {
     productTitleFilter?: string
     onProductTitleFilterChange?: (val: string) => void
     productTitles?: string[]
+    salesChannelFilter?: string
+    onSalesChannelFilterChange?: (val: string) => void
 }
 
 export default function OrderFilters({
@@ -44,12 +46,14 @@ export default function OrderFilters({
     cities = [],
     productTitleFilter = '',
     onProductTitleFilterChange,
-    productTitles = []
+    productTitles = [],
+    salesChannelFilter = '',
+    onSalesChannelFilterChange = () => {}
 }: OrderFiltersProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
 
-    const hasActiveFilters = currentStatus || searchTerm || shippingFilter || paymentFilter || cityFilter || productTitleFilter
+    const hasActiveFilters = currentStatus || searchTerm || shippingFilter || paymentFilter || cityFilter || productTitleFilter || salesChannelFilter
 
     return (
         <div className="w-full space-y-4">
@@ -76,6 +80,7 @@ export default function OrderFilters({
                                 onPaymentFilterChange?.('')
                                 onCityFilterChange?.('')
                                 onProductTitleFilterChange?.('')
+                                onSalesChannelFilterChange('')
                             }}
                             className="text-xs font-bold text-red-500 hover:underline flex items-center gap-1"
                         >
@@ -177,6 +182,27 @@ export default function OrderFilters({
                                     <Baby className="w-3.5 h-3.5" /> Enfants
                                 </Link>
                             </div>
+                        </div>
+
+                        {/* Shipping Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Filter className="w-3 h-3" />
+                                Canal de vente
+                            </label>
+                            <select
+                                aria-label="Canal de vente"
+                                value={salesChannelFilter}
+                                onChange={(event) => onSalesChannelFilterChange(event.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
+                            >
+                                <option value="">Tous les canaux</option>
+                                <option value="RIWAYA_STORE">Riwaya Store</option>
+                                <option value="RIWAYA_MA">Riwaya.ma</option>
+                                <option value="ADMIN_POS">Caisse / POS</option>
+                                <option value="MOBILE_APP">Application mobile</option>
+                                <option value="ADMIN_IMPORT">Import administratif</option>
+                            </select>
                         </div>
 
                         {/* Shipping Filter */}

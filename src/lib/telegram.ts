@@ -1,6 +1,7 @@
 // Lib Telegram Bot - Envoi de messages et notifications
 import { prisma } from '@/lib/prisma'
 import { headers } from 'next/headers'
+import { getSalesChannelLabel } from '@/lib/sales-channel'
 
 
 /**
@@ -60,6 +61,7 @@ export async function sendOrderNotification(order: {
     total: number
     status: string
     source?: string
+    salesChannel?: string
     comment?: string | null
     items?: { quantity: number; book?: { title: string } | null; pack?: { name: string } | null }[]
 }) {
@@ -74,16 +76,19 @@ export async function sendOrderNotification(order: {
     const ip = await getClientIp()
     const location = await getLocationFromIp(ip)
     const shortId = order.id.slice(0, 8).toUpperCase()
+    const channelLabel = getSalesChannelLabel(order.salesChannel)
     const itemsList = order.items
         ?.map(i => `  • ${escapeHtml(i.book?.title || i.pack?.name || 'Article')} x${i.quantity}`)
         .join('\n') || ''
 
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_order' } })
-    let text = templateSetting?.value || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`
+    let text = templateSetting?.value || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n🏪 <b>Canal:</b> {{channel}}\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`
+    const templateHasChannel = text.includes('{{channel}}')
 
     text = text.replace(/\{\{shortId\}\}/g, escapeHtml(shortId))
                .replace(/\{\{fullName\}\}/g, escapeHtml(order.fullName))
                .replace(/\{\{source\}\}/g, escapeHtml(order.source || 'Boutique'))
+               .replace(/\{\{channel\}\}/g, escapeHtml(channelLabel))
                .replace(/\{\{phone\}\}/g, escapeHtml(order.phone))
                .replace(/\{\{city\}\}/g, escapeHtml(order.city))
                .replace(/\{\{location\}\}/g, escapeHtml(location))
@@ -92,6 +97,10 @@ export async function sendOrderNotification(order: {
                .replace(/\{\{itemsList\}\}/g, itemsList ? `📦 <b>Articles:</b>\n${itemsList}` : '')
                .replace(/\{\{ip\}\}/g, ip)
                .replace(/\{\{orderUrl\}\}/g, `${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}`)
+
+    if (!templateHasChannel) {
+        text += `\n\n🏪 <b>Canal:</b> ${escapeHtml(channelLabel)}`
+    }
 
     let cleanPhone = order.phone.replace(/[^0-9]/g, '')
     if (cleanPhone.startsWith('0')) {
