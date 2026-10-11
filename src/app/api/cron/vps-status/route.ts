@@ -15,7 +15,6 @@ export async function GET(req: NextRequest) {
         const cronSecret = process.env.CRON_SECRET
 
         if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-            // Permettre aussi de passer un token dans l'URL pour la simplicité
             const token = req.nextUrl.searchParams.get('token')
             if (token !== cronSecret) {
                 return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -27,6 +26,8 @@ export async function GET(req: NextRequest) {
         const freeMem = os.freemem()
         const usedMem = totalMem - freeMem
         const memUsagePercent = ((usedMem / totalMem) * 100).toFixed(2)
+        const memPercentNum = parseFloat(memUsagePercent)
+        const isCriticalMem = memPercentNum >= 85
 
         const totalMemGB = (totalMem / 1024 / 1024 / 1024).toFixed(2)
         const usedMemGB = (usedMem / 1024 / 1024 / 1024).toFixed(2)
@@ -46,33 +47,57 @@ export async function GET(req: NextRequest) {
                 diskUsage = stdout.trim()
             }
         } catch (e) {
-            // Ignorer si erreur (ex: sous Windows)
+            // Ignorer si erreur
         }
 
         const hostname = os.hostname()
+        const alertOnly = req.nextUrl.searchParams.get('alert_only') === 'true'
 
-        const message = `
-🖥️ *Statut du Serveur VPS (${hostname})* 🖥️
+        // Si alert_only est demandé et que la mémoire est normale (<85%), ne pas envoyer de message
+        if (alertOnly && !isCriticalMem) {
+            return NextResponse.json({
+                success: true,
+                alerted: false,
+                memUsagePercent: `${memUsagePercent}%`,
+                message: 'Utilisation RAM normale (< 85%)'
+            })
+        }
 
-*CPU*
+        const alertHeader = isCriticalMem
+            ? `🚨 <b>ALERTE CRITIQUE RAM VPS : ${memUsagePercent}% (&gt; 85%)</b> 🚨\n⚠️ <i>Risque de saturation mémoire ou crash serveur !</i>\n\n`
+            : ''
+
+        const message = `${alertHeader}🖥️ <b>Statut du Serveur VPS (${hostname})</b>
+
+<b>CPU</b>
 - Coeurs : ${cpus}
 - Charge (1m, 5m, 15m) : ${loadAvg.map(n => n.toFixed(2)).join(', ')}
 
-*Mémoire (RAM)*
+<b>Mémoire (RAM)</b>
 - Utilisée : ${usedMemGB} Go / ${totalMemGB} Go
-- Pourcentage : ${memUsagePercent}%
+- Pourcentage : <b>${memUsagePercent}%</b> ${isCriticalMem ? '⚠️ CRITIQUE' : '✅ OK'}
 
-*Disque*
+<b>Disque</b>
 - Utilisation (/) : ${diskUsage}
 
-*Système*
+<b>Système</b>
 - Uptime : ${uptimeDays}j ${uptimeHours}h
 - OS : ${os.type()} ${os.release()}
 `
 
+        // Si critique, purger automatiquement le cache .next en arrière-plan
+        if (isCriticalMem && os.platform() !== 'win32') {
+            execAsync('rm -rf /app/.next/cache 2>/dev/null || rm -rf .next/cache 2>/dev/null || true').catch(() => {})
+        }
+
         await sendTelegramMessage(message)
 
-        return NextResponse.json({ success: true, message: 'Status sent to Telegram' })
+        return NextResponse.json({
+            success: true,
+            alerted: isCriticalMem,
+            memUsagePercent: `${memUsagePercent}%`,
+            message: isCriticalMem ? 'Alerte critique Telegram envoyée' : 'Statut VPS envoyé sur Telegram'
+        })
     } catch (error: any) {
         console.error('Erreur VPS Status Cron:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
