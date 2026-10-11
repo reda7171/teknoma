@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Globe } from 'lucide-react'
+import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Globe, TrendingUp } from 'lucide-react'
 import { Link, useRouter, usePathname } from '@/i18n/routing'
 
 interface ActiveFilters {
@@ -14,6 +14,7 @@ interface ActiveFilters {
     condition: string;
     category?: string;
     subCategory?: string;
+    seoScore?: string;
 }
 
 interface BookFiltersProps {
@@ -64,6 +65,7 @@ export default function BookFilters({
         if (newFilters.condition) params.set('condition', newFilters.condition)
         if (newFilters.category) params.set('category', newFilters.category)
         if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
+        if (newFilters.seoScore) params.set('seoScore', newFilters.seoScore)
         
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
@@ -244,6 +246,36 @@ export default function BookFilters({
                                         {filter.label}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Score SEO Filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <TrendingUp className="w-3 h-3 text-emerald-600" />
+                                Score SEO
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: '', label: 'Tous' },
+                                    { id: 'lte80', label: 'Score SEO ≤ 80' },
+                                    { id: 'gt80', label: 'Score SEO > 80' }
+                                ].map((f) => {
+                                    const isActive = f.id === '' ? !activeFilters.seoScore : activeFilters.seoScore === f.id
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => handleApplyFilters({ seoScore: f.id })}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                isActive
+                                                    ? (f.id === 'lte80' ? 'bg-amber-600 text-white shadow-sm' : f.id === 'gt80' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-black text-white')
+                                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -494,7 +526,9 @@ export default function BookFilters({
                                     { id: 'stock-asc', label: 'Stock Faible' },
                                     { id: 'stock-desc', label: 'Stock Élevé' },
                                     { id: 'title-asc', label: 'Nom (A-Z)' },
-                                    { id: 'title-desc', label: 'Nom (Z-A)' }
+                                    { id: 'title-desc', label: 'Nom (Z-A)' },
+                                    { id: 'seo-asc', label: 'Score SEO Croissant' },
+                                    { id: 'seo-desc', label: 'Score SEO Décroissant' }
                                 ].map((f) => (
                                     <button
                                         key={f.id}

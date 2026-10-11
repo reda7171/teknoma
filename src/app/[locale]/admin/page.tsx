@@ -11,6 +11,8 @@ import ScanRetourButton from '@/components/admin/ScanRetourButton'
 import BubbleToggle from '@/components/admin/BubbleToggle'
 import StatsGridController from '@/components/admin/StatsGridController'
 import { getJumiaStats as getJumiaRemoteStats } from './jumia-orders/actions'
+import { calculateBookSeoScore } from '@/lib/utils/seo-score'
+import SeoAlertBanner from '@/components/admin/seo/SeoAlertBanner'
 
 
 async function getStats(role: string | null, userId: string | null) {
@@ -54,6 +56,26 @@ async function getStats(role: string | null, userId: string | null) {
             _sum: { total: true }
         })
     ])
+
+    const booksForSeo = await prisma.book.findMany({
+        where: { active: true, ...sellerBookWhere },
+        select: {
+            title: true,
+            titleFr: true,
+            titleEn: true,
+            author: true,
+            description: true,
+            descriptionFr: true,
+            descriptionEn: true,
+            longDescription: true,
+            seoKeywords: true,
+            image: true,
+            price: true,
+            stock: true,
+            isbn: true,
+        }
+    })
+    const seoScoreLte80Count = booksForSeo.filter(b => calculateBookSeoScore(b) <= 80).length
 
     // For totalRevenue, revenueMonth, booksSoldToday we have to sum the specific items if it's a SELLER
     let totalRev = 0
@@ -124,6 +146,7 @@ async function getStats(role: string | null, userId: string | null) {
         paidOrdersCount,
         ltv: role === 'SELLER' ? 0 : ltv,
         salesChannels,
+        seoScoreLte80Count,
     }
 }
 
@@ -346,6 +369,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
 
     const statCards = [
         { name: 'Livres Actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Score SEO ≤ 80', value: stats.seoScoreLte80Count, iconName: 'Sparkles', color: 'amber', roles: ['ADMIN', 'SELLER'], href: `/${locale}/admin/books?seoScore=lte80` },
         { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
         { name: 'Commandes', value: stats.ordersCount, iconName: 'ShoppingCart', color: 'green', roles: ['ADMIN', 'SELLER'] },
         { name: 'Commandes (Store)', value: stats.salesChannels.RIWAYA_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },
@@ -458,6 +482,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
             </div>
 
             {/* Stats Grid Premium - controllable */}
+            {/* SEO Alert Banner (> 50% livres SEO <= 80) */}
+            <SeoAlertBanner
+                totalBooks={stats.booksCount}
+                lowSeoBooks={stats.seoScoreLte80Count}
+                thresholdPercent={50}
+                locale={locale}
+            />
+
             <StatsGridController cards={statCards} colorClasses={colorClasses} />
 
             {/* Charts Section */}

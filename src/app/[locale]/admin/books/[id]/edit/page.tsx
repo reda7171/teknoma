@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Languages, Warehouse, Bot, ClipboardPaste } from 'lucide-react'
+import { Link, useRouter } from '@/i18n/routing'
+import { ArrowLeft, Save, Loader2, Languages, Warehouse, Bot, ClipboardPaste, ShoppingBag, ShoppingCart, Eye, Sparkles, FileJson, CheckCircle2 } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia } from '@/lib/actions/jumia'
@@ -15,19 +14,41 @@ import type { CategoryTree } from '@/lib/constants/categories'
 import BookSeoScore from '@/components/admin/BookSeoScore'
 import BookMemberships from '@/components/admin/BookMemberships'
 import JumiaPushModal, { type JumiaPushLanguage } from '@/components/admin/JumiaPushModal'
+import BoostSeoModal, { type SeoBoostData } from '@/components/admin/BoostSeoModal'
 
-export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<{ page?: string, search?: string, filter?: string }> }) {
+export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<Record<string, string | string[] | undefined>> }) {
     const router = useRouter()
     const resolvedParams = use(params)
     const resolvedSearchParams = use(searchParams)
     const bookId = resolvedParams.id
     
-    // Construction de l'URL de retour
-    const returnUrlParams = new URLSearchParams()
-    if (resolvedSearchParams.page) returnUrlParams.set('page', resolvedSearchParams.page)
-    if (resolvedSearchParams.search) returnUrlParams.set('search', resolvedSearchParams.search)
-    if (resolvedSearchParams.filter) returnUrlParams.set('filter', resolvedSearchParams.filter)
-    const returnUrl = `/admin/books${returnUrlParams.toString() ? `?${returnUrlParams.toString()}` : ''}`
+    // Construction de l'URL de retour en conservant TOUS les filtres existants
+    const [returnUrl, setReturnUrl] = useState<string>(() => {
+        const returnUrlParams = new URLSearchParams()
+        if (resolvedSearchParams) {
+            Object.entries(resolvedSearchParams).forEach(([key, val]) => {
+                if (val !== undefined && val !== null && val !== '') {
+                    if (Array.isArray(val)) {
+                        val.forEach(v => returnUrlParams.append(key, v))
+                    } else {
+                        returnUrlParams.set(key, String(val))
+                    }
+                }
+            })
+        }
+        const returnQuery = returnUrlParams.toString()
+        return `/admin/books${returnQuery ? `?${returnQuery}` : ''}`
+    })
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.search) {
+            const currentParams = new URLSearchParams(window.location.search)
+            const queryStr = currentParams.toString()
+            if (queryStr) {
+                setReturnUrl(`/admin/books?${queryStr}`)
+            }
+        }
+    }, [])
 
     const [id, setId] = useState<string>(bookId)
     const [loading, setLoading] = useState(false)
@@ -67,6 +88,9 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [selectedSubCategory, setSelectedSubCategory] = useState<string>('')
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
     const [seoKeywordsState, setSeoKeywordsState] = useState<string>('')
+    const [isBoostSeoOpen, setIsBoostSeoOpen] = useState(false)
+    const [boostSeoInitialTab, setBoostSeoInitialTab] = useState<'prompt' | 'inject'>('prompt')
+    const [toastMessage, setToastMessage] = useState<string | null>(null)
     const mainCategories = Object.keys(categoryTree)
 
     interface WarehouseStock {
@@ -544,14 +568,61 @@ Please provide the following information in JSON format (so I can easily copy-pa
 Ensure the descriptions are catchy, SEO-friendly, and professional.`
 
         navigator.clipboard.writeText(prompt)
-        alert('Prompt ChatGPT copié dans le presse-papier !')
+        setToastMessage('Prompt ChatGPT copié dans le presse-papier !')
+    }
+
+    const handleApplySeoBoost = (data: SeoBoostData) => {
+        const setInputValue = (name: string, value?: string) => {
+            if (!value) return
+            const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement | null
+            if (el) el.value = value
+        }
+
+        // Champs non contrôlés
+        setInputValue('title_ar', data.title_ar)
+        setInputValue('title_fr', data.title_fr)
+        setInputValue('title_en', data.title_en)
+        setInputValue('isbn', data.isbn)
+        setInputValue('category', data.category)
+        setInputValue('subCategory', data.subCategory)
+        setInputValue('seoKeywords', data.seoKeywords)
+        setInputValue('jumiaHighlights', data.jumiaHighlights)
+        setInputValue('jumiaPackageContent', data.jumiaPackageContent)
+
+        // États contrôlés
+        if (data.author) setSelectedAuthor(data.author)
+        if (data.description_ar) setDescription(data.description_ar)
+        if (data.description_fr) setDescriptionFr(data.description_fr)
+        if (data.description_en) setDescriptionEn(data.description_en)
+        if (data.longDescription_ar) setLongDescription(data.longDescription_ar)
+        if (data.longDescription_fr) setLongDescriptionFr(data.longDescription_fr)
+        if (data.longDescription_en) setLongDescriptionEn(data.longDescription_en)
+        if (data.seoKeywords) setSeoKeywordsState(data.seoKeywords)
+        if (data.category) setSelectedMainCategory(data.category)
+        if (data.subCategory) setSelectedSubCategory(data.subCategory)
+
+        // Mise à jour de l'objet book pour recalcul immédiat du score SEO à 100%
+        setBook((prev: any) => ({
+            ...prev,
+            title: data.title_ar || prev?.title,
+            titleFr: data.title_fr || prev?.titleFr,
+            titleEn: data.title_en || prev?.titleEn,
+            author: data.author || prev?.author,
+            isbn: data.isbn || prev?.isbn,
+            category: data.category || prev?.category,
+            subCategory: data.subCategory || prev?.subCategory,
+            seoKeywords: data.seoKeywords || prev?.seoKeywords,
+        }))
+
+        setToastMessage('Score SEO optimisé à 100% avec succès ! N\'oubliez pas d\'enregistrer le livre.')
+        setTimeout(() => setToastMessage(null), 8000)
     }
 
     const pasteChatGptResponse = async () => {
         try {
             const text = await navigator.clipboard.readText()
             if (!text) {
-                alert('Presse-papier vide')
+                setToastMessage('Le presse-papier est vide.')
                 return
             }
             
@@ -560,40 +631,50 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
             try {
                 data = JSON.parse(jsonStr)
             } catch (e) {
-                alert('Le contenu du presse-papier n\'est pas un JSON valide.')
+                setToastMessage('Le contenu du presse-papier n\'est pas un JSON valide.')
                 return
             }
 
-            const setInput = (name: string, value: string) => {
-                if (value) {
-                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement
-                    if (el) el.value = value
-                }
-            }
-
-            // Uncontrolled inputs
-            setInput('title_ar', data.title_ar)
-            setInput('title_fr', data.title_fr)
-            setInput('title_en', data.title_en)
-            setInput('category', data.category)
-            setInput('subCategory', data.subCategory)
-            setInput('seoKeywords', data.seoKeywords)
-            setInput('jumiaHighlights', data.jumiaHighlights)
-            setInput('jumiaPackageContent', data.jumiaPackageContent)
-
-            // Controlled inputs (state variables)
-            if (data.description_ar) setDescription(data.description_ar)
-            if (data.description_fr) setDescriptionFr(data.description_fr)
-            if (data.description_en) setDescriptionEn(data.description_en)
-            if (data.longDescription_ar) setLongDescription(data.longDescription_ar)
-            if (data.longDescription_fr) setLongDescriptionFr(data.longDescription_fr)
-            if (data.longDescription_en) setLongDescriptionEn(data.longDescription_en)
-
-            alert('Champs remplis avec succès !')
+            handleApplySeoBoost(data)
         } catch (err) {
             console.error(err)
-            alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
+            setToastMessage('Erreur lors de la lecture du presse-papier. Utilisez le bouton Injecter JSON SEO.')
         }
+    }
+    if (loadingData && !book) {
+        return (
+            <div className="p-4 sm:p-8">
+                <Link
+                    href={returnUrl}
+                    className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Retour à la liste
+                </Link>
+                <div className="flex flex-col items-center justify-center min-h-[350px] gap-3 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                    <p className="text-sm font-medium text-gray-500">Chargement des données du livre...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (!book) {
+        return (
+            <div className="p-4 sm:p-8">
+                <Link
+                    href={returnUrl}
+                    className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Retour à la liste
+                </Link>
+                <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700">
+                    <p className="font-bold">Livre introuvable</p>
+                    <p className="text-sm mt-1">{error || 'Le livre demandé n\'existe pas ou a été supprimé.'}</p>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -631,19 +712,27 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                     <div className="flex flex-col sm:flex-row items-center gap-2">
                         <button
                             type="button"
-                            onClick={copyChatGptPrompt}
-                            className="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-purple-700 transition-colors shadow-sm"
+                            onClick={() => {
+                                setBoostSeoInitialTab('prompt')
+                                setIsBoostSeoOpen(true)
+                            }}
+                            className="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-semibold text-white hover:bg-emerald-700 transition-colors shadow-sm"
+                            title="Générer le prompt calibré pour atteindre 100% de score SEO"
                         >
-                            <Bot className="w-4 h-4 mr-2" />
-                            Prompt ChatGPT
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Boost SEO to 100%
                         </button>
                         <button
                             type="button"
-                            onClick={pasteChatGptResponse}
-                            className="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors shadow-sm"
+                            onClick={() => {
+                                setBoostSeoInitialTab('inject')
+                                setIsBoostSeoOpen(true)
+                            }}
+                            className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+                            title="Injecter le JSON retourné par l'IA"
                         >
-                            <ClipboardPaste className="w-4 h-4 mr-2" />
-                            Coller réponse
+                            <FileJson className="w-4 h-4 mr-2" />
+                            Injecter JSON SEO
                         </button>
                         <a
                             href={`/${resolvedParams.locale}/books/${bookId}`}
@@ -657,6 +746,94 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                     </div>
                 </div>
             </div>
+
+            {/* Statistiques clés du livre */}
+            {book && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                                Commandes
+                            </span>
+                            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <ShoppingBag className="w-5 h-5" />
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-black text-gray-900 tracking-tight">
+                                {book.stats?.ordersCount ?? 0}
+                            </span>
+                            <span className="text-xs font-semibold text-gray-400">
+                                commandes
+                            </span>
+                        </div>
+                        <p className="mt-2 text-xs text-emerald-700 font-medium">
+                            {book.stats?.unitsSold ?? 0} exemplaire{(book.stats?.unitsSold ?? 0) > 1 ? 's' : ''} vendu{(book.stats?.unitsSold ?? 0) > 1 ? 's' : ''}
+                        </p>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                                Visites
+                            </span>
+                            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <Eye className="w-5 h-5" />
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-black text-gray-900 tracking-tight">
+                                {book.stats?.viewsCount ?? book.views ?? 0}
+                            </span>
+                            <span className="text-xs font-semibold text-gray-400">
+                                visites
+                            </span>
+                        </div>
+                        <p className="mt-2 text-xs text-blue-700 font-medium">
+                            Consultations de la fiche produit
+                        </p>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                                Mises au panier
+                            </span>
+                            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <ShoppingCart className="w-5 h-5" />
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-black text-gray-900 tracking-tight">
+                                {book.stats?.cartCount ?? 0}
+                            </span>
+                            <span className="text-xs font-semibold text-gray-400">
+                                ajouts
+                            </span>
+                        </div>
+                        <p className="mt-2 text-xs text-amber-700 font-medium">
+                            Intention d'achat enregistrée
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Toast / Alerte personnalisée */}
+            {toastMessage && (
+                <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 shadow-sm animate-in fade-in">
+                    <div className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                        <span className="text-sm font-semibold">{toastMessage}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setToastMessage(null)}
+                        className="text-emerald-700 hover:text-emerald-900 text-xs font-bold px-2 py-1 rounded hover:bg-emerald-100 transition-colors"
+                    >
+                        Fermer
+                    </button>
+                </div>
+            )}
 
             {/* Error Message */}
             {error && (
@@ -1444,6 +1621,24 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                 onConfirm={handleConfirmJumiaPush}
                 isLoading={isPushingJumia}
             />
+
+            {book && (
+                <BoostSeoModal
+                    isOpen={isBoostSeoOpen}
+                    onClose={() => setIsBoostSeoOpen(false)}
+                    initialTab={boostSeoInitialTab}
+                    book={book}
+                    currentAuthor={selectedAuthor}
+                    currentDescription={description}
+                    currentDescriptionFr={descriptionFr}
+                    currentDescriptionEn={descriptionEn}
+                    currentLongDescription={longDescription}
+                    currentLongDescriptionFr={longDescriptionFr}
+                    currentLongDescriptionEn={longDescriptionEn}
+                    currentSeoKeywords={seoKeywordsState}
+                    onApply={handleApplySeoBoost}
+                />
+            )}
         </div>
     )
 }

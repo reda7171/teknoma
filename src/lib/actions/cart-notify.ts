@@ -1,11 +1,19 @@
-﻿'use server'
+'use server'
 
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getIpIdentifier } from '@/lib/rate-limit'
 import { isAuthenticated } from '@/lib/actions/auth'
 
-export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string, cartTotal?: number, cartItemsText?: string, discount?: number | null) {
+export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string, cartTotal?: number, cartItemsText?: string, discount?: number | null, productId?: string) {
     try {
+        if (type === 'BOOK' && productId) {
+            const { prisma } = await import('@/lib/prisma')
+            await prisma.book.update({
+                where: { id: productId },
+                data: { cartAdditions: { increment: 1 } }
+            }).catch(() => {})
+        }
+
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''

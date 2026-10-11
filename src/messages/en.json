@@ -2127,5 +2127,40 @@
     "Cancel": "Cancel",
     "Submit": "Push to Jumia",
     "Submitting": "Publishing..."
+  },
+  "AdminBooks": {
+    "SeoScore": "SEO Score",
+    "SeoScoreLte80": "SEO Score ≤ 80",
+    "SeoScoreGt80": "SEO Score > 80",
+    "OrdersCount": "Orders",
+    "ViewsCount": "Visits",
+    "CartAdditions": "Added to cart"
+  },
+  "BoostSeo": {
+    "ButtonBoost": "Boost SEO to 100%",
+    "ButtonInject": "Inject SEO JSON",
+    "ModalTitle": "Boost SEO to 100%",
+    "ModalSubtitle": "Generate an AI prompt and inject the JSON to reach a perfect 100% SEO score",
+    "TabPrompt": "1. AI Prompt (Copy)",
+    "TabInject": "2. Inject JSON (Apply)",
+    "PromptInstructions": "Copy this prompt into ChatGPT, Claude or Gemini. It contains all requirements to satisfy the 12 SEO criteria.",
+    "CopyPrompt": "Copy prompt",
+    "PromptCopied": "Prompt copied to clipboard!",
+    "GoToInject": "Proceed to JSON injection →",
+    "PasteJsonLabel": "Paste AI-generated JSON",
+    "PasteJsonPlaceholder": "Paste the JSON object returned by the AI here...",
+    "PasteFromClipboard": "Paste from clipboard",
+    "ApplyBtn": "Apply to book (100% SEO)",
+    "Applying": "Applying...",
+    "SuccessTitle": "SEO boosted successfully!",
+    "SuccessDesc": "All fields have been optimized for 100% SEO score. Remember to save the book.",
+    "InvalidJson": "The provided text is not valid JSON."
+  },
+  "SeoAlert": {
+    "Title": "SEO Optimization Alert",
+    "Description": "{count} out of {total} books ({percent}%) have an SEO score ≤ 80 (critical threshold > {threshold}%).",
+    "Badge": "Action required",
+    "Action": "Optimize listings",
+    "Dismiss": "Dismiss alert"
   }
 }

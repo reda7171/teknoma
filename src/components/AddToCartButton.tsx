@@ -97,7 +97,7 @@ export default function AddToCartButton({
                     const currentTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
                     const itemsText = items.map(i => `${i.quantity}x ${i.title}`).join(', ')
 
-                    notifyAddToCart(product.title, product.price, product.type, currentSessionId, currentTotal, itemsText, discount).catch(console.error)
+                    notifyAddToCart(product.title, product.price, product.type, currentSessionId, currentTotal, itemsText, discount, product.id).catch(console.error)
 
                     showNotification(t('AddedToCartSuccess'), 'success')
                     

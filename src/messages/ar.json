@@ -2124,5 +2124,40 @@
     "Cancel": "إلغاء",
     "Submit": "إرسال إلى جوميا",
     "Submitting": "جاري النشر..."
+  },
+  "AdminBooks": {
+    "SeoScore": "نقاط تحسين محركات البحث",
+    "SeoScoreLte80": "نقاط SEO ≤ 80",
+    "SeoScoreGt80": "نقاط SEO > 80",
+    "OrdersCount": "الطلبات",
+    "ViewsCount": "الزيارات",
+    "CartAdditions": "إضافة إلى السلة"
+  },
+  "BoostSeo": {
+    "ButtonBoost": "Boost SEO to 100%",
+    "ButtonInject": "حقن بيانات SEO",
+    "ModalTitle": "تعزيز SEO إلى 100%",
+    "ModalSubtitle": "توليد برومبت ذكاء اصطناعي وحقن ملف JSON للوصول إلى علامة SEO مثالية 100%",
+    "TabPrompt": "1. برومبت الذكاء الاصطناعي (نسخ)",
+    "TabInject": "2. حقن JSON (تطبيق)",
+    "PromptInstructions": "انسخ هذا البرومبت في ChatGPT أو Claude أو Gemini لتحصل على بيانات تستوفي كافة معايير SEO الـ 12.",
+    "CopyPrompt": "نسخ البرومبت",
+    "PromptCopied": "تم نسخ البرومبت بنجاح!",
+    "GoToInject": "الانتقال إلى حقن JSON ←",
+    "PasteJsonLabel": "الصق كود JSON الناتج من الذكاء الاصطناعي",
+    "PasteJsonPlaceholder": "الصق هنا كائن JSON...",
+    "PasteFromClipboard": "لصق من الحافظة",
+    "ApplyBtn": "تطبيق على الكتاب (100% SEO)",
+    "Applying": "جاري التطبيق...",
+    "SuccessTitle": "تم تعزيز SEO بنجاح!",
+    "SuccessDesc": "تم تحديث كافة الحقول للوصول إلى نتيجة 100%. لا تنس حفظ التعديلات.",
+    "InvalidJson": "النص المدخل ليس بصيغة JSON صالحة."
+  },
+  "SeoAlert": {
+    "Title": "تنبيه تحسين محركات البحث",
+    "Description": "{count} كتاباً من أصل {total} ({percent}%) لديهم نقاط SEO ≤ 80 (تجاوز العتبة الحرجة > {threshold}%).",
+    "Badge": "إجراء مطلوب",
+    "Action": "تحسين البطاقات",
+    "Dismiss": "إغلاق التنبيه"
   }
 }
