@@ -23,7 +23,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <span>RIWAYA</span><small>رواية</small>
         </Link>
         <nav aria-label="Navigation principale">
-          {t.nav.map((item) => <a href="#selection" key={item}>{item}</a>)}
+          {t.nav.map((item, index) => index === 0 ? <Link href={`/${locale}/books`} key={item}>{item}</Link> : <a href="#selection" key={item}>{item}</a>)}
         </nav>
         <div className="header-tools">
           <div className="languages" aria-label="Langues">
@@ -80,7 +80,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </article>
             ))}
           </div>
-          <a className="button outline" href="#selection">{t.viewAll}</a>
+          <Link className="button outline" href={`/${locale}/books`}>{t.viewAll}</Link>
         </section>
 
         <section className="services">
