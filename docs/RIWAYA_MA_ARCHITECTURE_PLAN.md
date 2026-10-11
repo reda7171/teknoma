@@ -1,6 +1,6 @@
 # Plan d’architecture — riwaya.ma avec backend Riwaya partagé
 
-Statut : **palier A démarré sur la branche `feat/riwaya-ma-multistore` — rien déployé en production**  
+Statut : **palier A en cours sur la branche `feat/riwaya-ma-multistore` — schéma multiboutique appliqué, code applicatif pas encore déployé**  
 Dernière mise à jour : **11 octobre 2026**  
 Projet actuel : **riwaya.store / Next.js 16 / Prisma / MySQL / Redis / Docker**
 
@@ -313,7 +313,10 @@ Préparation VPS du 11 octobre 2026 :
 - nouvelle sauvegarde de production créée et vérifiée : environ 5,59 Mo ;
 - restauration réelle réussie dans une base temporaire : 70 tables et 322 commandes ;
 - base de restauration supprimée automatiquement après le contrôle ;
-- migration multiboutique toujours non appliquée à la production à ce stade.
+- migration multiboutique appliquée à la production après restauration validée ;
+- 322 commandes historiques classées automatiquement `RIWAYA_STORE` ;
+- colonnes et index vérifiés sur `orders` et `abandoned_carts` ;
+- application historique restée disponible et contrôlée en HTTP 200 après la migration.
 
 **Terminé lorsque :** le site actuel se comporte comme avant et chaque nouvelle commande possède un canal fiable.
 
