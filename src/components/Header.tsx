@@ -574,8 +574,18 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 </button>
                             </div>
 
-                            {/* Mobile Actions: Login + Search */}
-                            <div className="flex md:hidden items-center gap-2">
+                            {/* Mobile Actions: Cart + Login + Search */}
+                            <div className="flex md:hidden items-center gap-1.5 sm:gap-2">
+                                <button onClick={openCart} className="relative group p-1" aria-label="Ouvrir le panier">
+                                    <div className={`w-9 h-9 border-2 border-transparent hover:border-black rounded-full flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12 bg-blue-50' : 'animate-cart-vibrate'}`}>
+                                        <ShoppingCart className={`w-5 h-5 transition-colors ${isCartAnimating ? 'text-blue-600' : 'text-gray-900'}`} />
+                                        {mounted && totalItems > 0 && (
+                                            <span className={`absolute -top-0.5 -right-0.5 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-125 bg-blue-600' : 'bg-black'}`}>
+                                                {totalItems}
+                                            </span>
+                                        )}
+                                    </div>
+                                </button>
                                 <div className="scale-90 origin-right rtl:origin-left">
                                     <UserDropdown user={user} features={features} />
                                 </div>

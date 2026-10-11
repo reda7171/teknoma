@@ -4,7 +4,7 @@ import { useCartStore } from '@/store/cart'
 import { normalizeImage } from '@/lib/utils'
 // import Link from 'next/link' <-- remove standard next link
 import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from '@/i18n/routing'
 import { useTranslations, useLocale } from 'next-intl'
 import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
@@ -25,12 +25,15 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
     const t = useTranslations('Cart');
     const locale = useLocale();
     const pathname = usePathname()
+    const initialPathnameRef = useRef(pathname)
 
-    // Fermer le panier à chaque changement de page
+    // Fermer le panier uniquement si l'utilisateur navigue vers une autre page
     useEffect(() => {
-        if (isOpen) onClose()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname])
+        if (initialPathnameRef.current !== pathname) {
+            initialPathnameRef.current = pathname
+            onClose()
+        }
+    }, [pathname, onClose])
 
     // Swipe to close states
     const [touchStart, setTouchStart] = useState<number | null>(null)
