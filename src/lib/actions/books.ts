@@ -114,9 +114,25 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             }
         }
 
+        const cleanIsbn = validatedData.isbn?.trim() ? validatedData.isbn.trim() : null
+
+        if (cleanIsbn) {
+            const existingWithIsbn = await prisma.book.findFirst({
+                where: { isbn: cleanIsbn },
+                select: { id: true, title: true }
+            })
+            if (existingWithIsbn) {
+                return {
+                    success: false,
+                    error: `Cet ISBN (${cleanIsbn}) est déjà attribué au livre "${existingWithIsbn.title}".`
+                }
+            }
+        }
+
         const book = await prisma.book.create({
             data: {
                 ...validatedData,
+                isbn: cleanIsbn,
                 active: validatedData.active ?? true,
                 isOriginal: validatedData.isOriginal ?? true,
                 ...additionalData,
@@ -139,6 +155,26 @@ export async function createBook(input: BookInput): Promise<BookResult> {
         }
     } catch (error: any) {
         console.error('Erreur lors de la création du livre:', error)
+
+        if (error?.code === 'P2002') {
+            const target = String(error.meta?.target || '')
+            if (target.includes('isbn')) {
+                return {
+                    success: false,
+                    error: 'Cet ISBN est déjà attribué à un autre livre dans le catalogue.'
+                }
+            }
+            if (target.includes('sellerSku')) {
+                return {
+                    success: false,
+                    error: 'Ce SKU vendeur est déjà attribué à un autre livre.'
+                }
+            }
+            return {
+                success: false,
+                error: 'Une valeur unique existe déjà pour un autre livre.'
+            }
+        }
 
         if (error instanceof z.ZodError) {
             return {
@@ -197,9 +233,23 @@ export async function getBookById(id: string) {
             image = 'data:image/jpeg;base64,' + image
         }
 
+        // Statistiques réelles du livre : commandes, visites, ajouts au panier
+        const [ordersCount, orderQuantityAgg, abandonedCartCount] = await Promise.all([
+            prisma.orderItem.count({ where: { bookId: id } }),
+            prisma.orderItem.aggregate({ where: { bookId: id }, _sum: { quantity: true } }),
+            prisma.abandonedCart.count({ where: { cartData: { contains: id } } }).catch(() => 0)
+        ])
+
+        const stats = {
+            ordersCount: ordersCount,
+            unitsSold: orderQuantityAgg._sum.quantity || 0,
+            viewsCount: book.views || 0,
+            cartCount: Math.max((book as any).cartAdditions || 0, abandonedCartCount + ordersCount)
+        }
+
         return {
             success: true,
-            data: { ...book, image },
+            data: { ...book, image, stats },
             error: null,
         }
     } catch (error) {
@@ -236,10 +286,29 @@ export async function updateBook(
             throw new Error('Non autorisé - Ce livre ne vous appartient pas')
         }
 
+        const cleanIsbn = validatedData.isbn?.trim() ? validatedData.isbn.trim() : null
+
+        if (cleanIsbn) {
+            const existingWithIsbn = await prisma.book.findFirst({
+                where: {
+                    isbn: cleanIsbn,
+                    id: { not: id }
+                },
+                select: { id: true, title: true }
+            })
+            if (existingWithIsbn) {
+                return {
+                    success: false,
+                    error: `Cet ISBN (${cleanIsbn}) est déjà attribué au livre "${existingWithIsbn.title}".`
+                }
+            }
+        }
+
         await prisma.book.update({
             where: { id },
             data: {
                 ...validatedData,
+                isbn: cleanIsbn,
                 longDescription: validatedData.longDescription || null,
             },
         })
@@ -274,6 +343,26 @@ export async function updateBook(
         }
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour du livre:', error)
+
+        if (error?.code === 'P2002') {
+            const target = String(error.meta?.target || '')
+            if (target.includes('isbn')) {
+                return {
+                    success: false,
+                    error: 'Cet ISBN est déjà attribué à un autre livre dans le catalogue.'
+                }
+            }
+            if (target.includes('sellerSku')) {
+                return {
+                    success: false,
+                    error: 'Ce SKU vendeur est déjà attribué à un autre livre.'
+                }
+            }
+            return {
+                success: false,
+                error: 'Une valeur unique existe déjà pour un autre livre.'
+            }
+        }
 
         if (error instanceof z.ZodError) {
             return {

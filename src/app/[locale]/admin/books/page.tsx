@@ -13,8 +13,9 @@ import { Prisma } from '@prisma/client'
 import BookFilters from './BookFilters'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import { getAdminRole, getAdminUser } from '@/lib/actions/auth'
+import { calculateBookSeoScore } from '@/lib/utils/seo-score'
 
-export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string }> }) {
+export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string, seoScore?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
@@ -27,6 +28,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const conditionParam = params.condition || ''
     const categoryParam = params.category || ''
     const subCategoryParam = params.subCategory || ''
+    const seoScoreParam = params.seoScore || ''
 
     const categoryTreePromise = getCategoryTree()
     const [role, userId, warehouses] = await Promise.all([
@@ -118,6 +120,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 subCategory: true,
                 language: true,
                 description: true,
+                descriptionFr: true,
+                seoKeywords: true,
+                isbn: true,
                 longDescription: true,
                 active: true,
                 isOriginal: true,
@@ -131,7 +136,17 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 _count: { select: { orderItems: { where: { order: { status: 'CONFIRMED' } } }, posts: true } }
             }
         })
-        allProducts.push(...books.map(b => ({ ...b, warehouseStocks: mapWarehouseStocks(b.inventories), productType: 'BOOK', orderCount: b._count?.orderItems || 0, sellerSku: b.sellerSku, isSyncedWithJumia: b.isSyncedWithJumia, jumiaStock: b.jumiaStock, hasArticle: (b._count?.posts || 0) > 0 })))
+        allProducts.push(...books.map(b => ({
+            ...b,
+            warehouseStocks: mapWarehouseStocks(b.inventories),
+            productType: 'BOOK',
+            orderCount: b._count?.orderItems || 0,
+            sellerSku: b.sellerSku,
+            isSyncedWithJumia: b.isSyncedWithJumia,
+            jumiaStock: b.jumiaStock,
+            hasArticle: (b._count?.posts || 0) > 0,
+            seoScore: calculateBookSeoScore(b)
+        })))
     }
 
     // 2. Fetch Packs
@@ -276,6 +291,13 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         allProducts = allProducts.filter(product => product.productType === 'BOOK' && ['GOOD', 'USED'].includes(product.condition))
     }
 
+    // Filtre Score SEO (ex: <= 80)
+    if (seoScoreParam === 'lte80' || seoScoreParam === '<=80') {
+        allProducts = allProducts.filter(product => product.productType === 'BOOK' && (product.seoScore ?? 0) <= 80)
+    } else if (seoScoreParam === 'gt80' || seoScoreParam === '>80') {
+        allProducts = allProducts.filter(product => product.productType === 'BOOK' && (product.seoScore ?? 0) > 80)
+    }
+
     const totalBooks = allProducts.length
     const activeBooks = allProducts.filter(b => b.active).length
     const stockProducts = productTypes.includes('all') ? allProducts.filter(p => p.productType === 'BOOK') : allProducts
@@ -293,6 +315,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     else if (sortParam === 'title-desc') allProducts.sort((a, b) => b.title.localeCompare(a.title))
     else if (sortParam === 'orders-asc') allProducts.sort((a, b) => a.orderCount - b.orderCount)
     else if (sortParam === 'orders-desc') allProducts.sort((a, b) => b.orderCount - a.orderCount)
+    else if (sortParam === 'seo-asc') allProducts.sort((a, b) => (a.seoScore || 0) - (b.seoScore || 0))
+    else if (sortParam === 'seo-desc') allProducts.sort((a, b) => (b.seoScore || 0) - (a.seoScore || 0))
     else {
         // Default sort by displayOrder (if book) and createdAt
         allProducts.sort((a, b) => {
@@ -315,7 +339,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         jumia: jumiaParam,
         condition: conditionParam,
         category: categoryParam,
-        subCategory: subCategoryParam
+        subCategory: subCategoryParam,
+        seoScore: seoScoreParam
     }
 
     const categoryTree = await categoryTreePromise

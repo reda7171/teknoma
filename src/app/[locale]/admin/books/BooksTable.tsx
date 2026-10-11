@@ -37,6 +37,7 @@ interface Book {
     isSyncedWithJumia?: boolean
     jumiaStock?: number | null
     hasArticle?: boolean
+    seoScore?: number
     warehouseStocks?: {
         warehouseId: string
         warehouseName: string
@@ -51,6 +52,7 @@ interface ActiveFilters {
     lang: string;
     sort: string;
     condition: string;
+    seoScore?: string;
 }
 
 export default function BooksTable({ books, pageNumber, totalProviderPages, activeFilters, limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, activeFilters: ActiveFilters, limit?: number }) {
@@ -82,6 +84,27 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         const normalizedName = name.trim().toLocaleLowerCase('fr')
         if (normalizedName.includes('principal')) return 'P'
         return name.trim().charAt(0).toLocaleUpperCase('fr') || '?'
+    }
+
+    const getEditUrl = (book: Book) => {
+        if (book.productType === 'PACK') return `/admin/packs/${book.id}/edit`
+        if (book.productType === 'EXTRA') return `/admin/accessories/${book.id}`
+        
+        let params: URLSearchParams
+        if (typeof window !== 'undefined' && window.location.search) {
+            params = new URLSearchParams(window.location.search)
+        } else {
+            params = new URLSearchParams()
+            if (activeFilters.search) params.set('search', activeFilters.search)
+            if (activeFilters.status) params.set('status', activeFilters.status)
+            if (activeFilters.type) params.set('type', activeFilters.type)
+            if (activeFilters.lang) params.set('lang', activeFilters.lang)
+            if (activeFilters.sort) params.set('sort', activeFilters.sort)
+            if (activeFilters.condition) params.set('condition', activeFilters.condition)
+            if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        }
+        if (!params.has('page')) params.set('page', pageNumber.toString())
+        return `/admin/books/${book.id}/edit?${params.toString()}`
     }
 
     useEffect(() => {
@@ -733,7 +756,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                     <div className="ml-4">
                                                                         <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
                                                                             <Link 
-                                                                                href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`}
+                                                                                href={getEditUrl(book)}
                                                                                 locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
                                                                                 title={displayTitle}
@@ -748,6 +771,20 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                             <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter rounded-md border ${book.isOriginal ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
                                                                             </span>
+                                                                            {book.seoScore !== undefined && book.productType === 'BOOK' && (
+                                                                                <span 
+                                                                                    className={`px-1.5 py-0.5 text-[8px] font-black tracking-tight rounded-md border ${
+                                                                                        book.seoScore >= 80 
+                                                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                                                                        : book.seoScore >= 50 
+                                                                                        ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                                                                                        : 'bg-red-50 text-red-700 border-red-200'
+                                                                                    }`}
+                                                                                    title={`Score SEO : ${book.seoScore}%`}
+                                                                                >
+                                                                                    SEO {book.seoScore}%
+                                                                                </span>
+                                                                            )}
                                                                             {book.sellerSku && (
                                                                                 <span className="max-w-[145px] truncate rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[9px] text-gray-600" title={`SKU: ${book.sellerSku}`}>
                                                                                     SKU: {book.sellerSku}
@@ -1032,7 +1069,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                                                                             <Edit3 className="w-4 h-4 text-emerald-500" /> Modification rapide
                                                                                         </button>
                                                                                         <Link
-                                                                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`}
+                                                                                            href={getEditUrl(book)}
                                                                                             onClick={() => setOpenDropdown(null)}
                                                                                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                                                                                         >
@@ -1079,7 +1116,7 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                         <button onClick={() => handleToggleStatus(book.id, book.active)} className={`p-1.5 rounded-md ${book.active ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`} title={book.active ? 'Désactiver' : 'Activer'}>
                                             {book.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                                         </button>
-                                        <Link aria-label="Modifier" href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
+                                        <Link aria-label="Modifier" href={getEditUrl(book)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md">
                                             <Edit className="w-3.5 h-3.5" />
                                         </Link>
                                         <button onClick={() => handleDelete(book.id, book.title)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-md">
@@ -1091,10 +1128,26 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                                     </div>
                                     <div className="flex-1 flex flex-col">
                                         <Link 
-                                            href={book.productType === 'PACK' ? `/admin/packs/${book.id}/edit` : book.productType === 'EXTRA' ? `/admin/accessories/${book.id}` : `/admin/books/${book.id}/edit?${new URLSearchParams({ page: pageNumber.toString(), ...(activeFilters.search ? {search: activeFilters.search} : {}), ...(activeFilters.status ? {status: activeFilters.status} : {}), ...(activeFilters.type ? {type: activeFilters.type} : {}), ...(activeFilters.lang ? {lang: activeFilters.lang} : {}), ...(activeFilters.sort ? {sort: activeFilters.sort} : {}), ...(activeFilters.condition ? {condition: activeFilters.condition} : {}) }).toString()}`}
+                                            href={getEditUrl(book)}
                                         >
                                             <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight hover:text-blue-600 hover:underline transition-colors">{displayTitle}</h3>
                                         </Link>
+                                        {book.seoScore !== undefined && book.productType === 'BOOK' && (
+                                            <div className="mt-1">
+                                                <span 
+                                                    className={`inline-block text-[8px] font-black px-1.5 py-0.5 rounded border ${
+                                                        book.seoScore >= 80 
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                                        : book.seoScore >= 50 
+                                                        ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                                                        : 'bg-red-50 text-red-700 border-red-200'
+                                                    }`}
+                                                    title={`Score SEO : ${book.seoScore}%`}
+                                                >
+                                                    SEO {book.seoScore}%
+                                                </span>
+                                            </div>
+                                        )}
                                         <p className="text-xs text-gray-500 mt-1 truncate">
                                             {book.author}
                                             {book.sellerSku && <span className="ml-2 font-mono text-[9px] px-1 bg-gray-100 rounded">SKU: {book.sellerSku}</span>}

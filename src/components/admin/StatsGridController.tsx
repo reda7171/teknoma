@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle, DollarSign, Link2 } from 'lucide-react'
+import Link from 'next/link'
+import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // Résolution des icônes côté client (évite de passer des classes depuis Server Components)
 const ICON_MAP: Record<string, LucideIcon> = {
     BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag,
     Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff,
-    Archive, CalendarDays, CheckCircle, DollarSign, Link2,
+    Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles,
 }
 
 interface StatCard {
@@ -17,6 +18,7 @@ interface StatCard {
     iconName: string
     color: string
     trend?: number | null
+    href?: string
 }
 
 interface StatsGridControllerProps {
@@ -177,10 +179,11 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
                     const hasTrend = typeof stat.trend === 'number' && Number.isFinite(stat.trend)
                     const trendIsPositive = hasTrend && stat.trend! > 0
                     const trendIsNegative = hasTrend && stat.trend! < 0
-                    return (
+                    const cardBody = (
                         <div
-                            key={stat.name}
-                            className="group bg-white rounded-3xl sm:rounded-[2.5rem] border border-gray-100 p-6 sm:p-8 shadow-xl shadow-black/5 hover:-translate-y-1 transition-all relative overflow-hidden"
+                            className={`group bg-white rounded-3xl sm:rounded-[2.5rem] border border-gray-100 p-6 sm:p-8 shadow-xl shadow-black/5 hover:-translate-y-1 transition-all relative overflow-hidden h-full flex flex-col justify-between ${
+                                stat.href ? 'hover:border-black/20 hover:shadow-2xl' : ''
+                            }`}
                         >
                             <div className="flex flex-col relative z-10">
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{stat.name}</p>
@@ -199,10 +202,24 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
                                     </>
                                 ) : stat.trend === null ? (
                                     <span className="text-[9px] font-bold text-blue-500 uppercase tracking-tighter">Nouveau ce mois</span>
+                                ) : stat.href ? (
+                                    <span className="text-[9px] font-black text-blue-600 group-hover:underline uppercase tracking-tighter flex items-center gap-1">
+                                        Filtrer livres →
+                                    </span>
                                 ) : (
                                     <span className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">Données cumulées</span>
                                 )}
                             </div>
+                        </div>
+                    )
+
+                    return stat.href ? (
+                        <Link key={stat.name} href={stat.href} className="block h-full focus:outline-none">
+                            {cardBody}
+                        </Link>
+                    ) : (
+                        <div key={stat.name} className="h-full">
+                            {cardBody}
                         </div>
                     )
                 })}
