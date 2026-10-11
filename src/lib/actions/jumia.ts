@@ -205,7 +205,7 @@ function cleanJumiaProductName(name: string): string {
         .trim()
 }
 
-export async function publishBooksToJumia(bookIds: string[]) {
+export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' | 'fr' | 'ar' | 'en' = 'all') {
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) {
@@ -252,20 +252,58 @@ export async function publishBooksToJumia(bookIds: string[]) {
             const baseName = titleFr.padEnd(15, ' ').substring(0, 60);
             const baseDesc = padDesc(descFr);
 
+            const rawTitleEn = book.titleEn || book.titleFr || book.title || `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            const titleEn = cleanJumiaProductName(rawTitleEn).substring(0, 60).replace(/[-:,]+$/, '').trim();
+            const descEnRaw = book.descriptionEn || book.descriptionFr || book.description || `A great book to read - ${book.sellerSku || book.id.substring(0, 8)}`;
+            const descEn = padDesc(descEnRaw);
+
+            let primaryName = baseName;
+            let primaryDesc = baseDesc;
+            let nameTranslations: Array<{ language: string; value: string }> = [];
+            let descTranslations: Array<{ language: string; value: string }> = [];
+
+            if (targetLang === 'ar') {
+                primaryName = (titleAr || baseName).padEnd(15, ' ').substring(0, 60);
+                primaryDesc = descAr;
+                nameTranslations = [{ language: "AR", value: titleAr.substring(0, 60) }];
+                descTranslations = [{ language: "AR", value: descAr }];
+            } else if (targetLang === 'fr') {
+                primaryName = titleFr.padEnd(15, ' ').substring(0, 60);
+                primaryDesc = descFr;
+                nameTranslations = [{ language: "FR", value: titleFr.substring(0, 60) }];
+                descTranslations = [{ language: "FR", value: descFr }];
+            } else if (targetLang === 'en') {
+                primaryName = titleEn.padEnd(15, ' ').substring(0, 60);
+                primaryDesc = descEn;
+                nameTranslations = [{ language: "EN", value: titleEn.substring(0, 60) }];
+                descTranslations = [{ language: "EN", value: descEn }];
+            } else {
+                primaryName = baseName;
+                primaryDesc = baseDesc;
+                nameTranslations = [
+                    { language: "AR", value: titleAr.substring(0, 60) },
+                    { language: "FR", value: titleFr.substring(0, 60) }
+                ];
+                descTranslations = [
+                    { language: "AR", value: descAr },
+                    { language: "FR", value: descFr }
+                ];
+                if (book.titleEn) {
+                    nameTranslations.push({ language: "EN", value: titleEn.substring(0, 60) });
+                }
+                if (book.descriptionEn) {
+                    descTranslations.push({ language: "EN", value: descEn });
+                }
+            }
+
             const payload: any = {
                 name: {
-                    value: baseName, // Length must be 15-60
-                    translations: [
-                        { language: "AR", value: titleAr.substring(0, 60) },
-                        { language: "FR", value: titleFr.substring(0, 60) }
-                    ]
+                    value: primaryName, // Length must be 15-60
+                    translations: nameTranslations
                 },
                 description: {
-                    value: baseDesc,
-                    translations: [
-                        { language: "AR", value: descAr },
-                        { language: "FR", value: descFr }
-                    ]
+                    value: primaryDesc,
+                    translations: descTranslations
                 },
                 parentSku: book.id,
                 sellerSku: book.sellerSku || book.isbn || book.id,
@@ -384,7 +422,7 @@ export async function publishBooksToJumia(bookIds: string[]) {
     }
 }
 
-export async function publishPacksToJumia(packIds: string[]) {
+export async function publishPacksToJumia(packIds: string[], targetLang: 'all' | 'fr' | 'ar' | 'en' = 'all') {
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) {
@@ -432,6 +470,50 @@ export async function publishPacksToJumia(packIds: string[]) {
             const baseName = titleFr.padEnd(15, ' ').substring(0, 60);
             const baseDesc = padDesc(descFr);
 
+            const rawTitleEn = pack.nameEn || pack.nameFr || pack.name || `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            const titleEn = cleanJumiaProductName(rawTitleEn).substring(0, 60).replace(/[-:,]+$/, '').trim();
+            const descEnRaw = pack.descriptionEn || pack.descriptionFr || pack.description || `A great book pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            const descEn = padDesc(descEnRaw);
+
+            let primaryName = baseName;
+            let primaryDesc = baseDesc;
+            let nameTranslations: Array<{ language: string; value: string }> = [];
+            let descTranslations: Array<{ language: string; value: string }> = [];
+
+            if (targetLang === 'ar') {
+                primaryName = (titleAr || baseName).padEnd(15, ' ').substring(0, 60);
+                primaryDesc = descAr;
+                nameTranslations = [{ language: "AR", value: titleAr.substring(0, 60) }];
+                descTranslations = [{ language: "AR", value: descAr }];
+            } else if (targetLang === 'fr') {
+                primaryName = titleFr.padEnd(15, ' ').substring(0, 60);
+                primaryDesc = descFr;
+                nameTranslations = [{ language: "FR", value: titleFr.substring(0, 60) }];
+                descTranslations = [{ language: "FR", value: descFr }];
+            } else if (targetLang === 'en') {
+                primaryName = titleEn.padEnd(15, ' ').substring(0, 60);
+                primaryDesc = descEn;
+                nameTranslations = [{ language: "EN", value: titleEn.substring(0, 60) }];
+                descTranslations = [{ language: "EN", value: descEn }];
+            } else {
+                primaryName = baseName;
+                primaryDesc = baseDesc;
+                nameTranslations = [
+                    { language: "AR", value: titleAr.substring(0, 60) },
+                    { language: "FR", value: titleFr.substring(0, 60) }
+                ];
+                descTranslations = [
+                    { language: "AR", value: descAr },
+                    { language: "FR", value: descFr }
+                ];
+                if (pack.nameEn) {
+                    nameTranslations.push({ language: "EN", value: titleEn.substring(0, 60) });
+                }
+                if (pack.descriptionEn) {
+                    descTranslations.push({ language: "EN", value: descEn });
+                }
+            }
+
             const calculatedStock = pack.books.length > 0
                 ? Math.min(...pack.books.map(b => b.book.stock))
                 : 0;
@@ -460,18 +542,12 @@ export async function publishPacksToJumia(packIds: string[]) {
 
             const payload: any = {
                 name: {
-                    value: baseName,
-                    translations: [
-                        { language: "AR", value: titleAr.substring(0, 60) },
-                        { language: "FR", value: titleFr.substring(0, 60) }
-                    ]
+                    value: primaryName,
+                    translations: nameTranslations
                 },
                 description: {
-                    value: baseDesc,
-                    translations: [
-                        { language: "AR", value: descAr },
-                        { language: "FR", value: descFr }
-                    ]
+                    value: primaryDesc,
+                    translations: descTranslations
                 },
                 parentSku: pack.id + "_v2",
                 sellerSku: (pack.sellerSku || pack.id) + "_v2",

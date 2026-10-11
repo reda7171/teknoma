@@ -2104,5 +2104,28 @@
     "OutOfStock": "Out of stock",
     "Savings": "Save",
     "PackOf": "Bundle of {count} books"
+  },
+  "AdminPacks": {
+    "PackLanguage": "Pack Language",
+    "All": "All",
+    "French": "French",
+    "Arabic": "Arabic",
+    "English": "English"
+  },
+  "JumiaPush": {
+    "Title": "Publish to Jumia",
+    "Subtitle": "Which language would you like to push to Jumia with?",
+    "All": "All languages",
+    "AllDesc": "Multilingual publication (Arabic + French + English)",
+    "Recommended": "Recommended",
+    "Fr": "French only",
+    "FrDesc": "Title, description and attributes in French",
+    "Ar": "Arabic only",
+    "ArDesc": "Title, description and attributes in Arabic",
+    "En": "English only",
+    "EnDesc": "Title, description and attributes in English",
+    "Cancel": "Cancel",
+    "Submit": "Push to Jumia",
+    "Submitting": "Publishing..."
   }
 }

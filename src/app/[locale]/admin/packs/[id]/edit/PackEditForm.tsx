@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste, Zap, X } from 'lucide-react'
@@ -10,6 +10,7 @@ import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import CatalogImageModal from '@/components/admin/CatalogImageModal'
+import JumiaPushModal, { type JumiaPushLanguage } from '@/components/admin/JumiaPushModal'
 
 interface Book {
     id: string
@@ -77,6 +78,7 @@ interface PackEditFormProps {
         name: string
         nameFr?: string
         nameEn?: string
+        language?: string
         description: string
         descriptionFr?: string
         descriptionEn?: string
@@ -100,8 +102,10 @@ interface PackEditFormProps {
 
 export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFormProps) {
     const router = useRouter()
+    const formRef = useRef<HTMLFormElement>(null)
     const [loading, setLoading] = useState(false)
     const [isPushingJumia, setIsPushingJumia] = useState(false)
+    const [isJumiaModalOpen, setIsJumiaModalOpen] = useState(false)
     const [isGeneratingDesc, setIsGeneratingDesc] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
@@ -133,6 +137,9 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
 
     // Champs multilingues
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
+    const [packLanguage, setPackLanguage] = useState<'ar' | 'fr' | 'en' | 'all'>(
+        pack.language === 'all' ? 'all' : pack.language === 'en' ? 'en' : pack.language === 'ar' ? 'ar' : 'fr'
+    )
     const [name, setName] = useState(pack.name)
     const [nameFr, setNameFr] = useState(pack.nameFr || '')
     const [nameEn, setNameEn] = useState(pack.nameEn || '')
@@ -414,12 +421,14 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             description: description || undefined,
             descriptionFr: descriptionFr || undefined,
             descriptionEn: descriptionEn || undefined,
+            language: packLanguage,
             price: Math.round(parseFloat(formData.get('price') as string)),
             originalPrice: formData.get('originalPrice') ? Math.round(parseFloat(formData.get('originalPrice') as string)) : undefined,
             image: formData.get('image') as string || packImage || undefined,
             isFreeDelivery,
             shippingFees: isFreeDelivery ? 0 : shippingFees,
             bookIds: selectedBooks,
+            extraProductIds: [],
             isAffiliate,
             affiliateLink: affiliateLink || undefined,
             sellerSku: formData.get('sellerSku') as string || undefined,
@@ -463,18 +472,49 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
         }
     }
 
-    async function handlePushToJumia() {
-        if (!confirm('Voulez-vous vraiment publier ce pack sur Jumia ?')) return
+    async function handleConfirmJumiaPush(pushLang: JumiaPushLanguage) {
         setIsPushingJumia(true)
         try {
-            const res = await publishPacksToJumia([pack.id])
-            if (res.success) {
-                alert(res.message || 'Pack publié avec succès sur Jumia')
-            } else {
-                alert('Erreur: ' + res.message)
+            if (formRef.current) {
+                const formData = new FormData(formRef.current)
+                const priceVal = formData.get('price') ? Math.round(parseFloat(formData.get('price') as string)) : pack.price
+                const originalPriceVal = formData.get('originalPrice') ? Math.round(parseFloat(formData.get('originalPrice') as string)) : undefined
+                const skuVal = (formData.get('sellerSku') as string) || undefined
+
+                const input: PackInput = {
+                    name,
+                    nameFr: nameFr || undefined,
+                    nameEn: nameEn || undefined,
+                    description: description || undefined,
+                    descriptionFr: descriptionFr || undefined,
+                    descriptionEn: descriptionEn || undefined,
+                    language: packLanguage,
+                    price: priceVal,
+                    originalPrice: originalPriceVal,
+                    image: (formData.get('image') as string) || packImage || undefined,
+                    isFreeDelivery,
+                    shippingFees: isFreeDelivery ? 0 : shippingFees,
+                    bookIds: selectedBooks,
+                    extraProductIds: [],
+                    isAffiliate,
+                    affiliateLink: affiliateLink || undefined,
+                    sellerSku: skuVal,
+                    jumiaHighlights: (currentLang === 'fr' ? jumiaHighlightsFr : currentLang === 'ar' ? jumiaHighlightsAr : jumiaHighlightsEn) || jumiaHighlightsFr || jumiaHighlightsAr || jumiaHighlightsEn || (formData.get('jumiaHighlights') as string) || undefined,
+                    jumiaPackageContent: (currentLang === 'fr' ? jumiaPackageContentFr : currentLang === 'ar' ? jumiaPackageContentAr : jumiaPackageContentEn) || jumiaPackageContentFr || jumiaPackageContentAr || jumiaPackageContentEn || (formData.get('jumiaPackageContent') as string) || undefined,
+                }
+                await updatePack(pack.id, input)
             }
-        } catch {
-            alert('Erreur technique lors de la publication')
+
+            const res = await publishPacksToJumia([pack.id], pushLang)
+            if (res.success) {
+                alert(res.message || 'Pack enregistré et publié avec succès sur Jumia !')
+                setIsJumiaModalOpen(false)
+                router.refresh()
+            } else {
+                alert('Erreur Jumia: ' + res.message)
+            }
+        } catch (err: any) {
+            alert('Erreur technique lors de la publication: ' + (err.message || 'Échec'))
         } finally {
             setIsPushingJumia(false)
         }
@@ -803,7 +843,7 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
                 )}
             </div>
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {/* Left Column */}
                 <div className="lg:col-span-2 xl:col-span-3 space-y-6">
                     {/* Pack Details */}
@@ -924,6 +964,70 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
                                     />
                                 )}
                             </div>
+
+                            {/* Langue du Pack */}
+                            <fieldset>
+                                <legend className="block text-sm font-medium text-gray-700 mb-2">
+                                    Langue du Pack
+                                </legend>
+                                <div className="flex flex-wrap gap-4">
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="all"
+                                            checked={packLanguage === 'all'}
+                                            onChange={() => {
+                                                setPackLanguage('all')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">All</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="fr"
+                                            checked={packLanguage === 'fr'}
+                                            onChange={() => {
+                                                setPackLanguage('fr')
+                                                setCurrentLang('fr')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Français</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="ar"
+                                            checked={packLanguage === 'ar'}
+                                            onChange={() => {
+                                                setPackLanguage('ar')
+                                                setCurrentLang('ar')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Arabe</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="en"
+                                            checked={packLanguage === 'en'}
+                                            onChange={() => {
+                                                setPackLanguage('en')
+                                                setCurrentLang('en')
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Anglais</span>
+                                    </label>
+                                </div>
+                            </fieldset>
 
                             {/* Prix barré */}
                             <div>
@@ -1298,14 +1402,14 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
                                     {loading ? '...' : 'Enregistrer et fermer'}
                                 </button>
                                 <button
-                                type="submit"
-                                value="push_to_jumia"
-                                disabled={isPushingJumia || loading}
-                                className="w-full inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                            >
-                                {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
-                                Push to Jumia
-                            </button>
+                                    type="button"
+                                    onClick={() => setIsJumiaModalOpen(true)}
+                                    disabled={isPushingJumia || loading}
+                                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                                >
+                                    {isPushingJumia ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                                    Push to Jumia
+                                </button>
                             <button
                                 type="button"
                                 onClick={() => setCreativeFormat('post')}
@@ -1350,6 +1454,13 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
                     setPackImage(url)
                     setIsMediaModalOpen(false)
                 }}
+            />
+
+            <JumiaPushModal
+                isOpen={isJumiaModalOpen}
+                onClose={() => setIsJumiaModalOpen(false)}
+                onConfirm={handleConfirmJumiaPush}
+                isLoading={isPushingJumia}
             />
         </div>
     )

@@ -333,12 +333,14 @@ model Pack {
   jumiaQcStatus       String?            @db.VarChar(50)
   isAffiliate         Boolean            @default(false)
   affiliateLink       String?            @db.VarChar(1000)
+  language            String             @default("fr") @db.VarChar(10)
   orderItems          OrderItem[]
   books               PackBook[]
   extraProducts       PackExtraProduct[]
   wishlists           Wishlist[]
 
   @@index([active])
+  @@index([language])
   @@map("packs")
 }
 

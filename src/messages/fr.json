@@ -2015,5 +2015,28 @@
     "OutOfStock": "Rupture de stock",
     "Savings": "Économisez",
     "PackOf": "Pack de {count} livres"
+  },
+  "AdminPacks": {
+    "PackLanguage": "Langue du Pack",
+    "All": "All",
+    "French": "Français",
+    "Arabic": "Arabe",
+    "English": "Anglais"
+  },
+  "JumiaPush": {
+    "Title": "Publier sur Jumia",
+    "Subtitle": "Avec quelle langue souhaitez-vous envoyer ce produit sur Jumia ?",
+    "All": "Toutes les langues",
+    "AllDesc": "Publication multilingue (Arabe + Français + Anglais)",
+    "Recommended": "Recommandé",
+    "Fr": "Français uniquement",
+    "FrDesc": "Titre, description et attributs en français",
+    "Ar": "العربية (Arabe uniquement)",
+    "ArDesc": "العنوان والوصف والخصائص باللغة العربية",
+    "En": "English (Anglais uniquement)",
+    "EnDesc": "Title, description and attributes in English",
+    "Cancel": "Annuler",
+    "Submit": "Pousser sur Jumia",
+    "Submitting": "Publication en cours..."
   }
 }
