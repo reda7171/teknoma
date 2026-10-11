@@ -19,3 +19,13 @@ La préproduction est `noindex` par défaut. Définir `RIWAYA_MA_INDEXABLE=true`
 Les livres affichés sont temporaires. Ils seront remplacés par le futur contrat API lecture seule du backoffice Riwaya.
 
 Pour utiliser le catalogue réel, définir `RIWAYA_BACKEND_URL=https://riwaya.store`. Le storefront appelle uniquement l'API publique versionnée `/api/storefront/v1/home` ; il ne reçoit aucun accès à la base de données.
+
+## Préproduction Docker
+
+Depuis la racine du dépôt :
+
+```bash
+docker compose -f docker-compose.storefront-ma.yml up -d --build
+```
+
+Le conteneur écoute uniquement sur `127.0.0.1:3001`. Nginx est le seul point d'entrée public. L'indexation reste désactivée sur la préproduction.

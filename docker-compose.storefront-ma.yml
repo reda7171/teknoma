@@ -1,0 +1,23 @@
+services:
+  storefront-ma:
+    build:
+      context: .
+      dockerfile: Dockerfile.storefront-ma
+    image: riwaya-storefront-ma:staging
+    container_name: riwaya_storefront_ma_staging
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_SITE_URL: https://staging.riwaya.ma
+      RIWAYA_BACKEND_URL: http://riwaya_app:3000
+      RIWAYA_MA_INDEXABLE: "false"
+    networks:
+      - riwaya_network
+
+networks:
+  riwaya_network:
+    external: true
+    name: riwayama_riwaya_network
