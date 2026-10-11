@@ -11,6 +11,7 @@ import { calculate3For4Discount } from '@/lib/utils'
 import { allocateOrderItemStock } from '@/lib/actions/warehouse'
 import * as crypto from 'crypto'
 import { resolveStorefrontChannel } from '@/lib/sales-channel'
+import type { SalesChannel } from '@prisma/client'
 
 const OrderSchema = z.object({
     fullName: z.string().min(1, 'Nom complet requis').max(100),
@@ -99,7 +100,7 @@ export async function getOrders() {
     }
 }
 
-export async function createOrder(input: z.infer<typeof OrderSchema>) {
+export async function createOrder(input: z.infer<typeof OrderSchema>, salesChannelOverride?: SalesChannel) {
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`order_${ip}`, { limit: 10, windowMs: 60000 }) // 3 commandes par minute max
 
@@ -109,7 +110,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>) {
 
     try {
 
-        const salesChannel = resolveStorefrontChannel(await headers())
+        const salesChannel = salesChannelOverride || resolveStorefrontChannel(await headers())
 
         // OWASP A03: Injection / Validation
         const data = OrderSchema.parse(input)

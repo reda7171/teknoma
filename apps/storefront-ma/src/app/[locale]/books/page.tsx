@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCatalog } from '@/lib/catalog'
 import { copy, isLocale, locales } from '@/lib/i18n'
+import { CartLink } from '@/components/cart-controls'
 
 const labels = {
   fr: { title: 'Tous les livres', intro: 'Le catalogue Riwaya, choisi et disponible au Maroc.', search: 'Titre ou auteur', category: 'Toutes les catégories', language: 'Toutes les langues', sort: 'Nouveautés', priceAsc: 'Prix croissant', priceDesc: 'Prix décroissant', filter: 'Filtrer', available: 'Disponible', unavailable: 'Indisponible', results: 'livres', previous: 'Précédent', next: 'Suivant' },
@@ -25,7 +26,7 @@ export default async function BooksPage({ params, searchParams }: { params: Prom
 
   return <div dir={locale === 'ar' ? 'rtl' : 'ltr'} lang={locale}>
     <div className="announcement">{home.announcement}</div>
-    <header className="site-header shell"><Link className="wordmark" href={`/${locale}`}><span>RIWAYA</span><small>رواية</small></Link><nav><Link href={`/${locale}/books`}>{home.nav[0]}</Link><Link href={`/${locale}`}>{home.nav[1]}</Link></nav><div className="header-tools"><div className="languages">{locales.map((item) => <Link className={item === locale ? 'active' : ''} href={`/${item}/books`} key={item}>{item.toUpperCase()}</Link>)}</div></div></header>
+    <header className="site-header shell"><Link className="wordmark" href={`/${locale}`}><span>RIWAYA</span><small>رواية</small></Link><nav><Link href={`/${locale}/books`}>{home.nav[0]}</Link><Link href={`/${locale}`}>{home.nav[1]}</Link></nav><div className="header-tools"><div className="languages">{locales.map((item) => <Link className={item === locale ? 'active' : ''} href={`/${item}/books`} key={item}>{item.toUpperCase()}</Link>)}</div><CartLink locale={locale}/></div></header>
     <main className="catalog shell">
       <div className="catalog-title"><p className="eyebrow">RIWAYA CATALOGUE</p><h1>{t.title}</h1><p>{t.intro}</p></div>
       <form className="filters" action={`/${locale}/books`}><input name="search" defaultValue={filters.search} placeholder={t.search}/><select name="category" defaultValue={filters.category || ''}><option value="">{t.category}</option>{catalog.categories.map((category) => <option key={category}>{category}</option>)}</select><select name="language" defaultValue={filters.language || ''}><option value="">{t.language}</option><option value="fr">Français</option><option value="ar">العربية</option><option value="en">English</option></select><select name="sort" defaultValue={filters.sort || 'newest'}><option value="newest">{t.sort}</option><option value="price-asc">{t.priceAsc}</option><option value="price-desc">{t.priceDesc}</option></select><button>{t.filter}</button></form>

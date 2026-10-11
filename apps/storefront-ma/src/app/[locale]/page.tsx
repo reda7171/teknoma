@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getHomeCatalog } from '@/lib/catalog'
 import { copy, isLocale, locales } from '@/lib/i18n'
+import { CartLink } from '@/components/cart-controls'
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -29,7 +30,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <div className="languages" aria-label="Langues">
             {locales.map((item) => <Link className={item === locale ? 'active' : ''} href={`/${item}`} key={item}>{item.toUpperCase()}</Link>)}
           </div>
-          <button className="bag" type="button" aria-label="Panier">0</button>
+          <CartLink locale={locale} />
         </div>
       </header>
 
