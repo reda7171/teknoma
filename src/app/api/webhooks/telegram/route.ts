@@ -256,6 +256,51 @@ export async function POST(req: Request) {
                 }
             }
             
+            else if (data && data.startsWith('jumia_label:')) {
+                const [, orderId] = data.split(':')
+                const { printJumiaOrderLabelsFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
+
+                try {
+                    await answerCallbackQuery(callbackId, `⏳ Impression de l'étiquette #${orderId}...`, token)
+                    const printResponse = await printJumiaOrderLabelsFull(orderId)
+
+                    const v2Base64 = printResponse?.success?.labels?.[0]?.label
+                    const trackingNumber = printResponse?.success?.labels?.[0]?.trackingNumber
+                    const base64Data = v2Base64 || printResponse.document || printResponse.file || printResponse.data || printResponse.pdf
+                    const contentType = printResponse.contentType || 'application/pdf'
+                    const ext = contentType.includes('zip') ? 'zip' : 'pdf'
+
+                    const { sendTelegramDocument, sendTelegramMessage } = await import('@/lib/telegram')
+
+                    if (typeof base64Data === 'string' && base64Data.length > 50) {
+                        const buffer = Buffer.from(base64Data, 'base64')
+                        await sendTelegramDocument(
+                            buffer,
+                            `etiquette_jumia_${orderId}.${ext}`,
+                            `🏷️ <b>Étiquette Jumia - Commande #${orderId}</b>\n${trackingNumber ? `📦 Suivi : <code>${trackingNumber}</code>\n` : ''}📄 Document généré avec succès.`,
+                            message?.chat?.id?.toString(),
+                            token
+                        )
+                    } else if (printResponse.url || printResponse.link) {
+                        await sendTelegramDocument(
+                            printResponse.url || printResponse.link,
+                            `etiquette_jumia_${orderId}.${ext}`,
+                            `🏷️ <b>Étiquette Jumia - Commande #${orderId}</b>`,
+                            message?.chat?.id?.toString(),
+                            token
+                        )
+                    } else {
+                        await sendTelegramMessage(
+                            `⚠️ Étiquette générée pour la commande #${orderId}, mais le fichier PDF n'a pas pu être extrait automatiquement.`,
+                            message?.chat?.id?.toString(),
+                            token
+                        )
+                    }
+                } catch (error: any) {
+                    await answerCallbackQuery(callbackId, `❌ Erreur étiquette : ${error.message}`, token)
+                }
+            }
+
             else if (data && data.startsWith('jumia_rts:')) {
                 const [, orderId] = data.split(':')
                 const { packJumiaOrderFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
@@ -268,7 +313,12 @@ export async function POST(req: Request) {
                         const { escapeHtml } = await import('@/lib/telegram')
                         const safeText = escapeHtml(message.text || '')
                         const updatedText = safeText + '\n\n✅ <b>Statut mis à jour sur Jumia :</b> Prête à expédier (Ready-to-Ship)'
-                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
+                        const updatedMarkup = {
+                            inline_keyboard: [
+                                [{ text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderId}` }]
+                            ]
+                        }
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, updatedMarkup)
                     }
                 } catch (error: any) {
                     await answerCallbackQuery(callbackId, `❌ Erreur Jumia : ${error.message}`, token)
@@ -735,7 +785,12 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `✅ Commande ${orderNumber} passée en Ready to Ship`, token)
                     if (message?.chat?.id && message?.message_id) {
                         const updatedText = `✅ <b>Commande Jumia prête à expédier (RTS)</b>\n\n🆔 Commande: <b>${orderNumber}</b>`
-                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
+                        const updatedMarkup = {
+                            inline_keyboard: [
+                                [{ text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderNumber}` }]
+                            ]
+                        }
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, updatedMarkup)
                     }
                 } catch (error: any) {
                     await answerCallbackQuery(callbackId, `❌ Erreur RTS : ${error.message}`, token)

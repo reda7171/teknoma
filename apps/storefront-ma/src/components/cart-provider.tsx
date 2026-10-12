@@ -7,6 +7,7 @@ type CartContextValue = {
   items: CartItem[]
   count: number
   subtotal: number
+  ready: boolean
   add: (item: Omit<CartItem, 'quantity'>) => void
   update: (id: string, quantity: number) => void
   remove: (id: string) => void
@@ -32,6 +33,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<CartContextValue>(() => ({
     items,
+    ready,
     count: items.reduce((sum, item) => sum + item.quantity, 0),
     subtotal: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     add: (product) => setItems((current) => {
@@ -43,7 +45,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     update: (id, quantity) => setItems((current) => current.map((item) => item.id === id ? { ...item, quantity: Math.max(1, Math.min(20, quantity)) } : item)),
     remove: (id) => setItems((current) => current.filter((item) => item.id !== id)),
     clear: () => setItems([]),
-  }), [items])
+  }), [items, ready])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

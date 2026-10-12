@@ -329,7 +329,13 @@ model Pack {
   originalPrice       Float?
   isPromoted          Boolean            @default(false)
   jumiaHighlights     String?            @db.VarChar(2000)
+  jumiaHighlightsAr   String?            @db.VarChar(2000)
+  jumiaHighlightsFr   String?            @db.VarChar(2000)
+  jumiaHighlightsEn   String?            @db.VarChar(2000)
   jumiaPackageContent String?            @db.VarChar(500)
+  jumiaPackageContentAr String?          @db.VarChar(500)
+  jumiaPackageContentFr String?          @db.VarChar(500)
+  jumiaPackageContentEn String?          @db.VarChar(500)
   jumiaProductSid     String?            @db.VarChar(100)
   jumiaQcStatus       String?            @db.VarChar(50)
   isAffiliate         Boolean            @default(false)

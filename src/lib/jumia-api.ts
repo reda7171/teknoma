@@ -148,7 +148,12 @@ export class JumiaAPI {
     }
 
     async printLabels(payload: any) {
-        return this.request(`/orders/print-labels?orderId=${payload.orderId}`, 'POST', payload)
+        const body = Array.isArray(payload)
+            ? { orderItemIds: payload }
+            : payload?.orderItemIds
+                ? { orderItemIds: payload.orderItemIds }
+                : payload
+        return this.request('/orders/print-labels', 'POST', body)
     }
 
     async printInvoice(payload: any) {

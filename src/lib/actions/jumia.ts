@@ -429,7 +429,7 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
             return { success: false, message: "Jumia n'est pas configuré ou activé." }
         }
 
-        const packs = await prisma.pack.findMany({
+        const packs: any[] = await prisma.pack.findMany({
             where: { id: { in: packIds } },
             include: { books: { include: { book: true } } }
         })
@@ -443,7 +443,8 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
         const productsToCreate: any[] = [];
         const productsToUpdate: any[] = [];
 
-        for (const pack of packs) {
+        for (const rawPack of packs) {
+            const pack = rawPack as any;
             const hasArabic = (str: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(str);
             const rawTitleAr = pack.name || pack.nameEn || pack.nameFr || `Pack ${pack.id.substring(0, 8)}`;
             const titleAr = cleanJumiaProductName(rawTitleAr).substring(0, 60).replace(/[-:,]+$/, '').trim();
@@ -577,11 +578,25 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
                 attributes: [
                     {
                         name: "short_description",
-                        value: pack.jumiaHighlights ? pack.jumiaHighlights.replace(/\|/g, '-') : `<ul><li>Titre: ${cleanJumiaProductName(pack.name)}</li><li>Type: Pack de Livres</li></ul>`
+                        value: (() => {
+                            const p = pack as any;
+                            const hlAr = p.jumiaHighlightsAr || p.jumiaHighlights;
+                            const hlEn = p.jumiaHighlightsEn || p.jumiaHighlights;
+                            const hlFr = p.jumiaHighlightsFr || p.jumiaHighlights;
+                            const hl = targetLang === 'ar' ? hlAr : targetLang === 'en' ? hlEn : hlFr;
+                            return hl ? String(hl).replace(/\|/g, '-') : `<ul><li>Titre: ${cleanJumiaProductName(p.name)}</li><li>Type: Pack de Livres</li></ul>`;
+                        })()
                     },
                     {
                         name: "package_content",
-                        value: pack.jumiaPackageContent ? pack.jumiaPackageContent.replace(/\|/g, '-') : `1 x Pack de livres : ${cleanJumiaProductName(pack.name)}`
+                        value: (() => {
+                            const p = pack as any;
+                            const pcAr = p.jumiaPackageContentAr || p.jumiaPackageContent;
+                            const pcEn = p.jumiaPackageContentEn || p.jumiaPackageContent;
+                            const pcFr = p.jumiaPackageContentFr || p.jumiaPackageContent;
+                            const pc = targetLang === 'ar' ? pcAr : targetLang === 'en' ? pcEn : pcFr;
+                            return pc ? String(pc).replace(/\|/g, '-') : `1 x Pack de livres : ${cleanJumiaProductName(p.name)}`;
+                        })()
                     },
                     {
                         name: "model",

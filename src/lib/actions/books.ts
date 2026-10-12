@@ -234,17 +234,20 @@ export async function getBookById(id: string) {
         }
 
         // Statistiques réelles du livre : commandes, visites, ajouts au panier
-        const [ordersCount, orderQuantityAgg, abandonedCartCount] = await Promise.all([
-            prisma.orderItem.count({ where: { bookId: id } }),
+        const [orders, orderQuantityAgg] = await Promise.all([
+            prisma.orderItem.findMany({
+                where: { bookId: id },
+                select: { orderId: true },
+                distinct: ['orderId']
+            }),
             prisma.orderItem.aggregate({ where: { bookId: id }, _sum: { quantity: true } }),
-            prisma.abandonedCart.count({ where: { cartData: { contains: id } } }).catch(() => 0)
         ])
 
         const stats = {
-            ordersCount: ordersCount,
+            ordersCount: orders.length,
             unitsSold: orderQuantityAgg._sum.quantity || 0,
             viewsCount: book.views || 0,
-            cartCount: Math.max((book as any).cartAdditions || 0, abandonedCartCount + ordersCount)
+            cartCount: book.cartAdditions || 0
         }
 
         return {

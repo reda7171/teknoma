@@ -7,5 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       ? [{ userAgent: ['Googlebot', 'Googlebot-Image', '*'], allow: '/' }]
       : [{ userAgent: '*', disallow: '/' }],
     sitemap: indexable ? 'https://riwaya.ma/sitemap.xml' : undefined,
+    host: indexable ? 'https://riwaya.ma' : undefined,
   }
 }

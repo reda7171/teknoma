@@ -812,7 +812,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional.`
                             </span>
                         </div>
                         <p className="mt-2 text-xs text-amber-700 font-medium">
-                            Intention d'achat enregistrée
+                            Clics sur « Ajouter au panier » enregistrés
                         </p>
                     </div>
                 </div>

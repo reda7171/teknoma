@@ -549,7 +549,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api-sandbox.pinterest.com/v5/pins",
+        "url": "https://api.pinterest.com/v5/pins",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

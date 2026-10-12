@@ -213,6 +213,7 @@ export async function GET(req: Request) {
             const replyMarkup = {
                 inline_keyboard: [
                     [
+                        { text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderId}` },
                         { text: '✅ Ready to Ship', callback_data: `jumia_rts:${orderId}` },
                         { text: '❌ Annuler', callback_data: `jumia_cancel:${orderId}` }
                     ],
@@ -226,7 +227,10 @@ export async function GET(req: Request) {
             try {
                 if (imageUrl) {
                     const { sendTelegramPhoto } = await import('@/lib/telegram')
-                    await sendTelegramPhoto(imageUrl, text, undefined, undefined, replyMarkup)
+                    const photoRes = await sendTelegramPhoto(imageUrl, text, undefined, undefined, replyMarkup)
+                    if (!photoRes?.ok) {
+                        await sendTelegramMessage(text, undefined, undefined, replyMarkup)
+                    }
                 } else {
                     await sendTelegramMessage(text, undefined, undefined, replyMarkup)
                 }

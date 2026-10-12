@@ -391,13 +391,31 @@ export async function restoreJumiaOrderStock(orderId: string, reason: 'FAILED' |
     }
 }
 
+async function resolveJumiaOrderInternalId(jumia: any, orderId: string): Promise<string> {
+    if (!orderId) return orderId
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)
+    if (isUuid) return orderId
+
+    try {
+        const searchRes = await jumia.request(`/orders?number=${encodeURIComponent(orderId)}`)
+        const orderList = searchRes?.orders || searchRes?.data?.orders || []
+        if (orderList[0]?.id) {
+            return orderList[0].id
+        }
+    } catch (e) {
+        console.warn(`[JUMIA] Impossible de mapper orderId ${orderId} en UUID:`, e)
+    }
+    return orderId
+}
+
 export async function packJumiaOrderFull(orderId: string) {
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
     
     try {
         // 1. Fetch Order Items
-        const responseItems = await jumia.getOrderItems(orderId)
+        const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
+        const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
         
@@ -451,9 +469,10 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
     if (!jumia) throw new Error("Jumia n'est pas configuré")
     
     try {
-        const responseItems = await jumia.getOrderItems(orderId)
+        const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
+        const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
-        const items = data?.items || data?.data?.items || data || []
+        const items = data?.items || data?.data?.items || data?.orderItems || data?.data?.orderItems || (Array.isArray(data) ? data : [])
         
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
@@ -467,16 +486,27 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
         
         const payload = {
             orderItemIds: orderItemIds,
-            orderIds: [orderId],
-            orderId: orderId,
-            order_id: orderId // Certaines versions de l'API Jumia utilisent underscore
+
+
+
         }
         
         void('[PRINT LABELS] Order ID:', orderId)
         void('[PRINT LABELS] Items found:', items.length, JSON.stringify(items.slice(0, 2)))
         void('[PRINT LABELS] Payload:', JSON.stringify(payload))
         
-        const response = await jumia.printLabels(payload)
+        let response: any
+        try {
+            response = await jumia.printLabels(payload)
+        } catch (printErr: any) {
+            const msg = (printErr.message || '').toLowerCase()
+            if (msg.includes('not packed') || msg.includes('pending')) {
+                await packJumiaOrderFull(orderId)
+                response = await jumia.printLabels(payload)
+            } else {
+                throw printErr
+            }
+        }
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_LABEL', status: 'SUCCESS' } }).catch(() => {})
         return response
     } catch (e: any) {
@@ -491,7 +521,8 @@ export async function printJumiaOrderInvoiceFull(orderId: string) {
     if (!jumia) throw new Error("Jumia n'est pas configuré")
     
     try {
-        const responseItems = await jumia.getOrderItems(orderId)
+        const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
+        const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
         
@@ -521,7 +552,8 @@ export async function readyToShipJumiaOrderFull(orderId: string) {
     if (!jumia) throw new Error("Jumia n'est pas configuré")
     
     try {
-        const responseItems = await jumia.getOrderItems(orderId)
+        const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
+        const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
         

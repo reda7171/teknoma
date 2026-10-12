@@ -91,6 +91,7 @@ export async function GET(req: Request) {
                 const replyMarkup = {
                     inline_keyboard: [
                         [
+                            { text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderId}` },
                             { text: '📦 Préparer (Ready-to-Ship)', callback_data: `jumia_rts:${orderId}` }
                         ]
                     ]
