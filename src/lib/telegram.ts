@@ -211,6 +211,64 @@ export async function sendTelegramPhoto(photoUrl: string, caption: string, chatI
 /**
  * Envoyer un album (MediaGroup)
  */
+export async function sendTelegramDocument(
+    document: Buffer | string,
+    filename: string = 'document.pdf',
+    caption?: string,
+    chatId?: string,
+    botToken?: string,
+    keyboard?: any
+) {
+    const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
+    const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
+    
+    if (!token || !id) return null
+
+    const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
+
+    const promises = chatIds.map(async cid => {
+        try {
+            if (typeof document === 'string' && document.startsWith('http')) {
+                const res = await fetch(`${TELEGRAM_API}${token}/sendDocument`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: cid,
+                        document: document,
+                        caption,
+                        parse_mode: 'HTML',
+                        reply_markup: keyboard
+                    })
+                })
+                return res.json()
+            } else {
+                const formData = new FormData()
+                formData.append('chat_id', cid)
+                const buf = Buffer.isBuffer(document)
+                    ? document
+                    : Buffer.from(document, 'base64')
+                const blob = new Blob([buf], { type: 'application/pdf' })
+                formData.append('document', blob, filename)
+                if (caption) formData.append('caption', caption)
+                formData.append('parse_mode', 'HTML')
+                if (keyboard) formData.append('reply_markup', JSON.stringify(keyboard))
+
+                const res = await fetch(`${TELEGRAM_API}${token}/sendDocument`, {
+                    method: 'POST',
+                    body: formData as any
+                })
+                return res.json()
+            }
+        } catch (err) {
+            console.error('[TELEGRAM] Erreur envoi document:', err)
+            return null
+        }
+    })
+
+    const results = await Promise.all(promises)
+    return results[0]
+}
+
 export async function sendTelegramMediaGroup(media: { type: 'photo', media: string, caption?: string }[], chatId?: string, botToken?: string) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
@@ -476,7 +534,7 @@ export async function sendLowStockNotification(book: { id: string, title: string
 /**
  * Envoyer un document Telegram (PDF, etc.)
  */
-export async function sendTelegramDocument(documentBuffer: Buffer, filename: string, caption: string, chatId?: string, botToken?: string) {
+export async function sendTelegramDocumentBuffer(documentBuffer: Buffer, filename: string, caption: string, chatId?: string, botToken?: string) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
     

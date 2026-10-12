@@ -29,7 +29,13 @@ const PackSchema = z.object({
     extraProductIds: z.array(z.string().uuid()).default([]),
     sellerSku: z.string().optional(),
     jumiaPackageContent: z.string().optional(),
+    jumiaPackageContentAr: z.string().optional(),
+    jumiaPackageContentFr: z.string().optional(),
+    jumiaPackageContentEn: z.string().optional(),
     jumiaHighlights: z.string().optional(),
+    jumiaHighlightsAr: z.string().optional(),
+    jumiaHighlightsFr: z.string().optional(),
+    jumiaHighlightsEn: z.string().optional(),
     isAffiliate: z.boolean().default(false).optional(),
     affiliateLink: z.string().optional(),
 }).refine(
@@ -78,8 +84,14 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                 isFreeDelivery: validatedData.isFreeDelivery,
                 shippingFees: validatedData.shippingFees,
                 sellerSku: validatedData.sellerSku,
-                jumiaPackageContent: validatedData.jumiaPackageContent,
-                jumiaHighlights: validatedData.jumiaHighlights,
+                jumiaPackageContent: validatedData.jumiaPackageContent || validatedData.jumiaPackageContentFr || validatedData.jumiaPackageContentAr || validatedData.jumiaPackageContentEn,
+                jumiaPackageContentAr: validatedData.jumiaPackageContentAr,
+                jumiaPackageContentFr: validatedData.jumiaPackageContentFr,
+                jumiaPackageContentEn: validatedData.jumiaPackageContentEn,
+                jumiaHighlights: validatedData.jumiaHighlights || validatedData.jumiaHighlightsFr || validatedData.jumiaHighlightsAr || validatedData.jumiaHighlightsEn,
+                jumiaHighlightsAr: validatedData.jumiaHighlightsAr,
+                jumiaHighlightsFr: validatedData.jumiaHighlightsFr,
+                jumiaHighlightsEn: validatedData.jumiaHighlightsEn,
                 isAffiliate: validatedData.isAffiliate,
                 affiliateLink: validatedData.affiliateLink,
                 active: true,
@@ -94,7 +106,7 @@ export async function createPack(input: PackInput): Promise<PackResult> {
                         extraProductId,
                     })),
                 },
-            },
+            } as any,
         })
 
         await createAuditLog({
@@ -245,8 +257,14 @@ export async function updatePack(
                     isFreeDelivery: validatedData.isFreeDelivery,
                     shippingFees: validatedData.shippingFees,
                     sellerSku: validatedData.sellerSku,
-                    jumiaPackageContent: validatedData.jumiaPackageContent,
-                    jumiaHighlights: validatedData.jumiaHighlights,
+                    jumiaPackageContent: validatedData.jumiaPackageContent || validatedData.jumiaPackageContentFr || validatedData.jumiaPackageContentAr || validatedData.jumiaPackageContentEn,
+                    jumiaPackageContentAr: validatedData.jumiaPackageContentAr,
+                    jumiaPackageContentFr: validatedData.jumiaPackageContentFr,
+                    jumiaPackageContentEn: validatedData.jumiaPackageContentEn,
+                    jumiaHighlights: validatedData.jumiaHighlights || validatedData.jumiaHighlightsFr || validatedData.jumiaHighlightsAr || validatedData.jumiaHighlightsEn,
+                    jumiaHighlightsAr: validatedData.jumiaHighlightsAr,
+                    jumiaHighlightsFr: validatedData.jumiaHighlightsFr,
+                    jumiaHighlightsEn: validatedData.jumiaHighlightsEn,
                     isAffiliate: validatedData.isAffiliate,
                     affiliateLink: validatedData.affiliateLink,
                     books: {
@@ -259,7 +277,7 @@ export async function updatePack(
                             extraProductId,
                         })),
                     },
-                },
+                } as any,
             })
         })
 

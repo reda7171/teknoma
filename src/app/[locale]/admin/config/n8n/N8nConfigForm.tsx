@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateSetting } from '@/lib/actions/site-settings'
-import { Save, Eye, EyeOff } from 'lucide-react'
+import { Save, Eye, EyeOff, CheckCircle2, AlertTriangle, RefreshCw, Send } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebhookUrl, initialFacebookAccessToken, initialInstagramAccountId, initialInstagramToken, initialThreadsAccountId, initialThreadsAccessToken, initialTiktokAccessToken, initialTiktokCreatorId, initialTiktokAppId, initialTiktokClientSecret, initialPinterestAccessToken, initialPinterestBoardId, initialPinterestAppId, initialPinterestAppSecret }: { initialWebhookUrl: string, initialInstagramWebhookUrl: string, initialFacebookAccessToken: string, initialInstagramAccountId: string, initialInstagramToken: string, initialThreadsAccountId: string, initialThreadsAccessToken: string, initialTiktokAccessToken?: string, initialTiktokCreatorId?: string, initialTiktokAppId?: string, initialTiktokClientSecret?: string, initialPinterestAccessToken?: string, initialPinterestBoardId?: string, initialPinterestAppId?: string, initialPinterestAppSecret?: string }) {
@@ -25,12 +25,68 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
     const [isCreatingBoard, setIsCreatingBoard] = useState(false)
     const [loading, setLoading] = useState(false)
     const [isTesting, setIsTesting] = useState(false)
+    const [isTestingPinterest, setIsTestingPinterest] = useState(false)
+    const [isPublishingPin, setIsPublishingPin] = useState(false)
+    const [pinterestDiagResult, setPinterestDiagResult] = useState<any>(null)
+    const [pinterestDiagError, setPinterestDiagError] = useState('')
     const [message, setMessage] = useState('')
     const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
     const router = useRouter()
 
     const toggleSecret = (key: string) => {
         setShowSecrets(prev => ({ ...prev, [key]: !prev[key] }))
+    }
+
+    async function handleCheckPinterestBoard() {
+        setIsTestingPinterest(true)
+        setPinterestDiagError('')
+        try {
+            const res = await fetch('/api/pinterest/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'check_status',
+                    tokenOverride: pinterestAccessToken,
+                    boardIdOverride: pinterestBoardId
+                })
+            })
+            const data = await res.json()
+            if (data.success) {
+                setPinterestDiagResult(data)
+            } else {
+                setPinterestDiagError(data.error || 'Erreur lors du test Pinterest')
+            }
+        } catch {
+            setPinterestDiagError('Erreur réseau lors de la vérification Pinterest.')
+        } finally {
+            setIsTestingPinterest(false)
+        }
+    }
+
+    async function handlePublishTestPin() {
+        setIsPublishingPin(true)
+        setPinterestDiagError('')
+        try {
+            const res = await fetch('/api/pinterest/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'test_publish',
+                    tokenOverride: pinterestAccessToken,
+                    boardIdOverride: pinterestBoardId
+                })
+            })
+            const data = await res.json()
+            if (data.success) {
+                setPinterestDiagResult(data)
+            } else {
+                setPinterestDiagError(data.error || 'Erreur lors de la publication de test')
+            }
+        } catch {
+            setPinterestDiagError('Erreur réseau lors de la publication de test.')
+        } finally {
+            setIsPublishingPin(false)
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -499,15 +555,97 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                     </div>
                 </div>
 
-                <div className="flex gap-4 items-center pt-2">
+                <div className="flex flex-wrap gap-3 items-center pt-2">
                     <a 
                         href="/api/pinterest/auth"
-                        className="px-6 py-3 bg-[#E60023] hover:bg-[#ad081b] text-white font-bold rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
+                        className="px-5 py-2.5 bg-[#E60023] hover:bg-[#ad081b] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow flex items-center justify-center gap-2"
                     >
                         Connecter le compte Pinterest
                     </a>
-
+                    <button
+                        type="button"
+                        onClick={handleCheckPinterestBoard}
+                        disabled={isTestingPinterest || !pinterestAccessToken}
+                        className="px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isTestingPinterest ? 'animate-spin' : ''}`} />
+                        {isTestingPinterest ? 'Vérification...' : 'Tester visibilité & statut'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handlePublishTestPin}
+                        disabled={isPublishingPin || !pinterestAccessToken || !pinterestBoardId}
+                        className="px-4 py-2.5 bg-gray-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <Send className={`w-3.5 h-3.5 ${isPublishingPin ? 'animate-spin' : ''}`} />
+                        {isPublishingPin ? 'Publication...' : 'Publier une épingle test'}
+                    </button>
                 </div>
+
+                {pinterestDiagError && (
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <div>{pinterestDiagError}</div>
+                    </div>
+                )}
+
+                {pinterestDiagResult && (
+                    <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm space-y-3">
+                        <div className="flex items-center justify-between border-b pb-2">
+                            <span className="text-xs font-black uppercase text-gray-500 tracking-wider">Diagnostic Pinterest en direct</span>
+                            <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" /> Token valide
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                                <span className="text-gray-500 block mb-0.5">Compte connecté</span>
+                                <span className="font-bold text-gray-900">@{pinterestDiagResult.userAccount?.username || 'Inconnu'}</span>
+                                <span className="text-gray-400 block text-[11px]">Type: {pinterestDiagResult.userAccount?.accountType || 'Standard'}</span>
+                            </div>
+
+                            <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                                <span className="text-gray-500 block mb-0.5">Visibilité du Tableau</span>
+                                {pinterestDiagResult.board ? (
+                                    <div>
+                                        <span className="font-bold text-gray-900 block">{pinterestDiagResult.board.name}</span>
+                                        {pinterestDiagResult.board.isPublic ? (
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded mt-1">
+                                                ✅ PUBLIC (Visible par tous & indexable Google)
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded mt-1">
+                                                ⚠️ {pinterestDiagResult.board.privacy} (SECRET - Invisible au public)
+                                            </span>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <span className="text-amber-600 font-semibold">Aucun ID de tableau vérifié</span>
+                                )}
+                            </div>
+                        </div>
+
+                        {pinterestDiagResult.publishedPin && (
+                            <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-xs text-green-800 flex items-center justify-between gap-2">
+                                <div>
+                                    <span className="font-bold block">Épingle test publiée avec succès !</span>
+                                    <span className="text-[11px] text-green-700">{pinterestDiagResult.publishedPin.title}</span>
+                                </div>
+                                {pinterestDiagResult.publishedPin.link && (
+                                    <a
+                                        href={pinterestDiagResult.publishedPin.link}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="underline text-[11px] font-bold text-green-900 shrink-0"
+                                    >
+                                        Lien du produit
+                                    </a>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* --- Boutons d'action --- */}

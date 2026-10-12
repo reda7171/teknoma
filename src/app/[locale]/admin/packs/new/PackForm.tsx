@@ -13,6 +13,8 @@ import CatalogImageModal from '@/components/admin/CatalogImageModal'
 interface Book {
     id: string
     title: string
+    titleFr?: string | null
+    titleEn?: string | null
     author: string
     price: number
     image?: string
@@ -40,6 +42,65 @@ function normalizeSearchText(str: string): string {
         .replace(/[^\p{L}\p{N}\s]/gu, ' ')
         .replace(/\s+/g, ' ')
         .trim()
+}
+
+function getBookSearchTitles(book: Book) {
+    return [book.title, book.titleFr, book.titleEn]
+        .filter((title): title is string => Boolean(title?.trim()))
+        .map(normalizeSearchText)
+}
+
+function getBookDisplayTitle(book: Book) {
+    const language = book.language?.toLowerCase()
+    if (language?.startsWith('en')) return book.titleEn?.trim() || book.title
+    if (language?.startsWith('fr')) return book.titleFr?.trim() || book.title
+    return book.title
+}
+
+function findBookByQuickTitle(books: Book[], token: string) {
+    const normalizedToken = normalizeSearchText(token)
+    if (!normalizedToken) return undefined
+
+    const preferredLanguage = /[\u0600-\u06FF]/.test(token) ? 'ar' : 'en'
+    const candidates = books
+        .map(book => ({
+            book,
+            primaryTitle: normalizeSearchText(book.title),
+            translatedTitles: [book.titleFr, book.titleEn]
+                .filter((title): title is string => Boolean(title?.trim()))
+                .map(normalizeSearchText),
+            titles: getBookSearchTitles(book),
+        }))
+        .sort((left, right) => {
+            const leftPreferred = left.book.language?.toLowerCase().startsWith(preferredLanguage) ? 1 : 0
+            const rightPreferred = right.book.language?.toLowerCase().startsWith(preferredLanguage) ? 1 : 0
+            return rightPreferred - leftPreferred
+        })
+
+    const exactPrimary = candidates.find(candidate => candidate.primaryTitle === normalizedToken)
+    if (exactPrimary) return exactPrimary.book
+
+    const exactTranslation = candidates.find(candidate => candidate.translatedTitles.some(title => title === normalizedToken))
+    if (exactTranslation) return exactTranslation.book
+
+    const primaryStartsWith = candidates.find(candidate => candidate.primaryTitle.startsWith(normalizedToken))
+    if (primaryStartsWith) return primaryStartsWith.book
+
+    const translationStartsWith = candidates.find(candidate => candidate.translatedTitles.some(title => title.startsWith(normalizedToken)))
+    if (translationStartsWith) return translationStartsWith.book
+
+    const contains = candidates.find(candidate => candidate.titles.some(title => (
+        title.includes(normalizedToken) || normalizedToken.includes(title)
+    )))
+    if (contains) return contains.book
+
+    const words = normalizedToken.split(' ').filter(word => word.length > 1)
+    if (words.length === 0) return undefined
+
+    return candidates.find(candidate => {
+        const searchableText = normalizeSearchText(`${candidate.titles.join(' ')} ${candidate.book.author}`)
+        return words.every(word => searchableText.includes(word))
+    })?.book
 }
 
 function parseQuickInput(raw: string) {
@@ -74,6 +135,108 @@ function parseQuickInput(raw: string) {
     }
 
     return { packName, booksPart }
+}
+
+function detectPackLanguage(items: { language?: string; itemType?: string }[]): 'ar' | 'fr' | 'en' | 'all' {
+    if (items.length === 0) return 'all'
+    const langs = items
+        .filter(b => b.itemType !== 'ACCESSORY')
+        .map(b => b.language?.toLowerCase() || '')
+        .filter(Boolean)
+    if (langs.length === 0) return 'all'
+    const enCount = langs.filter(l => l.startsWith('en')).length
+    const frCount = langs.filter(l => l.startsWith('fr')).length
+    const arCount = langs.filter(l => l.startsWith('ar')).length
+    if (enCount > 0 && enCount >= frCount && enCount >= arCount) return 'en'
+    if (frCount > 0 && frCount >= enCount && frCount >= arCount) return 'fr'
+    if (arCount > 0 && arCount >= enCount && arCount >= frCount) return 'ar'
+    return 'all'
+}
+
+function getLanguageLabel(lang: 'ar' | 'fr' | 'en' | 'all', targetLocale: 'ar' | 'fr' | 'en'): string {
+    if (lang === 'en') {
+        if (targetLocale === 'ar') return 'en anglais'
+        if (targetLocale === 'fr') return '(en anglais)'
+        return '(in English)'
+    }
+    if (lang === 'fr') {
+        if (targetLocale === 'ar') return 'en français'
+        if (targetLocale === 'fr') return '(en français)'
+        return '(in French)'
+    }
+    if (lang === 'ar') {
+        if (targetLocale === 'ar') return '(بالعربية)'
+        if (targetLocale === 'fr') return '(en arabe)'
+        return '(in Arabic)'
+    }
+    return ''
+}
+
+function appendLanguageSuffix(title: string, lang: 'ar' | 'fr' | 'en' | 'all', targetLocale: 'ar' | 'fr' | 'en'): string {
+    const clean = (title || '').replace(/\|/g, '-').replace(/\s+/g, ' ').trim()
+    if (!clean || lang === 'all') return clean
+
+    const lower = clean.toLowerCase()
+    if (
+        lower.includes('anglais') ||
+        lower.includes('english') ||
+        lower.includes('انجليز') ||
+        lower.includes('français') ||
+        lower.includes('francais') ||
+        lower.includes('french') ||
+        lower.includes('فرنس') ||
+        lower.includes('arabe') ||
+        lower.includes('arabic') ||
+        lower.includes('عرب')
+    ) {
+        return clean
+    }
+
+    const suffix = getLanguageLabel(lang, targetLocale)
+    if (!suffix) return clean
+    return `${clean} ${suffix}`
+}
+
+function getPackKeywords(
+    packName: string,
+    items: Book[],
+    locale: 'ar' | 'fr' | 'en'
+): string {
+    const titles = items.map(b => getBookDisplayTitle(b)).filter(Boolean)
+    const authors = Array.from(new Set(items.map(b => b.author?.trim()).filter(Boolean)))
+    
+    if (locale === 'ar') {
+        const baseTags = ['باقة كتب', 'روايات', 'كتب للقراءة', 'شراء كتب في المغرب', 'توصيل كتب المغرب']
+        const allKeywords = Array.from(new Set([packName, ...titles, ...authors, ...baseTags].filter(Boolean)))
+        return allKeywords.join(', ')
+    }
+    if (locale === 'en') {
+        const baseTags = ['book pack', 'book bundle', 'novels', 'reading', 'books in Morocco', 'bestseller books']
+        const allKeywords = Array.from(new Set([packName, ...titles, ...authors, ...baseTags].filter(Boolean)))
+        return allKeywords.join(', ')
+    }
+    const baseTags = ['pack de livres', 'lot de livres', 'romans', 'lecture', 'achat livres Maroc', 'meilleurs livres']
+    const allKeywords = Array.from(new Set([packName, ...titles, ...authors, ...baseTags].filter(Boolean)))
+    return allKeywords.join(', ')
+}
+
+function appendKeywordsToDescription(desc: string, keywords: string, locale: 'ar' | 'fr' | 'en'): string {
+    const trimmed = (desc || '').trim()
+    if (!keywords) return trimmed
+
+    if (locale === 'ar') {
+        if (trimmed.includes('الكلمات المفتاحية') || trimmed.includes('كلمات مفتاحية')) return trimmed
+        const prefix = trimmed ? `${trimmed}\n\n` : ''
+        return `${prefix}الكلمات المفتاحية: ${keywords}`
+    }
+    if (locale === 'en') {
+        if (trimmed.toLowerCase().includes('keywords:')) return trimmed
+        const prefix = trimmed ? `${trimmed}\n\n` : ''
+        return `${prefix}Keywords: ${keywords}`
+    }
+    if (trimmed.toLowerCase().includes('mots-clés') || trimmed.toLowerCase().includes('mots clés')) return trimmed
+    const prefix = trimmed ? `${trimmed}\n\n` : ''
+    return `${prefix}Mots-clés SEO : ${keywords}`
 }
 
 export default function PackForm({ books, whatsappPhone }: PackFormProps) {
@@ -150,31 +313,10 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
                 const nt = normalizeSearchText(token)
                 if (!nt) return
 
-                let found = books.find(b => normalizeSearchText(b.title) === nt)
-
-                if (!found) {
-                    found = books.find(b => normalizeSearchText(b.title).startsWith(nt))
-                }
-
-                if (!found) {
-                    found = books.find(b => {
-                        const nb = normalizeSearchText(b.title)
-                        return nb.includes(nt) || nt.includes(nb)
-                    })
-                }
-
-                if (!found) {
-                    const words = nt.split(' ').filter(w => w.length > 1)
-                    if (words.length > 0) {
-                        found = books.find(b => {
-                            const nb = normalizeSearchText(`${b.title} ${b.author}`)
-                            return words.every(w => nb.includes(w))
-                        })
-                    }
-                }
+                const found = findBookByQuickTitle(books, token)
 
                 if (found) {
-                    matched.push({ token, title: found.title, id: found.id })
+                    matched.push({ token, title: getBookDisplayTitle(found), id: found.id })
                     matchedIds.push(found.id)
                 } else {
                     notFound.push(token)
@@ -182,7 +324,14 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             })
 
             if (matchedIds.length > 0) {
-                setSelectedBooks(prev => Array.from(new Set([...prev, ...matchedIds])))
+                setSelectedBooks(prev => {
+                    const next = Array.from(new Set([...prev, ...matchedIds]))
+                    const detected = detectPackLanguage(books.filter(b => next.includes(b.id)))
+                    if (detected !== 'all') {
+                        setPackLanguage(detected)
+                    }
+                    return next
+                })
             }
         }
 
@@ -190,11 +339,16 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     }
 
     function toggleBook(bookId: string) {
-        setSelectedBooks(prev =>
-            prev.includes(bookId)
+        setSelectedBooks(prev => {
+            const next = prev.includes(bookId)
                 ? prev.filter(id => id !== bookId)
                 : [...prev, bookId]
-        )
+            const detected = detectPackLanguage(books.filter(b => next.includes(b.id)))
+            if (detected !== 'all') {
+                setPackLanguage(detected)
+            }
+            return next
+        })
     }
 
     function toggleAll() {
@@ -208,10 +362,13 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     function toggleAllInCategory(categoryBooks: Book[]) {
         const categoryBookIds = categoryBooks.map(b => b.id)
         const allSelected = categoryBookIds.every(id => selectedBooks.includes(id))
-        if (allSelected) {
-            setSelectedBooks(prev => prev.filter(id => !categoryBookIds.includes(id)))
-        } else {
-            setSelectedBooks(prev => Array.from(new Set([...prev, ...categoryBookIds])))
+        const next = allSelected
+            ? selectedBooks.filter(id => !categoryBookIds.includes(id))
+            : Array.from(new Set([...selectedBooks, ...categoryBookIds]))
+        setSelectedBooks(next)
+        const detected = detectPackLanguage(books.filter(b => next.includes(b.id)))
+        if (detected !== 'all') {
+            setPackLanguage(detected)
         }
     }
 
@@ -238,6 +395,32 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         }
     }
 
+    const handleAddKeywords = (allLangs = false) => {
+        const selectedBooksData = books.filter(b => selectedBooks.includes(b.id))
+        const pNameAr = name || 'باقة كتب'
+        const pNameFr = nameFr || name || 'Pack de livres'
+        const pNameEn = nameEn || name || 'Book pack'
+
+        const kwAr = getPackKeywords(pNameAr, selectedBooksData, 'ar')
+        const kwFr = getPackKeywords(pNameFr, selectedBooksData, 'fr')
+        const kwEn = getPackKeywords(pNameEn, selectedBooksData, 'en')
+
+        if (allLangs) {
+            setDescription(prev => appendKeywordsToDescription(prev, kwAr, 'ar'))
+            setDescriptionFr(prev => appendKeywordsToDescription(prev, kwFr, 'fr'))
+            setDescriptionEn(prev => appendKeywordsToDescription(prev, kwEn, 'en'))
+            return
+        }
+
+        if (currentLang === 'ar') {
+            setDescription(prev => appendKeywordsToDescription(prev, kwAr, 'ar'))
+        } else if (currentLang === 'fr') {
+            setDescriptionFr(prev => appendKeywordsToDescription(prev, kwFr, 'fr'))
+        } else {
+            setDescriptionEn(prev => appendKeywordsToDescription(prev, kwEn, 'en'))
+        }
+    }
+
     const generateDescription = () => {
         const packName = currentLang === 'ar' ? name : currentLang === 'fr' ? (nameFr || name) : (nameEn || name);
         if (!packName) {
@@ -255,20 +438,23 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         const accessoryText = currentLang === 'ar' ? 'إكسسوار' : currentLang === 'en' ? 'accessory' : 'accessoire';
         const booksListText = selectedBooksData.map(item =>
             item.itemType === 'BOOK'
-                ? `- ${item.title} (${writtenByText} ${item.author})`
+                ? `- ${getBookDisplayTitle(item)} (${writtenByText} ${item.author})`
                 : `- ${item.title} (${accessoryText})`
         ).join('\n');
         
-        let generatedText = '';
+        let baseText = '';
         if (currentLang === 'ar') {
-            generatedText = `استفد من باقتنا الحصرية: "${packName}"!\n\nتحتوي هذه الباقة على المنتجات التالية:\n${booksListText}\n\nاطلبها الآن بأفضل سعر!`;
-            setDescription(generatedText);
+            baseText = `استفد من باقتنا الحصرية: "${packName}"!\n\nتحتوي هذه الباقة على المنتجات التالية:\n${booksListText}\n\nاطلبها الآن بأفضل سعر!`;
+            const kw = getPackKeywords(packName, selectedBooksData, 'ar');
+            setDescription(appendKeywordsToDescription(baseText, kw, 'ar'));
         } else if (currentLang === 'fr') {
-            generatedText = `Profitez de notre pack exclusif : "${packName}" !\n\nCe pack contient les produits suivants :\n${booksListText}\n\nCommandez dès maintenant au meilleur prix !`;
-            setDescriptionFr(generatedText);
+            baseText = `Profitez de notre pack exclusif : "${packName}" !\n\nCe pack contient les produits suivants :\n${booksListText}\n\nCommandez dès maintenant au meilleur prix !`;
+            const kw = getPackKeywords(packName, selectedBooksData, 'fr');
+            setDescriptionFr(appendKeywordsToDescription(baseText, kw, 'fr'));
         } else {
-            generatedText = `Enjoy our exclusive pack: "${packName}"!\n\nThis pack contains the following products:\n${booksListText}\n\nOrder now at the best price!`;
-            setDescriptionEn(generatedText);
+            baseText = `Enjoy our exclusive pack: "${packName}"!\n\nThis pack contains the following products:\n${booksListText}\n\nOrder now at the best price!`;
+            const kw = getPackKeywords(packName, selectedBooksData, 'en');
+            setDescriptionEn(appendKeywordsToDescription(baseText, kw, 'en'));
         }
     }
 
@@ -280,7 +466,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         
         if (!currentVal) {
             const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
-            const lis = selectedBooksData.map(b => `<li>${b.title}</li>`).join('');
+            const lis = selectedBooksData.map(b => `<li>${getBookDisplayTitle(b)}</li>`).join('');
             let defaultText = '';
             if (currentLang === 'ar') {
                 defaultText = `<ul><li>العنوان: ${packName}</li><li>النوع: باقة كتب</li>${lis ? `<li>الكتب المتضمنة:</li>${lis}` : ''}</ul>`;
@@ -326,7 +512,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         
         if (!currentVal) {
             const selectedBooksData = books.filter(b => selectedBooks.includes(b.id));
-            const booksTitles = selectedBooksData.map(b => b.title).join(', ');
+            const booksTitles = selectedBooksData.map(getBookDisplayTitle).join(', ');
             let defaultText = '';
             if (currentLang === 'ar') {
                 defaultText = `1 x باقة كتب : ${packName}${booksTitles ? ` (${booksTitles})` : ''}`;
@@ -394,7 +580,13 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
             extraProductIds: selectedBooksData.filter(item => item.itemType === 'ACCESSORY').map(item => item.id),
             sellerSku: formData.get('sellerSku') as string || undefined,
             jumiaHighlights: (currentLang === 'fr' ? jumiaHighlightsFr : currentLang === 'ar' ? jumiaHighlightsAr : jumiaHighlightsEn) || jumiaHighlightsFr || jumiaHighlightsAr || jumiaHighlightsEn || (formData.get('jumiaHighlights') as string) || undefined,
+            jumiaHighlightsAr: jumiaHighlightsAr || undefined,
+            jumiaHighlightsFr: jumiaHighlightsFr || undefined,
+            jumiaHighlightsEn: jumiaHighlightsEn || undefined,
             jumiaPackageContent: (currentLang === 'fr' ? jumiaPackageContentFr : currentLang === 'ar' ? jumiaPackageContentAr : jumiaPackageContentEn) || jumiaPackageContentFr || jumiaPackageContentAr || jumiaPackageContentEn || (formData.get('jumiaPackageContent') as string) || undefined,
+            jumiaPackageContentAr: jumiaPackageContentAr || undefined,
+            jumiaPackageContentFr: jumiaPackageContentFr || undefined,
+            jumiaPackageContentEn: jumiaPackageContentEn || undefined,
         }
 
         const result = await createPack(input)
@@ -412,7 +604,7 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
     const totalOriginalPrice = Math.round(selectedBooksData.reduce((sum, b) => sum + b.price, 0))
 
     const filteredBooks = books.filter(book => {
-        const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const matchesSearch = getBookSearchTitles(book).some(title => title.includes(normalizeSearchText(searchQuery))) ||
             book.author.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesAvailability = onlyAvailable ? (book.active && book.stock > 0) : true
         const matchesAuthor = filterAuthor === 'ALL' || book.author?.trim() === filterAuthor
@@ -453,32 +645,59 @@ export default function PackForm({ books, whatsappPhone }: PackFormProps) {
         }
 
         setError(null)
+        const detectedLang = detectPackLanguage(selectedBooksData)
+        const effectiveLang = packLanguage !== 'all' ? packLanguage : detectedLang
+        const langLabel = effectiveLang === 'en' ? 'Anglais / English' : effectiveLang === 'ar' ? 'Arabe / Arabic' : effectiveLang === 'fr' ? 'Français / French' : 'Mixte'
+        const arSuffix = getLanguageLabel(effectiveLang, 'ar')
+        const frSuffix = getLanguageLabel(effectiveLang, 'fr')
+        const enSuffix = getLanguageLabel(effectiveLang, 'en')
+
         const packName = name || nameFr || nameEn || 'Nom du pack inconnu'
-        const selectedTitles = selectedBooksData.map(item => `${item.title} (${item.itemType === 'BOOK' ? 'Book' : 'Accessory'})`).join(', ')
+        const selectedTitles = selectedBooksData.map(item => `${getBookDisplayTitle(item)} (${item.itemType === 'BOOK' ? 'Book' : 'Accessory'})`).join(', ')
 
         const prompt = `Act as an expert e-commerce copywriter & bookseller for Jumia marketplace.
 Pack Name: ${packName}
+Original Language of Books in this Pack: ${langLabel}
 ${selectedTitles ? `Products Included in this Pack (${selectedBooksData.length}): ${selectedTitles}` : ''}
 Total retail price of all selected products: ${totalOriginalPrice} MAD.
 Suggest an attractive promotional price below the total retail price. Prices must be whole numbers in MAD.
 Generate one concise, unique Seller SKU usable on Jumia. The SKU must contain only uppercase letters, numbers and hyphens.
 
+CRITICAL TITLE INSTRUCTION:
+Because buyers must know the original language of the books in this pack, you MUST explicitly mention the language at the end of each title:
+- "name_ar": Must end with "${arSuffix}" (e.g. "اسم الباقة ${arSuffix}")
+- "name_fr": Must end with "${frSuffix}" (e.g. "Nom du pack ${frSuffix}")
+- "name_en": Must end with "${enSuffix}" (e.g. "Pack Name ${enSuffix}")
+
+CRITICAL DESCRIPTION & SEO KEYWORDS INSTRUCTION:
+For each language description ("description_ar", "description_fr", "description_en"), write 2 to 3 engaging paragraphs that highlight the reading experience and value of the pack.
+AT THE VERY END OF EACH DESCRIPTION, YOU MUST ADD A HIGH-IMPACT SEO KEYWORDS BLOCK:
+- In "description_ar", end with:
+  الكلمات المفتاحية: [قائمة كلمات مفتاحية غنية بالبحث مفصولة بفواصل، تشمل اسم الكاتب، عناوين الروايات، تصنيف الروايات، شراء كتب في المغرب، باقة روايات]
+- In "description_fr", end with:
+  Mots-clés SEO : [liste de mots-clés riches en recherche séparés par des virgules, incluant auteur, titres des livres, genre littéraire, achat livres Maroc, pack de livres]
+- In "description_en", end with:
+  Keywords: [list of high-volume search keywords separated by commas, including author name, book titles, genre, books in Morocco, book bundle]
+
 Please provide the following information in strict JSON format:
 {
-  "name_ar": "اسم الحزمة باللغة العربية (جذاب وواضح)",
-  "name_fr": "Nom du pack en français (accrocheur et clair)",
-  "name_en": "Pack name in English (catchy and professional)",
-  "description_ar": "وصف جذاب للحزمة بالعربية (فقرتين إلى 3 فقرات تشجع على القراءة)",
-  "description_fr": "Description engageante du pack en français (2 à 3 paragraphes)",
-  "description_en": "Engaging pack description in English (2-3 paragraphs)",
+  "name_ar": "اسم الحزمة باللغة العربية متبوعاً بـ ${arSuffix}",
+  "name_fr": "Nom du pack en français suivi de ${frSuffix}",
+  "name_en": "Pack name in English followed by ${enSuffix}",
+  "description_ar": "وصف جذاب للحزمة بالعربية (فقرتين إلى 3 فقرات تشجع على القراءة)\\n\\nالكلمات المفتاحية: [قائمة الكلمات المفتاحية بالعربية]",
+  "description_fr": "Description engageante du pack en français (2 à 3 paragraphes)\\n\\nMots-clés SEO : [liste des mots-clés en français]",
+  "description_en": "Engaging pack description in English (2-3 paragraphs)\\n\\nKeywords: [list of keywords in English]",
+  "keywords_ar": "[قائمة الكلمات المفتاحية بالعربية]",
+  "keywords_fr": "[liste des mots-clés en français]",
+  "keywords_en": "[list of keywords in English]",
   "jumiaHighlights_ar": "<ul><li>العنوان: [اسم الحزمة بالعربية]</li><li>النوع: باقة كتب</li>${selectedTitles ? `<li>الكتب: ${selectedTitles}</li>` : ''}</ul>",
   "jumiaHighlights_fr": "<ul><li>Titre: [Nom du pack en français]</li><li>Type: Pack de Livres</li>${selectedTitles ? `<li>Contient: ${selectedTitles}</li>` : ''}</ul>",
   "jumiaHighlights_en": "<ul><li>Title: [Pack name in English]</li><li>Type: Book Pack</li>${selectedTitles ? `<li>Contains: ${selectedTitles}</li>` : ''}</ul>",
-  "jumiaPackageContent_ar": "1 x باقة كتب : [اسم الحزمة بالعربية]",
-  "jumiaPackageContent_fr": "1 x Pack de livres : [Nom du pack en français]",
-  "jumiaPackageContent_en": "1 x Book pack : [Pack name in English]",
+  "jumiaPackageContent_ar": "1 x باقة كتب : [اسم الحزمة بالعربية ${arSuffix}]",
+  "jumiaPackageContent_fr": "1 x Pack de livres : [Nom du pack en français ${frSuffix}]",
+  "jumiaPackageContent_en": "1 x Book pack : [Pack name in English ${enSuffix}]",
   "jumiaHighlights": "<ul><li>Titre: [Nom du pack en français]</li><li>Type: Pack de Livres</li>${selectedTitles ? `<li>Contient: ${selectedTitles}</li>` : ''}</ul>",
-  "jumiaPackageContent": "1 x Pack de livres : [Nom du pack en français]",
+  "jumiaPackageContent": "1 x Pack de livres : [Nom du pack en français ${frSuffix}]",
   "originalPrice": ${totalOriginalPrice},
   "price": "[Prix promotionnel proposé en MAD, nombre entier inférieur à ${totalOriginalPrice}]",
   "sellerSku": "[SKU Jumia unique, par exemple RIW-PACK-XXXX]"
@@ -518,19 +737,57 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                 return
             }
 
+            // Détection de la langue du pack
+            const detectedLang = detectPackLanguage(selectedBooksData)
+            const effectiveLang = packLanguage !== 'all' ? packLanguage : detectedLang
+            if (effectiveLang !== 'all') {
+                setPackLanguage(effectiveLang)
+            }
+
             // Noms
             const nAr = data.name_ar || data.nameAr || data.title_ar || data.titleAr
             const nFr = data.name_fr || data.nameFr || data.title_fr || data.titleFr
             const nEn = data.name_en || data.nameEn || data.title_en || data.titleEn
-            const cleanName = (val: string) => (val || '').replace(/\|/g, '-').replace(/\s+/g, ' ').trim()
-            if (nAr) setName(cleanName(nAr))
-            if (nFr) setNameFr(cleanName(nFr))
-            if (nEn) setNameEn(cleanName(nEn))
+            if (nAr) setName(appendLanguageSuffix(nAr, effectiveLang, 'ar'))
+            if (nFr) setNameFr(appendLanguageSuffix(nFr, effectiveLang, 'fr'))
+            if (nEn) setNameEn(appendLanguageSuffix(nEn, effectiveLang, 'en'))
 
-            // Descriptions
-            const dAr = data.description_ar || data.descriptionAr
-            const dFr = data.description_fr || data.descriptionFr
-            const dEn = data.description_en || data.descriptionEn
+            // Descriptions & Mots-clés SEO
+            let dAr = data.description_ar || data.descriptionAr || ''
+            let dFr = data.description_fr || data.descriptionFr || ''
+            let dEn = data.description_en || data.descriptionEn || ''
+
+            const kwAr = data.keywords_ar || data.keywordsAr || data.tags_ar || ''
+            const kwFr = data.keywords_fr || data.keywordsFr || data.tags_fr || ''
+            const kwEn = data.keywords_en || data.keywordsEn || data.tags_en || ''
+
+            if (kwAr && dAr && !dAr.includes('الكلمات المفتاحية') && !dAr.includes('كلمات مفتاحية')) {
+                const kwStr = Array.isArray(kwAr) ? kwAr.join(', ') : String(kwAr)
+                dAr = `${dAr.trim()}\n\nالكلمات المفتاحية: ${kwStr}`
+            }
+            if (kwFr && dFr && !dFr.toLowerCase().includes('mots-clés') && !dFr.toLowerCase().includes('mots clés')) {
+                const kwStr = Array.isArray(kwFr) ? kwFr.join(', ') : String(kwFr)
+                dFr = `${dFr.trim()}\n\nMots-clés SEO : ${kwStr}`
+            }
+            if (kwEn && dEn && !dEn.toLowerCase().includes('keywords:')) {
+                const kwStr = Array.isArray(kwEn) ? kwEn.join(', ') : String(kwEn)
+                dEn = `${dEn.trim()}\n\nKeywords: ${kwStr}`
+            }
+
+            // Fallback automatique si aucun mot-clé n'a été inséré
+            if (dAr && !dAr.includes('الكلمات المفتاحية') && !dAr.includes('كلمات مفتاحية')) {
+                const kw = getPackKeywords(nAr || name || 'باقة كتب', selectedBooksData, 'ar')
+                dAr = appendKeywordsToDescription(dAr, kw, 'ar')
+            }
+            if (dFr && !dFr.toLowerCase().includes('mots-clés') && !dFr.toLowerCase().includes('mots clés')) {
+                const kw = getPackKeywords(nFr || nameFr || name || 'Pack de livres', selectedBooksData, 'fr')
+                dFr = appendKeywordsToDescription(dFr, kw, 'fr')
+            }
+            if (dEn && !dEn.toLowerCase().includes('keywords:')) {
+                const kw = getPackKeywords(nEn || nameEn || name || 'Book pack', selectedBooksData, 'en')
+                dEn = appendKeywordsToDescription(dEn, kw, 'en')
+            }
+
             if (dAr) setDescription(dAr)
             if (dFr) setDescriptionFr(dFr)
             if (dEn) setDescriptionEn(dEn)
@@ -547,9 +804,9 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
             const cAr = data.jumiaPackageContent_ar || data.jumia_package_content_ar || data.package_content_ar || data.packageContentAr || (data.jumiaPackageContent && /[\u0600-\u06FF]/.test(data.jumiaPackageContent) ? data.jumiaPackageContent : '')
             const cFr = data.jumiaPackageContent_fr || data.jumia_package_content_fr || data.package_content_fr || data.packageContentFr || data.jumiaPackageContent || data.package_content || ''
             const cEn = data.jumiaPackageContent_en || data.jumia_package_content_en || data.package_content_en || data.packageContentEn || ''
-            if (cAr) setJumiaPackageContentAr(cAr)
-            if (cFr) setJumiaPackageContentFr(cFr)
-            if (cEn) setJumiaPackageContentEn(cEn)
+            if (cAr) setJumiaPackageContentAr(appendLanguageSuffix(cAr, effectiveLang, 'ar'))
+            if (cFr) setJumiaPackageContentFr(appendLanguageSuffix(cFr, effectiveLang, 'fr'))
+            if (cEn) setJumiaPackageContentEn(appendLanguageSuffix(cEn, effectiveLang, 'en'))
 
             // Prix et SKU communs à toutes les langues
             const parsePrice = (value: unknown) => {
@@ -836,13 +1093,23 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                                     <label className="block text-sm font-medium text-gray-700">
                                         Description {currentLang === 'ar' ? '(Arabe)' : currentLang === 'fr' ? '(Français)' : '(Anglais)'}
                                     </label>
-                                    <button
-                                        type="button"
-                                        onClick={generateDescription}
-                                        className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100"
-                                    >
-                                        ✨ Générer la description
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddKeywords(false)}
+                                            className="text-xs font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all bg-emerald-50 px-2.5 py-1.5 rounded-md border border-emerald-100"
+                                            title="Ajouter les mots-clés SEO à la description active"
+                                        >
+                                            🏷️ + Mots-clés SEO
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={generateDescription}
+                                            className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100"
+                                        >
+                                            ✨ Générer la description
+                                        </button>
+                                    </div>
                                 </div>
                                 {currentLang === 'ar' && (
                                     <textarea
@@ -1091,6 +1358,8 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                                     }}
                                     placeholder={currentLang === 'ar' 
                                         ? `<ul><li>العنوان: ${name || 'اسم الحزمة'}</li><li>النوع: باقة كتب</li></ul>`
+                                        : currentLang === 'en'
+                                        ? `<ul><li>Title: ${nameEn || name || 'Pack Name'}</li><li>Type: Book Pack</li></ul>`
                                         : `<ul><li>Titre: ${nameFr || name || 'Nom du pack'}</li><li>Type: Pack de Livres</li></ul>`}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs"
                                 />
@@ -1122,12 +1391,161 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                                     }}
                                     placeholder={currentLang === 'ar' 
                                         ? `1 x باقة كتب : ${name || 'اسم الحزمة'}`
+                                        : currentLang === 'en'
+                                        ? `1 x Book pack : ${nameEn || name || 'Pack Name'}`
                                         : `1 x Pack de livres : ${nameFr || name || 'Nom du pack'}`}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                 />
                                 <p className="mt-1 text-sm text-gray-500">
                                     Exemple: "3 x Livres". Laisser vide pour la valeur par défaut.
                                 </p>
+                            </div>
+
+                            {/* Prévisualisation Comparative Multilingue Jumia */}
+                            <div className="mt-6 border border-indigo-100 bg-gradient-to-br from-indigo-50/40 via-white to-blue-50/30 rounded-xl p-4 shadow-xs">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-black uppercase tracking-wider">
+                                            Jumia Sync
+                                        </span>
+                                        <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                                            Aperçu Comparatif Multilingue (AR / FR / EN)
+                                        </h3>
+                                    </div>
+                                    <span className="text-[11px] text-gray-500">
+                                        Cliquez sur une langue pour basculer l'édition
+                                    </span>
+                                </div>
+
+                                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+                                    <table className="min-w-full text-xs divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" className="px-3 py-2 text-left font-bold text-gray-500 uppercase tracking-wider w-32">
+                                                    Attribut
+                                                </th>
+                                                <th scope="col" className="px-3 py-2 text-right">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCurrentLang('ar')}
+                                                        className={`text-xs font-bold px-2 py-1 rounded transition-colors ${currentLang === 'ar' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+                                                    >
+                                                        العربية (AR) {currentLang === 'ar' ? '✓' : ''}
+                                                    </button>
+                                                </th>
+                                                <th scope="col" className="px-3 py-2 text-left">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCurrentLang('fr')}
+                                                        className={`text-xs font-bold px-2 py-1 rounded transition-colors ${currentLang === 'fr' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+                                                    >
+                                                        Français (FR) {currentLang === 'fr' ? '✓' : ''}
+                                                    </button>
+                                                </th>
+                                                <th scope="col" className="px-3 py-2 text-left">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCurrentLang('en')}
+                                                        className={`text-xs font-bold px-2 py-1 rounded transition-colors ${currentLang === 'en' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+                                                    >
+                                                        English (EN) {currentLang === 'en' ? '✓' : ''}
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {/* Titre */}
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-3 py-2.5 font-semibold text-gray-700 bg-gray-50/40">
+                                                    Titre
+                                                </td>
+                                                <td className="px-3 py-2.5 text-right font-medium text-gray-900" dir="rtl">
+                                                    {name ? (
+                                                        <span>{name} <span className="text-[10px] text-gray-400 font-normal">({name.length}/60)</span></span>
+                                                    ) : (
+                                                        <span className="text-gray-400 italic">Non défini</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 font-medium text-gray-900">
+                                                    {nameFr || name ? (
+                                                        <span>{nameFr || name} <span className="text-[10px] text-gray-400 font-normal">({(nameFr || name).length}/60)</span></span>
+                                                    ) : (
+                                                        <span className="text-gray-400 italic">Non défini</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 font-medium text-gray-900">
+                                                    {nameEn || name ? (
+                                                        <span>{nameEn || name} <span className="text-[10px] text-gray-400 font-normal">({(nameEn || name).length}/60)</span></span>
+                                                    ) : (
+                                                        <span className="text-gray-400 italic">Non défini</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+
+                                            {/* Highlights */}
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-3 py-2.5 font-semibold text-gray-700 bg-gray-50/40">
+                                                    Highlights HTML
+                                                </td>
+                                                <td className="px-3 py-2.5 text-right font-mono text-[11px] text-gray-700" dir="rtl">
+                                                    {jumiaHighlightsAr ? (
+                                                        <span className="line-clamp-2">{jumiaHighlightsAr}</span>
+                                                    ) : (
+                                                        <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Par défaut</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 font-mono text-[11px] text-gray-700">
+                                                    {jumiaHighlightsFr ? (
+                                                        <span className="line-clamp-2">{jumiaHighlightsFr}</span>
+                                                    ) : (
+                                                        <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Par défaut</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 font-mono text-[11px] text-gray-700">
+                                                    {jumiaHighlightsEn ? (
+                                                        <span className="line-clamp-2">{jumiaHighlightsEn}</span>
+                                                    ) : (
+                                                        <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Par défaut</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+
+                                            {/* Contenu colis */}
+                                            <tr className="hover:bg-gray-50/50">
+                                                <td className="px-3 py-2.5 font-semibold text-gray-700 bg-gray-50/40">
+                                                    What's in the box
+                                                </td>
+                                                <td className="px-3 py-2.5 text-right text-gray-800" dir="rtl">
+                                                    {jumiaPackageContentAr ? (
+                                                        <span>{jumiaPackageContentAr}</span>
+                                                    ) : (
+                                                        <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                                                            1 x باقة كتب : {name || '...'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 text-gray-800">
+                                                    {jumiaPackageContentFr ? (
+                                                        <span>{jumiaPackageContentFr}</span>
+                                                    ) : (
+                                                        <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                                                            1 x Pack de livres : {nameFr || name || '...'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2.5 text-gray-800">
+                                                    {jumiaPackageContentEn ? (
+                                                        <span>{jumiaPackageContentEn}</span>
+                                                    ) : (
+                                                        <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                                                            1 x Book pack : {nameEn || name || '...'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1202,7 +1620,7 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                                                     />
                                                     <div className="ml-4 flex-1">
                                                         <p className="text-sm font-black text-gray-900 leading-tight">
-                                                            {book.title}
+                                                            {getBookDisplayTitle(book)}
                                                             <span className={`ml-2 px-1.5 py-0.5 text-[8px] font-black uppercase rounded ${book.itemType === 'BOOK' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
                                                                 {book.itemType === 'BOOK' ? 'Livre' : 'Accessoire'}
                                                             </span>
@@ -1250,7 +1668,7 @@ Ensure all descriptions and highlights are provided in Arabic, French and Englis
                                 <ul className="space-y-1">
                                     {selectedBooksData.map(book => (
                                         <li key={book.id} className="text-xs text-gray-600 flex justify-between border-b border-gray-50 pb-1 last:border-0 last:pb-0">
-                                            <span className="truncate pr-2">• {book.title}</span>
+                                            <span className="truncate pr-2">• {getBookDisplayTitle(book)}</span>
                                             <span className={`font-semibold whitespace-nowrap ${book.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                 Qté: {book.stock}
                                             </span>

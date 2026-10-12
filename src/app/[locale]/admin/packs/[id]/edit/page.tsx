@@ -39,7 +39,13 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
                 shippingFees: pack.shippingFees,
                 sellerSku: pack.sellerSku || '',
                 jumiaHighlights: (pack as any).jumiaHighlights || '',
+                jumiaHighlightsAr: (pack as any).jumiaHighlightsAr || '',
+                jumiaHighlightsFr: (pack as any).jumiaHighlightsFr || '',
+                jumiaHighlightsEn: (pack as any).jumiaHighlightsEn || '',
                 jumiaPackageContent: (pack as any).jumiaPackageContent || '',
+                jumiaPackageContentAr: (pack as any).jumiaPackageContentAr || '',
+                jumiaPackageContentFr: (pack as any).jumiaPackageContentFr || '',
+                jumiaPackageContentEn: (pack as any).jumiaPackageContentEn || '',
                 selectedBookIds
             } as any}
             books={books}

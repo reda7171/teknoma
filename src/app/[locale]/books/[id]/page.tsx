@@ -510,6 +510,7 @@ export default async function BookDetailPage({
                                         alt={displayTitle}
                                         className="w-full h-full object-cover transition-transform duration-700"
                                         priority={true}
+                                        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 384px"
                                     />
                                     {book.stock <= 5 && book.stock > 0 && (
                                         <div className="absolute top-6 right-6 rtl:left-6 rtl:right-auto z-20">

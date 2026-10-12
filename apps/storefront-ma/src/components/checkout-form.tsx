@@ -12,11 +12,13 @@ const labels = {
 } as const
 
 export function CheckoutForm({ locale }: { locale: Locale }) {
-  const { items, subtotal, clear } = useCart()
+  const { items, subtotal, clear, ready } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [orderId, setOrderId] = useState('')
   const t = labels[locale]
+  const shippingCost = subtotal >= 500 ? 0 : 30
+  if (!ready) return <main className="checkout shell" aria-busy="true"><div className="checkout-loading"/><div className="checkout-loading"/></main>
   if (orderId) return <main className="checkout-success shell"><p className="eyebrow">RIWAYA</p><h1>{t.success}</h1><p>{t.thanks}</p><strong>{t.order}: {orderId.slice(0, 8).toUpperCase()}</strong></main>
   if (!items.length) return <main className="empty-cart shell"><h1>{t.title}</h1><p>{t.empty}</p><Link className="button primary" href={`/${locale}/books`}>{t.back}</Link></main>
 
@@ -32,5 +34,5 @@ export function CheckoutForm({ locale }: { locale: Locale }) {
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Erreur') } finally { setLoading(false) }
   }
 
-  return <main className="checkout shell"><div><p className="eyebrow">RIWAYA CHECKOUT</p><h1>{t.title}</h1><form onSubmit={submit}><label>{t.name}<input name="fullName" required minLength={2}/></label><div className="form-row"><label>{t.phone}<input name="phone" type="tel" required minLength={8}/></label><label>{t.email}<input name="email" type="email"/></label></div><label>{t.city}<input name="city" required minLength={2}/></label><label>{t.address}<textarea name="address" required minLength={5}/></label><label>{t.comment}<textarea name="comment"/></label>{error ? <p className="form-error">{error}</p> : null}<button className="button primary" disabled={loading}>{loading ? t.sending : t.submit}</button></form></div><aside className="checkout-summary">{items.map((item) => <p key={item.id}><span>{item.quantity} × {item.title}</span><b>{item.quantity * item.price} MAD</b></p>)}<hr/><p><strong>{t.total}</strong><strong>{subtotal} MAD</strong></p><small>{t.shipping}</small></aside></main>
+  return <main className="checkout shell"><div><p className="eyebrow">RIWAYA CHECKOUT</p><h1>{t.title}</h1><form onSubmit={submit}><label>{t.name}<input name="fullName" autoComplete="name" required minLength={2}/></label><div className="form-row"><label>{t.phone}<input name="phone" type="tel" inputMode="tel" autoComplete="tel" required minLength={8}/></label><label>{t.email}<input name="email" type="email" autoComplete="email"/></label></div><label>{t.city}<input name="city" autoComplete="address-level2" required minLength={2}/></label><label>{t.address}<textarea name="address" autoComplete="street-address" required minLength={5}/></label><label>{t.comment}<textarea name="comment"/></label>{error ? <p className="form-error" role="alert">{error}</p> : null}<button className="button primary" disabled={loading} aria-busy={loading}>{loading ? t.sending : t.submit}</button></form></div><aside className="checkout-summary">{items.map((item) => <p key={item.id}><span>{item.quantity} × {item.title}</span><b>{item.quantity * item.price} MAD</b></p>)}<hr/><p><span>{t.total}</span><strong>{subtotal} MAD</strong></p><p><span>{locale === 'ar' ? 'التوصيل' : locale === 'en' ? 'Delivery' : 'Livraison'}</span><strong>{shippingCost ? `${shippingCost} MAD` : (locale === 'ar' ? 'مجاني' : locale === 'en' ? 'Free' : 'Offerte')}</strong></p><p className="checkout-grand-total"><strong>{locale === 'ar' ? 'المجموع' : locale === 'en' ? 'Total' : 'Total'}</strong><strong>{subtotal + shippingCost} MAD</strong></p><small>{t.shipping}</small></aside></main>
 }

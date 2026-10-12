@@ -8,12 +8,17 @@ import { useCart, type CartItem } from './cart-provider'
 export function CartLink({ locale }: { locale: Locale }) {
   const { count } = useCart()
   const label = locale === 'ar' ? 'السلة' : locale === 'en' ? 'Cart' : 'Panier'
-  return <Link className="bag" href={`/${locale}/cart`} aria-label={`${label}: ${count}`}>{count}</Link>
+  return <Link className="bag" href={`/${locale}/cart`} aria-label={`${label}: ${count}`}><span className="cart-label">{label}</span><span className="cart-count">{count}</span></Link>
 }
 
 export function AddToCartButton({ locale, product }: { locale: Locale; product: Omit<CartItem, 'quantity'> }) {
   const { add } = useCart()
   const [added, setAdded] = useState(false)
   const label = added ? (locale === 'ar' ? 'تمت الإضافة ✓' : locale === 'en' ? 'Added ✓' : 'Ajouté ✓') : (locale === 'ar' ? 'أضف إلى السلة' : locale === 'en' ? 'Add to cart' : 'Ajouter au panier')
-  return <button className="button primary buy-button" type="button" onClick={() => { add(product); setAdded(true); window.setTimeout(() => setAdded(false), 1400) }}>{label}</button>
+  const cartLabel = locale === 'ar' ? 'عرض السلة' : locale === 'en' ? 'View cart' : 'Voir le panier'
+
+  return <div className="purchase-actions" aria-live="polite">
+    <button className={`button primary buy-button ${added ? 'added' : ''}`} type="button" onClick={() => { add(product); setAdded(true) }}>{label}</button>
+    {added ? <Link className="button cart-next" href={`/${locale}/cart`}>{cartLabel} →</Link> : null}
+  </div>
 }
