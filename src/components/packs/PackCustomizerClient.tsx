@@ -9,10 +9,14 @@ import BookReplacementModal from './BookReplacementModal'
 import { Link } from '@/i18n/routing'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { notifyAddToCart } from '@/lib/actions/cart-notify'
+import { getLocalizedTitle, getLocalizedPackTitle } from '@/lib/i18n-utils'
 
 interface Book {
     id: string
     title: string
+    titleFr?: string | null
+    titleEn?: string | null
+    language?: string | null
     author: string
     image: string
     price: number
@@ -22,6 +26,9 @@ interface Book {
 interface Pack {
     id: string
     name: string
+    nameFr?: string | null
+    nameEn?: string | null
+    language?: string | null
     price: number
     image: string | null
     shippingFees: number
@@ -44,6 +51,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
     const t = useTranslations('PackDetail')
     const tCommon = useTranslations('Common')
     const locale = useLocale()
+    const packTitle = getLocalizedPackTitle(pack, locale)
 
     const addItem = useCartStore((state) => state.addItem)
     const openCart = useUIStore((state) => state.openCart)
@@ -83,7 +91,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
         if (selectedBookForReplacement) {
             setReplacedBooks(prev => ({
                 ...prev,
-                [selectedBookForReplacement]: { id: newBook.id, title: newBook.title }
+                [selectedBookForReplacement]: { id: newBook.id, title: getLocalizedTitle(newBook, locale) }
             }))
         }
     }
@@ -97,7 +105,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
             addItem({
                 type: 'PACK',
                 id: pack.id,
-                title: pack.name,
+                title: packTitle,
                 price: pack.price,
                 image: pack.image || pack.books[0]?.book.image || '',
                 shippingFees: pack.shippingFees,
@@ -128,7 +136,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
 
             fbPixelEvents.addToCart({
                 id: pack.id,
-                title: pack.name,
+                title: packTitle,
                 price: pack.price + (addUpsell ? 25 : 0),
                 quantity: 1
             });
@@ -143,7 +151,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
             const currentTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
             const itemsText = items.map(i => `${i.quantity}x ${i.title}`).join(', ')
             
-            notifyAddToCart(pack.name, pack.price + (addUpsell ? 25 : 0), 'PACK', currentSessionId, currentTotal, itemsText, discount).catch(console.error)
+            notifyAddToCart(packTitle, pack.price + (addUpsell ? 25 : 0), 'PACK', currentSessionId, currentTotal, itemsText, discount).catch(console.error)
 
             showNotification(tCommon('AddedToCartSuccess'), 'success')
             
@@ -159,7 +167,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
 
     const handleWhatsApp = () => {
         if (!whatsappPhone || hasMissingBooks) return;
-        let text = `Bonjour, je souhaite commander le pack : ${pack.name}\n`
+        let text = `Bonjour, je souhaite commander le pack : ${packTitle}\n`
         text += `Prix : ${pack.price + (addUpsell ? 25 : 0)} MAD\n`
         if (addUpsell) {
             text += `+ Inclus : فاتتني صلاة (25 MAD)\n`
@@ -289,7 +297,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                                                 </div>
                                             ) : (
                                                 <Link href={`/books/${pb.book.id}`} className={`text-xs rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal hover:underline cursor-pointer block w-fit ${isMissing ? 'text-red-500 hover:text-red-600' : 'text-gray-700 hover:text-black'}`}>
-                                                    {pb.book.title}
+                                                    {getLocalizedTitle(pb.book, locale)}
                                                 </Link>
                                             )}
                                             
@@ -311,7 +319,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
 
                                         {replacement && (
                                             <Link href={`/books/${pb.book.id}`} className="text-[10px] text-gray-400 mt-1 line-through hover:text-gray-600 block w-fit">
-                                                {pb.book.title}
+                                                {getLocalizedTitle(pb.book, locale)}
                                             </Link>
                                         )}
                                     </div>

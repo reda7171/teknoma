@@ -800,7 +800,8 @@ CRITICAL TITLE INSTRUCTION:
 - "name_en": Must end with "${enSuffix}" and strictly <= 30 characters in total (e.g. "Pack Name ${enSuffix}")
 
 CRITICAL DESCRIPTION & SEO KEYWORDS INSTRUCTION:
-For each language description ("description_ar", "description_fr", "description_en"), write 2 to 3 engaging paragraphs that highlight the reading experience and value of the pack.
+1. STRICT ZERO PRICE / NO DISCOUNT POLICY: NEVER mention or include any price, currency, discount or promo in descriptions, titles, keywords, highlights or package content (ABSOLUTELY NO 'prix', 'price', 'سعر', 'ثمن', 'DH', 'MAD', 'درهم', 'gratuit', 'free', 'off', 'promo', '%', 'remise', 'solde'). Jumia strictly rejects listings containing price mentions in the description!
+2. For each language description ("description_ar", "description_fr", "description_en"), write 2 to 3 engaging paragraphs that highlight the reading experience and value of the pack.
 AT THE VERY END OF EACH DESCRIPTION, YOU MUST ADD A HIGH-IMPACT SEO KEYWORDS BLOCK:
 - In "description_ar", end with:
   الكلمات المفتاحية: [قائمة كلمات مفتاحية غنية بالبحث مفصولة بفواصل، تشمل اسم الكاتب، عناوين الروايات، تصنيف الروايات، شراء كتب في المغرب، باقة روايات]

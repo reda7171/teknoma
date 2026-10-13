@@ -205,6 +205,23 @@ function cleanJumiaProductName(name: string): string {
         .trim()
 }
 
+export function cleanJumiaDescription(desc: string): string {
+    if (!desc) return ''
+    return desc
+        // Supprimer toute mention de prix en français, anglais, arabe (ex: "Prix: 120 DH", "Price: 150 MAD", "السعر: 150 درهم")
+        .replace(/(?:prix|price|سعر|ثمن)\s*[:：]?\s*\d+(?:[.,]\d+)?\s*(?:dh|mad|درهم|د\.م|dirhams?)?/gi, '')
+        // Supprimer les montants avec devise isolés (ex: "150 DH", "200 MAD", "150 درهم", "50 د.م")
+        .replace(/\b\d+(?:[.,]\d+)?\s*(?:dh|mad|درهم|د\.م|dirhams?)\b/gi, '')
+        .replace(/(?:بـ|ب)\s*\d+(?:[.,]\d+)?\s*(?:درهم|dh|mad)/gi, '')
+        // Supprimer les pourcentages de réduction (ex: "-30%", "20% de remise", "خصم 20%")
+        .replace(/[-+]?\d+\s*%\s*(?:de remise|de réduction|off|خصم|تخفيض)?/gi, '')
+        // Supprimer les termes promotionnels interdits par Jumia
+        .replace(/\b(?:promotion|promo|remise|solde|réduction|gratuit|free|مجاناً?|مجاني|تخفيض|خصم|عرض خاص)\b/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\(\s*\)/g, '')
+        .trim()
+}
+
 export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' | 'fr' | 'ar' | 'en' = 'all') {
     try {
         const jumia = await JumiaAPI.getInstance()
@@ -234,13 +251,14 @@ export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' |
             if (hasArabic(rawTitleFr)) rawTitleFr = `Livre - ${book.sellerSku || book.id.substring(0, 8)}`;
             const titleFr = cleanJumiaProductName(rawTitleFr).substring(0, 60).replace(/[-:,]+$/, '').trim();
 
-            const descArRaw = book.description || book.descriptionEn || book.descriptionFr || titleAr;
-            let descFrRaw = book.descriptionFr || book.descriptionEn || book.longDescription || `Un excellent livre - ${book.sellerSku || book.id.substring(0, 8)}`;
+            const descArRaw = cleanJumiaDescription(book.description || book.descriptionEn || book.descriptionFr || titleAr);
+            let descFrRaw = cleanJumiaDescription(book.descriptionFr || book.descriptionEn || book.longDescription || `Un excellent livre - ${book.sellerSku || book.id.substring(0, 8)}`);
             if (hasArabic(descFrRaw)) descFrRaw = `Un excellent livre à lire - ${book.sellerSku || book.id.substring(0, 8)}`;
 
             const padDesc = (desc: string) => {
+                const cleaned = cleanJumiaDescription(desc);
                 const suffix = " - Découvrez ce livre fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
-                const padded = desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+                const padded = cleaned.length >= 50 ? cleaned.substring(0, 9000) : (cleaned + " " + suffix).substring(0, 9000);
                 return padded.replace(/\n/g, '<br/>');
             };
 
@@ -338,11 +356,11 @@ export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' |
                     },
                     {
                         name: "short_description",
-                        value: (book.jumiaHighlights || `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`).replace(/\|/g, '-')
+                        value: cleanJumiaDescription((book.jumiaHighlights || `<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`).replace(/\|/g, '-'))
                     },
                     {
                         name: "package_content",
-                        value: (book.jumiaPackageContent || `1 x Livre : ${book.title}`).replace(/\|/g, '-')
+                        value: cleanJumiaDescription((book.jumiaPackageContent || `1 x Livre : ${book.title}`).replace(/\|/g, '-'))
                     },
                     {
                         name: "model",
@@ -501,13 +519,14 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
             if (hasArabic(rawTitleFr)) rawTitleFr = `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
             const titleFr = cleanJumiaProductName(rawTitleFr).substring(0, 60).replace(/[-:,]+$/, '').trim();
 
-            const descArRaw = pack.description || pack.descriptionEn || pack.descriptionFr || titleAr;
-            let descFrRaw = pack.descriptionFr || pack.descriptionEn || pack.description || `Un excellent pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            const descArRaw = cleanJumiaDescription(pack.description || pack.descriptionEn || pack.descriptionFr || titleAr);
+            let descFrRaw = cleanJumiaDescription(pack.descriptionFr || pack.descriptionEn || pack.description || `Un excellent pack - ${pack.sellerSku || pack.id.substring(0, 8)}`);
             if (hasArabic(descFrRaw)) descFrRaw = `Un excellent pack de livres - ${pack.sellerSku || pack.id.substring(0, 8)}`;
 
             const padDesc = (desc: string) => {
+                const cleaned = cleanJumiaDescription(desc);
                 const suffix = " - Découvrez ce pack fascinant qui viendra enrichir votre bibliothèque. Une excellente qualité pour des heures de lecture agréables et captivantes.";
-                const padded = desc.length >= 50 ? desc.substring(0, 9000) : (desc + " " + suffix).substring(0, 9000);
+                const padded = cleaned.length >= 50 ? cleaned.substring(0, 9000) : (cleaned + " " + suffix).substring(0, 9000);
                 return padded.replace(/\n/g, '<br/>');
             };
 
@@ -521,7 +540,7 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
 
             const rawTitleEn = pack.nameEn || pack.nameFr || pack.name || `Pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
             const titleEn = cleanJumiaProductName(rawTitleEn).substring(0, 60).replace(/[-:,]+$/, '').trim();
-            const descEnRaw = pack.descriptionEn || pack.descriptionFr || pack.description || `A great book pack - ${pack.sellerSku || pack.id.substring(0, 8)}`;
+            const descEnRaw = cleanJumiaDescription(pack.descriptionEn || pack.descriptionFr || pack.description || `A great book pack - ${pack.sellerSku || pack.id.substring(0, 8)}`);
             const descEn = padDesc(descEnRaw);
 
             let primaryName = baseName;
@@ -632,7 +651,8 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
                             const hlEn = p.jumiaHighlightsEn || p.jumiaHighlights;
                             const hlFr = p.jumiaHighlightsFr || p.jumiaHighlights;
                             const hl = targetLang === 'ar' ? hlAr : targetLang === 'en' ? hlEn : hlFr;
-                            return hl ? String(hl).replace(/\|/g, '-') : `<ul><li>Titre: ${cleanJumiaProductName(p.name)}</li><li>Type: Pack de Livres</li></ul>`;
+                            const val = hl ? String(hl).replace(/\|/g, '-') : `<ul><li>Titre: ${cleanJumiaProductName(p.name)}</li><li>Type: Pack de Livres</li></ul>`;
+                            return cleanJumiaDescription(val);
                         })()
                     },
                     {
@@ -643,7 +663,8 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
                             const pcEn = p.jumiaPackageContentEn || p.jumiaPackageContent;
                             const pcFr = p.jumiaPackageContentFr || p.jumiaPackageContent;
                             const pc = targetLang === 'ar' ? pcAr : targetLang === 'en' ? pcEn : pcFr;
-                            return pc ? String(pc).replace(/\|/g, '-') : `1 x Pack de livres : ${cleanJumiaProductName(p.name)}`;
+                            const val = pc ? String(pc).replace(/\|/g, '-') : `1 x Pack de livres : ${cleanJumiaProductName(p.name)}`;
+                            return cleanJumiaDescription(val);
                         })()
                     },
                     {

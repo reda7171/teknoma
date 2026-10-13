@@ -19,6 +19,7 @@ import { Edit } from 'lucide-react'
 import TestimonialsTabs from '@/components/home/TestimonialsTabs'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
+import { getLocalizedTitle, getLocalizedPackTitle, getLocalizedPackDescription } from '@/lib/i18n-utils'
 
 export async function generateMetadata({
     params,
@@ -44,37 +45,41 @@ export async function generateMetadata({
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
     const hasDiscount = savings > 0 && savingsPercent > 0
 
-    const bookTitles = pack.books.map(pb => pb.book.title).join(', ')
+    const displayName = getLocalizedPackTitle(pack, locale)
+    const displayDescription = getLocalizedPackDescription(pack, locale)
+    const bookTitles = pack.books.map(pb => getLocalizedTitle(pb.book, locale)).join(', ')
 
     const keywords = [
-        pack.name,
-        `pack ${pack.name}`,
+        displayName,
+        `pack ${displayName}`,
         'pack de livres maroc',
         'packs livres',
         'livres en promotion maroc',
         ...(hasDiscount ? [`économiser ${savingsPercent}%`] : []),
-        ...pack.books.map(pb => pb.book.title),
+        ...pack.books.map(pb => getLocalizedTitle(pb.book, locale)),
         ...pack.books.map(pb => pb.book.author),
         'librairie en ligne maroc',
     ]
 
     const ogTitle = locale === 'ar'
-        ? `باقة "${pack.name}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة رواية`
+        ? `باقة "${displayName}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة رواية`
         : locale === 'en'
-            ? `Pack "${pack.name}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | Riwaya`
-            : `Pack "${pack.name}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | Riwaya`
+            ? `Pack "${displayName}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | Riwaya`
+            : `Pack "${displayName}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | Riwaya`
 
-    const ogDescription = locale === 'ar'
+    const ogDescription = displayDescription || (locale === 'ar'
         ? `⚡ السعر: ${displayPrice} درهم مغربي ${hasDiscount ? `عوض ${totalOriginalPrice} درهم` : ''}. باقة من ${pack.books.length} كتب مختارة مع الدفع عند الاستلام والتوصيل السريع بالمغرب.`
         : locale === 'en'
             ? `⚡ Price: ${displayPrice} MAD ${hasDiscount ? `instead of ${totalOriginalPrice} MAD` : ''}. Bundle of ${pack.books.length} books with Cash on Delivery across Morocco.`
-            : `⚡ Prix: ${displayPrice} DH ${hasDiscount ? `au lieu de ${totalOriginalPrice} DH` : ''}. Pack de ${pack.books.length} livres avec Paiement à la livraison (COD) partout au Maroc.`
+            : `⚡ Prix: ${displayPrice} DH ${hasDiscount ? `au lieu de ${totalOriginalPrice} DH` : ''}. Pack de ${pack.books.length} livres avec Paiement à la livraison (COD) partout au Maroc.`)
 
     const dynamicOgImageUrl = `${baseUrl}/${locale}/packs/${pack.id}/opengraph-image`
 
     return {
-        title: `${pack.name} - Pack de ${pack.books.length} Livres | Riwaya`,
-        description: `Achetez le pack "${pack.name}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} درهم). ` : ''}Prix: ${displayPrice} درهم. Livraison rapide au Maroc.`,
+        title: `${displayName} - Pack de ${pack.books.length} Livres | Riwaya`,
+        description: displayDescription || (locale === 'ar'
+            ? `اشتري باقة "${displayName}" على رواية. ${pack.books.length} كتب مختارة : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `وفر ${savingsPercent}%. ` : ''}السعر: ${displayPrice} درهم. توصيل سريع بالمغرب.`
+            : `Achetez le pack "${displayName}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} DH). ` : ''}Prix: ${displayPrice} DH. Livraison rapide au Maroc.`),
         keywords,
         openGraph: {
             title: ogTitle,
@@ -84,9 +89,9 @@ export async function generateMetadata({
                     url: dynamicOgImageUrl,
                     width: 1200,
                     height: 630,
-                    alt: `${pack.name} - ${displayPrice} DH`,
+                    alt: `${displayName} - ${displayPrice} DH`,
                 },
-                ...(imageUrl ? [{ url: imageUrl, width: 800, height: 800, alt: pack.name }] : []),
+                ...(imageUrl ? [{ url: imageUrl, width: 800, height: 800, alt: displayName }] : []),
             ],
             type: 'website',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
@@ -143,6 +148,9 @@ export default async function PackDetailPage({
         notFound()
     }
 
+    const displayName = getLocalizedPackTitle(pack, locale)
+    const displayDescription = getLocalizedPackDescription(pack, locale)
+
     const totalOriginalPrice = Math.round(pack.originalPrice || pack.books.reduce((sum, pb) => sum + pb.book.price, 0))
     const displayPrice = Math.round(pack.price)
     const savings = totalOriginalPrice - displayPrice
@@ -158,9 +166,9 @@ export default async function PackDetailPage({
         {
             '@context': 'https://schema.org',
             '@type': 'Product',
-            name: pack.name,
+            name: displayName,
             sku: pack.id,
-            description: pack.description || `Pack de ${pack.books.length} livres sélectionné par Riwaya.`,
+            description: displayDescription || `Pack de ${pack.books.length} livres sélectionné par Riwaya.`,
             image: packImageUrl,
             brand: {
                 '@type': 'Brand',
@@ -238,7 +246,7 @@ export default async function PackDetailPage({
             },
             isRelatedTo: pack.books.map((pb) => ({
                 '@type': 'Thing',
-                name: pb.book.title,
+                name: getLocalizedTitle(pb.book, locale),
                 image: pb.book.image,
                 url: pb.book.id ? `${baseUrl}/${locale}/books/${pb.book.id}` : undefined
             })),
@@ -262,7 +270,7 @@ export default async function PackDetailPage({
                 {
                     '@type': 'ListItem',
                     position: 3,
-                    name: pack.name,
+                    name: displayName,
                     item: `${localeBaseUrl}/packs/${pack.id}`
                 }
             ]
@@ -277,29 +285,29 @@ export default async function PackDetailPage({
             {
                 '@type': 'Question',
                 name: locale === 'ar'
-                    ? `ما هي الكتب المتضمنة في باقة ${pack.name}؟`
+                    ? `ما هي الكتب المتضمنة في باقة ${displayName}؟`
                     : locale === 'en'
-                        ? `What books are included in the ${pack.name} pack?`
-                        : `Quels livres sont inclus dans le pack ${pack.name} ?`,
+                        ? `What books are included in the ${displayName} pack?`
+                        : `Quels livres sont inclus dans le pack ${displayName} ?`,
                 acceptedAnswer: {
                     '@type': 'Answer',
-                    text: pack.books.map(pb => `${pb.book.title} (${pb.book.author})`).join(', ')
+                    text: pack.books.map(pb => `${getLocalizedTitle(pb.book, locale)} (${pb.book.author})`).join(', ')
                 }
             },
             {
                 '@type': 'Question',
                 name: locale === 'ar'
-                    ? `ما هو سعر باقة ${pack.name}؟`
+                    ? `ما هو سعر باقة ${displayName}؟`
                     : locale === 'en'
-                        ? `What is the price of the ${pack.name} pack?`
-                        : `Quel est le prix du pack ${pack.name} ?`,
+                        ? `What is the price of the ${displayName} pack?`
+                        : `Quel est le prix du pack ${displayName} ?`,
                 acceptedAnswer: {
                     '@type': 'Answer',
                     text: locale === 'ar'
-                        ? `سعر باقة ${pack.name} هو ${displayPrice} درهم مغربي${hasDiscount ? `، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%.` : '.'} الدفع عند الاستلام.`
+                        ? `سعر باقة ${displayName} هو ${displayPrice} درهم مغربي${hasDiscount ? `، بدلاً من ${totalOriginalPrice} درهم عند الشراء المنفرد. وفر ${savingsPercent}%.` : '.'} الدفع عند الاستلام.`
                         : locale === 'en'
-                            ? `The ${pack.name} pack costs ${displayPrice} درهم${hasDiscount ? ` instead of ${totalOriginalPrice} درهم for individual purchases. Save ${savingsPercent}%.` : '.'} Payment on delivery.`
-                            : `Le pack ${pack.name} est à ${displayPrice} درهم${hasDiscount ? ` au lieu de ${totalOriginalPrice} درهم à l'achat individuel. Économisez ${savingsPercent}%.` : '.'} Paiement à la livraison.`
+                            ? `The ${displayName} pack costs ${displayPrice} درهم${hasDiscount ? ` instead of ${totalOriginalPrice} درهم for individual purchases. Save ${savingsPercent}%.` : '.'} Payment on delivery.`
+                            : `Le pack ${displayName} est à ${displayPrice} درهم${hasDiscount ? ` au lieu de ${totalOriginalPrice} درهم à l'achat individuel. Économisez ${savingsPercent}%.` : '.'} Paiement à la livraison.`
                 }
             },
             {
@@ -334,7 +342,7 @@ export default async function PackDetailPage({
             <div className="min-h-screen bg-pixio-cream">
                 <SetPixelView
                     id={pack.id}
-                    title={pack.name}
+                    title={displayName}
                     price={displayPrice}
                     category="Packs"
                 />
@@ -348,7 +356,7 @@ export default async function PackDetailPage({
                         <span className="text-gray-400">/</span>
                         <Link href="/packs" className="hover:text-black transition-colors">{tNav('Packs')}</Link>
                         <span className="text-gray-400">/</span>
-                        <span className="text-black">{pack.name}</span>
+                        <span className="text-black">{displayName}</span>
                     </div>
 
                     <div className="flex justify-between items-center mb-12">
@@ -389,7 +397,7 @@ export default async function PackDetailPage({
                                     <div className="relative w-full h-full min-h-[400px] group">
                                         <ImageWithFallback
                                             src={pack.image}
-                                            alt={pack.name}
+                                            alt={displayName}
                                             className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                                         />
                                     </div>
@@ -399,7 +407,7 @@ export default async function PackDetailPage({
                                             <div key={pb.book.id} className={`relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-105 transform ${i % 2 === 0 ? '-rotate-3 mt-6' : 'rotate-3 mb-6'}`}>
                                                 <ImageWithFallback
                                                     src={pb.book.image}
-                                                    alt={pb.book.title}
+                                                    alt={getLocalizedTitle(pb.book, locale)}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
@@ -416,7 +424,7 @@ export default async function PackDetailPage({
                                 </div>
 
                                 <h1 className="text-5xl md:text-7xl font-black text-black leading-none tracking-tighter mb-10">
-                                    {pack.name}<span className="text-gray-200">.</span>
+                                    {displayName}<span className="text-gray-200">.</span>
                                 </h1>
 
                                 <PackCustomizerClient 
