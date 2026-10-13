@@ -140,6 +140,11 @@ jobs:
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/vps-clean-cache.sh
               (crontab -l 2>/dev/null | grep -q "vps-clean-cache.sh") || (crontab -l 2>/dev/null; echo "0 4 * * * /var/www/riwayama/scripts/vps-clean-cache.sh >> /var/www/riwayama/backups/cache-clean.log 2>&1") | crontab -
               (crontab -l 2>/dev/null | grep -q "vps-status") || (crontab -l 2>/dev/null; echo "*/10 * * * * curl -s 'https://riwaya.store/api/cron/vps-status?alert_only=true' > /dev/null 2>&1") | crontab -
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/jumia-status-cron.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/log/riwaya
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/riwaya/jumia-status-cron.log
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chown "$(id -un):$(id -gn)" /var/log/riwaya/jumia-status-cron.log
+              (crontab -l 2>/dev/null | grep -q "jumia-status-cron.sh") || (crontab -l 2>/dev/null; echo "*/10 * * * * flock -n /tmp/riwaya-jumia-status.lock /var/www/riwayama/scripts/jumia-status-cron.sh >> /var/log/riwaya/jumia-status-cron.log 2>&1") | crontab -
             fi
 
             # ─── Page 502 personnalisee ────────────────────────────────────
