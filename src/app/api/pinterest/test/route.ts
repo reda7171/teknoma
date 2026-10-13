@@ -76,11 +76,23 @@ export async function POST(req: NextRequest) {
                 }, { status: 400 });
             }
 
-            // Récupérer un livre réel avec image ou fallback
-            const sampleBook = await prisma.book.findFirst({
-                where: { image: { not: '' } },
-                select: { id: true, title: true, description: true, image: true, price: true }
-            });
+            // Récupérer un livre réel spécifique ou varier avec un livre aléatoire
+            let sampleBook = null;
+            if (body.bookId) {
+                sampleBook = await prisma.book.findUnique({
+                    where: { id: body.bookId },
+                    select: { id: true, title: true, description: true, image: true, price: true }
+                });
+            }
+            if (!sampleBook) {
+                const count = await prisma.book.count({ where: { image: { not: '' } } });
+                const skip = count > 1 ? Math.floor(Math.random() * Math.min(count, 20)) : 0;
+                sampleBook = await prisma.book.findFirst({
+                    where: { image: { not: '' } },
+                    skip,
+                    select: { id: true, title: true, description: true, image: true, price: true }
+                });
+            }
 
             const imgUrl = sampleBook?.image?.startsWith('http')
                 ? sampleBook.image

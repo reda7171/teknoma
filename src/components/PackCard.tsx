@@ -11,12 +11,14 @@ import { normalizeImage } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { notifyAddToCart } from '@/lib/actions/cart-notify'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
+import { getLocalizedPackTitle } from '@/lib/i18n-utils'
 
 interface PackCardProps {
     id: string
     name: string
     nameFr?: string | null
     nameEn?: string | null
+    language?: string | null
     description?: string | null
     price: number
     originalPrice?: number | null
@@ -39,6 +41,7 @@ export default function PackCard({
     name,
     nameFr,
     nameEn,
+    language,
     price,
     originalPrice,
     image,
@@ -60,7 +63,7 @@ export default function PackCard({
     const savingsPercent = Math.round((savings / totalOriginalPrice) * 100)
     const hasDiscount = savings > 0 && savingsPercent > 0
 
-    const displayName = locale === 'fr' && nameFr ? nameFr : locale === 'en' && nameEn ? nameEn : name;
+    const displayName = getLocalizedPackTitle({ name, nameFr, nameEn, language, books }, locale);
 
     return (
         <div className="group relative bg-[#FDFBF7] rounded-[2rem] overflow-hidden border border-gray-100 hover:border-black shadow-sm hover:shadow-2xl transition-all duration-500">

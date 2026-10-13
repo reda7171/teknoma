@@ -238,7 +238,7 @@ Please provide the following information in JSON format (so I can easily copy-pa
   "jumiaHighlights": "Key highlights of the book (bullet points)",
   "jumiaPackageContent": "What's in the box? (e.g., 1 x Book)"
 }
-Ensure the descriptions are catchy, SEO-friendly, and professional.`
+Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NEVER mention price, discounts, promos, or currency (DH, MAD, درهم) in any description or highlights (Jumia strictly rejects listings mentioning price in descriptions).`
 
         navigator.clipboard.writeText(prompt)
         alert('Prompt ChatGPT copié dans le presse-papier !')

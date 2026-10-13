@@ -27,6 +27,46 @@ export function getLocalizedLongDescription(book: any, locale: string): string {
     return book.longDescription || '';
 }
 
+export function getLocalizedPackTitle(pack: any, locale?: string): string {
+    if (!pack) return '';
+
+    const lang = (pack.language || pack.books?.[0]?.book?.language || '')?.toLowerCase();
+
+    // Always display the pack title in its original language, consistent with book policy
+    if (lang) {
+        if (lang === 'en' || lang === 'english') {
+            if (pack.nameEn) return pack.nameEn;
+            if (pack.name && !/[\u0600-\u06FF]/.test(pack.name)) return pack.name;
+        }
+        if (lang === 'fr' || lang === 'french' || lang === 'français') {
+            if (pack.nameFr) return pack.nameFr;
+            if (pack.name && !/[\u0600-\u06FF]/.test(pack.name)) return pack.name;
+        }
+        if (lang === 'ar' || lang === 'arabic' || lang === 'arabe') {
+            if (pack.name) return pack.name;
+        }
+    }
+
+    if (locale === 'fr' && pack.nameFr) return pack.nameFr;
+    if (locale === 'en' && pack.nameEn) return pack.nameEn;
+    return pack.name || pack.nameEn || pack.nameFr || '';
+}
+
+export function getLocalizedPackDescription(pack: any, locale?: string): string {
+    if (!pack) return '';
+
+    const lang = (pack.language || pack.books?.[0]?.book?.language || '')?.toLowerCase();
+
+    if (lang) {
+        if ((lang === 'en' || lang === 'english') && pack.descriptionEn) return pack.descriptionEn;
+        if ((lang === 'fr' || lang === 'french' || lang === 'français') && pack.descriptionFr) return pack.descriptionFr;
+    }
+
+    if (locale === 'fr' && pack.descriptionFr) return pack.descriptionFr;
+    if (locale === 'en' && pack.descriptionEn) return pack.descriptionEn;
+    return pack.description || pack.descriptionFr || pack.descriptionEn || '';
+}
+
 /**
  * Creates a URL-friendly slug from a string.
  */
