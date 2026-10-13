@@ -758,6 +758,12 @@
     "Processing": "Processing...",
     "FastDelivery": "Fast worldwide <br /> delivery within 48h.",
     "OrderSuccess": "Order placed successfully!",
+    "RememberDeliveryInfo": "Save my delivery info for next orders",
+    "SavedProfileTitle": "Saved delivery information found",
+    "UseSavedProfile": "1-Click Autofill",
+    "ClearSavedProfile": "Clear",
+    "ProfileAutoFilled": "Information applied automatically",
+    "NetworkReconnecting": "Reconnecting network...",
     "Errors": {
       "FirstNameRequired": "First name is required",
       "LastNameRequired": "Last name is required",

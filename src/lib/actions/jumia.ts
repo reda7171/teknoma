@@ -438,6 +438,54 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
             return { success: true, message: "Aucun pack trouvé pour publication." }
         }
 
+        // Contrôle anti-doublon Jumia basé sur la composition réelle (IDs et titres des livres)
+        const allSyncedPacks = await prisma.pack.findMany({
+            where: {
+                id: { notIn: packIds },
+                OR: [
+                    { isSyncedWithJumia: true },
+                    { jumiaProductSid: { not: null } }
+                ]
+            },
+            include: {
+                books: { include: { book: { select: { id: true, title: true } } } },
+                extraProducts: true
+            }
+        });
+
+        const getBookIdsSignature = (p: any) => {
+            const bIds = (p.books || []).map((b: any) => b.bookId).sort().join('|');
+            const eIds = (p.extraProducts || []).map((e: any) => e.extraProductId).sort().join('|');
+            return `${bIds}#${eIds}`;
+        };
+
+        const getTitlesSignature = (p: any) => {
+            return (p.books || [])
+                .map((b: any) => (b.book?.title || '').trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''))
+                .filter(Boolean)
+                .sort()
+                .join('|');
+        };
+
+        for (const currentPack of packs) {
+            const currentIdSig = getBookIdsSignature(currentPack);
+            const currentTitleSig = getTitlesSignature(currentPack);
+
+            const duplicate = allSyncedPacks.find(sp => {
+                const spIdSig = getBookIdsSignature(sp);
+                const spTitleSig = getTitlesSignature(sp);
+                return (currentIdSig && spIdSig && currentIdSig === spIdSig) ||
+                       (currentTitleSig && spTitleSig && currentTitleSig === spTitleSig);
+            });
+
+            if (duplicate) {
+                return {
+                    success: false,
+                    message: `Publication Jumia refusée pour doublon (Duplicate SEO variant) : Le pack "${currentPack.name}" a exactement la même composition de livres que le pack "${duplicate.name}" déjà actif sur Jumia. Veuillez modifier au moins un livre ou ajouter un accessoire distinct.`
+                };
+            }
+        }
+
         const shops = await jumia.getShops()
         const shopId = shops?.data?.[0]?.id || shops?.[0]?.id || "UNKNOWN_SHOP_ID"
         const productsToCreate: any[] = [];
@@ -1134,5 +1182,62 @@ export async function deactivatePackOnJumia(packId: string) {
     } catch (e: any) {
         console.error("Erreur deactivatePackOnJumia:", e)
         return { success: false, message: e.message }
+    }
+}
+
+/**
+ * Vérifie si un pack possède une composition identique (livres ou accessoires)
+ * à un pack déjà présent ou synchronisé sur Jumia pour éviter les rejets SEO Duplicate.
+ */
+export async function checkPackJumiaCompositionDuplicate(
+    packId?: string,
+    bookIds: string[] = [],
+    extraProductIds: string[] = []
+): Promise<{ isDuplicate: boolean; duplicatePackName?: string }> {
+    try {
+        if (!bookIds || bookIds.length === 0) return { isDuplicate: false };
+
+        const targetBookIdSig = [...bookIds].sort().join('|') + '#' + [...extraProductIds].sort().join('|');
+
+        const targetBooks = await prisma.book.findMany({
+            where: { id: { in: bookIds } },
+            select: { title: true }
+        });
+        const targetTitleSig = targetBooks
+            .map(b => b.title.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''))
+            .filter(Boolean)
+            .sort()
+            .join('|');
+
+        const syncedPacks = await prisma.pack.findMany({
+            where: {
+                ...(packId ? { id: { not: packId } } : {}),
+                OR: [
+                    { isSyncedWithJumia: true },
+                    { jumiaProductSid: { not: null } }
+                ]
+            },
+            include: {
+                books: { include: { book: { select: { title: true } } } },
+                extraProducts: { select: { extraProductId: true } }
+            }
+        });
+
+        for (const sp of syncedPacks) {
+            const spIdSig = sp.books.map(b => b.bookId).sort().join('|') + '#' + (sp.extraProducts || []).map(e => e.extraProductId).sort().join('|');
+            const spTitleSig = sp.books
+                .map(b => (b.book?.title || '').trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''))
+                .filter(Boolean)
+                .sort()
+                .join('|');
+
+            if (spIdSig === targetBookIdSig || (targetTitleSig && spTitleSig && spTitleSig === targetTitleSig)) {
+                return { isDuplicate: true, duplicatePackName: sp.name };
+            }
+        }
+
+        return { isDuplicate: false };
+    } catch {
+        return { isDuplicate: false };
     }
 }

@@ -6,7 +6,7 @@ import { useRouter } from '@/i18n/routing'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { createOrder } from '@/lib/actions/orders'
-import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset, X, Building2, QrCode } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset, X, Building2, QrCode, Zap } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import CouponInput from '@/components/CouponInput'
 import { useTranslations, useLocale } from 'next-intl'
@@ -16,6 +16,8 @@ import { getActiveGifts } from '@/lib/actions/gifts'
 import { getWithYouCities } from '@/lib/actions/delivery'
 import { calculate3For4Discount } from '@/lib/utils'
 import { trackPurchase } from '@/lib/tracking'
+import { getSavedDeliveryProfile, saveDeliveryProfile, clearSavedDeliveryProfile, SavedDeliveryProfile } from '@/lib/delivery-storage'
+import { withExponentialRetry } from '@/lib/retry'
 
 interface CheckoutForm {
     fullName: string
@@ -42,14 +44,32 @@ export default function CheckoutClient({
     const { items, getTotalPrice, clearCart, discount: instantOfferDiscount, sessionId } = useCartStore()
     const { showNotification } = useUIStore()
     const [mounted, setMounted] = useState(false)
+    const [hasHydrated, setHasHydrated] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [coupon, setCoupon] = useState<any>(null)
     const [gifts, setGifts] = useState<any[]>([])
     const [selectedBankIndex, setSelectedBankIndex] = useState<number | null>(null)
     const [useCredits, setUseCredits] = useState(false)
+    const [savedProfile, setSavedProfile] = useState<SavedDeliveryProfile | null>(null)
+    const [rememberDetails, setRememberDetails] = useState(true)
     const t = useTranslations('Checkout')
     const locale = useLocale()
+
+    const handleApplySavedProfile = () => {
+        if (!savedProfile) return
+        setValue('fullName', savedProfile.fullName)
+        setValue('phone', savedProfile.phone)
+        setValue('city', savedProfile.city)
+        setValue('address', savedProfile.address)
+        if (savedProfile.email) setValue('email', savedProfile.email)
+        showNotification(t('ProfileAutoFilled'), 'success')
+    }
+
+    const handleClearSavedProfile = () => {
+        clearSavedDeliveryProfile()
+        setSavedProfile(null)
+    }
 
     // Pré-remplir le formulaire si l'utilisateur est connecté
     const defaultValues: Partial<CheckoutForm> = user ? {
@@ -76,23 +96,29 @@ export default function CheckoutClient({
         if (!data.phone && !data.email) return
 
         try {
-            const res = await fetch('/api/abandoned-cart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: abandonedCartId,
-                    phone: data.phone,
-                    email: data.email,
-                    fullName: data.fullName,
-                    paymentMethod: data.paymentMethod,
-                    selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
-                    sessionId,
-                    items,
-                    total: finalTotal
+            const result = await withExponentialRetry(async () => {
+                const res = await fetch('/api/abandoned-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: abandonedCartId,
+                        phone: data.phone,
+                        email: data.email,
+                        fullName: data.fullName,
+                        paymentMethod: data.paymentMethod,
+                        selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
+                        sessionId,
+                        items,
+                        total: finalTotal
+                    })
                 })
-            })
-            const result = await res.json()
-            if (result.success && result.id) {
+                if (!res.ok && res.status >= 500) {
+                    throw new Error(`Server error ${res.status}`)
+                }
+                return res.json()
+            }, { maxRetries: 2, baseDelayMs: 300 })
+
+            if (result?.success && result?.id) {
                 setAbandonedCartId(result.id)
             }
         } catch (e) {
@@ -113,10 +139,36 @@ export default function CheckoutClient({
 
     useEffect(() => {
         setMounted(true)
-        // Fetch active gifts
-        getActiveGifts().then(setGifts)
-        // Fetch cities from WithYou
-        getWithYouCities().then(setAllCities)
+        if (useCartStore.persist?.hasHydrated()) {
+            setHasHydrated(true)
+        } else {
+            const unsub = useCartStore.persist?.onFinishHydration?.(() => {
+                setHasHydrated(true)
+            })
+            const timer = setTimeout(() => setHasHydrated(true), 300)
+            return () => {
+                if (unsub) unsub()
+                clearTimeout(timer)
+            }
+        }
+        // Charger le profil de livraison sauvegardé
+        const profile = getSavedDeliveryProfile()
+        if (profile) {
+            setSavedProfile(profile)
+            if (!getValues('fullName') && !getValues('phone')) {
+                setValue('fullName', profile.fullName)
+                setValue('phone', profile.phone)
+                setValue('city', profile.city)
+                setValue('address', profile.address)
+                if (profile.email && !getValues('email')) {
+                    setValue('email', profile.email)
+                }
+            }
+        }
+        // Fetch active gifts with retry
+        withExponentialRetry(() => getActiveGifts(), { maxRetries: 3 }).then(setGifts).catch(console.error)
+        // Fetch cities from WithYou with retry
+        withExponentialRetry(() => getWithYouCities(), { maxRetries: 3 }).then(setAllCities).catch(console.error)
     }, [])
 
     useEffect(() => {
@@ -149,7 +201,7 @@ export default function CheckoutClient({
     const [isSuccess, setIsSuccess] = useState(false)
 
     useEffect(() => {
-        if (mounted && !isSuccess) {
+        if (mounted && hasHydrated && !isSuccess) {
             const currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
             const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
             const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
@@ -170,9 +222,15 @@ export default function CheckoutClient({
                 router.replace('/cart')
             }
         }
-    }, [mounted, items, minOrderAmount, router, isSuccess, getTotalPrice, coupon])
+    }, [mounted, hasHydrated, items, minOrderAmount, router, isSuccess, getTotalPrice, coupon])
 
-    if (!mounted) return null
+    if (!mounted || !hasHydrated) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-black" />
+            </div>
+        )
+    }
 
     if (items.length === 0) {
         return null
@@ -245,24 +303,27 @@ export default function CheckoutClient({
             const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
             let finalComment = data.comment || ''
 
-            const result = await createOrder({
-                fullName: data.fullName,
-                email: data.email,
-                phone: data.phone,
-                address: data.address,
-                city: data.city,
-                comment: finalComment,
-                items: orderItems,
-                couponCode: coupon?.code,
-                discount: totalDiscountAmount,
-                useCredits: useCredits,
-                utmSource: localStorage.getItem('utm_source') || undefined,
-                utmMedium: localStorage.getItem('utm_medium') || undefined,
-                utmCampaign: localStorage.getItem('utm_campaign') || undefined,
-                fbclid: localStorage.getItem('fbclid') || undefined,
-                ttclid: localStorage.getItem('ttclid') || undefined,
-                paymentMethod: data.paymentMethod,
-            })
+            const result = await withExponentialRetry(
+                () => createOrder({
+                    fullName: data.fullName,
+                    email: data.email,
+                    phone: data.phone,
+                    address: data.address,
+                    city: data.city,
+                    comment: finalComment,
+                    items: orderItems,
+                    couponCode: coupon?.code,
+                    discount: totalDiscountAmount,
+                    useCredits: useCredits,
+                    utmSource: localStorage.getItem('utm_source') || undefined,
+                    utmMedium: localStorage.getItem('utm_medium') || undefined,
+                    utmCampaign: localStorage.getItem('utm_campaign') || undefined,
+                    fbclid: localStorage.getItem('fbclid') || undefined,
+                    ttclid: localStorage.getItem('ttclid') || undefined,
+                    paymentMethod: data.paymentMethod,
+                }),
+                { maxRetries: 3, baseDelayMs: 400, maxDelayMs: 2500 }
+            )
 
             if (result.success) {
                 // Suivi des conversions : Google Analytics 4 & Meta Pixel
@@ -298,6 +359,17 @@ export default function CheckoutClient({
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: abandonedCartId })
                     }).catch(() => {})
+                }
+
+                // Sauvegarder les coordonnées pour le prochain passage
+                if (rememberDetails) {
+                    saveDeliveryProfile({
+                        fullName: data.fullName,
+                        phone: data.phone,
+                        city: data.city,
+                        address: data.address,
+                        email: data.email
+                    })
                 }
 
                 setIsSuccess(true)
@@ -382,6 +454,40 @@ export default function CheckoutClient({
                                 <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center text-sm shadow-xl">01</div>
                                 {t('ShippingInfo')}
                             </h2>
+
+                            {savedProfile && (
+                                <div className="mb-8 p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md">
+                                            <Zap className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-black">
+                                                {t('SavedProfileTitle')} : <span className="text-emerald-700">{savedProfile.fullName} ({savedProfile.city})</span>
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 font-mono">
+                                                {savedProfile.phone}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <button
+                                            type="button"
+                                            onClick={handleApplySavedProfile}
+                                            className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                                        >
+                                            {t('UseSavedProfile')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleClearSavedProfile}
+                                            className="px-3 py-2 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
+                                        >
+                                            {t('ClearSavedProfile')}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="space-y-3 mb-8">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullName')}</label>
@@ -487,6 +593,16 @@ export default function CheckoutClient({
                                     className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black min-h-[120px]"
                                 />
                             </div>
+
+                            <label className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100 text-xs font-black text-gray-700 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={rememberDetails}
+                                    onChange={(e) => setRememberDetails(e.target.checked)}
+                                    className="w-4 h-4 rounded text-black focus:ring-black accent-black cursor-pointer"
+                                />
+                                <span>{t('RememberDeliveryInfo')}</span>
+                            </label>
                         </div>
 
                         <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
@@ -793,6 +909,14 @@ export default function CheckoutClient({
                         <button
                             form="checkout-form"
                             type="submit"
+                            onClick={() => {
+                                const formEl = document.getElementById('checkout-form') as HTMLFormElement | null
+                                if (formEl && typeof formEl.requestSubmit === 'function') {
+                                    formEl.requestSubmit()
+                                } else {
+                                    handleSubmit(onSubmit)()
+                                }
+                            }}
                             disabled={isSubmitting}
                             className="w-full bg-black text-white font-black py-6 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.2)] hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs rtl:text-lg rtl:tracking-normal animate-bounce-light"
                         >

@@ -75,6 +75,10 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
         }
     }
 
+    if (!mounted || isCartOpen || pathname?.includes('/checkout') || pathname?.includes('/cart')) {
+        return null
+    }
+
     return (
         <>
             <nav

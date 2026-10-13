@@ -547,7 +547,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
 
                         {/* Actions */}
                         <div className="flex items-center gap-4 shrink-0">
-                            <div className="hidden lg:block">
+                            <div className="hidden md:block">
                                 <LanguageSwitcher />
                             </div>
 
@@ -574,8 +574,9 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 </button>
                             </div>
 
-                            {/* Mobile Actions: Cart + Login + Search */}
+                            {/* Mobile Actions: Language + Cart + Login + Search */}
                             <div className="flex md:hidden items-center gap-1.5 sm:gap-2">
+                                <LanguageSwitcher />
                                 <button onClick={openCart} className="relative group p-1" aria-label="Ouvrir le panier">
                                     <div className={`w-9 h-9 border-2 border-transparent hover:border-black rounded-full flex items-center justify-center transition-all duration-300 ${isCartAnimating ? 'scale-110 -rotate-12 bg-blue-50' : 'animate-cart-vibrate'}`}>
                                         <ShoppingCart className={`w-5 h-5 transition-colors ${isCartAnimating ? 'text-blue-600' : 'text-gray-900'}`} />
@@ -632,13 +633,16 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                         <span className="text-[#10b981] inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 4 : 6) * 100}ms` }}>.</span>
                         <span className="ml-1 rtl:ml-0 rtl:mr-1 inline-block animate-bounce" style={{ animationDelay: `${(locale === 'ar' ? 5 : 7) * 100}ms` }}>🇲🇦</span>
                     </span>
-                    <button
-                        onClick={closeMobileMenu}
-                        aria-label="Fermer le menu"
-                        className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
-                    >
-                        <X className="w-6 h-6 text-black" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <LanguageSwitcher />
+                        <button
+                            onClick={closeMobileMenu}
+                            aria-label="Fermer le menu"
+                            className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
+                        >
+                            <X className="w-6 h-6 text-black" />
+                        </button>
+                    </div>
                 </div>
                 <div className="flex-1 overflow-y-auto pb-24 overscroll-contain">
                     {mounted && isMobileMenuOpen && (
@@ -799,9 +803,6 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 </Link>
                             )
                         })}
-                        <div className="py-4 flex justify-center">
-                            <LanguageSwitcher upward={true} />
-                        </div>
                     </nav>
                     )}
                 </div>

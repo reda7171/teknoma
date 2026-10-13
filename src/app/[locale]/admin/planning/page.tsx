@@ -4,8 +4,8 @@ import PlanningClient from './PlanningClient'
 export const dynamic = 'force-dynamic'
 
 export default async function PlanningPage() {
-    let initialPosts = []
-    let availableBooks = []
+    let initialPosts: any[] = []
+    let availableBooks: any[] = []
     
     try {
         const posts = await prisma.scheduledPost.findMany({

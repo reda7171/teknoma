@@ -89,6 +89,27 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
         }
     }
 
+    const [recentPins, setRecentPins] = useState<any[]>([])
+    const [isLoadingPins, setIsLoadingPins] = useState(false)
+
+    async function handleFetchRecentPins() {
+        setIsLoadingPins(true)
+        setPinterestDiagError('')
+        try {
+            const res = await fetch('/api/pinterest/pins')
+            const data = await res.json()
+            if (data.success && Array.isArray(data.pins)) {
+                setRecentPins(data.pins)
+            } else {
+                setPinterestDiagError(data.error || 'Impossible de récupérer l’historique des épingles')
+            }
+        } catch {
+            setPinterestDiagError('Erreur réseau lors de la récupération de l’historique.')
+        } finally {
+            setIsLoadingPins(false)
+        }
+    }
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setLoading(true)
@@ -580,6 +601,15 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                         <Send className={`w-3.5 h-3.5 ${isPublishingPin ? 'animate-spin' : ''}`} />
                         {isPublishingPin ? 'Publication...' : 'Publier une épingle test'}
                     </button>
+                    <button
+                        type="button"
+                        onClick={handleFetchRecentPins}
+                        disabled={isLoadingPins || !pinterestAccessToken || !pinterestBoardId}
+                        className="px-4 py-2.5 bg-[#E60023] hover:bg-[#ad081b] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isLoadingPins ? 'animate-spin' : ''}`} />
+                        {isLoadingPins ? 'Chargement...' : 'Historique des épingles'}
+                    </button>
                 </div>
 
                 {pinterestDiagError && (
@@ -627,23 +657,89 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
                         </div>
 
                         {pinterestDiagResult.publishedPin && (
-                            <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-xs text-green-800 flex items-center justify-between gap-2">
+                            <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-xs text-green-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                 <div>
-                                    <span className="font-bold block">Épingle test publiée avec succès !</span>
+                                    <span className="font-bold block">Épingle test publiée avec succès ! (ID: {pinterestDiagResult.publishedPin.id})</span>
                                     <span className="text-[11px] text-green-700">{pinterestDiagResult.publishedPin.title}</span>
                                 </div>
-                                {pinterestDiagResult.publishedPin.link && (
-                                    <a
-                                        href={pinterestDiagResult.publishedPin.link}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="underline text-[11px] font-bold text-green-900 shrink-0"
-                                    >
-                                        Lien du produit
-                                    </a>
-                                )}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    {pinterestDiagResult.publishedPin.pinUrl && (
+                                        <a
+                                            href={pinterestDiagResult.publishedPin.pinUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="px-3 py-1 bg-[#E60023] hover:bg-[#ad081b] text-white rounded-lg text-[11px] font-bold shadow-sm"
+                                        >
+                                            Voir le Pin sur Pinterest ↗
+                                        </a>
+                                    )}
+                                    {pinterestDiagResult.publishedPin.link && (
+                                        <a
+                                            href={pinterestDiagResult.publishedPin.link}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="underline text-[11px] font-bold text-gray-700"
+                                        >
+                                            Lien livre
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {recentPins.length > 0 && (
+                    <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm space-y-3">
+                        <div className="flex items-center justify-between border-b pb-2">
+                            <span className="text-xs font-black uppercase text-gray-700 tracking-wider">
+                                Historique des épingles publiées ({recentPins.length})
+                            </span>
+                            <span className="text-[11px] text-gray-400">Vérification en 1 clic</span>
+                        </div>
+                        <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                            {recentPins.map((pin: any) => (
+                                <div key={pin.id} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs hover:bg-gray-50/70 p-2 rounded-xl transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        {pin.imageUrl ? (
+                                            <img src={pin.imageUrl} alt="" className="w-10 h-14 object-cover rounded-lg border border-gray-100 shrink-0 shadow-xs" />
+                                        ) : (
+                                            <div className="w-10 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 shrink-0 text-[10px]">Pin</div>
+                                        )}
+                                        <div className="min-w-0 space-y-1">
+                                            <p className="font-bold text-gray-900 truncate">{pin.title}</p>
+                                            <p className="text-[10px] text-gray-400 font-mono">ID: {pin.id} • {new Date(pin.createdAt).toLocaleDateString('fr-FR')}</p>
+                                            
+                                            {/* Métriques d'engagement en direct */}
+                                            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[10px] font-bold border border-blue-100" title="Impressions">
+                                                    👁 {pin.metrics?.impressions ?? 0} vues
+                                                </span>
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md text-[10px] font-bold border border-amber-100" title="Clics sur l'épingle">
+                                                    🖱 {pin.metrics?.pinClicks ?? 0} clics
+                                                </span>
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-bold border border-emerald-100" title="Visites vers la boutique">
+                                                    🔗 {pin.metrics?.outboundClicks ?? 0} vers site
+                                                </span>
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md text-[10px] font-bold border border-purple-100" title="Enregistrements / Saves">
+                                                    📌 {pin.metrics?.saves ?? 0} saves
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                        <a
+                                            href={pin.pinUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-3 py-1.5 bg-white border border-[#E60023] text-[#E60023] hover:bg-[#E60023] hover:text-white rounded-lg text-[11px] font-bold transition shadow-xs"
+                                        >
+                                            Voir l'épingle ↗
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

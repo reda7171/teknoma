@@ -124,6 +124,13 @@ export async function createPack(input: PackInput): Promise<PackResult> {
             }),
         })
 
+        try {
+            const { submitPackToIndexNow } = await import('@/lib/indexnow')
+            submitPackToIndexNow(pack.id)
+        } catch (idxErr) {
+            console.warn('[IndexNow] Erreur notification création pack:', idxErr)
+        }
+
         revalidatePath('/admin/packs')
         revalidatePath('/')
 
@@ -300,6 +307,13 @@ export async function updatePack(
                 },
             }),
         })
+
+        try {
+            const { submitPackToIndexNow } = await import('@/lib/indexnow')
+            submitPackToIndexNow(id)
+        } catch (idxErr) {
+            console.warn('[IndexNow] Erreur notification mise à jour pack:', idxErr)
+        }
 
         revalidatePath('/admin/packs')
         revalidatePath('/')
