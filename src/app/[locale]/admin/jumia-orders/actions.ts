@@ -462,8 +462,29 @@ export async function packJumiaOrderFull(orderId: string) {
             throw new Error(`Aucun fournisseur d'expédition trouvé pour ces articles.`)
         }
 
-        // 3. Take the first available provider
-        const shipmentProviderId = providers[0].id || providers[0].uuid || providers[0].ShipmentProviderId
+        // 3. Riwaya dépose ses colis au hub Rabat Océan. Ne jamais prendre le
+        // premier fournisseur de la liste : Jumia peut renvoyer Inezgane avant
+        // Rabat, ce qui prépare alors la commande pour le mauvais point dépôt.
+        const normalizeProviderName = (value: unknown) => String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim()
+        const rabatOceanProvider = providers.find((provider: any) => {
+            const name = normalizeProviderName(provider?.name || provider?.label)
+            return name.includes('rbt ocean') || name.includes('rabat ocean')
+        })
+
+        if (!rabatOceanProvider) {
+            const availableNames = providers
+                .map((provider: any) => provider?.name || provider?.label)
+                .filter(Boolean)
+                .join(', ')
+            throw new Error(`Le hub Rabat Océan n'est pas disponible. Hubs proposés : ${(availableNames || 'aucun').slice(0, 100)}.`)
+        }
+
+        const shipmentProviderId = rabatOceanProvider.id || rabatOceanProvider.uuid || rabatOceanProvider.ShipmentProviderId
 
         if (!shipmentProviderId) {
             throw new Error("Impossible de trouver l'ID du fournisseur d'expédition.")
@@ -480,7 +501,14 @@ export async function packJumiaOrderFull(orderId: string) {
         }
         
         const packResponse = await jumia.packOrders(payload)
-        await prisma.jumiaActionLog.create({ data: { orderId, action: 'PACK', status: 'SUCCESS' } }).catch(() => {})
+        await prisma.jumiaActionLog.create({
+            data: {
+                orderId,
+                action: 'PACK',
+                status: 'SUCCESS',
+                detail: `Hub sélectionné : ${rabatOceanProvider.name || 'Rabat Océan'} (${shipmentProviderId})`
+            }
+        }).catch(() => {})
         return packResponse
     } catch (e: any) {
         console.error("Error packing Jumia order:", e)
