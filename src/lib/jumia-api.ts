@@ -134,6 +134,29 @@ export class JumiaAPI {
         return this.request(url)
     }
 
+    async getOrdersUpdated(params: {
+        size?: number
+        token?: string
+        status?: string
+        country?: string
+        updatedAfter: string
+        updatedBefore: string
+        sort?: 'ASC' | 'DESC'
+    }) {
+        const query = new URLSearchParams({
+            size: String(Math.min(params.size || 300, 300)),
+            updatedAfter: params.updatedAfter,
+            updatedBefore: params.updatedBefore,
+            sort: params.sort || 'ASC'
+        })
+
+        if (params.token) query.set('token', params.token)
+        if (params.status) query.set('status', params.status)
+        if (params.country) query.set('country', params.country)
+
+        return this.request(`/orders?${query.toString()}`)
+    }
+
     async getOrderItems(orderId: string) {
         // Jumia API attend orderId (camelCase) dans la query string
         return this.request(`/orders/items?orderId=${orderId}`)
