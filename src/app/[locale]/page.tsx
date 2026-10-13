@@ -518,7 +518,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col lg:flex-row items-center gap-8">
                 <div className="flex-1">
-                  <div className="space-y-8 text-center lg:text-start animate-reveal-up" style={{ animationFillMode: 'both', animationDelay: '200ms' }}>
+                  <div className="space-y-8 text-center lg:text-start">
                     <div className={`inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 pulse-yellow-glow mx-auto lg:mx-0 ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
                       <Truck className="w-4 h-4 text-green-500" />
                       <span>{c('hero_badge', t('hero.Badge'))}</span>
@@ -546,7 +546,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       <CosmosBooks
                         centerBook={cosmosValidBooks[0]}
                         books={cosmosValidBooks}
-                        locale={locale}
                         autoRotateCenter={true}
                         autoRotateInterval={7000}
                       />
