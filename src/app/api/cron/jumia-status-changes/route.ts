@@ -51,8 +51,8 @@ function statusLabel(status: string): string {
     return labels[status] || status
 }
 
-function isoWithoutMilliseconds(date: Date): string {
-    return date.toISOString().replace(/\.\d{3}Z$/, 'Z')
+function formatJumiaDateTime(date: Date): string {
+    return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '')
 }
 
 export async function GET(request: Request) {
@@ -76,10 +76,10 @@ export async function GET(request: Request) {
             }
         }
 
-        const updatedBefore = isoWithoutMilliseconds(new Date())
+        const updatedBefore = formatJumiaDateTime(new Date())
         const updatedAfterDate = new Date()
         updatedAfterDate.setUTCDate(updatedAfterDate.getUTCDate() - 89)
-        const updatedAfter = isoWithoutMilliseconds(updatedAfterDate)
+        const updatedAfter = formatJumiaDateTime(updatedAfterDate)
 
         const orders: JumiaOrder[] = []
         let token: string | undefined
