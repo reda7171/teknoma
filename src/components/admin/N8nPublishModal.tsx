@@ -457,8 +457,20 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
 
                             {/* Résultat */}
                             {result && (
-                                <div className={`p-3 rounded-xl text-sm font-medium ${result.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                                    {result.success ? '✅ ' : '❌ '}{result.message || result.error}
+                                <div className={`p-3.5 rounded-xl text-sm font-medium ${result.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <span>{result.success ? '✅ ' : '❌ '}{result.message || (result.success ? 'Publication réussie !' : result.error)}</span>
+                                        {(result as any).pinUrl && (
+                                            <a
+                                                href={(result as any).pinUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E60023] hover:bg-[#ad081b] text-white rounded-lg text-xs font-bold transition shadow-sm w-fit"
+                                            >
+                                                Voir l'épingle sur Pinterest ↗
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>

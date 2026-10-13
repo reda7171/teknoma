@@ -64,6 +64,7 @@ const nextConfig: NextConfig = {
   // Brotli/gzip, but responses must never reach visitors uncompressed.
   compress: true,
   images: {
+    qualities: [75, 80],
     unoptimized: false,
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 2592000,

@@ -59,7 +59,8 @@ export default function LanguageSwitcher({ upward = false }: { upward?: boolean 
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-100 hover:border-gray-200 transition-colors bg-white group"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full border border-gray-100 hover:border-gray-200 transition-colors bg-white group shadow-xs"
+                aria-label="Changer de langue"
             >
                 <div className="w-5 h-5 bg-gray-50 rounded-full flex items-center justify-center group-hover:bg-gray-100 transition-colors">
                     <Globe className="w-3 h-3 text-black" />
@@ -71,13 +72,13 @@ export default function LanguageSwitcher({ upward = false }: { upward?: boolean 
             </button>
 
             {isOpen && (
-                <div className={`absolute ${upward ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 w-32 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-200`}>
+                <div className={`absolute ${upward ? 'bottom-full mb-2' : 'top-full mt-2'} end-0 w-32 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2 z-[200] animate-in fade-in zoom-in-95 duration-200`}>
                     {languages.map((lang) => (
                         <button
                             key={lang.code}
                             disabled={isPending}
                             onClick={() => handleChange(lang.code)}
-                            className={`w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors flex items-center justify-between ${locale === lang.code ? 'text-black bg-gray-50/50' : 'text-gray-400'
+                            className={`w-full text-left rtl:text-right px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors flex items-center justify-between ${locale === lang.code ? 'text-black bg-gray-50/50' : 'text-gray-400'
                                 }`}
                         >
                             <span>{lang.label}</span>

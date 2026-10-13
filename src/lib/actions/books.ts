@@ -149,6 +149,13 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             details: `Livre créé: ${book.title} par ${book.author}`
         })
 
+        try {
+            const { submitBookToIndexNow } = await import('@/lib/indexnow')
+            submitBookToIndexNow(book.id)
+        } catch (idxErr) {
+            console.warn('[IndexNow] Erreur notification création livre:', idxErr)
+        }
+
         return {
             success: true,
             bookId: book.id,
@@ -339,6 +346,13 @@ export async function updateBook(
             entityId: id,
             details: `Livre mis à jour: ${validatedData.title}`
         })
+
+        try {
+            const { submitBookToIndexNow } = await import('@/lib/indexnow')
+            submitBookToIndexNow(id)
+        } catch (idxErr) {
+            console.warn('[IndexNow] Erreur notification mise à jour livre:', idxErr)
+        }
 
         return {
             success: true,

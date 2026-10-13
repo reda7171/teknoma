@@ -5,9 +5,10 @@ import { normalizeImage } from '@/lib/utils'
 // import Link from 'next/link' <-- remove standard next link
 import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
-import { Link } from '@/i18n/routing'
+import { Link, useRouter } from '@/i18n/routing'
 import { useTranslations, useLocale } from 'next-intl'
 import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
+import { withExponentialRetry } from '@/lib/retry'
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
 import { usePathname } from 'next/navigation'
@@ -21,6 +22,7 @@ interface CartDrawerProps {
 
 export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: CartDrawerProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
+    const router = useRouter()
     const [mounted, setMounted] = useState(false)
     const t = useTranslations('Cart');
     const locale = useLocale();
@@ -53,7 +55,10 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         removeItem(item.id)
         try {
             const newTotal = useCartStore.getState().getTotalPrice()
-            await notifyRemoveFromCart(item.title, item.price, item.type, newTotal, sessionId || undefined)
+            await withExponentialRetry(
+                () => notifyRemoveFromCart(item.title, item.price, item.type, newTotal, sessionId || undefined),
+                { maxRetries: 2, baseDelayMs: 300 }
+            )
         } catch (error) {
             console.error('Erreur notification', error)
         }
@@ -65,7 +70,10 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         clearCart()
         try {
             if (count > 0) {
-                await notifyClearCart(value, count, sessionId || undefined)
+                await withExponentialRetry(
+                    () => notifyClearCart(value, count, sessionId || undefined),
+                    { maxRetries: 2, baseDelayMs: 300 }
+                )
             }
         } catch (error) {
             console.error('Erreur notification', error)
@@ -76,11 +84,16 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
     const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
 
 
-    const handleCheckoutClick = () => {
+    const handleCheckoutClick = (e?: React.MouseEvent) => {
+        if (e) e.preventDefault()
         const value = getTotalPrice()
         const count = getTotalItems()
-        notifyCheckoutInitiated(value, count, sessionId || undefined).catch(console.error)
+        withExponentialRetry(
+            () => notifyCheckoutInitiated(value, count, sessionId || undefined),
+            { maxRetries: 2, baseDelayMs: 300 }
+        ).catch(console.error)
         onClose()
+        router.push('/checkout')
     }
 
     // Swipe handlers
@@ -124,7 +137,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                 onTouchStart={onTouchStartEvent}
                 onTouchMove={onTouchMoveEvent}
                 onTouchEnd={onTouchEndEvent}
-                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[180] transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
+                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full h-[100dvh] w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[180] transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
             >
                 <div className="flex flex-col h-full">
@@ -284,18 +297,21 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
 
                     {/* Footer - Style Pixio Summary */}
                     {items.length > 0 && (
-                        <div className="p-4 md:p-8 bg-white border-t border-gray-50 space-y-6 md:space-y-8 pb-24 md:pb-safe">
+                        <div 
+                            onTouchStart={(e) => e.stopPropagation()}
+                            className="p-4 sm:p-8 bg-white border-t border-gray-50 space-y-4 pb-safe sm:pb-8"
+                        >
                             {/* Summary */}
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {promo3for4Discount > 0 && (
-                                    <div className="flex justify-between items-center text-rose-500 mb-2">
+                                    <div className="flex justify-between items-center text-rose-500 mb-1">
                                         <span className="text-sm font-black uppercase tracking-widest">{locale === 'ar' ? 'الكتاب الرابع مجاناً' : '4ème Livre Offert'}</span>
                                         <span className="text-xl font-black">-{promo3for4Discount} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                     </div>
                                 )}
-                                <div className="flex justify-between items-center pt-2">
+                                <div className="flex justify-between items-center pt-1">
                                     <span className="text-sm sm:text-base font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
-                                    <span className="text-4xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    <span className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <div className="text-center">
                                     <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>
@@ -303,16 +319,11 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                             </div>
 
                             {/* Checkout Button */}
-                            <div className="space-y-4">
+                            <div className="space-y-3 pt-2">
                                 <Link
                                     href="/checkout"
-                                    onClick={(e) => {
-                                        const value = getTotalPrice()
-                                        const count = getTotalItems()
-                                        notifyCheckoutInitiated(value, count, sessionId || undefined).catch(console.error)
-                                        // Ne pas appeler onClose ici pour éviter d'annuler la navigation du Link
-                                    }}
-                                    className="flex items-center justify-center gap-3 w-full py-4 sm:py-6 min-h-[56px] bg-black text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20"
+                                    onClick={handleCheckoutClick}
+                                    className="flex items-center justify-center gap-3 w-full py-4 sm:py-5 min-h-[52px] bg-black text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20"
                                 >
                                     <span>{t('ProceedToCheckout')}</span>
                                     <ArrowRight className="w-4 h-4 rtl:rotate-180" />
@@ -320,7 +331,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
 
                                 <button
                                     onClick={onClose}
-                                    className="flex items-center justify-center w-full py-4 sm:py-6 min-h-[56px] bg-white border-2 border-black text-black font-black text-xs sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-gray-50 transition-all"
+                                    className="flex items-center justify-center w-full py-3.5 sm:py-4 min-h-[48px] bg-white border-2 border-black text-black font-black text-xs uppercase tracking-[0.2em] rounded-full hover:bg-gray-50 transition-all"
                                 >
                                     {t('KeepExploring')}
                                 </button>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste, Zap, X } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
-import { publishPacksToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
+import { publishPacksToJumia, checkJumiaLinkBySkuExact, checkPackJumiaCompositionDuplicate } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
 import ImageInput from '@/components/admin/ImageInput'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
@@ -268,6 +268,7 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
     const [loading, setLoading] = useState(false)
     const [isPushingJumia, setIsPushingJumia] = useState(false)
     const [isJumiaModalOpen, setIsJumiaModalOpen] = useState(false)
+    const [duplicateJumiaPack, setDuplicateJumiaPack] = useState<string | null>(null)
     const [isGeneratingDesc, setIsGeneratingDesc] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [creativeFormat, setCreativeFormat] = useState<'post' | 'story' | null>(null)
@@ -296,6 +297,20 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             })
         }
     }, [pack.sellerSku, pack.jumiaProductSid])
+
+    useEffect(() => {
+        if (selectedBooks.length > 0) {
+            checkPackJumiaCompositionDuplicate(pack.id, selectedBooks).then(res => {
+                if (res.isDuplicate && res.duplicatePackName) {
+                    setDuplicateJumiaPack(res.duplicatePackName)
+                } else {
+                    setDuplicateJumiaPack(null)
+                }
+            }).catch(() => setDuplicateJumiaPack(null))
+        } else {
+            setDuplicateJumiaPack(null)
+        }
+    }, [selectedBooks, pack.id])
 
     // Champs multilingues
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>('ar')
@@ -778,10 +793,11 @@ Original Language of Books in this Pack: ${langLabel}
 ${selectedTitles ? `Books Included in this Pack (${selectedBooksData.length}): ${selectedTitles}` : ''}
 
 CRITICAL TITLE INSTRUCTION:
-Because buyers must know the original language of the books in this pack, you MUST explicitly mention the language at the end of each title:
-- "name_ar": Must end with "${arSuffix}" (e.g. "اسم الباقة ${arSuffix}")
-- "name_fr": Must end with "${frSuffix}" (e.g. "Nom du pack ${frSuffix}")
-- "name_en": Must end with "${enSuffix}" (e.g. "Pack Name ${enSuffix}")
+1. MAXIMUM 30 CHARACTERS STRICT: Each title ("name_ar", "name_fr", "name_en") MUST NOT EXCEED 30 CHARACTERS IN TOTAL (including spaces and the language suffix). Jumia requires concise titles. Be punchy, direct and stay strictly under 30 characters!
+2. Because buyers must know the original language of the books in this pack, you MUST explicitly mention the language at the end of each title:
+- "name_ar": Must end with "${arSuffix}" and strictly <= 30 characters in total (e.g. "اسم الباقة ${arSuffix}")
+- "name_fr": Must end with "${frSuffix}" and strictly <= 30 characters in total (e.g. "Nom du pack ${frSuffix}")
+- "name_en": Must end with "${enSuffix}" and strictly <= 30 characters in total (e.g. "Pack Name ${enSuffix}")
 
 CRITICAL DESCRIPTION & SEO KEYWORDS INSTRUCTION:
 For each language description ("description_ar", "description_fr", "description_en"), write 2 to 3 engaging paragraphs that highlight the reading experience and value of the pack.
@@ -795,9 +811,9 @@ AT THE VERY END OF EACH DESCRIPTION, YOU MUST ADD A HIGH-IMPACT SEO KEYWORDS BLO
 
 Please provide the following information in strict JSON format:
 {
-  "name_ar": "اسم الحزمة باللغة العربية متبوعاً بـ ${arSuffix}",
-  "name_fr": "Nom du pack en français suivi de ${frSuffix}",
-  "name_en": "Pack name in English followed by ${enSuffix}",
+  "name_ar": "اسم الحزمة بالعربية (أقصى حد 30 حرف مع ${arSuffix})",
+  "name_fr": "Nom du pack en français (max 30 carac avec ${frSuffix})",
+  "name_en": "Pack name in English (max 30 chars with ${enSuffix})",
   "description_ar": "وصف جذاب للحزمة بالعربية (فقرتين إلى 3 فقرات تشجع على القراءة)\\n\\nالكلمات المفتاحية: [قائمة الكلمات المفتاحية بالعربية]",
   "description_fr": "Description engageante du pack en français (2 à 3 paragraphes)\\n\\nMots-clés SEO : [liste des mots-clés en français]",
   "description_en": "Engaging pack description in English (2-3 paragraphs)\\n\\nKeywords: [list of keywords in English]",
@@ -1829,9 +1845,22 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
                                     <Save className="w-4 h-4 mr-1.5" />
                                     {loading ? '...' : 'Enregistrer et fermer'}
                                 </button>
+                                {duplicateJumiaPack && (
+                                    <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+                                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <span className="font-bold">Doublon Jumia détecté :</span> Même composition que le pack <strong>"{duplicateJumiaPack}"</strong> déjà synchronisé. Risque de rejet Jumia (Duplicate SEO variant).
+                                        </div>
+                                    </div>
+                                )}
                                 <button
                                     type="button"
-                                    onClick={() => setIsJumiaModalOpen(true)}
+                                    onClick={() => {
+                                        if (duplicateJumiaPack && !confirm(`Attention : Ce pack a la même composition que "${duplicateJumiaPack}" déjà présent sur Jumia. Jumia risque de rejeter la fiche pour doublon. Voulez-vous continuer ?`)) {
+                                            return
+                                        }
+                                        setIsJumiaModalOpen(true)
+                                    }}
                                     disabled={isPushingJumia || loading}
                                     className="w-full inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                                 >

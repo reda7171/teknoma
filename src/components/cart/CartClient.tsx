@@ -4,6 +4,7 @@ import { useCartStore } from '@/store/cart'
 import Image from 'next/image'
 import { Link } from '@/i18n/routing'
 import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
+import { withExponentialRetry } from '@/lib/retry'
 import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import { ArrowRight, Minus, Plus, Trash2, ShoppingCart, Shield, Truck, AlertCircle, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -29,7 +30,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
         removeItem(item.id)
         try {
             const newTotal = useCartStore.getState().getTotalPrice()
-            await notifyRemoveFromCart(item.title, item.price, item.type, newTotal, sessionId || undefined)
+            await withExponentialRetry(
+                () => notifyRemoveFromCart(item.title, item.price, item.type, newTotal, sessionId || undefined),
+                { maxRetries: 2, baseDelayMs: 300 }
+            )
         } catch (error) {
             console.error('Erreur notification', error)
         }
@@ -38,7 +42,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
     const handleCheckoutClick = () => {
         const value = getTotalPrice()
         const count = getTotalItems()
-        notifyCheckoutInitiated(value, count, sessionId || undefined).catch(console.error)
+        withExponentialRetry(
+            () => notifyCheckoutInitiated(value, count, sessionId || undefined),
+            { maxRetries: 2, baseDelayMs: 300 }
+        ).catch(console.error)
     }
 
     const handleClearCart = async () => {
@@ -47,7 +54,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
         clearCart()
         try {
             if (count > 0) {
-                await notifyClearCart(value, count, sessionId || undefined)
+                await withExponentialRetry(
+                    () => notifyClearCart(value, count, sessionId || undefined),
+                    { maxRetries: 2, baseDelayMs: 300 }
+                )
             }
         } catch (error) {
             console.error('Erreur notification', error)
@@ -365,7 +375,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                 </div>
             )}
             {/* Fixed Mobile Checkout Area */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60]">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-[150] pb-safe">
                 {minOrderAmount > 0 && !isMinAmountReached && (
                     <div className="bg-red-50 border-t border-red-100 px-4 py-3 flex items-center gap-3 shadow-lg">
                         <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />

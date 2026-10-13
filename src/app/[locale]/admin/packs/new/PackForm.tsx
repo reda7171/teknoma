@@ -664,10 +664,11 @@ Suggest an attractive promotional price below the total retail price. Prices mus
 Generate one concise, unique Seller SKU usable on Jumia. The SKU must contain only uppercase letters, numbers and hyphens.
 
 CRITICAL TITLE INSTRUCTION:
-Because buyers must know the original language of the books in this pack, you MUST explicitly mention the language at the end of each title:
-- "name_ar": Must end with "${arSuffix}" (e.g. "اسم الباقة ${arSuffix}")
-- "name_fr": Must end with "${frSuffix}" (e.g. "Nom du pack ${frSuffix}")
-- "name_en": Must end with "${enSuffix}" (e.g. "Pack Name ${enSuffix}")
+1. MAXIMUM 30 CHARACTERS STRICT: Each title ("name_ar", "name_fr", "name_en") MUST NOT EXCEED 30 CHARACTERS IN TOTAL (including spaces and the language suffix). Jumia requires concise titles. Be punchy, direct and stay strictly under 30 characters!
+2. Because buyers must know the original language of the books in this pack, you MUST explicitly mention the language at the end of each title:
+- "name_ar": Must end with "${arSuffix}" and strictly <= 30 characters in total (e.g. "اسم الباقة ${arSuffix}")
+- "name_fr": Must end with "${frSuffix}" and strictly <= 30 characters in total (e.g. "Nom du pack ${frSuffix}")
+- "name_en": Must end with "${enSuffix}" and strictly <= 30 characters in total (e.g. "Pack Name ${enSuffix}")
 
 CRITICAL DESCRIPTION & SEO KEYWORDS INSTRUCTION:
 For each language description ("description_ar", "description_fr", "description_en"), write 2 to 3 engaging paragraphs that highlight the reading experience and value of the pack.
@@ -681,9 +682,9 @@ AT THE VERY END OF EACH DESCRIPTION, YOU MUST ADD A HIGH-IMPACT SEO KEYWORDS BLO
 
 Please provide the following information in strict JSON format:
 {
-  "name_ar": "اسم الحزمة باللغة العربية متبوعاً بـ ${arSuffix}",
-  "name_fr": "Nom du pack en français suivi de ${frSuffix}",
-  "name_en": "Pack name in English followed by ${enSuffix}",
+  "name_ar": "اسم الحزمة بالعربية (أقصى حد 30 حرف مع ${arSuffix})",
+  "name_fr": "Nom du pack en français (max 30 carac avec ${frSuffix})",
+  "name_en": "Pack name in English (max 30 chars with ${enSuffix})",
   "description_ar": "وصف جذاب للحزمة بالعربية (فقرتين إلى 3 فقرات تشجع على القراءة)\\n\\nالكلمات المفتاحية: [قائمة الكلمات المفتاحية بالعربية]",
   "description_fr": "Description engageante du pack en français (2 à 3 paragraphes)\\n\\nMots-clés SEO : [liste des mots-clés en français]",
   "description_en": "Engaging pack description in English (2-3 paragraphs)\\n\\nKeywords: [list of keywords in English]",

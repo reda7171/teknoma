@@ -148,11 +148,9 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                         })}
                     </nav>
 
-                    {/* Right Actions: Search (Mobile & Desktop) & Lang (Desktop) */}
-                    <div className="flex items-center justify-end w-1/3 md:w-auto gap-2 md:gap-4 shrink-0">
-                        <div className="hidden md:block">
-                            <LanguageSwitcher />
-                        </div>
+                    {/* Right Actions: Lang & Search */}
+                    <div className="flex items-center justify-end w-auto gap-2 md:gap-4 shrink-0">
+                        <LanguageSwitcher />
                         <button
                             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
                             aria-label="Recherche"
@@ -182,12 +180,15 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
             >
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
                     <span className="text-lg font-black tracking-tighter">riwaya<span className="text-[#10b981]">.</span></span>
-                    <button 
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
-                    >
-                        <X className="w-6 h-6 text-black" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <LanguageSwitcher />
+                        <button 
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
+                        >
+                            <X className="w-6 h-6 text-black" />
+                        </button>
+                    </div>
                 </div>
                 <div className="overflow-y-auto h-[calc(100vh-73px)] pb-24">
                     <nav className="flex flex-col space-y-2 p-4">
@@ -211,9 +212,6 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                                 </Link>
                             )
                         })}
-                        <div className="py-4 border-t border-gray-100 mt-2">
-                            <LanguageSwitcher />
-                        </div>
                     </nav>
                 </div>
             </div>

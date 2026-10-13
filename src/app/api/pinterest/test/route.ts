@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
                 id: publishedPin.id,
                 title: publishedPin.title,
                 link: publishedPin.link,
+                pinUrl: `https://www.pinterest.com/pin/${publishedPin.id}/`,
                 createdAt: publishedPin.created_at
             } : null,
             diagnostics: {

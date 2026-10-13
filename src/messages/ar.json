@@ -758,6 +758,12 @@
     "Processing": "جاري المعالجة...",
     "FastDelivery": "توصيل سريع <br /> خلال 24-48 ساعة.",
     "OrderSuccess": "تم تقديم الطلب بنجاح!",
+    "RememberDeliveryInfo": "حفظ بيانات التوصيل للطلبات القادمة",
+    "SavedProfileTitle": "تم العثور على بيانات توصيل محفوظة",
+    "UseSavedProfile": "ملء بنقرة واحدة",
+    "ClearSavedProfile": "مسح",
+    "ProfileAutoFilled": "تم تطبيق البيانات تلقائياً",
+    "NetworkReconnecting": "جاري إعادة الاتصال بالشبكة...",
     "Errors": {
       "FirstNameRequired": "الاسم الأول مطلوب",
       "LastNameRequired": "الاسم العائلي مطلوب",

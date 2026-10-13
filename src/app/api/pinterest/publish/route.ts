@@ -44,7 +44,32 @@ export async function POST(req: NextRequest) {
             accessToken
         );
 
-        return NextResponse.json({ success: true, result });
+        const pinId = result?.id;
+        const pinUrl = pinId ? `https://www.pinterest.com/pin/${pinId}/` : undefined;
+
+        // Enregistrer la publication dans l'historique ScheduledPost
+        try {
+            await prisma.scheduledPost.create({
+                data: {
+                    date: new Date(),
+                    time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                    content: `[Pinterest] ${title} - ${description.substring(0, 150)}`,
+                    platforms: JSON.stringify(['pinterest']),
+                    mediaUrl: pinUrl || imageUrl,
+                    status: 'PUBLISHED'
+                }
+            });
+        } catch (dbErr) {
+            console.error('Erreur enregistrement ScheduledPost Pinterest:', dbErr);
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Épingle Pinterest publiée avec succès !',
+            pinId,
+            pinUrl,
+            result
+        });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

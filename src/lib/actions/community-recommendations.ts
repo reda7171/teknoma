@@ -51,12 +51,35 @@ export async function getUserRecommendations(): Promise<AIRecommendation[]> {
         const recommendations = await generateRecommendations(authors)
 
         if (recommendations && Array.isArray(recommendations) && recommendations.length > 0) {
-            // 4. Mettre en cache dans la DB
-            await prisma.customer.update({
-                where: { id: user.id },
-                data: { aiRecommendations: JSON.stringify(recommendations) }
-            })
+            // 4. Mettre en cache dans la DB si le client existe
+            if (customer) {
+                await prisma.customer.update({
+                    where: { id: user.id },
+                    data: { aiRecommendations: JSON.stringify(recommendations) }
+                }).catch(() => null)
+            }
             return recommendations
+        }
+
+        // Fallback intelligent depuis le catalogue si l'IA est indisponible
+        const fallbackBooks = await prisma.book.findMany({
+            where: {
+                active: true,
+                OR: [
+                    { author: { in: authors } },
+                    { isPromoted: true }
+                ]
+            },
+            take: 4,
+            select: { title: true, author: true }
+        })
+
+        if (fallbackBooks.length > 0) {
+            return fallbackBooks.map(b => ({
+                title: b.title,
+                author: b.author,
+                reason: "Sélection recommandée basée sur vos auteurs favoris."
+            }))
         }
 
         return []
