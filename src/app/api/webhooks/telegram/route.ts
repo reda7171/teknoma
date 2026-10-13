@@ -355,8 +355,9 @@ export async function POST(req: Request) {
                                 return `📦 #${id} | ${amount} درهم | ${date}`
                             }).join('\n')
                             const keyboard = orders.slice(0, 5).map((o: any) => {
-                                const id = o.number || o.orderId
-                                return [{ text: `📦 Préparer #${id}`, callback_data: `jumia_rts:${id}` }]
+                                const number = o.number || o.orderNumber || o.id
+                                const internalId = o.id || o.orderId || number
+                                return [{ text: `📦 Préparer #${number}`, callback_data: `jumia_rts:${internalId}` }]
                             })
                             await answerCallbackQuery(callbackId, `${orders.length} commande(s) en attente`, token)
                             await sendTelegramMessage(`🟠 <b>${orders.length} Commande(s) Jumia En Attente</b>\n\n${lines}`, message?.chat?.id.toString(), token, { inline_keyboard: keyboard })

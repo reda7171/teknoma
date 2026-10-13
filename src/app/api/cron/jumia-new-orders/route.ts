@@ -213,9 +213,9 @@ export async function GET(req: Request) {
             const replyMarkup = {
                 inline_keyboard: [
                     [
-                        { text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderId}` },
-                        { text: '✅ Ready to Ship', callback_data: `jumia_rts:${orderId}` },
-                        { text: '❌ Annuler', callback_data: `jumia_cancel:${orderId}` }
+                        { text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderInternalId}` },
+                        { text: '✅ Ready to Ship', callback_data: `jumia_rts:${orderInternalId}` },
+                        { text: '❌ Annuler', callback_data: `jumia_cancel:${orderInternalId}` }
                     ],
                     [
                         { text: syncButtonLabel, callback_data: `jumia:sync_order_stock:${orderInternalId}` },

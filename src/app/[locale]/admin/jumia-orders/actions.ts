@@ -397,10 +397,24 @@ async function resolveJumiaOrderInternalId(jumia: any, orderId: string): Promise
     if (isUuid) return orderId
 
     try {
-        const searchRes = await jumia.request(`/orders?number=${encodeURIComponent(orderId)}`)
-        const orderList = searchRes?.orders || searchRes?.data?.orders || []
-        if (orderList[0]?.id) {
-            return orderList[0].id
+        const updatedAfterDate = new Date()
+        updatedAfterDate.setUTCDate(updatedAfterDate.getUTCDate() - 89)
+        const formatDateTime = (date: Date) => date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '')
+        let token: string | undefined
+
+        for (let page = 0; page < 100; page++) {
+            const searchRes = await jumia.getOrdersUpdated({
+                size: 300,
+                token,
+                updatedAfter: formatDateTime(updatedAfterDate),
+                updatedBefore: formatDateTime(new Date())
+            })
+            const orderList = searchRes?.orders || searchRes?.data?.orders || []
+            const match = orderList.find((order: any) => String(order.number || order.orderNumber) === String(orderId))
+            if (match?.id) return String(match.id)
+
+            token = searchRes?.nextToken || searchRes?.data?.nextToken
+            if (!token) break
         }
     } catch (e) {
         console.warn(`[JUMIA] Impossible de mapper orderId ${orderId} en UUID:`, e)
@@ -431,7 +445,18 @@ export async function packJumiaOrderFull(orderId: string) {
 
         // 2. Fetch Shipment Providers using all order item IDs
         const responseProviders = await jumia.getShipmentProviders(orderItemIds)
-        const providers = responseProviders?.providers || responseProviders?.data?.providers || responseProviders || []
+        const directProviders = responseProviders?.providers || responseProviders?.data?.providers
+        const providerGroups = responseProviders?.orderItems || responseProviders?.data?.orderItems || []
+        const providerLists = Array.isArray(providerGroups)
+            ? providerGroups.map((group: any) => group?.shipmentProviders || []).filter((list: any[]) => list.length > 0)
+            : []
+        const providers = Array.isArray(directProviders)
+            ? directProviders
+            : providerLists.length > 0
+                ? providerLists[0].filter((provider: any) =>
+                    providerLists.every((list: any[]) => list.some((candidate: any) => candidate.id === provider.id))
+                )
+                : []
 
         if (!providers || !providers.length) {
             throw new Error(`Aucun fournisseur d'expédition trouvé pour ces articles.`)
