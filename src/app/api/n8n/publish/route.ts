@@ -5,6 +5,7 @@ import { sendTelegramMessage, sendTelegramPhoto } from '@/lib/telegram'
 
 import { verifyAdmin } from '@/lib/actions/auth'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
+import { publishPin } from '@/lib/pinterest'
 
 export async function POST(req: NextRequest) {
     try {
@@ -223,6 +224,61 @@ export async function POST(req: NextRequest) {
             platformsArray = [platform]
         }
 
+        let pinterestResult: any = null
+        if (platformsArray.includes('pinterest')) {
+            if (pinterestAccessToken && pinterestBoardId && imageUrl) {
+                try {
+                    const pinRes = await publishPin(
+                        imageUrl.startsWith('http') ? imageUrl : `https://riwaya.store${imageUrl}`,
+                        title,
+                        finalCaption,
+                        item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
+                        pinterestBoardId,
+                        pinterestAccessToken
+                    )
+                    const pinId = pinRes?.id
+                    const pinUrl = pinId ? `https://www.pinterest.com/pin/${pinId}/` : undefined
+                    pinterestResult = { success: true, pinId, pinUrl }
+
+                    try {
+                        await prisma.scheduledPost.create({
+                            data: {
+                                date: new Date(),
+                                time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                                content: `[Pinterest] ${title} - ${finalCaption.substring(0, 150)}`,
+                                platforms: JSON.stringify(['pinterest']),
+                                mediaUrl: pinUrl || imageUrl,
+                                status: 'PUBLISHED'
+                            }
+                        })
+                    } catch (dbErr) {
+                        console.error('Erreur enregistrement ScheduledPost Pinterest:', dbErr)
+                    }
+                } catch (pinErr: any) {
+                    console.error('[N8N PUBLISH] Pinterest direct publish error:', pinErr)
+                    pinterestResult = { success: false, error: pinErr.message }
+                }
+            }
+            // Retirer pinterest du lot envoyé à n8n pour éviter l'échec 401 sur le sandbox n8n
+            platformsArray = platformsArray.filter(p => p !== 'pinterest')
+        }
+
+        if (platformsArray.length === 0) {
+            const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            const messageText = `🚀 <b>Nouvelle Publication</b>\n\nUn post pour <b>${safeTitle}</b> a été publié sur <b>Pinterest</b> directement.`
+            if (imageUrl && !isVideo) {
+                sendTelegramPhoto(imageUrl, messageText).catch(console.error)
+            } else {
+                sendTelegramMessage(messageText).catch(console.error)
+            }
+
+            return NextResponse.json({
+                success: true,
+                message: 'Épingle Pinterest publiée avec succès !',
+                pinterest: pinterestResult
+            })
+        }
+
         const payload = {
             batch: platformsArray.map(p => ({
                 ...baseItem,
@@ -291,7 +347,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             message: scheduleAt ? `Programmé pour ${scheduleAt}` : 'Envoyé à n8n pour publication',
-            n8n: n8nData
+            n8n: n8nData,
+            pinterest: pinterestResult
         })
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Erreur interne'
