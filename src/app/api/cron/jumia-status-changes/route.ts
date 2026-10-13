@@ -13,6 +13,7 @@ type StatusSnapshot = Record<string, { status: string; number: string; observedA
 type JumiaOrder = Record<string, unknown> & {
     Statuses?: unknown[]
 }
+type StatusChange = { id: string; number: string; from: string; to: string }
 
 function cronIsAuthorized(request: Request) {
     const expected = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
@@ -53,6 +54,33 @@ function statusLabel(status: string): string {
 
 function formatJumiaDateTime(date: Date): string {
     return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '')
+}
+
+function extractOrderItems(response: unknown): Record<string, unknown>[] {
+    const containers = Array.isArray(response) ? response : [response]
+    return containers.flatMap((container) => {
+        if (!container || typeof container !== 'object') return []
+        const value = container as Record<string, unknown>
+        const data = value.data && typeof value.data === 'object'
+            ? value.data as Record<string, unknown>
+            : undefined
+        const items = value.orderItems || value.items || data?.orderItems || data?.items
+        return Array.isArray(items) ? items as Record<string, unknown>[] : []
+    })
+}
+
+function formatOrderItems(items: Record<string, unknown>[]): string {
+    if (items.length === 0) return '  • Articles indisponibles'
+
+    return items.slice(0, 20).map((item) => {
+        const product = item.product && typeof item.product === 'object'
+            ? item.product as Record<string, unknown>
+            : undefined
+        const name = String(product?.name || item.name || item.productName || 'Article inconnu')
+        const sku = String(product?.sellerSku || item.sellerSku || item.sku || '')
+        const quantity = Number(item.quantity || 1)
+        return `  • ${quantity} × ${escapeHtml(name)}${sku ? ` — <code>${escapeHtml(sku)}</code>` : ''}`
+    }).join('\n')
 }
 
 export async function GET(request: Request) {
@@ -102,7 +130,7 @@ export async function GET(request: Request) {
 
         const now = new Date().toISOString()
         const current: StatusSnapshot = { ...previous }
-        const changes: Array<{ number: string; from: string; to: string }> = []
+        const changes: StatusChange[] = []
 
         for (const order of orders) {
             const key = orderKey(order)
@@ -111,7 +139,7 @@ export async function GET(request: Request) {
 
             const oldStatus = previous[key]?.status
             if (oldStatus && oldStatus !== status) {
-                changes.push({ number: orderNumber(order), from: oldStatus, to: status })
+                changes.push({ id: key, number: orderNumber(order), from: oldStatus, to: status })
             }
 
             current[key] = { status, number: orderNumber(order), observedAt: now }
@@ -124,12 +152,23 @@ export async function GET(request: Request) {
         )
 
         for (const change of changes) {
+            let itemsText = '  • Articles indisponibles'
+            try {
+                const itemsResponse = await jumia.getOrderItems(change.id)
+                itemsText = formatOrderItems(extractOrderItems(itemsResponse))
+            } catch (itemError) {
+                console.warn(`[${JOB_NAME}] Articles indisponibles pour ${change.number}:`, itemError)
+            }
+
             const message = [
                 '🔄 <b>Statut commande Jumia modifié</b>',
                 '',
                 `📦 <b>Commande :</b> <code>${escapeHtml(change.number)}</code>`,
                 `⏮ <b>Avant :</b> ${escapeHtml(statusLabel(change.from))}`,
-                `⏭ <b>Maintenant :</b> ${escapeHtml(statusLabel(change.to))}`
+                `⏭ <b>Maintenant :</b> ${escapeHtml(statusLabel(change.to))}`,
+                '',
+                '📚 <b>Articles :</b>',
+                itemsText
             ].join('\n')
             const telegramResponse = await sendTelegramMessage(message)
             if (!telegramResponse?.ok) {
