@@ -205,7 +205,7 @@ function cleanJumiaProductName(name: string): string {
         .trim()
 }
 
-export function cleanJumiaDescription(desc: string): string {
+function cleanJumiaDescription(desc: string): string {
     if (!desc) return ''
     return desc
         // Supprimer toute mention de prix en français, anglais, arabe (ex: "Prix: 120 DH", "Price: 150 MAD", "السعر: 150 درهم")
