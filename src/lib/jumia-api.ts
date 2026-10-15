@@ -168,6 +168,10 @@ export class JumiaAPI {
         return this.request('/v2/orders/pack', 'POST', payload)
     }
 
+    async packOrdersV1(payload: any) {
+        return this.request('/orders/pack', 'POST', payload)
+    }
+
     async readyToShipOrders(payload: any) {
         return this.request('/orders/ready-to-ship', 'POST', payload)
     }
