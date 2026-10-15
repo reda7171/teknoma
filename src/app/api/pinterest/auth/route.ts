@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     }
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/pinterest/callback`;
-    const scope = 'boards:read,boards:write,pins:read,pins:write';
+    const scope = 'boards:read,boards:write,pins:read,pins:write,user_accounts:read';
     
     const authUrl = `https://www.pinterest.com/oauth/?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}`;
 
