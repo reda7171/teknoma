@@ -822,7 +822,7 @@
     "NoReviews": "Be the first to review this book! ✨"
   },
   "PredictiveSearch": {
-    "Placeholder": "Search for a book, an author...",
+    "Placeholder": "Search for a book, pack, author...",
     "RecentSearches": "Recent Searches",
     "Clear": "Clear",
     "PopularThemes": "Popular Themes",
@@ -831,9 +831,12 @@
     "Remaining": "remaining",
     "From": "From {price} MAD",
     "Suggestions": "Suggestions",
+    "DidYouMean": "Did you mean: {suggestion}?",
     "By": "By {author}",
+    "PackBadge": "Pack",
+    "PackBooksCount": "{count, plural, =0 {Book pack} one {1 book included} other {{count} books included}}",
     "NoResultsTitle": "Oops!",
-    "NoResultsDesc": "No books match your search.",
+    "NoResultsDesc": "No books or packs match your search.",
     "ViewAll": "View all results",
     "EndsIn": "Ends in {time}",
     "Terminated": "Terminated",
@@ -1316,8 +1319,8 @@
     "MinOrderWarning": "The minimum order amount is {min} MAD. Please add more items to continue."
   },
   "Blog": {
-    "Badge": "Journal",
-    "Title": "Riwaya.store",
+    "Badge": "Blog",
+    "Title": "Blog",
     "Subtitle": "Inspiration, Culture & Ideas for the Modern Mind",
     "NoPosts": "No articles published yet.",
     "ComingSoon": "Come back soon to discover our upcoming publications.",

@@ -39,8 +39,8 @@ function GoogleOneTapInner() {
             void('Google One Tap Error')
         },
         auto_select: false,
-        use_fedcm_for_prompt: true,
-        itp_support: true,
+        use_fedcm_for_prompt: false,
+        cancel_on_tap_outside: true,
     })
 
     if (!mounted) return null
@@ -51,7 +51,7 @@ function GoogleOneTapInner() {
 }
 
 export default function GoogleOneTap() {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
     if (!clientId) return null
     return (
         <GoogleOAuthProvider clientId={clientId}>

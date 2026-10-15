@@ -611,7 +611,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     {!bgImage && (<><div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)' }} /><div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%)' }} /></>)}
                     <div className="pt-8 px-8 flex justify-between items-start z-10">
                         <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}><p className={`text-[10px] font-black tracking-[0.2em] uppercase ${currentTheme.text} opacity-90`}>{editableTexts.badge}</p></div>
-                        {showLogo && <img src="/logo.png" alt="Riwaya" onError={(e) => { e.currentTarget.style.display = 'none'; }} className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
+                        {showLogo && <img src="/logo-riwaya.png?v=riwaya2" alt="Riwaya" onError={(e) => { e.currentTarget.style.display = 'none'; }} className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
                     </div>
                     <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30`}>
                         <div 
@@ -741,7 +741,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
-                                        src="/logo.png"
+                                        src="/logo-riwaya.png?v=riwaya2"
                                         alt="Riwaya Logo"
                                         crossOrigin="anonymous"
                                         className="h-6 sm:h-8 object-contain filter brightness-0 invert transition-transform"

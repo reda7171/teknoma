@@ -185,6 +185,12 @@ const nextConfig: NextConfig = {
           { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
         ],
       },
+      {
+        source: '/api/auth/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
       ...(process.env.NODE_ENV === 'production' ? [
         // Headers pour les assets statiques (images, polices, CSS, JS) — immutable cache
         {

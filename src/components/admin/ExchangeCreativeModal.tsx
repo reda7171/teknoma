@@ -277,7 +277,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                             </Draggable>
                             <Draggable>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/logo.png" alt="Riwaya" crossOrigin="anonymous" style={{ height: logoSize }} className={`object-contain pointer-events-none ${theme !== 'light' ? 'filter brightness-0 invert' : ''}`} />
+                                <img src="/logo-riwaya.png?v=riwaya2" alt="Riwaya" crossOrigin="anonymous" style={{ height: logoSize }} className={`object-contain pointer-events-none ${theme !== 'light' ? 'filter brightness-0 invert' : ''}`} />
                             </Draggable>
                         </div>
 

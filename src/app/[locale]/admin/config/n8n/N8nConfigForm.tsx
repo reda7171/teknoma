@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateSetting } from '@/lib/actions/site-settings'
+import { updateMultipleSettings } from '@/lib/actions/site-settings'
 import { Save, Eye, EyeOff, CheckCircle2, AlertTriangle, RefreshCw, Send } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -116,21 +116,26 @@ export default function N8nConfigForm({ initialWebhookUrl, initialInstagramWebho
         setMessage('')
 
         try {
-            await updateSetting('n8n_webhook_url', webhookUrl, 'config', 'URL du Webhook n8n')
-            await updateSetting('n8n_instagram_webhook_url', instagramWebhookUrl, 'config', 'URL du Webhook Instagram')
-            await updateSetting('facebook_access_token', facebookAccessToken, 'config', 'Facebook Access Token')
-            await updateSetting('instagram_account_id', instagramAccountId, 'config', 'Instagram Account ID')
-            await updateSetting('instagram_token', instagramToken, 'config', 'Instagram Token')
-            await updateSetting('threads_account_id', threadsAccountId, 'config', 'Threads Account ID')
-            await updateSetting('threads_access_token', threadsAccessToken, 'config', 'Threads Access Token')
-            await updateSetting('tiktok_access_token', tiktokAccessToken, 'config', 'TikTok Access Token')
-            await updateSetting('tiktok_creator_id', tiktokCreatorId, 'config', 'TikTok Creator ID')
-            await updateSetting('tiktok_app_id', tiktokAppId, 'config', 'TikTok App ID')
-            await updateSetting('tiktok_client_secret', tiktokClientSecret, 'config', 'TikTok Client Secret')
-            await updateSetting('pinterest_access_token', pinterestAccessToken, 'config', 'Pinterest Access Token')
-            await updateSetting('pinterest_board_id', pinterestBoardId, 'config', 'Pinterest Board ID')
-            await updateSetting('pinterest_app_id', pinterestAppId, 'config', 'Pinterest App ID')
-            await updateSetting('pinterest_app_secret', pinterestAppSecret, 'config', 'Pinterest App Secret')
+            const result = await updateMultipleSettings([
+                { key: 'n8n_webhook_url', value: webhookUrl, category: 'config', description: 'URL du Webhook n8n' },
+                { key: 'n8n_instagram_webhook_url', value: instagramWebhookUrl, category: 'config', description: 'URL du Webhook Instagram' },
+                { key: 'facebook_access_token', value: facebookAccessToken, category: 'config', description: 'Facebook Access Token' },
+                { key: 'instagram_account_id', value: instagramAccountId, category: 'config', description: 'Instagram Account ID' },
+                { key: 'instagram_token', value: instagramToken, category: 'config', description: 'Instagram Token' },
+                { key: 'threads_account_id', value: threadsAccountId, category: 'config', description: 'Threads Account ID' },
+                { key: 'threads_access_token', value: threadsAccessToken, category: 'config', description: 'Threads Access Token' },
+                { key: 'tiktok_access_token', value: tiktokAccessToken, category: 'config', description: 'TikTok Access Token' },
+                { key: 'tiktok_creator_id', value: tiktokCreatorId, category: 'config', description: 'TikTok Creator ID' },
+                { key: 'tiktok_app_id', value: tiktokAppId, category: 'config', description: 'TikTok App ID' },
+                { key: 'tiktok_client_secret', value: tiktokClientSecret, category: 'config', description: 'TikTok Client Secret' },
+                { key: 'pinterest_access_token', value: pinterestAccessToken, category: 'config', description: 'Pinterest Access Token' },
+                { key: 'pinterest_board_id', value: pinterestBoardId, category: 'config', description: 'Pinterest Board ID' },
+                { key: 'pinterest_app_id', value: pinterestAppId, category: 'config', description: 'Pinterest App ID' },
+                { key: 'pinterest_app_secret', value: pinterestAppSecret, category: 'config', description: 'Pinterest App Secret' },
+            ])
+            if (!result.success) {
+                throw new Error(result.error || 'Échec de l’enregistrement')
+            }
             setMessage('Configuration enregistrée avec succès !')
             router.refresh()
         } catch (error) {

@@ -264,6 +264,14 @@ export async function POST(req: NextRequest) {
         }
 
         if (platformsArray.length === 0) {
+            if (!pinterestResult?.success) {
+                return NextResponse.json({
+                    success: false,
+                    error: pinterestResult?.error || 'La publication Pinterest a échoué.',
+                    pinterest: pinterestResult
+                }, { status: 502 })
+            }
+
             const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             const messageText = `🚀 <b>Nouvelle Publication</b>\n\nUn post pour <b>${safeTitle}</b> a été publié sur <b>Pinterest</b> directement.`
             if (imageUrl && !isVideo) {

@@ -21,11 +21,16 @@ export default function GoogleOneTapLoader() {
             window.removeEventListener('keydown', enable)
         }
 
+        const timer = setTimeout(enable, 2500)
+
         window.addEventListener('scroll', enable, { once: true, passive: true })
         window.addEventListener('pointerdown', enable, { once: true, passive: true })
         window.addEventListener('touchstart', enable, { once: true, passive: true })
         window.addEventListener('keydown', enable, { once: true, passive: true })
-        return cleanup
+        return () => {
+            clearTimeout(timer)
+            cleanup()
+        }
     }, [])
 
     return enabled ? <GoogleOneTap /> : null

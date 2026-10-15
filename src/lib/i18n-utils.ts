@@ -4,9 +4,19 @@ export function getLocalizedTitle(book: any, locale?: string): string {
     // Always display the title in the book's original language, regardless of the site locale.
     if (book.language) {
         const lang = book.language.toLowerCase();
-        if ((lang === 'en' || lang === 'english') && book.titleEn) return book.titleEn;
-        if ((lang === 'fr' || lang === 'french' || lang === 'français') && book.titleFr) return book.titleFr;
-        if ((lang === 'ar' || lang === 'arabic' || lang === 'arabe') && book.title) return book.title;
+        if (lang === 'en' || lang === 'english') {
+            if (book.titleEn) return book.titleEn;
+            if (book.title && !/[\u0600-\u06FF]/.test(book.title)) return book.title;
+            if (book.titleFr && !/[\u0600-\u06FF]/.test(book.titleFr)) return book.titleFr;
+        }
+        if (lang === 'fr' || lang === 'french' || lang === 'français') {
+            if (book.titleFr) return book.titleFr;
+            if (book.title && !/[\u0600-\u06FF]/.test(book.title)) return book.title;
+            if (book.titleEn && !/[\u0600-\u06FF]/.test(book.titleEn)) return book.titleEn;
+        }
+        if (lang === 'ar' || lang === 'arabic' || lang === 'arabe') {
+            if (book.title) return book.title;
+        }
     }
     
     // Fallback: prioritize the default title (Arabic), then French, then English.

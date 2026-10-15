@@ -2,8 +2,16 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { getCached } from '@/lib/cache'
+
+function invalidateSettingsCache(keys: string[]) {
+    revalidateTag('setting', { expire: 0 })
+    revalidateTag('settings', { expire: 0 })
+    for (const key of keys) {
+        revalidateTag(`setting:${key}`, { expire: 0 })
+    }
+}
 
 // Récupérer tous les paramètres
 export async function getAllSettings() {
@@ -64,6 +72,7 @@ export async function updateSetting(key: string, value: string, category: string
             create: { key, value, category, description }
         })
 
+        invalidateSettingsCache([key])
         revalidatePath('/admin/settings')
         revalidatePath('/')
 
@@ -88,6 +97,7 @@ export async function updateMultipleSettings(settings: { key: string; value: str
             )
         )
 
+        invalidateSettingsCache(settings.map(({ key }) => key))
         revalidatePath('/admin/settings')
         revalidatePath('/')
 
@@ -106,6 +116,7 @@ export async function deleteSetting(key: string) {
             where: { key }
         })
 
+        invalidateSettingsCache([key])
         revalidatePath('/admin/settings')
 
         return { success: true }

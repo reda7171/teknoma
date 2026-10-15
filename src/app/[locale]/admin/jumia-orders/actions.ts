@@ -490,21 +490,37 @@ export async function packJumiaOrderFull(orderId: string) {
             throw new Error("Impossible de trouver l'ID du fournisseur d'expédition.")
         }
         
-        // 4. Construct V2 Payload
+        // Rabat Océan does not require a caller-provided tracking code, so use
+        // the V1 packing endpoint. Jumia's V2 endpoint rejects a missing
+        // trackingCode even when the provider reports trackingCodeRequired=false.
         const payload = {
-            packages: [
-                {
-                    shipmentProviderId: shipmentProviderId,
-                    orderItemIds: orderItemIds
-                }
-            ]
+            orderItems: orderItemIds.map((id: string) => ({
+                id,
+                shipmentProviderId
+            }))
         }
         
-        const packResponse = await jumia.packOrders(payload)
+        const packResponse = await jumia.packOrdersV1(payload)
+        const packErrors = packResponse?.error?.packages || packResponse?.error?.orderItems || []
+        if (Array.isArray(packErrors) && packErrors.length > 0) {
+            const packError = packErrors[0]?.error
+                || packErrors[0]?.response?.message
+                || 'Jumia n\'a pas pu emballer la commande.'
+            throw new Error(packError)
+        }
+
+        const readyResponse = await jumia.readyToShipOrders({ orderItemIds })
+        const readyErrors = readyResponse?.error?.packages || readyResponse?.error?.orderItems || []
+        if (Array.isArray(readyErrors) && readyErrors.length > 0) {
+            const readyError = readyErrors[0]?.error
+                || readyErrors[0]?.response?.message
+                || 'Jumia n\'a pas pu passer la commande en Ready to Ship.'
+            throw new Error(readyError)
+        }
         await prisma.jumiaActionLog.create({
             data: {
                 orderId,
-                action: 'PACK',
+                action: 'READY_TO_SHIP',
                 status: 'SUCCESS',
                 detail: `Hub sélectionné : ${rabatOceanProvider.name || 'Rabat Océan'} (${shipmentProviderId})`
             }
@@ -512,7 +528,7 @@ export async function packJumiaOrderFull(orderId: string) {
         return packResponse
     } catch (e: any) {
         console.error("Error packing Jumia order:", e)
-        await prisma.jumiaActionLog.create({ data: { orderId, action: 'PACK', status: 'ERROR', detail: e.message } }).catch(() => {})
+        await prisma.jumiaActionLog.create({ data: { orderId, action: 'READY_TO_SHIP', status: 'ERROR', detail: e.message } }).catch(() => {})
         throw new Error(e.message)
     }
 }

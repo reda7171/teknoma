@@ -1086,7 +1086,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         >
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
-                                                src="/logo.png"
+                                                src="/logo-riwaya.png?v=riwaya2"
                                                 alt="Riwaya Logo"
                                                 crossOrigin="anonymous"
                                                 className="h-6 sm:h-8 object-contain filter brightness-0 invert transition-transform"

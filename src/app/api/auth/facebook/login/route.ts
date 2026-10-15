@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-    const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID
+    const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
 
     if (!FACEBOOK_CLIENT_ID) {
         return NextResponse.json({ error: 'FACEBOOK_CLIENT_ID is not configured' }, { status: 500 })
     }
 
-    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
+    const requestOrigin = new URL(request.url).origin
+    const origin = requestOrigin.includes('localhost') ? requestOrigin : (process.env.NEXT_PUBLIC_APP_URL || requestOrigin)
     const redirectUri = `${origin}/api/auth/facebook/callback`
 
     const params = new URLSearchParams({

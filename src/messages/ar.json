@@ -822,7 +822,7 @@
     "NoReviews": "كن أول من يبدي رأيه في هذا الكتاب! ✨"
   },
   "PredictiveSearch": {
-    "Placeholder": "ابحث عن كتاب، مؤلف...",
+    "Placeholder": "ابحث عن كتاب، حزمة، مؤلف...",
     "RecentSearches": "عمليات البحث الأخيرة",
     "Clear": "مسح",
     "PopularThemes": "ثيمات شائعة",
@@ -831,9 +831,12 @@
     "Remaining": "متبقية",
     "From": "ابتداء من {price} درهم",
     "Suggestions": "اقتراحات",
+    "DidYouMean": "هل تقصد: {suggestion}؟",
     "By": "بقلم {author}",
+    "PackBadge": "حزمة",
+    "PackBooksCount": "{count, plural, =0 {حزمة كتب} one {كتاب واحد متضمن} two {كتابان متضمنان} few {{count} كتب متضمنة} many {{count} كتاباً متضمناً} other {{count} كتاب متضمن}}",
     "NoResultsTitle": "عذراً!",
-    "NoResultsDesc": "لا توجد كتب تطابق بحثك.",
+    "NoResultsDesc": "لا توجد كتب أو حزم تطابق بحثك.",
     "ViewAll": "عرض كل النتائج",
     "EndsIn": "ينتهي في {time}",
     "Terminated": "انتهى",

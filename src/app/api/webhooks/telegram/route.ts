@@ -305,23 +305,39 @@ export async function POST(req: Request) {
                 const [, orderId] = data.split(':')
                 const { packJumiaOrderFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
 
+                await answerCallbackQuery(callbackId, `⏳ Préparation de la commande ${orderId}...`, token).catch(() => {})
+
                 try {
-                    await answerCallbackQuery(callbackId, `⏳ Préparation de la commande ${orderId}...`, token)
                     await packJumiaOrderFull(orderId)
                     
-                    if (message?.chat?.id && message?.message_id) {
-                        const { escapeHtml } = await import('@/lib/telegram')
-                        const safeText = escapeHtml(message.text || '')
-                        const updatedText = safeText + '\n\n✅ <b>Statut mis à jour sur Jumia :</b> Prête à expédier (Ready-to-Ship)'
-                        const updatedMarkup = {
+                    if (message?.chat?.id) {
+                        const successMarkup = {
                             inline_keyboard: [
                                 [{ text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderId}` }]
                             ]
                         }
-                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, updatedMarkup)
+
+                        if (message.message_id) {
+                            const safeText = escapeHtml(message.text || '')
+                            const updatedText = safeText + '\n\n✅ <b>Statut mis à jour sur Jumia :</b> Prête à expédier (Ready-to-Ship)'
+                            await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, successMarkup).catch(() => {})
+                        }
+
+                        await sendTelegramMessage(
+                            `✅ <b>Commande ${orderId} prête à expédier</b>\n\nLe statut Ready-to-Ship a été appliqué avec succès sur Jumia.`,
+                            message.chat.id.toString(),
+                            token,
+                            successMarkup
+                        )
                     }
                 } catch (error: any) {
-                    await answerCallbackQuery(callbackId, `❌ Erreur Jumia : ${error.message}`, token)
+                    if (message?.chat?.id) {
+                        await sendTelegramMessage(
+                            `❌ <b>Erreur Jumia pour la commande ${orderId}</b>\n\n${escapeHtml(error.message || 'Erreur inconnue')}`,
+                            message.chat.id.toString(),
+                            token
+                        )
+                    }
                 }
             }
 

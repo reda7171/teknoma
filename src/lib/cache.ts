@@ -81,12 +81,13 @@ export async function getCached<T>(
     ttlSeconds: number = 300
 ): Promise<T> {
     try {
+        const prefix = key.split(':')[0]
         const cachedFn = unstable_cache(
             fetchFn,
             [key],
             {
                 revalidate: ttlSeconds,
-                tags: [key.split(':')[0]], // ex: 'setting' pour 'setting:site_url'
+                tags: [prefix, key],
             }
         )
         return await cachedFn()

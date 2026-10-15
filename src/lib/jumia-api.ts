@@ -42,7 +42,8 @@ export class JumiaAPI {
                 client_id: this.email,
                 refresh_token: this.apiKey,
                 grant_type: 'refresh_token'
-            })
+            }),
+            signal: AbortSignal.timeout(20_000)
         })
 
         if (!response.ok) {
@@ -63,7 +64,8 @@ export class JumiaAPI {
                 'Authorization': `Bearer ${this.accessToken}`
             },
             body: body ? JSON.stringify(body) : undefined,
-            cache: 'no-store'
+            cache: 'no-store',
+            signal: AbortSignal.timeout(20_000)
         })
 
         if (!response.ok) {
@@ -164,6 +166,10 @@ export class JumiaAPI {
 
     async packOrders(payload: any) {
         return this.request('/v2/orders/pack', 'POST', payload)
+    }
+
+    async packOrdersV1(payload: any) {
+        return this.request('/orders/pack', 'POST', payload)
     }
 
     async readyToShipOrders(payload: any) {
