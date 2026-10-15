@@ -310,23 +310,25 @@ export async function POST(req: Request) {
                 try {
                     await packJumiaOrderFull(orderId)
                     
-                    if (message?.chat?.id && message?.message_id) {
-                        const safeText = escapeHtml(message.text || '')
-                        const updatedText = safeText + '\n\n✅ <b>Statut mis à jour sur Jumia :</b> Prête à expédier (Ready-to-Ship)'
-                        const updatedMarkup = {
+                    if (message?.chat?.id) {
+                        const successMarkup = {
                             inline_keyboard: [
                                 [{ text: '🏷️ Imprimer étiquette', callback_data: `jumia_label:${orderId}` }]
                             ]
                         }
-                        try {
-                            await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, updatedMarkup)
-                        } catch {
-                            await sendTelegramMessage(
-                                `✅ <b>Commande ${orderId} prête à expédier</b>\n\nLe statut Ready-to-Ship a été appliqué sur Jumia.`,
-                                message.chat.id.toString(),
-                                token
-                            )
+
+                        if (message.message_id) {
+                            const safeText = escapeHtml(message.text || '')
+                            const updatedText = safeText + '\n\n✅ <b>Statut mis à jour sur Jumia :</b> Prête à expédier (Ready-to-Ship)'
+                            await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, successMarkup).catch(() => {})
                         }
+
+                        await sendTelegramMessage(
+                            `✅ <b>Commande ${orderId} prête à expédier</b>\n\nLe statut Ready-to-Ship a été appliqué avec succès sur Jumia.`,
+                            message.chat.id.toString(),
+                            token,
+                            successMarkup
+                        )
                     }
                 } catch (error: any) {
                     if (message?.chat?.id) {
