@@ -18,6 +18,7 @@ import UtmTracker from '@/components/UtmTracker'
 import DeferredMarketingScripts from '@/components/DeferredMarketingScripts'
 import AuthModalLoader from '@/components/auth/AuthModalLoader'
 import FacebookSDK from '@/components/FacebookSDK'
+import { resolveActiveWhatsAppAgent } from '@/lib/whatsapp-presence'
 
 
 const outfit = localFont({
@@ -462,7 +463,8 @@ export default async function LocaleLayout({
     googleSearchConsoleIdFallback,
     googleAnalyticsId,
     adsenseId,
-    adsenseEnabled
+    adsenseEnabled,
+    activeWhatsAppAgent
   ] = await Promise.all([
     getMessages(),
     isFeatureEnabled('feature_chatbot'),
@@ -482,7 +484,8 @@ export default async function LocaleLayout({
     getSetting('seo_google_verification'),
     getSetting('google_analytics_id'),
     getSetting('adsense_publisher_id'),
-    getSetting('adsense_enabled')
+    getSetting('adsense_enabled'),
+    resolveActiveWhatsAppAgent()
   ]);
 
   const siteUrl = siteUrlRaw || 'https://riwaya.store';
@@ -607,7 +610,12 @@ export default async function LocaleLayout({
           </main>
           <Toaster />
           <CookieConsent />
-          {isWhatsAppEnabled && <WhatsAppButton phone={whatsappPhone || undefined} />}
+          {isWhatsAppEnabled && (
+            <WhatsAppButton
+              phone={activeWhatsAppAgent?.phone || whatsappPhone || undefined}
+              agentName={activeWhatsAppAgent?.name}
+            />
+          )}
           <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
           <AuthModalLoader />

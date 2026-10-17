@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import PacksListClient from '@/components/packs/PacksListClient'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/routing'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -36,7 +37,28 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export const dynamic = 'force-dynamic'
 
-export default async function PacksPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function PacksPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ locale: string }>
+    searchParams: Promise<{ custom?: string | string[] }>
+}) {
+    const [{ custom }, { locale }] = await Promise.all([searchParams, params]);
+    if (custom === 'true') {
+        redirect(`/${locale}/packs/create`)
+    }
+
+    return <PacksContent params={Promise.resolve({ locale })} />
+}
+
+export async function PacksContent({
+    params,
+    openCustomBuilder = false,
+}: {
+    params: Promise<{ locale: string }>
+    openCustomBuilder?: boolean
+}) {
     const { locale } = await params;
     const packs = await getPacks()
     const availableBooks = await prisma.book.findMany({
@@ -75,7 +97,11 @@ export default async function PacksPage({ params }: { params: Promise<{ locale: 
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">
-                <PacksListClient packs={packs} availableBooks={availableBooks} />
+                <PacksListClient
+                    packs={packs}
+                    availableBooks={availableBooks}
+                    openCustomBuilder={openCustomBuilder}
+                />
             </div>
             <Footer />
         </div>

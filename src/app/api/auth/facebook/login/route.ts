@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
     const requestOrigin = new URL(request.url).origin
     const origin = requestOrigin.includes('localhost') ? requestOrigin : (process.env.NEXT_PUBLIC_APP_URL || requestOrigin)
-    const redirectUri = `${origin}/api/auth/facebook/callback`
+    const redirectUri = process.env.FACEBOOK_REDIRECT_URI || `${origin}/api/auth/facebook/callback`
 
     const params = new URLSearchParams({
         client_id: FACEBOOK_CLIENT_ID,

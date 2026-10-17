@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
     const FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET
-    const redirectUri = `${origin}/api/auth/facebook/callback`
+    const redirectUri = process.env.FACEBOOK_REDIRECT_URI || `${origin}/api/auth/facebook/callback`
 
     if (!FACEBOOK_CLIENT_ID || !FACEBOOK_CLIENT_SECRET) {
         return NextResponse.redirect(`${origin}/community/login?error=FacebookAuthNotConfigured`)

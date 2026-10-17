@@ -20,6 +20,8 @@ interface CartDrawerProps {
     is3For4Active?: boolean
 }
 
+const formatPrice = (value: number) => Math.round(Number(value) || 0).toString()
+
 export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: CartDrawerProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const router = useRouter()
@@ -164,7 +166,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-pixio-cream/30">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar bg-pixio-cream/30">
                         {items.length === 0 ? (
                             // Empty State - Style Pixio
                             <div className="flex flex-col items-center justify-center h-full p-6 sm:p-12 text-center space-y-8">
@@ -192,19 +194,19 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                             </div>
                         ) : (
                             // Cart Items - Styled Cards
-                            <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
+                            <div className={`p-4 sm:p-8 grid grid-cols-1 gap-4 sm:gap-6 ${items.length > 2 ? 'sm:grid-cols-2' : ''}`}>
                                 {items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="flex gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:border-black group/item"
+                                        className={`relative flex gap-4 p-4 bg-white rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:border-black group/item min-w-0 ${items.length > 2 ? 'sm:flex-col sm:gap-3 sm:p-4' : 'sm:gap-6 sm:p-6'}`}
                                     >
                                         {/* Image */}
-                                        <div className="relative w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0 bg-pixio-cream rounded-2xl overflow-hidden border border-gray-50 group-hover:scale-105 transition-transform">
+                                        <div className={`relative w-20 h-28 flex-shrink-0 bg-pixio-cream rounded-2xl overflow-hidden border border-gray-50 group-hover:scale-[1.02] transition-transform ${items.length > 2 ? 'sm:w-full sm:h-44' : 'sm:w-24 sm:h-32'}`}>
                                             {item.image && typeof item.image === 'string' && item.image.trim().length > 5 ? (
                                                 <img
                                                     src={normalizeImage(item.image)}
                                                     alt={item.title}
-                                                    className="w-full h-full object-cover"
+                                                    className={`w-full h-full ${items.length > 2 ? 'object-cover sm:object-contain' : 'object-cover'}`}
                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
                                                 />
                                             ) : (
@@ -225,19 +227,20 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                                             <div>
                                                 <div className="flex justify-between items-start gap-2">
-                                                    <h3 className="font-black text-black tracking-tight line-clamp-2 leading-none group-hover:underline">
+                                                    <h3 className={`font-black text-black tracking-tight line-clamp-2 leading-none group-hover:underline ${items.length > 2 ? 'sm:hidden' : ''}`}>
                                                         {item.title}
                                                     </h3>
                                                     <button
                                                         onClick={() => handleRemove(item)}
-                                                        className="p-1 text-gray-300 hover:text-black transition-colors"
+                                                        aria-label="Supprimer du panier"
+                                                        className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-500 transition-all ${items.length > 2 ? 'sm:absolute sm:top-3 sm:right-3 rtl:sm:right-auto rtl:sm:left-3 sm:z-10' : ''}`}
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
-                                                <div className="flex items-center gap-4 mt-3">
+                                                <div className={`flex items-center gap-4 mt-3 ${items.length > 2 ? 'sm:justify-center sm:mt-0' : ''}`}>
                                                     <p className="text-sm font-black text-black">
-                                                        {item.price} <span className="text-[10px] text-gray-500">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                                        {formatPrice(item.price)} <span className="text-[10px] text-gray-500">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                                     </p>
                                                     {item.booksCount && (
                                                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 py-0.5 bg-gray-50 rounded-full">
@@ -261,8 +264,8 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                                             </div>
 
                                             {/* Quantity Controls - Style Pixio */}
-                                            <div className="flex items-center justify-between mt-4">
-                                                <div className="flex items-center p-1 bg-pixio-cream rounded-full border border-gray-100">
+                                            <div className={`flex items-center justify-between mt-4 ${items.length > 2 ? 'sm:justify-center sm:mt-3' : ''}`}>
+                                                <div className={`flex items-center p-1 bg-pixio-cream rounded-full border border-gray-100 ${items.length > 2 ? 'sm:w-full sm:justify-between' : ''}`}>
                                                     <button
                                                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                                         className="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-black"
@@ -275,7 +278,8 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                                                     </span>
                                                     <button
                                                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm hover:bg-black hover:text-white transition-all"
+                                                        disabled={item.quantity >= 2}
+                                                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm hover:bg-black hover:text-white transition-all disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-black disabled:cursor-not-allowed"
                                                     >
                                                         <Plus className="w-3 h-3" />
                                                     </button>
@@ -287,7 +291,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
 
                                 {/* Upsell Marque-pages */}
                                 {items.length > 0 && (
-                                    <div className="hidden sm:block">
+                                    <div className={`hidden sm:block ${items.length > 2 ? 'sm:col-span-2' : ''}`}>
                                         <CartBookmarksUpsell />
                                     </div>
                                 )}
@@ -306,12 +310,12 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                                 {promo3for4Discount > 0 && (
                                     <div className="flex justify-between items-center text-rose-500 mb-1">
                                         <span className="text-sm font-black uppercase tracking-widest">{locale === 'ar' ? 'الكتاب الرابع مجاناً' : '4ème Livre Offert'}</span>
-                                        <span className="text-xl font-black">-{promo3for4Discount} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                        <span className="text-xl font-black">-{formatPrice(promo3for4Discount)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center pt-1">
                                     <span className="text-sm sm:text-base font-black uppercase tracking-[0.2em] text-black">{t('OrderTotal')}</span>
-                                    <span className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    <span className="text-3xl sm:text-4xl font-black text-black tracking-tighter">{formatPrice(finalTotal)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <div className="text-center">
                                     <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400">{t('DeliveryCalculatedNextStep')}</span>

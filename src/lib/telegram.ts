@@ -102,6 +102,16 @@ export async function sendOrderNotification(order: {
         text += `\n\n🏪 <b>Canal:</b> ${escapeHtml(channelLabel)}`
     }
 
+    try {
+        const { resolveActiveWhatsAppAgent } = await import('@/lib/whatsapp-presence')
+        const activeAgent = await resolveActiveWhatsAppAgent()
+        if (activeAgent?.name) {
+            text += `\n👤 <b>Admin assigné :</b> ${escapeHtml(activeAgent.name)}`
+        }
+    } catch {
+        // ignore presence error
+    }
+
     let cleanPhone = order.phone.replace(/[^0-9]/g, '')
     if (cleanPhone.startsWith('0')) {
         cleanPhone = '212' + cleanPhone.substring(1)

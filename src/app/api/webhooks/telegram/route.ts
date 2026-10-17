@@ -662,6 +662,26 @@ export async function POST(req: Request) {
                         } catch (err: any) {
                             await sendTelegramMessage(`❌ Impossible de contacter l'API: ${err.message}`, message?.chat?.id.toString(), token)
                         }
+                    } else if (action === 'status_check') {
+                        await answerCallbackQuery(callbackId, '🔄 Vérification des statuts Jumia...', token)
+                        try {
+                            const cronUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-status-changes?secret=${process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026'}`
+                            const res = await fetch(cronUrl)
+                            const data = await res.json()
+                            if (data.success) {
+                                await sendTelegramMessage(
+                                    `🚚 <b>Vérification Statuts Jumia Terminée</b>\n\n` +
+                                    `📦 Commandes vérifiées : <b>${data.inspectedCount || 0}</b>\n` +
+                                    `🔄 Changements notifiés : <b>${data.changedCount || 0}</b>`,
+                                    message?.chat?.id.toString(),
+                                    token
+                                )
+                            } else {
+                                await sendTelegramMessage(`❌ Erreur vérification Jumia: ${data.error || 'Erreur inconnue'}`, message?.chat?.id.toString(), token)
+                            }
+                        } catch (err: any) {
+                            await sendTelegramMessage(`❌ Erreur contact cron Jumia: ${err.message}`, message?.chat?.id.toString(), token)
+                        }
                     } else if (action === 'sync_order_stock') {
                         const orderInternalId = data.split(':').slice(2).join(':')
                         await answerCallbackQuery(callbackId, '🔄 Synchronisation des articles commandés...', token)
@@ -2160,10 +2180,33 @@ export async function POST(req: Request) {
                         ],
                         [
                             { text: '🔄 Alerte Retours/Annulations', callback_data: 'jumia:returns_check' }
+                        ],
+                        [
+                            { text: '🚚 Statuts Livraison Jumia', callback_data: 'jumia:status_check' }
                         ]
                     ]
                 }
                 await sendTelegramMessage(`🟠 <b>Menu Jumia</b>\n\nChoisissez une action :`, chatId.toString(), token, replyMarkup)
+            }
+            else if (text.startsWith('/JUMIASTATUT') || text === 'JUMIASTATUT') {
+                try {
+                    const cronUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-status-changes?secret=${process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026'}`
+                    const res = await fetch(cronUrl)
+                    const data = await res.json()
+                    if (data.success) {
+                        await sendTelegramMessage(
+                            `🚚 <b>Vérification Statuts Jumia Terminée</b>\n\n` +
+                            `📦 Commandes vérifiées : <b>${data.inspectedCount || 0}</b>\n` +
+                            `🔄 Changements notifiés : <b>${data.changedCount || 0}</b>`,
+                            chatId.toString(),
+                            token
+                        )
+                    } else {
+                        await sendTelegramMessage(`❌ Erreur vérification Jumia: ${data.error || 'Erreur inconnue'}`, chatId.toString(), token)
+                    }
+                } catch (e: any) {
+                    await sendTelegramMessage(`❌ Erreur: ${e.message}`, chatId.toString(), token)
+                }
             }
             else if (text.startsWith('/RAPPORT') || text === 'RAPPORT') {
                 // Déclencher rapport quotidien maintenant

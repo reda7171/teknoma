@@ -167,18 +167,30 @@ export async function notifyCheckoutInitiated(totalValue: number, totalItems: nu
 
 
 
-export async function notifyWhatsAppClick(message: string) {
+export async function notifyWhatsAppClick(message: string, assignedAgentName?: string) {
     try {
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
+
+        let agentDisplay = assignedAgentName
+        if (!agentDisplay) {
+            const { resolveActiveWhatsAppAgent } = await import('@/lib/whatsapp-presence')
+            const active = await resolveActiveWhatsAppAgent().catch(() => null)
+            if (active?.name) {
+                agentDisplay = active.name
+            }
+        }
+        const assignedLine = agentDisplay
+            ? `\n👤 <b>Admin en charge :</b> ${agentDisplay}`
+            : '\n👤 <b>Admin en charge :</b> Standard Riwaya'
         
         const cleanMessage = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
         
         if (shouldNotify) {
-            await sendTelegramMessage(`💬 <b>Nouveau Contact WhatsApp Initié</b>${adminTag}\n\n<b>Message :</b>\n<pre>${cleanMessage}</pre>\n\n🌍 <b>IP:</b> ${ip || 'Inconnue'}`)
+            await sendTelegramMessage(`💬 <b>Nouveau Contact WhatsApp Initié</b>${adminTag}${assignedLine}\n\n<b>Message :</b>\n<pre>${cleanMessage}</pre>\n\n🌍 <b>IP:</b> ${ip || 'Inconnue'}`)
         }
         return { success: true }
     } catch (error) {

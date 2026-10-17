@@ -261,6 +261,24 @@ export async function checkApprovalStatus(requestId: string): Promise<LoginResul
  * Déconnexion admin
  */
 export async function logout() {
+    try {
+        const userId = await getAdminUser()
+        if (userId) {
+            const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } })
+            if (user?.email) {
+                const { getWhatsAppAgents } = await import('@/lib/whatsapp-presence')
+                const agents = await getWhatsAppAgents().catch(() => [])
+                const agent = agents.find(a => a.email.trim().toLowerCase() === user.email.trim().toLowerCase())
+                if (agent) {
+                    const { setWhatsAppAvailability } = await import('@/lib/actions/whatsapp-presence')
+                    await setWhatsAppAvailability(agent.id, false).catch(() => {})
+                }
+            }
+        }
+    } catch {
+        // ignore presence error on logout
+    }
+
     await createAuditLog({
         action: 'LOGOUT',
         entity: 'AUTH'

@@ -9,11 +9,12 @@ import CustomPackBuilder from './CustomPackBuilder'
 interface PacksListClientProps {
     packs: any[]
     availableBooks: any[]
+    openCustomBuilder?: boolean
 }
 
 const ITEMS_PER_PAGE = 9
 
-export default function PacksListClient({ packs, availableBooks }: PacksListClientProps) {
+export default function PacksListClient({ packs, availableBooks, openCustomBuilder = false }: PacksListClientProps) {
     const t = useTranslations('PacksPage')
     const tCommon = useTranslations('Common')
     const [filterAvailable, setFilterAvailable] = useState(false)
@@ -53,7 +54,7 @@ export default function PacksListClient({ packs, availableBooks }: PacksListClie
     return (
         <>
             {/* Custom Pack Builder */}
-            <CustomPackBuilder availableBooks={availableBooks} />
+            <CustomPackBuilder availableBooks={availableBooks} initialOpen={openCustomBuilder} />
 
             {/* Filter */}
             <div className="flex justify-end mb-10">
