@@ -3,7 +3,8 @@ import { oauthLoginOrRegister } from '@/lib/actions/community-auth'
 
 export async function GET(request: Request) {
     const searchParams = new URL(request.url).searchParams
-    const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
+    const requestOrigin = new URL(request.url).origin
+    const origin = requestOrigin.includes('localhost') ? requestOrigin : (process.env.NEXT_PUBLIC_APP_URL || requestOrigin)
     const code = searchParams.get('code')
     const error = searchParams.get('error')
 
@@ -15,9 +16,9 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/community/login?error=NoCodeProvided`)
     }
 
-    const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID
+    const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
     const FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET
-    const redirectUri = `${origin}/api/auth/facebook/callback`
+    const redirectUri = process.env.FACEBOOK_REDIRECT_URI || `${origin}/api/auth/facebook/callback`
 
     if (!FACEBOOK_CLIENT_ID || !FACEBOOK_CLIENT_SECRET) {
         return NextResponse.redirect(`${origin}/community/login?error=FacebookAuthNotConfigured`)

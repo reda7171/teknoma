@@ -11,7 +11,7 @@ import { trackBadgeClick } from '@/lib/actions/analytics'
 import { useTranslations, useLocale } from 'next-intl'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { normalizeImage } from '@/lib/utils'
-import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
+import { getLocalizedTitle, getLocalizedPackTitle, generateBookUrl } from '@/lib/i18n-utils'
 
 const Countdown = ({ expiresAt }: { expiresAt: string | Date }) => {
     const [timeLeft, setTimeLeft] = useState('')
@@ -45,6 +45,7 @@ const Countdown = ({ expiresAt }: { expiresAt: string | Date }) => {
 export default function PredictiveSearch() {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<any[]>([])
+    const [suggestion, setSuggestion] = useState<string | null>(null)
     const [history, setHistory] = useState<string[]>([])
     const [selectedIndex, setSelectedIndex] = useState(-1)
 
@@ -99,12 +100,16 @@ export default function PredictiveSearch() {
             if (query.length >= 2) {
                 setIsLoading(true)
                 const data = await searchBooksPredictive(query)
-                setResults(data)
+                const items = Array.isArray(data) ? data : (data?.results || [])
+                const didYouMean = Array.isArray(data) ? null : (data?.suggestion || null)
+                setResults(items)
+                setSuggestion(didYouMean)
                 setSelectedIndex(-1)
                 setIsLoading(false)
                 setIsOpen(true)
             } else {
                 setResults([])
+                setSuggestion(null)
                 // Si l'input est vide on affiche l'historique ou les thèmes
                 if (query.length === 0 && history.length > 0) {
                     // L'état isOpen est géré par onFocus
@@ -138,10 +143,13 @@ export default function PredictiveSearch() {
             setSelectedIndex(prev => Math.max(prev - 1, -1));
         } else if (e.key === 'Enter' && selectedIndex >= 0 && selectedIndex < results.length) {
             e.preventDefault();
-            const selectedBook = results[selectedIndex];
+            const selectedItem = results[selectedIndex];
             saveToHistory(query);
             setIsOpen(false);
-            router.push(generateBookUrl(selectedBook, locale));
+            const targetUrl = selectedItem.type === 'PACK'
+                ? `/packs/${selectedItem.id}`
+                : generateBookUrl(selectedItem, locale);
+            router.push(targetUrl);
         }
     }
 
@@ -251,6 +259,24 @@ export default function PredictiveSearch() {
                                 {isLoading && <Loader2 className="w-4 h-4 animate-spin text-black" />}
                             </div>
 
+                            {suggestion && (
+                                <div className="px-4 py-2.5 bg-amber-50/80 border-b border-amber-100 flex items-center justify-between text-xs">
+                                    <span className="text-amber-900 font-medium">
+                                        {t('DidYouMean', { suggestion: '' })}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setQuery(suggestion)
+                                                saveToHistory(suggestion)
+                                            }}
+                                            className="font-black underline text-amber-950 hover:text-black ml-1 rtl:mr-1 transition-colors cursor-pointer"
+                                        >
+                                            {suggestion}
+                                        </button>
+                                    </span>
+                                </div>
+                            )}
+
                             <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
                                 {isLoading && results.length === 0 ? (
                                     <div className="p-4 space-y-3">
@@ -267,13 +293,14 @@ export default function PredictiveSearch() {
                                     </div>
                                 ) : results.length > 0 ? (
                                     <div className="p-4 space-y-3">
-                                        {results.map((book, idx) => {
-                                            const displayTitle = getLocalizedTitle(book, locale);
-                                            const bookUrl = generateBookUrl(book, locale);
+                                        {results.map((item, idx) => {
+                                            const isPack = item.type === 'PACK';
+                                            const displayTitle = isPack ? getLocalizedPackTitle(item, locale) : getLocalizedTitle(item, locale);
+                                            const itemUrl = isPack ? `/packs/${item.id}` : generateBookUrl(item, locale);
                                             return (
                                             <Link
-                                                key={book.id}
-                                                href={bookUrl}
+                                                key={item.id}
+                                                href={itemUrl}
                                                 onMouseEnter={() => setSelectedIndex(idx)}
                                                 onClick={() => {
                                                     saveToHistory(query)
@@ -287,7 +314,7 @@ export default function PredictiveSearch() {
                                             >
                                                 <div className="relative w-14 h-20 rounded-xl overflow-hidden bg-gray-50 shrink-0 border border-gray-50 shadow-sm transition-all group-hover/item:scale-105">
                                                     <Image
-                                                        src={normalizeImage(book.image)}
+                                                        src={normalizeImage(item.image)}
                                                         alt={displayTitle}
                                                         fill
                                                         className="object-cover"
@@ -295,11 +322,25 @@ export default function PredictiveSearch() {
                                                     />
                                                 </div>
                                                 <div className="flex-1 min-w-0 space-y-1">
-                                                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">{book.category || 'Collection'}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        {isPack ? (
+                                                            <span className="text-[9px] font-black uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full tracking-wider">
+                                                                {t('PackBadge')}
+                                                            </span>
+                                                        ) : (
+                                                            <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">{item.category || 'Collection'}</p>
+                                                        )}
+                                                    </div>
                                                     <h4 className="font-black text-gray-900 text-sm truncate group-hover/item:text-black transition-colors leading-none">{displayTitle}</h4>
-                                                    <p className="text-[10px] font-bold text-gray-500 italic">{t('By', { author: book.author })}</p>
+                                                    {isPack ? (
+                                                        <p className="text-[10px] font-bold text-amber-800">
+                                                            {t('PackBooksCount', { count: item.booksCount || 0 })}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-[10px] font-bold text-gray-500 italic">{t('By', { author: item.author })}</p>
+                                                    )}
                                                     <div className="flex items-center justify-between mt-2">
-                                                        <span className="text-sm font-black text-gray-900">{book.price} درهم</span>
+                                                        <span className="text-sm font-black text-gray-900">{item.price} درهم</span>
                                                         <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0 rtl:translate-x-2 rtl:group-hover/item:translate-x-0">
                                                             <ArrowRight className="w-3 h-3 rtl:rotate-180" />
                                                         </div>

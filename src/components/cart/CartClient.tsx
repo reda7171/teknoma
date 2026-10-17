@@ -20,6 +20,8 @@ interface CartClientProps {
     is3For4Active?: boolean
 }
 
+const formatPrice = (value: number) => Math.round(Number(value) || 0).toString()
+
 export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], is3For4Active = false }: CartClientProps) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems, clearCart, sessionId } = useCartStore()
     const [mounted, setMounted] = useState(false)
@@ -116,7 +118,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-16">
                     {/* Cart Items */}
-                    <div className="lg:col-span-2 space-y-6 sm:space-y-8 px-4 sm:px-0">
+                    <div className={`lg:col-span-2 grid grid-cols-1 gap-6 sm:gap-8 px-4 sm:px-0 ${items.length > 2 ? 'xl:grid-cols-2' : ''}`}>
 
                         {items.map((item) => (
                             <div
@@ -149,12 +151,12 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                                 {item.title}
                                             </h3>
                                             <p className="text-lg sm:text-xl font-black tracking-tighter whitespace-nowrap">
-                                                {item.price * item.quantity} {locale === 'ar' ? 'درهم' : 'MAD'}
+                                                {formatPrice(item.price * item.quantity)} {locale === 'ar' ? 'درهم' : 'MAD'}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-4 mb-8">
                                             <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest bg-pixio-cream px-4 py-2 rounded-xl text-black">
-                                                {item.price} {locale === 'ar' ? 'درهم' : 'MAD'} / {t('ItemUnit')}
+                                                {formatPrice(item.price)} {locale === 'ar' ? 'درهم' : 'MAD'} / {t('ItemUnit')}
                                             </span>
                                             {item.booksCount && (
                                                 <span className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">
@@ -191,7 +193,8 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                             </span>
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                className="w-10 h-10 flex items-center justify-center bg-white rounded-xl hover:bg-black hover:text-white transition-all shadow-sm active:scale-95"
+                                                disabled={item.quantity >= 2}
+                                                className="w-10 h-10 flex items-center justify-center bg-white rounded-xl hover:bg-black hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-black disabled:cursor-not-allowed"
                                                 aria-label="Increase quantity"
                                             >
                                                 <Plus className="w-3 h-3" />
@@ -210,7 +213,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                             </div>
                         ))}
 
-                        <div className="flex justify-start pt-10">
+                        <div className={`flex justify-start pt-4 sm:pt-10 ${items.length > 2 ? 'xl:col-span-2' : ''}`}>
                             <button
                                 onClick={handleClearCart}
                                 className="text-gray-500 hover:text-red-500 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] flex items-center gap-4 px-8 py-4 transition-all rounded-full border border-gray-100 hover:border-red-100 hover:bg-red-50 bg-white shadow-sm"
@@ -233,7 +236,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                             <div className="space-y-6 mb-12">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Items')} ({totalItems})</span>
-                                    <span className="text-xs font-black uppercase tracking-widest">{totalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    <span className="text-xs font-black uppercase tracking-widest">{formatPrice(totalPrice)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Shipping')}</span>
@@ -243,7 +246,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                 {finalTotal < 500 && (
                                     <div className="bg-pixio-cream/50 p-8 rounded-[2rem] border border-gray-50">
                                         <p className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500 mb-6 leading-relaxed"
-                                            dangerouslySetInnerHTML={{ __html: t.raw('FreeShippingAd').replace('{amount}', (500 - finalTotal).toString()) }} />
+                                            dangerouslySetInnerHTML={{ __html: t.raw('FreeShippingAd').replace('{amount}', formatPrice(500 - finalTotal)) }} />
                                         <div className="w-full bg-white h-2 rounded-full overflow-hidden shadow-inner">
                                             <div
                                                 className="bg-black h-full rounded-full transition-all duration-1000"
@@ -258,12 +261,12 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                 {promo3for4Discount > 0 && (
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-4 gap-2 text-rose-500">
                                         <span className="text-xs font-black uppercase tracking-[0.3em]">{locale === 'ar' ? 'الكتاب الرابع مجاناً' : '4ème Livre Offert'}</span>
-                                        <span className="text-xl sm:text-2xl font-black tracking-tighter">-{promo3for4Discount} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                        <span className="text-xl sm:text-2xl font-black tracking-tighter">-{formatPrice(promo3for4Discount)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                     </div>
                                 )}
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-2 gap-2">
                                     <span className="text-xs font-black uppercase tracking-[0.3em]">{t('TotalValue')}</span>
-                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{finalTotal} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                                    <span className="text-4xl sm:text-5xl font-black tracking-tighter">{formatPrice(finalTotal)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 </div>
                                 <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-left sm:text-right">{t('TaxesNote')}</p>
                             </div>
@@ -387,7 +390,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                 <div className="bg-white border-t border-gray-100 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('TotalValue')}</span>
-                        <span className="text-xl font-black">{totalPrice} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                        <span className="text-xl font-black">{formatPrice(totalPrice)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                     </div>
                     <div className="flex-1">
                         {isMinAmountReached ? (

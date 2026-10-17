@@ -4,7 +4,7 @@ import { Link } from '@/i18n/routing'
 import Image from 'next/image'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { ArrowRight, Calendar, User, Quote, Sparkles, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
+import { ArrowRight, Calendar, User, Quote, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
 import AdUnit from '@/components/AdUnit'
 import { getSetting } from '@/lib/actions/site-settings'
 import { getTranslations } from 'next-intl/server'
@@ -86,10 +86,6 @@ export default async function BlogPage({
             <div className="bg-pixio-beige pt-10 sm:pt-12 md:pt-20 pb-10 sm:pb-12 md:pb-20 relative overflow-hidden">
                 <Quote className="absolute -top-10 -right-10 w-48 h-48 sm:w-64 sm:h-64 text-pixio-cream opacity-50 -rotate-12" />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-md rounded-full text-black text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shadow-sm mb-4 sm:mb-6 hover:scale-105 transition-transform duration-300">
-                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 animate-pulse" />
-                        <span>{t('Badge')}</span>
-                    </div>
                     <h1 className="text-4xl sm:text-5xl md:text-8xl font-black text-black mb-4 sm:mb-6 tracking-tighter hover:scale-[1.02] transition-transform duration-500">
                         {t('Title')}
                     </h1>

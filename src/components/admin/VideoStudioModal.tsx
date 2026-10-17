@@ -865,7 +865,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                             {/* LOGO */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             {showLogo && el('logo', 'top-6 right-6',
-                                <img src="/logo.png" alt="Logo" crossOrigin="anonymous" className="h-6 object-contain brightness-0 invert opacity-90" />
+                                <img src="/logo-riwaya.png?v=riwaya2" alt="Logo" crossOrigin="anonymous" className="h-6 object-contain brightness-0 invert opacity-90" />
                             )}
 
                             {/* BOOK COVER */}

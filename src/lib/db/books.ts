@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import Fuse from 'fuse.js'
 import { getCached, generateCacheKey } from '@/lib/cache'
+import { matchWithLevenshtein } from '@/lib/utils/levenshtein'
 
 // Types pour les filtres
 export interface BookFilters {
@@ -95,6 +96,8 @@ export async function getBooks(filters?: BookFilters) {
             const fuseOptions = {
                 keys: [
                     { name: 'title', weight: 1.0 },
+                    { name: 'titleFr', weight: 1.0 },
+                    { name: 'titleEn', weight: 1.0 },
                     { name: 'author', weight: 0.8 }
                 ],
                 threshold: 0.4,
@@ -102,7 +105,36 @@ export async function getBooks(filters?: BookFilters) {
                 ignoreLocation: true
             }
             const fuse = new Fuse(books, fuseOptions)
-            let results = fuse.search(filters.search).map(res => res.item)
+            const fuseResults = fuse.search(filters.search).map(res => res.item)
+
+            // Tolérance aux fautes de frappe via la distance de Levenshtein (auteurs et titres)
+            const searchPattern = filters.search.trim()
+            const levMatches = books
+                .map(book => {
+                    const authorCheck = matchWithLevenshtein(searchPattern, book.author)
+                    const titleCheck = matchWithLevenshtein(searchPattern, book.title)
+                    const titleFrCheck = matchWithLevenshtein(searchPattern, book.titleFr)
+                    const titleEnCheck = matchWithLevenshtein(searchPattern, book.titleEn)
+
+                    const maxScore = Math.max(
+                        authorCheck.matches ? authorCheck.score * 1.15 : 0,
+                        titleCheck.matches ? titleCheck.score : 0,
+                        titleFrCheck.matches ? titleFrCheck.score : 0,
+                        titleEnCheck.matches ? titleEnCheck.score : 0
+                    )
+                    return { book, score: maxScore }
+                })
+                .filter(entry => entry.score >= 0.7)
+                .sort((a, b) => b.score - a.score)
+                .map(entry => entry.book)
+
+            const merged = new Map<string, typeof books[0]>()
+            for (const b of levMatches) merged.set(b.id, b)
+            for (const b of fuseResults) {
+                if (!merged.has(b.id)) merged.set(b.id, b)
+            }
+
+            let results = Array.from(merged.values())
             
             // Mettre les livres en rupture à la fin
             const inStock = results.filter(b => b.stock > 0)
@@ -240,15 +272,32 @@ export async function getBooksCount(filters?: BookFilters) {
             // Pour Fuse.js, on doit appliquer le filtre puis filtrer manuellement
             const books = await prisma.book.findMany({
                 where,
-                select: { id: true, title: true, author: true }
+                select: { id: true, title: true, titleFr: true, titleEn: true, author: true }
             })
 
             const fuseOptions = {
-                keys: ['title', 'author'],
+                keys: ['title', 'titleFr', 'titleEn', 'author'],
                 threshold: 0.4
             }
             const fuse = new Fuse(books, fuseOptions)
-            return fuse.search(filters.search).length
+            const fuseResults = fuse.search(filters.search).map(res => res.item)
+
+            const searchPattern = filters.search.trim()
+            const mergedIds = new Set<string>()
+            for (const b of books) {
+                const authorCheck = matchWithLevenshtein(searchPattern, b.author)
+                const titleCheck = matchWithLevenshtein(searchPattern, b.title)
+                const titleFrCheck = matchWithLevenshtein(searchPattern, b.titleFr)
+                const titleEnCheck = matchWithLevenshtein(searchPattern, b.titleEn)
+                if (authorCheck.matches || titleCheck.matches || titleFrCheck.matches || titleEnCheck.matches) {
+                    mergedIds.add(b.id)
+                }
+            }
+            for (const b of fuseResults) {
+                mergedIds.add(b.id)
+            }
+
+            return mergedIds.size
         }
 
         return await prisma.book.count({ where })

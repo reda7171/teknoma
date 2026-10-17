@@ -18,8 +18,12 @@ import {
     Download,
     Package,
     Calculator,
-    FileText
+    FileText,
+    Plus,
+    Trash2,
+    UserRound
 } from 'lucide-react'
+import type { WhatsAppAgentConfig } from '@/lib/whatsapp-presence'
 
 interface AdvancedSettingsFormProps {
     initialSettings: Record<string, string>
@@ -125,6 +129,18 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
     const [loading, setLoading] = useState(false)
     const [backupLoading, setBackupLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [whatsappAgents, setWhatsappAgents] = useState<WhatsAppAgentConfig[]>(() => {
+        try {
+            const saved = JSON.parse(initialSettings.whatsapp_agents || '[]') as WhatsAppAgentConfig[]
+            if (Array.isArray(saved) && saved.length > 0) return saved
+        } catch {
+            // Use the initial suggested team below.
+        }
+        return [
+            { id: 'amine', name: 'Amine', email: '', phone: '', enabled: true, priority: 1 },
+            { id: 'reda', name: 'Reda', email: '', phone: '', enabled: true, priority: 2 },
+        ]
+    })
 
     const toggle = (key: string) => {
         setFeatures(prev => ({ ...prev, [key]: !prev[key] }))
@@ -140,6 +156,12 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
             category: 'features',
             description: f.label
         }))
+        settingsArray.push({
+            key: 'whatsapp_agents',
+            value: JSON.stringify(whatsappAgents),
+            category: 'whatsapp',
+            description: 'Agents disponibles pour le bouton WhatsApp public',
+        })
 
         const result = await updateMultipleSettings(settingsArray)
 
@@ -247,6 +269,99 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
                         )
                     })}
                 </div>
+            </div>
+
+            {/* Équipe WhatsApp */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <div>
+                        <h2 className="text-2xl font-black text-black mb-2 flex items-center gap-3">
+                            <div className="w-10 h-10 bg-[#25D366] rounded-xl flex items-center justify-center">
+                                <MessageCircle className="w-5 h-5 text-white" />
+                            </div>
+                            Équipe WhatsApp
+                        </h2>
+                        <p className="text-sm text-gray-500">L’e-mail doit être identique à celui utilisé par l’administrateur pour se connecter.</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setWhatsappAgents(agents => [...agents, {
+                            id: `agent-${Date.now()}`,
+                            name: '',
+                            email: '',
+                            phone: '',
+                            enabled: true,
+                            priority: agents.length + 1,
+                        }])}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 px-4 py-3 text-xs font-black uppercase tracking-wider hover:border-black"
+                    >
+                        <Plus className="w-4 h-4" /> Ajouter
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    {whatsappAgents.map((agent, index) => (
+                        <div key={agent.id} className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
+                            <div className="mb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm">
+                                        <UserRound className="h-4 w-4 text-gray-600" />
+                                    </div>
+                                    <span className="text-sm font-black">Agent {index + 1}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setWhatsappAgents(agents => agents.map(item => item.id === agent.id ? { ...item, enabled: !item.enabled } : item))}
+                                        className={`rounded-full px-3 py-1.5 text-[10px] font-black uppercase ${agent.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}
+                                    >
+                                        {agent.enabled ? 'Activé' : 'Désactivé'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setWhatsappAgents(agents => agents.filter(item => item.id !== agent.id))}
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 hover:bg-red-50"
+                                        aria-label="Supprimer cet agent"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1.35fr_1fr_110px]">
+                                <input
+                                    value={agent.name}
+                                    onChange={event => setWhatsappAgents(agents => agents.map(item => item.id === agent.id ? { ...item, name: event.target.value } : item))}
+                                    placeholder="Nom (ex. Reda)"
+                                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-black"
+                                />
+                                <input
+                                    type="email"
+                                    value={agent.email}
+                                    onChange={event => setWhatsappAgents(agents => agents.map(item => item.id === agent.id ? { ...item, email: event.target.value.trim() } : item))}
+                                    placeholder="E-mail de connexion admin"
+                                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-black"
+                                />
+                                <input
+                                    value={agent.phone}
+                                    onChange={event => setWhatsappAgents(agents => agents.map(item => item.id === agent.id ? { ...item, phone: event.target.value } : item))}
+                                    placeholder="WhatsApp (ex. 2126...)"
+                                    inputMode="tel"
+                                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-black"
+                                />
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={agent.priority}
+                                    onChange={event => setWhatsappAgents(agents => agents.map(item => item.id === agent.id ? { ...item, priority: Math.max(1, Number(event.target.value) || 1) } : item))}
+                                    aria-label="Priorité"
+                                    title="Priorité (1 = premier choix)"
+                                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-black"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs font-medium text-gray-400">Si plusieurs agents sont en ligne, celui ayant la priorité la plus basse (1, puis 2…) reçoit les visiteurs. Si personne n’est en ligne, le numéro général est utilisé.</p>
             </div>
 
             {/* Section Maintenance */}

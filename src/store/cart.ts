@@ -33,6 +33,8 @@ interface CartStore {
     getItemQuantity: (id: string) => number
 }
 
+const MAX_ITEM_QUANTITY = 2
+
 export const useCartStore = create<CartStore>()(
     persist(
         (set, get) => ({
@@ -42,22 +44,24 @@ export const useCartStore = create<CartStore>()(
 
             // Ajouter un item au panier
             addItem: (item) => {
+                const roundedPrice = Math.round(Number(item.price) || 0)
+                const sanitizedItem = { ...item, price: roundedPrice }
                 const items = get().items
-                const existingItem = items.find((i) => i.id === item.id)
+                const existingItem = items.find((i) => i.id === sanitizedItem.id)
 
                 if (existingItem) {
                     // Incrémenter la quantité si l'item existe déjà
                     set({
                         items: items.map((i) =>
-                            i.id === item.id
-                                ? { ...i, quantity: i.quantity + 1 }
+                            i.id === sanitizedItem.id
+                                ? { ...i, price: roundedPrice, quantity: Math.min(i.quantity + 1, MAX_ITEM_QUANTITY) }
                                 : i
                         ),
                     })
                 } else {
                     // Ajouter le nouvel item
                     set({
-                        items: [...items, { ...item, quantity: 1 }],
+                        items: [...items, { ...sanitizedItem, quantity: 1 }],
                     })
                 }
             },
@@ -77,7 +81,7 @@ export const useCartStore = create<CartStore>()(
                 } else {
                     set({
                         items: get().items.map((item) =>
-                            item.id === id ? { ...item, quantity } : item
+                            item.id === id ? { ...item, price: Math.round(item.price), quantity: Math.min(quantity, MAX_ITEM_QUANTITY) } : item
                         ),
                     })
                 }
@@ -93,20 +97,20 @@ export const useCartStore = create<CartStore>()(
             },
 
             applyDiscount: (discount) => {
-                set({ discount })
+                set({ discount: Math.round(discount) })
             },
 
-            // Calculer le prix total
+            // Calculer le prix total (toujours un entier arrondi)
             getTotalPrice: () => {
                 const total = get().items.reduce(
-                    (sum, item) => sum + item.price * item.quantity,
+                    (sum, item) => sum + Math.round(item.price) * item.quantity,
                     0
                 )
                 const discount = get().discount
                 if (discount) {
-                    return Math.max(0, total - discount)
+                    return Math.max(0, Math.round(total - discount))
                 }
-                return total
+                return Math.round(total)
             },
 
             // Calculer le nombre total d'items
@@ -123,6 +127,18 @@ export const useCartStore = create<CartStore>()(
         {
             name: 'riwaya-cart-storage', // Nom de la clé dans localStorage
             storage: createJSONStorage(() => localStorage),
+            version: 2,
+            migrate: (persistedState) => {
+                const state = persistedState as CartStore
+                return {
+                    ...state,
+                    items: (state.items ?? []).map((item) => ({
+                        ...item,
+                        price: Math.round(Number(item.price) || 0),
+                        quantity: Math.min(item.quantity, MAX_ITEM_QUANTITY),
+                    })),
+                }
+            },
         }
     )
 )

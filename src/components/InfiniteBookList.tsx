@@ -301,7 +301,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                             {tCTA('CustomPackDesc')}
                                         </p>
                                         <Link 
-                                            href="/packs?custom=true" 
+                                            href="/packs/create"
                                             className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-900 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
                                             {tCTA('CreatePack')}

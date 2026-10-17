@@ -58,6 +58,8 @@ import {
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import WhatsAppAvailabilityPopup from '@/components/admin/WhatsAppAvailabilityPopup'
+import WhatsAppStatusButton from '@/components/admin/WhatsAppStatusButton'
 
 export default function AdminLayout({
     children,
@@ -508,6 +510,7 @@ export default function AdminLayout({
                             </div>
                         </div>
 
+                        <WhatsAppStatusButton isCollapsed={isCollapsed} />
                         <a
                             href={`/${lang}`}
                             target="_blank"
@@ -534,6 +537,7 @@ export default function AdminLayout({
 
     return (
         <div className="min-h-screen bg-[#F8FAFC]">
+            <WhatsAppAvailabilityPopup />
             {/* Overlay mobile */}
             {sidebarOpen && (
                 <div
@@ -578,6 +582,7 @@ export default function AdminLayout({
                             <span className="text-base font-black text-slate-900">Riwaya<span className="text-blue-600">.</span></span>
                         </div>
                         <div className="flex items-center gap-2">
+                            <WhatsAppStatusButton isCollapsed={true} />
                             <LanguageSwitcher />
                             <OrderNotifications />
                         </div>
