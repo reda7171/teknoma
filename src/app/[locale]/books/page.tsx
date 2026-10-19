@@ -17,6 +17,7 @@ import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { headers } from 'next/headers'
+import { getBaseUrl } from '@/lib/utils'
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<SearchParams> }): Promise<Metadata> {
     const { locale } = await params
@@ -24,11 +25,58 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     const tCommon = await getTranslations('Common')
     const tCats = await getTranslations('Categories')
     const tBooksPage = await getTranslations('BooksPage')
+    const baseUrl = getBaseUrl()
+
+    const isUsedOnly = resolvedParams.usedOnly === 'true'
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    if (isUsedOnly) {
+        const title = isAr
+            ? 'كتب وروايات مستعملة بالمغرب | بأسعار مخفضة | متجر رواية'
+            : isEn
+                ? 'Used Books in Morocco | Pre-Loved Books at Low Prices | Riwaya'
+                : 'Livres d\'Occasion au Maroc | Petits Prix & Paiement à la Livraison | Riwaya'
+
+        const description = isAr
+            ? 'اشتري كتب وروايات مستعملة بحالة ممتازة وبأفضل الأسعار في المغرب. توصيل سريع والدفع عند الاستلام.'
+            : isEn
+                ? 'Buy pre-loved and second-hand books in great condition across Morocco. Discounted novels, essays, and self-help with Cash on Delivery.'
+                : 'Achetez des livres d\'occasion en excellent état au Maroc. Romans, essais, développement personnel à petits prix avec paiement à la livraison.'
+
+        const keywords = isAr
+            ? ['كتب مستعملة المغرب', 'شراء كتب مستعملة', 'روايات مستعملة', 'كتب رخيصة المغرب', 'livres occasion maroc']
+            : isEn
+                ? ['used books morocco', 'second hand books morocco', 'pre loved books morocco', 'cheap books morocco', 'used novels']
+                : ['livres d occasion maroc', 'livres occasion maroc', 'acheter livre occasion', 'livres pas chers maroc', 'livres occasion casablanca rabat']
+
+        const canonicalUrl = `${baseUrl}/${locale}/books?usedOnly=true`
+
+        return {
+            title,
+            description,
+            keywords,
+            openGraph: {
+                title,
+                description,
+                url: canonicalUrl,
+                type: 'website',
+                images: ['/og-image.jpg'],
+            },
+            alternates: {
+                canonical: canonicalUrl,
+                languages: {
+                    'ar': `${baseUrl}/ar/books?usedOnly=true`,
+                    'fr': `${baseUrl}/fr/books?usedOnly=true`,
+                    'en': `${baseUrl}/en/books?usedOnly=true`,
+                    'x-default': `${baseUrl}/fr/books?usedOnly=true`,
+                },
+            },
+        }
+    }
 
     const categoryName = resolvedParams.category ? (tCats.has(resolvedParams.category as any) ? String(tCats(resolvedParams.category as any)) : resolvedParams.category) : null
     const title = categoryName ? `${categoryName} | Riwaya` : String(tBooksPage('Title')) + ' | Riwaya'
-
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
 
     return {
         title,
@@ -62,40 +110,41 @@ interface SearchParams {
 }
 
 export default async function BooksPage({
+    params,
     searchParams,
 }: {
+    params: Promise<{ locale: string }>
     searchParams: Promise<SearchParams>
 }) {
-    const params = await searchParams
+    const { locale } = await params
+    const sParams = await searchParams
     const tCommon = await getTranslations('Common');
     const tCats = await getTranslations('Categories');
     const tBooksPage = await getTranslations('BooksPage');
     const tNav = await getTranslations('Navigation');
 
-
-
     // Parser le prix dans la recherche si elle existe
-    const priceFilter = params.search ? parsePriceFilter(params.search) : { minPrice: undefined, maxPrice: undefined, cleanQuery: params.search };
+    const priceFilter = sParams.search ? parsePriceFilter(sParams.search) : { minPrice: undefined, maxPrice: undefined, cleanQuery: sParams.search };
 
     const filterObj = {
-        category: params.category,
-        subCategory: params.subCategory,
+        category: sParams.category,
+        subCategory: sParams.subCategory,
         search: priceFilter.cleanQuery,
         minPrice: priceFilter.minPrice,
         maxPrice: priceFilter.maxPrice,
         active: true,
-        language: params.language,
-        inStock: params.inStock === undefined ? true : params.inStock === 'true',
-        usedOnly: params.usedOnly === 'true',
-        newArrivals: params.newArrivals === 'true',
-        author: params.author,
+        language: sParams.language,
+        inStock: sParams.inStock === undefined ? true : sParams.inStock === 'true',
+        usedOnly: sParams.usedOnly === 'true',
+        newArrivals: sParams.newArrivals === 'true',
+        author: sParams.author,
     };
 
     const [books, totalCount, categoryTree, categoryConfig, authors, adsenseEnabled, adsensePublisherId, adsenseSlotBetweenBooks, popularPacks, categoryCounts, boardGames, kidsProductsData] = await Promise.all([
         getBooks(filterObj),
         getBooksCount(filterObj),
         getCategoryTree(),
-        params.category ? getCategoryConfigByName(params.category) : null,
+        sParams.category ? getCategoryConfigByName(sParams.category) : null,
         getAllAuthors(),
         getSetting('adsense_enabled'),
         getSetting('adsense_publisher_id'),
@@ -106,7 +155,7 @@ export default async function BooksPage({
         prisma.extraProduct.findMany({ where: { category: 'KIDS', active: true }, take: 3, select: { id: true, name: true, images: true } })
     ])
 
-    const isEnfants = params.category?.toLowerCase() === 'enfants'
+    const isEnfants = sParams.category?.toLowerCase() === 'enfants'
     let kidsProducts: any[] = []
     if (isEnfants) {
         kidsProducts = await prisma.extraProduct.findMany({
@@ -121,19 +170,68 @@ export default async function BooksPage({
         { code: 'ar', label: 'العربية' },
     ];
 
+    const isUsedOnly = sParams.usedOnly === 'true'
+    const baseUrl = getBaseUrl()
+    const pageUrl = isUsedOnly ? `${baseUrl}/${locale}/books?usedOnly=true` : `${baseUrl}/${locale}/books`
+
+    let usedBooksSchema = null
+    if (isUsedOnly) {
+        usedBooksSchema = {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: locale === 'ar' ? 'كتب وروايات مستعملة بالمغرب' : 'Livres d\'Occasion au Maroc',
+            description: locale === 'ar' ? 'تشكيلة مختارة من الكتب والروايات المستعملة بحالة ممتازة في المغرب' : 'Sélection de livres et romans d\'occasion en excellent état à petits prix au Maroc',
+            url: pageUrl,
+            mainEntity: {
+                '@type': 'ItemList',
+                numberOfItems: books.length,
+                itemListElement: books.slice(0, 20).map((b: any, index: number) => ({
+                    '@type': 'ListItem',
+                    position: index + 1,
+                    name: b.title,
+                    url: `${baseUrl}/${locale}/books/${b.id}`,
+                    item: {
+                        '@type': 'Product',
+                        name: b.title,
+                        description: b.description ? b.description.slice(0, 160) : b.title,
+                        image: b.image ? (b.image.startsWith('http') ? b.image : `${baseUrl}${b.image}`) : undefined,
+                        offers: {
+                            '@type': 'Offer',
+                            priceCurrency: 'MAD',
+                            price: b.price,
+                            availability: b.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                            itemCondition: 'https://schema.org/UsedCondition',
+                            seller: {
+                                '@type': 'Organization',
+                                name: 'Riwaya'
+                            }
+                        }
+                    }
+                }))
+            }
+        }
+    }
+
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
+            {isUsedOnly && <link rel="canonical" href={pageUrl} />}
+            {usedBooksSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(usedBooksSchema) }}
+                />
+            )}
             <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-4 pt-0 lg:py-10 lg:mt-10">
                 <h1 className="sr-only">
-                    {params.category ? `Livres ${params.category}` : tBooksPage('Title')}
+                    {sParams.category ? `Livres ${sParams.category}` : tBooksPage('Title')}
                 </h1>
                 
                 <div className="flex flex-col lg:flex-row gap-4 xl:gap-6">
                     {/* Sidebar / Mobile Sticky Filters */}
                     <BooksFilters 
-                        params={params}
+                        params={sParams}
                         categoryTree={categoryTree}
                         categoryCounts={categoryCounts}
                         authors={authors}
@@ -185,17 +283,17 @@ export default async function BooksPage({
                                 <InfiniteBookList
                                     initialBooks={books}
                                     initialFilters={{
-                                        category: params.category,
-                                        subCategory: params.subCategory,
+                                        category: sParams.category,
+                                        subCategory: sParams.subCategory,
                                         search: priceFilter.cleanQuery,
                                         minPrice: priceFilter.minPrice,
                                         maxPrice: priceFilter.maxPrice,
                                         active: true,
-                                        language: params.language,
-                                        inStock: params.inStock === undefined ? true : params.inStock === 'true',
-                                        usedOnly: params.usedOnly === 'true',
-                                        newArrivals: params.newArrivals === 'true',
-                                        author: params.author,
+                                        language: sParams.language,
+                                        inStock: sParams.inStock === undefined ? true : sParams.inStock === 'true',
+                                        usedOnly: sParams.usedOnly === 'true',
+                                        newArrivals: sParams.newArrivals === 'true',
+                                        author: sParams.author,
                                         page: 1,
                                         limit: 12
                                     }}

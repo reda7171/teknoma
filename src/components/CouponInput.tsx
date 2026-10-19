@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { validateCoupon } from '@/lib/actions/coupons'
 import { Ticket, X, Check, Loader2 } from 'lucide-react'
@@ -17,6 +17,20 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
     const [isLoading, setIsLoading] = useState(false)
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
     const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        try {
+            const pending = localStorage.getItem('riwaya_pending_coupon')
+            if (pending && cartTotal > 0 && !appliedCoupon) {
+                validateCoupon(pending, cartTotal).then((res) => {
+                    if (res.success) {
+                        setAppliedCoupon(res.coupon)
+                        onApplied(res.coupon)
+                    }
+                }).catch(() => {})
+            }
+        } catch {}
+    }, [cartTotal, onApplied])
 
     const handleApply = async () => {
         if (!code.trim()) return

@@ -103,10 +103,27 @@ services:
     networks:
       - riwaya_network
 
+  # WhatsApp Gateway - Connexion QR gratuite (WAHA / Baileys)
+  whatsapp:
+    image: devlikeapro/waha
+    container_name: riwaya_whatsapp
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=WEBJS
+      - WAHA_ZIPPER=ZIPPER
+      - WAHA_PRINT_QR=false
+    volumes:
+      - waha_data:/app/.sessions
+    networks:
+      - riwaya_network
+
 volumes:
   mysql_data:
   n8n_data:
   redis_data:
+  waha_data:
 
 networks:
   riwaya_network:

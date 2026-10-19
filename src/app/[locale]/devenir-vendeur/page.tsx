@@ -7,26 +7,83 @@ import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-    title: 'Devenir vendeur | Riwaya',
-    description: 'Rejoignez la plus grande librairie en ligne du Maroc. Vendez vos livres simplement et rapidement avec Riwaya.',
-    keywords: ['vendre', 'vendeur', 'livres', 'maroc', 'librairie', 'boutique', 'ecommerce'],
-    openGraph: {
-        title: 'Devenir vendeur | Riwaya',
-        description: 'Rejoignez la plus grande librairie en ligne du Maroc. Vendez vos livres simplement et rapidement avec Riwaya.',
-        images: ['/og-image.jpg'],
+import { getBaseUrl } from '@/lib/utils'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/devenir-vendeur`
+
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    const title = isAr 
+        ? 'كن بائعاً أو موزعاً للكتب | متجر رواية المغرب'
+        : isEn 
+            ? 'Become a Book Seller & Partner | Riwaya Morocco'
+            : 'Devenir Vendeur & Revendeur de Livres | Riwaya Maroc'
+
+    const description = isAr
+        ? 'انضم إلى أكبر منصة ومكتبة لبيع الكتب في المغرب. اعرض كتبك كموزع أو بائع مستقل واستفد من آلاف القراء في جميع المدن المغربية.'
+        : isEn
+            ? 'Join Morocco\'s premier online bookstore. Sell and distribute your books effortlessly with fast local delivery and maximum reach.'
+            : 'Rejoignez la première librairie en ligne du Maroc. Vendez et distribuez vos livres simplement : touchez des milliers de lecteurs partout au Maroc.'
+
+    const keywords = isAr
+        ? ['موزع كتب', 'بيع كتب بالمغرب', 'كن بائعاً', 'مكتبة الكترونية', 'شريك رواية', 'تجارة الكتب المغرب', 'devenir revendeur maroc']
+        : isEn
+            ? ['become a book reseller', 'sell books morocco', 'book reseller morocco', 'book distributor', 'riwaya partner']
+            : ['devenir revendeur', 'devenir vendeur', 'revendeur livres maroc', 'vendre des livres maroc', 'librairie en ligne maroc', 'partenaire librairie']
+
+    return {
+        title,
+        description,
+        keywords,
+        openGraph: {
+            title,
+            description,
+            url: pageUrl,
+            images: ['/og-image.jpg'],
+            type: 'website',
+        },
+        alternates: {
+            canonical: pageUrl,
+            languages: {
+                'fr': `${baseUrl}/fr/devenir-vendeur`,
+                'ar': `${baseUrl}/ar/devenir-vendeur`,
+                'en': `${baseUrl}/en/devenir-vendeur`,
+                'x-default': `${baseUrl}/fr/devenir-vendeur`,
+            }
+        }
     }
 }
 
-export default async function BecomeSellerPage() {
+export default async function BecomeSellerPage({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/devenir-vendeur`
+
     // Guard: vérifier si la fonctionnalité Devenir Vendeur est activée
     const enabled = await isFeatureEnabled('feature_seller')
     if (!enabled) notFound()
 
     const t = await getTranslations('DevenirVendeur')
 
+    const sellerSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: locale === 'ar' ? 'كن بائعاً أو موزعاً للكتب' : locale === 'en' ? 'Become a Book Seller & Partner' : 'Devenir Vendeur & Revendeur de Livres',
+        description: locale === 'ar' ? 'انضم إلى أكبر منصة ومكتبة لبيع الكتب في المغرب' : 'Rejoignez la première librairie en ligne du Maroc pour vendre et distribuer vos livres',
+        url: pageUrl,
+    }
+
     return (
         <div className="min-h-screen bg-white">
+            <link rel="canonical" href={pageUrl} />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(sellerSchema) }}
+            />
             <HeaderWithUser />
             {/* Hero Section */}
             <section className="relative bg-pixio-cream text-black py-8 sm:py-16 md:py-32 overflow-hidden">

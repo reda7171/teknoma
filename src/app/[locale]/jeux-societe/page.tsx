@@ -8,19 +8,61 @@ import type { Metadata } from 'next'
 import JeuxSocieteClient from './JeuxSocieteClient'
 import { getTranslations } from 'next-intl/server'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import { getBaseUrl, normalizeImage } from '@/lib/utils'
 
-export const metadata: Metadata = {
-    title: 'Jeux de Société | Riwaya',
-    description: 'Découvrez notre sélection de jeux de société : stratégie, ambiance, coopération et tout ce qu\'il faut pour vos soirées en famille ou entre amis.',
-    openGraph: {
-        title: 'Jeux de Société | Riwaya',
-        description: 'Découvrez notre sélection de jeux de société : stratégie, ambiance, coopération et tout ce qu\'il faut pour vos soirées en famille ou entre amis.',
-        images: ['/og-image.jpg'],
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/jeux-societe`
+
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    const title = isAr
+        ? 'ألعاب جماعية ولوحية بالمغرب | متجر رواية'
+        : isEn
+            ? 'Board Games in Morocco | Riwaya Store'
+            : 'Jeux de Société au Maroc | Riwaya Store'
+
+    const description = isAr
+        ? 'اكتشف أفضل الألعاب الجماعية واللوحية بالمغرب: ألعاب التفكير، الاستراتيجية، وألعاب الذكاء للعائلة والأصدقاء. توصيل سريع لجميع المدن والدفع عند الاستلام.'
+        : isEn
+            ? 'Discover our curated selection of board games in Morocco: strategy, trivia, family fun, and party games. Fast nationwide delivery with Cash on Delivery.'
+            : 'Découvrez notre sélection de jeux de société au Maroc : stratégie, ambiance, coopération et réflexion pour vos soirées en famille ou entre amis. Livraison express COD.'
+
+    const keywords = isAr
+        ? ['ألعاب جماعية المغرب', 'ألعاب لوحية', 'شراء ألعاب جماعية', 'ألعاب عائلية المغرب', 'board games maroc', 'ألعاب الذكاء']
+        : isEn
+            ? ['board games morocco', 'party games morocco', 'strategy games morocco', 'family board games', 'buy board games casablanca rabat']
+            : ['jeux de societe maroc', 'acheter jeux de societe maroc', 'jeux de societe casablanca', 'jeux de societe rabat', 'jeux de plateau maroc', 'jeux de strategie maroc', 'jeux ambiance maroc']
+
+    return {
+        title,
+        description,
+        keywords,
+        openGraph: {
+            title,
+            description,
+            url: pageUrl,
+            type: 'website',
+            images: ['/og-image.jpg'],
+        },
+        alternates: {
+            canonical: pageUrl,
+            languages: {
+                'fr': `${baseUrl}/fr/jeux-societe`,
+                'ar': `${baseUrl}/ar/jeux-societe`,
+                'en': `${baseUrl}/en/jeux-societe`,
+                'x-default': `${baseUrl}/fr/jeux-societe`,
+            }
+        }
     }
 }
 
 export default async function JeuxSocietePage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/jeux-societe`
     const t = await getTranslations('BoardGamesPage')
     
     /* Récupérer les produits catégorie BOARD_GAME depuis extra_products */
@@ -31,8 +73,50 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
 
     const featuredProducts = products.filter(p => !!p.image).slice(0, 4)
 
+    const boardGamesSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: locale === 'ar' ? 'ألعاب جماعية ولوحية بالمغرب' : 'Jeux de Société au Maroc',
+        description: locale === 'ar' ? 'أفضل الألعاب الجماعية واللوحية للعائلة والأصدقاء بالمغرب' : 'Sélection de jeux de société, réflexion et stratégie au Maroc',
+        url: pageUrl,
+        mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: products.length,
+            itemListElement: products.map((p, index) => {
+                const img = p.image ? (p.image.startsWith('http') ? p.image : `${baseUrl}${p.image}`) : undefined
+                return {
+                    '@type': 'ListItem',
+                    position: index + 1,
+                    name: p.name,
+                    item: {
+                        '@type': 'Product',
+                        name: p.name,
+                        description: p.description || p.name,
+                        image: img,
+                        offers: {
+                            '@type': 'Offer',
+                            priceCurrency: 'MAD',
+                            price: p.price,
+                            availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                            itemCondition: 'https://schema.org/NewCondition',
+                            seller: {
+                                '@type': 'Organization',
+                                name: 'Riwaya'
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+
     return (
         <div className="min-h-screen bg-[#FAFAF9]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+            <link rel="canonical" href={pageUrl} />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(boardGamesSchema) }}
+            />
             <HeaderWithUser />
 
             {/* ──────── HERO ──────── */}

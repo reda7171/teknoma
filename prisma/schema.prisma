@@ -1513,3 +1513,21 @@ model NewsletterSubscriber {
 
   @@map("newsletter_subscribers")
 }
+
+model PromoLead {
+  id        String   @id @default(uuid())
+  phone     String?  @db.VarChar(50)
+  email     String?  @db.VarChar(255)
+  promoCode String?  @default("RIWAYA10") @db.VarChar(50)
+  source    String?  @default("cart_popup") @db.VarChar(100)
+  contacted Boolean  @default(false)
+  notes     String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([phone])
+  @@index([email])
+  @@map("promo_leads")
+}
+

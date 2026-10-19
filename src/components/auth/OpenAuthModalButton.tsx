@@ -21,32 +21,32 @@ export default function OpenAuthModalButton({ label, sub }: Props) {
     const { openAuthModal } = useUIStore()
 
     return (
-        <div className="flex flex-col items-center md:items-start gap-3">
-            <div className="flex flex-row items-center justify-center md:justify-start gap-3 w-full">
+        <div className="w-full max-w-md flex flex-col items-center lg:items-start gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
                 <button
                     onClick={openAuthModal}
                     aria-label={`${label} - Google`}
-                    className="group flex-1 inline-flex items-center justify-center gap-2 px-4 py-4 bg-white text-slate-800 font-black text-xs sm:text-sm rounded-full hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 border border-gray-200"
+                    className="group w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-white text-slate-800 font-black text-sm sm:text-base rounded-full hover:bg-gray-50 transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 border border-gray-200 cursor-pointer"
                 >
                     <span className="flex items-center justify-center w-6 h-6 bg-white rounded-full shadow-sm border border-gray-100 shrink-0">
                         <GoogleIcon />
                     </span>
-                    Google
+                    <span>Google</span>
                 </button>
 
                 <button
                     type="button"
                     onClick={() => { window.location.href = '/api/auth/facebook/login' }}
                     aria-label={`${label} - Facebook`}
-                    className="group flex-1 inline-flex items-center justify-center gap-2 px-4 py-4 bg-[#1877F2] text-white font-black text-xs sm:text-sm rounded-full hover:bg-[#166FE5] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+                    className="group w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-[#1877F2] text-white font-black text-sm sm:text-base rounded-full hover:bg-[#166FE5] transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 >
                     <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.385H7.078v-3.542h3.047V9.372c0-3.017 1.792-4.684 4.533-4.684 1.312 0 2.686.235 2.686.235v2.966H15.83c-1.491 0-1.956.93-1.956 1.884v2.3h3.328l-.532 3.542h-2.796V24C19.612 23.094 24 18.1 24 12.073Z" />
                     </svg>
-                    Facebook
+                    <span>Facebook</span>
                 </button>
             </div>
-            <p className="text-slate-600 text-xs font-semibold text-center md:text-left">{sub}</p>
+            <p className="text-slate-600 text-xs font-semibold text-center lg:text-start">{sub}</p>
         </div>
     )
 }

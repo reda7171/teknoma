@@ -53,7 +53,8 @@ import {
     Wallet,
     Network,
     Bell,
-    Mail
+    Mail,
+    PhoneCall
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -197,6 +198,8 @@ export default function AdminLayout({
                 { name: 'Notifications Push', href: `/${lang}/admin/push-campaigns`, icon: Bell },
                 { name: 'Mailing / Newsletters', href: `/${lang}/admin/mailing`, icon: Mail },
                 { name: 'Codes Promo', href: `/${lang}/admin/coupons`, icon: Ticket },
+                { name: 'Leads Panier (-10%)', href: `/${lang}/admin/promo-leads`, icon: PhoneCall },
+                { name: 'Passerelle WhatsApp QR', href: `/${lang}/admin/whatsapp-gateway`, icon: MessageCircle },
                 { name: 'Affiliation', href: `/${lang}/admin/affiliates`, icon: Share2 },
                 { name: 'Cartes Cadeaux', href: `/${lang}/admin/gifts`, icon: Gift },
             ]
@@ -478,7 +481,7 @@ export default function AdminLayout({
                                             >
                                                 <ChildIcon className={`w-4 h-4 mr-3 ${isChildActive ? 'text-blue-600' : 'text-slate-400'}`} />
                                                 <span className="flex-1">{child.name}</span>
-                                                {child.badge > 0 && (
+                                                {typeof child.badge === 'number' && child.badge > 0 && (
                                                     <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isChildActive ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}`}>
                                                         {child.badge}
                                                     </span>

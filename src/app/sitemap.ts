@@ -15,7 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const staticPages = [
         { path: '', priority: 1.0, freq: 'daily' as const },
         { path: '/books', priority: 0.9, freq: 'daily' as const },
+        { path: '/books?usedOnly=true', priority: 0.85, freq: 'daily' as const },
         { path: '/packs', priority: 0.9, freq: 'daily' as const },
+        { path: '/jeux-societe', priority: 0.85, freq: 'daily' as const },
+        { path: '/mon-enfant', priority: 0.85, freq: 'daily' as const },
         { path: '/blog', priority: 0.9, freq: 'daily' as const },
         { path: '/faq', priority: 0.85, freq: 'weekly' as const },
         { path: '/about', priority: 0.8, freq: 'monthly' as const },
@@ -26,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { path: '/terms', priority: 0.3, freq: 'yearly' as const },
         { path: '/tracking', priority: 0.5, freq: 'weekly' as const },
         { path: '/livraison', priority: 0.6, freq: 'monthly' as const },
-        { path: '/returns', priority: 0.4, freq: 'yearly' as const },
+        { path: '/community/market', priority: 0.85, freq: 'daily' as const },
         ...(sellerEnabled ? [{ path: '/devenir-vendeur', priority: 0.7, freq: 'monthly' as const }] : []),
     ]
 
@@ -146,5 +149,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('⚠️ Sitemaps: Could not fetch seo categories during build')
     }
 
-    return [...staticUrls, ...bookUrls, ...postUrls, ...packUrls, ...authorUrls, ...seoUrls]
+    // 7. Livres d'échange communautaires (disponibles pour le troc)
+    let exchangeBookUrls: any[] = []
+    try {
+        const exchangeBooks = await (prisma as any).exchangeBook.findMany({
+            where: { status: 'AVAILABLE' },
+            select: { id: true, updatedAt: true },
+            orderBy: { updatedAt: 'desc' },
+            take: 200
+        })
+        exchangeBookUrls = locales.flatMap((locale) =>
+            exchangeBooks.map((b: any) => ({
+                url: `${baseUrl}/${locale}/community/market/${b.id}`,
+                lastModified: b.updatedAt,
+                changeFrequency: 'weekly' as const,
+                priority: 0.75,
+            }))
+        )
+    } catch (e) {
+        console.warn('⚠️ Sitemaps: Could not fetch exchange books during build')
+    }
+
+    return [...staticUrls, ...bookUrls, ...postUrls, ...packUrls, ...authorUrls, ...seoUrls, ...exchangeBookUrls]
 }

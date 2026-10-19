@@ -51,6 +51,7 @@ brain/
 scratch/
 .gemini/
 .agent/
+data/whatsapp_auth/
 
 # Backups and temporary files
 *.sql

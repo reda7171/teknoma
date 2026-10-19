@@ -8,23 +8,63 @@ import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import KidsProductsClient from './KidsProductsClient'
+import type { Metadata } from 'next'
+import { getBaseUrl, normalizeImage } from '@/lib/utils'
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
-    const t = await getTranslations('KidsPage');
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/mon-enfant`
+
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    const title = isAr
+        ? 'كتب وقصص الأطفال وأنشطة التلوين بالمغرب | متجر رواية'
+        : isEn
+            ? 'Kids Books, Stories & Coloring in Morocco | Riwaya Store'
+            : 'Livres pour Enfants, Histoires & Coloriages au Maroc | Riwaya'
+
+    const description = isAr
+        ? 'اكتشف أفضل كتب وقصص الأطفال المصورة بالمغرب: تنمية الذكاء، قصص قبل النوم، دفاتر تلوين وأنشطة تعليمية ممتعة. توصيل سريع والدفع عند الاستلام.'
+        : isEn
+            ? 'Discover our magical collection of children\'s books in Morocco: bedtime stories, early learning books, and creative coloring for young minds. Fast COD delivery.'
+            : 'Découvrez notre collection magique de livres pour enfants au Maroc : contes, histoires du soir, livres d\'éveil et coloriages créatifs. Livraison rapide partout au Maroc.'
+
+    const keywords = isAr
+        ? ['كتب أطفال المغرب', 'قصص أطفال مصورة', 'شراء كتب أطفال المغرب', 'قصص قبل النوم', 'دفاتر تلوين أطفال', 'livres enfants maroc', 'أدب الطفل']
+        : isEn
+            ? ['kids books morocco', 'children books morocco', 'bedtime stories kids', 'early learning books', 'coloring books kids morocco']
+            : ['livres pour enfants maroc', 'livres jeunesse maroc', 'contes pour enfants', 'histoires du soir enfants', 'cahier de coloriage maroc', 'livre eveil bebe maroc', 'acheter livre enfant casablanca rabat']
+
     return {
-        title: `${t('Title')} | Riwaya`,
-        description: t('Description'),
+        title,
+        description,
+        keywords,
         openGraph: {
-            title: `${t('Title')} | Riwaya`,
-            description: t('Description'),
+            title,
+            description,
+            url: pageUrl,
+            type: 'website',
             images: ['/images/kids/hero.png'],
+        },
+        alternates: {
+            canonical: pageUrl,
+            languages: {
+                'fr': `${baseUrl}/fr/mon-enfant`,
+                'ar': `${baseUrl}/ar/mon-enfant`,
+                'en': `${baseUrl}/en/mon-enfant`,
+                'x-default': `${baseUrl}/fr/mon-enfant`,
+            }
         }
     }
 }
 
 export default async function KidsPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/mon-enfant`
+
     // Guard: vérifier si la fonctionnalité Mon Enfant est activée
     const enabled = await isFeatureEnabled('feature_kids')
     if (!enabled) notFound()
@@ -35,6 +75,43 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
         where: { category: 'KIDS', active: true },
         orderBy: { createdAt: 'desc' }
     })
+
+    const kidsSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: locale === 'ar' ? 'كتب وقصص الأطفال بالمغرب' : 'Livres pour Enfants et Jeunesse au Maroc',
+        description: locale === 'ar' ? 'تشكيلة مختارة من قصص وكتب الأطفال والأنشطة الإبداعية' : 'Collection de livres d\'éveil, histoires pour enfants et coloriages au Maroc',
+        url: pageUrl,
+        mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: kidsProducts.length,
+            itemListElement: kidsProducts.map((p, index) => {
+                const img = p.image ? (p.image.startsWith('http') ? p.image : `${baseUrl}${p.image}`) : undefined
+                return {
+                    '@type': 'ListItem',
+                    position: index + 1,
+                    name: p.name,
+                    item: {
+                        '@type': 'Product',
+                        name: p.name,
+                        description: p.description || p.name,
+                        image: img,
+                        offers: {
+                            '@type': 'Offer',
+                            priceCurrency: 'MAD',
+                            price: p.price,
+                            availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                            itemCondition: 'https://schema.org/NewCondition',
+                            seller: {
+                                '@type': 'Organization',
+                                name: 'Riwaya'
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
 
     const customStyles = `
         @keyframes float {
@@ -51,6 +128,11 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
 
     return (
         <div className="min-h-screen bg-[#FDFBF7] overflow-hidden font-sans">
+            <link rel="canonical" href={pageUrl} />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(kidsSchema) }}
+            />
             <HeaderWithUser />
             <style>{customStyles}</style>
             {/* --- Hero Section --- */}

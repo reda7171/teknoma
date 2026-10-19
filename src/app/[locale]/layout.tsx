@@ -14,6 +14,7 @@ const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'))
 const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannelButton'))
 const ChatBot = dynamic(() => import('@/components/ChatBot'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
+const CartPromoLeadPopup = dynamic(() => import('@/components/cart/CartPromoLeadPopup'))
 import UtmTracker from '@/components/UtmTracker'
 import DeferredMarketingScripts from '@/components/DeferredMarketingScripts'
 import AuthModalLoader from '@/components/auth/AuthModalLoader'
@@ -619,6 +620,7 @@ export default async function LocaleLayout({
           <WhatsAppChannelButton url={whatsappChannelUrl || undefined} />
           {isChatBotEnabled && <ChatBot />}
           <AuthModalLoader />
+          <CartPromoLeadPopup />
           <FacebookSDK />
           <DeferredMarketingScripts
             adsenseId={adsenseId || ''}

@@ -25,8 +25,8 @@ export default async function Footer() {
         developer_name,
         developer_link
     ] = await Promise.all([
-        isFeatureEnabled('feature_seller', false),
-        isFeatureEnabled('feature_exchange'),
+        isFeatureEnabled('feature_seller', true),
+        isFeatureEnabled('feature_exchange', true),
         isFeatureEnabled('feature_usb_key'),
         isFeatureEnabled('feature_kids'),
         isFeatureEnabled('feature_reading_list'),

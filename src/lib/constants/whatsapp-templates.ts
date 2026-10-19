@@ -1,0 +1,10 @@
+export const DEFAULT_WHATSAPP_TEMPLATES = {
+    whatsapp_template_promo_lead:
+        "Salam ! Merci pour votre intérêt pour nos livres sur Riwaya.store.\nVoici votre code promo de -{discount}% immédiat : *{promoCode}*.\nUtilisez-le dès maintenant pour finaliser votre commande : {siteUrl}/fr/cart",
+
+    whatsapp_template_order_confirm:
+        "Salam {customerName} !\nVotre commande Riwaya #{orderId} d'un montant de {total} DH est bien confirmée.\nArticles inclus :\n{itemsList}\nLivraison prévue à : {city} (Paiement à la livraison - COD).\nSuivre votre commande : {trackingUrl}",
+
+    whatsapp_template_abandoned_cart:
+        "Salam {customerName} !\nVous avez laissé des articles dans votre panier sur Riwaya.store :\n{itemsList}\nProfitez de -10% immédiats avec le code *{promoCode}* pour finaliser vos achats : {cartUrl}"
+}

@@ -6,6 +6,7 @@ import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import { CheckCircle2, Truck, Shield, Star, BookOpen } from 'lucide-react'
 import { Link } from '@/i18n/routing'
+import { getBaseUrl, normalizeImage } from '@/lib/utils'
 
 import { getSeoCategoryBySlug } from '@/lib/actions/seo-categories'
 import { getTranslations } from 'next-intl/server'
@@ -30,13 +31,15 @@ const slugKeywordsMap: Record<string, string[]> = {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ seoSlug: string, locale: string }> }): Promise<Metadata> {
-  const { seoSlug } = await params
+  const { seoSlug, locale } = await params
   const data = await getSeoCategoryBySlug(seoSlug)
 
   if (!data) return {}
 
   // Keywords enrichis selon le slug
   const extraKeywords = slugKeywordsMap[seoSlug] || []
+  const baseUrl = getBaseUrl()
+  const pageUrl = `${baseUrl}/${locale}/collection/${seoSlug}`
 
   return {
     title: data.title,
@@ -51,9 +54,16 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
       description: data.description,
       type: 'website',
       siteName: 'Riwaya Store',
+      url: pageUrl,
     },
     alternates: {
-      canonical: `https://riwaya.store/fr/collection/${seoSlug}`,
+      canonical: pageUrl,
+      languages: {
+        'fr': `${baseUrl}/fr/collection/${seoSlug}`,
+        'ar': `${baseUrl}/ar/collection/${seoSlug}`,
+        'en': `${baseUrl}/en/collection/${seoSlug}`,
+        'x-default': `${baseUrl}/fr/collection/${seoSlug}`,
+      }
     }
   }
 }
@@ -65,6 +75,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
 
   if (!data || !data.isActive) {
     notFound()
+    return null
   }
 
   // Obtenir les livres assignés manuellement d'abord
@@ -134,7 +145,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+  const baseUrl = getBaseUrl()
   const pageUrl = `${baseUrl}/${locale}/collection/${seoSlug}`
 
   const faqSchema = {
@@ -157,14 +168,14 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
       {
         '@type': 'ListItem',
         position: 1,
-        name: locale === 'ar' ? 'الرئيسية' : 'Accueil',
+        name: t('BreadcrumbHome'),
         item: `${baseUrl}/${locale}`,
       },
       {
         '@type': 'ListItem',
         position: 2,
-        name: locale === 'ar' ? 'المجموعات' : 'Collections',
-        item: `${baseUrl}/${locale}/books`,
+        name: t('BreadcrumbCollections'),
+        item: `${baseUrl}/${locale}/catalog`,
       },
       {
         '@type': 'ListItem',
@@ -173,6 +184,45 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         item: pageUrl,
       },
     ],
+  }
+
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: data.title,
+    description: data.description,
+    url: pageUrl,
+    numberOfItems: popularBooks.length,
+    itemListElement: popularBooks.map((book: any, index: number) => {
+      const bookUrl = `${baseUrl}/${locale}/books/${book.id}`
+      const rawImage = normalizeImage(book.image)
+      const imageUrl = rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage}`
+
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: bookUrl,
+        name: book.title,
+        item: {
+          '@type': 'Product',
+          name: book.title,
+          image: imageUrl,
+          description: book.description ? book.description.substring(0, 160) : book.title,
+          url: bookUrl,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'MAD',
+            price: book.price,
+            availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            seller: {
+              '@type': 'Organization',
+              name: 'Riwaya'
+            }
+          }
+        }
+      }
+    }),
   }
 
   const collectionSchema = {
@@ -195,6 +245,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
+      <link rel="canonical" href={pageUrl} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -202,6 +253,10 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
       <script
         type="application/ld+json"
