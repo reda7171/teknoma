@@ -210,27 +210,6 @@ export default function MarketMap({ books, isBlurred, isLoggedIn }: { books: any
                 })()}
             </GoogleMap>
             
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="max-w-7xl mx-auto h-full relative px-4 sm:px-6 lg:px-8">
-                    <div 
-                        dir={isRtl ? 'rtl' : 'ltr'} 
-                        className={`absolute top-4 sm:top-6 z-10 bg-white/90 backdrop-blur-md px-4 py-2 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 flex items-center gap-2 sm:gap-3 ${isRtl ? 'right-4 sm:right-6 lg:right-8' : 'left-4 sm:left-6 lg:left-8'}`}
-                    >
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-lg sm:rounded-xl flex items-center justify-center text-white shrink-0">
-                            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </div>
-                        <div>
-                            <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                {tc('MapNetwork')}
-                            </div>
-                            <div className="text-xs sm:text-sm font-black text-black leading-none mt-1">
-                                {tc('MapExchange')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {isBlurred && (
                 <div className="absolute inset-0 z-20 backdrop-blur-md bg-black/60 flex flex-col items-center justify-center p-4 sm:p-6 text-center animate-in fade-in duration-500" dir={isRtl ? 'rtl' : 'ltr'}>
                     <div className="bg-white rounded-3xl sm:rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col items-center relative overflow-hidden">

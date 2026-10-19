@@ -1,81 +1,184 @@
 import { prisma } from '@/lib/prisma'
-import { Users, Zap, RefreshCw } from 'lucide-react'
-import CustomersTable from '@/components/admin/CustomersTable'
+import { Users } from 'lucide-react'
+import CustomersPageClient from './CustomersPageClient'
 
-async function syncCustomers() {
-    // Cette fonction permet de peupler la table Customer à partir des commandes existantes
-    const orders = await prisma.order.findMany({
-        orderBy: { createdAt: 'desc' },
-    })
+export interface CustomerItem {
+    id: string
+    customerId?: string
+    userId?: string
+    fullName: string
+    phone: string
+    email?: string
+    city?: string
+    address?: string
+    totalOrders: number
+    totalSpent: number
+    lastOrderDate: string
+    source: 'google' | 'facebook' | 'order' | 'community'
+}
 
-    const customersMap = new Map()
+function cleanPhone(phone?: string | null): string {
+    if (!phone) return ''
+    return phone.replace(/[\s\-\.\(\)\+]/g, '')
+}
 
-    orders.forEach(order => {
-        if (!customersMap.has(order.phone)) {
-            customersMap.set(order.phone, {
-                fullName: order.fullName,
-                phone: order.phone,
-                email: order.email,
-                city: order.city,
-                address: order.address,
+async function getCustomers(): Promise<CustomerItem[]> {
+    const [orders, customers, users] = await Promise.all([
+        prisma.order.findMany({
+            select: {
+                id: true,
+                fullName: true,
+                phone: true,
+                email: true,
+                city: true,
+                address: true,
+                total: true,
+                createdAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+        }),
+        prisma.customer.findMany({
+            orderBy: { updatedAt: 'desc' },
+        }),
+        prisma.user.findMany({
+            where: { role: 'USER' },
+            include: {
+                loginHistory: {
+                    orderBy: { createdAt: 'desc' },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        }),
+    ])
+
+    const readersMap = new Map<string, CustomerItem>()
+
+    // 1. Ingestion des utilisateurs enregistrés (Google, Facebook, Communauté)
+    for (const u of users) {
+        const isGoogle =
+            u.loginHistory.some(
+                (lh) =>
+                    lh.userAgent &&
+                    (lh.userAgent.toLowerCase().includes('google') ||
+                        lh.userAgent.includes('google OAuth'))
+            ) || (u.email && u.email.endsWith('@gmail.com'))
+
+        const isFacebook = u.loginHistory.some(
+            (lh) => lh.userAgent && lh.userAgent.toLowerCase().includes('facebook')
+        )
+
+        const source: 'google' | 'facebook' | 'community' = isGoogle
+            ? 'google'
+            : isFacebook
+            ? 'facebook'
+            : 'community'
+
+        const emailKey = u.email ? u.email.toLowerCase().trim() : ''
+        const phoneKey = cleanPhone(u.phone)
+        const key = emailKey || phoneKey || u.id
+
+        readersMap.set(key, {
+            id: u.id,
+            userId: u.id,
+            fullName: u.fullName || u.email?.split('@')[0] || 'Lecteur Riwaya',
+            phone: u.phone || '',
+            email: u.email || '',
+            city: u.city || '',
+            address: u.address || '',
+            totalOrders: 0,
+            totalSpent: 0,
+            lastOrderDate: u.createdAt.toISOString(),
+            source,
+        })
+    }
+
+    // 2. Ingestion des commandes COD (associe au compte ou crée une entrée)
+    for (const o of orders) {
+        const phoneKey = cleanPhone(o.phone)
+        const emailKey = o.email ? o.email.toLowerCase().trim() : ''
+
+        let key = ''
+        if (emailKey && readersMap.has(emailKey)) {
+            key = emailKey
+        } else if (phoneKey && readersMap.has(phoneKey)) {
+            key = phoneKey
+        } else {
+            key = phoneKey || emailKey || o.id
+        }
+
+        if (!readersMap.has(key)) {
+            readersMap.set(key, {
+                id: o.id,
+                fullName: o.fullName || 'Client Commande',
+                phone: o.phone || '',
+                email: o.email || '',
+                city: o.city || '',
+                address: o.address || '',
                 totalOrders: 0,
                 totalSpent: 0,
-                lastOrderDate: order.createdAt
+                lastOrderDate: o.createdAt.toISOString(),
+                source: 'order',
             })
         }
-        const client = customersMap.get(order.phone)
-        client.totalOrders += 1
-        client.totalSpent += order.total
-    })
 
-    const customersToCreate = Array.from(customersMap.values())
+        const reader = readersMap.get(key)!
+        reader.totalOrders += 1
+        reader.totalSpent += o.total || 0
+        if (new Date(o.createdAt) > new Date(reader.lastOrderDate)) {
+            reader.lastOrderDate = o.createdAt.toISOString()
+            if (o.city && !reader.city) reader.city = o.city
+            if (o.address && !reader.address) reader.address = o.address
+            if (o.phone && !reader.phone) reader.phone = o.phone
+        }
+    }
 
-    // Création massive (on utilise createMany si supporté, sinon boucle)
-    for (const c of customersToCreate) {
-        await prisma.customer.upsert({
-            where: { phone: c.phone },
-            update: {
-                totalOrders: c.totalOrders,
-                totalSpent: c.totalSpent,
-                lastOrderDate: c.lastOrderDate,
+    // 3. Ingestion des profils existants de Customer
+    for (const c of customers) {
+        const phoneKey = cleanPhone(c.phone)
+        const emailKey = c.email ? c.email.toLowerCase().trim() : ''
+
+        let key = ''
+        if (emailKey && readersMap.has(emailKey)) {
+            key = emailKey
+        } else if (phoneKey && readersMap.has(phoneKey)) {
+            key = phoneKey
+        } else {
+            key = phoneKey || emailKey || c.id
+        }
+
+        if (!readersMap.has(key)) {
+            readersMap.set(key, {
+                id: c.id,
+                customerId: c.id,
                 fullName: c.fullName,
-                email: c.email,
-                city: c.city,
-                address: c.address
-            },
-            create: c
-        })
+                phone: c.phone || '',
+                email: c.email || '',
+                city: c.city || '',
+                address: c.address || '',
+                totalOrders: c.totalOrders || 0,
+                totalSpent: c.totalSpent || 0,
+                lastOrderDate: (c.lastOrderDate || c.createdAt).toISOString(),
+                source: 'order',
+            })
+        } else {
+            const reader = readersMap.get(key)!
+            reader.customerId = c.id
+            if (c.totalOrders && c.totalOrders > reader.totalOrders) {
+                reader.totalOrders = c.totalOrders
+            }
+            if (c.totalSpent && c.totalSpent > reader.totalSpent) {
+                reader.totalSpent = c.totalSpent
+            }
+            if (c.address && !reader.address) reader.address = c.address
+            if (c.city && !reader.city) reader.city = c.city
+        }
     }
+
+    // Tri par date de dernière activité décroissante
+    return Array.from(readersMap.values()).sort(
+        (a, b) => new Date(b.lastOrderDate).getTime() - new Date(a.lastOrderDate).getTime()
+    )
 }
-
-async function getCustomers() {
-    let customers = await prisma.customer.findMany({
-        orderBy: { updatedAt: 'desc' },
-    })
-
-    // Si la table est vide, on tente de synchroniser
-    if (customers.length === 0) {
-        await syncCustomers()
-        customers = await prisma.customer.findMany({
-            orderBy: { updatedAt: 'desc' },
-        })
-    }
-
-    return customers.map(c => ({
-        ...c,
-        id: c.id,
-        fullName: c.fullName,
-        phone: c.phone,
-        email: c.email || '',
-        city: c.city || '',
-        address: c.address || '',
-        totalOrders: c.totalOrders,
-        totalSpent: c.totalSpent,
-        lastOrderDate: c.lastOrderDate
-    }))
-}
-
-import CustomersPageClient from './CustomersPageClient'
 
 export default async function AdminCustomersPage() {
     const customers = await getCustomers()

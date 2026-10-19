@@ -183,14 +183,23 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                                         dangerouslySetInnerHTML={{ __html: t.raw('EmptyDesc') }}
                                     />
                                 </div>
-                                <Link
+                                <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+                                    <Link
                                     href="/books"
                                     onClick={onClose}
-                                    className="inline-flex items-center gap-3 px-10 py-5 bg-black text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20"
+                                    className="w-full inline-flex items-center justify-center gap-3 px-10 py-5 bg-black text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20"
                                 >
                                     <span>{t('DiscoverBooks')}</span>
                                     <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-                                </Link>
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="w-full inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-black text-xs uppercase tracking-widest rounded-full transition-all"
+                                    >
+                                        <span>{t('CloseCart')}</span>
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             // Cart Items - Styled Cards

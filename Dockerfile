@@ -39,7 +39,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache mysql-client perl exiftool su-exec
+RUN apk add --no-cache mysql-client perl exiftool su-exec libc6-compat
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

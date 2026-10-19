@@ -14,19 +14,36 @@ interface MarketClientSectionProps {
     search?: string
     city?: string
     isBlurred?: boolean
+    isLoggedIn?: boolean
 }
 
-export default function MarketClientSection({ initialBooks, smartMatches, search, city, isBlurred }: MarketClientSectionProps) {
+export default function MarketClientSection({ initialBooks, smartMatches, search, city, isBlurred, isLoggedIn }: MarketClientSectionProps) {
     const [isPending, setIsPending] = useState(false)
     const t = useTranslations('Community.Market')
 
     return (
-        <div className="w-full">
-            {/* Filters */}
-            <MarketFiltersClient onPendingChange={setIsPending} />
+        <div className="w-full flex-grow">
+            <div className="relative w-full">
+                <MarketMap books={initialBooks} isBlurred={isBlurred} isLoggedIn={isLoggedIn} />
 
-            {/* Content Container */}
-            <div className="relative min-h-[500px] w-full">
+                {/* Filtres intégrés à la carte */}
+                <div className="absolute top-3 sm:top-5 left-4 right-4 z-20 md:left-1/2 md:right-auto md:w-[60rem] md:max-w-[calc(100%-3rem)] md:-translate-x-1/2">
+                    <MarketFiltersClient onPendingChange={setIsPending} embedded />
+                </div>
+            </div>
+
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-32 w-full">
+                <div className="mb-8 sm:mb-12 text-center md:text-start">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-black tracking-tighter mb-3 sm:mb-4 uppercase">
+                        {t('Title')}
+                    </h1>
+                    <p className="text-gray-500 font-medium max-w-2xl mx-auto md:mx-0">
+                        {t('Subtitle')}
+                    </p>
+                </div>
+
+                {/* Content Container */}
+                <div className="relative min-h-[500px] w-full">
                 {/* Overlay Skeleton during transitions */}
                 {isPending && (
                     <div className="absolute inset-0 bg-pixio-cream/60 z-20 backdrop-blur-[2px] animate-in fade-in duration-300">
@@ -80,7 +97,8 @@ export default function MarketClientSection({ initialBooks, smartMatches, search
                         </div>
                     )}
                 </div>
-            </div>
+                </div>
+            </main>
         </div>
     )
 }

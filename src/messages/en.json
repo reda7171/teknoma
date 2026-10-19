@@ -36,7 +36,7 @@
     "Headline": "Is your name on this list?",
     "Body": "Every book you read earns your rank. Hundreds of readers compete every day — are you one of them?",
     "CTA": "Join the race",
-    "Sub": "Free · Sign in with Google",
+    "Sub": "Free · Sign in with Google or Facebook",
     "Pages": "pages",
     "Hours": "h",
     "Challenge": "Challenge",
@@ -415,7 +415,8 @@
       "ViewAll": "View All",
       "ViewMore": "View More Books",
       "NoData": "No exchange books available yet",
-      "JoinCommunity": "Join Community"
+      "JoinCommunity": "Join Community",
+      "LoginWithFacebook": "Connect with Facebook"
     },
     "MobileApp": {
       "ComingSoon": "Coming Soon",
@@ -722,6 +723,7 @@
     "EmptyTitle": "Your cart is empty.",
     "EmptyDesc": "Seems like you haven't discovered <br /> our treasures yet.",
     "DiscoverBooks": "Discover Books",
+    "CloseCart": "Close cart",
     "Set": "SET",
     "Titles": "Titles",
     "ClearSelection": "Clear Selection",
@@ -804,7 +806,10 @@
     "GenericError": "An error occurred",
     "AccountHolder": "Account Holder",
     "RibIban": "RIB / IBAN",
-    "FullName": "Full Name"
+    "FullName": "Full Name",
+    "BankInfoModalTitle": "Bank Information",
+    "ScanToPay": "Scan to pay",
+    "Close": "Close"
   },
   "Review": {
     "SuccessTitle": "Thank you for your review!",
@@ -1017,6 +1022,12 @@
     "TopReaders": "Top Readers",
     "TopReadersTitle": "Top Readers",
     "TopReadersSubtitle": "Most avid readers of the week",
+    "Recommendations": {
+      "Title": "Reading suggestions for you",
+      "Badge": "AI selection",
+      "Description": "These books are suggested from the authors in your wishlist. They offer ideas for your next read; availability in our catalog is not guaranteed.",
+      "Why": "Why this recommendation?"
+    },
     "Dashboard": {
       "RestrictedAccess": "Restricted access to exchanges",
       "EligibilityDesc": "You must have placed at least one order in our shop to be able to add books or make exchange requests in the community.",
@@ -1600,7 +1611,9 @@
     "TableOfContents": "Table of Contents",
     "Blog": "Blog",
     "PublishedArticles": "Published articles",
-    "ViewAllArticles": "View all their articles"
+    "ViewAllArticles": "View all their articles",
+    "AdTopArticle": "Top of article",
+    "AdBottomArticle": "Bottom of article"
   },
   "BlogComments": {
     "CommentsTitle": "Comments",

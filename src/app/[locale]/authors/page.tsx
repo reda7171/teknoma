@@ -48,12 +48,12 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
             <Header />
             <main className="min-h-screen bg-white">
                 {/* Hero Section */}
-                <section className="relative pt-24 pb-20 overflow-hidden bg-pixio-cream">
+                <section className="relative pt-10 sm:pt-16 md:pt-24 pb-8 sm:pb-14 md:pb-20 overflow-hidden bg-pixio-cream">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-yellow/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-pixio-pink/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 animate-float-slow"></div>
                     
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                        <div className="flex flex-col items-center text-center space-y-8">
+                        <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6 md:space-y-8">
                             <ScrollReveal animation="animate-reveal-up">
                                 <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-xs rtl:text-sm rtl:tracking-normal font-black uppercase rtl:uppercase-none tracking-widest shadow-xl">
                                     <Users className="w-4 h-4 text-pixio-yellow" />
@@ -78,9 +78,9 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
 
                 {/* Featured Section (Optional but nice) */}
                 {featuredAuthors.length > 0 && (
-                    <section className="py-20 border-b border-gray-100">
+                    <section className="py-8 sm:py-14 md:py-20 border-b border-gray-100">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex items-center gap-4 mb-12">
+                            <div className="flex items-center gap-4 mb-6 sm:mb-10 md:mb-12">
                                 <div className="p-3 bg-pixio-yellow rounded-2xl">
                                     <Sparkles className="w-6 h-6 text-black" />
                                 </div>

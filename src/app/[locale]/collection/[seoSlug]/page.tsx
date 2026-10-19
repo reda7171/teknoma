@@ -87,13 +87,126 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     popularBooks = popularBooks.slice(0, 8)
   }
 
-  let faqList = []
+  let faqList: { q: string; a: string }[] = []
   try {
     if (data.faq) faqList = JSON.parse(data.faq)
   } catch(e) {}
 
+  if (!Array.isArray(faqList) || faqList.length === 0) {
+    if (locale === 'ar') {
+      faqList = [
+        {
+          q: `كيف يمكنني طلب كتب ${data.title} عبر متجر رواية؟`,
+          a: "يمكنك اختيار الكتب أو الباقات وإضافتها إلى السلة، ثم تأكيد الطلب بكتابة رقم هاتفك وعنوانك. الدفع يتم نقداً عند الاستلام (COD) بعد استلام طلبيتك وفحصها."
+        },
+        {
+          q: "ما هي مدة وتكلفة توصيل الكتب في المغرب؟",
+          a: "نقوم بالتوصيل السريع إلى جميع مدن وقرى المملكة المغربية في غضون 24 إلى 48 ساعة عمل عبر شركاء توصيل موثوقين."
+        },
+        {
+          q: "هل الكتب المعروضة أصلية وجديدة وبجودة ممتازة؟",
+          a: "نعم، جميع كتب وروايات متجر رواية جديدة 100%، بجودة طباعة وتغليف عالية لضمان تجربة قراءة ممتعة تدوم طويلاً."
+        },
+        {
+          q: "هل يمكنني فحص الطرد قبل الدفع عند الاستلام؟",
+          a: "نعم بكل تأكيد، يتيح لك متجر رواية فحص محتوى الطرد والتأكد من سلامته قبل تسليم المبلغ لموزع التوصيل."
+        }
+      ]
+    } else {
+      faqList = [
+        {
+          q: `Comment commander des livres ${data.title} sur Riwaya ?`,
+          a: "Sélectionnez vos livres préférés, ajoutez-les au panier et validez votre commande avec vos coordonnées. Le paiement s'effectue en espèces à la livraison (Cash on Delivery) après réception de votre colis."
+        },
+        {
+          q: "Quels sont les délais de livraison au Maroc ?",
+          a: "Nous livrons partout au Maroc sous 24 à 48 heures ouvrables dans toutes les villes (Casablanca, Rabat, Marrakech, Fès, Tanger, Agadir, etc.)."
+        },
+        {
+          q: "Les livres sont-ils neufs et authentiques ?",
+          a: "Oui, l'ensemble de notre catalogue se compose d'éditions neuves, d'origine et soigneusement emballées pour préserver l'état parfait de chaque ouvrage."
+        },
+        {
+          q: "Puis-je vérifier mon colis avant de payer ?",
+          a: "Absolument. Avec notre service de paiement à la livraison, vous pouvez vérifier l'état de votre colis directement auprès du livreur avant de régler."
+        }
+      ]
+    }
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+  const pageUrl = `${baseUrl}/${locale}/collection/${seoSlug}`
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqList.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
+  }
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: locale === 'ar' ? 'الرئيسية' : 'Accueil',
+        item: `${baseUrl}/${locale}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: locale === 'ar' ? 'المجموعات' : 'Collections',
+        item: `${baseUrl}/${locale}/books`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: data.title,
+        item: pageUrl,
+      },
+    ],
+  }
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: data.title,
+    description: data.description,
+    url: pageUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: popularBooks.length,
+      itemListElement: popularBooks.map((book: any, index: number) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: book.title,
+        url: `${baseUrl}/${locale}/books/${book.id}`,
+      })),
+    },
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+      />
       <Header />
       
       {/* Hero Section */}

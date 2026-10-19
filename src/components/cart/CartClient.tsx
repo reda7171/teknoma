@@ -81,8 +81,8 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
     const isMinAmountReached = finalTotal >= minOrderAmount
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 pb-20 sm:pb-40">
-            <div className="flex items-center justify-between mb-8 sm:mb-16 px-2 sm:px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-10 md:py-20 pb-24 sm:pb-32 md:pb-40">
+            <div className="flex items-center justify-between mb-4 sm:mb-10 md:mb-16 px-2 sm:px-4">
                 <h1 className="text-4xl sm:text-6xl font-black tracking-tighter flex items-center gap-4 sm:gap-6">
                     {t('Title')}<span className="text-gray-500">.</span>
                 </h1>
@@ -228,12 +228,12 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                     <div className="lg:col-span-1">
                         <CartBookmarksUpsell />
                         
-                        <div className="bg-white rounded-3xl sm:rounded-[3rem] p-6 sm:p-12 shadow-2xl shadow-black/5 border border-gray-50 sticky top-32 mt-6 lg:mt-0">
+                        <div className="bg-white rounded-2xl sm:rounded-[3rem] p-4 sm:p-8 md:p-12 shadow-2xl shadow-black/5 border border-gray-50 sticky top-32 mt-6 lg:mt-0">
                             <h2 className="text-sm rtl:text-xl font-black uppercase tracking-[0.3em] mb-6 sm:mb-10 pb-6 border-b border-gray-50">
                                 {t('SummaryTitle')}
                             </h2>
 
-                            <div className="space-y-6 mb-12">
+                            <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-12">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] rtl:text-sm font-black uppercase tracking-widest text-gray-500">{t('Items')} ({totalItems})</span>
                                     <span className="text-xs font-black uppercase tracking-widest">{formatPrice(totalPrice)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
@@ -244,7 +244,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                 </div>
 
                                 {finalTotal < 500 && (
-                                    <div className="bg-pixio-cream/50 p-8 rounded-[2rem] border border-gray-50">
+                                    <div className="bg-pixio-cream/50 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[2rem] border border-gray-50">
                                         <p className="text-[9px] rtl:text-sm font-black uppercase tracking-widest text-gray-500 mb-6 leading-relaxed"
                                             dangerouslySetInnerHTML={{ __html: t.raw('FreeShippingAd').replace('{amount}', formatPrice(500 - finalTotal)) }} />
                                         <div className="w-full bg-white h-2 rounded-full overflow-hidden shadow-inner">

@@ -9,13 +9,13 @@ export default async function PrivacyPage() {
     return (
         <div className="min-h-screen bg-pixio-cream">
             <Header />
-            <main className="max-w-4xl mx-auto px-4 py-24">
-                <div className="bg-white rounded-[3rem] p-12 md:p-20 shadow-2xl shadow-black/5 border border-gray-100">
-                    <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center mb-10">
-                        <Shield className="w-8 h-8" />
+            <main className="max-w-4xl mx-auto px-4 py-8 sm:py-16 md:py-24">
+                <div className="bg-white rounded-2xl sm:rounded-[3rem] p-6 sm:p-12 md:p-20 shadow-2xl shadow-black/5 border border-gray-100">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-10">
+                        <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                     
-                    <h1 className="text-5xl font-black text-black tracking-tighter mb-12 italic">
+                    <h1 className="text-3xl sm:text-5xl font-black text-black tracking-tighter mb-6 sm:mb-12 italic">
                         {t('Title')}<span className="text-gray-200">.</span>
                     </h1>
 

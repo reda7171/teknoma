@@ -20,13 +20,13 @@ export default async function JoinUsPage() {
             <Header />
             
             {/* Hero Section */}
-            <section className="relative py-32 md:py-48 px-4 border-b border-gray-100" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
+            <section className="relative py-8 sm:py-16 md:py-32 lg:py-48 px-4 border-b border-gray-100" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
                 <div className="max-w-7xl mx-auto text-center relative z-10">
-                    <div className="inline-flex items-center gap-3 px-6 py-2 bg-black text-white rounded-full text-sm font-black mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 bg-black text-white rounded-full text-xs sm:text-sm font-black mb-6 sm:mb-10 md:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <Edit className="w-4 h-4 text-pixio-yellow" />
                         {t('heroTag')}
                     </div>
-                    <h1 className="text-5xl md:text-8xl font-black text-black leading-tight mb-10">
+                    <h1 className="text-3xl sm:text-5xl md:text-8xl font-black text-black leading-tight mb-4 sm:mb-8 md:mb-10">
                         {t('heroTitle1')} <span className="text-gray-400">{t('heroTitle2')}</span>
                     </h1>
                     <p className="max-w-3xl mx-auto text-lg md:text-2xl font-bold text-gray-500 leading-relaxed">
@@ -39,23 +39,23 @@ export default async function JoinUsPage() {
             </section>
 
             {/* Conditions Section */}
-            <section className="py-24 px-4 bg-white" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
+            <section className="py-8 sm:py-14 md:py-24 px-4 bg-white" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
                 <div className="max-w-5xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-6xl font-black text-black mb-6">{t('conditionsTitle')}</h2>
+                    <div className="text-center mb-6 sm:mb-10 md:mb-16">
+                        <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-black mb-3 sm:mb-6">{t('conditionsTitle')}</h2>
                         <p className="text-xl text-gray-500 font-bold leading-relaxed">
                             {t('conditionsDescription')}
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                         {[
                             { title: t('condition1Title'), desc: t('condition1Desc') },
                             { title: t('condition2Title'), desc: t('condition2Desc') },
                             { title: t('condition3Title'), desc: t('condition3Desc') },
                             { title: t('condition4Title'), desc: t('condition4Desc') }
                         ].map((condition, index) => (
-                            <div key={index} className="p-10 bg-gray-50 rounded-[2.5rem] border border-gray-100 hover:bg-black group transition-all duration-500">
+                            <div key={index} className="p-5 sm:p-8 md:p-10 bg-gray-50 rounded-[1.5rem] sm:rounded-[2.5rem] border border-gray-100 hover:bg-black group transition-all duration-500">
                                 <div className="w-14 h-14 bg-white group-hover:bg-gray-800 rounded-2xl flex items-center justify-center shadow-sm mb-6 transition-colors duration-500">
                                     <AlertCircle className="w-7 h-7 text-black group-hover:text-pixio-yellow transition-colors duration-500" />
                                 </div>
@@ -70,13 +70,13 @@ export default async function JoinUsPage() {
             </section>
 
             {/* Apply Section */}
-            <section className="py-32 px-4 bg-pixio-cream border-t border-gray-100" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
+            <section className="py-8 sm:py-14 md:py-32 px-4 bg-pixio-cream border-t border-gray-100" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
                 <div className="max-w-4xl mx-auto text-center">
-                    <div className="bg-white p-12 md:p-16 rounded-[3rem] shadow-2xl border border-gray-100 relative overflow-hidden group">
+                    <div className="bg-white p-6 sm:p-10 md:p-16 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-gray-100 relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-pixio-pink via-pixio-yellow to-blue-400"></div>
-                        <FileText className="w-20 h-20 text-gray-200 group-hover:text-black transition-colors duration-500 mx-auto mb-10" />
-                        <h2 className="text-4xl md:text-6xl font-black text-black mb-8">{t('applyTitle')}</h2>
-                        <p className="text-2xl text-gray-500 font-bold leading-relaxed mb-12">
+                        <FileText className="w-12 h-12 sm:w-20 sm:h-20 text-gray-200 group-hover:text-black transition-colors duration-500 mx-auto mb-4 sm:mb-10" />
+                        <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-black mb-3 sm:mb-8">{t('applyTitle')}</h2>
+                        <p className="text-base sm:text-xl md:text-2xl text-gray-500 font-bold leading-relaxed mb-6 sm:mb-12">
                             {t('applyDescription')}
                         </p>
                         
@@ -89,7 +89,7 @@ export default async function JoinUsPage() {
                             <MessageCircle className="w-8 h-8" />
                             {t('applyButton')}
                         </a>
-                        <div className="mt-12 text-4xl font-black text-gray-300 italic">
+                        <div className="mt-6 sm:mt-12 text-2xl sm:text-4xl font-black text-gray-300 italic">
                             {t('applyThanks')}
                         </div>
                     </div>

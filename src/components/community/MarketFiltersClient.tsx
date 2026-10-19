@@ -26,9 +26,10 @@ function useDebounce<T>(value: T, delay: number): T {
 
 interface MarketFiltersProps {
     onPendingChange?: (isPending: boolean) => void
+    embedded?: boolean
 }
 
-export default function MarketFiltersClient({ onPendingChange }: MarketFiltersProps) {
+export default function MarketFiltersClient({ onPendingChange, embedded = false }: MarketFiltersProps) {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -73,8 +74,8 @@ export default function MarketFiltersClient({ onPendingChange }: MarketFiltersPr
     }, [debouncedSearch, debouncedCity, pathname, router, searchParams])
 
     return (
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="flex-1 relative">
+        <div className={`flex flex-col md:flex-row gap-3 md:gap-4 ${embedded ? 'm-0 rounded-[1.5rem] bg-white/90 p-2.5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl' : 'mb-8'}`}>
+            <div className="flex-1 lg:max-w-2xl relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                     type="text"

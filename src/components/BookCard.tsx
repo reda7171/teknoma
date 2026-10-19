@@ -11,6 +11,7 @@ import { fbPixelEvents } from '@/lib/facebook-pixel'
 import WishlistButton from '@/components/WishlistButton'
 import AddToReadingListButton from '@/components/AddToReadingListButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import ReserveBookButton from '@/components/ReserveBookButton'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 
 interface BookCardProps {
@@ -207,6 +208,10 @@ export default function BookCard({
                                 <span>{t('AddToCart')}</span>
                             )}
                         </button>
+                    )}
+
+                    {stock <= 0 && (
+                        <ReserveBookButton bookId={id} variant="card" />
                     )}
                 </div>
             </div>

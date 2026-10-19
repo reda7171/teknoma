@@ -44,6 +44,10 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
     return (
         <div className="w-full max-w-md">
             <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-black/5 border border-gray-100">
+                <div className="mb-8">
+                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
+                </div>
+
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('FullName')}</label>
@@ -113,10 +117,6 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
                         {!loading && <ArrowRight className="w-4 h-4 rtl:rotate-180" />}
                     </button>
                 </form>
-
-                <div className="mt-8">
-                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
-                </div>
 
                 <div className="mt-8 text-center">
                     <p className="text-xs font-bold text-gray-400">

@@ -21,8 +21,8 @@ export default async function OrdersPage({
     return (
         <div className="min-h-screen bg-pixio-cream flex flex-col">
             <Header />
-            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32 w-full">
-                <div className="mb-12">
+            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 md:py-12 pb-16 sm:pb-24 md:pb-32 w-full">
+                <div className="mb-6 sm:mb-10 md:mb-12">
                     <h1 className="text-4xl md:text-5xl font-black text-black tracking-tighter mb-2">
                         {t('Title')}
                     </h1>

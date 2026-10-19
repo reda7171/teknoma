@@ -15,7 +15,7 @@ export default function BookLoadingSkeleton() {
                 </div>
             </div>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-64 md:pb-40">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 md:pt-10 pb-28 sm:pb-36 md:pb-40">
                 {/* Search skeleton */}
                 <div className="mb-6 md:mb-10 max-w-xl mx-auto">
                     <div className="h-12 bg-white rounded-full border border-gray-100 shadow-sm animate-pulse" />

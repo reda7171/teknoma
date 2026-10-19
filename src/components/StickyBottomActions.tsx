@@ -33,7 +33,7 @@ export default function StickyBottomActions({ children, productId }: { children:
     if (isInCart) return null
 
     return (
-        <div className={`fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom))] left-0 right-0 z-[110] px-3 py-2.5 sm:px-4 sm:py-3 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] grid grid-cols-2 gap-2 md:flex md:flex-col md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none md:space-y-4 md:gap-0 transition-all duration-300 ease-in-out ${isHidden ? 'translate-y-full md:translate-y-0 opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto' : 'translate-y-0 opacity-100 pointer-events-auto'}`}>
+        <div className={`fixed bottom-0 left-0 right-0 z-[150] px-4 py-3 bg-white border-t border-gray-200/80 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] pb-[calc(0.75rem+env(safe-area-inset-bottom))] grid grid-cols-2 gap-3 md:flex md:flex-col md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:p-0 md:bg-transparent md:border-none md:shadow-none md:space-y-4 md:gap-0 transition-all duration-300 ease-in-out ${isHidden ? 'translate-y-full md:translate-y-0 opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto' : 'translate-y-0 opacity-100 pointer-events-auto'}`}>
             {children}
         </div>
     )

@@ -198,3 +198,28 @@ export async function notifyWhatsAppClick(message: string, assignedAgentName?: s
         return { success: false }
     }
 }
+
+export async function notifyWhatsAppOrderClick(title: string, price: number, type: string, message: string, phone?: string) {
+    try {
+        const ip = await getIpIdentifier()
+        const isAdmin = await isAuthenticated()
+        const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
+
+        const cleanTitle = (title || 'Produit').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const cleanMessage = (message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+        const text = `📱 <b>Commande WhatsApp Initiée</b>${adminTag}\n\n` +
+            `📖 <b>Produit :</b> ${cleanTitle}\n` +
+            `🏷️ <b>Type :</b> ${type}\n` +
+            `💰 <b>Prix :</b> ${price ? price.toFixed(2) : '0.00'} درهم\n` +
+            (phone ? `📞 <b>Contact WhatsApp :</b> +${phone}\n` : '') +
+            `💬 <b>Message pré-rempli :</b>\n<i>${cleanMessage}</i>\n\n` +
+            `🌐 <b>IP :</b> ${ip || 'Inconnue'}`
+
+        await sendTelegramMessage(text).catch(() => null)
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur notifyWhatsAppOrderClick:', error)
+        return { success: false }
+    }
+}

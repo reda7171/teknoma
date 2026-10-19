@@ -1,23 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
-import { 
-    Users, 
-    ShoppingBag, 
-    MapPin, 
-    Phone, 
-    Edit2, 
-    Trash2, 
-    X, 
-    Save, 
+import {
+    Users,
+    ShoppingBag,
+    MapPin,
+    Phone,
+    Edit2,
+    Trash2,
+    X,
+    Save,
     Loader2,
-    Search,
-    Plus,
     Mail
 } from 'lucide-react'
 import { updateCustomer, deleteCustomer, createCustomer } from '@/lib/actions/customers'
 
-interface Customer {
+export interface Customer {
     id: string
     fullName: string
     phone: string
@@ -26,16 +24,23 @@ interface Customer {
     address?: string
     totalOrders: number
     totalSpent: number
-    lastOrderDate: Date
+    lastOrderDate: Date | string
+    source?: 'google' | 'facebook' | 'order' | 'community'
 }
 
 interface CustomersTableProps {
     initialCustomers: Customer[]
     externalSearch?: string
+    selectedSource?: string
     setIsCreating?: (val: boolean) => void
 }
 
-export default function CustomersTable({ initialCustomers, externalSearch = '', setIsCreating: setExternalIsCreating }: CustomersTableProps) {
+export default function CustomersTable({
+    initialCustomers,
+    externalSearch = '',
+    selectedSource = 'all',
+    setIsCreating: setExternalIsCreating
+}: CustomersTableProps) {
     const [customers, setCustomers] = useState(initialCustomers)
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
     const [isCreating, setIsCreating] = useState(false)
@@ -44,17 +49,27 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
     const [error, setError] = useState<string | null>(null)
 
     React.useEffect(() => {
+        setCustomers(initialCustomers)
+    }, [initialCustomers])
+
+    React.useEffect(() => {
         const handleOpen = () => setIsCreating(true)
         window.addEventListener('open-customer-modal', handleOpen)
         return () => window.removeEventListener('open-customer-modal', handleOpen)
     }, [])
 
-    // Filtrage
-    const filteredCustomers = customers.filter(c => 
-        c.fullName.toLowerCase().includes(externalSearch.toLowerCase()) ||
-        c.phone.includes(externalSearch) ||
-        (c.city || '').toLowerCase().includes(externalSearch.toLowerCase())
-    )
+    // Filtrage recherche textuelle + source
+    const filteredCustomers = customers.filter(c => {
+        const search = externalSearch.toLowerCase()
+        const matchesSearch =
+            (c.fullName || '').toLowerCase().includes(search) ||
+            (c.phone || '').includes(search) ||
+            (c.email || '').toLowerCase().includes(search) ||
+            (c.city || '').toLowerCase().includes(search)
+
+        const matchesSource = !selectedSource || selectedSource === 'all' || c.source === selectedSource
+        return matchesSearch && matchesSource
+    })
 
     const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -72,9 +87,9 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
         }
 
         const result = await updateCustomer(editingCustomer.id, data)
-        
+
         if (result.success) {
-            setCustomers(prev => prev.map(c => 
+            setCustomers(prev => prev.map(c =>
                 c.id === editingCustomer.id ? { ...c, ...data } : c
             ))
             setEditingCustomer(null)
@@ -98,10 +113,17 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
         }
 
         const result = await createCustomer(data)
-        
+
         if (result.success) {
-            // Re-fetch or manual update (simple re-fetch for now)
-            window.location.reload()
+            setCustomers(prev => [{
+                id: Math.random().toString(),
+                ...data,
+                totalOrders: 0,
+                totalSpent: 0,
+                lastOrderDate: new Date(),
+                source: 'community'
+            }, ...prev])
+            setIsCreating(false)
         } else {
             setError(result.error || 'Erreur lors de la création')
         }
@@ -109,23 +131,21 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) return
-
+        if (!confirm('Voulez-vous vraiment supprimer ce lecteur de la base de données ?')) return
         setIsDeleting(id)
         const result = await deleteCustomer(id)
-        
         if (result.success) {
             setCustomers(prev => prev.filter(c => c.id !== id))
+        } else {
+            alert(result.error || 'Erreur lors de la suppression')
         }
         setIsDeleting(null)
     }
 
     return (
-        <div className="space-y-6">
-            {/* Barre d'action */}
-            {/* Actions removed - moved to CustomerFilters */}
-
-            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden font-sans">
+        <div className="relative">
+            {/* Table Container */}
+            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -149,18 +169,52 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                 </tr>
                             ) : (
                                 filteredCustomers.map((customer) => (
-                                    <tr key={customer.id} className="group hover:bg-pixio-cream/30 transition-colors">
+                                    <tr key={customer.id} className="group hover:bg-gray-50/60 transition-colors">
                                         <td className="px-8 py-7">
                                             <div className="flex items-center gap-5">
-                                                <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-black/10">
-                                                    {customer.fullName.charAt(0)}
+                                                <div className="relative flex-shrink-0">
+                                                    <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-black/10">
+                                                        {(customer.fullName || 'L').charAt(0).toUpperCase()}
+                                                    </div>
+                                                    {customer.source === 'google' && (
+                                                        <span className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100" title="Connecté via Google">
+                                                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                                                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                                                            </svg>
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <p className="text-base font-black text-black leading-none mb-1">{customer.fullName}</p>
+                                                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                                        <p className="text-base font-black text-black leading-none">{customer.fullName}</p>
+                                                        {customer.source === 'google' && (
+                                                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-red-50 text-red-600 border border-red-100 flex items-center gap-1">
+                                                                Google
+                                                            </span>
+                                                        )}
+                                                        {customer.source === 'facebook' && (
+                                                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100">
+                                                                Facebook
+                                                            </span>
+                                                        )}
+                                                        {customer.source === 'community' && (
+                                                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-100">
+                                                                Communauté
+                                                            </span>
+                                                        )}
+                                                        {customer.source === 'order' && (
+                                                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                                Client COD
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <div className="flex flex-col gap-1">
                                                         <p className="text-xs text-gray-400 font-bold flex items-center gap-1.5">
                                                             <Phone className="w-3 h-3" />
-                                                            {customer.phone}
+                                                            {customer.phone || 'Non renseigné'}
                                                         </p>
                                                         {customer.email && (
                                                             <p className="text-[10px] text-gray-400 font-bold flex items-center gap-1.5 lowercase">
@@ -174,8 +228,8 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                         </td>
                                         <td className="px-8 py-7">
                                             <div className="flex items-center gap-2 text-sm font-bold text-black">
-                                                <MapPin className="w-4 h-4 text-gray-300" />
-                                                {customer.city || 'Non renseigné'}
+                                                <MapPin className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                                                <span>{customer.city || 'Non renseigné'}</span>
                                             </div>
                                             <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 truncate max-w-[200px]">
                                                 {customer.address || 'Aucune adresse'}
@@ -199,16 +253,18 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                         </td>
                                         <td className="px-8 py-7 text-right">
                                             <div className="flex items-center justify-end gap-3">
-                                                <button 
+                                                <button
                                                     onClick={() => setEditingCustomer(customer)}
                                                     className="p-3 bg-gray-50 text-gray-400 rounded-2xl hover:bg-black hover:text-white transition-all active:scale-90"
+                                                    title="Modifier"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleDelete(customer.id)}
                                                     disabled={isDeleting === customer.id}
                                                     className="p-3 bg-red-50 text-red-400 rounded-2xl hover:bg-red-500 hover:text-white transition-all active:scale-90 disabled:opacity-50"
+                                                    title="Supprimer"
                                                 >
                                                     {isDeleting === customer.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                                                 </button>
@@ -226,7 +282,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
             {(isCreating || editingCustomer) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className="bg-white w-full max-w-2xl rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20">
-                        <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-pixio-cream/20">
+                        <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <div>
                                 <h3 className="text-3xl font-black text-black tracking-tighter">
                                     {isCreating ? 'Nouveau Lecteur' : 'Profil Lecteur'}
@@ -235,7 +291,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                     {isCreating ? 'Ajouter manuellement à la base' : 'Édition des informations de contact'}
                                 </p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setIsCreating(false)
                                     setEditingCustomer(null)
@@ -246,10 +302,10 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                 <X className="w-6 h-6 text-gray-400" />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={isCreating ? handleCreate : handleUpdate} className="p-12 space-y-10">
                             {error && (
-                                <div className="p-5 bg-red-50 border-2 border-red-100 rounded-3xl text-red-600 text-xs font-black uppercase tracking-widest text-center animate-shake">
+                                <div className="p-5 bg-red-50 border-2 border-red-100 rounded-3xl text-red-600 text-xs font-black uppercase tracking-widest text-center">
                                     {error}
                                 </div>
                             )}
@@ -257,7 +313,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Identité complète</label>
-                                    <input 
+                                    <input
                                         name="fullName"
                                         defaultValue={editingCustomer?.fullName}
                                         required
@@ -267,17 +323,16 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                 </div>
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Numéro WhatsApp</label>
-                                    <input 
+                                    <input
                                         name="phone"
                                         defaultValue={editingCustomer?.phone}
-                                        required
                                         placeholder="Ex: 0612345678"
                                         className="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-bold text-black text-sm"
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email (Optionnel)</label>
-                                    <input 
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email</label>
+                                    <input
                                         name="email"
                                         type="email"
                                         defaultValue={editingCustomer?.email || ''}
@@ -287,7 +342,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                 </div>
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Ville de résidence</label>
-                                    <input 
+                                    <input
                                         name="city"
                                         defaultValue={editingCustomer?.city || ''}
                                         placeholder="Ex: Casablanca"
@@ -296,7 +351,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                 </div>
                                 <div className="col-span-1 md:col-span-2 space-y-4">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Adresse de livraison détaillée</label>
-                                    <textarea 
+                                    <textarea
                                         name="address"
                                         defaultValue={editingCustomer?.address || ''}
                                         placeholder="Numéro, rue, quartier..."
@@ -307,7 +362,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                             </div>
 
                             <div className="flex flex-col md:flex-row gap-5 pt-4">
-                                <button 
+                                <button
                                     type="button"
                                     onClick={() => {
                                         setIsCreating(false)
@@ -318,7 +373,7 @@ export default function CustomersTable({ initialCustomers, externalSearch = '', 
                                 >
                                     Fermer sans enregistrer
                                 </button>
-                                <button 
+                                <button
                                     type="submit"
                                     disabled={loading}
                                     className="flex-2 py-6 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl shadow-black/20"

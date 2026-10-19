@@ -10,9 +10,10 @@ export interface AIRecommendation {
     reason: string;
 }
 
-export async function getUserRecommendations(): Promise<AIRecommendation[]> {
+export async function getUserRecommendations(locale: string = 'fr'): Promise<AIRecommendation[]> {
     const user = await getCommunityUser()
     if (!user) return []
+    const recommendationLocale = ['ar', 'en', 'fr'].includes(locale) ? locale : 'fr'
 
     try {
         // 1. Vérifier le cache en base de données
@@ -23,7 +24,11 @@ export async function getUserRecommendations(): Promise<AIRecommendation[]> {
 
         if (customer?.aiRecommendations) {
             try {
-                return JSON.parse(customer.aiRecommendations)
+                const cached = JSON.parse(customer.aiRecommendations)
+                if (Array.isArray(cached) && recommendationLocale === 'fr') return cached
+                if (cached && !Array.isArray(cached) && Array.isArray(cached[recommendationLocale])) {
+                    return cached[recommendationLocale]
+                }
             } catch (e) {
                 console.error("Erreur parsing aiRecommendations:", e)
             }
@@ -48,14 +53,20 @@ export async function getUserRecommendations(): Promise<AIRecommendation[]> {
         if (authors.length === 0) return []
 
         // 3. Demander à Gemini
-        const recommendations = await generateRecommendations(authors)
+        const recommendations = await generateRecommendations(authors, recommendationLocale)
 
         if (recommendations && Array.isArray(recommendations) && recommendations.length > 0) {
             // 4. Mettre en cache dans la DB si le client existe
             if (customer) {
+                let cachedByLocale: Record<string, AIRecommendation[]> = {}
+                try {
+                    const previous = customer.aiRecommendations ? JSON.parse(customer.aiRecommendations) : null
+                    cachedByLocale = Array.isArray(previous) ? { fr: previous } : (previous || {})
+                } catch {}
+                cachedByLocale[recommendationLocale] = recommendations
                 await prisma.customer.update({
                     where: { id: user.id },
-                    data: { aiRecommendations: JSON.stringify(recommendations) }
+                    data: { aiRecommendations: JSON.stringify(cachedByLocale) }
                 }).catch(() => null)
             }
             return recommendations
@@ -75,10 +86,15 @@ export async function getUserRecommendations(): Promise<AIRecommendation[]> {
         })
 
         if (fallbackBooks.length > 0) {
+            const fallbackReason = recommendationLocale === 'ar'
+                ? 'اقتراح مبني على الكتّاب المفضلين لديك.'
+                : recommendationLocale === 'en'
+                    ? 'A suggestion based on your favorite authors.'
+                    : 'Sélection recommandée basée sur vos auteurs favoris.'
             return fallbackBooks.map(b => ({
                 title: b.title,
                 author: b.author,
-                reason: "Sélection recommandée basée sur vos auteurs favoris."
+                reason: fallbackReason
             }))
         }
 

@@ -120,7 +120,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
     };
 
     return (
-        <footer id="main-footer" className="bg-black text-white relative">
+        <footer id="main-footer" className="bg-black text-white relative pb-[env(safe-area-inset-bottom)]">
             <GoogleReviewsBadge />
 
             {/* Top Bar with Back to Top */}
@@ -134,7 +134,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                 </button>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-24 md:pb-12 relative">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 md:pt-24 pb-16 md:pb-12 relative">
                 {/* Vertical Social Sidebar */}
                 <div className="absolute ltr:right-4 sm:ltr:-right-16 rtl:left-4 sm:rtl:-left-16 top-32 z-10 hidden xl:flex">
                     <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-full py-6 px-3 flex flex-col gap-6 shadow-2xl">
@@ -148,7 +148,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 mb-12 md:mb-20">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 md:gap-16 mb-8 sm:mb-14 md:mb-20">
                     <div className="space-y-6 col-span-2 md:col-span-1">
                         <Link href="/" className="flex items-center gap-2 group">
                             {siteLogo ? (
@@ -244,7 +244,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                 </div>
 
                 {/* Mobile Socials */}
-                <div className="flex xl:hidden gap-6 mb-12 justify-center">
+                <div className="flex xl:hidden gap-6 mb-6 sm:mb-12 justify-center">
                     {socials.instagram && <a href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Instagram" className="text-gray-400 hover:text-white transition-colors"><Instagram className="w-5 h-5" /></a>}
                     {socials.linkedin && <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur LinkedIn" className="text-gray-400 hover:text-white transition-colors"><Linkedin className="w-5 h-5" /></a>}
                     {socials.facebook && <a href={socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Riwaya sur Facebook" className="text-gray-400 hover:text-white transition-colors"><Facebook className="w-5 h-5" /></a>}

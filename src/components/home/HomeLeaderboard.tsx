@@ -32,9 +32,9 @@ export default async function HomeLeaderboard({ topReaders }: { topReaders: Read
     const top3 = topReaders.slice(0, 3)
 
     return (
-        <section className="py-20 md:py-28 bg-[#F9F7F4] border-y border-stone-100">
+        <section className="py-8 sm:py-16 md:py-28 bg-[#F9F7F4] border-y border-stone-100">
             <div className="max-w-6xl mx-auto px-4 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 lg:gap-20 items-center">
 
                     {/* ── Colonne classement ── */}
                     <div className="lg:col-span-7 space-y-3">

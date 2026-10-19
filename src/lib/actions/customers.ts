@@ -28,20 +28,41 @@ export async function createCustomer(data: { fullName: string, phone: string, em
 
 export async function updateCustomer(id: string, data: { fullName: string, phone: string, email?: string, city?: string, address?: string }) {
     try {
-        await prisma.customer.update({
-            where: { id },
-            data: {
-                fullName: data.fullName,
-                phone: data.phone,
-                email: data.email,
-                city: data.city,
-                address: data.address
+        const customer = await prisma.customer.findUnique({ where: { id } })
+        if (customer) {
+            await prisma.customer.update({
+                where: { id },
+                data: {
+                    fullName: data.fullName,
+                    phone: data.phone,
+                    email: data.email,
+                    city: data.city,
+                    address: data.address
+                }
+            })
+        }
+
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { id },
+                    ...(data.email ? [{ email: data.email }] : [])
+                ]
             }
         })
 
-        // On met aussi à jour les commandes liées si le téléphone a changé
-        // Mais avec la relation, c'est mieux de garder le customerId
-        
+        if (user) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    fullName: data.fullName,
+                    phone: data.phone,
+                    city: data.city,
+                    address: data.address
+                }
+            })
+        }
+
         revalidatePath('/[locale]/admin/customers', 'page')
         return { success: true }
     } catch (error) {
@@ -52,9 +73,15 @@ export async function updateCustomer(id: string, data: { fullName: string, phone
 
 export async function deleteCustomer(id: string) {
     try {
-        await prisma.customer.delete({
-            where: { id }
-        })
+        const customer = await prisma.customer.findUnique({ where: { id } })
+        if (customer) {
+            await prisma.customer.delete({ where: { id } })
+        }
+
+        const user = await prisma.user.findUnique({ where: { id } })
+        if (user && user.role === 'USER') {
+            await prisma.user.delete({ where: { id } })
+        }
 
         revalidatePath('/[locale]/admin/customers', 'page')
         return { success: true }

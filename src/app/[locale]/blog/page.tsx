@@ -94,26 +94,6 @@ export default async function BlogPage({
                     </p>
                 </div>
 
-                {/* Categories Bar */}
-                <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 mt-8 sm:mt-12 relative z-10">
-                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-                        <Link
-                            href="/blog"
-                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs rtl:text-sm rtl:md:text-base font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
-                        >
-                            {t('All')}
-                        </Link>
-                        {displayCategories.map((cat) => (
-                            <Link
-                                key={cat}
-                                href={`/blog?category=${cat}`}
-                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs rtl:text-sm rtl:md:text-base font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
-                            >
-                                {cat}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
             </div>
 
             <AdUnit 
@@ -282,6 +262,27 @@ export default async function BlogPage({
                         )}
                     </div>
                 )}
+
+                {/* Categories / mots-clés */}
+                <div className="mt-12 md:mt-20 pt-8 md:pt-12 border-t border-gray-200">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                        <Link
+                            href="/blog"
+                            className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs rtl:text-sm rtl:md:text-base font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${!category ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                        >
+                            {t('All')}
+                        </Link>
+                        {displayCategories.map((cat) => (
+                            <Link
+                                key={cat}
+                                href={`/blog?category=${cat}`}
+                                className={`px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full text-[9px] sm:text-[10px] md:text-xs rtl:text-sm rtl:md:text-base font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal transition-all duration-300 hover:-translate-y-1 ${category === cat ? 'bg-black text-white shadow-xl shadow-black/20' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-black shadow-sm border border-gray-100'}`}
+                            >
+                                {cat}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
             </div>
             <Footer />
         </div>

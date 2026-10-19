@@ -22,6 +22,8 @@ export default function robots(): MetadataRoute.Robots {
                     '/*/cart',
                     '/*/*/cart',
                     '/orders',
+                    '*/opengraph-image',
+                    '*/opengraph-image/*',
                     '/*/orders',
                 ],
             },
@@ -42,6 +44,8 @@ export default function robots(): MetadataRoute.Robots {
                     '/cart',
                     '/*/cart',
                     '/orders',
+                    '*/opengraph-image',
+                    '*/opengraph-image/*',
                 ],
             },
             {
@@ -61,6 +65,8 @@ export default function robots(): MetadataRoute.Robots {
                     '/cart',
                     '/*/cart',
                     '/orders',
+                    '*/opengraph-image',
+                    '*/opengraph-image/*',
                     '/*/orders',
                 ],
             }

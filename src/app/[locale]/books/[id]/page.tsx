@@ -192,12 +192,6 @@ export async function generateMetadata({
             description: ogDescription,
             images: [
                 {
-                    url: dynamicOgImageUrl,
-                    width: 1200,
-                    height: 630,
-                    alt: `${localizedTitle} - ${book.price} DH`,
-                },
-                {
                     url: imageUrl,
                     width: 800,
                     height: 800,
@@ -212,7 +206,7 @@ export async function generateMetadata({
             card: 'summary_large_image',
             title: ogTitle,
             description: ogDescription,
-            images: [dynamicOgImageUrl],
+            images: [imageUrl],
         },
         other: {
             'product:price:amount': `${book.price}`,
@@ -469,7 +463,7 @@ export default async function BookDetailPage({
                     backLabel={tBook('BackToSelection') || 'Retour à la sélection'}
                 />
 
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 pb-64 md:pb-40">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 md:pt-10 pb-28 sm:pb-36 md:pb-40">
                     <div className="mb-6 md:mb-10">
                         <PredictiveSearch />
                     </div>
@@ -479,14 +473,14 @@ export default async function BookDetailPage({
                         <AdBanner
                             publisherId={adsensePublisherId}
                             slotId={adsenseSidebarSlot}
-                            label="Publicité — Page Livre"
+                            label={locale === 'ar' ? 'إعلان — صفحة الكتاب' : locale === 'en' ? 'Advertisement — Book Page' : 'Publicité — Page Livre'}
                             format="horizontal"
                             className="!my-3"
                         />
                     )}
 
                     {/* Product Detail */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 mb-10 md:mb-32">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-20 mb-8 sm:mb-16 md:mb-32">
                         {/* Image */}
                         <div className="lg:sticky lg:top-24 lg:self-start">
                             <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-4 sm:p-6 md:p-10 shadow-2xl shadow-black/5 border border-gray-100 flex flex-col gap-8 md:gap-10">
@@ -756,12 +750,12 @@ export default async function BookDetailPage({
 
                             {/* CTA */}
                             <div className="md:space-y-8">
-                                {book.stock > 0 ? (
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
-                                        <p className="text-sm font-black text-black uppercase tracking-widest">{tBook('ReadyForCollection')}</p>
-                                    </div>
-                                ) : (
+                                {book.stock <= 0 && (
+                                    
+                                        
+                                        
+                                    
+                                
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 bg-gray-200 rounded-full" />
                                         <p className="text-[10px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black text-gray-500 uppercase tracking-widest">{tBook('OutOfStock')}</p>
@@ -1052,7 +1046,7 @@ export default async function BookDetailPage({
                     {/* Similar Books */}
                     {filteredSimilarBooks.length > 0 && (
                         <section className="py-8 md:py-16 border-t border-gray-100">
-                            <div className="flex items-center justify-between mb-8 md:mb-20 px-2">
+                            <div className="flex items-center justify-between mb-4 sm:mb-10 md:mb-20 px-2">
                                 <h2 className="text-4xl font-black text-black tracking-tighter">{tBook('RecommendedReads')}<span className="text-gray-200">.</span></h2>
                                 <Link href="/books" className="text-[10px] rtl:text-xs rtl:tracking-normal font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all">
                                     {tBook('ExploreAll')}
@@ -1069,7 +1063,7 @@ export default async function BookDetailPage({
                     {/* Related Articles */}
                     {relatedPosts && relatedPosts.length > 0 && (
                         <section className="py-8 md:py-16 border-t border-gray-100">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 md:mb-16 px-2">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-8 md:mb-16 px-2">
                                 <div>
                                     <h2 className="text-4xl font-black text-black tracking-tighter">
                                         {locale === 'ar' ? 'مقالات ذات صلة' : locale === 'en' ? 'Related Articles' : 'Articles Liés'}
@@ -1120,9 +1114,9 @@ export default async function BookDetailPage({
 
                     {/* Testimonials Section (Audio & Images) */}
                     {(audioTestimonials.length > 0 || imageTestimonials.length > 0) && (
-                        <section className="py-8 md:py-16 border-t border-gray-100">
-                            <div className="flex flex-col items-center text-center mb-12 space-y-4">
-                                <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
+                        <section className="py-6 sm:py-8 md:py-16 border-t border-gray-100">
+                            <div className="flex flex-col items-center text-center mb-3 sm:mb-6 md:mb-12 space-y-2 sm:space-y-4">
+                                <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-black tracking-tight">
                                     {locale === 'ar' ? 'تجارب عملائنا' : locale === 'en' ? 'Testimonials' : 'Témoignages'}<span className="text-emerald-500">.</span>
                                 </h2>
                             </div>

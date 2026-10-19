@@ -553,7 +553,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   })()}
                   {/* Boutons sous le cosmos — toutes tailles d'écran */}
                   <div className="flex flex-col sm:flex-row gap-4 justify-center w-full z-10 px-4">
-                    <Link href="/packs" className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-black text-sm md:text-base uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
+                    <Link href="/books" className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-black text-sm md:text-base uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/40 hover:-translate-y-1">
                       <span>{c('hero_btn_packs', t('hero.OurBundles'))}</span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                     </Link>
@@ -601,9 +601,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_features':
         return (
-          <section key={key} {...getSectionProps('home_section_features', 'bg-white')} className={`py-12 ${getSectionProps('home_section_features', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_features', 'bg-white')} className={`py-6 sm:py-10 md:py-12 ${getSectionProps('home_section_features', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
                 {[
                   { icon: Truck, title: c('features_1_title', t('Features.ShippingTitle')), desc: c('features_1_desc', t('Features.ShippingDesc')), color: 'bg-pixio-cream' },
                   { icon: Shield, title: c('features_2_title', t('Features.PaymentTitle')), desc: c('features_2_desc', t('Features.PaymentDesc')), color: 'bg-pixio-yellow' },
@@ -627,9 +627,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_best_sellers':
         return (
-          <section key={key} {...getSectionProps('home_section_best_sellers', 'bg-white')} className={`py-12 ${getSectionProps('home_section_best_sellers', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_best_sellers', 'bg-white')} className={`py-6 sm:py-10 md:py-12 ${getSectionProps('home_section_best_sellers', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-16 space-y-6" dir="ltr">
+              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-6 sm:mb-12 md:mb-16 space-y-4 sm:space-y-6" dir="ltr">
                 <div className="space-y-4">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
                     <TrendingUp className="w-4 h-4 text-orange-600" />
@@ -698,15 +698,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_packs':
         return (
-          <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_packs', 'bg-pixio-cream')} className={`py-6 sm:py-10 md:py-12 overflow-hidden ${getSectionProps('home_section_packs', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-start text-start mb-16 space-y-4">
+              <ScrollReveal delay={100} className="flex flex-col items-start text-start mb-6 sm:mb-10 md:mb-16 space-y-2 sm:space-y-4">
                 <span className="text-xs md:text-sm font-black uppercase text-gray-500 tracking-[0.3em] rtl:tracking-normal">{c('collections_subtitle', t('Collections.Subtitle'))}</span>
                 <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight rtl:tracking-normal">
                   {c('collections_title', t('Collections.Title'))}<span className="text-pixio-pink">.</span>
                 </h2>
               </ScrollReveal>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
                 {popularPacks.map((pack: any, idx: number) => (
                   <ScrollReveal key={pack.id} delay={idx * 150} animation="animate-reveal-up">
                     <PackCard {...pack} />
@@ -770,9 +770,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_new_arrivals':
         return (
-          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-12 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-6 sm:py-10 md:py-12 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
+              <ScrollReveal delay={100} className="flex items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <div className="space-y-4">
                   <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
                   <h2 className="text-4xl md:text-6xl rtl:tracking-normal font-black text-black tracking-tight">{c('new_arrivals_title', t('NewArrivals.Title'))}</h2>
@@ -784,7 +784,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </div>
                 </Link>
               </ScrollReveal>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 md:gap-x-8 gap-y-6 sm:gap-y-10 md:gap-y-16">
                 {newBooks.map((book: any, idx: number) => (
                   <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
                     <BookCard {...book} variant={idx === 0 ? 'featured' : 'default'} priority={false} />
@@ -799,9 +799,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_used_books':
         if (!usedBooks || usedBooks.length === 0) return null
         return (
-          <section key={key} {...getSectionProps('home_section_used_books', 'bg-pixio-cream')} className={`py-12 overflow-hidden ${getSectionProps('home_section_used_books', 'bg-pixio-cream').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_used_books', 'bg-pixio-cream')} className={`py-6 sm:py-10 md:py-12 overflow-hidden ${getSectionProps('home_section_used_books', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
+              <ScrollReveal delay={100} className="flex items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <div className="space-y-4">
                   <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em]">
                     {locale === 'ar' ? 'اكتشف' : locale === 'en' ? 'Discover' : 'Découvrez'}
@@ -819,7 +819,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </div>
                 </Link>
               </ScrollReveal>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 md:gap-x-8 gap-y-6 sm:gap-y-10 md:gap-y-16">
                 {usedBooks.map((book: any, idx: number) => (
                   <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
                     <BookCard {...book} variant="default" priority={false} />
@@ -833,9 +833,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_exchange':
         if (!featureExchange) return null
         return (
-          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-12 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-6 sm:py-10 md:py-12 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
+              <ScrollReveal className="flex flex-col md:flex-row items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <div className="space-y-4 flex-1">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full">
                     <RefreshCw className="w-4 h-4 text-green-600" />
@@ -871,6 +871,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                       </svg>
                       <span>Google</span>
+                    </Link>
+                    <Link href="/api/auth/facebook/login" className="inline-flex items-center gap-3 px-8 py-4 bg-[#1877F2] text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-[#166FE5] transition-all shadow-lg hover:-translate-y-1">
+                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.385H7.078v-3.542h3.047V9.372c0-3.017 1.792-4.684 4.533-4.684 1.312 0 2.686.235 2.686.235v2.966H15.83c-1.491 0-1.956.93-1.956 1.884v2.3h3.328l-.532 3.542h-2.796V24C19.612 23.094 24 18.1 24 12.073Z" />
+                      </svg>
+                      <span>{t('ExchangeBooks.LoginWithFacebook')}</span>
                     </Link>
                   </div>
                 </ScrollReveal>
@@ -918,9 +924,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             case 'home_section_audio_testimonials':
         if (!audioTestimonials?.length && !imageTestimonials?.length) return null
         return (
-          <section key={key} {...getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream')} className={`py-16 overflow-hidden ${getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream')} className={`py-8 sm:py-12 md:py-16 overflow-hidden ${getSectionProps('home_section_audio_testimonials', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-12 space-y-4">
+              <ScrollReveal delay={100} className="flex flex-col items-center text-center mb-3 sm:mb-6 md:mb-12 space-y-2 sm:space-y-4">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full">
                     <Headphones className="w-4 h-4 text-emerald-600" />
                     <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-emerald-600 tracking-[0.3em]">
@@ -939,12 +945,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_digital':
         if (!featureDigitalBooks) return null
         return (
-          <section key={key} {...getSectionProps('home_section_digital', 'bg-black')} className={`py-12 overflow-hidden relative ${getSectionProps('home_section_digital', 'bg-black').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_digital', 'bg-black')} className={`py-6 sm:py-10 md:py-12 overflow-hidden relative ${getSectionProps('home_section_digital', 'bg-black').className || ''}`}>
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-400/5 rounded-full blur-[120px]" />
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
                 <div className="flex-1 space-y-8">
                   <ScrollReveal animation="animate-reveal-up" delay={100}><div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400/10 border border-amber-400/20 rounded-full"><Zap className="w-3 h-3 text-amber-400" /><span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-amber-400 tracking-[0.3em]">{c('digital_badge', tDigital('HomeSection.Badge'))}</span></div></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={200}><h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">{c('digital_title', tDigital('HomeSection.Title'))}<span className="text-amber-400">.</span></h2></ScrollReveal>
@@ -992,9 +998,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       case 'home_section_new_arrivals':
         return (
-          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-24 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_new_arrivals', 'bg-white')} className={`py-8 sm:py-14 md:py-24 overflow-hidden ${getSectionProps('home_section_new_arrivals', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal delay={100} className="flex items-end justify-between mb-16 gap-8">
+              <ScrollReveal delay={100} className="flex items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <div className="space-y-4">
                   <span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-gray-500 tracking-[0.3em]">{c('new_arrivals_subtitle', t('NewArrivals.Subtitle'))}</span>
                   <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight">
@@ -1013,7 +1019,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 </Link>
               </ScrollReveal>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-6 md:gap-x-8 gap-y-6 sm:gap-y-10 md:gap-y-16">
                 {newBooks.map((book: any, idx: number) => (
                   <ScrollReveal key={book.id} delay={idx * 100} animation="animate-reveal-up">
                     <BookCard
@@ -1030,9 +1036,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_exchange':
         if (!featureExchange) return null
         return (
-          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-24 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50')} className={`py-8 sm:py-14 md:py-24 overflow-hidden ${getSectionProps('home_section_exchange', 'bg-gradient-to-br from-green-50 to-teal-50').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ScrollReveal className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
+              <ScrollReveal className="flex flex-col md:flex-row items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <div className="space-y-4 flex-1">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 rounded-full">
                     <RefreshCw className="w-4 h-4 text-green-600" />
@@ -1080,6 +1086,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                       </svg>
                       <span>Google</span>
+                    </Link>
+                    <Link href="/api/auth/facebook/login" className="inline-flex items-center gap-3 px-8 py-4 bg-[#1877F2] text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-[#166FE5] transition-all shadow-lg hover:-translate-y-1">
+                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.385H7.078v-3.542h3.047V9.372c0-3.017 1.792-4.684 4.533-4.684 1.312 0 2.686.235 2.686.235v2.966H15.83c-1.491 0-1.956.93-1.956 1.884v2.3h3.328l-.532 3.542h-2.796V24C19.612 23.094 24 18.1 24 12.073Z" />
+                      </svg>
+                      <span>{t('ExchangeBooks.LoginWithFacebook')}</span>
                     </Link>
                   </div>
                 </ScrollReveal>
@@ -1180,15 +1192,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_featured_blog':
         if (!featuredPosts || featuredPosts.length === 0) return null
         return (
-          <section key={key} {...getSectionProps('home_section_featured_blog', 'bg-pixio-cream')} className={`py-32 relative overflow-hidden ${getSectionProps('home_section_featured_blog', 'bg-pixio-cream').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_featured_blog', 'bg-pixio-cream')} className={`py-8 sm:py-16 md:py-32 relative overflow-hidden ${getSectionProps('home_section_featured_blog', 'bg-pixio-cream').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm"><Star className="w-4 h-4 text-amber-500" /><span className="text-xs md:text-sm font-black uppercase text-black tracking-[0.3em]">En Vedette</span></div>
                   <h2 className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-[0.9]">Articles <br /><span className="text-amber-600 italic">En Vedette</span></h2>
                 </ScrollReveal>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
                 {featuredPosts.map((post: any, idx: number) => (
                   <ScrollReveal key={post.id} delay={idx * 150} animation="animate-reveal-up">
                     <Link href={`/blog/${post.slug}`} className="group block h-full">
@@ -1239,9 +1251,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_featured_accessories':
         if (!featuredAccessories || featuredAccessories.length === 0) return null
         return (
-          <section key={key} {...getSectionProps('home_section_featured_accessories', 'bg-white')} className={`py-24 md:py-32 relative overflow-hidden ${getSectionProps('home_section_featured_accessories', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_featured_accessories', 'bg-white')} className={`py-8 sm:py-16 md:py-32 relative overflow-hidden ${getSectionProps('home_section_featured_accessories', 'bg-white').className || ''}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full shadow-sm"><Package className="w-4 h-4 text-amber-500" /><span className="text-xs md:text-sm font-black uppercase text-slate-700 tracking-[0.3em]">Accessoires</span></div>
                   <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]">Accessoires <br /><span className="text-amber-500 italic">En Vedette</span></h2>
@@ -1301,10 +1313,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       case 'home_section_blog':
         if (!recentPosts || recentPosts.length === 0) return null
         return (
-          <section key={key} {...getSectionProps('home_section_blog', 'bg-white')} className={`py-32 relative overflow-hidden ${getSectionProps('home_section_blog', 'bg-white').className || ''}`}>
+          <section key={key} {...getSectionProps('home_section_blog', 'bg-white')} className={`py-8 sm:py-16 md:py-32 relative overflow-hidden ${getSectionProps('home_section_blog', 'bg-white').className || ''}`}>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 text-[20vw] font-black text-gray-50 opacity-[0.03] select-none pointer-events-none whitespace-nowrap">JOURNAL RIWAYA</div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
+              <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-6 sm:mb-10 md:mb-16 gap-4 sm:gap-8">
                 <ScrollReveal className="space-y-4 max-w-xl text-left rtl:text-right">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-pixio-cream rounded-full"><FileText className="w-4 h-4 text-black" /><span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal rtl:text-sm rtl:tracking-normal font-black uppercase text-black tracking-[0.3em]">{c('journal_subtitle', t('Journal.Subtitle') || 'Notre Journal')}</span></div>
                   <h2 className="text-5xl md:text-7xl rtl:tracking-normal font-black text-black tracking-tighter leading-[0.9]">{c('journal_title_part1', t('Journal.TitlePart1') || 'Derniers Articles')}<br /><span className="text-gray-500 italic">{c('journal_title_part2', t('Journal.TitlePart2') || 'à Découvrir')}</span></h2>
@@ -1313,7 +1325,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <Link href="/blog" className="group flex items-center gap-4 bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1"><span className="text-xs rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest">{c('journal_view_all', t('Journal.ViewAll') || 'Tout Lire')}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" /></Link>
                 </ScrollReveal>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
                 {recentPosts.map((post: any, idx: number) => (
                   <ScrollReveal key={post.id} delay={idx * 150} animation="animate-reveal-up">
                     <Link href={`/blog/${post.slug}`} className="group block h-full">
@@ -1371,11 +1383,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {finalOrder.map(key => renderSection(key))}
 
         {/* CTA + AEO fusionnés */}
-        <section className="py-16 bg-black overflow-hidden relative">
+        <section className="py-8 sm:py-12 md:py-16 bg-black overflow-hidden relative">
           <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-beige/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
-          <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 flex flex-col items-center gap-10" dir="ltr">
+          <ScrollReveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 flex flex-col items-center gap-6 sm:gap-10" dir="ltr">
             <div>
-              <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">
+              <h2 className="text-4xl md:text-6xl font-black text-white mb-4 sm:mb-8 tracking-tighter">
                 {c('cta_title_part1', t('CTA.TitlePart1'))} <br />
                 <span className="text-gray-500 italic">{c('cta_title_part2', t('CTA.TitlePart2'))}</span>
               </h2>
