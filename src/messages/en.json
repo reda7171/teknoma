@@ -1,4 +1,27 @@
 {
+  "CartPromoPopup": {
+    "Badge": "-10% Off",
+    "Title": "Get an instant 10% discount on your cart!",
+    "Subtitle": "Enter your WhatsApp number or email to unlock your instant discount and receive private book deals.",
+    "PhoneLabel": "WhatsApp / Phone Number",
+    "PhonePlaceholder": "06 XX XX XX XX",
+    "EmailLabel": "Email (optional)",
+    "EmailPlaceholder": "your.email@example.com",
+    "SubmitButton": "Unlock my 10% off now",
+    "Submitting": "Activating...",
+    "Dismiss": "No thanks, continue without discount",
+    "SuccessTitle": "Congratulations! Your 10% off is active",
+    "SuccessSubtitle": "Your exclusive coupon code has been generated:",
+    "YourCode": "Your coupon code",
+    "CopyCode": "Copy code",
+    "Copied": "Code copied successfully!",
+    "ApplyToCart": "Apply 10% to cart",
+    "Applied": "10% discount applied!",
+    "ContinueShopping": "Continue shopping",
+    "SecurityNote": "Your details remain strictly confidential. Zero spam.",
+    "ErrorRequiredField": "Please provide your phone number or email.",
+    "GenericError": "An error occurred. Please try again."
+  },
   "PacksPage": {
     "Title": "Bundle Deals",
     "Subtitle": "Save up to 30% by choosing our curated book collections. Hand-picked literature for universal minds.",
@@ -480,7 +503,7 @@
     "Kids": "Kids",
     "UsbKey": "USB Key",
     "Journal": "Journal",
-    "Community": "Community",
+    "Community": "Book Exchange",
     "BoardGames": "Board Games",
     "JoinCommunity": "Join the community!",
     "LoginToEnjoy": "Log in to enjoy:",
@@ -518,7 +541,7 @@
     },
     "Menu": "Menu",
     "Quotes": "Quotes",
-    "BecomeSeller": "Become a seller",
+    "BecomeSeller": "Become a Reseller & Partner",
     "KidsWorld": "Kids World"
   },
   "Footer": {
@@ -1816,7 +1839,9 @@
     "GuaranteeText": "Satisfied or refunded within 7 days. Careful packaging and fast shipping within 24 business hours to all cities in Morocco (Casablanca, Rabat, Marrakech, Tangier, etc.).",
     "SelectionOfTheWeek": "Selection of the week",
     "ViewCatalog": "View the entire catalog",
-    "FAQ": "Frequently Asked Questions"
+    "FAQ": "Frequently Asked Questions",
+    "BreadcrumbHome": "Home",
+    "BreadcrumbCollections": "Collections"
   },
   "InstagramFeed": {
     "Badge": "Instagram",

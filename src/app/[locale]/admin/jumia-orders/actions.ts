@@ -124,14 +124,26 @@ async function enrichJumiaOrdersWithItems(jumia: any, rawOrders: any[]) {
 
 }
 
-export async function getJumiaOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string) {
+export async function getJumiaOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string, sortBy = 'createdAt', sortDirection = 'DESC') {
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
     
     try {
-        const response = await jumia.getOrders(size, token, status, createdAfter, createdBefore)
+        const response = await jumia.getOrders(size, token, status, createdAfter, createdBefore, sortBy, sortDirection)
+        const rawOrders = response?.orders || response?.data?.orders || []
+
+        // Tri systématique en ordre décroissant (plus récentes en premier)
+        rawOrders.sort((a: any, b: any) => {
+            const dateA = new Date(a.createdAt || a.CreatedAt || a.created_at || 0).getTime()
+            const dateB = new Date(b.createdAt || b.CreatedAt || b.created_at || 0).getTime()
+            if (dateA && dateB && dateA !== dateB) return dateB - dateA
+            const numA = Number(String(a.number || a.OrderId || a.OrderNumber || a.id || '').replace(/\D/g, '')) || 0
+            const numB = Number(String(b.number || b.OrderId || b.OrderNumber || b.id || '').replace(/\D/g, '')) || 0
+            return numB - numA
+        })
+
         return {
-            orders: await enrichJumiaOrdersWithItems(jumia, response?.orders || response?.data?.orders || []),
+            orders: await enrichJumiaOrdersWithItems(jumia, rawOrders),
             nextToken: response?.nextToken || response?.data?.nextToken || null
         }
     } catch (e: any) {

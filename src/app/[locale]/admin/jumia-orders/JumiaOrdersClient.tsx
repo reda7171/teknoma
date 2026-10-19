@@ -25,6 +25,7 @@ export default function JumiaOrdersClient() {
     const [statusFilter, setStatusFilter] = useState<string>('')
     const [searchTerm, setSearchTerm] = useState<string>('')
     const [productTitleFilter, setProductTitleFilter] = useState<string>('')
+    const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc')
     const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false)
     const [currentToken, setCurrentToken] = useState<string | null>(null)
     const [tokenHistory, setTokenHistory] = useState<string[]>([])
@@ -46,7 +47,7 @@ export default function JumiaOrdersClient() {
     
     const size = 50
 
-    const fetchOrders = async (status: string, token?: string | null, isNext: boolean = false) => {
+    const fetchOrders = async (status: string, token?: string | null, isNext: boolean = false, orderDir: 'desc' | 'asc' = sortOrder) => {
         setLoading(true)
         setErrorMsg(null)
         try {
@@ -59,7 +60,7 @@ export default function JumiaOrdersClient() {
             tomorrow.setDate(tomorrow.getDate() + 1)
             const createdBefore = tomorrow.toISOString().split('T')[0]
 
-            const response = await getJumiaOrders(size, token || undefined, status || undefined, createdAfter, createdBefore)
+            const response = await getJumiaOrders(size, token || undefined, status || undefined, createdAfter, createdBefore, 'createdAt', orderDir.toUpperCase())
             
             setOrders(response.orders)
             setCurrentToken(response.nextToken)
@@ -118,7 +119,7 @@ export default function JumiaOrdersClient() {
     }, [orders])
 
     const filteredOrders = React.useMemo(() => {
-        return orders.filter(order => {
+        const list = orders.filter(order => {
             const normSearch = normalizeForSearch(searchTerm)
             const normProduct = normalizeForSearch(productTitleFilter)
 
@@ -140,7 +141,21 @@ export default function JumiaOrdersClient() {
 
             return matchesSearch && matchesProduct
         })
-    }, [orders, searchTerm, productTitleFilter])
+
+        return list.sort((a: any, b: any) => {
+            const dateA = new Date(a.createdAt || a.CreatedAt || a.created_at || 0).getTime()
+            const dateB = new Date(b.createdAt || b.CreatedAt || b.created_at || 0).getTime()
+            let diff = 0
+            if (dateA && dateB && dateA !== dateB) {
+                diff = dateB - dateA
+            } else {
+                const numA = Number(String(a.number || a.OrderId || a.OrderNumber || a.id || '').replace(/\D/g, '')) || 0
+                const numB = Number(String(b.number || b.OrderId || b.OrderNumber || b.id || '').replace(/\D/g, '')) || 0
+                diff = numB - numA
+            }
+            return sortOrder === 'desc' ? diff : -diff
+        })
+    }, [orders, searchTerm, productTitleFilter, sortOrder])
 
     const handleCancelOrder = async (orderId: string) => {
         setConfirmAction(null)
@@ -491,6 +506,18 @@ export default function JumiaOrdersClient() {
                         <option value="RETURNED">Retournées (Historique)</option>
                         <option value="FAILED">Échouées (Historique)</option>
                     </select>
+                    <select aria-label="Ordre de tri"
+                        value={sortOrder}
+                        onChange={(e) => {
+                            const val = e.target.value as 'desc' | 'asc'
+                            setSortOrder(val)
+                            fetchOrders(statusFilter, currentToken, false, val)
+                        }}
+                        className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                        <option value="desc">Tri : Date DESC (Plus récent)</option>
+                        <option value="asc">Tri : Date ASC (Plus ancien)</option>
+                    </select>
                     <button 
                         onClick={() => fetchOrders(statusFilter, currentToken || undefined)}
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all"
@@ -677,7 +704,21 @@ export default function JumiaOrdersClient() {
                                 <thead>
                                     <tr className="border-b border-slate-100 bg-slate-50/50">
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">ID Jumia</th>
-                                        <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Date</th>
+                                        <th 
+            onClick={() => {
+                const nextSort = sortOrder === 'desc' ? 'asc' : 'desc'
+                setSortOrder(nextSort)
+                fetchOrders(statusFilter, currentToken, false, nextSort)
+            }}
+            className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-700 cursor-pointer hover:bg-slate-100/80 transition-colors select-none"
+            title="Cliquer pour basculer l'ordre (actuel: DESC)"
+        >
+            <div className="flex items-center gap-1.5">
+                <span>Date</span>
+                <span className="text-orange-500 font-black">{sortOrder === 'desc' ? '↓' : '↑'}</span>
+                <span className="text-[9px] text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">{sortOrder === 'desc' ? 'DESC' : 'ASC'}</span>
+            </div>
+        </th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Client</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Articles</th>
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Statut</th>

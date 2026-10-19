@@ -165,6 +165,23 @@ export default function CheckoutClient({
                 }
             }
         }
+        // Préremplissage automatique depuis le pop-up promo si le champ téléphone est vide
+        if (!getValues('phone')) {
+            try {
+                const promoPhone = localStorage.getItem('riwaya_user_phone')
+                if (promoPhone) {
+                    setValue('phone', promoPhone, { shouldValidate: true })
+                }
+            } catch {}
+        }
+        if (!getValues('email')) {
+            try {
+                const promoEmail = localStorage.getItem('riwaya_user_email')
+                if (promoEmail) {
+                    setValue('email', promoEmail, { shouldValidate: true })
+                }
+            } catch {}
+        }
         // Fetch active gifts with retry
         withExponentialRetry(() => getActiveGifts(), { maxRetries: 3 }).then(setGifts).catch(console.error)
         // Fetch cities from WithYou with retry

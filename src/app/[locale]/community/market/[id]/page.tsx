@@ -4,16 +4,19 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
-import { normalizeImage } from '@/lib/utils'
+import { getBaseUrl, normalizeImage } from '@/lib/utils'
 import { BookOpen, MapPin, Star, Calendar, RefreshCw, ArrowLeft, ShieldCheck, MessageCircle, Edit } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { parseImages } from '@/lib/utils/image'
 import BookGalleryClient from '@/components/community/BookGalleryClient'
+import ImageWithFallback from '@/components/ImageWithFallback'
 import { Metadata } from 'next'
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-    const { id } = await params
+export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }): Promise<Metadata> {
+    const { id, locale } = await params
     const book = await getExchangeBookDetails(id)
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/community/market/${id}`
     
     if (!book) {
         return {
@@ -21,23 +24,38 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         }
     }
 
+    const coverImg = book.image ? (book.image.startsWith('http') ? book.image.split(',')[0] : `${baseUrl}${book.image.split(',')[0]}`) : `${baseUrl}/og-image.jpg`
+
     return {
-        title: `${book.title} par ${book.author} | Riwaya Community`,
-        description: book.seoDescription || book.description || `Échangez ${book.title} de ${book.author} sur Riwaya Community.`,
-        keywords: book.seoKeywords || `${book.title}, ${book.author}, échange livre, Riwaya`,
+        title: `${book.title} par ${book.author} — Échange de livres | Riwaya Community`,
+        description: book.seoDescription || book.description || `Échangez ${book.title} de ${book.author} sur Riwaya Community au Maroc. Troc de livres direct entre lecteurs.`,
+        keywords: book.seoKeywords || `${book.title}, ${book.author}, échange livre, troc livre maroc, Riwaya`,
         openGraph: {
-            title: `${book.title} | Échange de livres`,
+            title: `${book.title} | Échange de livres Maroc`,
             description: book.seoDescription || book.description || `Découvrez et échangez ${book.title} sur la communauté Riwaya.`,
-            images: book.image ? [{ url: book.image.split(',')[0] }] : [],
+            url: pageUrl,
+            images: [{ url: coverImg }],
+        },
+        alternates: {
+            canonical: pageUrl,
+            languages: {
+                'fr': `${baseUrl}/fr/community/market/${id}`,
+                'ar': `${baseUrl}/ar/community/market/${id}`,
+                'en': `${baseUrl}/en/community/market/${id}`,
+                'x-default': `${baseUrl}/fr/community/market/${id}`,
+            }
         }
     }
 }
+
 export default async function CommunityBookDetailPage({
     params
 }: {
-    params: Promise<{ id: string }>
+    params: Promise<{ id: string; locale: string }>
 }) {
-    const { id } = await params
+    const { id, locale } = await params
+    const baseUrl = getBaseUrl()
+    const pageUrl = `${baseUrl}/${locale}/community/market/${id}`
     const book = await getExchangeBookDetails(id)
     const t = await getTranslations('Community')
     const tc = await getTranslations('Community.Market')
@@ -53,8 +71,33 @@ export default async function CommunityBookDetailPage({
     
     const parsedImages = parseImages(book.image)
 
+    const bookSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Book',
+        name: book.title,
+        author: {
+            '@type': 'Person',
+            name: book.author
+        },
+        description: book.description || book.title,
+        image: book.image ? (book.image.startsWith('http') ? book.image.split(',')[0] : `${baseUrl}${book.image.split(',')[0]}`) : undefined,
+        offers: {
+            '@type': 'Offer',
+            price: 0,
+            priceCurrency: 'MAD',
+            availability: 'https://schema.org/InStock',
+            itemCondition: book.condition === 'NEW' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
+            description: 'Livre disponible pour troc et échange entre lecteurs au Maroc'
+        }
+    }
+
     return (
         <div className="min-h-screen bg-pixio-cream flex flex-col">
+            <link rel="canonical" href={pageUrl} />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(bookSchema) }}
+            />
             <Header />
 
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">

@@ -204,12 +204,12 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                             </li>
                             {features.exchange === true && (
                                 <li suppressHydrationWarning>
-                                    <Link href="/community/market" title="Échanger vos livres avec la communauté" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Community')}</Link>
+                                    <Link href="/community/market" title="Échanger vos livres entre lecteurs au Maroc" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Community')}</Link>
                                 </li>
                             )}
                             {features.seller === true && (
                                 <li suppressHydrationWarning>
-                                    <Link href="/devenir-vendeur" title="Créer une boutique et commencer à vendre vos livres !" className="text-pixio-yellow hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
+                                    <Link href="/devenir-vendeur" title="Devenir revendeur et partenaire de livres au Maroc" className="text-pixio-yellow hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-black tracking-tight inline-flex items-center gap-2 group" suppressHydrationWarning>
                                         {tNav('BecomeSeller')}
                                     </Link>
                                 </li>
