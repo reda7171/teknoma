@@ -86,12 +86,11 @@ export async function generateMetadata({
             description: ogDescription,
             images: [
                 {
-                    url: dynamicOgImageUrl,
-                    width: 1200,
-                    height: 630,
-                    alt: `${displayName} - ${displayPrice} DH`,
+                    url: imageUrl || `${baseUrl}/og-image.jpg`,
+                    width: 800,
+                    height: 800,
+                    alt: displayName,
                 },
-                ...(imageUrl ? [{ url: imageUrl, width: 800, height: 800, alt: displayName }] : []),
             ],
             type: 'website',
             locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA',
@@ -101,7 +100,7 @@ export async function generateMetadata({
             card: 'summary_large_image',
             title: ogTitle,
             description: ogDescription,
-            images: [dynamicOgImageUrl],
+            images: [imageUrl || `${baseUrl}/og-image.jpg`],
         },
         other: {
             'product:price:amount': `${displayPrice}`,
@@ -200,49 +199,59 @@ export default async function PackDetailPage({
                 }
             ],
             offers: {
-                '@type': 'Offer',
+                '@type': 'AggregateOffer',
                 priceCurrency: 'MAD',
-                price: displayPrice,
-                validFrom: new Date(pack.createdAt).toISOString().split('T')[0],
+                lowPrice: displayPrice,
+                highPrice: totalOriginalPrice > displayPrice ? totalOriginalPrice : displayPrice,
+                offerCount: pack.books.length,
                 priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                itemCondition: 'https://schema.org/NewCondition',
-                availability: 'https://schema.org/InStock',
-                url: `${baseUrl}/${locale}/packs/${pack.id}`,
-                hasMerchantReturnPolicy: {
-                    '@type': 'MerchantReturnPolicy',
-                    applicableCountry: 'MA',
-                    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                    merchantReturnDays: 3,
-                    returnMethod: 'https://schema.org/ReturnByMail',
-                    returnFees: 'https://schema.org/FreeReturn'
-                },
-                shippingDetails: {
-                    '@type': 'OfferShippingDetails',
-                    shippingRate: {
-                        '@type': 'MonetaryAmount',
-                        value: 35,
-                        currency: 'MAD'
-                    },
-                    shippingDestination: {
-                        '@type': 'DefinedRegion',
-                        addressCountry: 'MA'
-                    },
-                    deliveryTime: {
-                        '@type': 'ShippingDeliveryTime',
-                        handlingTime: {
-                            '@type': 'QuantitativeValue',
-                            minValue: 0,
-                            maxValue: 1,
-                            unitCode: 'DAY'
+                offers: [
+                    {
+                        '@type': 'Offer',
+                        priceCurrency: 'MAD',
+                        price: displayPrice,
+                        validFrom: new Date(pack.createdAt).toISOString().split('T')[0],
+                        priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        itemCondition: 'https://schema.org/NewCondition',
+                        availability: 'https://schema.org/InStock',
+                        url: `${baseUrl}/${locale}/packs/${pack.id}`,
+                        hasMerchantReturnPolicy: {
+                            '@type': 'MerchantReturnPolicy',
+                            applicableCountry: 'MA',
+                            returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                            merchantReturnDays: 3,
+                            returnMethod: 'https://schema.org/ReturnByMail',
+                            returnFees: 'https://schema.org/FreeReturn'
                         },
-                        transitTime: {
-                            '@type': 'QuantitativeValue',
-                            minValue: 1,
-                            maxValue: 3,
-                            unitCode: 'DAY'
+                        shippingDetails: {
+                            '@type': 'OfferShippingDetails',
+                            shippingRate: {
+                                '@type': 'MonetaryAmount',
+                                value: 35,
+                                currency: 'MAD'
+                            },
+                            shippingDestination: {
+                                '@type': 'DefinedRegion',
+                                addressCountry: 'MA'
+                            },
+                            deliveryTime: {
+                                '@type': 'ShippingDeliveryTime',
+                                handlingTime: {
+                                    '@type': 'QuantitativeValue',
+                                    minValue: 0,
+                                    maxValue: 1,
+                                    unitCode: 'DAY'
+                                },
+                                transitTime: {
+                                    '@type': 'QuantitativeValue',
+                                    minValue: 1,
+                                    maxValue: 3,
+                                    unitCode: 'DAY'
+                                }
+                            }
                         }
                     }
-                }
+                ]
             },
             isRelatedTo: pack.books.map((pb) => ({
                 '@type': 'Thing',
@@ -349,9 +358,9 @@ export default async function PackDetailPage({
 
                 <Header />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-40 md:pb-32">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 md:py-12 pb-24 sm:pb-32 md:pb-32">
                     {/* Breadcrumb */}
-                    <div className="flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-700 mb-12">
+                    <div className="flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-700 mb-6 sm:mb-8 md:mb-12">
                         <Link href="/" className="hover:text-black transition-colors">{tNav('Home')}</Link>
                         <span className="text-gray-400">/</span>
                         <Link href="/packs" className="hover:text-black transition-colors">{tNav('Packs')}</Link>
@@ -359,7 +368,7 @@ export default async function PackDetailPage({
                         <span className="text-black">{displayName}</span>
                     </div>
 
-                    <div className="flex justify-between items-center mb-12">
+                    <div className="flex justify-between items-center mb-6 sm:mb-8 md:mb-12">
                         <Link
                             href="/packs"
                             className="inline-flex items-center gap-4 text-[10px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-700 hover:text-black group transition-colors"
@@ -380,21 +389,21 @@ export default async function PackDetailPage({
                     </div>
 
                     {/* Hero Pack */}
-                    <div className="bg-white rounded-[3rem] overflow-hidden shadow-2xl shadow-black/5 border border-gray-100 mb-32">
+                    <div className="bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl shadow-black/5 border border-gray-100 mb-12 sm:mb-20 md:mb-32">
                         <div className="grid grid-cols-1 lg:grid-cols-2">
                             {/* Image Section */}
-                            <div className="bg-pixio-beige p-12 flex items-center justify-center relative min-h-[500px]">
-                                <div className="absolute top-10 right-10 z-10">
+                            <div className="bg-pixio-beige p-6 sm:p-8 md:p-12 flex items-center justify-center relative min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
+                                <div className="absolute top-6 sm:top-10 right-6 sm:right-10 z-10">
                                     {hasDiscount && (
-                                        <div className="bg-black text-white px-8 py-8 rounded-[2rem] shadow-2xl transform rotate-6 flex flex-col items-center justify-center">
+                                        <div className="bg-black text-white px-5 sm:px-8 py-5 sm:py-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl transform rotate-6 flex flex-col items-center justify-center">
                                             <p className="text-[10px] font-black uppercase tracking-widest mb-1">{tPacks('Save')}</p>
-                                            <p className="text-4xl font-black leading-none tracking-tighter">{savingsPercent}%</p>
+                                            <p className="text-2xl sm:text-4xl font-black leading-none tracking-tighter">{savingsPercent}%</p>
                                         </div>
                                     )}
                                 </div>
 
                                 {pack.image ? (
-                                    <div className="relative w-full h-full min-h-[400px] group">
+                                    <div className="relative w-full h-full min-h-[260px] sm:min-h-[400px] group">
                                         <ImageWithFallback
                                             src={pack.image}
                                             alt={displayName}
@@ -402,9 +411,9 @@ export default async function PackDetailPage({
                                         />
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-2 gap-6 w-full max-w-md">
+                                    <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-md">
                                         {pack.books.slice(0, 4).map((pb, i) => (
-                                            <div key={pb.book.id} className={`relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-105 transform ${i % 2 === 0 ? '-rotate-3 mt-6' : 'rotate-3 mb-6'}`}>
+                                             <div key={pb.book.id} className={`relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-105 transform ${i % 2 === 0 ? '-rotate-3 mt-4 sm:mt-6' : 'rotate-3 mb-4 sm:mb-6'}`}>
                                                 <ImageWithFallback
                                                     src={pb.book.image}
                                                     alt={getLocalizedTitle(pb.book, locale)}
@@ -417,13 +426,13 @@ export default async function PackDetailPage({
                             </div>
 
                             {/* Content Section */}
-                            <div className="p-12 lg:p-20 flex flex-col justify-center">
-                                <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-black text-white rounded-full text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal mb-10 w-fit">
+                            <div className="p-6 sm:p-10 lg:p-20 flex flex-col justify-center">
+                                <div className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-[10px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal mb-6 sm:mb-10 w-fit">
                                     <Package className="w-4 h-4" />
                                     {t('VolumeSelection', { count: pack.books.length })}
                                 </div>
 
-                                <h1 className="text-5xl md:text-7xl font-black text-black leading-none tracking-tighter mb-10">
+                                <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-black leading-none tracking-tighter mb-6 sm:mb-10">
                                     {displayName}<span className="text-gray-200">.</span>
                                 </h1>
 
@@ -455,16 +464,16 @@ export default async function PackDetailPage({
 
                     {/* Books Details */}
                     <section>
-                        <div className="flex items-center justify-between mb-20 px-4">
-                            <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center text-4xl font-black tracking-tighter">
+                        <div className="flex items-center justify-between mb-8 sm:mb-14 md:mb-20 px-2 sm:px-4">
+                            <div className="flex items-center gap-4 sm:gap-6">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black text-white rounded-[1rem] sm:rounded-[1.5rem] flex items-center justify-center text-2xl sm:text-4xl font-black tracking-tighter">
                                     {pack.books.length}
                                 </div>
-                                <h2 className="text-4xl font-black text-black tracking-tighter leading-none">{t('VolumesInCollection')}<span className="text-gray-200">.</span></h2>
+                                <h2 className="text-2xl sm:text-4xl font-black text-black tracking-tighter leading-none">{t('VolumesInCollection')}<span className="text-gray-200">.</span></h2>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8 lg:gap-12">
                             {pack.books.map((pb) => (
                                 <BookCard key={pb.book.id} {...pb.book} />
                             ))}
@@ -473,9 +482,9 @@ export default async function PackDetailPage({
 
                     {/* Testimonials Section (Audio & Images) */}
                     {(audioTestimonials.length > 0 || imageTestimonials.length > 0) && (
-                        <section className="py-8 md:py-16 border-t border-gray-100 mt-20">
-                            <div className="flex flex-col items-center text-center mb-12 space-y-4">
-                                <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
+                        <section className="py-6 sm:py-8 md:py-16 border-t border-gray-100 mt-8 sm:mt-14 md:mt-20">
+                            <div className="flex flex-col items-center text-center mb-3 sm:mb-6 md:mb-12 space-y-2 sm:space-y-4">
+                                <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-black tracking-tight">
                                     {locale === 'ar' ? 'تجارب عملائنا' : locale === 'en' ? 'Testimonials' : 'Témoignages'}<span className="text-emerald-500">.</span>
                                 </h2>
                             </div>
@@ -485,20 +494,20 @@ export default async function PackDetailPage({
 
                     {/* FAQ Section */}
                     {faqSchema.mainEntity.length > 0 && (
-                        <section className="py-8 md:py-16 border-t border-gray-100 mt-20">
-                            <div className="flex flex-col md:flex-row gap-16">
+                        <section className="py-6 sm:py-8 md:py-16 border-t border-gray-100 mt-8 sm:mt-14 md:mt-20">
+                            <div className="flex flex-col md:flex-row gap-6 sm:gap-10 md:gap-16">
                                 <div className="md:w-1/3">
-                                    <h2 className="text-4xl font-black text-black tracking-tighter mb-4">
+                                    <h2 className="text-2xl sm:text-4xl font-black text-black tracking-tighter mb-2 sm:mb-4">
                                         {locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}<span className="text-blue-500">.</span>
                                     </h2>
                                     <p className="text-sm font-bold text-gray-400">
                                         {locale === 'ar' ? 'كل ما تحتاج معرفته عن هذه الباقة.' : locale === 'en' ? 'Everything you need to know about this pack.' : 'Tout ce que vous devez savoir sur ce pack.'}
                                     </p>
                                 </div>
-                                <div className="md:w-2/3 space-y-6">
+                                <div className="md:w-2/3 space-y-4 sm:space-y-6">
                                     {faqSchema.mainEntity.map((faq, index) => (
-                                        <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 hover:shadow-md transition-shadow">
-                                            <h3 className="text-xl font-black text-black mb-4">{faq.name}</h3>
+                                        <div key={index} className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-gray-50 hover:shadow-md transition-shadow">
+                                            <h3 className="text-lg sm:text-xl font-black text-black mb-2 sm:mb-4">{faq.name}</h3>
                                             <p className="text-sm font-medium text-gray-500 leading-relaxed">{faq.acceptedAnswer.text}</p>
                                         </div>
                                     ))}

@@ -76,9 +76,9 @@ export default async function SeoCategoriesSection({ locale }: { locale: string 
   }
 
   return (
-    <section className="py-16 bg-white overflow-hidden">
+    <section className="py-8 sm:py-12 md:py-16 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-black text-center mb-12 text-gray-900">
+        <h2 className="text-3xl md:text-4xl font-black text-center mb-6 sm:mb-10 md:mb-12 text-gray-900">
           {texts.title}
         </h2>
 

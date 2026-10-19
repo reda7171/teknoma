@@ -6,7 +6,12 @@ import { useUIStore } from '@/store/ui'
 
 import { useLocale } from 'next-intl'
 
-export default function ReserveBookButton({ bookId }: { bookId: string }) {
+interface ReserveBookButtonProps {
+    bookId: string
+    variant?: 'default' | 'card'
+}
+
+export default function ReserveBookButton({ bookId, variant = 'default' }: ReserveBookButtonProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [whatsapp, setWhatsapp] = useState('')
     const [loading, setLoading] = useState(false)
@@ -63,7 +68,11 @@ export default function ReserveBookButton({ bookId }: { bookId: string }) {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-4 mt-4 bg-black text-white text-xs font-black uppercase tracking-widest rounded-full hover:bg-gray-800 transition-colors shadow-2xl hover:shadow-black/20"
+                className={`relative z-10 w-full flex items-center justify-center gap-2 bg-black text-white font-black uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-2xl hover:shadow-black/20 ${
+                    variant === 'card'
+                        ? 'min-h-[52px] px-4 py-3 text-[11px] rtl:text-sm rtl:tracking-normal rounded-2xl'
+                        : 'py-4 mt-4 text-xs rounded-full'
+                }`}
             >
                 <Bell className="w-4 h-4" />
                 {t.reserve}

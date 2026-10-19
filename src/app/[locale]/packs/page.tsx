@@ -79,7 +79,7 @@ export async function PacksContent({
             <Header />
 
             {/* Page Header */}
-            <div className="bg-pixio-beige py-12 md:py-20">
+            <div className="bg-pixio-beige py-6 sm:py-12 md:py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-black">
                     {/* Breadcrumbs */}
                     <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-[10px] md:text-sm font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-gray-700 mb-6 md:mb-8">
@@ -96,7 +96,7 @@ export async function PacksContent({
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14 md:py-20 pb-16 sm:pb-24 md:pb-32">
                 <PacksListClient
                     packs={packs}
                     availableBooks={availableBooks}

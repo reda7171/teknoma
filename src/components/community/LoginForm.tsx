@@ -49,6 +49,10 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
     return (
         <div className="w-full max-w-md">
             <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-black/5 border border-gray-100">
+                <div className="mb-8">
+                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
+                </div>
+
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
                         <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
@@ -96,10 +100,6 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
                         {!loading && <ArrowRight className="w-4 h-4 rtl:rotate-180" />}
                     </button>
                 </form>
-
-                <div className="mt-8">
-                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
-                </div>
 
                 <div className="mt-8 text-center">
                     <p className="text-xs rtl:text-sm font-bold text-gray-400">

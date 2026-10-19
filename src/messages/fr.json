@@ -8,7 +8,7 @@
     "Headline": "Ta place est-elle dans ce classement ?",
     "Body": "Chaque livre lu te rapproche du sommet. Des centaines de lecteurs se battent chaque jour pour leur rang — où en es-tu ?",
     "CTA": "Rejoindre la course",
-    "Sub": "Connexion gratuite via Google",
+    "Sub": "Connexion gratuite via Google ou Facebook",
     "Pages": "pages",
     "Hours": "h",
     "Challenge": "Challenge",
@@ -387,7 +387,8 @@
       "ViewAll": "Tout voir",
       "ViewMore": "Voir Plus de Livres",
       "NoData": "Aucun livre d'échange disponible pour le moment",
-      "JoinCommunity": "Rejoindre la Communauté"
+      "JoinCommunity": "Rejoindre la Communauté",
+      "LoginWithFacebook": "Se connecter avec Facebook"
     },
     "MobileApp": {
       "ComingSoon": "Bientôt disponible",
@@ -702,6 +703,7 @@
     "EmptyTitle": "Votre panier est vide.",
     "EmptyDesc": "Il semble que vous n'ayez pas encore découvert <br /> nos trésors.",
     "DiscoverBooks": "Découvrir les livres",
+    "CloseCart": "Fermer le panier",
     "Set": "PACK",
     "Titles": "Titres",
     "ClearSelection": "Vider la sélection",
@@ -783,7 +785,10 @@
     "GenericError": "Une erreur est survenue",
     "AccountHolder": "Titulaire",
     "RibIban": "RIB / IBAN",
-    "FullName": "Nom complet"
+    "FullName": "Nom complet",
+    "BankInfoModalTitle": "Informations Bancaires",
+    "ScanToPay": "Scanner pour payer",
+    "Close": "Fermer"
   },
   "Review": {
     "SuccessTitle": "Merci pour votre avis !",
@@ -996,6 +1001,12 @@
     "TopReaders": "Top Lecteurs",
     "TopReadersTitle": "Les Plus Grands Lecteurs",
     "TopReadersSubtitle": "Membres ayant lu le plus de livres cette semaine",
+    "Recommendations": {
+      "Title": "Suggestions de lecture pour vous",
+      "Badge": "Sélection par IA",
+      "Description": "Ces livres sont suggérés d'après les auteurs présents dans votre liste d'envies. Ils donnent de nouvelles idées de lecture ; leur disponibilité dans notre catalogue n'est pas garantie.",
+      "Why": "Pourquoi ce choix ?"
+    },
     "Dashboard": {
       "RestrictedAccess": "Accès restreint aux échanges",
       "EligibilityDesc": "Vous devez avoir effectué au moins une commande sur notre boutique pour pouvoir ajouter des livres ou faire des demandes d'échange dans la communauté.",
@@ -1510,7 +1521,9 @@
     "TableOfContents": "Sommaire",
     "Blog": "Blog",
     "PublishedArticles": "Articles publiés",
-    "ViewAllArticles": "Voir tous ses articles"
+    "ViewAllArticles": "Voir tous ses articles",
+    "AdTopArticle": "Haut de l'article",
+    "AdBottomArticle": "Bas de l'article"
   },
   "BlogComments": {
     "CommentsTitle": "Commentaires",

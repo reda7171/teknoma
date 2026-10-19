@@ -182,12 +182,15 @@ Réponds UNIQUEMENT au format JSON strict avec la structure suivante, sans texte
   }
 }
 
-export async function generateRecommendations(authors: string[]) {
+export async function generateRecommendations(authors: string[], locale: string = 'fr') {
   try {
     if (!authors || authors.length === 0) return null;
     const authorsList = authors.join(', ');
+    const language = locale === 'ar' ? 'arabe' : locale === 'en' ? 'anglais' : 'français';
     const prompt = `Le lecteur s'intéresse à ces auteurs: ${authorsList}.
 Suggère-lui 4 livres passionnants qui pourraient lui plaire (soit des mêmes auteurs, soit d'auteurs similaires).
+
+Rédige tous les titres, noms d'auteurs et explications en ${language}. Pour les titres traduits, utilise le titre le plus connu dans cette langue et conserve le titre original entre parenthèses si cela aide à identifier le livre.
 
 Réponds UNIQUEMENT au format JSON strict (sans \`\`\`json) sous forme d'un tableau d'objets avec cette structure exacte :
 [

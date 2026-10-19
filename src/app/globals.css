@@ -137,6 +137,17 @@ body {
   overflow-x: clip;
 }
 
+/*
+ * Le footer est le dernier bloc visuel des pages publiques. Sur Safari/Chrome
+ * mobile, la zone située après le contenu peut révéler le fond blanc du
+ * document (notamment avec la barre de navigation fixe). Utiliser le même
+ * fond que le footer évite cette bande sans affecter l'admin ou le checkout.
+ */
+html:has(#main-footer),
+body:has(#main-footer) {
+  background-color: #000;
+}
+
 .font-tajawal {
   font-family: var(--font-tajawal), system-ui, sans-serif;
 }

@@ -75,7 +75,16 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
         }
     }
 
-    if (!mounted || isCartOpen || pathname?.includes('/checkout') || pathname?.includes('/cart')) {
+    const isProductPage = Boolean(
+        pathname && (
+            pathname.startsWith('/books/') ||
+            pathname.startsWith('/jeux-societe/') ||
+            pathname.startsWith('/mon-enfant/') ||
+            pathname.startsWith('/fourniture-bureau/')
+        )
+    )
+
+    if (!mounted || isCartOpen || isMobileMenuOpen || pathname?.includes('/checkout') || pathname?.includes('/cart') || isProductPage) {
         return null
     }
 
@@ -83,14 +92,14 @@ export default function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
         <>
             <nav
                 aria-label="Navigation principale"
-                className="md:hidden fixed bottom-4 left-4 right-4 z-[160] rounded-3xl"
+                className="md:hidden fixed bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 z-[160] rounded-2xl sm:rounded-3xl"
                 style={{
                     background: 'rgba(255,255,255,0.92)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
                     border: '1px solid rgba(0,0,0,0.07)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    paddingBottom: 'env(safe-area-inset-bottom)',
+                    
                 }}
             >
                 <div className="flex items-center justify-around px-1 py-1">

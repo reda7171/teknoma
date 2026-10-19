@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { generateBookUrl } from '@/lib/i18n-utils'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 
+export const revalidate = 3600
+
 const locales = ['fr', 'ar', 'en']
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://riwaya.store'
 
@@ -37,18 +39,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }))
     )
 
-    // 2. Livres dynamiques
+    // 2. Livres dynamiques actifs (triés du plus récent au plus ancien)
     let bookUrls: any[] = []
     try {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
         const books = await prisma.book.findMany({
-            select: { id: true, title: true, titleFr: true, titleEn: true, updatedAt: true }
+            where: { active: true },
+            select: { id: true, title: true, titleFr: true, titleEn: true, updatedAt: true },
+            orderBy: { updatedAt: 'desc' }
         })
         bookUrls = locales.flatMap((locale) =>
             books.map((book) => ({
                 url: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,
                 lastModified: book.updatedAt,
-                changeFrequency: 'weekly' as const,
-                priority: 0.7,
+                changeFrequency: book.updatedAt > thirtyDaysAgo ? ('daily' as const) : ('weekly' as const),
+                priority: book.updatedAt > thirtyDaysAgo ? 0.85 : 0.75,
             }))
         )
     } catch (e) {
@@ -60,31 +65,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const posts = await prisma.post.findMany({
             where: { published: true },
-            select: { slug: true, updatedAt: true }
+            select: { slug: true, updatedAt: true },
+            orderBy: { updatedAt: 'desc' }
         })
         postUrls = locales.flatMap((locale) =>
             posts.map((post) => ({
                 url: `${baseUrl}/${locale}/blog/${post.slug}`,
                 lastModified: post.updatedAt,
                 changeFrequency: 'weekly' as const,
-                priority: 0.6,
+                priority: 0.7,
             }))
         )
     } catch (e) {
         console.warn('⚠️ Sitemaps: Could not fetch posts during build')
     }
 
-    // 4. Packs dynamiques
+    // 4. Packs dynamiques actifs
     let packUrls: any[] = []
     try {
         const packs = await prisma.pack.findMany({
             where: { active: true },
-            select: { id: true }
+            select: { id: true, updatedAt: true },
+            orderBy: { updatedAt: 'desc' }
         })
         packUrls = locales.flatMap((locale) =>
             packs.map((pack) => ({
                 url: `${baseUrl}/${locale}/packs/${pack.id}`,
-                lastModified: new Date(),
+                lastModified: pack.updatedAt,
                 changeFrequency: 'daily' as const,
                 priority: 0.9,
             }))
@@ -93,20 +100,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('⚠️ Sitemaps: Could not fetch packs during build')
     }
 
-    // 5. Auteurs dynamiques (récupérés depuis les livres)
+    // 5. Auteurs dynamiques (récupérés depuis les livres actifs)
     let authorUrls: any[] = []
     try {
         const authors = await prisma.book.findMany({
             where: { active: true },
-            select: { author: true },
-            distinct: ['author']
+            select: { author: true, updatedAt: true },
+            orderBy: { updatedAt: 'desc' }
         })
+        const authorMap = new Map<string, Date>()
+        for (const a of authors) {
+            if (a.author && !authorMap.has(a.author)) {
+                authorMap.set(a.author, a.updatedAt)
+            }
+        }
         authorUrls = locales.flatMap((locale) =>
-            authors.filter(a => a.author).map((a) => ({
-                url: `${baseUrl}/${locale}/authors/${encodeURIComponent(a.author)}`,
-                lastModified: new Date(),
+            Array.from(authorMap.entries()).map(([authorName, updatedAt]) => ({
+                url: `${baseUrl}/${locale}/authors/${encodeURIComponent(authorName)}`,
+                lastModified: updatedAt,
                 changeFrequency: 'weekly' as const,
-                priority: 0.6,
+                priority: 0.7,
             }))
         )
     } catch (e) {
@@ -118,7 +131,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const seoPages = await prisma.seoCategory.findMany({
             where: { isActive: true },
-            select: { slug: true, updatedAt: true }
+            select: { slug: true, updatedAt: true },
+            orderBy: { updatedAt: 'desc' }
         })
         seoUrls = locales.flatMap((locale) =>
             seoPages.map((page) => ({

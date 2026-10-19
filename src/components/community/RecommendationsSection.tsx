@@ -2,26 +2,33 @@
 
 import { AIRecommendation } from '@/lib/actions/community-recommendations'
 import { Sparkles, BookOpen } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface RecommendationsSectionProps {
     recommendations: AIRecommendation[]
 }
 
 export default function RecommendationsSection({ recommendations }: RecommendationsSectionProps) {
+    const t = useTranslations('Community.Recommendations')
     if (!recommendations || recommendations.length === 0) return null;
 
     return (
         <section className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-2 rounded-xl shadow-lg shadow-purple-500/20">
-                    <Sparkles className="w-6 h-6 text-white" />
+            <div className="flex flex-col items-center md:items-start text-center md:text-start mb-6">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+                    <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-2 rounded-xl shadow-lg shadow-purple-500/20">
+                        <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black text-black uppercase tracking-tight">
+                        {t('Title')}
+                    </h2>
+                    <span className="bg-gradient-to-r from-purple-500 to-indigo-600 text-transparent bg-clip-text text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-purple-50 rounded-full border border-purple-100">
+                        {t('Badge')}
+                    </span>
                 </div>
-                <h2 className="text-2xl font-black text-black uppercase tracking-tight">
-                    Recommandé pour vous
-                </h2>
-                <span className="bg-gradient-to-r from-purple-500 to-indigo-600 text-transparent bg-clip-text text-[10px] font-black uppercase tracking-widest ml-2 px-3 py-1 bg-purple-50 rounded-full border border-purple-100">
-                    Propulsé par l'IA
-                </span>
+                <p className="max-w-3xl text-sm text-gray-600 font-medium leading-relaxed">
+                    {t('Description')}
+                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -43,8 +50,9 @@ export default function RecommendationsSection({ recommendations }: Recommendati
                             
                             <div className="mt-auto">
                                 <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-4"></div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-2">{t('Why')}</p>
                                 <p className="text-sm text-gray-600 leading-relaxed italic">
-                                    "{rec.reason}"
+                                    {rec.reason}
                                 </p>
                             </div>
                         </div>

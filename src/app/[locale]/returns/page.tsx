@@ -10,19 +10,19 @@ export default async function ReturnsPage() {
         <div className="min-h-screen bg-pixio-cream">
             <Header />
 
-            <div className="pt-24 pb-12 bg-pixio-beige relative overflow-hidden">
+            <div className="pt-10 sm:pt-16 md:pt-24 pb-6 sm:pb-12 bg-pixio-beige relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-96 h-96 bg-pixio-pink/10 rounded-full blur-3xl -translate-x-1/2"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 mb-8">
+                    <div className="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-xs font-black uppercase tracking-widest shadow-sm border border-gray-100 mb-4 sm:mb-8">
                         <ShieldCheck className="w-4 h-4 text-pixio-pink" />
                         <span>{t('Subtitle')}</span>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-black tracking-tighter mb-6">{t('Title')}</h1>
-                    <p className="text-gray-500 max-w-2xl mx-auto text-lg font-medium">{t('Intro')}</p>
+                    <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-black tracking-tighter mb-4 sm:mb-6">{t('Title')}</h1>
+                    <p className="text-gray-500 max-w-2xl mx-auto text-base sm:text-lg font-medium">{t('Intro')}</p>
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14 md:py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative group overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">

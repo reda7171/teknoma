@@ -17,7 +17,8 @@ import RegistrationTracker from '@/components/community/RegistrationTracker'
 import CityLocalizer from '@/components/community/CityLocalizer'
 import WelcomeOfferPopup from '@/components/community/WelcomeOfferPopup'
 
-export default async function CommunityDashboard() {
+export default async function CommunityDashboard({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params
     const user = await getCommunityUser()
 
     if (!user) {
@@ -31,7 +32,7 @@ export default async function CommunityDashboard() {
         getTopReaders(5),
         getUserExchangeCount(user.id),
         isFeatureEnabled('exchange'),
-        getUserRecommendations()
+        getUserRecommendations(locale)
     ])
 
 

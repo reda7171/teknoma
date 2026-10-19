@@ -57,7 +57,7 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
             <CustomPackBuilder availableBooks={availableBooks} initialOpen={openCustomBuilder} />
 
             {/* Filter */}
-            <div className="flex justify-end mb-10">
+            <div className="flex justify-end mb-4 sm:mb-8 md:mb-10">
                 <button
                     onClick={() => setFilterAvailable(!filterAvailable)}
                     className={`flex items-center gap-3 px-6 py-4 rounded-full font-black text-sm md:text-base uppercase tracking-widest transition-all whitespace-nowrap shadow-xl ${
@@ -72,8 +72,8 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
             </div>
 
             {/* Benefits Banner */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-14 md:mb-20">
+                <div className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
                     <div className="w-16 h-16 bg-pixio-beige rounded-full flex items-center justify-center shrink-0">
                         <span className="text-2xl font-black text-black tracking-tighter">%</span>
                     </div>
@@ -82,7 +82,7 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
                         <p className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest leading-loose">{t('Benefits.HighSavings.Desc')}</p>
                     </div>
                 </div>
-                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
+                <div className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
                     <div className="w-16 h-16 bg-pixio-pink rounded-full flex items-center justify-center shrink-0">
                         <Sparkles className="w-8 h-8 text-black" />
                     </div>
@@ -91,7 +91,7 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
                         <p className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest leading-loose">{t('Benefits.CuratedMix.Desc')}</p>
                     </div>
                 </div>
-                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
+                <div className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center text-center gap-6 group hover:-translate-y-2 transition-transform">
                     <div className="w-16 h-16 bg-pixio-yellow rounded-full flex items-center justify-center shrink-0">
                         <Package className="w-8 h-8 text-black" />
                     </div>
@@ -103,7 +103,7 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
                 {displayedPacks.length > 0 ? (
                     displayedPacks.map((pack, idx) => (
                         <PackCard
@@ -129,7 +129,7 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
 
             {/* Pagination / Load More */}
             {filteredPacks.length > visibleCount && (
-                <div className="flex flex-col items-center justify-center mt-16 gap-3">
+                <div className="flex flex-col items-center justify-center mt-8 sm:mt-16 gap-3">
                     <button
                         onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_PAGE)}
                         className="flex items-center gap-3 px-8 py-4 rounded-full font-black text-sm md:text-base uppercase tracking-widest bg-black text-white hover:bg-gray-800 transition-all shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"

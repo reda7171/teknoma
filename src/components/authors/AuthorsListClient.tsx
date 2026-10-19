@@ -111,12 +111,12 @@ export default function AuthorsListClient({ authors, locale }: AuthorsListClient
                 )}
 
                 {/* Grid / List */}
-                <div className="space-y-20">
+                <div className="space-y-8 sm:space-y-14 md:space-y-20">
                     {groupedAuthors.length > 0 ? (
                         groupedAuthors.map(([letter, list]) => (
-                            <div key={letter} id={`letter-${letter}`} className="space-y-8">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center text-3xl font-black">
+                            <div key={letter} id={`letter-${letter}`} className="space-y-4 sm:space-y-8">
+                                <div className="flex items-center gap-4 sm:gap-6">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 bg-black text-white rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl font-black">
                                         {letter}
                                     </div>
                                     <div className="h-px flex-grow bg-gray-200"></div>

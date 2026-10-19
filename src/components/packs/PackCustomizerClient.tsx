@@ -8,7 +8,7 @@ import { useUIStore } from '@/store/ui'
 import BookReplacementModal from './BookReplacementModal'
 import { Link } from '@/i18n/routing'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
-import { notifyAddToCart } from '@/lib/actions/cart-notify'
+import { notifyAddToCart, notifyWhatsAppOrderClick } from '@/lib/actions/cart-notify'
 import { getLocalizedTitle, getLocalizedPackTitle } from '@/lib/i18n-utils'
 
 interface Book {
@@ -178,6 +178,7 @@ export default function PackCustomizerClient({ pack, whatsappPhone, priceData }:
                 text += `- ${r.title}\n`
             })
         }
+        notifyWhatsAppOrderClick(packTitle, pack.price + (addUpsell ? 25 : 0), 'pack', text, whatsappPhone).catch(console.error)
         window.open(`https://wa.me/${whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`, '_blank')
     }
 

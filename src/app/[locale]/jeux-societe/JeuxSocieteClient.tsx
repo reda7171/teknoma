@@ -49,13 +49,13 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
             {/* Barre recherche */}
             <div className="flex flex-col md:flex-row md:items-center justify-center gap-6 mb-12">
                 <div className="relative w-full max-w-xl mx-auto group">
-                    <Search className={`absolute ${locale === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-purple-500 transition-colors`} />
+                    <Search className={`absolute ${locale === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-amber-500 transition-colors`} />
                     <input
                         type="text"
                         placeholder={t('SearchPlaceholder')}
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className={`w-full ${locale === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-4 bg-white border-2 border-slate-100 rounded-2xl text-base focus:border-purple-300 focus:ring-4 focus:ring-purple-500/10 outline-none shadow-sm transition-all font-medium`}
+                        className={`w-full ${locale === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-4 bg-white border-2 border-slate-100 rounded-2xl text-base focus:border-amber-300 focus:ring-4 focus:ring-amber-500/10 outline-none shadow-sm transition-all font-medium`}
                     />
                 </div>
             </div>
@@ -65,10 +65,10 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                 {filtered.map(product => (
                     <div
                         key={product.id}
-                        className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(168,85,247,0.15)] hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col group relative"
+                        className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(245,158,11,0.2)] hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col group relative"
                     >
                         {/* Interactive hover glow */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/0 to-fuchsia-500/0 group-hover:from-purple-500/5 group-hover:to-fuchsia-500/5 pointer-events-none transition-colors duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 pointer-events-none transition-colors duration-500" />
                         
                         <Link href={`/jeux-societe/${product.id}`} className="flex flex-col flex-grow z-10">
                             {/* Image */}
@@ -125,7 +125,7 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
 
                             {/* Infos */}
                             <div className="p-4 sm:p-5 flex flex-col flex-grow relative z-10">
-                                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">{product.name}</h3>
+                                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight mb-2 line-clamp-2 group-hover:text-amber-600 transition-colors">{product.name}</h3>
                                 {product.description && (
                                     <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 mb-3 leading-relaxed font-medium">{product.description}</p>
                                 )}
@@ -142,7 +142,7 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                                         ? 'bg-emerald-500 text-white shadow-emerald-500/30 -translate-y-1'
                                         : product.stock === 0
                                         ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
-                                        : 'bg-slate-900 text-white hover:bg-purple-600 hover:shadow-purple-500/30 hover:-translate-y-0.5 active:scale-95'
+                                        : 'bg-slate-900 text-white hover:bg-amber-600 hover:shadow-amber-500/30 hover:-translate-y-0.5 active:scale-95'
                                 }`}
                             >
                                 <ShoppingCart className={`w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0 ${added === product.id ? 'animate-bounce' : ''}`} />

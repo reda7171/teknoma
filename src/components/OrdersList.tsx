@@ -31,10 +31,10 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                 {orders.map((order) => (
                     <div
                         key={order.id}
-                        className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-shadow"
+                        className="bg-white rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-shadow"
                     >
                         {/* Header */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-6 border-b border-gray-100">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-100">
                             <div>
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="text-lg font-black text-black">
@@ -75,9 +75,9 @@ export default function OrderList({ orders, locale }: OrderListProps) {
                         </div>
 
                         {/* Items */}
-                        <div className="space-y-4 mb-6">
+                        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
                             {order.items?.map((item: any) => (
-                                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl hover:bg-gray-50/50 transition-colors">
+                                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl hover:bg-gray-50/50 transition-colors">
                                     <div className="flex items-center gap-4 flex-grow">
                                         <div className="w-16 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-100 shadow-sm">
                                             {(item.book?.image || item.extraProduct?.image || item.pack?.image || item.digitalProduct?.image) && (

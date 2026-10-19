@@ -42,7 +42,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
         <div className="w-full flex flex-col items-center">
             {/* Tabs Selector */}
             {audioTestimonials.length > 0 && imageTestimonials.length > 0 && (
-                <div className="flex bg-white/50 p-1.5 rounded-full shadow-inner mb-12 backdrop-blur-sm border border-emerald-100/50">
+                <div className="flex bg-white/50 p-1.5 rounded-full shadow-inner mb-4 sm:mb-8 md:mb-12 backdrop-blur-sm border border-emerald-100/50">
                     <button
                         onClick={() => setActiveTab('audio')}
                         className={`px-6 py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'audio' ? 'bg-emerald-600 text-white shadow-xl scale-105' : 'text-emerald-700/60 hover:text-emerald-700'}`}
@@ -61,7 +61,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
             )}
 
             {/* Content Area */}
-            <div className="w-full min-h-[400px]">
+            <div className="w-full min-h-0 sm:min-h-[300px] md:min-h-[400px]">
                 {activeTab === 'audio' && audioTestimonials.length > 0 && (
                     <div className="flex flex-wrap justify-center gap-8 animate-in fade-in zoom-in-95 duration-500">
                         {visibleAudioTestimonials.map((testimonial, idx) => (
@@ -73,7 +73,7 @@ export default function TestimonialsTabs({ audioTestimonials, imageTestimonials,
                 )}
 
                 {activeTab === 'image' && imageTestimonials.length > 0 && (
-                    <div className="w-full overflow-hidden pb-8 pt-4 animate-in fade-in zoom-in-95 duration-500 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+                    <div className="w-full overflow-hidden pb-4 sm:pb-8 pt-0 sm:pt-4 animate-in fade-in zoom-in-95 duration-500 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
                         <div className="flex w-max animate-marquee hover:[animation-play-state:paused] gap-6 px-4">
                             {marqueeTestimonials.map((testimonial, idx) => {
                                 const normalizedImg = testimonial.imageUrl?.trim() || '';

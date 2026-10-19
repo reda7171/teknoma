@@ -90,7 +90,7 @@ export default function AddManualBookReadingList() {
                     </div>
 
                     {/* Mobile FABs */}
-                    <div className="md:hidden fixed bottom-6 right-4 z-50 flex flex-col gap-3">
+                    <div className="md:hidden fixed bottom-28 left-4 z-[70] flex flex-col gap-3">
                         <button
                             onClick={() => setIsSearchOpen(true)}
                             className="flex items-center justify-center w-14 h-14 bg-[#f39c12] text-white rounded-full hover:bg-[#e67e22] transition-all active:scale-95 shadow-xl shadow-[#f39c12]/20"

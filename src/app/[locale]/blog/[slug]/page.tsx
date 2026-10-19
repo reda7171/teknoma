@@ -490,7 +490,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             )}
 
             {/* === CONTENU PRINCIPAL === */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-12 lg:py-16 pb-32">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-12 lg:py-16 pb-16 sm:pb-24 md:pb-32">
                 {/* Desktop Layout : 12 colonnes */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
 
@@ -501,7 +501,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             <AdBanner
                                 publisherId={adsensePublisherId}
                                 slotId={slotTop}
-                                label="Haut de l'article"
+                                label={t('AdTopArticle')}
                             />
                         )}
 
@@ -600,7 +600,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             <AdBanner
                                 publisherId={adsensePublisherId}
                                 slotId={slotBottom}
-                                label="Bas de l'article"
+                                label={t('AdBottomArticle')}
                             />
                         )}
 
@@ -961,9 +961,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* === ARTICLES SIMILAIRES === */}
             {relatedPosts.length > 0 && (
-                <section className="bg-gray-50 py-20 border-t border-gray-100">
+                <section className="bg-gray-50 py-8 sm:py-14 md:py-20 border-t border-gray-100">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-between mb-12">
+                        <div className="flex items-center justify-between mb-6 sm:mb-10 md:mb-12">
                             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
                                 {t('SimilarArticles')}
                             </h2>
@@ -1053,9 +1053,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             )}
 
             {/* FAQ Section */}
-            <section className="bg-white py-20 border-t border-gray-100">
+            <section className="bg-white py-8 sm:py-14 md:py-20 border-t border-gray-100">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-10 text-center">
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-6 sm:mb-10 text-center">
                         {locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'Frequently Asked Questions' : 'Questions Fréquentes'}
                     </h2>
                     <div className="space-y-6">

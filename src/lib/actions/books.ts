@@ -140,6 +140,9 @@ export async function createBook(input: BookInput): Promise<BookResult> {
         })
 
         revalidatePath('/admin/books')
+        revalidatePath('/sitemap.xml')
+        revalidatePath('/[locale]/books', 'page')
+        revalidatePath('/books')
         revalidatePath('/')
 
         await createAuditLog({
@@ -338,6 +341,9 @@ export async function updateBook(
         revalidatePath('/admin/books')
         revalidatePath('/books/[id]', 'page')
         revalidatePath('/[locale]/books/[id]', 'page')
+        revalidatePath('/sitemap.xml')
+        revalidatePath('/[locale]/books', 'page')
+        revalidatePath('/books')
         revalidatePath('/')
 
         await createAuditLog({

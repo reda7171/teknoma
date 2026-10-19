@@ -434,24 +434,24 @@ export default function CheckoutClient({
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-16">
             <Link
                 href="/"
-                className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black mb-12 transition-colors group rtl:flex-row-reverse"
+                className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black mb-4 sm:mb-8 lg:mb-12 transition-colors group rtl:flex-row-reverse"
             >
                 <ArrowLeft className="w-3 h-3 mr-2 transition-transform group-hover:-translate-x-1 rtl:ml-2 rtl:mr-0 rtl:rotate-180 rtl:group-hover:translate-x-1" />
                 {t('BackToSelection')}
             </Link>
 
-            <h1 className="text-5xl font-black text-black mb-16 tracking-tighter">{t('YourDetails')}<span className="text-gray-200">.</span></h1>
+            <h1 className="text-3xl sm:text-5xl font-black text-black mb-6 sm:mb-10 lg:mb-16 tracking-tighter">{t('YourDetails')}<span className="text-gray-200">.</span></h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16">
                 {/* Formulaire Principal */}
-                <div className="lg:col-span-2 space-y-12">
-                    <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-12">
-                        <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
-                            <h2 className="text-2xl font-black text-black mb-10 flex items-center gap-4">
-                                <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center text-sm shadow-xl">01</div>
+                <div className="lg:col-span-2 space-y-6 sm:space-y-10 lg:space-y-12">
+                    <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-10 lg:space-y-12">
+                        <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-sm border border-gray-100">
+                            <h2 className="text-xl sm:text-2xl font-black text-black mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center text-xs sm:text-sm shadow-xl">01</div>
                                 {t('ShippingInfo')}
                             </h2>
 
@@ -605,9 +605,9 @@ export default function CheckoutClient({
                             </label>
                         </div>
 
-                        <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
-                            <h2 className="text-2xl font-black text-black mb-10 flex items-center gap-4">
-                                <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center text-sm shadow-xl">02</div>
+                        <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-sm border border-gray-100">
+                            <h2 className="text-xl sm:text-2xl font-black text-black mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center text-xs sm:text-sm shadow-xl">02</div>
                                 {t('PaymentMethod')}
                             </h2>
 
@@ -670,27 +670,27 @@ export default function CheckoutClient({
                             )}
 
                             {paymentSettings?.codEnabled && (
-                                <label className={`relative flex items-center p-8 border-2 rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'COD' ? 'border-black bg-pixio-cream/50' : 'border-transparent bg-pixio-cream/30 hover:border-black/50'}`}>
+                                <label className={`relative flex items-center p-4 sm:p-6 md:p-8 border-2 rounded-2xl sm:rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'COD' ? 'border-black bg-pixio-cream/50' : 'border-transparent bg-pixio-cream/30 hover:border-black/50'}`}>
                                     <input 
                                         type="radio" 
                                         value="COD" 
                                         {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="sr-only"
                                     />
-                                    <div className="w-16 h-16 bg-white border border-gray-100 text-black rounded-2xl flex items-center justify-center shrink-0">
-                                        <Wallet className="w-8 h-8" />
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white border border-gray-100 text-black rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                                        <Wallet className="w-6 h-6 sm:w-8 sm:h-8" />
                                     </div>
-                                    <div className="ml-8">
-                                        <p className="font-black text-black text-xl tracking-tight">
+                                    <div className="ml-4 sm:ml-8 rtl:mr-4 sm:rtl:mr-8 rtl:ml-0">
+                                        <p className="font-black text-black text-base sm:text-xl tracking-tight">
                                             {hasOnlyDigital ? 'Paiement à distance (Virement/CashPlus)' : t('CashOnDelivery')}
                                         </p>
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                        <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
                                             {hasOnlyDigital ? 'Nous vous contacterons via WhatsApp pour le règlement.' : t('PayWhenReceive')}
                                         </p>
                                     </div>
                                     <div className="ml-auto rtl:mr-auto rtl:ml-0">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'COD' ? 'bg-black text-white' : 'bg-gray-200 text-gray-400'}`}>
-                                            <CheckCircle className="w-5 h-5" />
+                                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'COD' ? 'bg-black text-white' : 'bg-gray-200 text-gray-400'}`}>
+                                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                                         </div>
                                     </div>
                                 </label>
@@ -698,23 +698,23 @@ export default function CheckoutClient({
 
                             {paymentSettings?.bankTransferEnabled && (
                                 <div>
-                                    <label className={`relative flex items-center p-8 border-2 rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'border-teal-600 bg-teal-50/30' : 'border-transparent bg-pixio-cream/30 hover:border-teal-400'}`}>
+                                    <label className={`relative flex items-center p-4 sm:p-6 md:p-8 border-2 rounded-2xl sm:rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'border-teal-600 bg-teal-50/30' : 'border-transparent bg-pixio-cream/30 hover:border-teal-400'}`}>
                                         <input 
                                             type="radio" 
                                             value="BANK_TRANSFER" 
                                             {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                             className="sr-only"
                                         />
-                                        <div className="w-16 h-16 bg-teal-50 border border-teal-100 text-teal-600 rounded-2xl flex items-center justify-center shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-50 border border-teal-100 text-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                                         </div>
-                                        <div className="ml-8">
-                                            <p className="font-black text-black text-xl tracking-tight">{t('BankTransfer')}</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{t('TransferAmountToBank')}</p>
+                                        <div className="ml-4 sm:ml-8 rtl:mr-4 sm:rtl:mr-8 rtl:ml-0">
+                                            <p className="font-black text-black text-base sm:text-xl tracking-tight">{t('BankTransfer')}</p>
+                                            <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{t('TransferAmountToBank')}</p>
                                         </div>
                                         <div className="ml-auto rtl:mr-auto rtl:ml-0">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
-                                                <CheckCircle className="w-5 h-5" />
+                                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                                             </div>
                                         </div>
                                     </label>
@@ -761,9 +761,9 @@ export default function CheckoutClient({
 
                 {/* Résumé Panier & Code Promo */}
                 <div className="lg:col-span-1">
-                    <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-gray-100 sticky top-24 space-y-10">
+                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-xl border border-gray-100 sticky top-24 space-y-6 sm:space-y-10">
                         <div>
-                            <h2 className="text-xl font-black text-black tracking-tight mb-8">{t('SelectionSummary')}</h2>
+                            <h2 className="text-xl font-black text-black tracking-tight mb-4 sm:mb-8">{t('SelectionSummary')}</h2>
                             <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                 {items.map((item) => (
                                     <div key={item.id} className="flex gap-5 group">
@@ -818,8 +818,8 @@ export default function CheckoutClient({
                         </div>
 
                         {/* Section Coupon */}
-                        <div className="pt-10 border-t border-gray-50">
-                            <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-[0.2em] rtl:tracking-normal mb-6">{t('PromotionalCode')}</p>
+                        <div className="pt-6 sm:pt-10 border-t border-gray-50">
+                            <p className="text-[10px] rtl:text-sm font-black uppercase text-gray-400 tracking-[0.2em] rtl:tracking-normal mb-4 sm:mb-6">{t('PromotionalCode')}</p>
                             <CouponInput
                                 cartTotal={subtotal}
                                 onApplied={setCoupon}
@@ -828,7 +828,7 @@ export default function CheckoutClient({
                         </div>
 
                         {/* Totaux */}
-                        <div className="space-y-5 pt-10 border-t border-gray-50">
+                        <div className="space-y-4 sm:space-y-5 pt-6 sm:pt-10 border-t border-gray-50">
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
                                 <span>{t('SelectionSummary')}</span>
                                 <span className="text-black">{subtotal.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
@@ -973,7 +973,7 @@ export default function CheckoutClient({
                         
                         <div className="p-6 md:p-8">
                             <h3 className="text-xl font-black text-slate-900 mb-6 text-center">
-                                Informations Bancaires
+                                {t('BankInfoModalTitle')}
                             </h3>
                             
                             <div className="space-y-6">
@@ -983,9 +983,11 @@ export default function CheckoutClient({
                                             <img src={normalizeImage(paymentSettings.bankTransferAccounts[selectedBankIndex].logo)} alt={paymentSettings.bankTransferAccounts[selectedBankIndex].bankName} className="max-h-full object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
                                         </div>
                                     ) : (
-                                        <Building2 className="w-12 h-12 text-teal-600" />
+                                        <>
+                                            <Building2 className="w-12 h-12 text-teal-600" />
+                                            <span className="text-lg font-black text-slate-800">{paymentSettings.bankTransferAccounts[selectedBankIndex].bankName}</span>
+                                        </>
                                     )}
-                                    <span className="text-lg font-black text-slate-800">{paymentSettings.bankTransferAccounts[selectedBankIndex].bankName}</span>
                                 </div>
                                 
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
@@ -1001,7 +1003,7 @@ export default function CheckoutClient({
                                 
                                 {paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode && (
                                     <div className="border-t border-slate-100 pt-6">
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">Scanner pour payer</p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">{t('ScanToPay')}</p>
                                         <div className="flex justify-center">
                                             <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
                                                 <img src={normalizeImage(paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode)} alt="QR Code" className="w-48 h-48 object-contain" onError={(e) => (e.target as HTMLImageElement).style.display = 'none'} />
@@ -1016,7 +1018,7 @@ export default function CheckoutClient({
                                     onClick={() => setSelectedBankIndex(null)}
                                     className="w-full py-4 bg-teal-600 text-white rounded-xl font-black tracking-widest text-sm uppercase hover:bg-teal-700 transition-colors"
                                 >
-                                    Fermer
+                                    {t('Close')}
                                 </button>
                             </div>
                         </div>

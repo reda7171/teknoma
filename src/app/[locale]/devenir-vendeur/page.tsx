@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { Store, Truck, ShieldCheck, Wallet, ArrowRight, BookOpen } from 'lucide-react'
+import { Store, Truck, ShieldCheck, Wallet, ArrowRight, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react'
 import BecomeSellerForm from './BecomeSellerForm'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
@@ -29,7 +29,7 @@ export default async function BecomeSellerPage() {
         <div className="min-h-screen bg-white">
             <HeaderWithUser />
             {/* Hero Section */}
-            <section className="relative bg-pixio-cream text-black py-24 md:py-32 overflow-hidden">
+            <section className="relative bg-pixio-cream text-black py-8 sm:py-16 md:py-32 overflow-hidden">
                 <div className="absolute inset-0 opacity-40">
                     {/* Background Pattern */}
                     <div className="absolute top-0 -left-1/4 w-96 h-96 bg-pixio-yellow rounded-full mix-blend-multiply filter blur-[128px] animate-blob"></div>
@@ -39,11 +39,11 @@ export default async function BecomeSellerPage() {
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="max-w-3xl">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-black text-xs font-black uppercase tracking-widest mb-8 shadow-sm">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-black text-xs font-black uppercase tracking-widest mb-4 sm:mb-8 shadow-sm">
                             <Store className="w-4 h-4 text-pixio-yellow" />
                             <span>{t('ProgrammeVendeurPartenaire')}</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.1]">
+                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight mb-4 sm:mb-6 leading-[1.1]">
                             {t('OuvrezVotre')}<br />
                             <span className="text-pixio-yellow relative inline-block">
                                 <span className="relative z-10 text-black">{t('SuccursaleLitteraire')}</span>
@@ -67,9 +67,9 @@ export default async function BecomeSellerPage() {
             </section>
 
             {/* Pourquoi choisir Riwaya */}
-            <section className="py-24 bg-white overflow-hidden">
+            <section className="py-8 sm:py-16 md:py-24 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-6 sm:mb-10 md:mb-16">
                         <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight">
                             {t('PourquoiVendre')}
                         </h2>
@@ -125,7 +125,7 @@ export default async function BecomeSellerPage() {
             </section>
 
             {/* Comment ça marche */}
-            <section id="comment-ca-marche" className="py-24 bg-pixio-cream">
+            <section id="comment-ca-marche" className="py-8 sm:py-16 md:py-24 bg-pixio-cream">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col lg:flex-row items-center gap-16">
                         <div className="flex-1">
@@ -169,25 +169,51 @@ export default async function BecomeSellerPage() {
                             </div>
                         </div>
 
-                        {/* Image illustrative (placeholder/styled) */}
-                        <div className="flex-1 relative">
-                            <div className="absolute inset-0 bg-blue-50 transform rotate-3 rounded-[3rem] -z-10"></div>
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-gray-100">
-                                <div className="w-full aspect-square bg-gray-50 rounded-[2rem] flex items-center justify-center relative overflow-hidden group">
-                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pixio-yellow/20 rounded-full filter blur-[60px] group-hover:bg-pixio-yellow/30 transition-colors duration-500"></div>
-                                    <BookOpen className="w-32 h-32 text-gray-200 z-10" />
-                                    <div className="absolute top-4 left-4 bg-white shadow-md rounded-2xl p-4 flex items-center gap-3 animate-bounce" style={{ animationDuration: '3s' }}>
-                                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">✅</div>
-                                        <div>
-                                            <div className="text-[10px] font-bold text-gray-400 uppercase">{t('NouvelleCommande')}</div>
-                                            <div className="font-black text-sm">{t('AlchimistePrice')}</div>
+                        {/* Image illustrative dashboard seller */}
+                        <div className="flex-1 relative w-full max-w-lg mx-auto">
+                            <div className="absolute inset-0 bg-blue-50/70 transform rotate-2 rounded-2xl sm:rounded-[3rem] -z-10"></div>
+                            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[3rem] shadow-xl border border-gray-100">
+                                <div className="w-full bg-gradient-to-b from-gray-50 to-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-100 flex flex-col gap-3 sm:gap-4 relative overflow-hidden">
+                                    <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <span className="text-xs font-black uppercase tracking-wider text-gray-700">Riwaya Seller</span>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                            <BookOpen className="w-4 h-4" />
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-10 right-4 bg-black text-white shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-pulse" style={{ animationDuration: '4s' }}>
-                                        <Wallet className="w-6 h-6 text-pixio-yellow" />
-                                        <div>
-                                            <div className="text-[10px] font-bold text-gray-400 uppercase">{t('SoldeDisponible')}</div>
-                                            <div className="font-black text-sm text-pixio-yellow">{t('SoldeAmount')}</div>
+
+                                    {/* Nouvelle commande item */}
+                                    <div className="bg-white shadow-sm rounded-xl p-3.5 sm:p-4 border border-gray-100 flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+                                                <CheckCircle2 className="w-5 h-5" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">{t('NouvelleCommande')}</div>
+                                                <div className="font-black text-xs sm:text-sm text-gray-900 truncate">{t('AlchimistePrice')}</div>
+                                            </div>
+                                        </div>
+                                        <span className="shrink-0 text-[10px] sm:text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                                            COD 100%
+                                        </span>
+                                    </div>
+
+                                    {/* Solde disponible item */}
+                                    <div className="bg-neutral-900 text-white shadow-md rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-9 h-9 bg-neutral-800 rounded-xl flex items-center justify-center text-pixio-yellow shrink-0">
+                                                <Wallet className="w-5 h-5" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">{t('SoldeDisponible')}</div>
+                                                <div className="font-black text-sm sm:text-base text-pixio-yellow truncate">{t('SoldeAmount')}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0 text-emerald-400 text-xs font-bold bg-neutral-800 px-2.5 py-1 rounded-full">
+                                            <TrendingUp className="w-3.5 h-3.5" />
+                                            <span>0% com.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -198,9 +224,9 @@ export default async function BecomeSellerPage() {
             </section>
 
             {/* Inscription Form */}
-            <section id="inscription" className="py-24 bg-gray-50 border-t border-gray-100">
+            <section id="inscription" className="py-8 sm:py-16 md:py-24 bg-gray-50 border-t border-gray-100">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border-2 border-gray-100">
+                    <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl p-5 sm:p-8 md:p-12 border-2 border-gray-100">
                         <div className="text-center mb-12">
                             <h2 className="text-4xl font-black text-black tracking-tight mb-4">{t('RejoindreVendeurs')}</h2>
                             <p className="text-gray-500 font-medium">{t('FormDescription')}</p>

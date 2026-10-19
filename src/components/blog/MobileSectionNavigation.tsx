@@ -80,14 +80,14 @@ export default function MobileSectionNavigation({ language = 'fr' }: { language?
     const isRtl = language === 'ar'
 
     return (
-        <div className={`md:hidden fixed bottom-36 ${isRtl ? 'left-4' : 'right-4'} z-40 flex flex-col gap-2 pointer-events-auto`}>
+        <div className="md:hidden fixed bottom-36 right-4 z-40 flex flex-col gap-2 pointer-events-auto">
             <button
                 onClick={handlePrev}
                 disabled={currentIndex === -1}
                 className={`p-3 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center transition-all ${
                     currentIndex === -1 ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 text-slate-700 hover:text-black hover:bg-slate-50'
                 }`}
-                aria-label="Section précédente"
+                aria-label={isRtl ? 'القسم السابق' : 'Section précédente'}
             >
                 <ChevronUp className="w-5 h-5" />
             </button>
@@ -97,7 +97,7 @@ export default function MobileSectionNavigation({ language = 'fr' }: { language?
                 className={`p-3 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center transition-all ${
                     currentIndex >= headings.length - 1 ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 text-slate-700 hover:text-black hover:bg-slate-50'
                 }`}
-                aria-label="Section suivante"
+                aria-label={isRtl ? 'القسم التالي' : 'Section suivante'}
             >
                 <ChevronDown className="w-5 h-5" />
             </button>
