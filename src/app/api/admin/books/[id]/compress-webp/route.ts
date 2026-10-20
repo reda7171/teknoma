@@ -27,32 +27,57 @@ export async function POST(
             return NextResponse.json({ success: true, message: 'Déjà en WEBP' })
         }
 
-        // Must be a local file
-        if (book.image.startsWith('http://') || book.image.startsWith('https://')) {
-            return NextResponse.json({ success: false, error: 'URL externe non supportée pour la compression locale' }, { status: 400 })
+        const publicDir = path.join(process.cwd(), 'public')
+        const uploadsDir = path.join(publicDir, 'uploads', 'books')
+        if (!fs.existsSync(uploadsDir)) {
+            await fs.promises.mkdir(uploadsDir, { recursive: true })
         }
 
-        const publicDir = path.join(process.cwd(), 'public')
-        const currentFilePath = path.join(publicDir, book.image)
+        let inputBuffer: Buffer
+        let oldFilePathToDelete: string | null = null
 
-        if (!fs.existsSync(currentFilePath)) {
-            return NextResponse.json({ success: false, error: 'Fichier physique introuvable' }, { status: 404 })
+        if (book.image.startsWith('http://') || book.image.startsWith('https://')) {
+            const res = await fetch(book.image, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) RiwayaBot/1.0',
+                    'Accept': 'image/avif,image/webp,image/*,*/*'
+                }
+            })
+            if (!res.ok) {
+                return NextResponse.json({
+                    success: false,
+                    error: `Impossible de récupérer l'image distante (${res.status})`
+                }, { status: 400 })
+            }
+            const arrayBuf = await res.arrayBuffer()
+            inputBuffer = Buffer.from(arrayBuf)
+        } else {
+            const localRel = book.image.startsWith('/') ? book.image.slice(1) : book.image
+            const currentFilePath = path.join(publicDir, localRel)
+            if (!fs.existsSync(currentFilePath)) {
+                return NextResponse.json({ success: false, error: 'Fichier physique introuvable' }, { status: 404 })
+            }
+            inputBuffer = await fs.promises.readFile(currentFilePath)
+            oldFilePathToDelete = currentFilePath
         }
 
         // Convert to webp
-        const newFileName = `${path.basename(book.image, path.extname(book.image))}.webp`
-        const newRelativePath = path.join(path.dirname(book.image), newFileName).replace(/\\/g, '/')
-        const newFilePath = path.join(publicDir, newRelativePath)
+        const cleanBookId = book.id.replace(/[^a-zA-Z0-9_-]/g, '')
+        const newFileName = `book-${cleanBookId}-${Date.now()}.webp`
+        const newFilePath = path.join(uploadsDir, newFileName)
+        const newRelativePath = `/uploads/books/${newFileName}`
 
-        await sharp(currentFilePath)
-            .webp({ quality: 80 })
+        await sharp(inputBuffer)
+            .webp({ quality: 80, effort: 4 })
             .toFile(newFilePath)
 
-        // Delete old file
-        try {
-            await fs.promises.unlink(currentFilePath)
-        } catch (e) {
-            console.error('Erreur lors de la suppression de l\'ancienne image:', e)
+        // Delete old local file if existing
+        if (oldFilePathToDelete && oldFilePathToDelete !== newFilePath) {
+            try {
+                await fs.promises.unlink(oldFilePathToDelete)
+            } catch (e) {
+                console.warn('Erreur lors de la suppression de l\'ancienne image:', e)
+            }
         }
 
         // Update database

@@ -61,6 +61,7 @@ interface BooksFiltersProps {
         language?: string
         inStock?: string
         usedOnly?: string
+        isUsed?: string
         newArrivals?: string
         author?: string
     }
@@ -72,6 +73,7 @@ interface BooksFiltersProps {
 }
 
 export default function BooksFilters({ params, categoryTree, categoryCounts, authors, languages, totalCount }: BooksFiltersProps) {
+    const isUsed = params.isUsed === 'true' || params.usedOnly === 'true'
     const t = useTranslations('BooksPage')
     const tCats = useTranslations('Categories')
     const tCommon = useTranslations('Common')
@@ -98,7 +100,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
         if (params.category) newParams.set('category', params.category)
         if (params.language) newParams.set('language', params.language)
         if (params.inStock) newParams.set('inStock', params.inStock)
-        if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
+        if (isUsed) newParams.set('isUsed', 'true')
         router.push(`/books?${newParams.toString()}`)
     }
 
@@ -175,7 +177,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 ...(params.category ? { category: params.category } : {}),
                                 ...(params.search ? { search: params.search } : {}),
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
-                                ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
+                                ...(isUsed ? { isUsed: 'true' } : {}),
                             }).toString()}`}
                             scroll={false}
                             className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
@@ -194,7 +196,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                     ...(params.category ? { category: params.category } : {}),
                                     ...(params.search ? { search: params.search } : {}),
                                     ...(params.inStock ? { inStock: params.inStock } : {}),
-                                    ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
+                                    ...(isUsed ? { isUsed: 'true' } : {}),
                                     language: lang.code
                                 }).toString()}`}
                                 scroll={false}
@@ -241,7 +243,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                             if (params.search) newParams.set('search', params.search)
                             if (params.category) newParams.set('category', params.category)
                             if (params.language) newParams.set('language', params.language)
-                            if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
+                            if (isUsed) newParams.set('isUsed', 'true')
                             if (params.newArrivals) newParams.set('newArrivals', params.newArrivals)
                             newParams.set('inStock', params.inStock === 'false' ? 'true' : 'false')
                             router.push(`/books?${newParams.toString()}`)
@@ -263,11 +265,11 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                             if (params.language) newParams.set('language', params.language)
                             if (params.inStock) newParams.set('inStock', params.inStock)
                             if (params.newArrivals) newParams.set('newArrivals', params.newArrivals)
-                            newParams.set('usedOnly', params.usedOnly === 'true' ? 'false' : 'true')
+                            if (!isUsed) newParams.set('isUsed', 'true')
                             router.push(`/books?${newParams.toString()}`)
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                            params.usedOnly === 'true'
+                            isUsed
                             ? 'bg-amber-100 text-amber-700 border-amber-200 shadow-md' 
                             : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
                         }`}
@@ -282,7 +284,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                             if (params.category) newParams.set('category', params.category)
                             if (params.language) newParams.set('language', params.language)
                             if (params.inStock) newParams.set('inStock', params.inStock)
-                            if (params.usedOnly) newParams.set('usedOnly', params.usedOnly)
+                            if (isUsed) newParams.set('isUsed', 'true')
                             newParams.set('newArrivals', (params as any).newArrivals === 'true' ? 'false' : 'true')
                             router.push(`/books?${newParams.toString()}`)
                         }}
@@ -319,7 +321,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 ...(params.search ? { search: params.search } : {}),
                                 ...(params.author ? { author: params.author } : {}),
                                 ...(params.inStock ? { inStock: params.inStock } : {}),
-                                ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
+                                ...(isUsed ? { isUsed: 'true' } : {}),
                             }).toString()}`}
                             scroll={false}
                             className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${!params.category
@@ -345,7 +347,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                                 ...(params.search ? { search: params.search } : {}),
                                                 ...(params.author ? { author: params.author } : {}),
                                                 ...(params.inStock ? { inStock: params.inStock } : {}),
-                                                ...(params.usedOnly ? { usedOnly: params.usedOnly } : {})
+                                                ...(isUsed ? { isUsed: 'true' } : {})
                                             }).toString()}`}
                                             scroll={false}
                                             className={`flex-1 flex justify-between items-center px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${isSelected && !params.subCategory
@@ -423,7 +425,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             </div>
 
             {/* Active Filters */}
-            {(params.category || params.subCategory || params.search || params.language || params.inStock || params.usedOnly || (params as any).newArrivals) && (
+            {(params.category || params.subCategory || params.search || params.language || params.inStock || isUsed || (params as any).newArrivals) && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
@@ -472,14 +474,14 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             <span className="hidden sm:inline">{t('Filters')}</span>
-                            {(params.category || params.subCategory || params.language || params.author || params.inStock || params.usedOnly || (params as any).newArrivals) && (
+                            {(params.category || params.subCategory || params.language || params.author || params.inStock || isUsed || (params as any).newArrivals) && (
                                 <span className="w-2 h-2 rounded-full bg-red-500" />
                             )}
                         </button>
                     </div>
 
                     {/* Active Chips Horizontal Scroll */}
-                    {(params.category || params.subCategory || params.language || params.search || params.author || params.inStock || params.usedOnly || (params as any).newArrivals) && (
+                    {(params.category || params.subCategory || params.language || params.search || params.author || params.inStock || isUsed || (params as any).newArrivals) && (
                         <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
                             {params.category && (
                                 <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
@@ -544,7 +546,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                     >×</Link>
                                 </div>
                             )}
-                            {params.usedOnly === 'true' && (
+                            {isUsed && (
                                 <div className="flex-shrink-0 px-3 py-1.5 bg-amber-600 text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
                                     {tCommon('UsedBook') || "Livre d'occasion"}
                                     <Link 

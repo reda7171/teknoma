@@ -23,12 +23,19 @@ export function normalizeImage(raw: string | null | undefined): string {
         return img.startsWith('/') ? img : '/' + img;
     }
 
-    // DÃ©jÃ  une URL ou dÃ©jÃ  formatÃ©
+    if (img.startsWith('//')) {
+        img = 'https:' + img
+    }
+
+    // Déjà une URL ou déjà formaté
     if (img.startsWith('http') || img.startsWith('data:') || img.startsWith('/')) {
+        if (img.startsWith('http://') && !img.includes('localhost') && !img.includes('127.0.0.1')) {
+            img = img.replace('http://', 'https://')
+        }
         // Ignorer si c'est un message d'erreur
         if (img.includes('cellule')) return '/book-placeholder.png'
         
-        // Cas particulier : /9j/ dÃ©tectÃ© comme chemin local alors que c'est du JPEG Base64
+        // Cas particulier : /9j/ détecté comme chemin local alors que c'est du JPEG Base64
         if (img.startsWith('/9j/')) return 'data:image/jpeg;base64,' + img
         return img
     }

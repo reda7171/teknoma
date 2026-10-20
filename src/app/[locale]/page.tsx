@@ -810,7 +810,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     {locale === 'ar' ? 'كتب مستعملة' : locale === 'en' ? 'Used Books' : 'Livres d\'occasion'}
                   </h2>
                 </div>
-                <Link href="/books?condition=USED,GOOD" aria-label={`${c('see_all', t('SeeAll'))} - Livres d'occasion`} className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <Link href="/books?isUsed=true" aria-label={`${c('see_all', t('SeeAll'))} - Livres d'occasion`} className="group flex items-center gap-4 bg-white px-6 py-3 rounded-full border border-gray-100 hover:border-black transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                   <span className="text-xs font-black uppercase tracking-widest text-black">
                     {locale === 'ar' ? 'عرض الكل' : locale === 'en' ? 'View all' : 'Voir tout'}
                   </span>
