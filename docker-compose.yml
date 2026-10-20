@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Database - MySQL 8
   db:
@@ -46,6 +44,7 @@ services:
     env_file:
       - .env
     environment:
+      - WHATSAPP_GATEWAY_URL=http://whatsapp:3000
       - DATABASE_URL=mysql://${DB_USER:-riwaya_user}:${DB_PASSWORD:-riwaya_pass}@db:3306/${DB_NAME:-riwaya_db}?connect_timeout=30
       - KEEP_ALIVE_TIMEOUT=75000
       - NODE_OPTIONS=--max-old-space-size=4096
@@ -112,6 +111,7 @@ services:
       - "3001:3000"
     environment:
       - WHATSAPP_DEFAULT_ENGINE=WEBJS
+      - WHATSAPP_START_SESSION=default
       - WAHA_ZIPPER=ZIPPER
       - WAHA_PRINT_QR=false
     volumes:

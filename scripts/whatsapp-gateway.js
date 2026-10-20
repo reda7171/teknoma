@@ -213,7 +213,8 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({ success: false, error: 'Endpoint non trouvé' }));
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-    console.log(`[WhatsApp Gateway] Serveur en écoute sur http://127.0.0.1:${PORT}`);
+const HOST = process.env.WHATSAPP_HOST || '0.0.0.0';
+server.listen(PORT, HOST, () => {
+    console.log(`[WhatsApp Gateway] Serveur en écoute sur http://${HOST}:${PORT}`);
     startWhatsApp();
 });
