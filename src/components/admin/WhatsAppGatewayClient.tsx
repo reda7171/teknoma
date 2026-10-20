@@ -21,6 +21,7 @@ import {
 import {
     getWhatsAppGatewayStatus,
     sendWhatsAppMessageViaGateway,
+    restartWhatsAppSession,
     disconnectWhatsAppGateway,
     updateWhatsAppGatewaySetting,
     updateWhatsAppTemplate,
@@ -88,6 +89,7 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
     const [activeTemplateTab, setActiveTemplateTab] = useState<TemplateKey>('whatsapp_template_promo_lead')
     const [isSavingTemplate, setIsSavingTemplate] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const [isRestarting, setIsRestarting] = useState(false)
     const [testPhone, setTestPhone] = useState('')
     const [testMessage, setTestMessage] = useState('Salam ! Test de connexion WhatsApp depuis Riwaya.store réussi avec succès.')
     const [isSendingTest, setIsSendingTest] = useState(false)
@@ -111,9 +113,9 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
         }
     }
 
-    // Polling automatique si en attente de scan QR
+    // Polling automatique si en attente de scan QR ou en cours de connexion
     useEffect(() => {
-        if (statusData.status === 'SCAN_QR' || statusData.status === 'CONNECTING') {
+        if (statusData.status === 'SCAN_QR' || statusData.status === 'CONNECTING' || statusData.status === 'INITIALIZING') {
             const interval = setInterval(async () => {
                 const data = await getWhatsAppGatewayStatus()
                 setStatusData(data)
@@ -124,6 +126,19 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
             return () => clearInterval(interval)
         }
     }, [statusData.status])
+
+    const handleRestartSession = async () => {
+        setIsRestarting(true)
+        showFeedback('Redémarrage de la session WhatsApp en cours...', 'success')
+        const res = await restartWhatsAppSession()
+        if (res.success) {
+            showFeedback('Session relancée avec succès ! Recherche du code QR...', 'success')
+            await refreshStatus()
+        } else {
+            showFeedback(res.error || 'Erreur lors du redémarrage', 'error')
+        }
+        setIsRestarting(false)
+    }
 
     const handleSendTest = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -200,7 +215,8 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
     }
 
     const isConnected = statusData.status === 'CONNECTED'
-    const isScanReady = statusData.status === 'SCAN_QR' && statusData.qr
+    const isScanReady = statusData.status === 'SCAN_QR' && !!statusData.qr
+    const isConnecting = statusData.status === 'CONNECTING' || statusData.status === 'INITIALIZING' || (statusData.status === 'SCAN_QR' && !statusData.qr)
 
     return (
         <div className="space-y-8">
@@ -229,20 +245,28 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                                 ? 'bg-emerald-50 text-emerald-600'
                                 : isScanReady
                                 ? 'bg-amber-50 text-amber-600'
+                                : isConnecting
+                                ? 'bg-sky-50 text-sky-600'
                                 : 'bg-gray-100 text-gray-500'
                         }`}>
-                            <QrCode className="w-7 h-7" />
+                            {isConnecting ? (
+                                <RefreshCw className="w-7 h-7 animate-spin text-sky-600" />
+                            ) : (
+                                <QrCode className="w-7 h-7" />
+                            )}
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="text-base font-black text-slate-900">
-                                    {isConnected ? 'Session Active' : isScanReady ? 'En attente de scan' : 'Passerelle Hors Ligne'}
+                                    {isConnected ? 'Session Active' : isScanReady ? 'En attente de scan' : isConnecting ? 'Initialisation en cours' : 'Passerelle Hors Ligne'}
                                 </span>
                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider ${
                                     isConnected
                                         ? 'bg-emerald-100 text-emerald-800'
                                         : isScanReady
                                         ? 'bg-amber-100 text-amber-800'
+                                        : isConnecting
+                                        ? 'bg-sky-100 text-sky-800'
                                         : 'bg-gray-200 text-gray-700'
                                 }`}>
                                     {isConnected ? (
@@ -255,8 +279,13 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                                             <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
                                             Scan QR
                                         </>
+                                    ) : isConnecting ? (
+                                        <>
+                                            <RefreshCw className="w-3 h-3 animate-spin text-sky-600" />
+                                            Démarrage
+                                        </>
                                     ) : (
-                                        'VPS Standby'
+                                        'Hors Ligne'
                                     )}
                                 </span>
                             </div>
@@ -265,7 +294,9 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                                     ? `Connecté au numéro : ${statusData.user.phone} (${statusData.user.name})`
                                     : isScanReady
                                     ? 'Scannez le code QR ci-dessous avec l\'application WhatsApp de votre téléphone'
-                                    : 'Le conteneur WhatsApp sera activé sur votre serveur VPS via docker-compose'}
+                                    : isConnecting
+                                    ? 'Démarrage du moteur WhatsApp Web (Chromium)... Le QR code va s\'afficher automatiquement.'
+                                    : (statusData.error || 'Le conteneur WhatsApp sera activé sur votre serveur VPS via docker-compose')}
                             </p>
                         </div>
                     </div>
@@ -278,6 +309,15 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                         >
                             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                             <span>Actualiser</span>
+                        </button>
+
+                        <button
+                            onClick={handleRestartSession}
+                            disabled={isRestarting}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-800 rounded-xl text-xs font-black transition-all cursor-pointer disabled:opacity-50"
+                        >
+                            <RotateCcw className={`w-3.5 h-3.5 ${isRestarting ? 'animate-spin' : ''}`} />
+                            <span>{isRestarting ? 'Relance...' : 'Relancer la session'}</span>
                         </button>
 
                         {isConnected && (
@@ -347,20 +387,60 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                                 </p>
                             </div>
                         </div>
+                    ) : isConnecting ? (
+                        <div className="bg-sky-50/70 border border-sky-200 rounded-3xl p-8 text-center max-w-lg mx-auto">
+                            <div className="w-16 h-16 bg-white border-2 border-sky-400 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                <RefreshCw className="w-8 h-8 animate-spin text-sky-600" />
+                            </div>
+                            <h4 className="text-xl font-black text-slate-900 mb-2">
+                                Initialisation de WhatsApp Web...
+                            </h4>
+                            <p className="text-xs text-slate-600 font-medium max-w-sm mx-auto leading-relaxed mb-6">
+                                Le conteneur WAHA charge le navigateur Chromium et génère votre QR code en direct. Cela prend généralement entre 10 et 20 secondes. Cette page s&apos;actualisera automatiquement.
+                            </p>
+                            <div className="flex items-center justify-center gap-2">
+                                <button
+                                    onClick={refreshStatus}
+                                    disabled={isRefreshing}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                >
+                                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                    <span>Vérifier le QR maintenant</span>
+                                </button>
+                            </div>
+                        </div>
                     ) : (
                         <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 text-center max-w-xl mx-auto">
                             <div className="w-14 h-14 bg-slate-200 text-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-4 font-black">
                                 <Terminal className="w-7 h-7" />
                             </div>
                             <h4 className="text-lg font-black text-slate-900 mb-2">
-                                Prêt pour Déploiement VPS
+                                Passerelle non détectée
                             </h4>
                             <p className="text-xs text-slate-600 font-medium leading-relaxed mb-6">
-                                Le conteneur Docker gratuit est configuré dans votre <code className="bg-slate-200 px-1.5 py-0.5 rounded text-slate-800">docker-compose.yml</code>. Sur votre VPS, lancez simplement la commande suivante pour activer la passerelle :
+                                Le conteneur Docker est configuré dans votre <code className="bg-slate-200 px-1.5 py-0.5 rounded text-slate-800">docker-compose.yml</code>. Sur votre serveur VPS, vérifiez que le conteneur est lancé :
                             </p>
-                            <div className="bg-slate-900 text-emerald-400 p-4 rounded-2xl font-mono text-xs text-left overflow-x-auto shadow-inner">
+                            <div className="bg-slate-900 text-emerald-400 p-4 rounded-2xl font-mono text-xs text-left overflow-x-auto shadow-inner mb-6">
                                 <span className="text-slate-500"># Sur votre VPS :</span><br />
                                 docker compose up -d whatsapp
+                            </div>
+                            <div className="flex items-center justify-center gap-3">
+                                <button
+                                    onClick={handleRestartSession}
+                                    disabled={isRestarting}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                                >
+                                    <RotateCcw className={`w-3.5 h-3.5 ${isRestarting ? 'animate-spin' : ''}`} />
+                                    <span>Tenter de démarrer la session</span>
+                                </button>
+                                <button
+                                    onClick={refreshStatus}
+                                    disabled={isRefreshing}
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                >
+                                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                    <span>Actualiser</span>
+                                </button>
                             </div>
                         </div>
                     )}

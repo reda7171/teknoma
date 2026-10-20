@@ -18,7 +18,7 @@ const formatAdminDate = (value: Date | string) => new Intl.DateTimeFormat('fr-FR
 const getNotificationLinks = (order: any) => {
     const trackingLink = `https://riwaya.store/fr/track/${order.id}`
     let text = ''
-    
+
     switch (order.status) {
         case 'PENDING':
             text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
@@ -48,9 +48,9 @@ const getCompanyReturnWaLink = (order: any) => {
     const daysSince = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24))
     const formattedDate = formatAdminDate(order.createdAt)
     const trackingText = order.trackingID ? `N° Suivi : ${order.trackingID}` : `Commande #${order.id.slice(0, 8)}`
-    
+
     const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande Riwaya :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSince} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci de votre collaboration.\nL'équipe Riwaya.`
-    
+
     if (order.shippingCompanySupportPhone) {
         let clean = order.shippingCompanySupportPhone.replace(/\D/g, '')
         if (clean.startsWith('0')) clean = '212' + clean.slice(1)
@@ -141,7 +141,7 @@ export default function OrdersTableClient({
     useEffect(() => {
         setLocalOrders(orders)
     }, [orders])
-    
+
     // Modal state for Invoice Selection
     const [showInvoiceModal, setShowInvoiceModal] = useState(false)
     const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<string | null>(null)
@@ -189,7 +189,7 @@ export default function OrdersTableClient({
 
     const handlePaymentToggle = async (orderId: string, currentPaidStatus: boolean) => {
         const newPaidStatus = !currentPaidStatus
-        
+
         if (newPaidStatus) {
             setSelectedOrderForInvoice(orderId)
             setSelectedInvoiceId('')
@@ -357,12 +357,20 @@ export default function OrdersTableClient({
                                             <div className="flex items-center gap-2">
                                                 <div className="text-sm font-black text-gray-900 group-hover:text-blue-600 transition-colors">#{order.id.slice(0, 8)}</div>
                                                 {order.trackingID && (
-                                                    <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer" title={`Expédié: ${order.trackingID}\nCliquez pour synchroniser`} onClick={(e) => { e.preventDefault(); handleSyncDelivery(order.id) }}>
+                                                    <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer hover:bg-blue-200 transition-colors" title={`Expédié: ${order.trackingID}\nCliquez pour synchroniser`} onClick={(e) => { e.preventDefault(); handleSyncDelivery(order.id) }}>
                                                         <Search className={`w-2.5 h-2.5 text-blue-600 ${syncingId === order.id ? 'animate-spin' : ''}`} />
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors">{order.createdAtFormatted}</div>
+                                            {order.trackingID && (
+                                                <div className="mt-1 p-1 bg-blue-50/70 border border-blue-100/80 rounded flex flex-col text-[11px] leading-snug w-fit">
+
+                                                    <span className="font-mono text-gray-900 font-bold">
+                                                        ID: {order.trackingID}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors mt-0.5">{order.createdAtFormatted}</div>
                                             <div className="mt-1">
                                                 <span className="inline-flex rounded-md bg-gray-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-gray-600">
                                                     {{
@@ -444,31 +452,30 @@ export default function OrdersTableClient({
                                         <div className="flex flex-col gap-1">
                                             {order.paymentMethod ? (
                                                 <span className={`px-2.5 py-1 inline-flex w-fit text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider ${order.paymentMethod === 'COD' ? 'bg-amber-100 text-amber-800' :
-                                                        order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
-                                                            order.paymentMethod === 'STRIPE' ? 'bg-indigo-100 text-indigo-800' :
-                                                                order.paymentMethod === 'PAYPAL' ? 'bg-blue-100 text-blue-800' :
-                                                                    order.paymentMethod === 'CMI' ? 'bg-orange-100 text-orange-800' :
-                                                                        'bg-gray-100 text-gray-700'
+                                                    order.paymentMethod === 'BANK_TRANSFER' ? 'bg-teal-100 text-teal-800' :
+                                                        order.paymentMethod === 'STRIPE' ? 'bg-indigo-100 text-indigo-800' :
+                                                            order.paymentMethod === 'PAYPAL' ? 'bg-blue-100 text-blue-800' :
+                                                                order.paymentMethod === 'CMI' ? 'bg-orange-100 text-orange-800' :
+                                                                    'bg-gray-100 text-gray-700'
                                                     }`}>
                                                     {order.paymentMethod === 'BANK_TRANSFER' ? 'Virement' : order.paymentMethod}
                                                 </span>
                                             ) : (
                                                 <span className="w-fit px-2.5 py-1 inline-flex text-xs text-gray-400 bg-gray-100 rounded-lg">COD</span>
                                             )}
-                                            
-                                            <button 
+
+                                            <button
                                                 onClick={() => handlePaymentToggle(order.id, !!order.isPaid)}
-                                                className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md w-fit cursor-pointer transition-colors ${
-                                                    order.isPaid 
-                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                                                    : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                                }`}
+                                                className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md w-fit cursor-pointer transition-colors ${order.isPaid
+                                                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                        : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                                    }`}
                                                 title="Cliquez pour changer le statut de paiement"
                                             >
                                                 {order.isPaid ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                                                 {order.isPaid ? 'Payé' : 'Non payé'}
                                             </button>
-                                            
+
                                             {order.isPaid && (order.expense?.title || order.invoiceNumber) && (
                                                 <span className="text-[9px] font-medium text-gray-500 truncate w-fit max-w-[120px]" title={`Facture: ${order.expense?.title || order.invoiceNumber}`}>
                                                     Fac: {order.expense?.title || order.invoiceNumber}
@@ -563,7 +570,7 @@ export default function OrdersTableClient({
                     <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
                         <h3 className="text-lg font-bold text-gray-900 mb-4">Lier à une facture de livraison</h3>
                         <p className="text-sm text-gray-600 mb-4">Sélectionnez la facture correspondante pour marquer cette commande comme payée.</p>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Facture Société de Livraison (Optionnel)</label>
@@ -574,14 +581,14 @@ export default function OrdersTableClient({
                                     value={invoiceSearch}
                                     onChange={e => setInvoiceSearch(e.target.value)}
                                 />
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50 focus:bg-white outline-none"
                                     value={selectedInvoiceId}
                                     onChange={e => setSelectedInvoiceId(e.target.value)}
                                 >
                                     <option value="">-- Ne pas lier à une facture --</option>
-                                    {deliveryInvoices.filter(inv => 
-                                        inv.title.toLowerCase().includes(invoiceSearch.toLowerCase()) || 
+                                    {deliveryInvoices.filter(inv =>
+                                        inv.title.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
                                         (inv.description && inv.description.toLowerCase().includes(invoiceSearch.toLowerCase()))
                                     ).map(inv => (
                                         <option key={inv.id} value={inv.id}>
@@ -595,7 +602,7 @@ export default function OrdersTableClient({
                                     </Link>
                                 </div>
                             </div>
-                            
+
                             <div className="flex gap-3 justify-end pt-4">
                                 <button
                                     onClick={() => {

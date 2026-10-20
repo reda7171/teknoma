@@ -8,9 +8,10 @@ import { DEFAULT_WHATSAPP_TEMPLATES } from '@/lib/constants/whatsapp-templates'
 const CANDIDATE_URLS = [
     process.env.WHATSAPP_GATEWAY_URL,
     'http://whatsapp:3000',
+    'http://riwaya_whatsapp:3000',
+    'http://167.86.108.246:3001',
     'http://127.0.0.1:3001',
     'http://localhost:3001',
-    'http://riwaya_whatsapp:3000'
 ].filter(Boolean) as string[]
 
 export interface WhatsAppGatewayStatusResponse {
@@ -30,20 +31,39 @@ interface ActiveGateway {
     baseUrl: string
 }
 
+function getWahaHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+        'Accept': 'application/json, image/png, */*',
+    }
+    const apiKey = process.env.WAHA_API_KEY || process.env.WHATSAPP_API_KEY
+    if (apiKey) {
+        headers['X-Api-Key'] = apiKey
+    }
+    const user = process.env.WAHA_USER || process.env.WAHA_DASHBOARD_USERNAME || 'admin'
+    const pass = process.env.WAHA_PASS || process.env.WAHA_DASHBOARD_PASSWORD || 'admin123'
+    if (user && pass) {
+        headers['Authorization'] = `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`
+    }
+    return headers
+}
+
 async function detectGateway(): Promise<ActiveGateway | null> {
-    for (const url of CANDIDATE_URLS) {
+    const urls = Array.from(new Set(CANDIDATE_URLS))
+    for (const url of urls) {
         try {
             const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 1500)
+            const timeoutId = setTimeout(() => controller.abort(), 4000)
+
+            const authHeaders = getWahaHeaders()
 
             // Check WAHA
             const wahaRes = await fetch(`${url}/api/sessions?all=true`, {
-                headers: { Accept: 'application/json' },
+                headers: authHeaders,
                 signal: controller.signal,
                 cache: 'no-store'
             }).catch(() => null)
 
-            if (wahaRes && wahaRes.ok) {
+            if (wahaRes && (wahaRes.ok || wahaRes.status === 401)) {
                 clearTimeout(timeoutId)
                 return { engine: 'waha', baseUrl: url }
             }
@@ -65,6 +85,69 @@ async function detectGateway(): Promise<ActiveGateway | null> {
     return null
 }
 
+async function extractWahaQr(baseUrl: string, sessionName: string): Promise<string | null> {
+    const headers = getWahaHeaders()
+
+    // 1. Tenter l'endpoint officiel WAHA /api/{session}/auth/qr
+    try {
+        const qrRes = await fetch(`${baseUrl}/api/${sessionName}/auth/qr`, {
+            headers,
+            cache: 'no-store'
+        }).catch(() => null)
+
+        if (qrRes && qrRes.ok) {
+            const contentType = qrRes.headers.get('content-type') || ''
+            if (contentType.includes('application/json')) {
+                const qrJson = await qrRes.json().catch(() => null)
+                if (qrJson?.data) {
+                    return qrJson.data.startsWith('data:')
+                        ? qrJson.data
+                        : `data:${qrJson.mimetype || 'image/png'};base64,${qrJson.data}`
+                }
+                if (qrJson?.value && typeof qrJson.value === 'string') {
+                    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrJson.value)}`
+                }
+            } else {
+                // Réponse binaire image/png
+                const arrayBuffer = await qrRes.arrayBuffer()
+                if (arrayBuffer.byteLength > 100) {
+                    const buffer = Buffer.from(arrayBuffer)
+                    const mime = contentType.includes('image/') ? contentType.split(';')[0] : 'image/png'
+                    return `data:${mime};base64,${buffer.toString('base64')}`
+                }
+            }
+        }
+    } catch {}
+
+    // 2. Fallback: Screenshot direct de l'instance WhatsApp Web de Chromium
+    try {
+        const screenRes = await fetch(`${baseUrl}/api/screenshot?session=${encodeURIComponent(sessionName)}`, {
+            headers,
+            cache: 'no-store'
+        }).catch(() => null)
+
+        if (screenRes && screenRes.ok) {
+            const contentType = screenRes.headers.get('content-type') || ''
+            if (contentType.includes('application/json')) {
+                const screenJson = await screenRes.json().catch(() => null)
+                if (screenJson?.data) {
+                    return screenJson.data.startsWith('data:')
+                        ? screenJson.data
+                        : `data:${screenJson.mimetype || 'image/png'};base64,${screenJson.data}`
+                }
+            } else {
+                const arrayBuffer = await screenRes.arrayBuffer()
+                if (arrayBuffer.byteLength > 500) {
+                    const buffer = Buffer.from(arrayBuffer)
+                    return `data:image/png;base64,${buffer.toString('base64')}`
+                }
+            }
+        }
+    } catch {}
+
+    return null
+}
+
 export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusResponse> {
     await verifyAdmin()
 
@@ -75,7 +158,7 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
             status: 'OFFLINE',
             qr: null,
             user: null,
-            error: 'Passerelle WhatsApp hors ligne (démarrez le conteneur WhatsApp ou scripts/whatsapp-gateway.js)'
+            error: 'Passerelle WhatsApp hors ligne (démarrez le conteneur WhatsApp ou docker compose up -d whatsapp)'
         }
     }
 
@@ -94,27 +177,48 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
         }
 
         // WAHA Engine
+        const headers = getWahaHeaders()
         let sessionsRes = await fetch(`${gateway.baseUrl}/api/sessions?all=true`, {
-            headers: { Accept: 'application/json' },
+            headers,
             cache: 'no-store'
-        })
-        let sessions = await sessionsRes.json()
-        let session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === 'default') || sessions[0]) : null
+        }).catch(() => null)
 
-        if (!session || session.status === 'STOPPED' || session.status === 'FAILED') {
-            await fetch(`${gateway.baseUrl}/api/sessions/start`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'default' })
-            }).catch(() => null)
-
-            sessionsRes = await fetch(`${gateway.baseUrl}/api/sessions?all=true`, {
-                headers: { Accept: 'application/json' },
-                cache: 'no-store'
-            }).catch(() => null as any)
-            if (sessionsRes?.ok) {
+        let sessions: any[] = []
+        if (sessionsRes && sessionsRes.ok) {
+            try {
                 sessions = await sessionsRes.json()
-                session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === 'default') || sessions[0]) : null
+            } catch {}
+        }
+
+        let session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === 'default') || sessions[0]) : null
+        const sessionName = session?.name || 'default'
+
+        // Si la session n'existe pas encore dans WAHA, on la crée
+        if (!session) {
+            await fetch(`${gateway.baseUrl}/api/sessions`, {
+                method: 'POST',
+                headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: sessionName })
+            }).catch(() => null)
+        } else if (session.status === 'STOPPED' || session.status === 'FAILED') {
+            // Si la session existe mais est arrêtée, on la démarre
+            await fetch(`${gateway.baseUrl}/api/sessions/${sessionName}/start`, {
+                method: 'POST',
+                headers: { ...headers, 'Content-Type': 'application/json' }
+            }).catch(() => null)
+        }
+
+        // Récupérer le statut actualisé si on vient de démarrer
+        if (!session || session.status === 'STOPPED' || session.status === 'FAILED') {
+            sessionsRes = await fetch(`${gateway.baseUrl}/api/sessions?all=true`, {
+                headers,
+                cache: 'no-store'
+            }).catch(() => null)
+            if (sessionsRes && sessionsRes.ok) {
+                try {
+                    sessions = await sessionsRes.json()
+                    session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === sessionName) || sessions[0]) : null
+                } catch {}
             }
         }
 
@@ -134,22 +238,10 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
             }
         }
 
-        if (sessionStatus === 'SCAN_QR_CODE') {
-            const qrRes = await fetch(`${gateway.baseUrl}/api/default/auth/qr`, {
-                headers: { Accept: 'application/json' },
-                cache: 'no-store'
-            }).catch(() => null)
+        // Si la session est en SCAN_QR_CODE ou en train d'initialiser Chromium (STARTING)
+        const qrDataUrl = await extractWahaQr(gateway.baseUrl, sessionName)
 
-            let qrDataUrl: string | null = null
-            if (qrRes && qrRes.ok) {
-                const qrJson = await qrRes.json()
-                if (qrJson?.data) {
-                    qrDataUrl = qrJson.data.startsWith('data:')
-                        ? qrJson.data
-                        : `data:${qrJson.mimetype || 'image/png'};base64,${qrJson.data}`
-                }
-            }
-
+        if (qrDataUrl) {
             return {
                 isRunning: true,
                 status: 'SCAN_QR',
@@ -162,7 +254,10 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
             isRunning: true,
             status: 'CONNECTING',
             qr: null,
-            user: null
+            user: null,
+            error: sessionStatus === 'STARTING'
+                ? 'Démarrage du moteur WhatsApp Web en cours... Le QR code va apparaître dans quelques secondes.'
+                : null
         }
     } catch (err: any) {
         return {
@@ -199,9 +294,10 @@ export async function sendWhatsAppMessageViaGateway(phone: string, message: stri
         }
         const chatId = cleanPhone.includes('@') ? cleanPhone : `${cleanPhone}@c.us`
 
+        const headers = getWahaHeaders()
         const res = await fetch(`${gateway.baseUrl}/api/sendText`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { ...headers, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 session: 'default',
                 chatId,
@@ -212,6 +308,38 @@ export async function sendWhatsAppMessageViaGateway(phone: string, message: stri
         return { success: res.ok, ...data }
     } catch (err: any) {
         return { success: false, error: err.message || 'Impossible d\'envoyer le message WhatsApp' }
+    }
+}
+
+export async function restartWhatsAppSession() {
+    await verifyAdmin()
+
+    const gateway = await detectGateway()
+    if (!gateway) {
+        return { success: false, error: 'Passerelle WhatsApp indisponible' }
+    }
+
+    try {
+        if (gateway.engine === 'baileys') {
+            await fetch(`${gateway.baseUrl}/restart`, { method: 'POST' }).catch(() => null)
+        } else {
+            const headers = getWahaHeaders()
+            // Tenter restart direct puis fallback stop -> start
+            const res = await fetch(`${gateway.baseUrl}/api/sessions/default/restart`, {
+                method: 'POST',
+                headers
+            }).catch(() => null)
+
+            if (!res || !res.ok) {
+                await fetch(`${gateway.baseUrl}/api/sessions/default/stop`, { method: 'POST', headers }).catch(() => null)
+                await fetch(`${gateway.baseUrl}/api/sessions/default/start`, { method: 'POST', headers }).catch(() => null)
+            }
+        }
+
+        revalidatePath('/[locale]/admin/whatsapp-gateway', 'page')
+        return { success: true, message: 'Session relancée avec succès' }
+    } catch (err: any) {
+        return { success: false, error: err.message || 'Erreur lors du redémarrage' }
     }
 }
 
@@ -231,8 +359,9 @@ export async function disconnectWhatsAppGateway() {
             return data
         }
 
-        await fetch(`${gateway.baseUrl}/api/sessions/default/logout`, { method: 'POST' }).catch(() => null)
-        await fetch(`${gateway.baseUrl}/api/sessions/default/stop`, { method: 'POST' }).catch(() => null)
+        const headers = getWahaHeaders()
+        await fetch(`${gateway.baseUrl}/api/sessions/default/logout`, { method: 'POST', headers }).catch(() => null)
+        await fetch(`${gateway.baseUrl}/api/sessions/default/stop`, { method: 'POST', headers }).catch(() => null)
         revalidatePath('/[locale]/admin/whatsapp-gateway', 'page')
         return { success: true, message: 'Session déconnectée avec succès' }
     } catch (err: any) {

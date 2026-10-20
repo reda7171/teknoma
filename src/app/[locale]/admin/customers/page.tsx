@@ -2,6 +2,23 @@ import { prisma } from '@/lib/prisma'
 import { Users } from 'lucide-react'
 import CustomersPageClient from './CustomersPageClient'
 
+export interface CartProductItem {
+    id: string
+    title: string
+    price: number
+    quantity: number
+    image?: string
+    type?: string
+}
+
+export interface CustomerCartInfo {
+    itemCount: number
+    total: number
+    items: CartProductItem[]
+    type: 'active_cart' | 'last_order' | 'empty'
+    updatedAt?: string
+}
+
 export interface CustomerItem {
     id: string
     customerId?: string
@@ -15,6 +32,7 @@ export interface CustomerItem {
     totalSpent: number
     lastOrderDate: string
     source: 'google' | 'facebook' | 'order' | 'community'
+    cart?: CustomerCartInfo
 }
 
 function cleanPhone(phone?: string | null): string {
@@ -22,8 +40,26 @@ function cleanPhone(phone?: string | null): string {
     return phone.replace(/[\s\-\.\(\)\+]/g, '')
 }
 
+function parseCartData(rawJson?: string | null): CartProductItem[] {
+    if (!rawJson) return []
+    try {
+        const parsed = JSON.parse(rawJson)
+        if (Array.isArray(parsed)) {
+            return parsed.map((it: any) => ({
+                id: String(it.id || Math.random()),
+                title: it.title || it.name || 'Livre',
+                price: Number(it.price) || 0,
+                quantity: Number(it.quantity) || 1,
+                image: it.image || undefined,
+                type: it.type || 'BOOK'
+            }))
+        }
+    } catch {}
+    return []
+}
+
 async function getCustomers(): Promise<CustomerItem[]> {
-    const [orders, customers, users] = await Promise.all([
+    const [orders, customers, users, abandonedCarts] = await Promise.all([
         prisma.order.findMany({
             select: {
                 id: true,
@@ -34,6 +70,42 @@ async function getCustomers(): Promise<CustomerItem[]> {
                 address: true,
                 total: true,
                 createdAt: true,
+                items: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        price: true,
+                        type: true,
+                        book: {
+                            select: {
+                                id: true,
+                                title: true,
+                                image: true,
+                            }
+                        },
+                        pack: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            }
+                        },
+                        gift: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            }
+                        },
+                        extraProduct: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            }
+                        }
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' },
         }),
@@ -49,7 +121,18 @@ async function getCustomers(): Promise<CustomerItem[]> {
             },
             orderBy: { createdAt: 'desc' },
         }),
+        prisma.abandonedCart.findMany({
+            orderBy: { updatedAt: 'desc' }
+        }),
     ])
+
+    const abandonedMap = new Map<string, any>()
+    for (const ac of abandonedCarts) {
+        const pKey = cleanPhone(ac.phone)
+        const eKey = ac.email ? ac.email.toLowerCase().trim() : ''
+        if (pKey && !abandonedMap.has(pKey)) abandonedMap.set(pKey, ac)
+        if (eKey && !abandonedMap.has(eKey)) abandonedMap.set(eKey, ac)
+    }
 
     const readersMap = new Map<string, CustomerItem>()
 
@@ -171,6 +254,60 @@ async function getCustomers(): Promise<CustomerItem[]> {
             }
             if (c.address && !reader.address) reader.address = c.address
             if (c.city && !reader.city) reader.city = c.city
+        }
+    }
+
+    // 4. Association des produits dans les paniers
+    for (const reader of readersMap.values()) {
+        const pKey = cleanPhone(reader.phone)
+        const eKey = reader.email ? reader.email.toLowerCase().trim() : ''
+        const ac = (pKey && abandonedMap.get(pKey)) || (eKey && abandonedMap.get(eKey))
+
+        if (ac) {
+            const items = parseCartData(ac.cartData)
+            if (items.length > 0) {
+                reader.cart = {
+                    itemCount: items.reduce((s, it) => s + it.quantity, 0),
+                    total: ac.total || items.reduce((s, it) => s + it.price * it.quantity, 0),
+                    items,
+                    type: 'active_cart',
+                    updatedAt: ac.updatedAt.toISOString(),
+                }
+                continue
+            }
+        }
+
+        // Si pas de panier abandonné, récupérer les articles de la dernière commande
+        const matchingOrder = orders.find(o => {
+            const op = cleanPhone(o.phone)
+            const oe = o.email ? o.email.toLowerCase().trim() : ''
+            return (pKey && op === pKey) || (eKey && oe === eKey)
+        })
+
+        if (matchingOrder && matchingOrder.items && matchingOrder.items.length > 0) {
+            const orderItems: CartProductItem[] = matchingOrder.items.map(it => ({
+                id: it.id,
+                title: it.book?.title || it.pack?.name || it.gift?.name || it.extraProduct?.name || 'Article',
+                price: it.price,
+                quantity: it.quantity,
+                image: it.book?.image || it.pack?.image || it.gift?.image || it.extraProduct?.image || undefined,
+                type: it.type
+            }))
+
+            reader.cart = {
+                itemCount: orderItems.reduce((s, it) => s + it.quantity, 0),
+                total: matchingOrder.total || 0,
+                items: orderItems,
+                type: 'last_order',
+                updatedAt: matchingOrder.createdAt.toISOString()
+            }
+        } else {
+            reader.cart = {
+                itemCount: 0,
+                total: 0,
+                items: [],
+                type: 'empty'
+            }
         }
     }
 

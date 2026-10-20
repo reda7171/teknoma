@@ -1531,7 +1531,7 @@ export async function POST(req: Request) {
                 const orders = await prisma.order.findMany({
                     take: 5,
                     orderBy: { createdAt: 'desc' },
-                    select: { id: true, fullName: true, city: true, total: true, status: true, createdAt: true }
+                    select: { id: true, fullName: true, city: true, total: true, status: true, createdAt: true, trackingID: true }
                 })
 
                 const statusIcons: Record<string, string> = {
@@ -1541,12 +1541,15 @@ export async function POST(req: Request) {
 
                 const list = orders.map(o => {
                     const icon = statusIcons[o.status] || '📦'
-                    const shortId = o.id.slice(0, 6).toUpperCase()
+                    const shortId = o.id.slice(0, 8).toUpperCase()
                     const date = new Date(o.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
-                    return `${icon} <b>#${shortId}</b> — ${escapeHtml(o.fullName)} — <b>${o.total.toFixed(0)} درهم</b> — ${date}`
-                }).join('\n')
+                    const trackingLine = o.trackingID?.trim()
+                        ? `\n   ↳ 🚚 <b>WithYou:</b> <code>${escapeHtml(o.trackingID.trim())}</code>`
+                        : `\n   ↳ <i>Sans suivi WithYou</i>`
+                    return `${icon} <b>#${shortId}</b> — ${escapeHtml(o.fullName)} (${escapeHtml(o.city || 'Maroc')}) — <b>${o.total.toFixed(0)} DH</b> — ${date}${trackingLine}`
+                }).join('\n\n')
 
-                const text = `🛒 <b>5 DERNIÈRES COMMANDES</b>\n\n${list}`
+                const text = `🛒 <b>5 DERNIÈRES COMMANDES (AVEC SUIVI WITHYOU)</b>\n\n${list || 'Aucune commande trouvée.'}`
                 await answerCallbackQuery(callbackId, '🛒 Dernières commandes', token)
                 await sendTelegramMessage(text, message?.chat?.id.toString(), token)
             }
@@ -1884,7 +1887,11 @@ export async function POST(req: Request) {
                 const replyMarkup = { inline_keyboard }
                 await sendTelegramMessage(replyText, chatId.toString(), token, replyMarkup)
             }
-            else if (text.startsWith('/BILAN') || text === 'BILAN' || text.startsWith('/STATS')) {
+            else if (
+                text.startsWith('/BILAN') || text === 'BILAN' ||
+                text.startsWith('/BLIAN') || text === 'BLIAN' ||
+                text.startsWith('/STATS') || text === 'STATS'
+            ) {
                 const replyText = `📊 <b>Centre de Rapports Riwaya</b>\n\nQue souhaitez-vous consulter ?`
                 const replyMarkup = {
                     inline_keyboard: [

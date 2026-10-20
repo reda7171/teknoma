@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import {
     Users,
     ShoppingBag,
+    ShoppingCart,
     MapPin,
     Phone,
     Edit2,
@@ -11,9 +12,15 @@ import {
     X,
     Save,
     Loader2,
-    Mail
+    Mail,
+    BookOpen,
+    ExternalLink,
+    MessagesSquare,
+    CheckCircle,
+    Eye
 } from 'lucide-react'
 import { updateCustomer, deleteCustomer, createCustomer } from '@/lib/actions/customers'
+import type { CustomerCartInfo, CartProductItem } from '@/app/[locale]/admin/customers/page'
 
 export interface Customer {
     id: string
@@ -26,6 +33,7 @@ export interface Customer {
     totalSpent: number
     lastOrderDate: Date | string
     source?: 'google' | 'facebook' | 'order' | 'community'
+    cart?: CustomerCartInfo
 }
 
 interface CustomersTableProps {
@@ -43,10 +51,29 @@ export default function CustomersTable({
 }: CustomersTableProps) {
     const [customers, setCustomers] = useState(initialCustomers)
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+    const [viewingCartCustomer, setViewingCartCustomer] = useState<Customer | null>(null)
     const [isCreating, setIsCreating] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    const getWhatsAppUrl = (phone?: string, name?: string, items?: CartProductItem[], type?: string) => {
+        if (!phone) return null
+        let clean = phone.replace(/[^0-9]/g, '')
+        if (clean.startsWith('0') && clean.length === 10) {
+            clean = '212' + clean.slice(1)
+        } else if (clean.startsWith('00')) {
+            clean = clean.slice(2)
+        } else if (!clean.startsWith('212') && clean.length === 9) {
+            clean = '212' + clean
+        }
+        const booksList = items?.map(i => `• ${i.title} (x${i.quantity}) - ${i.price} DH`).join('\n') || ''
+        const intro = type === 'active_cart'
+            ? `Bonjour ${name || ''}, nous avons remarqué que vous aviez sélectionné des articles sur Riwaya.store :`
+            : `Bonjour ${name || ''}, suite à votre commande sur Riwaya.store :`
+        const msg = `${intro}\n\n${booksList}\n\nSouhaitez-vous de l'aide ou finaliser une nouvelle livraison ? Nous restons à votre entière disposition.`
+        return `https://wa.me/${clean}?text=${encodeURIComponent(msg)}`
+    }
 
     React.useEffect(() => {
         setCustomers(initialCustomers)
@@ -152,6 +179,7 @@ export default function CustomersTable({
                             <tr className="bg-gray-50/50">
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Lecteur</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Localisation</th>
+                                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">Panier & Produits</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-center">Historique</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-right">Valeur</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 text-right">Actions</th>
@@ -160,7 +188,7 @@ export default function CustomersTable({
                         <tbody className="divide-y divide-gray-50">
                             {filteredCustomers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-8 py-16 text-center">
+                                    <td colSpan={6} className="px-8 py-16 text-center">
                                         <div className="flex flex-col items-center gap-3">
                                             <Users className="w-12 h-12 text-gray-100" />
                                             <p className="text-gray-400 font-bold">Aucun lecteur trouvé</p>
@@ -234,6 +262,77 @@ export default function CustomersTable({
                                             <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 truncate max-w-[200px]">
                                                 {customer.address || 'Aucune adresse'}
                                             </p>
+                                        </td>
+                                        <td className="px-8 py-7">
+                                            {(!customer.cart || !customer.cart.items || customer.cart.items.length === 0) ? (
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-gray-50 text-gray-400 border border-gray-100">
+                                                    <ShoppingCart className="w-3 h-3 opacity-50" />
+                                                    Panier vide
+                                                </span>
+                                            ) : (
+                                                <div className="flex flex-col gap-2 min-w-[200px]">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                                                            customer.cart.type === 'active_cart'
+                                                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                                                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        }`}>
+                                                            <ShoppingCart className="w-2.5 h-2.5" />
+                                                            {customer.cart.type === 'active_cart' ? 'En cours' : 'Dernier'} ({customer.cart.items.reduce((s, it) => s + (it.quantity || 1), 0)})
+                                                        </span>
+                                                        <span className="text-xs font-black text-black">
+                                                            {customer.cart.total.toFixed(0)} <span className="text-[9px] text-gray-400 font-bold">DH</span>
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex items-center -space-x-2 overflow-hidden py-0.5">
+                                                            {customer.cart.items.slice(0, 3).map((item, idx) => (
+                                                                <button
+                                                                    key={idx}
+                                                                    type="button"
+                                                                    title={`${item.title} (x${item.quantity}) - ${item.price} DH`}
+                                                                    onClick={() => setViewingCartCustomer(customer)}
+                                                                    className="w-8 h-10 rounded-md overflow-hidden bg-gray-100 border-2 border-white shadow-sm flex-shrink-0 relative hover:scale-105 transition-transform"
+                                                                >
+                                                                    {item.image ? (
+                                                                        <img
+                                                                            src={item.image}
+                                                                            alt={item.title}
+                                                                            className="w-full h-full object-cover"
+                                                                            loading="lazy"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+                                                                            <BookOpen className="w-3 h-3" />
+                                                                        </div>
+                                                                    )}
+                                                                </button>
+                                                            ))}
+                                                            {customer.cart.items.length > 3 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setViewingCartCustomer(customer)}
+                                                                    className="w-8 h-10 rounded-md bg-black text-white text-[9px] font-black flex items-center justify-center border-2 border-white shadow-sm flex-shrink-0 hover:bg-gray-800 transition-colors"
+                                                                    title="Voir tous les articles"
+                                                                >
+                                                                    +{customer.cart.items.length - 3}
+                                                                </button>
+                                                            )}
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setViewingCartCustomer(customer)}
+                                                            className="text-[10px] font-bold text-gray-500 hover:text-black flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                                                            title="Consulter le panier"
+                                                        >
+                                                            <Eye className="w-3 h-3" />
+                                                            Voir
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-8 py-7">
                                             <div className="flex flex-col items-center gap-2">
@@ -383,6 +482,127 @@ export default function CustomersTable({
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Détails du Panier */}
+            {viewingCartCustomer && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-2xl rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 border border-white/20">
+                        <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white">
+                                    <ShoppingCart className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-xl font-black text-black">
+                                            {viewingCartCustomer.fullName}
+                                        </h3>
+                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                                            viewingCartCustomer.cart?.type === 'active_cart'
+                                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                        }`}>
+                                            {viewingCartCustomer.cart?.type === 'active_cart' ? 'Panier actif / abandonné' : 'Dernier panier commandé'}
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-gray-400 font-bold flex items-center gap-2 mt-0.5">
+                                        <span>{viewingCartCustomer.phone || 'Sans téléphone'}</span>
+                                        {viewingCartCustomer.city && <span>• {viewingCartCustomer.city}</span>}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setViewingCartCustomer(null)}
+                                className="p-3 hover:bg-white rounded-2xl transition-colors shadow-sm"
+                            >
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
+
+                        {/* Liste des articles */}
+                        <div className="p-8 max-h-[50vh] overflow-y-auto divide-y divide-gray-100">
+                            {(!viewingCartCustomer.cart?.items || viewingCartCustomer.cart.items.length === 0) ? (
+                                <div className="py-12 text-center text-gray-400 font-bold text-sm">
+                                    Aucun produit dans ce panier
+                                </div>
+                            ) : (
+                                viewingCartCustomer.cart.items.map((item, idx) => (
+                                    <div key={idx} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-14 h-18 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0 shadow-sm">
+                                                {item.image ? (
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                        <BookOpen className="w-6 h-6" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <p className="text-sm font-black text-black leading-tight">
+                                                        {item.title}
+                                                    </p>
+                                                    {item.type && (
+                                                        <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-gray-100 text-gray-600">
+                                                            {item.type}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-gray-500 font-bold">
+                                                    {item.price.toFixed(0)} DH × {item.quantity}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-sm font-black text-black">
+                                                {(item.price * item.quantity).toFixed(0)} DH
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Récapitulatif & Actions */}
+                        <div className="p-8 bg-gray-50/70 border-t border-gray-100 flex flex-col gap-4">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-black uppercase tracking-wider text-gray-400">
+                                    Total Panier ({viewingCartCustomer.cart?.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 0} articles)
+                                </span>
+                                <span className="text-2xl font-black text-black">
+                                    {(viewingCartCustomer.cart?.total || 0).toFixed(0)} <span className="text-xs text-gray-400 uppercase font-bold">DH</span>
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-3 pt-2">
+                                {viewingCartCustomer.phone && getWhatsAppUrl(viewingCartCustomer.phone, viewingCartCustomer.fullName, viewingCartCustomer.cart?.items, viewingCartCustomer.cart?.type) && (
+                                    <a
+                                        href={getWhatsAppUrl(viewingCartCustomer.phone, viewingCartCustomer.fullName, viewingCartCustomer.cart?.items, viewingCartCustomer.cart?.type) || '#'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 py-4 bg-emerald-600 text-white font-black uppercase tracking-wider text-[11px] rounded-2xl hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-95"
+                                    >
+                                        <MessagesSquare className="w-4 h-4" />
+                                        Relance WhatsApp Panier
+                                    </a>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => setViewingCartCustomer(null)}
+                                    className="px-8 py-4 bg-gray-200 text-gray-700 font-black uppercase tracking-wider text-[11px] rounded-2xl hover:bg-gray-300 transition-all active:scale-95"
+                                >
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

@@ -27,7 +27,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     const tBooksPage = await getTranslations('BooksPage')
     const baseUrl = getBaseUrl()
 
-    const isUsedOnly = resolvedParams.usedOnly === 'true'
+    const isUsedOnly = resolvedParams.usedOnly === 'true' || resolvedParams.isUsed === 'true'
     const isAr = locale === 'ar'
     const isEn = locale === 'en'
 
@@ -106,6 +106,7 @@ interface SearchParams {
     inStock?: string
     author?: string
     usedOnly?: string
+    isUsed?: string
     newArrivals?: string
 }
 
@@ -135,7 +136,8 @@ export default async function BooksPage({
         active: true,
         language: sParams.language,
         inStock: sParams.inStock === undefined ? true : sParams.inStock === 'true',
-        usedOnly: sParams.usedOnly === 'true',
+        usedOnly: sParams.usedOnly === 'true' || sParams.isUsed === 'true',
+        isUsed: sParams.isUsed === 'true' || sParams.usedOnly === 'true',
         newArrivals: sParams.newArrivals === 'true',
         author: sParams.author,
     };
@@ -170,9 +172,9 @@ export default async function BooksPage({
         { code: 'ar', label: 'العربية' },
     ];
 
-    const isUsedOnly = sParams.usedOnly === 'true'
+    const isUsedOnly = sParams.usedOnly === 'true' || sParams.isUsed === 'true'
     const baseUrl = getBaseUrl()
-    const pageUrl = isUsedOnly ? `${baseUrl}/${locale}/books?usedOnly=true` : `${baseUrl}/${locale}/books`
+    const pageUrl = isUsedOnly ? `${baseUrl}/${locale}/books?isUsed=true` : `${baseUrl}/${locale}/books`
 
     let usedBooksSchema = null
     if (isUsedOnly) {
@@ -291,7 +293,8 @@ export default async function BooksPage({
                                         active: true,
                                         language: sParams.language,
                                         inStock: sParams.inStock === undefined ? true : sParams.inStock === 'true',
-                                        usedOnly: sParams.usedOnly === 'true',
+                                        usedOnly: sParams.usedOnly === 'true' || sParams.isUsed === 'true',
+                                        isUsed: sParams.isUsed === 'true' || sParams.usedOnly === 'true',
                                         newArrivals: sParams.newArrivals === 'true',
                                         author: sParams.author,
                                         page: 1,
