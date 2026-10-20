@@ -114,6 +114,9 @@ services:
       - WHATSAPP_START_SESSION=default
       - WAHA_ZIPPER=ZIPPER
       - WAHA_PRINT_QR=false
+      - WAHA_DASHBOARD_ENABLED=true
+      - WAHA_DASHBOARD_USERNAME=${WAHA_USER:-admin}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_PASS:-admin123}
     volumes:
       - waha_data:/app/.sessions
     networks:
