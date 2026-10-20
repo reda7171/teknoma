@@ -5,7 +5,13 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { DEFAULT_WHATSAPP_TEMPLATES } from '@/lib/constants/whatsapp-templates'
 
-const GATEWAY_URL = process.env.WHATSAPP_GATEWAY_URL || 'http://127.0.0.1:3001'
+const CANDIDATE_URLS = [
+    process.env.WHATSAPP_GATEWAY_URL,
+    'http://whatsapp:3000',
+    'http://127.0.0.1:3001',
+    'http://localhost:3001',
+    'http://riwaya_whatsapp:3000'
+].filter(Boolean) as string[]
 
 export interface WhatsAppGatewayStatusResponse {
     isRunning: boolean
@@ -19,44 +25,152 @@ export interface WhatsAppGatewayStatusResponse {
     error?: string | null
 }
 
+interface ActiveGateway {
+    engine: 'waha' | 'baileys'
+    baseUrl: string
+}
+
+async function detectGateway(): Promise<ActiveGateway | null> {
+    for (const url of CANDIDATE_URLS) {
+        try {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 1500)
+
+            // Check WAHA
+            const wahaRes = await fetch(`${url}/api/sessions?all=true`, {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal,
+                cache: 'no-store'
+            }).catch(() => null)
+
+            if (wahaRes && wahaRes.ok) {
+                clearTimeout(timeoutId)
+                return { engine: 'waha', baseUrl: url }
+            }
+
+            // Check Baileys
+            const baileysRes = await fetch(`${url}/status`, {
+                signal: controller.signal,
+                cache: 'no-store'
+            }).catch(() => null)
+
+            if (baileysRes && baileysRes.ok) {
+                clearTimeout(timeoutId)
+                return { engine: 'baileys', baseUrl: url }
+            }
+
+            clearTimeout(timeoutId)
+        } catch {}
+    }
+    return null
+}
+
 export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusResponse> {
     await verifyAdmin()
 
-    try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3500)
-
-        const res = await fetch(`${GATEWAY_URL}/status`, {
-            cache: 'no-store',
-            signal: controller.signal
-        })
-        clearTimeout(timeoutId)
-
-        if (!res.ok) {
-            return {
-                isRunning: false,
-                status: 'OFFLINE',
-                qr: null,
-                user: null,
-                error: `Service HTTP ${res.status}`
-            }
-        }
-
-        const data = await res.json()
-        return {
-            isRunning: true,
-            status: data.status || 'DISCONNECTED',
-            qr: data.qr || null,
-            user: data.user || null,
-            error: data.error || null
-        }
-    } catch {
+    const gateway = await detectGateway()
+    if (!gateway) {
         return {
             isRunning: false,
             status: 'OFFLINE',
             qr: null,
             user: null,
-            error: 'Le service passerelle WhatsApp est éteint (scripts/whatsapp-gateway.js)'
+            error: 'Passerelle WhatsApp hors ligne (démarrez le conteneur WhatsApp ou scripts/whatsapp-gateway.js)'
+        }
+    }
+
+    try {
+        if (gateway.engine === 'baileys') {
+            const res = await fetch(`${gateway.baseUrl}/status`, { cache: 'no-store' })
+            if (!res.ok) throw new Error(`HTTP ${res.status}`)
+            const data = await res.json()
+            return {
+                isRunning: true,
+                status: data.status || 'DISCONNECTED',
+                qr: data.qr || null,
+                user: data.user || null,
+                error: data.error || null
+            }
+        }
+
+        // WAHA Engine
+        let sessionsRes = await fetch(`${gateway.baseUrl}/api/sessions?all=true`, {
+            headers: { Accept: 'application/json' },
+            cache: 'no-store'
+        })
+        let sessions = await sessionsRes.json()
+        let session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === 'default') || sessions[0]) : null
+
+        if (!session || session.status === 'STOPPED' || session.status === 'FAILED') {
+            await fetch(`${gateway.baseUrl}/api/sessions/start`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'default' })
+            }).catch(() => null)
+
+            sessionsRes = await fetch(`${gateway.baseUrl}/api/sessions?all=true`, {
+                headers: { Accept: 'application/json' },
+                cache: 'no-store'
+            }).catch(() => null as any)
+            if (sessionsRes?.ok) {
+                sessions = await sessionsRes.json()
+                session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === 'default') || sessions[0]) : null
+            }
+        }
+
+        const sessionStatus = session?.status || 'STARTING'
+
+        if (sessionStatus === 'WORKING') {
+            const phone = (session.me?.id || '').split('@')[0]
+            return {
+                isRunning: true,
+                status: 'CONNECTED',
+                qr: null,
+                user: {
+                    id: session.me?.id || 'whatsapp-connected',
+                    name: session.me?.pushName || 'Riwaya WhatsApp',
+                    phone: phone ? `+${phone}` : 'Connecté'
+                }
+            }
+        }
+
+        if (sessionStatus === 'SCAN_QR_CODE') {
+            const qrRes = await fetch(`${gateway.baseUrl}/api/default/auth/qr`, {
+                headers: { Accept: 'application/json' },
+                cache: 'no-store'
+            }).catch(() => null)
+
+            let qrDataUrl: string | null = null
+            if (qrRes && qrRes.ok) {
+                const qrJson = await qrRes.json()
+                if (qrJson?.data) {
+                    qrDataUrl = qrJson.data.startsWith('data:')
+                        ? qrJson.data
+                        : `data:${qrJson.mimetype || 'image/png'};base64,${qrJson.data}`
+                }
+            }
+
+            return {
+                isRunning: true,
+                status: 'SCAN_QR',
+                qr: qrDataUrl,
+                user: null
+            }
+        }
+
+        return {
+            isRunning: true,
+            status: 'CONNECTING',
+            qr: null,
+            user: null
+        }
+    } catch (err: any) {
+        return {
+            isRunning: false,
+            status: 'OFFLINE',
+            qr: null,
+            user: null,
+            error: err.message || 'Erreur communication passerelle'
         }
     }
 }
@@ -64,31 +178,63 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
 export async function sendWhatsAppMessageViaGateway(phone: string, message: string) {
     await verifyAdmin()
 
+    const gateway = await detectGateway()
+    if (!gateway) {
+        return { success: false, error: 'Passerelle WhatsApp indisponible' }
+    }
+
     try {
-        const res = await fetch(`${GATEWAY_URL}/send`, {
+        if (gateway.engine === 'baileys') {
+            const res = await fetch(`${gateway.baseUrl}/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to: phone, message })
+            })
+            return await res.json()
+        }
+
+        let cleanPhone = phone.replace(/[^0-9]/g, '')
+        if (cleanPhone.startsWith('0')) {
+            cleanPhone = '212' + cleanPhone.slice(1)
+        }
+        const chatId = cleanPhone.includes('@') ? cleanPhone : `${cleanPhone}@c.us`
+
+        const res = await fetch(`${gateway.baseUrl}/api/sendText`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: phone, message })
+            body: JSON.stringify({
+                session: 'default',
+                chatId,
+                text: message
+            })
         })
-
         const data = await res.json()
-        return data
+        return { success: res.ok, ...data }
     } catch (err: any) {
-        return { success: false, error: err.message || 'Impossible de joindre le serveur WhatsApp' }
+        return { success: false, error: err.message || 'Impossible d\'envoyer le message WhatsApp' }
     }
 }
 
 export async function disconnectWhatsAppGateway() {
     await verifyAdmin()
 
+    const gateway = await detectGateway()
+    if (!gateway) {
+        return { success: false, error: 'Passerelle WhatsApp indisponible' }
+    }
+
     try {
-        const res = await fetch(`${GATEWAY_URL}/logout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        const data = await res.json()
+        if (gateway.engine === 'baileys') {
+            const res = await fetch(`${gateway.baseUrl}/logout`, { method: 'POST' })
+            const data = await res.json()
+            revalidatePath('/[locale]/admin/whatsapp-gateway', 'page')
+            return data
+        }
+
+        await fetch(`${gateway.baseUrl}/api/sessions/default/logout`, { method: 'POST' }).catch(() => null)
+        await fetch(`${gateway.baseUrl}/api/sessions/default/stop`, { method: 'POST' }).catch(() => null)
         revalidatePath('/[locale]/admin/whatsapp-gateway', 'page')
-        return data
+        return { success: true, message: 'Session déconnectée avec succès' }
     } catch (err: any) {
         return { success: false, error: err.message || 'Erreur lors de la déconnexion' }
     }
