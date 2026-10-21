@@ -33,9 +33,10 @@ export interface OrderInvoiceData {
     }>;
 }
 
-export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'fr'): string {
+export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'fr', customPhone?: string): string {
     const isAr = locale === 'ar';
     const isEn = locale === 'en';
+    const phone = customPhone || "07 02 22 05 75 / 06 66 03 81 29";
 
     const invoiceNum = order.invoiceNumber || `FAC-${order.id.slice(0, 8).toUpperCase()}`;
     const orderDate = new Date(order.invoiceDate || order.createdAt).toLocaleDateString(
@@ -75,7 +76,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             paidStatus: "Facture soldée",
             unpaidStatus: "Paiement à la livraison (COD)",
             footer1: "Riwaya Books — Librairie en ligne au Maroc. ICE: 002589632000045.",
-            footer2: "Pour toute question : contact@riwaya.store | 06 66 66 66 66",
+            footer2: `Pour toute question : contact@riwaya.store | ${phone}`,
             printBtn: "Imprimer / Enregistrer en PDF",
             closeBtn: "Fermer"
         },
@@ -100,7 +101,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             paidStatus: "مدفوعة بالكامل",
             unpaidStatus: "الدفع عند الاستلام (COD)",
             footer1: "مكتبة رواية — بيع الكتب وتوصيلها بالمغرب.",
-            footer2: "لأي استفسار : contact@riwaya.store | 06 66 66 66 66",
+            footer2: `لأي استفسار : contact@riwaya.store | ${phone}`,
             printBtn: "طباعة / حفظ بصيغة PDF",
             closeBtn: "إغلاق"
         },
@@ -125,7 +126,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             paidStatus: "Paid in Full",
             unpaidStatus: "Cash on Delivery (COD)",
             footer1: "Riwaya Books — Online Bookstore in Morocco. ICE: 002589632000045.",
-            footer2: "Support: contact@riwaya.store | 06 66 66 66 66",
+            footer2: `Support: contact@riwaya.store | ${phone}`,
             printBtn: "Print / Save as PDF",
             closeBtn: "Close"
         }
@@ -356,7 +357,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
                         <td style="vertical-align: middle;">
                             <div class="company-title">RIWAYA BOOKS</div>
                             <div class="company-sub">Librairie & Édition • Maroc</div>
-                            <div class="company-sub">contact@riwaya.store | 06 66 66 66 66</div>
+                            <div class="company-sub">contact@riwaya.store | ${escapeHtml(phone)}</div>
                         </td>
                         <td class="invoice-tag" style="vertical-align: middle;">
                             <div class="invoice-badge">${labels.title}</div>

@@ -33,7 +33,32 @@ export async function GET(
             return new NextResponse('Order not found', { status: 404 });
         }
 
-        const html = generateInvoiceHtml(order as any, locale);
+        // Récupérer dynamiquement les numéros des agents WhatsApp
+        let formattedAgentsPhone = "07 02 22 05 75 / 06 66 03 81 29";
+        try {
+            const agentsSetting = await prisma.siteSettings.findUnique({
+                where: { key: 'whatsapp_agents' }
+            });
+            if (agentsSetting?.value) {
+                const agents = JSON.parse(agentsSetting.value);
+                if (Array.isArray(agents)) {
+                    const activePhones = agents
+                        .filter((a: any) => a.enabled !== false && a.phone)
+                        .map((a: any) => {
+                            const raw = String(a.phone).replace(/\s+/g, '');
+                            if (/^0[5-7]\d{8}$/.test(raw)) {
+                                return raw.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+                            }
+                            return a.phone;
+                        });
+                    if (activePhones.length > 0) {
+                        formattedAgentsPhone = activePhones.join(' / ');
+                    }
+                }
+            }
+        } catch {}
+
+        const html = generateInvoiceHtml(order as any, locale, formattedAgentsPhone);
 
         return new Response(html, {
             status: 200,

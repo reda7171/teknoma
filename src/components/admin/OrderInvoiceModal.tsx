@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useId } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { 
     X, 
     Printer, 
@@ -62,10 +62,40 @@ export default function OrderInvoiceModal({
 
     // Company info (Émetteur)
     const [companyName, setCompanyName] = useState('Riwaya Books')
-    const [companyPhone, setCompanyPhone] = useState('06 66 66 66 66')
+    const [companyPhone, setCompanyPhone] = useState('07 02 22 05 75 / 06 66 03 81 29')
     const [companyEmail, setCompanyEmail] = useState('contact@riwaya.store')
     const [companyAddress, setCompanyAddress] = useState('Casablanca, Maroc')
     const [companyIce, setCompanyIce] = useState('002589632000045')
+
+    useEffect(() => {
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.settings) {
+                    const rawAgents = data.settings.whatsapp_agents
+                    if (rawAgents) {
+                        try {
+                            const parsed = JSON.parse(rawAgents)
+                            if (Array.isArray(parsed)) {
+                                const activePhones = parsed
+                                    .filter((a: any) => a.enabled !== false && a.phone)
+                                    .map((a: any) => {
+                                        const raw = String(a.phone).replace(/\s+/g, '')
+                                        if (/^0[5-7]\d{8}$/.test(raw)) {
+                                            return raw.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5')
+                                        }
+                                        return a.phone
+                                    })
+                                if (activePhones.length > 0) {
+                                    setCompanyPhone(activePhones.join(' / '))
+                                }
+                            }
+                        } catch {}
+                    }
+                }
+            })
+            .catch(() => {})
+    }, [])
 
     // Customer info (Destinataire)
     const [fullName, setFullName] = useState(order.fullName || '')
