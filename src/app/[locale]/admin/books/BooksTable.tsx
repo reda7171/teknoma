@@ -451,9 +451,9 @@ CRITICAL INSTRUCTIONS:
    Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
 2. STRICT ZERO PRICE / NO DISCOUNT POLICY:
    NEVER mention or include any price, currency, discount or promo in descriptions, titles, keywords, highlights or package content (ABSOLUTELY NO 'prix', 'price', 'سعر', 'ثمن', 'DH', 'MAD', 'درهم', 'gratuit', 'free', 'off', 'promo', '%', 'remise', 'solde'). Jumia strictly rejects listings containing price mentions in the description!
-3. MULTILINGUAL CONTENT:
-   - "description_ar", "description_fr", "description_en": 2 to 3 engaging paragraphs highlighting the reading experience and book value.
-   - "longDescription_ar", "longDescription_fr", "longDescription_en": Comprehensive presentation, themes, and key takeaways.
+3. MULTILINGUAL CONTENT & SEMANTIC SEO STRUCTURE:
+   - For "longDescription_ar", "longDescription_fr", and "longDescription_en", use semantic <h2> headings to capture high-intent long-tail and voice search queries in Morocco (e.g. <h2>Pourquoi lire ce livre ?</h2>, <h2>Résumé et thèmes principaux</h2>, <h2>À qui s'adresse ce livre ?</h2> / <h2>لماذا يجب قراءة هذا الكتاب؟</h2>, <h2>ملخص وأهم المحاور</h2>).
+   - "description_ar", "description_fr", "description_en": 2 to 3 engaging hook paragraphs highlighting the reading experience and book value.
    - "category": Recommended main category (e.g. Romans & Littérature, Développement Personnel, Histoire, etc.).
    - "subCategory": Recommended subcategory.
    - "seoKeywords": High-volume search keywords separated by commas (author name, title transliteration, genre, book in Morocco).
@@ -468,12 +468,12 @@ You MUST return ONLY a valid JSON array of objects (one object per book), preser
     "title_ar": "العنوان بالعربية",
     "title_fr": "Titre phonétique en français",
     "title_en": "Phonetic title in English",
-    "description_ar": "الوصف بالعربية",
-    "description_fr": "Description engageante en français",
-    "description_en": "Engaging description in English",
-    "longDescription_ar": "الوصف التفصيلي بالعربية",
-    "longDescription_fr": "Description détaillée en français",
-    "longDescription_en": "Detailed description in English",
+    "description_ar": "الوصف المختصر بالعربية",
+    "description_fr": "Description courte et engageante en français",
+    "description_en": "Engaging short description in English",
+    "longDescription_ar": "<h2>لماذا يجب قراءة هذا الكتاب؟</h2><p>...</p><h2>ملخص وأهم المحاور</h2><p>...</p>",
+    "longDescription_fr": "<h2>Pourquoi lire ce livre ?</h2><p>...</p><h2>Résumé et thèmes principaux</h2><p>...</p>",
+    "longDescription_en": "<h2>Why read this book?</h2><p>...</p><h2>Key themes & summary</h2><p>...</p>",
     "category": "Catégorie principale",
     "subCategory": "Sous-catégorie",
     "seoKeywords": "mot-clé 1, mot-clé 2, mot-clé 3",

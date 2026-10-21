@@ -556,16 +556,16 @@ Please provide the following information in JSON format (so I can easily copy-pa
   "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
   "description_fr": "Short engaging description in French (max 3 paragraphs)",
   "description_en": "Short engaging description in English (max 3 paragraphs)",
-  "longDescription_ar": "Detailed description in Arabic",
-  "longDescription_fr": "Detailed description in French",
-  "longDescription_en": "Detailed description in English",
+  "longDescription_ar": "Detailed description in Arabic with semantic <h2> headings (e.g. <h2>لماذا يجب قراءة هذا الكتاب؟</h2>, <h2>ملخص وأهم المحاور</h2>)",
+  "longDescription_fr": "Detailed description in French with semantic <h2> headings (e.g. <h2>Pourquoi lire ce livre ?</h2>, <h2>Résumé et thèmes clés</h2>)",
+  "longDescription_en": "Detailed description in English with semantic <h2> headings (e.g. <h2>Why read this book?</h2>, <h2>Key themes & summary</h2>)",
   "category": "Main category of the book",
   "subCategory": "Sub-category",
   "seoKeywords": "Comma-separated SEO keywords (ar, fr, en)",
   "jumiaHighlights": "Key highlights of the book (bullet points)",
   "jumiaPackageContent": "What's in the box? (e.g., 1 x Book)"
 }
-Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NEVER mention price, discounts, promos, or currency (DH, MAD, درهم) in any description or highlights (Jumia strictly rejects listings mentioning price in descriptions).`
+Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural question headings <h2> to optimize for voice search and long-tail Moroccan queries. CRITICAL: NEVER mention price, discounts, promos, or currency (DH, MAD, درهم) in any description or highlights (Jumia strictly rejects listings mentioning price in descriptions).`
 
         navigator.clipboard.writeText(prompt)
         setToastMessage('Prompt ChatGPT copié dans le presse-papier !')
