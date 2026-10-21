@@ -62,8 +62,8 @@ export async function POST() {
         }
 
         // Ajouter l'admin par défaut au cas où
-        const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
-        if (admin) authors.push(admin)
+        const defaultAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
+        if (defaultAdmin) authors.push(defaultAdmin)
 
         // Nettoyage complet
         await prisma.post.deleteMany({
