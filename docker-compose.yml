@@ -9,7 +9,16 @@ services:
       MYSQL_DATABASE: ${DB_NAME:-riwaya_db}
       MYSQL_USER: ${DB_USER:-riwaya_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-riwaya_pass}
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=512M --innodb-log-buffer-size=16M --max-connections=150 --table-open-cache=2000 --thread-cache-size=16 --skip-name-resolve
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    cpu_shares: 1024
     ports:
       - "3906:3306"
     volumes:
@@ -27,6 +36,12 @@ services:
     image: redis:alpine
     container_name: riwaya_redis
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    cpu_shares: 512
     ports:
       - "6379:6379"
     volumes:
@@ -45,9 +60,19 @@ services:
       - .env
     environment:
       - WHATSAPP_GATEWAY_URL=http://whatsapp:3000
-      - DATABASE_URL=mysql://${DB_USER:-riwaya_user}:${DB_PASSWORD:-riwaya_pass}@db:3306/${DB_NAME:-riwaya_db}?connect_timeout=30
+      - DATABASE_URL=mysql://${DB_USER:-riwaya_user}:${DB_PASSWORD:-riwaya_pass}@db:3306/${DB_NAME:-riwaya_db}?connect_timeout=30&pool_timeout=30&connection_limit=25
       - KEEP_ALIVE_TIMEOUT=75000
       - NODE_OPTIONS=--max-old-space-size=4096
+      - UV_THREADPOOL_SIZE=64
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3072M
+        reservations:
+          cpus: '0.5'
+          memory: 1024M
+    cpu_shares: 1024
     depends_on:
       db:
         condition: service_healthy
@@ -70,6 +95,12 @@ services:
     image: docker.n8n.io/n8nio/n8n:latest
     container_name: riwaya_n8n
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+    cpu_shares: 256
     ports:
       - "5678:5678"
     environment:
@@ -90,6 +121,12 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     container_name: riwaya_phpmyadmin
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    cpu_shares: 128
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
@@ -108,6 +145,12 @@ services:
     container_name: riwaya_whatsapp
     restart: always
     shm_size: '1gb'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    cpu_shares: 256
     ports:
       - "3001:3000"
     environment:
