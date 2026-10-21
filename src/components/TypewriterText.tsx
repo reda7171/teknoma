@@ -29,7 +29,7 @@ export default function TypewriterText({ text, speed = 50, delay = 0, loop = fal
 
         let i = 0;
         let isDeleting = false;
-        let timeoutId: NodeJS.Timeout;
+        let timeoutId: any;
         setDisplayedText(''); // Reset on start
         
         const type = () => {

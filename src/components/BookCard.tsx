@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/routing'
 import { useState } from 'react'
-import { ShoppingCart, Star, Check } from 'lucide-react'
+import { ShoppingCart, Star, Check, TrendingUp } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
@@ -28,6 +28,8 @@ interface BookCardProps {
     condition?: string | null
     variant?: 'default' | 'compact' | 'featured'
     priority?: boolean
+    views?: number
+    isTrending?: boolean
 }
 
 export default function BookCard({
@@ -44,6 +46,8 @@ export default function BookCard({
     condition,
     variant = 'default',
     priority = false,
+    views,
+    isTrending,
 }: BookCardProps) {
     const t = useTranslations('Common');
     const locale = useLocale();
@@ -103,9 +107,9 @@ export default function BookCard({
                             </span>
                         </div>
                     )}
-                    {/* Badge langue AR/FR/EN */}
-                    {language && (
-                        <div className="absolute top-3 left-3 z-20">
+                    {/* Badges en haut à gauche (Langue & Tendance) */}
+                    <div className="absolute top-3 left-3 z-20 flex flex-col items-start gap-1.5">
+                        {language && (
                             <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md shadow-sm ${
                                 language === 'ar' ? 'bg-emerald-800 text-white' :
                                 language === 'fr' ? 'bg-blue-800 text-white' :
@@ -114,8 +118,14 @@ export default function BookCard({
                             }`}>
                                 {language.toUpperCase()}
                             </span>
-                        </div>
-                    )}
+                        )}
+                        {(isTrending || (views !== undefined && views >= 20)) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
+                                <TrendingUp className="w-2.5 h-2.5" />
+                                <span>{t('Trending')}</span>
+                            </span>
+                        )}
+                    </div>
                 </div>
             </Link>
 

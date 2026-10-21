@@ -3,6 +3,7 @@ import { verifyAdmin } from '@/lib/actions/auth'
 import { importBooksFromExcel, updateStockFromTsv, type ProgressCallback } from '@/lib/actions/bulk-import'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300 // 5 minutes pour les gros volumes
 
 // POST /api/admin/books/bulk-import (Streaming NDJSON avec progression temps réel)
 export async function POST(request: Request) {
@@ -29,8 +30,8 @@ export async function POST(request: Request) {
                     }
 
                     const result = importType === 'new'
-                        ? await importBooksFromExcel(formData as any, onProgress)
-                        : await updateStockFromTsv(formData as any, onProgress)
+                        ? await importBooksFromExcel(formData as any, onProgress, { skipAuthCheck: true })
+                        : await updateStockFromTsv(formData as any, onProgress, { skipAuthCheck: true })
 
                     sendEvent({ type: 'complete', ...result })
                 } catch (err: unknown) {
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
                 'Content-Type': 'application/x-ndjson; charset=utf-8',
                 'Cache-Control': 'no-cache, no-transform',
                 'X-Content-Type-Options': 'nosniff',
+                'X-Accel-Buffering': 'no',
             },
         })
     } catch (error: unknown) {

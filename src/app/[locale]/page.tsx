@@ -45,7 +45,7 @@ export const revalidate = 3600;
 // queries for every anonymous request.
 const getCachedHomepageData = unstable_cache(
   async (locale: string) => Promise.all([
-    getPopularBooks(8),
+    getPopularBooks(12),
     getPopularPacks(3),
     prisma.siteSettings.findMany({
       where: {
@@ -69,7 +69,7 @@ const getCachedHomepageData = unstable_cache(
     getFeaturedPosts(3, locale),
     getFeaturedAccessories(4),
   ]),
-  ['homepage-public-data-v1'],
+  ['homepage-public-data-v2'],
   { revalidate: 3600, tags: ['homepage-public-data'] }
 )
 
@@ -169,6 +169,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   )
   const featureDigitalBooks = settingsByKey.feature_digital_books !== 'false'
   const featureExchange = settingsByKey.feature_exchange !== 'false'
+  const heroPinnedBookId = settingsByKey.hero_pinned_book_id?.trim() || null
+  let heroPinnedBook = heroPinnedBookId ? (popularBooks.find(b => b.id === heroPinnedBookId) || null) : null
+  if (heroPinnedBookId && !heroPinnedBook) {
+    try {
+      const { getBookById } = await import('@/lib/db/books')
+      heroPinnedBook = await getBookById(heroPinnedBookId)
+    } catch (e) {
+      console.error('Error fetching hero pinned book:', e)
+    }
+  }
   const aeoFaqJson = settingsByKey.aeo_faq_json || null
   const dbAeoSnippetQ = settingsByKey.aeo_short_answer_question || null
   const dbAeoSnippetA = settingsByKey.aeo_short_answer_text || null
@@ -535,16 +545,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 </div>
                 <div className="flex-1 relative w-full lg:w-auto flex flex-col items-center justify-center overflow-hidden gap-6">
                   {(() => {
-                    const cosmosValidBooks = popularBooks.filter(book => {
+                    let cosmosValidBooks = popularBooks.filter(book => {
                       const img = book.image ? book.image.trim() : '';
                       if (!img || img.includes('book-placeholder.png') || img === '/book-placeholder.png') return false;
                       const normalized = img.startsWith('http') || img.startsWith('data:') || img.startsWith('/') ? img : `data:image/jpeg;base64,${img}`;
                       return normalized && !normalized.includes('book-placeholder.png');
                     });
-                    if (cosmosValidBooks.length === 0) return null;
+
+                    let centerBook = cosmosValidBooks[0];
+
+                    if (heroPinnedBook) {
+                      const img = heroPinnedBook.image ? heroPinnedBook.image.trim() : '';
+                      const isImgValid = img && !img.includes('book-placeholder.png');
+                      if (isImgValid) {
+                        centerBook = heroPinnedBook;
+                        cosmosValidBooks = [
+                          heroPinnedBook,
+                          ...cosmosValidBooks.filter(b => b.id !== heroPinnedBook.id)
+                        ];
+                      }
+                    }
+
+                    if (!centerBook || cosmosValidBooks.length === 0) return null;
                     return (
                       <CosmosBooks
-                        centerBook={cosmosValidBooks[0]}
+                        centerBook={centerBook}
                         books={cosmosValidBooks}
                         autoRotateCenter={true}
                         autoRotateInterval={7000}

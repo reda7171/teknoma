@@ -1,9 +1,8 @@
-import { exec } from 'child_process'
+import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { promisify } from 'util'
+import { pipeline } from 'stream/promises'
 
-const execAsync = promisify(exec)
 const BACKUP_DIR = path.join(process.cwd(), 'backups')
 
 export interface BackupFile {
@@ -25,18 +24,27 @@ function ensureBackupDir() {
  * Parse DATABASE_URL pour extraire les infos MySQL
  */
 function parseDatabaseUrl(url: string) {
-    // mysql://user:pass@host:port/db
-    const regex = /mysql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/
-    const match = url.match(regex)
-    if (!match) throw new Error('Format DATABASE_URL invalide')
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'mysql:' || !parsed.hostname || !parsed.pathname.slice(1)) {
+        throw new Error('Format DATABASE_URL invalide')
+    }
     
     return {
-        user: match[1],
-        password: match[2],
-        host: match[3],
-        port: match[4],
-        database: match[5].split('?')[0] // Remove query parameters
+        user: decodeURIComponent(parsed.username),
+        password: decodeURIComponent(parsed.password),
+        host: parsed.hostname,
+        port: parsed.port || '3306',
+        database: decodeURIComponent(parsed.pathname.slice(1))
     }
+}
+
+function resolveBackupPath(filename: string) {
+    if (!/^backup_[A-Za-z0-9_.-]+\.sql$/.test(filename) || path.basename(filename) !== filename) {
+        return null
+    }
+
+    const filepath = path.resolve(BACKUP_DIR, filename)
+    return filepath.startsWith(`${path.resolve(BACKUP_DIR)}${path.sep}`) ? filepath : null
 }
 
 /**
@@ -53,16 +61,36 @@ export async function createBackup() {
     const filename = `backup_${timestamp}.sql`
     const filepath = path.join(BACKUP_DIR, filename)
     
-    // Commande mysqldump
-    // --column-statistics=0 est souvent nécessaire pour les versions récentes de mysql client vs serveurs anciens
-    const command = `mysqldump --skip-ssl -h ${config.host} -P ${config.port} -u ${config.user} -p${config.password} ${config.database} > "${filepath}"`
-    
     try {
-        await execAsync(command)
+        const output = fs.createWriteStream(filepath, { flags: 'wx' })
+        const dump = spawn('mysqldump', [
+            '--skip-ssl',
+            '-h', config.host,
+            '-P', config.port,
+            '-u', config.user,
+            config.database
+        ], {
+            env: { ...process.env, MYSQL_PWD: config.password },
+            stdio: ['ignore', 'pipe', 'pipe'],
+            windowsHide: true
+        })
+        let stderr = ''
+        dump.stderr.on('data', chunk => { stderr += chunk.toString() })
+
+        const processCompleted = new Promise<void>((resolve, reject) => {
+            dump.on('error', reject)
+            dump.on('close', code => {
+                if (code === 0) resolve()
+                else reject(new Error(stderr.trim() || `mysqldump terminé avec le code ${code}`))
+            })
+        })
+
+        await Promise.all([pipeline(dump.stdout, output), processCompleted])
         return { filename, filepath }
-    } catch (error: any) {
+    } catch (error) {
+        if (fs.existsSync(filepath)) fs.unlinkSync(filepath)
         console.error('Erreur mysqldump:', error)
-        throw new Error(`Erreur lors de la génération du dump : ${error.message}`)
+        throw new Error('Erreur lors de la génération du dump')
     }
 }
 
@@ -90,18 +118,22 @@ export async function listBackups(): Promise<BackupFile[]> {
  * Supprime un backup
  */
 export async function deleteBackup(filename: string) {
-    const filepath = path.join(BACKUP_DIR, filename)
-    if (fs.existsSync(filepath)) {
-        fs.unlinkSync(filepath)
+    const filepath = resolveBackupPath(filename)
+    if (!filepath) return false
+    if (fs.existsSync(/* turbopackIgnore: true */ filepath)) {
+        fs.unlinkSync(/* turbopackIgnore: true */ filepath)
+        return true
     }
+    return false
 }
 
 /**
  * Récupère le chemin d'un backup pour téléchargement
  */
 export function getBackupPath(filename: string) {
-    const filepath = path.join(BACKUP_DIR, filename)
-    if (fs.existsSync(filepath)) {
+    const filepath = resolveBackupPath(filename)
+    if (!filepath) return null
+    if (fs.existsSync(/* turbopackIgnore: true */ filepath)) {
         return filepath
     }
     return null

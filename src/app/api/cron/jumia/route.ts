@@ -113,9 +113,14 @@ export async function GET(req: Request) {
         }
 
         // Déclencher discrètement la vérification des livraisons (sans attendre)
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (req.headers.get('host') ? `https://${req.headers.get('host')}` : 'http://localhost:3000');
-        const tokenQuery = process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : '';
-        fetch(`${baseUrl}/api/cron/jumia-delivered-alert${tokenQuery}`).catch(() => {});
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+        const cronSecret = process.env.CRON_SECRET
+        if (baseUrl && cronSecret) {
+            fetch(new URL('/api/cron/jumia-delivered-alert', baseUrl), {
+                headers: { Authorization: `Bearer ${cronSecret}` },
+                cache: 'no-store'
+            }).catch(() => {})
+        }
 
         return NextResponse.json({ 
             success: true, 

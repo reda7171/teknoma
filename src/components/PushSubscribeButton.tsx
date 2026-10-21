@@ -101,7 +101,7 @@ export default function PushSubscribeButton() {
         <button
             onClick={status === 'subscribed' ? unsubscribe : subscribe}
             disabled={status === 'loading' || status === 'denied'}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-transform duration-200 active:scale-95 ${
                 status === 'subscribed'
                     ? 'bg-emerald-100 text-emerald-700 hover:bg-red-50 hover:text-red-600'
                     : status === 'denied'

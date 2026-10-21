@@ -5,6 +5,7 @@ import { cookies, headers } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import crypto from 'crypto'
+import { JWT_SECRET } from '@/lib/jwt-secret'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { OAuth2Client } from 'google-auth-library'
 import { getCached } from '@/lib/cache'
@@ -353,7 +354,7 @@ async function createSession(userId: string) {
 
     const timestamp = Date.now().toString()
     const payload = `${userId}:${timestamp}`
-    const secret = process.env.JWT_SECRET || 'default_secure_secret_for_riwaya'
+    const secret = JWT_SECRET
     
     let signature = ''
     if (typeof crypto !== 'undefined' && crypto.createHmac) {
@@ -387,18 +388,22 @@ export async function getCommunityUser() {
         const decoded = Buffer.from(token.value, 'base64').toString('utf-8')
         const [userId, timestamp, signature] = decoded.split(':')
 
-        if (!userId || !timestamp) return null
+        if (!userId || !timestamp || !signature) return null
 
         // Vérification signature
         const payload = `${userId}:${timestamp}`
-        const secret = process.env.JWT_SECRET || 'default_secure_secret_for_riwaya'
+        const secret = JWT_SECRET
         if (typeof crypto !== 'undefined' && crypto.createHmac) {
             const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-            if (!signature || signature !== expectedSignature) {
-
-                return null
-            }
+            const expectedBuffer = Buffer.from(expectedSignature)
+            const suppliedBuffer = Buffer.from(signature)
+            if (expectedBuffer.length !== suppliedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, suppliedBuffer)) return null
         }
+
+        const tokenTime = Number(timestamp)
+        const tokenAge = Date.now() - tokenTime
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000
+        if (!Number.isFinite(tokenTime) || tokenAge < 0 || tokenAge > thirtyDays) return null
 
         const user = await prisma.user.findUnique({
             where: { id: userId }
@@ -409,6 +414,7 @@ export async function getCommunityUser() {
         return null
     }
 }
+
 
 export async function getUserOrderCount(user: any): Promise<number> {
     if (!user) return 0

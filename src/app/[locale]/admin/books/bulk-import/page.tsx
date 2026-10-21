@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Download, FileSpreadsheet, CheckCircle, XCircle, AlertCircle, RefreshCw, Plus, Loader2, BookOpen, X, Eye, AlertTriangle, ExternalLink, Image as ImageIcon } from 'lucide-react'
@@ -49,6 +49,7 @@ function formatFileSize(bytes: number): string {
 export default function BulkImportPage() {
     const t = useTranslations('BulkImport')
     const router = useRouter()
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [loading, setLoading] = useState(false)
     const [progress, setProgress] = useState<ImportProgress | null>(null)
     const [result, setResult] = useState<BulkImportResult | null>(null)
@@ -98,8 +99,12 @@ export default function BulkImportPage() {
         }
     }
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
+    async function handleSubmit(e?: React.FormEvent<HTMLFormElement>) {
+        if (e) {
+            e.preventDefault()
+        }
+        if (!selectedFile || loading) return
+
         setLoading(true)
         setResult(null)
         setProgress({
@@ -111,10 +116,8 @@ export default function BulkImportPage() {
             failed: 0,
         })
 
-        const formData = new FormData(e.currentTarget)
-        if (!formData.get('file') && selectedFile) {
-            formData.set('file', selectedFile)
-        }
+        const formData = new FormData()
+        formData.append('file', selectedFile)
         formData.append('type', importType)
 
         try {
@@ -173,6 +176,24 @@ export default function BulkImportPage() {
                     }
                 }
             }
+
+            if (buffer.trim()) {
+                try {
+                    const event = JSON.parse(buffer.trim())
+                    if (event.type === 'complete' || event.success !== undefined) {
+                        setResult(event)
+                        setProgress(null)
+                        if (event.success && event.imported && event.imported > 0) {
+                            setTimeout(() => {
+                                router.push('/admin/books')
+                                router.refresh()
+                            }, 3500)
+                        }
+                    }
+                } catch {
+                    // Ignorer
+                }
+            }
         } catch (error: unknown) {
             const err = error as Error
             setResult({
@@ -202,9 +223,14 @@ export default function BulkImportPage() {
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const file = e.dataTransfer.files[0]
-            const fileInput = document.getElementById('file') as HTMLInputElement
-            if (fileInput) {
-                fileInput.files = e.dataTransfer.files
+            if (fileInputRef.current) {
+                try {
+                    const dt = new DataTransfer()
+                    dt.items.add(file)
+                    fileInputRef.current.files = dt.files
+                } catch {
+                    // DataTransfer non supporté sur certains vieux navigateurs
+                }
             }
             handleFileSelection(file)
         }
@@ -396,7 +422,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
             </div>
 
             {/* Upload Form */}
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
+            <form onSubmit={handleSubmit} noValidate className="bg-white rounded-lg border border-gray-200 p-6">
                 <div
                     className={`relative border-2 border-dashed rounded-xl p-8 sm:p-12 text-center transition-all ${
                         dragActive
@@ -433,13 +459,14 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                             </p>
 
                             <div className="mt-5 flex items-center gap-2">
-                                <label
-                                    htmlFor="file"
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
                                     className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-sm"
                                 >
                                     <RefreshCw className="w-3.5 h-3.5" />
                                     <span>Changer de fichier</span>
-                                </label>
+                                </button>
                                 <button
                                     type="button"
                                     onClick={(e) => {
@@ -448,8 +475,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                                         setSelectedFile(null)
                                         setPreviewData(null)
                                         setPreviewError(null)
-                                        const fileInput = document.getElementById('file') as HTMLInputElement
-                                        if (fileInput) fileInput.value = ''
+                                        if (fileInputRef.current) fileInputRef.current.value = ''
                                     }}
                                     className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                                 >
@@ -457,44 +483,38 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                                     <span>Supprimer</span>
                                 </button>
                             </div>
-
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept={importType === 'new' ? ".xlsx,.xls,.csv" : ".tsv,.txt"}
-                                required
-                                className="hidden"
-                                disabled={loading}
-                                onChange={(e) => handleFileSelection(e.target.files?.[0] || null)}
-                            />
                         </div>
                     ) : (
-                        <>
+                        <div>
                             <FileSpreadsheet className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                            <label htmlFor="file" className="cursor-pointer">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="cursor-pointer group block mx-auto text-center"
+                            >
                                 <span className="text-lg font-medium text-gray-700">
                                     Glissez-déposez votre fichier ou{' '}
-                                    <span className="text-blue-600 hover:text-blue-700 font-bold">
+                                    <span className="text-blue-600 group-hover:text-blue-700 font-bold">
                                         cliquez pour parcourir
                                     </span>
                                 </span>
-                                <input
-                                    type="file"
-                                    id="file"
-                                    name="file"
-                                    accept={importType === 'new' ? ".xlsx,.xls,.csv" : ".tsv,.txt"}
-                                    required
-                                    className="hidden"
-                                    disabled={loading}
-                                    onChange={(e) => handleFileSelection(e.target.files?.[0] || null)}
-                                />
-                            </label>
+                            </button>
                             <p className="mt-2 text-sm text-gray-500">
                                 {importType === 'new' ? 'Formats acceptés: Excel (.xlsx, .xls) ou CSV' : 'Formats acceptés: TSV (.tsv) ou Texte (.txt)'}
                             </p>
-                        </>
+                        </div>
                     )}
+
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        id="bulk-import-file-input"
+                        name="file"
+                        accept={importType === 'new' ? ".xlsx,.xls,.csv" : ".tsv,.txt"}
+                        className="hidden"
+                        disabled={loading}
+                        onChange={(e) => handleFileSelection(e.target.files?.[0] || null)}
+                    />
                 </div>
 
                 {/* Prévisualisation interactive des 5 premières lignes */}

@@ -81,10 +81,13 @@ function getField(row: Record<string, unknown>, aliases: string[]): unknown {
  */
 export async function importBooksFromExcel(
     formData: FormData | any,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
+    options?: { skipAuthCheck?: boolean }
 ): Promise<BulkImportResult> {
     try {
-        await verifyAdmin() // OWASP A01: Broken Access Control
+        if (!options?.skipAuthCheck) {
+            await verifyAdmin() // OWASP A01: Broken Access Control
+        }
 
         const file = formData.get('file') as File
 
@@ -494,10 +497,13 @@ export async function generateExcelTemplate() {
  */
 export async function updateStockFromTsv(
     formData: FormData | any,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
+    options?: { skipAuthCheck?: boolean }
 ): Promise<BulkImportResult> {
     try {
-        await verifyAdmin()
+        if (!options?.skipAuthCheck) {
+            await verifyAdmin()
+        }
         const file = formData.get('file') as File
 
         if (!file) {

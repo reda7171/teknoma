@@ -368,7 +368,15 @@
       "CustomBundle": "إنشاء باقتي الخاصة (-30%)",
       "SocialProof": "⭐ 4.8/5 من قبل أكثر من 1000 قارئ راضٍ",
       "EditorsChoice": "ختيار المحرر",
-      "Select": "تحديد"
+      "Select": "تحديد",
+      "PinnedBook": "الكتاب المثبت في وسط الواجهة",
+      "PinnedBookSubtitle": "تثبيت كتاب محدد في مقدمة الواجهة الرئيسية",
+      "PinnedBookAutoMode": "الوضع التلقائي (الكتاب الأكثر زيارة)",
+      "PinnedBookManual": "مثبت يدويًا",
+      "PinnedBookSearch": "ابحث عن كتاب بالعنوان أو الكاتب...",
+      "PinnedBookRemove": "إلغاء التثبيت (العودة للوضع التلقائي)",
+      "PinnedBookSelect": "تثبيت هذا الكتاب في الواجهة",
+      "PinnedBookCurrently": "معروض حاليًا في وسط الواجهة"
     },
     "SearchSection": {
       "Badge": "بحث",
@@ -579,6 +587,8 @@
     "Remaining": "متبقي",
     "By": "الكاتب",
     "BestSeller": "الأكثر مبيعاً",
+    "Trending": "الأكثر زيارة",
+    "MostVisited": "رائج",
     "AddedToReadingList": "تمت الإضافة إلى قائمة القراءة",
     "RemovedFromReadingList": "تمت الإزالة من قائمة القراءة",
     "BookCount": "{count, plural, =0 {لا توجد كتب} one {كتاب واحد} two {كتابان} few {{count} كتب} many {{count} كتاباً} other {{count} كتاب}}",
@@ -705,6 +715,7 @@
     }
   },
   "BookDetail": {
+    "TrendingBadge": "الأكثر زيارة · رائج",
     "AboutAuthor": "عن الكاتب",
     "DiscoverMore": "اكتشف المزيد",
     "BackToSelection": "العودة إلى التحديد",

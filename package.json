@@ -23,7 +23,6 @@
     "whatsapp:gateway": "node scripts/whatsapp-gateway.js"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.6",
     "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@microsoft/clarity": "^1.0.2",
@@ -54,7 +53,7 @@
     "nanoid": "^6.0.1",
     "next": "^16.2.4",
     "next-intl": "^4.8.2",
-    "nodemailer": "^9.0.4",
+    "nodemailer": "^10.0.9",
     "pdfjs-dist": "^4.10.38",
     "pdfmake": "^0.3.11",
     "pino": "^10.4.0",
@@ -82,6 +81,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@ducanh2912/next-pwa": "^10.2.6",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.20",
     "@types/bcryptjs": "^2.4.6",
@@ -109,5 +109,9 @@
     },
     "serialize-javascript": "^7.1.0",
     "deepmerge-ts": "^8.0.1"
-  }
+  },
+  "browserslist": [
+    "defaults and supports es6-module",
+    "maintained node versions"
+  ]
 }

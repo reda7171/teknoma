@@ -4,6 +4,7 @@ import { Link } from '@/i18n/routing'
 import { Download, FileText, Star, BookOpen, ShoppingCart } from 'lucide-react'
 import { normalizeImage } from '@/lib/utils'
 import { useState } from 'react'
+import { useLocale } from 'next-intl'
 
 interface DigitalProductCardProps {
   product: {
@@ -24,6 +25,7 @@ interface DigitalProductCardProps {
 }
 
 export default function DigitalProductCard({ product }: DigitalProductCardProps) {
+  const locale = useLocale()
   const [imageError, setImageError] = useState(false)
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)

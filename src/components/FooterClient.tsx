@@ -155,8 +155,8 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 <Image
                                     src={siteLogo}
                                     alt="Riwaya Logo"
-                                    width={150}
-                                    height={50}
+                                    width={96}
+                                    height={32}
                                     sizes="96px"
                                     quality={75}
                                     className="h-8 w-auto object-contain invert transition-transform group-hover:scale-105"

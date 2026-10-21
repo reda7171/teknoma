@@ -3,6 +3,7 @@ import HomepageSectionsForm from '@/components/admin/HomepageSectionsForm'
 import HomepageContentForm from '@/components/admin/HomepageContentForm'
 import { LayoutDashboard, Type } from 'lucide-react'
 import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
 
 export default async function HomepageConfigPage({
     searchParams,
@@ -12,9 +13,25 @@ export default async function HomepageConfigPage({
     const sp = await searchParams
     const activeTab = sp?.tab === 'sections' ? 'sections' : 'content'
 
-    const [sectionSettings, contentSettings] = await Promise.all([
+    const [sectionSettings, contentSettings, books] = await Promise.all([
         getSettingsByCategory('homepage_sections'),
         getSettingsByCategory('homepage_content'),
+        prisma.book.findMany({
+            where: { active: true },
+            select: {
+                id: true,
+                title: true,
+                author: true,
+                image: true,
+                price: true,
+                views: true,
+            },
+            orderBy: [
+                { views: 'desc' },
+                { title: 'asc' },
+            ],
+            take: 500,
+        }),
     ])
 
     return (
@@ -89,7 +106,7 @@ export default async function HomepageConfigPage({
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Modifier chaque mot, titre et description</p>
                             </div>
                         </div>
-                        <HomepageContentForm initialSettings={contentSettings} />
+                        <HomepageContentForm initialSettings={contentSettings} books={books} />
                     </div>
                 )}
             </div>

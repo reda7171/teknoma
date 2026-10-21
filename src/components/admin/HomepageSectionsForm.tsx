@@ -429,6 +429,26 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
                                     </div>
                                 )}
 
+                                {section.key === 'home_section_hero' && isEnabled && (
+                                    <div className="mt-4 pt-4 border-t border-gray-200/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-100">
+                                        <div className="flex items-center gap-2.5">
+                                            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-black text-black">Livre au centre du Hero</p>
+                                                <p className="text-[11px] text-gray-500">
+                                                    Mode automatique (plus visité) ou épinglé manuellement.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <a
+                                            href="?tab=content"
+                                            className="px-3.5 py-1.5 bg-black text-white hover:bg-gray-800 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0"
+                                        >
+                                            Gérer dans Contenu →
+                                        </a>
+                                    </div>
+                                )}
+
                                 {section.key === 'home_section_custom_html' && isEnabled && (
                                     <div className="mt-6 pt-6 border-t border-gray-200/50 space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-indigo-600 flex items-center gap-2">

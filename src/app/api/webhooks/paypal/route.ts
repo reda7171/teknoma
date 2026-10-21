@@ -53,13 +53,14 @@ async function verifyPaypalWebhook(req: Request, body: string): Promise<boolean>
 export async function POST(req: Request) {
     const body = await req.text()
 
-    // Vérification de signature (si PAYPAL_WEBHOOK_ID est configuré)
-    if (process.env.PAYPAL_WEBHOOK_ID) {
-        const isValid = await verifyPaypalWebhook(req, body)
-        if (!isValid) {
-            console.error('PayPal webhook signature verification failed')
-            return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
-        }
+    if (!process.env.PAYPAL_WEBHOOK_ID) {
+        return NextResponse.json({ error: 'PayPal webhook is not configured' }, { status: 500 })
+    }
+
+    const isValid = await verifyPaypalWebhook(req, body)
+    if (!isValid) {
+        console.error('PayPal webhook signature verification failed')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
 
     let event: any

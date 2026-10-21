@@ -8,6 +8,7 @@ import { getCached } from '@/lib/cache'
 function invalidateSettingsCache(keys: string[]) {
     revalidateTag('setting', { expire: 0 })
     revalidateTag('settings', { expire: 0 })
+    revalidateTag('homepage-public-data', { expire: 0 })
     for (const key of keys) {
         revalidateTag(`setting:${key}`, { expire: 0 })
     }

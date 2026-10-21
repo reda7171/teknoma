@@ -273,31 +273,35 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     <Image
                                         src={siteLogo}
                                         alt="Riwaya Logo"
-                                        width={150}
-                                        height={50}
-                                        sizes="(max-width: 768px) 96px, 150px"
+                                        width={96}
+                                        height={32}
+                                        sizes="96px"
                                         quality={75}
                                         className="h-8 w-auto object-contain"
                                         priority
                                     />
-                                    {/* Effet premium : reflet luxury diagonal */}
-                                    <span aria-hidden="true" style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        background: 'linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.08) 35%, rgba(255,220,80,0.5) 45%, rgba(255,255,255,0.9) 50%, rgba(255,220,80,0.5) 55%, rgba(255,255,255,0.08) 65%, transparent 80%)',
-                                        backgroundSize: '300% 100%',
-                                        backgroundPosition: '-300% center',
-                                        animation: 'logo-premium-shine 4s cubic-bezier(0.4,0,0.2,1) infinite',
-                                        mixBlendMode: 'screen',
-                                        borderRadius: '2px',
-                                        pointerEvents: 'none',
-                                    }} />
+                                    {/* Effet premium : reflet luxury diagonal (100% composited GPU) */}
+                                    <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2px]">
+                                        <span
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                bottom: 0,
+                                                left: '-50%',
+                                                width: '200%',
+                                                background: 'linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.08) 35%, rgba(255,220,80,0.5) 45%, rgba(255,255,255,0.9) 50%, rgba(255,220,80,0.5) 55%, rgba(255,255,255,0.08) 65%, transparent 80%)',
+                                                mixBlendMode: 'screen',
+                                                willChange: 'transform, opacity',
+                                                animation: 'logo-premium-shine 4s cubic-bezier(0.4,0,0.2,1) infinite',
+                                            }}
+                                        />
+                                    </span>
                                     <style>{`
                                     @keyframes logo-premium-shine {
-                                        0%   { background-position: -300% center; opacity: 0; }
+                                        0%   { transform: translateX(-100%); opacity: 0; }
                                         10%  { opacity: 1; }
-                                        35%  { background-position: 300% center; opacity: 0; }
-                                        100% { background-position: 300% center; opacity: 0; }
+                                        35%  { transform: translateX(100%); opacity: 0; }
+                                        100% { transform: translateX(100%); opacity: 0; }
                                     }
                                 `}</style>
                                 </div>
