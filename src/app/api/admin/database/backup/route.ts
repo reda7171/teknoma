@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdmin } from '@/lib/actions/auth'
+import { NextResponse } from 'next/server'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
+import { randomUUID } from 'crypto'
 
 /**
  * API pour générer un backup SQL de la base de données
  * Nécessite mysql-client installé sur le serveur/conteneur
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
-        await verifyAdmin()
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
 
         const dbUrl = process.env.DATABASE_URL || ''
         
@@ -23,18 +27,13 @@ export async function GET(req: NextRequest) {
             host = url.hostname
             port = url.port || '3306'
             dbname = url.pathname.substring(1).split('?')[0] // Remove leading slash and query params
-        } catch (e) {
+        } catch {
             return NextResponse.json({ error: 'DATABASE_URL format invalide' }, { status: 500 })
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
         const filename = `backup_riwaya_${timestamp}.sql`
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-        const tempPath = path.join(uploadDir, filename)
-
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true })
-        }
+        const tempPath = path.join(os.tmpdir(), `riwaya-${randomUUID()}.sql`)
 
         // On utilise spawn pour éviter les problèmes d'échappement du shell
         return new Promise<NextResponse>((resolve) => {
@@ -45,9 +44,10 @@ export async function GET(req: NextRequest) {
                 '-h', host,
                 '-P', port,
                 '-u', user,
-                `-p${password}`,
                 dbname
-            ])
+            ], {
+                env: { ...process.env, MYSQL_PWD: password }
+            })
 
             mysqldump.stdout.pipe(writeStream)
 
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
                 }))
             })
 
-            mysqldump.on('error', (err: any) => {
+            mysqldump.on('error', (err: NodeJS.ErrnoException) => {
                 console.error('Spawn error:', err)
                 if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath)
                 
@@ -108,8 +108,9 @@ export async function GET(req: NextRequest) {
             })
         })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Backup API error:', error)
-        return NextResponse.json({ error: error.message || 'Erreur lors du backup' }, { status: 500 })
+        const message = error instanceof Error ? error.message : 'Erreur lors du backup'
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }

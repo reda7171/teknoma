@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getAllSettings } from '@/lib/actions/site-settings'
-import { verifyAdmin } from '@/lib/actions/auth'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function GET() {
     try {
-        await verifyAdmin()
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
         const settings = await getAllSettings()
         return NextResponse.json({ success: true, settings })
-    } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 401 })
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Erreur serveur'
+        return NextResponse.json({ success: false, error: message }, { status: 500 })
     }
 }

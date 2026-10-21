@@ -3,6 +3,7 @@ import { sendTelegramMessage } from '@/lib/telegram'
 import os from 'os'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 const execAsync = promisify(exec)
 
@@ -10,15 +11,8 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
-        // Authentification via CRON_SECRET (optionnel mais recommandé)
-        const authHeader = req.headers.get('authorization')
-        const cronSecret = process.env.CRON_SECRET
-
-        if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-            const token = req.nextUrl.searchParams.get('token')
-            if (token !== cronSecret) {
-                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-            }
+        if (!isAuthorizedCronRequest(req)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         // Metrics

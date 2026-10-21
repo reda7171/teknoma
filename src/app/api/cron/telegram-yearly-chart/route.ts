@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { JumiaAPI } from '@/lib/jumia-api'
 import { sendTelegramDocument } from '@/lib/telegram'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 import { prisma } from '@/lib/prisma'
 import PdfPrinter from 'pdfmake'
 
@@ -8,9 +9,7 @@ export const maxDuration = 60 // Allow longer execution time if fetching many pa
 
 export async function GET(req: Request) {
     try {
-        const url = new URL(req.url)
-        const expectedToken = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
-        if (url.searchParams.get('token') !== expectedToken) {
+        if (!isAuthorizedCronRequest(req)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 

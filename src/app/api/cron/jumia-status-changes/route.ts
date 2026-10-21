@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { JumiaAPI } from '@/lib/jumia-api'
 import { prisma } from '@/lib/prisma'
 import { escapeHtml, sendTelegramMessage } from '@/lib/telegram'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,13 +17,7 @@ type JumiaOrder = Record<string, unknown> & {
 type StatusChange = { id: string; number: string; from: string; to: string }
 
 function cronIsAuthorized(request: Request) {
-    const expected = (process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026').replace(/^["']|["']$/g, '')
-    const { searchParams } = new URL(request.url)
-    const supplied = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-        || searchParams.get('secret')
-        || searchParams.get('token')
-
-    return Boolean(supplied && supplied === expected)
+    return isAuthorizedCronRequest(request)
 }
 
 function orderKey(order: JumiaOrder): string {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { JumiaAPI } from '@/lib/jumia-api'
 import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 import { prisma } from '@/lib/prisma'
 
 function extractOrderItems(response: any): any[] {
@@ -32,9 +33,9 @@ function formatAmount(value: unknown): string {
 
 export async function GET(req: Request) {
     try {
-        const url = new URL(req.url)
-        const expectedToken = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
-        if (url.searchParams.get('token') !== expectedToken) {
+        if (!isAuthorizedCronRequest(req)) {
+
+
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 

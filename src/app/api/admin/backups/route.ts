@@ -1,39 +1,37 @@
 import { NextResponse } from 'next/server'
 import { listBackups, createBackup } from '@/lib/admin/backup'
-import { isAuthenticated } from '@/lib/actions/auth'
-import { cookies } from 'next/headers'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
+
+async function authorize() {
+    const admin = await getAuthenticatedAdmin()
+    if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+    if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
+    return null
+}
 
 export async function GET() {
     try {
-        const isAuth = await isAuthenticated()
-        const cookieStore = await cookies()
-        const role = cookieStore.get('admin-role')?.value
+        const denied = await authorize()
+        if (denied) return denied
 
-        if (!isAuth || role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-        }
-        
         const backups = await listBackups()
         return NextResponse.json({ success: true, backups })
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Erreur serveur'
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }
 
 export async function POST() {
     try {
-        const isAuth = await isAuthenticated()
-        const cookieStore = await cookies()
-        const role = cookieStore.get('admin-role')?.value
+        const denied = await authorize()
+        if (denied) return denied
 
-        if (!isAuth || role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-        }
-        
         const result = await createBackup()
         return NextResponse.json({ success: true, ...result })
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('API Backup POST Error:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        const message = error instanceof Error ? error.message : 'Erreur serveur'
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }

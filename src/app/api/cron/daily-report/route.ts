@@ -2,14 +2,12 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendTelegramMessage } from "@/lib/telegram"
 import { JumiaAPI } from "@/lib/jumia-api"
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 // Rapport quotidien — à appeler via cron chaque matin à 8h
 export async function GET(req: Request) {
     try {
-        const url = new URL(req.url)
-        const token = url.searchParams.get("token")
-        
-        if (process.env.CRON_SECRET && token !== process.env.CRON_SECRET) {
+        if (!isAuthorizedCronRequest(req)) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 

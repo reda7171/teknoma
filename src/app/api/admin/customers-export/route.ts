@@ -1,14 +1,26 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
+import { timingSafeEqual } from 'crypto';
+
+function hasValidApiSecret(request: Request) {
+    const configuredSecret = process.env.API_SECRET;
+    const authorization = request.headers.get('authorization');
+    const providedSecret = authorization?.startsWith('Bearer ')
+        ? authorization.slice('Bearer '.length)
+        : request.headers.get('x-api-key');
+
+    if (!configuredSecret || !providedSecret) return false;
+
+    const expected = Buffer.from(configuredSecret);
+    const provided = Buffer.from(providedSecret);
+    return expected.length === provided.length && timingSafeEqual(expected, provided);
+}
 
 export async function GET(request: Request) {
     try {
-        const url = new URL(request.url);
-        const secret = url.searchParams.get('secret');
-
-        // Sécurité : Utiliser uniquement la variable d'environnement (pas de clé en dur)
-        if (!process.env.API_SECRET || secret !== process.env.API_SECRET) {
+        // Query strings commonly leak into access logs, so credentials are header-only.
+        if (!hasValidApiSecret(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

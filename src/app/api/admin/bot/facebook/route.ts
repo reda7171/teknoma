@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import { exec } from 'child_process'
 import path from 'path'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function POST(request: Request) {
     try {
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
+
         const body = await request.json()
         const bookId = body.bookId
 

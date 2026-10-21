@@ -14,6 +14,10 @@ const LoginSchema = z.object({
     password: z.string().min(1, 'Le mot de passe est requis'),
 })
 
+const ADMIN_LOGIN_ROLES = ['ADMIN', 'MANAGER', 'CONFIRMATOR', 'BLOG_MODERATOR']
+const DIRECT_PORTAL_ROLES = ['SELLER', 'INFLUENCER']
+const APPROVAL_TTL_MS = 10 * 60 * 1000
+
 export type LoginResult =
     | { success: true; redirect: string }
     | { success: true; pendingApproval: true; requestId: string }
@@ -59,6 +63,10 @@ export async function login(formData: FormData): Promise<LoginResult> {
                 success: false,
                 error: 'Email ou mot de passe incorrect',
             }
+        }
+
+        if (!ADMIN_LOGIN_ROLES.includes(user.role) && !DIRECT_PORTAL_ROLES.includes(user.role)) {
+            return { success: false, error: 'Accès non autorisé pour ce compte' }
         }
 
         // Sécurisation OWASP: Token signé avec HMAC
@@ -190,12 +198,28 @@ export async function checkApprovalStatus(requestId: string): Promise<LoginResul
     const request = await prisma.adminAuthRequest.findUnique({ where: { id: requestId } })
     if (!request) return { success: false, error: 'Requête introuvable' }
 
+    const approvalCutoff = new Date(Date.now() - APPROVAL_TTL_MS)
+    if (request.createdAt < approvalCutoff) {
+        return { success: false, error: 'Demande expirée, veuillez vous reconnecter' }
+    }
+
     if (request.status === 'PENDING') return { success: false, pending: true }
     if (request.status === 'REJECTED') return { success: false, error: 'Accès refusé par le super admin' }
 
     if (request.status === 'APPROVED') {
+        const claimed = await prisma.adminAuthRequest.updateMany({
+            where: { id: requestId, status: 'APPROVED', createdAt: { gte: approvalCutoff } },
+            data: { status: 'CONSUMED' }
+        })
+        if (claimed.count !== 1) {
+            return { success: false, error: 'Demande déjà utilisée ou expirée' }
+        }
+
         const user = await prisma.user.findUnique({ where: { email: request.email } })
         if (!user) return { success: false, error: 'Utilisateur introuvable' }
+        if (!ADMIN_LOGIN_ROLES.includes(user.role)) {
+            return { success: false, error: 'Rôle administrateur non autorisé' }
+        }
 
         const timestamp = Date.now().toString()
         const payload = `${user.id}:${timestamp}`
@@ -348,6 +372,23 @@ export async function verifyAdmin() {
 
     if (!isAuth) {
         throw new Error('Non autorisé - Accès administrateur requis')
+    }
+
+    const userId = await getAdminUser()
+    if (!userId) {
+        throw new Error('Non autorisé - Session administrateur invalide')
+    }
+
+    // Re-read the role for every protected operation so demotions and
+    // revocations take effect immediately. Role cookies are only UI hints.
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true }
+    })
+    const staffRoles = ['ADMIN', 'MANAGER', 'SELLER', 'CONFIRMATOR', 'BLOG_MODERATOR']
+
+    if (!user || !staffRoles.includes(user.role)) {
+        throw new Error('Interdit - Permission administrateur requise')
     }
 }
 

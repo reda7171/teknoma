@@ -6,6 +6,10 @@ import { useSearchParams } from 'next/navigation'
 import { login, checkApprovalStatus } from '@/lib/actions/auth'
 import { Lock, Mail, Clock } from 'lucide-react'
 
+function safeRedirectPath(requested: string | null, fallback: string) {
+    return requested?.startsWith('/') && !requested.startsWith('//') ? requested : fallback
+}
+
 export default function LoginPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -30,7 +34,7 @@ export default function LoginPage() {
                         const result = await checkApprovalStatus(pendingRequestId)
                         
                         if (result.success && 'redirect' in result) {
-                            const from = searchParams.get('from') || result.redirect
+                            const from = safeRedirectPath(searchParams.get('from'), result.redirect)
                             router.push(from)
                             router.refresh()
                         } else if (!result.success && !('pending' in result && result.pending)) {
@@ -70,7 +74,7 @@ export default function LoginPage() {
                 setPendingRequestId(result.requestId)
                 setIsWaitingApproval(true)
             } else if ('redirect' in result) {
-                const from = searchParams.get('from') || result.redirect
+                const from = safeRedirectPath(searchParams.get('from'), result.redirect)
                 router.push(from)
                 router.refresh()
             }
@@ -107,8 +111,8 @@ export default function LoginPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4 animate-pulse">
                                 <Clock className="w-8 h-8 text-yellow-600" />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 mb-2">En attente d'approbation</h2>
-                            <p className="text-gray-600">Veuillez patienter, attendez l'approbation du super admin via Telegram.</p>
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">En attente d&apos;approbation</h2>
+                            <p className="text-gray-600">Veuillez patienter, attendez l&apos;approbation du super admin via Telegram.</p>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">

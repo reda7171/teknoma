@@ -107,9 +107,9 @@ export default function BookCard({
                     {language && (
                         <div className="absolute top-3 left-3 z-20">
                             <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md shadow-sm ${
-                                language === 'ar' ? 'bg-emerald-600 text-white' :
-                                language === 'fr' ? 'bg-blue-600 text-white' :
-                                language === 'en' ? 'bg-amber-500 text-white' :
+                                language === 'ar' ? 'bg-emerald-800 text-white' :
+                                language === 'fr' ? 'bg-blue-800 text-white' :
+                                language === 'en' ? 'bg-amber-900 text-white' :
                                 'bg-black text-white'
                             }`}>
                                 {language.toUpperCase()}

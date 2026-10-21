@@ -1,6 +1,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 function slugifyStrict(text: string) {
     return text
@@ -16,8 +17,12 @@ function slugifyStrict(text: string) {
         .replace(/-+$/, '')
 }
 
-export async function GET() {
+export async function POST() {
     try {
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
+
         // Liste d'auteurs fictifs avec images premium
         const fakeAuthors = [
             {

@@ -1,61 +1,90 @@
 'use client'
 
-import { useGoogleOneTapLogin, GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { useRouter } from '@/i18n/routing'
 import { useUIStore } from '@/store/ui'
 import { googleOneTapLogin } from '@/lib/actions/community-auth'
-import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useEffect, useRef } from 'react'
 
-function GoogleOneTapInner() {
-    const router = useRouter()
-    const { showNotification } = useUIStore()
-    const t = useTranslations('Market') 
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    const handleSuccess = async (credentialResponse: any) => {
-        if (!credentialResponse.credential) return
-
-        try {
-            const result = await googleOneTapLogin(credentialResponse.credential)
-            if (result.success) {
-                showNotification('Connexion réussie', 'success')
-                router.refresh()
-            } else {
-                showNotification(result.error || 'Erreur de connexion', 'error')
+declare global {
+    interface Window {
+        google?: {
+            accounts: {
+                id: {
+                    initialize: (config: any) => void
+                    prompt: (momentListener?: (notification: any) => void) => void
+                    cancel: () => void
+                }
             }
-        } catch (error) {
-            showNotification('Erreur inattendue', 'error')
         }
     }
-
-    useGoogleOneTapLogin({
-        onSuccess: handleSuccess,
-        onError: () => {
-            void('Google One Tap Error')
-        },
-        auto_select: false,
-        use_fedcm_for_prompt: false,
-        cancel_on_tap_outside: true,
-    })
-
-    if (!mounted) return null
-
-    return (
-        <div id="google-one-tap-container" className="hidden" />
-    )
 }
 
 export default function GoogleOneTap() {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
-    if (!clientId) return null
-    return (
-        <GoogleOAuthProvider clientId={clientId}>
-            <GoogleOneTapInner />
-        </GoogleOAuthProvider>
-    )
+    const router = useRouter()
+    const { showNotification } = useUIStore()
+    const initializedRef = useRef(false)
+
+    useEffect(() => {
+        if (initializedRef.current) return
+        if (typeof window === 'undefined') return
+
+        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
+        if (!clientId) return
+
+        const handleCredentialResponse = async (response: { credential?: string }) => {
+            if (!response.credential) return
+            try {
+                const result = await googleOneTapLogin(response.credential)
+                if (result.success) {
+                    showNotification('Connexion réussie', 'success')
+                    router.refresh()
+                } else {
+                    showNotification(result.error || 'Erreur de connexion', 'error')
+                }
+            } catch {
+                showNotification('Erreur inattendue', 'error')
+            }
+        }
+
+        const initGsi = () => {
+            if (!window.google?.accounts?.id || initializedRef.current) return
+            initializedRef.current = true
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: handleCredentialResponse,
+                    auto_select: false,
+                    use_fedcm_for_prompt: true,
+                    cancel_on_tap_outside: true,
+                })
+                window.google.accounts.id.prompt()
+            } catch (err) {
+                // Silently ignore GSI initialization errors in headless/unsupported environments
+            }
+        }
+
+        if (window.google?.accounts?.id) {
+            initGsi()
+        } else {
+            const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]')
+            if (existingScript) {
+                existingScript.addEventListener('load', initGsi, { once: true })
+            } else {
+                const script = document.createElement('script')
+                script.src = 'https://accounts.google.com/gsi/client'
+                script.async = true
+                script.defer = true
+                script.onload = initGsi
+                document.head.appendChild(script)
+            }
+        }
+
+        return () => {
+            try {
+                window.google?.accounts?.id?.cancel()
+            } catch {}
+        }
+    }, [router, showNotification])
+
+    return null
 }

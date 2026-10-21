@@ -4,6 +4,16 @@ import FooterWithFeatures from '@/components/FooterWithFeatures'
 import { Link } from '@/i18n/routing'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getLocale } from 'next-intl/server'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Page Introuvable | Riwaya',
+  description: 'La page demandée est introuvable sur la librairie en ligne Riwaya.store.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function NotFound() {
   const messages = await getMessages()

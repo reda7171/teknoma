@@ -1,66 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+const APPROVAL_TTL_MS = 10 * 60 * 1000
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 export async function GET(req: NextRequest) {
     const requestId = req.nextUrl.searchParams.get('requestId')
+    if (!requestId || !UUID_PATTERN.test(requestId)) {
+        return NextResponse.json({ error: 'Invalid requestId' }, { status: 400 })
+    }
 
-    if (!requestId) {
-        return NextResponse.json({ error: 'requestId required' }, { status: 400 })
+    const authRequest = await prisma.adminAuthRequest.findUnique({
+        where: { id: requestId },
+        select: { createdAt: true, status: true }
+    })
+    if (!authRequest) return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+
+    const expiresAt = authRequest.createdAt.getTime() + APPROVAL_TTL_MS
+    if (Date.now() >= expiresAt) {
+        return NextResponse.json({ error: 'Request expired' }, { status: 410 })
     }
 
     const stream = new ReadableStream({
-        async start(controller) {
-            let isClosed = false
+        start(controller) {
+            let closed = false
             const encoder = new TextEncoder()
+            const timers: {
+                poll?: ReturnType<typeof setInterval>
+                keepAlive?: ReturnType<typeof setInterval>
+                expiry?: ReturnType<typeof setTimeout>
+            } = {}
 
-            const pushMessage = (data: any) => {
-                if (!isClosed) {
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
-                }
+            const cleanup = () => {
+                if (closed) return
+                closed = true
+                if (timers.poll) clearInterval(timers.poll)
+                if (timers.keepAlive) clearInterval(timers.keepAlive)
+                if (timers.expiry) clearTimeout(timers.expiry)
+                try { controller.close() } catch { /* already closed */ }
             }
 
-            const interval = setInterval(async () => {
-                if (isClosed) return
+            const push = (data: { status: string }) => {
+                if (!closed) controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
+            }
+
+            timers.poll = setInterval(async () => {
+                if (closed) return
                 try {
-                    const request = await prisma.adminAuthRequest.findUnique({
+                    const current = await prisma.adminAuthRequest.findUnique({
                         where: { id: requestId },
                         select: { status: true }
                     })
-                    if (request) {
-                        pushMessage({ status: request.status })
-                        if (request.status === 'APPROVED' || request.status === 'REJECTED') {
-                            clearInterval(interval)
-                            if (!isClosed) {
-                                controller.close()
-                                isClosed = true
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error('SSE Error', e)
+                    if (!current) return cleanup()
+                    push({ status: current.status })
+                    if (current.status !== 'PENDING') cleanup()
+                } catch (error) {
+                    console.error('Admin approval stream error:', error)
+                    cleanup()
                 }
             }, 2000)
 
-            // Keep-alive heartbeat
-            const keepAlive = setInterval(() => {
-                if (!isClosed) {
-                    controller.enqueue(encoder.encode(': keepalive\n\n'))
-                }
+            timers.keepAlive = setInterval(() => {
+                if (!closed) controller.enqueue(encoder.encode(': keepalive\n\n'))
             }, 15000)
+            timers.expiry = setTimeout(cleanup, Math.max(1, expiresAt - Date.now()))
+            req.signal.addEventListener('abort', cleanup, { once: true })
 
-            req.signal.addEventListener('abort', () => {
-                isClosed = true
-                clearInterval(interval)
-                clearInterval(keepAlive)
-            })
+            push({ status: authRequest.status })
+            if (authRequest.status !== 'PENDING') cleanup()
         }
     })
 
     return new NextResponse(stream, {
         headers: {
             'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache, no-transform',
-            'Connection': 'keep-alive'
+            'Cache-Control': 'private, no-store, no-transform',
+            'Connection': 'keep-alive',
+            'X-Content-Type-Options': 'nosniff'
         }
     })
 }

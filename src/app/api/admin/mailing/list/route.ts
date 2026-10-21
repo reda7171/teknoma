@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getAdminRole } from '@/lib/actions/auth'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request) {
     try {
-        const role = await getAdminRole()
-        
-        if (!role || (role !== 'ADMIN' && role !== 'MANAGER')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN', 'MANAGER'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
 
         // Fetch customers with emails
         const customers = await prisma.customer.findMany({

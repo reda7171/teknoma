@@ -61,7 +61,7 @@ export default function OAuthButtons({ googleEnabled = true, facebookEnabled = t
                         type="button"
                         disabled={loadingProvider !== null}
                         onClick={() => handleOAuth('facebook')}
-                        className={`flex items-center justify-center gap-3 px-6 py-4 bg-[#1877F2] text-white font-bold rounded-2xl hover:bg-[#1864D9] transition-all disabled:opacity-50 ${!googleEnabled ? 'sm:col-span-2' : ''}`}
+                        className={`flex items-center justify-center gap-3 px-6 py-4 bg-[#0960ea] text-white font-bold rounded-2xl hover:bg-[#074ebd] transition-all disabled:opacity-50 ${!googleEnabled ? 'sm:col-span-2' : ''}`}
                     >
                         {loadingProvider === 'facebook' ? (
                             <Loader2 className="w-5 h-5 animate-spin" />

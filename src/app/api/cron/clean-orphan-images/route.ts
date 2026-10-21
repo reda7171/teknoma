@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendTelegramMessage } from '@/lib/telegram'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 import fs from 'fs'
 import path from 'path'
 
@@ -188,21 +189,15 @@ export async function cleanOrphanImages() {
 
 export async function GET(req: Request) {
     try {
-        const url = new URL(req.url)
-        const token = url.searchParams.get('token')
-        const authHeader = req.headers.get('authorization')
-        const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
-
-        const expectedToken = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
-        if (expectedToken && token !== expectedToken && bearerToken !== expectedToken) {
+        if (!isAuthorizedCronRequest(req)) {
             return new NextResponse('Unauthorized', { status: 401 })
         }
 
         const result = await cleanOrphanImages()
         return NextResponse.json(result)
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Erreur cron clean-orphan-images:', error)
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+        return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 })
     }
 }
 

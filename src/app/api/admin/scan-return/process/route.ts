@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { isAuthenticated } from '@/lib/actions/auth'
+import { getAuthenticatedAdmin, hasAdminRole, ORDER_OPERATION_ROLES } from '@/lib/admin-auth'
 
 export async function POST(request: Request) {
     try {
-        const isAuth = await isAuthenticated()
-        if (!isAuth) {
-            return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-        }
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ORDER_OPERATION_ROLES)) return NextResponse.json({ error: 'Accès interdit' }, { status: 403 })
 
         const body = await request.json()
         const { orderId } = body

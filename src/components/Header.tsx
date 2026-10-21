@@ -273,8 +273,10 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     <Image
                                         src={siteLogo}
                                         alt="Riwaya Logo"
-                                        width={200}
-                                        height={64}
+                                        width={150}
+                                        height={50}
+                                        sizes="(max-width: 768px) 96px, 150px"
+                                        quality={75}
                                         className="h-8 w-auto object-contain"
                                         priority
                                     />

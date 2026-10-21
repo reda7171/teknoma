@@ -1,9 +1,14 @@
 
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
-export async function GET() {
+export async function POST() {
     try {
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
+
         // Find the main menu (usually slug 'header')
         const menu = await prisma.menu.findFirst({
             where: { 

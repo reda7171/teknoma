@@ -258,7 +258,7 @@ export default async function BooksPage({
                                 <div className="w-24 h-24 bg-pixio-cream rounded-full flex items-center justify-center mx-auto mb-10">
                                     <Filter className="w-10 h-10 text-black/10" />
                                 </div>
-                                <h3 className="text-2xl font-black text-black mb-4">{tBooksPage('NoVolumes')}</h3>
+                                <h2 className="text-2xl font-black text-black mb-4">{tBooksPage('NoVolumes')}</h2>
                                 <p className="text-gray-400 font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-[10px] rtl:text-sm mb-10">
                                     {tBooksPage('EmptyCollection')}
                                 </p>
@@ -275,9 +275,9 @@ export default async function BooksPage({
                                 <div className="flex items-center justify-between mb-4 px-2">
                                     <div className="flex items-center gap-3">
                                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                                        <p className="text-xs rtl:text-sm font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-gray-500">
+                                        <h2 className="text-xs rtl:text-sm font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-gray-500">
                                             <span className="text-gray-900 font-black">{totalCount}</span> {tBooksPage('Results')}
-                                        </p>
+                                        </h2>
                                     </div>
                                 </div>
 

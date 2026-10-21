@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server"
 import { JumiaAPI } from "@/lib/jumia-api"
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 // Export commandes Jumia du mois en CSV
 export async function GET(req: Request) {
     try {
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
+
         const url = new URL(req.url)
         const monthParam = url.searchParams.get("month") // Format: YYYY-MM (optionnel)
 

@@ -114,8 +114,10 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                                 <Image 
                                     src={siteLogo} 
                                     alt="Riwaya Logo"
-                                    width={200}
-                                    height={64}
+                                    width={150}
+                                    height={50}
+                                    sizes="(max-width: 768px) 96px, 150px"
+                                    quality={75}
                                     className="h-7 md:h-8 w-auto object-contain transition-transform group-hover:scale-105"
                                     priority
                                 />

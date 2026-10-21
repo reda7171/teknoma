@@ -38,7 +38,7 @@ export default function OpenAuthModalButton({ label, sub }: Props) {
                     type="button"
                     onClick={() => { window.location.href = '/api/auth/facebook/login' }}
                     aria-label={`${label} - Facebook`}
-                    className="group w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-[#1877F2] text-white font-black text-sm sm:text-base rounded-full hover:bg-[#166FE5] transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    className="group w-full inline-flex items-center justify-center gap-3 px-6 py-4 bg-[#0960ea] text-white font-black text-sm sm:text-base rounded-full hover:bg-[#074ebd] transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 >
                     <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.385H7.078v-3.542h3.047V9.372c0-3.017 1.792-4.684 4.533-4.684 1.312 0 2.686.235 2.686.235v2.966H15.83c-1.491 0-1.956.93-1.956 1.884v2.3h3.328l-.532 3.542h-2.796V24C19.612 23.094 24 18.1 24 12.073Z" />

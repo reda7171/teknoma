@@ -109,23 +109,23 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                     if (isCtaPosition) {
                         const usedBooksCount = books.filter(b => b.condition === 'USED').length;
                         const showUsedCTA = usedBooksCount > 4;
-                        
+
                         const ctaTypesList = [];
                         if (randomPack) ctaTypesList.push('PACK');
                         ctaTypesList.push('CUSTOM');
                         ctaTypesList.push('BOARD_GAMES');
                         ctaTypesList.push('KIDS');
                         if (showUsedCTA) ctaTypesList.push('USED');
-                        
+
                         const ctaType = ctaTypesList[ctaIndex % ctaTypesList.length];
-                        
+
                         if (ctaType === 'PACK' && randomPack) {
                             const pack = randomPack;
                             ctaBlock = (
                                 <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-purple-900 to-indigo-900 rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 shadow-2xl my-4">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-                                    
+
                                     <div className="flex-1 relative z-10 text-center md:text-left">
                                         <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md mb-4 border border-white/10">
                                             <Sparkles className="w-4 h-4 text-purple-300" />
@@ -135,8 +135,8 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
                                             <span className="text-3xl md:text-4xl font-black text-purple-300">{pack.price} {tCommon('Currency')}</span>
                                         </div>
-                                        <Link 
-                                            href={`/packs/${pack.id}`} 
+                                        <Link
+                                            href={`/packs/${pack.id}`}
                                             className="inline-flex items-center gap-2 bg-white text-purple-900 px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-100 transition-all hover:scale-105 active:scale-95 shadow-xl"
                                         >
                                             {tCommon('DiscoverPack')}
@@ -149,10 +149,10 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                             const displayTitle = getLocalizedTitle(pb.book, locale);
                                             const bookUrl = generateBookUrl(pb.book, locale);
                                             return (
-                                            <Link aria-label="Action ImageWithFallback" href={bookUrl} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
-                                                <ImageWithFallback 
-                                                    src={pb.book.image || ''} 
-                                                    alt={displayTitle} 
+                                            <Link aria-label={displayTitle} href={bookUrl} key={pb.id} className="w-24 h-36 md:w-32 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transform transition-transform hover:-translate-y-4 hover:rotate-2 relative z-10" style={{ zIndex: 10 - i }}>
+                                                <ImageWithFallback
+                                                    src={pb.book.image || ''}
+                                                    alt={displayTitle}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </Link>
@@ -174,8 +174,8 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         <p className="text-purple-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
                                             {tCTA('BoardGamesDesc')}
                                         </p>
-                                        <Link 
-                                            href="/jeux-societe" 
+                                        <Link
+                                            href="/jeux-societe"
                                             className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-purple-700 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
                                             {tCTA('DiscoverBoardGames')}
@@ -187,9 +187,9 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         {boardGames.length > 0 ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {boardGames.slice(0, 3).map((game, i) => (
-                                                    <Link aria-label="Action ImageWithFallback" 
+                                                    <Link aria-label={game.name}
                                                         href={`/jeux-societe/${game.id}`}
-                                                        key={game.id} 
+                                                        key={game.id}
                                                         className="absolute w-28 h-28 rounded-xl overflow-hidden shadow-xl border-2 border-white transform transition-transform hover:-translate-y-4"
                                                         style={{
                                                             left: `${(i * 30)}%`,
@@ -197,9 +197,9 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                                             transform: `rotate(${i === 0 ? -5 : i === 1 ? 5 : -3}deg)`
                                                         }}
                                                     >
-                                                        <ImageWithFallback 
-                                                            src={game.images[0] || ''} 
-                                                            alt={game.name} 
+                                                        <ImageWithFallback
+                                                            src={game.images[0] || ''}
+                                                            alt={game.name}
                                                             className="w-full h-full object-cover"
                                                         />
                                                     </Link>
@@ -224,8 +224,8 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         <p className="text-pink-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
                                             {tCTA('KidsWorldDesc')}
                                         </p>
-                                        <Link 
-                                            href="/mon-enfant" 
+                                        <Link
+                                            href="/mon-enfant"
                                             className="inline-flex items-center gap-2 bg-pink-500 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-pink-600 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
                                             {tCTA('DiscoverKidsWorld')}
@@ -237,9 +237,9 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         {kidsProducts.length > 0 ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {kidsProducts.slice(0, 3).map((prod, i) => (
-                                                    <Link aria-label="Action ImageWithFallback" 
+                                                    <Link aria-label={prod.name}
                                                         href={`/mon-enfant/${prod.id}`}
-                                                        key={prod.id} 
+                                                        key={prod.id}
                                                         className="absolute w-28 h-28 rounded-xl overflow-hidden shadow-xl border-2 border-white transform transition-transform hover:-translate-y-4"
                                                         style={{
                                                             left: `${(i * 30)}%`,
@@ -247,9 +247,9 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                                             transform: `rotate(${i === 0 ? -5 : i === 1 ? 5 : -3}deg)`
                                                         }}
                                                     >
-                                                        <ImageWithFallback 
-                                                            src={prod.images[0] || ''} 
-                                                            alt={prod.name} 
+                                                        <ImageWithFallback
+                                                            src={prod.images[0] || ''}
+                                                            alt={prod.name}
                                                             className="w-full h-full object-cover"
                                                         />
                                                     </Link>
@@ -274,8 +274,8 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         <p className="text-amber-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
                                             {tCTA('UsedBooksDesc')}
                                         </p>
-                                        <Link 
-                                            href="/books?usedOnly=true" 
+                                        <Link
+                                            href="/books?usedOnly=true"
                                             className="inline-flex items-center gap-2 bg-amber-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-amber-700 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
                                             {tCTA('BrowseUsedBooks')}
@@ -300,7 +300,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                         <p className="text-gray-600 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
                                             {tCTA('CustomPackDesc')}
                                         </p>
-                                        <Link 
+                                        <Link
                                             href="/packs/create"
                                             className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-900 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >

@@ -3,19 +3,14 @@ import { prisma } from '@/lib/prisma'
 import { withyouService } from '@/lib/delivery/withyou'
 import { revalidatePath } from 'next/cache'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 // Maximum number of tracking IDs to sync at once
 const BATCH_SIZE = 50
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url)
-        const secret = searchParams.get('secret') || searchParams.get('token')
-        const authHeader = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-        const expectedSecret = (process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026').replace(/^["']|["']$/g, '')
-        
-        // Security check
-        if (secret !== expectedSecret && authHeader !== expectedSecret) {
+        if (!isAuthorizedCronRequest(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 

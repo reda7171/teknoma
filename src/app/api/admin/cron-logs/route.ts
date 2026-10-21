@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { isAuthenticated } from '@/lib/actions/auth'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function GET() {
     try {
-        const auth = await isAuthenticated()
-        if (!auth) {
-            return new NextResponse('Unauthorized', { status: 401 })
-        }
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return new NextResponse('Authentication required', { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return new NextResponse('Forbidden', { status: 403 })
 
         const logs = await prisma.cronLog.findMany({
             where: { isRead: false },
@@ -23,10 +22,9 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
     try {
-        const auth = await isAuthenticated()
-        if (!auth) {
-            return new NextResponse('Unauthorized', { status: 401 })
-        }
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return new NextResponse('Authentication required', { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return new NextResponse('Forbidden', { status: 403 })
 
         const body = await req.json()
         const { logIds } = body
