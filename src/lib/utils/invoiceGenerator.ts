@@ -33,10 +33,13 @@ export interface OrderInvoiceData {
     }>;
 }
 
-export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'fr', customPhone?: string): string {
+const DEFAULT_RIWAYA_LOGO = "/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png";
+
+export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'fr', customPhone?: string, customLogo?: string): string {
     const isAr = locale === 'ar';
     const isEn = locale === 'en';
     const phone = customPhone || "07 02 22 05 75 / 06 66 03 81 29";
+    const logoSrc = customLogo || DEFAULT_RIWAYA_LOGO;
 
     const invoiceNum = order.invoiceNumber || `FAC-${order.id.slice(0, 8).toUpperCase()}`;
     const orderDate = new Date(order.invoiceDate || order.createdAt).toLocaleDateString(
@@ -355,8 +358,13 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
                 <table class="header-table">
                     <tr>
                         <td style="vertical-align: middle;">
-                            <div class="company-title">RIWAYA BOOKS</div>
-                            <div class="company-sub">Librairie & Édition • Maroc</div>
+                            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
+                                <img src="${logoSrc}" alt="Riwaya Logo" style="height: 44px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <div style="display: inline-block; vertical-align: middle;">
+                                    <div class="company-title" style="margin: 0; line-height: 1.1;">RIWAYA BOOKS</div>
+                                    <div class="company-sub" style="margin-top: 2px;">Librairie & Édition • Maroc</div>
+                                </div>
+                            </div>
                             <div class="company-sub">contact@riwaya.store | ${escapeHtml(phone)}</div>
                         </td>
                         <td class="invoice-tag" style="vertical-align: middle;">

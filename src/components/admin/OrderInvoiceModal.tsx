@@ -62,6 +62,7 @@ export default function OrderInvoiceModal({
 
     // Company info (Émetteur)
     const [companyName, setCompanyName] = useState('Riwaya Books')
+    const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png')
     const [companyPhone, setCompanyPhone] = useState('07 02 22 05 75 / 06 66 03 81 29')
     const [companyEmail, setCompanyEmail] = useState('contact@riwaya.store')
     const [companyAddress, setCompanyAddress] = useState('Casablanca, Maroc')
@@ -72,6 +73,9 @@ export default function OrderInvoiceModal({
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.settings) {
+                    if (data.settings.site_logo) {
+                        setCompanyLogo(data.settings.site_logo)
+                    }
                     const rawAgents = data.settings.whatsapp_agents
                     if (rawAgents) {
                         try {
@@ -308,8 +312,13 @@ export default function OrderInvoiceModal({
                 <table class="header-table">
                     <tr>
                         <td style="vertical-align: top;">
-                            <div class="brand">${companyName}</div>
-                            <div class="brand-sub">Librairie & Édition • Maroc</div>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <img src="${companyLogo}" alt="Riwaya Logo" style="height: 42px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <div>
+                                    <div class="brand" style="line-height: 1.1;">${companyName}</div>
+                                    <div class="brand-sub">Librairie & Édition • Maroc</div>
+                                </div>
+                            </div>
                             <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
                                 ${companyAddress} • Tél: ${companyPhone} • ${companyEmail}
                                 ${companyIce ? `<br>ICE: ${companyIce}` : ''}

@@ -33,12 +33,20 @@ export async function GET(
             return new NextResponse('Order not found', { status: 404 });
         }
 
-        // Récupérer dynamiquement les numéros des agents WhatsApp
+        // Récupérer dynamiquement les numéros des agents WhatsApp et le logo du site
         let formattedAgentsPhone = "07 02 22 05 75 / 06 66 03 81 29";
+        let siteLogo = "/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png";
         try {
-            const agentsSetting = await prisma.siteSettings.findUnique({
-                where: { key: 'whatsapp_agents' }
+            const settings = await prisma.siteSettings.findMany({
+                where: { key: { in: ['whatsapp_agents', 'site_logo'] } }
             });
+            const agentsSetting = settings.find(s => s.key === 'whatsapp_agents');
+            const logoSetting = settings.find(s => s.key === 'site_logo');
+
+            if (logoSetting?.value) {
+                siteLogo = logoSetting.value;
+            }
+
             if (agentsSetting?.value) {
                 const agents = JSON.parse(agentsSetting.value);
                 if (Array.isArray(agents)) {
@@ -58,7 +66,7 @@ export async function GET(
             }
         } catch {}
 
-        const html = generateInvoiceHtml(order as any, locale, formattedAgentsPhone);
+        const html = generateInvoiceHtml(order as any, locale, formattedAgentsPhone, siteLogo);
 
         return new Response(html, {
             status: 200,
