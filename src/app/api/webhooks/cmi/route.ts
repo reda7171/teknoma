@@ -6,11 +6,17 @@ import { generateCMIHash } from '@/lib/cmi'
 
 export async function POST(req: Request) {
     try {
-        const formData = await req.formData()
+        const formData = (await req.formData()) as any
         const params: Record<string, string> = {}
         
-        for (const [key, value] of formData.entries()) {
-            params[key] = value.toString()
+        if (typeof formData.forEach === 'function') {
+            formData.forEach((value: any, key: string) => {
+                params[key] = value?.toString() || ''
+            })
+        } else if (typeof formData.entries === 'function') {
+            for (const [key, value] of formData.entries()) {
+                params[key] = value?.toString() || ''
+            }
         }
 
         const storeKey = await getSetting('payment_cmi_store_key')
