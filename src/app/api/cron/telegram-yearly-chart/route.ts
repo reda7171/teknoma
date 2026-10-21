@@ -3,7 +3,7 @@ import { JumiaAPI } from '@/lib/jumia-api'
 import { sendTelegramDocument } from '@/lib/telegram'
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 import { prisma } from '@/lib/prisma'
-import PdfPrinter from 'pdfmake'
+import pdfMake from 'pdfmake'
 
 export const maxDuration = 60 // Allow longer execution time if fetching many pages
 
@@ -143,7 +143,7 @@ export async function GET(req: Request) {
                 bolditalics: 'Helvetica-BoldOblique'
             }
         }
-        const printer = new PdfPrinter(fonts)
+        pdfMake.setFonts(fonts)
         const docDef: any = {
             content: [
                 { text: 'Rapport Mensuel Consolidé - Riwaya', style: 'header' },
@@ -168,14 +168,8 @@ export async function GET(req: Request) {
             defaultStyle: { font: 'Roboto' }
         }
 
-        const pdfDoc = printer.createPdfKitDocument(docDef)
-        const chunks: Buffer[] = []
-        pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk))
-        await new Promise((resolve) => {
-            pdfDoc.on('end', () => resolve(null))
-            pdfDoc.end()
-        })
-        const pdfBuffer = Buffer.concat(chunks)
+        const pdfDoc = pdfMake.createPdf(docDef)
+        const pdfBuffer = await pdfDoc.getBuffer()
         
         await sendTelegramDocument(pdfBuffer, `Rapport_Riwaya_${now.getFullYear()}_${now.getMonth()+1}.pdf`, `📊 <b>Rapport Automatique Mensuel</b>\n📈 Voici votre rapport consolidé incluant les KPIs et graphiques de ce mois.`)
 
