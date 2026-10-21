@@ -15,19 +15,21 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'Query is required' }, { status: 400 })
         }
 
-        // Security check: restrict to safe SQL statements, or allow all since it's an admin terminal.
-        // We will allow SELECT, SHOW, DESCRIBE, UPDATE, DELETE, INSERT
-        const upperQuery = query.trim().toUpperCase()
-        const allowedPrefixes = ['SELECT', 'SHOW', 'DESCRIBE', 'UPDATE', 'DELETE', 'INSERT', 'ALTER', 'CREATE', 'DROP']
+        const normalizedQuery = query.trim().replace(/;\s*$/, '')
+        const upperQuery = normalizedQuery.toUpperCase()
+        const allowedPrefixes = ['SELECT', 'SHOW', 'DESCRIBE', 'EXPLAIN']
         
-        if (!allowedPrefixes.some(prefix => upperQuery.startsWith(prefix))) {
+        if (
+            !allowedPrefixes.some(prefix => upperQuery === prefix || upperQuery.startsWith(`${prefix} `))
+            || normalizedQuery.includes(';')
+        ) {
             return NextResponse.json({ 
                 success: false, 
-                error: 'Type de requête non reconnu ou non autorisé.' 
+                error: 'Seules les requêtes SQL de lecture sont autorisées.'
             }, { status: 403 })
         }
 
-        const result = await prisma.$queryRawUnsafe<any[]>(query)
+        const result = await prisma.$queryRawUnsafe<unknown[]>(normalizedQuery)
         
         // Ensure BigInts are converted to string to avoid JSON serialization errors
         const serializedResult = JSON.parse(JSON.stringify(result, (key, value) =>
@@ -35,8 +37,8 @@ export async function POST(req: NextRequest) {
         ))
 
         return NextResponse.json({ success: true, data: serializedResult })
-    } catch (err: any) {
+    } catch (err) {
         console.error('SQL TERMINAL ERROR:', err)
-        return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+        return NextResponse.json({ success: false, error: 'Erreur lors de la requête SQL' }, { status: 500 })
     }
 }

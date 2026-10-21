@@ -388,17 +388,44 @@ export async function getAllAuthors() {
 }
 
 /**
- * Récupère les livres populaires (avec cache)
+ * Récupère les livres populaires (les plus visités / consultés)
  */
 export async function getPopularBooks(limit = 6) {
     return getCached(
-        `book:popular:${limit}`,
+        `book:popular:views:${limit}`,
         async () => {
             return prisma.book.findMany({
                 where: { active: true },
-                orderBy: { stock: 'desc' },
+                orderBy: [
+                    { views: 'desc' },
+                    { cartAdditions: 'desc' },
+                    { createdAt: 'desc' }
+                ],
                 take: limit,
             })
+        },
+        300 // Cache 5 minutes
+    )
+}
+
+/**
+ * Récupère les identifiants des livres les plus visités (Tendance / Top vues)
+ */
+export async function getTopViewedBookIds(limit = 24): Promise<string[]> {
+    return getCached(
+        `book:top-viewed-ids:${limit}`,
+        async () => {
+            const books = await prisma.book.findMany({
+                where: { active: true, views: { gt: 0 } },
+                orderBy: [
+                    { views: 'desc' },
+                    { cartAdditions: 'desc' },
+                    { createdAt: 'desc' }
+                ],
+                select: { id: true },
+                take: limit,
+            })
+            return books.map((b) => b.id)
         },
         300 // Cache 5 minutes
     )

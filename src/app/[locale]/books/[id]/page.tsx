@@ -1,11 +1,11 @@
-import { getBookById, getBooks, getCustomersAlsoLikedBooks } from '@/lib/db/books'
+import { getBookById, getBooks, getCustomersAlsoLikedBooks, getTopViewedBookIds } from '@/lib/db/books'
 import { getAuthorProfile } from '@/lib/db/authors'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import WishlistButton from '@/components/WishlistButton'
 import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
-import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2, Eye } from 'lucide-react'
+import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2, Eye, TrendingUp } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
@@ -286,7 +286,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, la note et les recommandations issues des commandes réelles
-    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, audioTestimonialsResult, imageTestimonialsResult] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, audioTestimonialsResult, imageTestimonialsResult, topViewedIds] = await Promise.all([
         getBookReviews(bookId).catch(() => []),
         getBookAverageRating(bookId).catch(() => ({ average: 5, count: 0 })),
         book.category ? getCategoryConfigByName(book.category).catch(() => null) : Promise.resolve(null),
@@ -302,8 +302,11 @@ export default async function BookDetailPage({
         getSetting('adsense_slot_sidebar').then(v => v || '').catch(() => ''),
         getAuthorProfile(book.author).catch(() => null),
         getApprovedAudioTestimonials().catch(() => ({ success: true, testimonials: [] })),
-        getApprovedImageTestimonials().catch(() => ({ success: true, testimonials: [] }))
+        getApprovedImageTestimonials().catch(() => ({ success: true, testimonials: [] })),
+        getTopViewedBookIds(24).catch(() => [])
     ])
+
+    const isTrending = topViewedIds.includes(book.id) || Boolean((book as any).views && (book as any).views >= 20)
 
     // Un article n'est affiché que s'il est explicitement relié au livre dans l'admin.
     // Le précédent fallback ajoutait les derniers articles, même sans rapport avec le produit.
@@ -613,6 +616,14 @@ export default async function BookDetailPage({
                         <div className="flex flex-col gap-8 md:gap-12">
                             <div className="space-y-4 md:space-y-6">
                                 <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-2 md:mb-4">
+                                    {/* Badge Tendance / Plus visité */}
+                                    {isTrending && (
+                                        <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] md:text-xs font-black rounded-full uppercase tracking-wider shadow-sm">
+                                            <TrendingUp className="w-3.5 h-3.5 text-orange-600" />
+                                            <span>{tBook('TrendingBadge')}</span>
+                                        </div>
+                                    )}
+
                                     {/* Badge Vendeur (Livre d'occasion) */}
                                     {(book.customerSeller || book.seller) && (book.condition === 'USED' || book.condition === 'GOOD') && (
                                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] md:text-xs font-black rounded-full uppercase tracking-widest shadow-sm">

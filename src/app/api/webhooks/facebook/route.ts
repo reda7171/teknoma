@@ -34,20 +34,22 @@ export async function POST(req: NextRequest) {
         const rawBody = await req.text()
         const appSecret = process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_CLIENT_SECRET
 
-        if (appSecret) {
-            const signature = req.headers.get('x-hub-signature-256')
-            if (!signature || !signature.startsWith('sha256=')) {
-                return NextResponse.json({ error: 'Missing or invalid signature' }, { status: 401 })
-            }
+        if (!appSecret) {
+            return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
+        }
 
-            const hash = createHmac('sha256', appSecret).update(rawBody).digest('hex')
-            const expectedSignature = `sha256=${hash}`
-            const expectedBuffer = Buffer.from(expectedSignature)
-            const suppliedBuffer = Buffer.from(signature)
+        const signature = req.headers.get('x-hub-signature-256')
+        if (!signature || !signature.startsWith('sha256=')) {
+            return NextResponse.json({ error: 'Missing or invalid signature' }, { status: 401 })
+        }
 
-            if (expectedBuffer.length !== suppliedBuffer.length || !timingSafeEqual(expectedBuffer, suppliedBuffer)) {
-                return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-            }
+        const hash = createHmac('sha256', appSecret).update(rawBody).digest('hex')
+        const expectedSignature = `sha256=${hash}`
+        const expectedBuffer = Buffer.from(expectedSignature)
+        const suppliedBuffer = Buffer.from(signature)
+
+        if (expectedBuffer.length !== suppliedBuffer.length || !timingSafeEqual(expectedBuffer, suppliedBuffer)) {
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
         }
 
         const body = JSON.parse(rawBody || '{}')

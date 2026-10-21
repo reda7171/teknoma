@@ -368,7 +368,15 @@
       "CustomBundle": "Create my Custom Bundle (-30%)",
       "SocialProof": "⭐ 4.8/5 by over 1000 satisfied readers",
       "EditorsChoice": "Editor's Choice",
-      "Select": "SELECT"
+      "Select": "SELECT",
+      "PinnedBook": "Pinned Book in Hero Center",
+      "PinnedBookSubtitle": "Pin a specific book at the center of the Hero",
+      "PinnedBookAutoMode": "Automatic mode (Most visited book)",
+      "PinnedBookManual": "Manually pinned",
+      "PinnedBookSearch": "Search a book by title or author...",
+      "PinnedBookRemove": "Unpin (return to automatic)",
+      "PinnedBookSelect": "Pin this book to Hero",
+      "PinnedBookCurrently": "Currently at Hero center"
     },
     "SearchSection": {
       "Badge": "Search",
@@ -576,6 +584,8 @@
     "Remaining": "remaining",
     "By": "By",
     "BestSeller": "Best Seller",
+    "Trending": "Trending",
+    "MostVisited": "Most Visited",
     "AddedToCartSuccess": "Item successfully added to cart!",
     "AddedToCartError": "Error adding item to cart. Please try again.",
     "AddedToReadingList": "Added to my reading list!",
@@ -705,6 +715,7 @@
     }
   },
   "BookDetail": {
+    "TrendingBadge": "Trending · Most Visited",
     "AboutAuthor": "About the author",
     "DiscoverMore": "Discover more",
     "BackToSelection": "Back to selection",

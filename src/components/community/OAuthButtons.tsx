@@ -1,6 +1,5 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 
@@ -32,13 +31,19 @@ export default function OAuthButtons({ googleEnabled = true, facebookEnabled = t
         }
 
         const handleMessage = (e: MessageEvent) => {
+            if (e.origin !== window.location.origin || e.source !== authWindow) return
+
             if (e.data?.type === 'oauth_success') {
                 window.removeEventListener('message', handleMessage);
-                window.location.href = e.data.redirect || '/community';
+                const redirect = typeof e.data.redirect === 'string' && e.data.redirect.startsWith('/') && !e.data.redirect.startsWith('//')
+                    ? e.data.redirect
+                    : '/community'
+                window.location.href = redirect;
             } else if (e.data?.type === 'oauth_error') {
                 window.removeEventListener('message', handleMessage);
                 setLoadingProvider(null);
-                window.location.href = `/community/login?error=${encodeURIComponent(e.data.error)}`;
+                const error = typeof e.data.error === 'string' ? e.data.error : 'OAuthLoginFailed'
+                window.location.href = `/community/login?error=${encodeURIComponent(error)}`;
             }
         };
         window.addEventListener('message', handleMessage);

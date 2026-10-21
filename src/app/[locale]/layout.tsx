@@ -508,9 +508,16 @@ export default async function LocaleLayout({
             dangerouslySetInnerHTML={{ __html: injectedHeadTags }}
           />
         )}
+        {/* Trusted Types Default Policy pour CSP */}
+        <script
+          id="trusted-types-init"
+          dangerouslySetInnerHTML={{
+            __html: `if(typeof window!=='undefined'&&window.trustedTypes&&window.trustedTypes.createPolicy&&!window.trustedTypes.defaultPolicy){try{window.trustedTypes.createPolicy('default',{createHTML:function(s){return s},createScript:function(s){return s},createScriptURL:function(s){return s}})}catch(e){}}`
+          }}
+        />
       </head>
       <body
-        className={`${outfit.variable} ${tajawal.variable} ${cairo.variable} font-cairo-var font-sans antialiased bg-white`}
+        className={`${outfit.variable} ${tajawal.variable} ${cairo.variable} ${locale === 'ar' ? 'font-cairo-var' : 'font-sans'} antialiased bg-white`}
         suppressHydrationWarning={true}
       >
         <noscript>

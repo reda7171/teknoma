@@ -27,8 +27,9 @@ export async function GET(
                 'Content-Disposition': `attachment; filename="${params.filename}"`
             }
         })
-    } catch (error: any) {
-        return new NextResponse(error.message, { status: 500 })
+    } catch (error) {
+        console.error('Erreur téléchargement backup:', error)
+        return new NextResponse('Erreur serveur', { status: 500 })
     }
 }
 
@@ -45,7 +46,8 @@ export async function DELETE(
         
         await deleteBackup(params.filename)
         return NextResponse.json({ success: true })
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+    } catch (error) {
+        console.error('Erreur suppression backup:', error)
+        return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
     }
 }

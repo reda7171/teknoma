@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const stripeSecretKey = await getSetting('payment_stripe_secret_key')
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 
-    if (!stripeSecretKey) {
+    if (!stripeSecretKey || !endpointSecret) {
         return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 })
     }
 
@@ -21,12 +21,7 @@ export async function POST(req: Request) {
     let event: Stripe.Event
 
     try {
-        if (!endpointSecret) {
-            // Si pas de secret webhook configuré, on parse juste l'événement non vérifié (à éviter en prod)
-            event = JSON.parse(body) as Stripe.Event
-        } else {
-            event = stripe.webhooks.constructEvent(body, signature, endpointSecret)
-        }
+        event = stripe.webhooks.constructEvent(body, signature, endpointSecret)
     } catch (err: any) {
         console.error(`Webhook signature verification failed.`, err.message)
         return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })

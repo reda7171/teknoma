@@ -62,7 +62,7 @@ export default function FacebookSDK({
             <div id="fb-root"></div>
             <Script
                 id="facebook-jssdk"
-                strategy="afterInteractive"
+                strategy="lazyOnload"
                 dangerouslySetInnerHTML={{
                     __html: `
                         window.statusChangeCallback = function(response) {

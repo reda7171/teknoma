@@ -340,7 +340,15 @@
       "CustomBundle": "Créer mon Pack Perso (-30%)",
       "SocialProof": "⭐ 4.8/5 par plus de 1000 lecteurs satisfaits",
       "EditorsChoice": "Choix de l'éditeur",
-      "Select": "SÉLECTIONNER"
+      "Select": "SÉLECTIONNER",
+      "PinnedBook": "Livre épinglé au centre",
+      "PinnedBookSubtitle": "Épingler un livre spécifique au premier plan du Hero",
+      "PinnedBookAutoMode": "Mode automatique (Livre le plus visité)",
+      "PinnedBookManual": "Épinglé manuellement",
+      "PinnedBookSearch": "Rechercher un livre par titre ou auteur...",
+      "PinnedBookRemove": "Détacher (remettre en automatique)",
+      "PinnedBookSelect": "Épingler ce livre au Hero",
+      "PinnedBookCurrently": "Actuellement au centre du Hero"
     },
     "SearchSection": {
       "Badge": "Recherche",
@@ -559,6 +567,8 @@
     "OutOfStock": "Rupture de stock",
     "Remaining": "restants",
     "BestSeller": "Best-seller",
+    "Trending": "Tendance",
+    "MostVisited": "Plus visité",
     "BookCount": "{count, plural, =0 {0 livre} one {1 livre} other {{count} livres}}",
     "NoResultsDesc": "Aucun livre trouvé pour cet auteur.",
     "By": "Par",
@@ -685,6 +695,7 @@
     }
   },
   "BookDetail": {
+    "TrendingBadge": "Tendance · Plus visité",
     "AboutAuthor": "À propos de l'auteur",
     "DiscoverMore": "Découvrir plus",
     "BackToSelection": "Retour à la sélection",

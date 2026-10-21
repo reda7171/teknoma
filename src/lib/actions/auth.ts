@@ -8,6 +8,7 @@ import crypto from 'crypto'
 import { createAuditLog } from './audit'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sendTelegramMessage } from '@/lib/telegram'
+import { JWT_SECRET } from '@/lib/jwt-secret'
 
 const LoginSchema = z.object({
     email: z.string().email('Email invalide'),
@@ -77,7 +78,7 @@ export async function login(formData: FormData): Promise<LoginResult> {
             console.error('[SECURITY] JWT_SECRET manquant en production !')
             return { success: false, error: 'Erreur de configuration serveur.' }
         }
-        const secret = process.env.JWT_SECRET || 'default_secure_secret_for_riwaya'
+        const secret = JWT_SECRET
         
         let signature = ''
         if (typeof crypto !== 'undefined' && crypto.createHmac) {
@@ -223,7 +224,7 @@ export async function checkApprovalStatus(requestId: string): Promise<LoginResul
 
         const timestamp = Date.now().toString()
         const payload = `${user.id}:${timestamp}`
-        const secret = process.env.JWT_SECRET || 'default_secure_secret_for_riwaya'
+        const secret = JWT_SECRET
         let signature = ''
         if (typeof crypto !== 'undefined' && crypto.createHmac) {
             signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
@@ -329,11 +330,11 @@ export async function isAuthenticated(): Promise<boolean> {
         const decoded = Buffer.from(token, 'base64').toString('ascii')
         const [userId, timestamp, signature] = decoded.split(':')
 
-        if (!userId || !timestamp) return false
+        if (!userId || !timestamp || !signature) return false
 
         // Vérification de la signature HMAC
         const payload = `${userId}:${timestamp}`
-        const secret = process.env.JWT_SECRET || 'default_secure_secret_for_riwaya'
+        const secret = JWT_SECRET
         // OWASP: avertir si secret par défaut utilisé en production
         if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
             console.error('[SECURITY] JWT_SECRET manquant — token verification compromise!')
@@ -341,20 +342,16 @@ export async function isAuthenticated(): Promise<boolean> {
         }
         if (typeof crypto !== 'undefined' && crypto.createHmac) {
             const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-            if (!signature || signature !== expectedSignature) {
-
-                return false
-            }
+            const expectedBuffer = Buffer.from(expectedSignature)
+            const suppliedBuffer = Buffer.from(signature)
+            if (expectedBuffer.length !== suppliedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, suppliedBuffer)) return false
         }
 
         // Vérifier si le token a moins de 7 jours (sécurité supplémentaire)
-        const tokenTime = parseInt(timestamp)
+        const tokenTime = Number(timestamp)
         const sevenDays = 7 * 24 * 60 * 60 * 1000
-        
-        const isValid = (Date.now() - tokenTime <= sevenDays)
-
-        
-        if (!isValid) return false
+        const tokenAge = Date.now() - tokenTime
+        if (!Number.isFinite(tokenTime) || tokenAge < 0 || tokenAge > sevenDays) return false
 
         return true
     } catch (e) {
@@ -393,6 +390,8 @@ export async function verifyAdmin() {
 }
 
 export async function getAdminUser() {
+    if (!(await isAuthenticated())) return null
+
     const cookieStore = await cookies()
     const token = cookieStore.get('admin-token')?.value
 
@@ -400,18 +399,22 @@ export async function getAdminUser() {
 
     try {
         const decoded = Buffer.from(token, 'base64').toString('ascii')
-        const [userId, timestamp, signature] = decoded.split(':')
-        
-        // Vérification HMAC Optionnelle ici
-        return userId
+        const [userId] = decoded.split(':')
+        return userId || null
     } catch {
         return null
     }
 }
 
 export async function getAdminRole() {
-    const cookieStore = await cookies()
-    return cookieStore.get('admin-role')?.value || null
+    const userId = await getAdminUser()
+    if (!userId) return null
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true }
+    })
+    return user?.role || null
 }
 
 export async function resetPassword(email: string, newPassword: string): Promise<{ success: boolean; error?: string }> {

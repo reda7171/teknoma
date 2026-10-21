@@ -6,7 +6,7 @@ import { sanitizeFilename } from '@/lib/security'
 import { createHash } from 'crypto'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_riwaya_mobile_key_2026';
+import { JWT_SECRET } from '@/lib/jwt-secret';
 
 const ALLOWED_MIME_TYPES = [
     'image/jpeg',

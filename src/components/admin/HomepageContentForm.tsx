@@ -159,7 +159,14 @@ const SECTIONS = [
   },
 ]
 
-export default function HomepageContentForm({ initialSettings }: { initialSettings: Record<string, string> }) {
+import HeroPinnedBookSelector, { AdminBookItem } from '@/components/admin/HeroPinnedBookSelector'
+
+interface HomepageContentFormProps {
+  initialSettings: Record<string, string>
+  books?: AdminBookItem[]
+}
+
+export default function HomepageContentForm({ initialSettings, books = [] }: HomepageContentFormProps) {
   const [values, setValues] = useState<Record<string, string>>(initialSettings)
   const [openSections, setOpenSections] = useState<string[]>(['hero'])
   const [saving, setSaving] = useState(false)
@@ -180,7 +187,9 @@ export default function HomepageContentForm({ initialSettings }: { initialSettin
         key,
         value,
         category: 'homepage_content',
-        description: SECTIONS.flatMap(s => s.fields).find(f => f.key === key)?.label || key
+        description: key === 'hero_pinned_book_id'
+          ? 'Livre épinglé au centre du Hero'
+          : SECTIONS.flatMap(s => s.fields).find(f => f.key === key)?.label || key
       }))
       await updateMultipleSettings(entries)
       setMessage('Sauvegardé avec succès !')
@@ -242,6 +251,15 @@ export default function HomepageContentForm({ initialSettings }: { initialSettin
             {/* Section Fields */}
             {isOpen && (
               <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-50">
+                {section.id === 'hero' && (
+                  <div className="md:col-span-2 pt-4">
+                    <HeroPinnedBookSelector
+                      pinnedBookId={values['hero_pinned_book_id'] || ''}
+                      onSelectBook={(bookId) => setValues(prev => ({ ...prev, hero_pinned_book_id: bookId }))}
+                      books={books}
+                    />
+                  </div>
+                )}
                 {section.fields.map(field => (
                   <div key={field.key} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
                     <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1.5 mt-4">

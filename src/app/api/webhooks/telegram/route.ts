@@ -18,6 +18,17 @@ const STATUS_LABELS: Record<string, string> = {
     FAILED: 'Échec',
 }
 
+async function callProtectedCron(pathname: string) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    const cronSecret = process.env.CRON_SECRET
+    if (!appUrl || !cronSecret) throw new Error('Configuration cron incomplète')
+
+    return fetch(new URL(pathname, appUrl), {
+        headers: { Authorization: `Bearer ${cronSecret}` },
+        cache: 'no-store'
+    })
+}
+
 export async function POST(req: Request) {
     let currentCallbackId: string | null = null
     let currentToken: string | null = null
@@ -642,7 +653,7 @@ export async function POST(req: Request) {
                     } else if (action === 'returns_check') {
                         await answerCallbackQuery(callbackId, '🔄 Vérification en cours, merci de patienter...', token)
                         try {
-                            const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-returns-alert${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
+                            const res = await callProtectedCron('/api/cron/jumia-returns-alert')
                             const data = await res.json()
                             
                             if (data.success) {
@@ -661,8 +672,7 @@ export async function POST(req: Request) {
                     } else if (action === 'status_check') {
                         await answerCallbackQuery(callbackId, '🔄 Vérification des statuts Jumia...', token)
                         try {
-                            const cronUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-status-changes?secret=${process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026'}`
-                            const res = await fetch(cronUrl)
+                            const res = await callProtectedCron('/api/cron/jumia-status-changes')
                             const data = await res.json()
                             if (data.success) {
                                 await sendTelegramMessage(
@@ -2213,8 +2223,7 @@ export async function POST(req: Request) {
             }
             else if (text.startsWith('/JUMIASTATUT') || text === 'JUMIASTATUT') {
                 try {
-                    const cronUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/jumia-status-changes?secret=${process.env.CRON_SECRET || 'une_cle_secrete_pour_cron_2026'}`
-                    const res = await fetch(cronUrl)
+                    const res = await callProtectedCron('/api/cron/jumia-status-changes')
                     const data = await res.json()
                     if (data.success) {
                         await sendTelegramMessage(
@@ -2234,7 +2243,7 @@ export async function POST(req: Request) {
             else if (text.startsWith('/RAPPORT') || text === 'RAPPORT') {
                 // Déclencher rapport quotidien maintenant
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cron/daily-report${process.env.CRON_SECRET ? `?token=${process.env.CRON_SECRET}` : ''}`)
+                    const res = await callProtectedCron('/api/cron/daily-report')
                     const data = await res.json()
                     if (data.success) {
                         await sendTelegramMessage(`✅ Rapport envoyé !`, chatId.toString(), token)
