@@ -49,6 +49,30 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
         <main className="min-h-screen bg-slate-50 flex flex-col">
             <Header />
 
+            {/* Données Structurées Schema.org — ProfilePage & Person pour E-E-A-T */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "ProfilePage",
+                        "mainEntity": {
+                            "@type": "Person",
+                            "name": user.fullName || user.email?.split('@')[0],
+                            "url": `https://riwaya.store/${locale}/blog/author/${user.id}`,
+                            ...(user.image ? { "image": user.image.startsWith('http') ? user.image : `https://riwaya.store${user.image.startsWith('/') ? '' : '/'}${user.image}` } : {}),
+                            ...(user.bio ? { "description": user.bio } : {}),
+                            ...(user.editorialRole ? { "jobTitle": user.editorialRole } : { "jobTitle": "Rédacteur & Chroniqueur Littéraire" }),
+                            "worksFor": {
+                                "@type": "Organization",
+                                "name": "Riwaya",
+                                "url": "https://riwaya.store"
+                            }
+                        }
+                    }).replace(/</g, '\\u003c')
+                }}
+            />
+
             {/* Header Profil (Style Banner) */}
             <div className="bg-white border-b border-slate-100 relative">
                 <div className="absolute inset-0 bg-[url('/img/pattern.svg')] opacity-5"></div>

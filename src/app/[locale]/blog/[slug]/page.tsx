@@ -187,7 +187,30 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 }
             })
         }
-    }
+    const siteUrl = getBaseUrl() || 'https://riwaya.store'
+    const canonicalArticleUrl = `${siteUrl}/${locale}/blog/${post.slug}`
+    const fullCoverImageUrl = post.coverImage
+        ? (post.coverImage.startsWith('http') ? post.coverImage : `${siteUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`)
+        : `${siteUrl}/images/og-blog.png`
+
+    const authorProfileUrl = post.author?.id
+        ? `${siteUrl}/${locale}/blog/author/${post.author.id}`
+        : `${siteUrl}/${locale}/blog`
+
+    const authorImageUrl = post.author?.image
+        ? (post.author.image.startsWith('http') ? post.author.image : `${siteUrl}${post.author.image.startsWith('/') ? '' : '/'}${post.author.image}`)
+        : undefined
+
+    const defaultEditorialRole = locale === 'ar'
+        ? 'كاتب ومحرر أدبي'
+        : locale === 'en'
+            ? 'Literary Writer & Editor'
+            : 'Rédacteur & Chroniqueur Littéraire'
+
+    const authorRole = post.author?.editorialRole || defaultEditorialRole
+
+    const articlePublishedIso = post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString()
+    const articleModifiedIso = post.updatedAt ? new Date(post.updatedAt).toISOString() : articlePublishedIso
 
     return (
         <div className="min-h-screen bg-white" id="article-page">
@@ -196,29 +219,47 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <MobileSectionNavigation language={locale} />
             <Header />
 
-            {/* Données Structurées Schema.org — AEO enrichi */}
+            {/* Données Structurées Schema.org — Article, Author & Discover enrichis */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
                     __html: JSON.stringify([
                         {
                             "@context": "https://schema.org",
-                            "@type": "BlogPosting",
+                            "@type": ["Article", "BlogPosting"],
+                            "mainEntityOfPage": {
+                                "@type": "WebPage",
+                                "@id": canonicalArticleUrl
+                            },
                             "headline": post.title,
-                            "image": post.coverImage,
-                            "url": `https://riwaya.store/${locale}/blog/${post.slug}`,
-                                "author": {
-                                    "@type": "Person",
-                                    "name": displayAuthor,
-                                    "url": `https://riwaya.store/${locale}/blog`
-                                },
+                            "image": [fullCoverImageUrl],
+                            "url": canonicalArticleUrl,
+                            "author": {
+                                "@type": "Person",
+                                "name": displayAuthor,
+                                "url": authorProfileUrl,
+                                "jobTitle": authorRole,
+                                ...(authorImageUrl ? { "image": authorImageUrl } : {}),
+                                ...(post.author?.bio ? { "description": post.author.bio } : {}),
+                                "worksFor": {
+                                    "@type": "Organization",
+                                    "name": "Riwaya",
+                                    "url": siteUrl
+                                }
+                            },
                             "publisher": {
                                 "@type": "Organization",
                                 "name": "Riwaya",
-                                "logo": { "@type": "ImageObject", "url": "https://riwaya.store/logo.png", "width": 200, "height": 60 }
+                                "url": siteUrl,
+                                "logo": {
+                                    "@type": "ImageObject",
+                                    "url": `${siteUrl}/logo.png`,
+                                    "width": 200,
+                                    "height": 60
+                                }
                             },
-                            "datePublished": post.publishedAt,
-                            "dateModified": post.updatedAt,
+                            "datePublished": articlePublishedIso,
+                            "dateModified": articleModifiedIso,
                             "description": post.excerpt || post.title,
                             "abstract": post.excerpt || post.title,
                             "about": {
@@ -230,7 +271,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "wordCount": post.content ? post.content.trim().split(/\s+/).length : 0,
                             ...(post.category ? { "articleSection": post.category } : {}),
                             ...(tags.length > 0 ? { "keywords": tags.join(', ') } : {}),
-                            // Speakable : les sections que les assistants vocaux doivent lire
                             "speakable": {
                                 "@type": "SpeakableSpecification",
                                 "cssSelector": ["h1", ".article-excerpt", ".article-lead"]
@@ -238,8 +278,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "isPartOf": {
                                 "@type": "Blog",
                                 "name": "Blog Riwaya",
-                                "url": `https://riwaya.store/${locale}/blog`
+                                "url": `${siteUrl}/${locale}/blog`
                             }
+                        },
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "name": locale === 'ar' ? 'الرئيسية' : locale === 'en' ? 'Home' : 'Accueil',
+                                    "item": `${siteUrl}/${locale}`
+                                },
+                                {
+                                    "@type": "ListItem",
+                                    "position": 2,
+                                    "name": "Blog",
+                                    "item": `${siteUrl}/${locale}/blog`
+                                },
+                                ...(post.category ? [{
+                                    "@type": "ListItem",
+                                    "position": 3,
+                                    "name": post.category,
+                                    "item": `${siteUrl}/${locale}/blog?category=${encodeURIComponent(post.category)}`
+                                }] : []),
+                                {
+                                    "@type": "ListItem",
+                                    "position": post.category ? 4 : 3,
+                                    "name": post.title,
+                                    "item": canonicalArticleUrl
+                                }
+                            ]
                         },
                         {
                             "@context": "https://schema.org",
