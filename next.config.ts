@@ -193,23 +193,9 @@ const nextConfig: NextConfig = {
         ],
       },
       ...(process.env.NODE_ENV === 'production' ? [
-        // Headers pour les assets statiques (images, polices, CSS, JS) — immutable cache
+        // Headers pour les assets statiques (images, polices) — immutable cache
         {
           source: '/(.*)\\.(png|jpg|jpeg|svg|gif|webp|ico|avif|woff2|woff|ttf)',
-          headers: [
-            { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-          ],
-        },
-        // Chunks CSS Next.js — cache long terme (hash dans le nom)
-        {
-          source: '/_next/static/chunks/(.*)\\.css',
-          headers: [
-            { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-          ],
-        },
-        // Chunks JS Next.js — cache long terme
-        {
-          source: '/_next/static/(.*)',
           headers: [
             { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
           ],

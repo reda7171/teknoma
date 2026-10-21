@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw } from 'lucide-react'
-import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices } from '@/lib/actions/books'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste } from 'lucide-react'
+import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBooksFromAi } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import BookCreativeModal from '@/components/admin/BookCreativeModal'
@@ -421,6 +421,172 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         }
     }
 
+    const handleCopyChatGptPrompt = () => {
+        if (selectedIds.length === 0) return
+
+        const selectedBooksData = orderedBooks.filter(b => selectedIds.includes(b.id))
+        if (selectedBooksData.length === 0) return
+
+        const booksListText = selectedBooksData.map((b, i) => {
+            return `LIVRE #${i + 1}:
+- ID: ${b.id}
+- Titre actuel (Arabe ou principal): ${b.title || 'N/A'}
+- Titre actuel (Français): ${b.titleFr || 'N/A'}
+- Titre actuel (Anglais): ${b.titleEn || 'N/A'}
+- Auteur: ${b.author || 'N/A'}
+- Catégorie actuelle: ${b.category || 'N/A'}${b.subCategory ? ` / ${b.subCategory}` : ''}
+- Langue: ${b.language || 'fr'}
+- SKU Vendeur: ${b.sellerSku || 'N/A'}`
+        }).join('\n\n')
+
+        const prompt = `Act as an expert e-commerce copywriter & bookseller for Riwaya bookstore & Jumia marketplace.
+I have ${selectedBooksData.length} book(s) to optimize.
+
+=== BOOKS LIST TO PROCESS ===
+${booksListText}
+
+CRITICAL INSTRUCTIONS:
+1. TITLES TRANSLITERATION:
+   For title_fr and title_en, DO NOT translate Arabic titles literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
+   Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
+2. STRICT ZERO PRICE / NO DISCOUNT POLICY:
+   NEVER mention or include any price, currency, discount or promo in descriptions, titles, keywords, highlights or package content (ABSOLUTELY NO 'prix', 'price', 'سعر', 'ثمن', 'DH', 'MAD', 'درهم', 'gratuit', 'free', 'off', 'promo', '%', 'remise', 'solde'). Jumia strictly rejects listings containing price mentions in the description!
+3. MULTILINGUAL CONTENT:
+   - "description_ar", "description_fr", "description_en": 2 to 3 engaging paragraphs highlighting the reading experience and book value.
+   - "longDescription_ar", "longDescription_fr", "longDescription_en": Comprehensive presentation, themes, and key takeaways.
+   - "category": Recommended main category (e.g. Romans & Littérature, Développement Personnel, Histoire, etc.).
+   - "subCategory": Recommended subcategory.
+   - "seoKeywords": High-volume search keywords separated by commas (author name, title transliteration, genre, book in Morocco).
+   - "jumiaHighlights": Clean HTML bullet points (<ul><li>...</li></ul>) with 3-4 key selling points WITHOUT any price.
+   - "jumiaPackageContent": e.g. "1 x Livre : [Titre du livre]"
+
+STRICT JSON OUTPUT REQUIREMENT:
+You MUST return ONLY a valid JSON array of objects (one object per book), preserving the EXACT "id" for each book:
+[
+  {
+    "id": "EXACT_BOOK_ID",
+    "title_ar": "العنوان بالعربية",
+    "title_fr": "Titre phonétique en français",
+    "title_en": "Phonetic title in English",
+    "description_ar": "الوصف بالعربية",
+    "description_fr": "Description engageante en français",
+    "description_en": "Engaging description in English",
+    "longDescription_ar": "الوصف التفصيلي بالعربية",
+    "longDescription_fr": "Description détaillée en français",
+    "longDescription_en": "Detailed description in English",
+    "category": "Catégorie principale",
+    "subCategory": "Sous-catégorie",
+    "seoKeywords": "mot-clé 1, mot-clé 2, mot-clé 3",
+    "jumiaHighlights": "<ul><li>Auteur: ...</li><li>Genre: ...</li></ul>",
+    "jumiaPackageContent": "1 x Livre : [Titre]"
+  }
+]
+Do not add explanatory text outside the JSON array or code block.`
+
+        navigator.clipboard.writeText(prompt)
+        setToast({ msg: `Prompt ChatGPT copié pour ${selectedBooksData.length} livre(s) !`, ok: true })
+        setTimeout(() => setToast(null), 4000)
+    }
+
+    const handlePasteChatGptResponse = async () => {
+        try {
+            const text = await navigator.clipboard.readText()
+            if (!text || !text.trim()) {
+                setToast({ msg: 'Le presse-papier est vide.', ok: false })
+                setTimeout(() => setToast(null), 4000)
+                return
+            }
+
+            // Extraction robuste du JSON (gère markdown ```json ... ``` ou accolades)
+            let jsonStr = text.trim()
+            const matchCodeBlock = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+            if (matchCodeBlock) {
+                jsonStr = matchCodeBlock[1].trim()
+            } else {
+                const firstBracket = text.indexOf('[')
+                const lastBracket = text.lastIndexOf(']')
+                const firstBrace = text.indexOf('{')
+                const lastBrace = text.lastIndexOf('}')
+
+                if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+                    jsonStr = text.substring(firstBracket, lastBracket + 1)
+                } else if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                    jsonStr = text.substring(firstBrace, lastBrace + 1)
+                }
+            }
+
+            let parsedData: any
+            try {
+                parsedData = JSON.parse(jsonStr)
+            } catch {
+                setToast({ msg: 'Le contenu du presse-papier n\'est pas un JSON valide.', ok: false })
+                setTimeout(() => setToast(null), 4000)
+                return
+            }
+
+            let itemsArray: any[] = []
+            if (Array.isArray(parsedData)) {
+                itemsArray = parsedData
+            } else if (typeof parsedData === 'object' && parsedData !== null) {
+                if (parsedData.id) {
+                    itemsArray = [parsedData]
+                } else if (selectedIds.length === 1) {
+                    itemsArray = [{ ...parsedData, id: selectedIds[0] }]
+                } else {
+                    setToast({ msg: 'Format invalide : tableau JSON requis pour plusieurs livres.', ok: false })
+                    setTimeout(() => setToast(null), 4000)
+                    return
+                }
+            }
+
+            if (itemsArray.length === 0) {
+                setToast({ msg: 'Aucun livre trouvé dans le JSON.', ok: false })
+                setTimeout(() => setToast(null), 4000)
+                return
+            }
+
+            // Associer par index de sélection en fallback si l'ID n'a pas été retourné correctement
+            itemsArray = itemsArray.map((item, idx) => {
+                if (item.id && selectedIds.includes(item.id)) return item
+                if (selectedIds[idx]) return { ...item, id: selectedIds[idx] }
+                return item
+            })
+
+            setBulkLoading(true)
+            const result = await bulkUpdateBooksFromAi(itemsArray)
+            setBulkLoading(false)
+
+            if (result.success) {
+                const updatedMap = new Map(itemsArray.map(item => [item.id, item]))
+                setOrderedBooks(prev => prev.map(book => {
+                    const update = updatedMap.get(book.id)
+                    if (!update) return book
+                    return {
+                        ...book,
+                        title: update.title_ar || update.title || book.title,
+                        titleFr: update.title_fr || update.titleFr || book.titleFr,
+                        titleEn: update.title_en || update.titleEn || book.titleEn,
+                        category: update.category || book.category,
+                        subCategory: update.subCategory || book.subCategory,
+                        description: update.description_ar || update.description || book.description,
+                        longDescription: update.longDescription_ar || update.longDescription || book.longDescription,
+                    }
+                }))
+                setToast({ msg: `✅ ${result.count || itemsArray.length} livre(s) mis à jour avec succès depuis ChatGPT !`, ok: true })
+                router.refresh()
+                setTimeout(() => setToast(null), 5000)
+            } else {
+                setToast({ msg: `❌ ${result.error || 'Erreur de mise à jour'}`, ok: false })
+                setTimeout(() => setToast(null), 5000)
+            }
+        } catch (err: any) {
+            console.error('Erreur pasteChatGptResponse:', err)
+            setToast({ msg: 'Erreur lors de la lecture du presse-papier.', ok: false })
+            setTimeout(() => setToast(null), 5000)
+        } finally {
+            setBulkLoading(false)
+        }
+    }
 
     async function handleDelete(id: string, title: string) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${title}" ?`)) {
@@ -639,6 +805,25 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
                             >
                                 <Send className="w-4 h-4" />
                                 Publier Réseaux
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCopyChatGptPrompt}
+                                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition shadow-sm"
+                                title="Générer et copier le prompt ChatGPT pour les livres sélectionnés"
+                            >
+                                <Bot className="w-4 h-4" />
+                                Prompt ChatGPT
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handlePasteChatGptResponse}
+                                disabled={bulkLoading}
+                                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-700 transition shadow-sm disabled:opacity-50"
+                                title="Coller la réponse ChatGPT pour mettre à jour les livres sélectionnés"
+                            >
+                                <ClipboardPaste className="w-4 h-4" />
+                                Coller réponse
                             </button>
                             <button
                                 onClick={handleBulkDelete}
