@@ -9,9 +9,9 @@ export async function POST(req: Request) {
         const formData = await req.formData()
         const params: Record<string, string> = {}
         
-        formData.forEach((value, key) => {
+        for (const [key, value] of formData.entries()) {
             params[key] = value.toString()
-        })
+        }
 
         const storeKey = await getSetting('payment_cmi_store_key')
         
