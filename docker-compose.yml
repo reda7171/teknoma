@@ -107,13 +107,14 @@ services:
     image: devlikeapro/waha
     container_name: riwaya_whatsapp
     restart: always
+    shm_size: '1gb'
     ports:
       - "3001:3000"
     environment:
-      - WHATSAPP_DEFAULT_ENGINE=WEBJS
+      - WHATSAPP_DEFAULT_ENGINE=NOWEB
       - WHATSAPP_START_SESSION=default
       - WAHA_ZIPPER=ZIPPER
-      - WAHA_PRINT_QR=false
+      - WAHA_PRINT_QR=true
       - WAHA_DASHBOARD_ENABLED=true
       - WAHA_DASHBOARD_USERNAME=${WAHA_USER:-admin}
       - WAHA_DASHBOARD_PASSWORD=${WAHA_PASS:-admin123}

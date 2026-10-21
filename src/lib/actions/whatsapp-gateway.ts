@@ -4,6 +4,7 @@ import { verifyAdmin } from './auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { DEFAULT_WHATSAPP_TEMPLATES } from '@/lib/constants/whatsapp-templates'
+import QRCode from 'qrcode'
 
 const CANDIDATE_URLS = [
     process.env.WHATSAPP_GATEWAY_URL,
@@ -56,14 +57,14 @@ async function detectGateway(): Promise<ActiveGateway | null> {
 
             const authHeaders = getWahaHeaders()
 
-            // Check WAHA
+            // Check WAHA (do not treat 401 as available since requests will fail)
             const wahaRes = await fetch(`${url}/api/sessions?all=true`, {
                 headers: authHeaders,
                 signal: controller.signal,
                 cache: 'no-store'
             }).catch(() => null)
 
-            if (wahaRes && (wahaRes.ok || wahaRes.status === 401)) {
+            if (wahaRes && wahaRes.ok) {
                 clearTimeout(timeoutId)
                 return { engine: 'waha', baseUrl: url }
             }
@@ -88,7 +89,26 @@ async function detectGateway(): Promise<ActiveGateway | null> {
 async function extractWahaQr(baseUrl: string, sessionName: string): Promise<string | null> {
     const headers = getWahaHeaders()
 
-    // 1. Tenter l'endpoint officiel WAHA /api/{session}/auth/qr
+    // 1. Tenter l'endpoint direct image WAHA /api/{session}/auth/qr?format=image
+    try {
+        const qrImgRes = await fetch(`${baseUrl}/api/${sessionName}/auth/qr?format=image`, {
+            headers: { ...headers, 'Accept': 'image/png, */*' },
+            cache: 'no-store'
+        }).catch(() => null)
+
+        if (qrImgRes && qrImgRes.ok) {
+            const contentType = qrImgRes.headers.get('content-type') || ''
+            if (!contentType.includes('application/json')) {
+                const arrayBuffer = await qrImgRes.arrayBuffer()
+                if (arrayBuffer.byteLength > 100) {
+                    const mime = contentType.includes('image/') ? contentType.split(';')[0] : 'image/png'
+                    return `data:${mime};base64,${Buffer.from(arrayBuffer).toString('base64')}`
+                }
+            }
+        }
+    } catch {}
+
+    // 2. Tenter l'endpoint officiel WAHA /api/{session}/auth/qr
     try {
         const qrRes = await fetch(`${baseUrl}/api/${sessionName}/auth/qr`, {
             headers,
@@ -99,13 +119,21 @@ async function extractWahaQr(baseUrl: string, sessionName: string): Promise<stri
             const contentType = qrRes.headers.get('content-type') || ''
             if (contentType.includes('application/json')) {
                 const qrJson = await qrRes.json().catch(() => null)
-                if (qrJson?.data) {
-                    return qrJson.data.startsWith('data:')
-                        ? qrJson.data
-                        : `data:${qrJson.mimetype || 'image/png'};base64,${qrJson.data}`
+                // WAHA peut retourner la clé qrcode
+                if (qrJson?.qrcode && typeof qrJson.qrcode === 'string') {
+                    return qrJson.qrcode.startsWith('data:')
+                        ? qrJson.qrcode
+                        : `data:image/png;base64,${qrJson.qrcode}`
                 }
-                if (qrJson?.value && typeof qrJson.value === 'string') {
-                    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrJson.value)}`
+                // WAHA renvoie le string brut dans "raw" (ou "qr", "value", "data")
+                const rawQr = qrJson?.raw || qrJson?.qr || qrJson?.value || qrJson?.data
+                if (rawQr && typeof rawQr === 'string') {
+                    if (rawQr.startsWith('data:image')) return rawQr
+                    try {
+                        return await QRCode.toDataURL(rawQr, { margin: 2, scale: 7 })
+                    } catch {
+                        return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(rawQr)}`
+                    }
                 }
             } else {
                 // Réponse binaire image/png
@@ -119,31 +147,35 @@ async function extractWahaQr(baseUrl: string, sessionName: string): Promise<stri
         }
     } catch {}
 
-    // 2. Fallback: Screenshot direct de l'instance WhatsApp Web de Chromium
-    try {
-        const screenRes = await fetch(`${baseUrl}/api/screenshot?session=${encodeURIComponent(sessionName)}`, {
-            headers,
-            cache: 'no-store'
-        }).catch(() => null)
+    // 3. Fallbacks screenshots WAHA
+    const screenshotEndpoints = [
+        `${baseUrl}/api/${sessionName}/screenshot`,
+        `${baseUrl}/api/screenshot?session=${encodeURIComponent(sessionName)}`
+    ]
+    for (const ep of screenshotEndpoints) {
+        try {
+            const screenRes = await fetch(ep, {
+                headers,
+                cache: 'no-store'
+            }).catch(() => null)
 
-        if (screenRes && screenRes.ok) {
-            const contentType = screenRes.headers.get('content-type') || ''
-            if (contentType.includes('application/json')) {
-                const screenJson = await screenRes.json().catch(() => null)
-                if (screenJson?.data) {
-                    return screenJson.data.startsWith('data:')
-                        ? screenJson.data
-                        : `data:${screenJson.mimetype || 'image/png'};base64,${screenJson.data}`
-                }
-            } else {
-                const arrayBuffer = await screenRes.arrayBuffer()
-                if (arrayBuffer.byteLength > 500) {
-                    const buffer = Buffer.from(arrayBuffer)
-                    return `data:image/png;base64,${buffer.toString('base64')}`
+            if (screenRes && screenRes.ok) {
+                const contentType = screenRes.headers.get('content-type') || ''
+                if (contentType.includes('application/json')) {
+                    const screenJson = await screenRes.json().catch(() => null)
+                    const val = screenJson?.data || screenJson?.qrcode || screenJson?.raw
+                    if (val && typeof val === 'string') {
+                        return val.startsWith('data:') ? val : `data:image/png;base64,${val}`
+                    }
+                } else {
+                    const arrayBuffer = await screenRes.arrayBuffer()
+                    if (arrayBuffer.byteLength > 500) {
+                        return `data:image/png;base64,${Buffer.from(arrayBuffer).toString('base64')}`
+                    }
                 }
             }
-        }
-    } catch {}
+        } catch {}
+    }
 
     return null
 }
@@ -193,12 +225,12 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
         let session = Array.isArray(sessions) ? (sessions.find((s: any) => s.name === 'default') || sessions[0]) : null
         const sessionName = session?.name || 'default'
 
-        // Si la session n'existe pas encore dans WAHA, on la crée
+        // Si la session n'existe pas encore dans WAHA, on la crée et on la démarre
         if (!session) {
             await fetch(`${gateway.baseUrl}/api/sessions`, {
                 method: 'POST',
                 headers: { ...headers, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: sessionName })
+                body: JSON.stringify({ name: sessionName, start: true })
             }).catch(() => null)
         } else if (session.status === 'STOPPED' || session.status === 'FAILED') {
             // Si la session existe mais est arrêtée, on la démarre
