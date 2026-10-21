@@ -4,6 +4,7 @@ import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTele
 import { OrderStatus } from '@prisma/client'
 import fs from 'fs/promises'
 import path from 'path'
+import { isAuthorizedTelegramWebhook } from '@/lib/telegram-webhook-auth'
 
 const STATUS_LABELS: Record<string, string> = {
     PENDING: 'En attente',
@@ -22,11 +23,11 @@ export async function POST(req: Request) {
     let currentToken: string | null = null
 
     try {
-        const { searchParams } = new URL(req.url)
-        const queryToken = searchParams.get('token')
-        
+        if (!(await isAuthorizedTelegramWebhook(req))) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const body = await req.json()
-        console.log('[TELEGRAM WEBHOOK] Incoming Body:', JSON.stringify(body))
         
         // Récupérer le token depuis la DB
         const tokenSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } })
@@ -36,11 +37,6 @@ export async function POST(req: Request) {
         if (!token) {
             console.error('[SECURITY] Bot token not configured')
             return NextResponse.json({ error: 'Not configured' }, { status: 500 })
-        }
-
-        if (queryToken && queryToken !== token) {
-            console.error('[SECURITY] Unauthorized Telegram Webhook attempt: Token mismatch')
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         // Traitement des callback_query (boutons)
@@ -1202,10 +1198,20 @@ export async function POST(req: Request) {
             // Format: auth_approve:{requestId}
             else if (data && data.startsWith('auth_approve:')) {
                 const [, requestId] = data.split(':')
-                const request = await prisma.adminAuthRequest.update({
-                    where: { id: requestId },
+                const request = await prisma.adminAuthRequest.findUnique({ where: { id: requestId } })
+                const updated = await prisma.adminAuthRequest.updateMany({
+                    where: {
+                        id: requestId,
+                        status: 'PENDING',
+                        createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) }
+                    },
                     data: { status: 'APPROVED' }
                 })
+
+                if (!request || updated.count !== 1) {
+                    await answerCallbackQuery(callbackId, 'Demande expirée ou déjà traitée.', token)
+                    return NextResponse.json({ ok: true })
+                }
                 
                 await answerCallbackQuery(callbackId, '✅ Connexion approuvée !', token)
                 const updatedText = `✅ <b>Demande d'accès Approuvée</b>\n\n` +
@@ -1221,10 +1227,20 @@ export async function POST(req: Request) {
             // Format: auth_reject:{requestId}
             else if (data && data.startsWith('auth_reject:')) {
                 const [, requestId] = data.split(':')
-                const request = await prisma.adminAuthRequest.update({
-                    where: { id: requestId },
+                const request = await prisma.adminAuthRequest.findUnique({ where: { id: requestId } })
+                const updated = await prisma.adminAuthRequest.updateMany({
+                    where: {
+                        id: requestId,
+                        status: 'PENDING',
+                        createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) }
+                    },
                     data: { status: 'REJECTED' }
                 })
+
+                if (!request || updated.count !== 1) {
+                    await answerCallbackQuery(callbackId, 'Demande expirée ou déjà traitée.', token)
+                    return NextResponse.json({ ok: true })
+                }
                 
                 await answerCallbackQuery(callbackId, '❌ Connexion refusée !', token)
                 const updatedText = `❌ <b>Demande d'accès Refusée</b>\n\n` +

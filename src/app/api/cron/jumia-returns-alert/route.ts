@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server"
 import { JumiaAPI } from "@/lib/jumia-api"
 import { sendTelegramMessage } from "@/lib/telegram"
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 // Alerte commandes Jumia retournées/remboursées
 export async function GET(req: Request) {
     try {
-        const url = new URL(req.url)
-        const token = url.searchParams.get("token")
-        
-        if (process.env.CRON_SECRET && token !== process.env.CRON_SECRET) {
+        if (!isAuthorizedCronRequest(req)) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 

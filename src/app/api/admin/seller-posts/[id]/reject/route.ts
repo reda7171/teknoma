@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 // Rejeter (supprimer) un article vendeur
 export async function DELETE(
@@ -7,6 +8,10 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
+
         const { id } = await params
         await prisma.post.delete({ where: { id } })
         return NextResponse.json({ success: true })

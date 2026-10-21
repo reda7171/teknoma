@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdmin } from '@/lib/actions/auth'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
     try {
-        await verifyAdmin()
+        const admin = await getAuthenticatedAdmin()
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
         const { query } = await req.json()
         
         if (!query || typeof query !== 'string') {

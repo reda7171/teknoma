@@ -385,10 +385,14 @@ export async function editTelegramMessage(chatId: string | number, messageId: nu
 
 // Configurer le webhook Telegram
 export async function setTelegramWebhook(webhookUrl: string, token: string) {
+    const { getTelegramWebhookSecret } = await import('@/lib/telegram-webhook-auth')
     const res = await fetch(`${TELEGRAM_API}${token}/setWebhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: webhookUrl })
+        body: JSON.stringify({
+            url: webhookUrl,
+            secret_token: getTelegramWebhookSecret(token)
+        })
     })
     return res.json()
 }

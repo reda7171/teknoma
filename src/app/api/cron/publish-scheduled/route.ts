@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSetting } from '@/lib/actions/site-settings'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 // Cron toutes les 5 minutes — envoie les posts programmés à n8n (fire & forget)
 export async function GET(req: NextRequest) {
     try {
-        const { searchParams } = new URL(req.url)
-        const secret = searchParams.get('secret')
-        if (secret !== process.env.CRON_SECRET) {
+        if (!isAuthorizedCronRequest(req)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -106,7 +105,7 @@ export async function GET(req: NextRequest) {
             sent: duePosts.length,
             message: `${duePosts.length} post(s) envoyés à n8n`
         })
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 500 })
+    } catch (err: unknown) {
+        return NextResponse.json({ error: (err as Error).message }, { status: 500 })
     }
 }

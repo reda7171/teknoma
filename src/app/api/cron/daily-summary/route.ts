@@ -2,17 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getSetting } from '@/lib/actions/site-settings'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
     try {
-        // Sécurisation: exiger un token dans l'URL (?token=XYZ) pour authentifier Vercel Cron
-        const { searchParams } = new URL(req.url)
-        const token = searchParams.get('token')
-        const CRON_SECRET = process.env.CRON_SECRET
-
-        if (!CRON_SECRET || token !== CRON_SECRET) {
+        if (!isAuthorizedCronRequest(req)) {
             return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
         }
 

@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getAdminRole } from '@/lib/actions/auth';
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
 import { transporter } from '@/lib/email';
 
 export async function POST(req: Request) {
     try {
-        const role = await getAdminRole();
-        
-        if (!role || (role !== 'ADMIN' && role !== 'MANAGER')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const admin = await getAuthenticatedAdmin();
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 });
+        if (!hasAdminRole(admin, ['ADMIN', 'MANAGER'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 });
 
         const body = await req.json();
         const { subject, html, audience } = body;
@@ -29,10 +26,8 @@ export async function POST(req: Request) {
             });
             recipients = customers as { email: string; fullName: string }[];
         } else if (audience === 'TEST_ONLY') {
-            const cookieStore = await cookies();
-            const adminEmail = cookieStore.get('admin-email')?.value || 'contact@riwaya.store';
             recipients = [
-                { email: adminEmail, fullName: 'Admin' }
+                { email: admin.email, fullName: 'Admin' }
             ];
         } else if (audience === 'NEWSLETTER_SUBSCRIBERS') {
             const subscribers = await prisma.newsletterSubscriber.findMany({

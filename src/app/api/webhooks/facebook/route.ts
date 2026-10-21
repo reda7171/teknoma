@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac, timingSafeEqual } from 'crypto'
 
 /**
  * Webhook Facebook / Instagram
@@ -10,34 +11,47 @@ export async function GET(req: NextRequest) {
     const token = searchParams.get('hub.verify_token')
     const challenge = searchParams.get('hub.challenge')
 
-    // Récupérer le token de vérification depuis le .env ou la DB
-    const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN || 'riwaya_secret_token_2026'
-
-    if (mode && token) {
-        if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-            void('[FB WEBHOOK] Verified successfully')
-            // Meta attend impérativement le challenge en texte brut (text/plain)
-            return new Response(challenge, { 
-                status: 200,
-                headers: { 'Content-Type': 'text/plain' }
-            })
-        } else {
-            console.error('[FB WEBHOOK] Verification failed')
-            return new Response('Forbidden', { status: 403 })
-        }
+    const verifyToken = process.env.FACEBOOK_VERIFY_TOKEN
+    if (!verifyToken || !mode || !token || mode !== 'subscribe') {
+        return new Response('Forbidden', { status: 403 })
     }
 
-    return NextResponse.json({ message: 'Facebook Webhook Endpoint' })
+    const expectedBuffer = Buffer.from(verifyToken)
+    const suppliedBuffer = Buffer.from(token)
+    if (expectedBuffer.length !== suppliedBuffer.length || !timingSafeEqual(expectedBuffer, suppliedBuffer)) {
+        return new Response('Forbidden', { status: 403 })
+    }
+
+    // Meta attend impérativement le challenge en texte brut (text/plain)
+    return new Response(challenge || '', {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' }
+    })
 }
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json()
-        
-        void('[FB WEBHOOK] Received event:', JSON.stringify(body, null, 2))
+        const rawBody = await req.text()
+        const appSecret = process.env.FACEBOOK_APP_SECRET || process.env.FACEBOOK_CLIENT_SECRET
 
-        // Ici vous pouvez traiter les commentaires Instagram, les messages Messenger, etc.
-        // Exemple: body.entry[0].changes[0].value...
+        if (appSecret) {
+            const signature = req.headers.get('x-hub-signature-256')
+            if (!signature || !signature.startsWith('sha256=')) {
+                return NextResponse.json({ error: 'Missing or invalid signature' }, { status: 401 })
+            }
+
+            const hash = createHmac('sha256', appSecret).update(rawBody).digest('hex')
+            const expectedSignature = `sha256=${hash}`
+            const expectedBuffer = Buffer.from(expectedSignature)
+            const suppliedBuffer = Buffer.from(signature)
+
+            if (expectedBuffer.length !== suppliedBuffer.length || !timingSafeEqual(expectedBuffer, suppliedBuffer)) {
+                return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+            }
+        }
+
+        const body = JSON.parse(rawBody || '{}')
+        void body
 
         return NextResponse.json({ status: 'received' })
     } catch (error) {

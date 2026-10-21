@@ -12,16 +12,23 @@ const outfit = localFont({
 });
 
 export default async function NotFound() {
-  // Charge la locale par défaut car nous sommes en fallback global
-  const messages = await getMessages();
+  let messages = {}
+  try {
+    messages = await getMessages()
+  } catch {}
 
   return (
     <html lang="fr" dir="ltr" suppressHydrationWarning>
+      <head>
+        <title>Page Introuvable | Riwaya</title>
+        <meta name="description" content="La page demandée est introuvable sur la librairie en ligne Riwaya.store." />
+        <meta name="robots" content="noindex, nofollow" />
+      </head>
       <body className={`${outfit.variable} font-sans antialiased bg-white`} suppressHydrationWarning>
         <NextIntlClientProvider locale="fr" messages={messages}>
           <HeaderWithUser />
 
-          <div className="min-h-screen bg-pixio-cream flex flex-col items-center justify-center p-4 relative overflow-hidden">
+          <main id="main-content" role="main" className="min-h-screen bg-pixio-cream flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pixio-yellow/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
 
@@ -56,7 +63,7 @@ export default async function NotFound() {
                 </a>
               </div>
             </div>
-          </div>
+          </main>
 
           <FooterWithFeatures />
         </NextIntlClientProvider>

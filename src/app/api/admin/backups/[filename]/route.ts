@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBackupPath, deleteBackup } from '@/lib/admin/backup'
-import { isAuthenticated } from '@/lib/actions/auth'
-import { cookies } from 'next/headers'
+import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 import fs from 'fs'
 
 export async function GET(
@@ -10,13 +9,10 @@ export async function GET(
 ) {
     const params = await props.params;
     try {
-        const isAuth = await isAuthenticated()
-        const cookieStore = await cookies()
-        const role = cookieStore.get('admin-role')?.value
+        const admin = await getAuthenticatedAdmin()
 
-        if (!isAuth || role !== 'ADMIN') {
-            return new NextResponse('Non autorisé', { status: 401 })
-        }
+        if (!admin) return new NextResponse('Authentification requise', { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return new NextResponse('Accès interdit', { status: 403 })
         
         const filepath = getBackupPath(params.filename)
         if (!filepath) {
@@ -42,13 +38,10 @@ export async function DELETE(
 ) {
     const params = await props.params;
     try {
-        const isAuth = await isAuthenticated()
-        const cookieStore = await cookies()
-        const role = cookieStore.get('admin-role')?.value
+        const admin = await getAuthenticatedAdmin()
 
-        if (!isAuth || role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-        }
+        if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
+        if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Accès interdit' }, { status: 403 })
         
         await deleteBackup(params.filename)
         return NextResponse.json({ success: true })

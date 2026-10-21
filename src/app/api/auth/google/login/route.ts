@@ -1,30 +1,25 @@
 import { NextResponse } from 'next/server'
+import { createOAuthState, getTrustedAppOrigin, oauthStateCookieName, oauthStateCookieOptions } from '@/lib/oauth-security'
 
 export async function GET(request: Request) {
-    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
-
-    if (!GOOGLE_CLIENT_ID) {
+    const clientId = process.env.GOOGLE_CLIENT_ID
+    if (!clientId) {
         return NextResponse.json({ error: 'GOOGLE_CLIENT_ID is not configured' }, { status: 500 })
     }
 
-    let proto = request.headers.get('x-forwarded-proto') || 'https'
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
-    if (host && host.includes('riwaya.store')) {
-        proto = 'https' // Forcer HTTPS en production (évite l'erreur redirect_uri_mismatch)
-    }
-    const origin = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
-    const redirectUri = `${origin}/api/auth/google/callback`
-
+    const origin = getTrustedAppOrigin(request)
+    const state = createOAuthState()
     const params = new URLSearchParams({
-        client_id: GOOGLE_CLIENT_ID,
-        redirect_uri: redirectUri,
+        client_id: clientId,
+        redirect_uri: `${origin}/api/auth/google/callback`,
         response_type: 'code',
         scope: 'openid email profile',
         access_type: 'online',
-        prompt: 'select_account'
+        prompt: 'select_account',
+        state
     })
 
-    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-
-    return NextResponse.redirect(googleAuthUrl)
+    const response = NextResponse.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`)
+    response.cookies.set(oauthStateCookieName('google'), state, oauthStateCookieOptions('google'))
+    return response
 }

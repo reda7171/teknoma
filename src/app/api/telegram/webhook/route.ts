@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendTelegramMessage, answerCallbackQuery, editTelegramMessage } from '@/lib/telegram'
+import { isAuthorizedTelegramWebhook } from '@/lib/telegram-webhook-auth'
 
 export async function POST(req: Request) {
     try {
+        if (!(await isAuthorizedTelegramWebhook(req))) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const body = await req.json()
 
         // Handle button clicks (callback queries)

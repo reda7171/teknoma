@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { getSetting } from '@/lib/actions/site-settings'
 import { generateCMIHash } from '@/lib/cmi'
@@ -18,11 +19,13 @@ export async function POST(req: Request) {
             return new NextResponse('CMI Store Key missing', { status: 500 })
         }
 
-        // Validate Hash
-        const receivedHash = params['HASH']
+        // Validate Hash with timing-safe comparison
+        const receivedHash = params['HASH'] || ''
         const calculatedHash = generateCMIHash(params, storeKey)
 
-        if (receivedHash !== calculatedHash) {
+        const expectedBuffer = Buffer.from(calculatedHash)
+        const suppliedBuffer = Buffer.from(receivedHash)
+        if (expectedBuffer.length !== suppliedBuffer.length || !timingSafeEqual(expectedBuffer, suppliedBuffer)) {
             console.error('CMI Webhook: Hash mismatch')
             return new NextResponse('Invalid Hash', { status: 400 })
         }
@@ -51,7 +54,7 @@ export async function POST(req: Request) {
             return new NextResponse('APPROVED', { status: 200, headers: { 'Content-Type': 'text/plain' } })
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('CMI Webhook error:', error)
         return new NextResponse('Internal server error', { status: 500 })
     }

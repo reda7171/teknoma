@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendTelegramMessage } from "@/lib/telegram"
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 // Alerte stock critique — à appeler via cron toutes les heures
 export async function GET(req: Request) {
     try {
-        const url = new URL(req.url)
-        const token = url.searchParams.get("token")
-        
-        const expectedToken = process.env.CRON_SECRET?.replace(/^["']|["']$/g, '')
-        if (expectedToken && token !== expectedToken) {
+        if (!isAuthorizedCronRequest(req)) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 

@@ -1,66 +1,67 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { oauthLoginOrRegister } from '@/lib/actions/community-auth'
+import { getTrustedAppOrigin, isValidOAuthState, oauthStateCookieName } from '@/lib/oauth-security'
 
-export async function GET(request: Request) {
-    const searchParams = new URL(request.url).searchParams
-    const requestOrigin = new URL(request.url).origin
-    const origin = requestOrigin.includes('localhost') ? requestOrigin : (process.env.NEXT_PUBLIC_APP_URL || requestOrigin)
+export async function GET(request: NextRequest) {
+    const origin = getTrustedAppOrigin(request)
+    const searchParams = request.nextUrl.searchParams
+    const stateCookie = oauthStateCookieName('facebook')
+
+    const redirect = (path: string) => {
+        const response = NextResponse.redirect(`${origin}${path}`)
+        response.cookies.set(stateCookie, '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 0,
+            path: '/api/auth/facebook/callback'
+        })
+        response.headers.set('Cache-Control', 'private, no-store')
+        return response
+    }
+
+    if (!isValidOAuthState(searchParams.get('state'), request.cookies.get(stateCookie)?.value)) {
+        return redirect('/community/login?error=InvalidOAuthState')
+    }
+    if (searchParams.get('error')) return redirect('/community/login?error=OAuthDenied')
+
     const code = searchParams.get('code')
-    const error = searchParams.get('error')
+    if (!code) return redirect('/community/login?error=NoCodeProvided')
 
-    if (error) {
-        return NextResponse.redirect(`${origin}/community/login?error=${encodeURIComponent(error)}`)
-    }
-
-    if (!code) {
-        return NextResponse.redirect(`${origin}/community/login?error=NoCodeProvided`)
-    }
-
-    const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
-    const FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET
+    const clientId = process.env.FACEBOOK_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
+    const clientSecret = process.env.FACEBOOK_CLIENT_SECRET
     const redirectUri = process.env.FACEBOOK_REDIRECT_URI || `${origin}/api/auth/facebook/callback`
-
-    if (!FACEBOOK_CLIENT_ID || !FACEBOOK_CLIENT_SECRET) {
-        return NextResponse.redirect(`${origin}/community/login?error=FacebookAuthNotConfigured`)
-    }
+    if (!clientId || !clientSecret) return redirect('/community/login?error=FacebookAuthNotConfigured')
 
     try {
-        // Exchange code for access token
-        const tokenResponse = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${FACEBOOK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${FACEBOOK_CLIENT_SECRET}&code=${code}`)
-
+        const tokenResponse = await fetch('https://graph.facebook.com/v19.0/oauth/access_token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, client_secret: clientSecret, code }),
+            cache: 'no-store'
+        })
         const tokenData = await tokenResponse.json()
-
-        if (tokenData.error) {
-            console.error('Facebook token error:', tokenData)
-            return NextResponse.redirect(`${origin}/community/login?error=TokenExchangeFailed`)
+        if (!tokenResponse.ok || !tokenData.access_token) {
+            console.error('Facebook token exchange failed:', tokenResponse.status)
+            return redirect('/community/login?error=TokenExchangeFailed')
         }
 
-        const { access_token } = tokenData
-
-        // Fetch user profile
-        const profileResponse = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${access_token}`)
-
+        const profileResponse = await fetch('https://graph.facebook.com/me?fields=id,name,email', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` },
+            cache: 'no-store'
+        })
         const profileData = await profileResponse.json()
+        if (!profileResponse.ok || !profileData.email) return redirect('/community/login?error=NoEmailProvidedByFacebook')
 
-        if (!profileData.email) {
-            return NextResponse.redirect(`${origin}/community/login?error=NoEmailProvidedByFacebook`)
-        }
-
-        // Connect to community-auth
         const authResult = await oauthLoginOrRegister({
             email: profileData.email,
             fullName: profileData.name || 'Utilisateur Facebook',
             provider: 'facebook'
         })
-
-        if (authResult.success) {
-            return NextResponse.redirect(`${origin}${authResult.redirect || '/community'}`)
-        } else {
-            return NextResponse.redirect(`${origin}/community/login?error=${encodeURIComponent(authResult.error || 'Erreur inconnue')}`)
-        }
-
-    } catch (err) {
-        console.error('Facebook Auth Error:', err)
-        return NextResponse.redirect(`${origin}/community/login?error=InternalAuthError`)
+        if (authResult.success) return redirect(authResult.redirect || '/community')
+        return redirect('/community/login?error=OAuthLoginFailed')
+    } catch (error) {
+        console.error('Facebook Auth Error:', error)
+        return redirect('/community/login?error=InternalAuthError')
     }
 }

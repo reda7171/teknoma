@@ -158,6 +158,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                     width={150}
                                     height={50}
                                     sizes="96px"
+                                    quality={75}
                                     className="h-8 w-auto object-contain invert transition-transform group-hover:scale-105"
                                 />
                             ) : (
