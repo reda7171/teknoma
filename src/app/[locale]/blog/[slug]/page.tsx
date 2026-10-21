@@ -187,6 +187,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 }
             })
         }
+    }
     const siteUrl = getBaseUrl() || 'https://riwaya.store'
     const canonicalArticleUrl = `${siteUrl}/${locale}/blog/${post.slug}`
     const fullCoverImageUrl = post.coverImage

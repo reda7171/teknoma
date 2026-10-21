@@ -33,7 +33,40 @@ export async function GET(
             return new NextResponse('Order not found', { status: 404 });
         }
 
-        const html = generateInvoiceHtml(order as any, locale);
+        // Récupérer dynamiquement les numéros des agents WhatsApp et le logo du site
+        let formattedAgentsPhone = "07 02 22 05 75 / 06 66 03 81 29";
+        let siteLogo = "/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png";
+        try {
+            const settings = await prisma.siteSettings.findMany({
+                where: { key: { in: ['whatsapp_agents', 'site_logo'] } }
+            });
+            const agentsSetting = settings.find(s => s.key === 'whatsapp_agents');
+            const logoSetting = settings.find(s => s.key === 'site_logo');
+
+            if (logoSetting?.value) {
+                siteLogo = logoSetting.value;
+            }
+
+            if (agentsSetting?.value) {
+                const agents = JSON.parse(agentsSetting.value);
+                if (Array.isArray(agents)) {
+                    const activePhones = agents
+                        .filter((a: any) => a.enabled !== false && a.phone)
+                        .map((a: any) => {
+                            const raw = String(a.phone).replace(/\s+/g, '');
+                            if (/^0[5-7]\d{8}$/.test(raw)) {
+                                return raw.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+                            }
+                            return a.phone;
+                        });
+                    if (activePhones.length > 0) {
+                        formattedAgentsPhone = activePhones.join(' / ');
+                    }
+                }
+            }
+        } catch {}
+
+        const html = generateInvoiceHtml(order as any, locale, formattedAgentsPhone, siteLogo);
 
         return new Response(html, {
             status: 200,

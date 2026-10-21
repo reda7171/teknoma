@@ -774,6 +774,115 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
     }
 }
 
+export interface AiBookUpdateData {
+    id: string
+    title_ar?: string
+    title_fr?: string
+    title_en?: string
+    title?: string
+    titleFr?: string
+    titleEn?: string
+    author?: string
+    isbn?: string
+    description_ar?: string
+    description_fr?: string
+    description_en?: string
+    description?: string
+    descriptionFr?: string
+    descriptionEn?: string
+    longDescription_ar?: string
+    longDescription_fr?: string
+    longDescription_en?: string
+    longDescription?: string
+    longDescriptionFr?: string
+    longDescriptionEn?: string
+    category?: string
+    subCategory?: string
+    seoKeywords?: string | string[]
+    jumiaHighlights?: string
+    jumiaPackageContent?: string
+}
+
+/**
+ * Mettre à jour des livres en masse depuis la réponse IA (ChatGPT)
+ */
+export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
+    try {
+        await verifyAdmin()
+        if (!Array.isArray(booksData) || booksData.length === 0) {
+            return { success: false, error: 'Aucune donnée fournie' }
+        }
+
+        let updatedCount = 0
+
+        for (const item of booksData) {
+            if (!item || !item.id) continue
+
+            const dataToUpdate: any = {}
+
+            const tAr = item.title_ar || item.title
+            const tFr = item.title_fr || item.titleFr
+            const tEn = item.title_en || item.titleEn
+            if (tAr) dataToUpdate.title = tAr.trim()
+            if (tFr) dataToUpdate.titleFr = tFr.trim()
+            if (tEn) dataToUpdate.titleEn = tEn.trim()
+
+            if (item.author) dataToUpdate.author = item.author.trim()
+            if (item.isbn) dataToUpdate.isbn = item.isbn.trim()
+
+            const dAr = item.description_ar || item.description
+            const dFr = item.description_fr || item.descriptionFr
+            const dEn = item.description_en || item.descriptionEn
+            if (dAr) dataToUpdate.description = dAr.trim()
+            if (dFr) dataToUpdate.descriptionFr = dFr.trim()
+            if (dEn) dataToUpdate.descriptionEn = dEn.trim()
+
+            const ldAr = item.longDescription_ar || item.longDescription
+            const ldFr = item.longDescription_fr || item.longDescriptionFr
+            const ldEn = item.longDescription_en || item.longDescriptionEn
+            if (ldAr) dataToUpdate.longDescription = ldAr.trim()
+            if (ldFr) dataToUpdate.longDescriptionFr = ldFr.trim()
+            if (ldEn) dataToUpdate.longDescriptionEn = ldEn.trim()
+
+            if (item.category) dataToUpdate.category = item.category.trim()
+            if (item.subCategory) dataToUpdate.subCategory = item.subCategory.trim()
+
+            if (item.seoKeywords) {
+                dataToUpdate.seoKeywords = Array.isArray(item.seoKeywords)
+                    ? item.seoKeywords.join(', ')
+                    : String(item.seoKeywords).trim()
+            }
+
+            if (item.jumiaHighlights) dataToUpdate.jumiaHighlights = item.jumiaHighlights.trim()
+            if (item.jumiaPackageContent) dataToUpdate.jumiaPackageContent = item.jumiaPackageContent.trim()
+
+            if (Object.keys(dataToUpdate).length > 0) {
+                await prisma.book.update({
+                    where: { id: item.id },
+                    data: dataToUpdate,
+                })
+                updatedCount++
+            }
+        }
+
+        revalidatePath('/admin/books')
+        revalidatePath('/')
+        revalidatePath('/books')
+
+        await createAuditLog({
+            action: 'BULK_AI_UPDATE',
+            entity: 'BOOK',
+            details: `Mise à jour IA (ChatGPT) pour ${updatedCount} livre(s)`,
+        })
+
+        return { success: true, count: updatedCount }
+    } catch (error: any) {
+        console.error('Erreur lors de la mise à jour bulk IA:', error)
+        return { success: false, error: error.message || 'Impossible de mettre à jour les livres depuis l\'IA' }
+    }
+}
+
+
 
 export async function incrementBookViews(id: string, userSession: string = 'Visiteur Anonyme') {
     try {

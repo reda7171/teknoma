@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useId } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { 
     X, 
     Printer, 
@@ -62,10 +62,44 @@ export default function OrderInvoiceModal({
 
     // Company info (Émetteur)
     const [companyName, setCompanyName] = useState('Riwaya Books')
-    const [companyPhone, setCompanyPhone] = useState('06 66 66 66 66')
+    const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png')
+    const [companyPhone, setCompanyPhone] = useState('07 02 22 05 75 / 06 66 03 81 29')
     const [companyEmail, setCompanyEmail] = useState('contact@riwaya.store')
     const [companyAddress, setCompanyAddress] = useState('Casablanca, Maroc')
     const [companyIce, setCompanyIce] = useState('002589632000045')
+
+    useEffect(() => {
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.settings) {
+                    if (data.settings.site_logo) {
+                        setCompanyLogo(data.settings.site_logo)
+                    }
+                    const rawAgents = data.settings.whatsapp_agents
+                    if (rawAgents) {
+                        try {
+                            const parsed = JSON.parse(rawAgents)
+                            if (Array.isArray(parsed)) {
+                                const activePhones = parsed
+                                    .filter((a: any) => a.enabled !== false && a.phone)
+                                    .map((a: any) => {
+                                        const raw = String(a.phone).replace(/\s+/g, '')
+                                        if (/^0[5-7]\d{8}$/.test(raw)) {
+                                            return raw.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5')
+                                        }
+                                        return a.phone
+                                    })
+                                if (activePhones.length > 0) {
+                                    setCompanyPhone(activePhones.join(' / '))
+                                }
+                            }
+                        } catch {}
+                    }
+                }
+            })
+            .catch(() => {})
+    }, [])
 
     // Customer info (Destinataire)
     const [fullName, setFullName] = useState(order.fullName || '')
@@ -278,8 +312,13 @@ export default function OrderInvoiceModal({
                 <table class="header-table">
                     <tr>
                         <td style="vertical-align: top;">
-                            <div class="brand">${companyName}</div>
-                            <div class="brand-sub">Librairie & Édition • Maroc</div>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <img src="${companyLogo}" alt="Riwaya Logo" style="height: 42px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <div>
+                                    <div class="brand" style="line-height: 1.1;">${companyName}</div>
+                                    <div class="brand-sub">Librairie & Édition • Maroc</div>
+                                </div>
+                            </div>
                             <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
                                 ${companyAddress} • Tél: ${companyPhone} • ${companyEmail}
                                 ${companyIce ? `<br>ICE: ${companyIce}` : ''}
