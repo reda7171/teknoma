@@ -318,8 +318,9 @@ export async function logout() {
  * Vérifier si l'utilisateur est authentifié avec une validation basique du token
  */
 export async function isAuthenticated(): Promise<boolean> {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('admin-token')?.value
+    let cookieStore: any = null
+    try { cookieStore = await cookies() } catch { return false }
+    const token = cookieStore?.get('admin-token')?.value
 
 
 

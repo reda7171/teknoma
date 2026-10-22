@@ -1,0 +1,87 @@
+# Contrôle des accès administrateur — 21 octobre 2026
+
+## Conclusion
+
+*Fuite de données administratives confirmée sans authentification. Priorité élevée.* La route /api/admin/notifications/stream fournit des informations sur des commandes à une session HTTP ne contenant aucun cookie ni en-tête Authorization. Cela ne démontre pas un accès complet au compte administrateur ni un droit de modification.
+
+## Preuve minimale
+
+Une requête GET anonyme avec un paramètre since limité aux dernières 24 heures a reçu HTTP 200, Content-Type application/json, avec un corps de 1 375 octets. La réponse comporte deux événements. Le premier contient cinq commandes ; le schéma de chaque objet examiné comprend :
+
+- id : chaîne ;
+- fullName : chaîne ;
+- total : nombre ;
+- city : chaîne ;
+- createdAt : chaîne ;
+- status : chaîne.
+
+Les valeurs des commandes, noms et identifiants n'ont pas été enregistrées dans l'artefact de preuve. La structure et le nombre d'éléments ont été conservés dans admin-notifications.json. Le second événement n'a pas été détaillé. Aucun historique supplémentaire n'a été demandé après confirmation.
+
+Un contrôle de portée distinct, limité aux *30 derniers jours*, a compté neuf commandes au total dans les événements renvoyés (corps de 3 181 octets). Seuls les nombres ont été conservés dans exposure-window.json, sans données client. C'est le volume renvoyé pour cette fenêtre, pas une estimation de tous les clients affectés dans l'historique du site.
+
+Une fenêtre de *90 jours* renvoie dix commandes (corps lu de 3 957 octets). Le test a plafonné la lecture à 64 ko et n'a conservé que le nombre de commandes. Cela confirme que le paramètre permet de remonter au moins sur 90 jours ; la profondeur historique maximale n'a pas été testée.
+
+Des contrôles supplémentaires montrent HTTP 200 et le même nombre d'événements avec un cookie communautaire factice, un faux Bearer et un en-tête Origin externe. Aucune autorisation CORS n'est renvoyée : cela bloque la lecture cross-origin par JavaScript ordinaire, mais ne protège pas l'API contre les requêtes directes. Cache-Control: no-store est correctement présent ; le problème d'autorisation reste entier.
+
+La même route avait auparavant répondu 200 avec une période démarrant à l'instant du test, pour un visiteur anonyme comme pour le compte normal. Une liste vide dans ce premier essai ne suffisait donc pas à conclure à une protection effective.
+
+## Résultats du compte normal
+
+La connexion communautaire avec le compte fourni a réussi. Le navigateur a affiché /ar/community et le profil correspondant. Le cookie community-token présente HttpOnly, Secure et SameSite=Lax ; sa valeur n'a pas été enregistrée dans les rapports.
+
+L'ouverture de l'administration depuis cette session conduit à /fr/admin/login. La tentative avec les mêmes identifiants affiche finalement *« En attente d'approbation »*, et aucun cookie administrateur supplémentaire n'a été observé. Aucun tableau de bord authentifié ni élévation de rôle n'a été obtenu. Aucune approbation n'a été accordée et aucune modification de rôle n'a été demandée. Le comportement exact de ce mécanisme d'approbation côté serveur n'a pas été inspecté.
+
+/fr/admin/users répond HTTP 200 et livre une interface d'administration aussi bien sans connexion qu'avec le compte normal. Le tableau HTML ne contient aucune ligne d'utilisateur. L'accès à cette interface seule ne prouve pas une fuite de la liste des comptes ; la fuite confirmée concerne l'API de notifications décrite plus haut.
+
+L'essai unique d'ouverture de session administrateur avec le compte normal fourni s'est terminé sur *« En attente d'approbation »*, sans cookie admin. Le compte a été authentifié pour l'espace communautaire, mais aucun accès admin n'a été obtenu. Les pages admin renvoient HTTP 200 car Next.js sert le shell de page ; le navigateur affiche ensuite /fr/admin/login. Les pages /fr/admin/users, /fr/admin/orders et /fr/admin/settings ne doivent donc pas être évaluées uniquement sur leur statut HTTP.
+
+J'ai relu le HTML et les 22 scripts référencés par la page publique /fr/admin/users. Le seul chemin API administratif explicite trouvé dans ces scripts était /api/admin/notifications/stream?since=, déjà confirmé accessible sans authentification. Cette recherche statique ne couvre pas les appels composés dynamiquement, les Server Actions, ni les routes côté serveur absentes des ressources client.
+
+Un inventaire plus large des 27 scripts uniques utilisés par l'accueil, le catalogue, la connexion et l'interface admin trouve huit références API : le flux admin, l'authentification OAuth, la réservation de livres, le chat, l'inscription newsletter, l'abonnement push et sa clé publique. Les GET directs sur réservation, chat, newsletter et abonnement push répondent 405 ; la clé VAPID répond 200, ce qui est attendu pour une clé publique. Cet inventaire ne signifie pas que toutes les actions POST de ces API sont sûres ; les corps invalides testés précédemment ont été rejetés.
+
+| API découverte dans les scripts publics | Contrôles sans écriture | Résultat |
+|---|---|---|
+| /api/admin/notifications/stream?since= | GET sans cookie, cookie invalide, Bearer invalide, Origin externe ; fenêtres 24 h, 30 j et 90 j | *Fuite confirmée* : noms, villes, montants, statuts, identifiants et dates de commande. Voir les volumes anonymisés ci-dessus. |
+| /api/auth/google/login | GET normal et paramètre redirect externe | 307 vers Google, callback riwaya fixé ; paramètre externe ignoré. Aucun état state observé dans la requête d'autorisation. |
+| /api/auth/facebook/login | GET normal et paramètre callbackUrl externe | 307 vers Facebook, callback riwaya fixé ; paramètre externe ignoré. Aucun état state observé dans la requête d'autorisation. |
+| /api/books/reserve | GET, OPTIONS, POST JSON vide | GET 405 ; OPTIONS 204 sans ACAO ; POST 400 « Données manquantes ». Pas de réservation créée. |
+| /api/chat | GET et POST JSON vide | GET 405 ; POST 400. Aucun message envoyé. |
+| /api/newsletter/subscribe | GET et POST JSON vide | GET 405 ; POST 400 « Email invalide ». Aucun email inscrit. |
+| /api/push/subscribe | GET et POST JSON vide | GET 405 ; POST 400 « Données manquantes ». Aucun abonnement créé. |
+| /api/push/vapid-key | GET | 200, clé publique prévue pour les notifications push. |
+
+Ce tableau couvre les huit références trouvées dans les scripts publics des quatre pages examinées, pas toutes les routes serveur du site. Les callbacks OAuth, les actions de connexion communautaire et toute API non référencée publiquement ne sont pas couverts. Les données valides de réservation, inscription, chat ou notifications n'ont pas été soumises.
+
+## Injection SQL
+
+SQLMap 1.10.10 a testé les paramètres catalogue isUsed, usedOnly et ref avec une technique booléenne, niveau 1, risque 1, un seul thread et un délai entre les requêtes. Aucun des trois n'a été signalé comme injectable. SQLMap a averti que les réponses de pages sont variables ; le test additionnel qu'il a déclenché sur l'en-tête Referer s'est achevé par la limite de temps sans conclusion. Résultats dans sqlmap-execution-retry.json et sqlmap-filter-probes/.
+
+Cette couverture ne permet pas d'affirmer que les autres paramètres ou traitements serveur sont exempts de SQLi. Aucun INSERT, ajout de compte ou changement de rôle n'a été tenté. Pour examiner une injection sans modifier les données, il faut d'abord identifier le point d'entrée puis effectuer les tests dans une préproduction avec une copie isolée de la base.
+
+## Correction prioritaire
+
+1. Dans le gestionnaire serveur de /api/admin/notifications/stream, contrôler la session administrateur *avant toute lecture des commandes*. Refuser une session communautaire ordinaire.
+2. Renvoyer 401 en l'absence d'authentification et 403 lorsque l'utilisateur connecté ne possède pas la permission requise. Vérifier les permissions côté serveur, sans se fier à la page affichée ou à une valeur de rôle envoyée par le navigateur.
+3. N'envoyer que les champs nécessaires à l'administrateur autorisé et empêcher la mise en cache publique de ces réponses.
+4. Examiner les autres routes et actions serveur administratives : la redirection de l'interface ne protège pas automatiquement les appels de données.
+5. Après correction, tester la route avec une session anonyme, une session normale et une session admin autorisée. Les deux premières ne doivent retourner aucune commande. Vérifier également qu'une session admin révoquée perd l'accès.
+
+Les corrections ne sont pas appliquées : le dépôt local est celui de HexStrike, pas le code de Riwaya. Il faut accéder au gestionnaire serveur du site pour corriger puis retester.
+
+## Méthode et limites
+
+Les contrôles authentifiés ont utilisé un navigateur Edge isolé et des requêtes Python directes. Ils n'ont pas été exécutés à travers HexStrike. Les secrets ont été fournis au processus par son environnement ; le script et les rapports ne contiennent pas le mot de passe ou les valeurs de cookies. Les cookies du navigateur d'audit ont été effacés à la fin du test.
+
+Des essais précédents ont été perturbés par un manque de ressources Windows et une erreur de résolution DNS. Le dernier essai a terminé la connexion et le contrôle ciblé de l'API. Les résultats en cours « Connexion… » n'ont pas été considérés comme une preuve de refus.
+
+Pas de modification de commande, paiement, permission, compte ou paramètre admin. Aucun contournement d'approbation tenté. Les permissions d'écriture et l'accès entre deux comptes ordinaires restent non validés. Ce constat n'implique pas une prise de contrôle totale du site.
+
+## Artefacts
+
+- admin-notifications.json : preuve anonymisée de la réponse non authentifiée ;
+- api-controls.json, exposure-window.json et exposure-window-90d.json : contrôles de session, CORS, cache et volumes sur 30/90 jours, sans valeurs client ;
+- access-control-admin.json : dernier contrôle du compte normal et du formulaire admin ;
+- access-control.json : premier contrôle navigateur ;
+- admin-discovery.json : référence publique à l'API dans le JavaScript du site ;
+- api-inventory.json et public-api-methods.json : inventaire des routes trouvées dans 27 scripts et vérification des méthodes GET ;
+- ../../audit_admin_notifications.py : script de vérification limité et sans conservation des valeurs clients.
