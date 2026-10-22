@@ -109,8 +109,11 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
     }
 
     try {
-
-        const salesChannel = salesChannelOverride || resolveStorefrontChannel(await headers())
+        let requestHeaders: Pick<Headers, 'get'> = { get: () => null }
+        try {
+            requestHeaders = await headers()
+        } catch {}
+        const salesChannel = salesChannelOverride || resolveStorefrontChannel(requestHeaders)
 
         // OWASP A03: Injection / Validation
         const data = OrderSchema.parse(input)
@@ -398,23 +401,27 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
         }, { timeout: 30000, maxWait: 15000 })
 
         // Sauvegarder l'email dans un cookie pour le suivi invité
-        const cookieStore = await cookies()
-        if (data.email && !cookieStore.get('userEmail')) {
-            cookieStore.set('userEmail', data.email, {
+        try {
+            const cookieStore = await cookies()
+            if (data.email && !cookieStore.get('userEmail')) {
+                cookieStore.set('userEmail', data.email, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'lax',
+                    maxAge: 60 * 60 * 24 * 30 // 30 jours 
+                })
+            }
+            
+            // Sauvegarder l'ID de la commande pour éviter l'erreur 404 sur la page de succès
+            cookieStore.set('lastOrderId', order.id, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
-                maxAge: 60 * 60 * 24 * 30 // 30 jours 
+                maxAge: 60 * 60 * 24 // 24 heures
             })
+        } catch {
+            // Ignoré si exécuté hors d'un contexte de requête HTTP (ex: CLI, tests E2E, workers)
         }
-        
-        // Sauvegarder l'ID de la commande pour éviter l'erreur 404 sur la page de succès
-        cookieStore.set('lastOrderId', order.id, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 // 24 heures
-        })
 
         // Notification Telegram (asynchrone, on ne bloque pas la réponse)
         try {
@@ -527,16 +534,20 @@ export async function getOrderById(orderId: string) {
         // Seul l'admin ou le propriétaire de la commande peut voir les détails
         const isAdmin = await isAuthenticated()
         if (!isAdmin) {
-            const cookieStore = await cookies()
-            const lastOrderId = cookieStore.get('lastOrderId')?.value
+            let lastOrderId: string | undefined
+            let guestEmail: string | undefined
+            try {
+                const cookieStore = await cookies()
+                lastOrderId = cookieStore?.get('lastOrderId')?.value
+                guestEmail = cookieStore?.get('userEmail')?.value
+            } catch {}
             
             // Allow access if this is the order they just placed
-            if (lastOrderId === order.id) {
+            if (lastOrderId && lastOrderId === order.id) {
                 return order
             }
 
-            const guestEmail = cookieStore.get('userEmail')?.value
-            const communityUser = await getCommunityUser()
+            const communityUser = await getCommunityUser().catch(() => null)
             const emailToCheck = communityUser?.email || guestEmail
 
             const emailMatches = emailToCheck && order.email === emailToCheck

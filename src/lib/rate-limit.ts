@@ -61,16 +61,20 @@ export async function rateLimit(
  * Obtenir l'identifiant IP du client
  */
 export async function getIpIdentifier(): Promise<string> {
-    const headersList = await headers()
+    try {
+        const headersList = await headers()
 
-    // Essayer différents headers pour obtenir l'IP réelle
-    const forwardedFor = headersList.get('x-forwarded-for')
-    const realIp = headersList.get('x-real-ip')
-    const cfConnectingIp = headersList.get('cf-connecting-ip') // Cloudflare
+        // Essayer différents headers pour obtenir l'IP réelle
+        const forwardedFor = headersList.get('x-forwarded-for')
+        const realIp = headersList.get('x-real-ip')
+        const cfConnectingIp = headersList.get('cf-connecting-ip') // Cloudflare
 
-    const ip = cfConnectingIp || realIp || forwardedFor?.split(',')[0] || 'unknown'
+        const ip = cfConnectingIp || realIp || forwardedFor?.split(',')[0] || 'unknown'
 
-    return ip.trim()
+        return ip.trim()
+    } catch {
+        return '127.0.0.1'
+    }
 }
 
 /**
@@ -87,5 +91,6 @@ export function cleanupRateLimitStore() {
 
 // Nettoyer toutes les 5 minutes
 if (typeof setInterval !== 'undefined') {
-    setInterval(cleanupRateLimitStore, 5 * 60 * 1000)
+    const timer = setInterval(cleanupRateLimitStore, 5 * 60 * 1000)
+    timer.unref?.()
 }

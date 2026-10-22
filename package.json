@@ -20,7 +20,8 @@
     "setup": "npm run docker:up && timeout /t 10 && npm run prisma:migrate && npm run prisma:seed",
     "bundle": "node scripts/bundle-standalone.js",
     "build:safe": "node scripts/build-safe.js",
-    "whatsapp:gateway": "node scripts/whatsapp-gateway.js"
+    "whatsapp:gateway": "node scripts/whatsapp-gateway.js",
+    "test:e2e": "tsx scripts/test-cod-checkout-e2e.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -71,6 +72,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
+    "server-only": "^0.0.1",
     "sharp": "^0.35.3",
     "sonner": "^2.0.8",
     "stripe": "^22.3.0",
