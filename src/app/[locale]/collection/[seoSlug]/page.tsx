@@ -209,6 +209,12 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
           image: imageUrl,
           description: book.description ? book.description.substring(0, 160) : book.title,
           url: bookUrl,
+          sku: book.id,
+          brand: {
+            '@type': 'Brand',
+            name: 'Riwaya'
+          },
+          ...(book.isbn ? { isbn: book.isbn } : {}),
           offers: {
             '@type': 'Offer',
             priceCurrency: 'MAD',
@@ -218,6 +224,44 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
             seller: {
               '@type': 'Organization',
               name: 'Riwaya'
+            },
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'MA',
+              returnPolicyCountry: 'MA',
+              returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+              merchantReturnDays: 3,
+              returnMethod: 'https://schema.org/ReturnByMail',
+              returnFees: 'https://schema.org/FreeReturn',
+              refundType: 'https://schema.org/FullRefund',
+              merchantReturnLink: `${baseUrl}/${locale}/returns`
+            },
+            shippingDetails: {
+              '@type': 'OfferShippingDetails',
+              shippingRate: {
+                '@type': 'MonetaryAmount',
+                value: 35,
+                currency: 'MAD'
+              },
+              shippingDestination: {
+                '@type': 'DefinedRegion',
+                addressCountry: 'MA'
+              },
+              deliveryTime: {
+                '@type': 'ShippingDeliveryTime',
+                handlingTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 0,
+                  maxValue: 1,
+                  unitCode: 'DAY'
+                },
+                transitTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 1,
+                  maxValue: 3,
+                  unitCode: 'DAY'
+                }
+              }
             }
           }
         }

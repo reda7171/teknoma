@@ -592,3 +592,24 @@ export async function sendTelegramDocumentBuffer(documentBuffer: Buffer, filenam
     const results = await Promise.all(promises)
     return results[0]
 }
+
+export async function sendTelegramAlert(text: string) {
+    const token = await getTelegramToken()
+    const id = await getTelegramChatId()
+    if (!token || !id) return null
+
+    const chatIds = String(id).split(',').map(i => i.trim()).filter(Boolean)
+    const promises = chatIds.map(cid =>
+        fetch(`${TELEGRAM_API}${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: cid,
+                text,
+                parse_mode: 'HTML'
+            })
+        }).then(res => res.json()).catch(() => null)
+    )
+    return Promise.all(promises)
+}
+

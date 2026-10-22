@@ -13,6 +13,9 @@ import StatsGridController from '@/components/admin/StatsGridController'
 import { getJumiaStats as getJumiaRemoteStats } from './jumia-orders/actions'
 import { calculateBookSeoScore } from '@/lib/utils/seo-score'
 import SeoAlertBanner from '@/components/admin/seo/SeoAlertBanner'
+import { DashboardPrivacyProvider } from '@/components/admin/DashboardPrivacyContext'
+import DashboardPrivacyToggle from '@/components/admin/DashboardPrivacyToggle'
+import SensitiveValue from '@/components/admin/SensitiveValue'
 
 
 async function getStats(role: string | null, userId: string | null) {
@@ -444,42 +447,44 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     }
 
     return (
-        <div className="space-y-12">
+        <DashboardPrivacyProvider>
+            <div className="space-y-12">
 
-            {/* Header section style Riwaya */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
-                <div>
-                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
-                        Tableau<span className="text-blue-600">.</span>
-                    </h1>
-                    <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                        Centre de commande global Riwaya
-                    </p>
-                </div>
+                {/* Header section style Riwaya */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
+                    <div>
+                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
+                            Tableau<span className="text-blue-600">.</span>
+                        </h1>
+                        <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+                            Centre de commande global Riwaya
+                        </p>
+                    </div>
 
-                <div className="flex flex-wrap gap-3">
-                    <a
-                        href="https://web.whatsapp.com/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-6 py-3 bg-white border border-[#25D366] text-[#25D366] rounded-2xl hover:bg-[#25D366] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
-                    >
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.128.552 4.195 1.6 6.004L.014 24l6.108-1.597A11.96 11.96 0 0012.031 24c6.646 0 12.031-5.385 12.031-12.031S18.677 0 12.031 0zm-1.042 17.653c-1.802 0-3.565-.483-5.116-1.404l-.367-.218-3.805.996.996-3.805-.218-.367c-.921-1.551-1.404-3.314-1.404-5.116 0-5.617 4.568-10.185 10.185-10.185 5.617 0 10.185 4.568 10.185 10.185 0 5.617-4.568 10.185-10.185 10.185zm5.59-7.618c-.307-.154-1.815-.895-2.097-.996-.281-.102-.486-.154-.69.154-.205.307-.793.996-.972 1.201-.18.205-.358.23-.665.077-1.464-.73-2.673-1.637-3.72-3.136-.205-.282.205-.268.808-1.482.102-.205.051-.383-.026-.537-.077-.154-.69-1.662-.946-2.276-.256-.614-.512-.512-.69-.512-.18 0-.383 0-.588 0-.205 0-.537.077-.819.384-.281.307-1.074 1.048-1.074 2.556 0 1.509 1.1 2.967 1.253 3.171.154.205 2.148 3.395 5.253 4.673 2.063.851 2.766.921 3.279.768.512-.154 1.815-.742 2.071-1.458.256-.716.256-1.329.18-1.458-.077-.128-.281-.205-.588-.358z" /></svg>
-                        WhatsApp
-                    </a>
-                    <a
-                        href={n8nBaseUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-6 py-3 bg-black text-white rounded-2xl hover:bg-gray-900 transition-all font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95"
-                    >
-                        <Cpu className="w-4 h-4 text-orange-500" />
-                        n8n Server
-                    </a>
-                    <ScanRetourButton />
-                    <BubbleToggle stats={statCards.map(s => ({ name: s.name, value: s.value, color: s.color }))} />
+                    <div className="flex flex-wrap gap-3">
+                        <DashboardPrivacyToggle />
+                        <a
+                            href="https://web.whatsapp.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 px-6 py-3 bg-white border border-[#25D366] text-[#25D366] rounded-2xl hover:bg-[#25D366] hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
+                        >
+                            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.128.552 4.195 1.6 6.004L.014 24l6.108-1.597A11.96 11.96 0 0012.031 24c6.646 0 12.031-5.385 12.031-12.031S18.677 0 12.031 0zm-1.042 17.653c-1.802 0-3.565-.483-5.116-1.404l-.367-.218-3.805.996.996-3.805-.218-.367c-.921-1.551-1.404-3.314-1.404-5.116 0-5.617 4.568-10.185 10.185-10.185 5.617 0 10.185 4.568 10.185 10.185 0 5.617-4.568 10.185-10.185 10.185zm5.59-7.618c-.307-.154-1.815-.895-2.097-.996-.281-.102-.486-.154-.69.154-.205.307-.793.996-.972 1.201-.18.205-.358.23-.665.077-1.464-.73-2.673-1.637-3.72-3.136-.205-.282.205-.268.808-1.482.102-.205.051-.383-.026-.537-.077-.154-.69-1.662-.946-2.276-.256-.614-.512-.512-.69-.512-.18 0-.383 0-.588 0-.205 0-.537.077-.819.384-.281.307-1.074 1.048-1.074 2.556 0 1.509 1.1 2.967 1.253 3.171.154.205 2.148 3.395 5.253 4.673 2.063.851 2.766.921 3.279.768.512-.154 1.815-.742 2.071-1.458.256-.716.256-1.329.18-1.458-.077-.128-.281-.205-.588-.358z" /></svg>
+                            WhatsApp
+                        </a>
+                        <a
+                            href={n8nBaseUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 px-6 py-3 bg-black text-white rounded-2xl hover:bg-gray-900 transition-all font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95"
+                        >
+                            <Cpu className="w-4 h-4 text-orange-500" />
+                            n8n Server
+                        </a>
+                        <ScanRetourButton />
+                        <BubbleToggle stats={statCards.map(s => ({ name: s.name, value: s.value, color: s.color }))} />
+                    </div>
                 </div>
-            </div>
 
             {/* Stats Grid Premium - controllable */}
             {/* SEO Alert Banner (> 50% livres SEO <= 80) */}
@@ -515,7 +520,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                                 {badgeStats.map((stat: any) => (
                                     <div key={stat.name} className="flex flex-col items-center justify-center p-6 md:p-8 bg-gray-50/50 rounded-2xl md:rounded-[2rem] hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-gray-100 group">
-                                        <span className="text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">{stat.value}</span>
+                                        <SensitiveValue name={stat.name} value={stat.value} className="text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform" />
                                         <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-2">{stat.name}</span>
                                     </div>
                                 ))}
@@ -552,8 +557,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                             <div className="flex-grow min-w-0">
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{book.title}</p>
                                                 <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-[10px] font-black text-blue-600">{book.totalQuantity} VENTES</span>
-                                                    <span className="text-[10px] font-black text-emerald-500">{book.totalRevenue.toFixed(0)} {currency}</span>
+                                                    <span className="text-[10px] font-black text-blue-600"><SensitiveValue name="Ventes" value={`${book.totalQuantity} VENTES`} /></span>
+                                                    <span className="text-[10px] font-black text-emerald-500"><SensitiveValue name="CA" value={`${book.totalRevenue.toFixed(0)} ${currency}`} /></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -579,8 +584,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                             <div className="flex-grow min-w-0">
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{pack.name}</p>
                                                 <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-[10px] font-black text-amber-600">{pack.totalQuantity} VENTES</span>
-                                                    <span className="text-[10px] font-black text-emerald-500">{pack.totalRevenue.toFixed(0)} {currency}</span>
+                                                    <span className="text-[10px] font-black text-amber-600"><SensitiveValue name="Ventes" value={`${pack.totalQuantity} VENTES`} /></span>
+                                                    <span className="text-[10px] font-black text-emerald-500"><SensitiveValue name="CA" value={`${pack.totalRevenue.toFixed(0)} ${currency}`} /></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -606,8 +611,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                             <div className="flex-grow min-w-0">
                                                 <p className="font-black text-[10px] text-black uppercase truncate italic">{item.title}</p>
                                                 <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-[10px] font-black text-emerald-500">{item.totalRevenue.toFixed(0)} {currency}</span>
-                                                    <span className="text-[10px] font-black text-gray-500">{item.totalQuantity} VENTES</span>
+                                                    <span className="text-[10px] font-black text-emerald-500"><SensitiveValue name="CA" value={`${item.totalRevenue.toFixed(0)} ${currency}`} /></span>
+                                                    <span className="text-[10px] font-black text-gray-500"><SensitiveValue name="Ventes" value={`${item.totalQuantity} VENTES`} /></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -634,7 +639,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                             <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{order.city}</div>
                                         </td>
                                         <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap text-sm font-black text-blue-600 tracking-tighter">
-                                            {order.total.toLocaleString()} {currency}
+                                            <SensitiveValue name="Montant Commande" value={`${order.total.toLocaleString()} ${currency}`} />
                                         </td>
                                         <td className="px-6 py-4 md:px-10 md:py-6 whitespace-nowrap text-right">
                                             <span className={`px-4 py-1 inline-flex text-[9px] font-black rounded-full uppercase tracking-widest shadow-sm ${statusColors[order.status as keyof typeof statusColors]}`}>
@@ -788,7 +793,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                                                     {order.shippingAddress?.firstName || order.CustomerFirstName}
                                                 </td>
                                                 <td className="px-4 py-3 text-[11px] font-black text-orange-600 tracking-tighter">
-                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} {currency}
+                                                    <SensitiveValue name="CA Jumia" value={`${order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} ${currency}`} />
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
                                                     <span className={`inline-flex px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg ${(order.status || order.Statuses?.[0] || '').toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
@@ -809,6 +814,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 </div>
             </div>
             {/* ─────────────────────────────────────────────────────────────────── */}
-        </div>
+            </div>
+        </DashboardPrivacyProvider>
     )
 }

@@ -143,8 +143,8 @@ jobs:
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/jumia-status-cron.sh
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/log/riwaya
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/riwaya/jumia-status-cron.log
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chown "$(id -un):$(id -gn)" /var/log/riwaya/jumia-status-cron.log
               (crontab -l 2>/dev/null | grep -q "jumia-status-cron.sh") || (crontab -l 2>/dev/null; echo "*/10 * * * * flock -n /tmp/riwaya-jumia-status.lock /var/www/riwayama/scripts/jumia-status-cron.sh >> /var/log/riwaya/jumia-status-cron.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "abandoned-cart-reminder") || (crontab -l 2>/dev/null; echo "*/15 * * * * curl -s 'https://riwaya.store/api/cron/abandoned-cart-reminder?key=une_cle_secrete_pour_cron_2026' > /dev/null 2>&1") | crontab -
             fi
 
             # ─── Retrait et nettoyage de la page 502 de Nginx ─────────────

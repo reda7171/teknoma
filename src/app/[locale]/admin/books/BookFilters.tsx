@@ -15,6 +15,7 @@ interface ActiveFilters {
     category?: string;
     subCategory?: string;
     seoScore?: string;
+    limit?: string | number;
 }
 
 interface BookFiltersProps {
@@ -54,6 +55,7 @@ export default function BookFilters({
 
     const handleApplyFilters = (updates: Partial<ActiveFilters>) => {
         const newFilters = { ...activeFilters, ...updates }
+        const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
         const params = new URLSearchParams()
         
         if (newFilters.search?.trim()) params.set('search', newFilters.search.trim())
@@ -67,16 +69,38 @@ export default function BookFilters({
         if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
         if (newFilters.seoScore) params.set('seoScore', newFilters.seoScore)
         
+        const effectiveLimit = newFilters.limit || currentUrlParams.get('limit')
+        if (effectiveLimit && effectiveLimit.toString() !== '20') {
+            params.set('limit', effectiveLimit.toString())
+        }
+        
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
     }
 
     const clearFilters = () => {
         setLocalSearch('')
-        router.push(pathname)
+        const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+        const effectiveLimit = activeFilters.limit || currentUrlParams.get('limit')
+        const params = new URLSearchParams()
+        if (effectiveLimit && effectiveLimit.toString() !== '20') {
+            params.set('limit', effectiveLimit.toString())
+        }
+        router.push(params.toString() ? `${pathname}?${params.toString()}` : pathname)
     }
 
-    const hasActiveFilters = Object.values(activeFilters).some(v => v !== '')
+    const hasActiveFilters = [
+        activeFilters.search,
+        activeFilters.status,
+        activeFilters.type,
+        activeFilters.lang,
+        activeFilters.sort,
+        activeFilters.jumia,
+        activeFilters.condition,
+        activeFilters.category,
+        activeFilters.subCategory,
+        activeFilters.seoScore
+    ].some(v => !!v)
 
     return (
         <div className="w-full space-y-4">

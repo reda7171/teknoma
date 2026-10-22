@@ -48,7 +48,8 @@
     "LoginSuccess": "تم تسجيل الدخول بنجاح",
     "LoginError": "خطأ في تسجيل الدخول",
     "UnexpectedError": "حدث خطأ غير متوقع",
-    "GoogleLoginError": "خطأ في تسجيل الدخول عبر جوجل"
+    "GoogleLoginError": "خطأ في تسجيل الدخول عبر جوجل",
+    "ContinueWithFacebook": "متابعة باستخدام Facebook"
   },
   "HomeLeaderboard": {
     "WallOfFame": "أفضل القراء",
@@ -365,6 +366,8 @@
       "Description": "اكتشف مجموعة متميزة من الكتب ووفر مع باقاتنا الحصرية. المعرفة بأسلوب راقٍ.",
       "ShopLibrary": "تسوق المكتبة",
       "OurBundles": "رؤية الباقات الأكثر مبيعاً",
+      "GoogleLogin": "تسجيل الدخول عبر Google",
+      "GoogleBonus": "احصل على 10 دراهم هدية",
       "CustomBundle": "إنشاء باقتي الخاصة (-30%)",
       "SocialProof": "⭐ 4.8/5 من قبل أكثر من 1000 قارئ راضٍ",
       "EditorsChoice": "ختيار المحرر",
@@ -1049,6 +1052,7 @@
     "LoginButton": "دخول",
     "NoAccount": "ليس لديك حساب؟",
     "AlreadyAccount": "مسجل بالفعل؟",
+    "Or": "أو",
     "MyBooks": "كتبي",
     "AddBook": "أضف كتاباً",
     "Credits": "الرصيد",
@@ -1135,6 +1139,7 @@
       "UnlockDesc": "لرؤية الكتب المتاحة بالقرب منك والبدء في التبادل.",
       "SignUpCTA": "قم بالتسجيل و اطلب لتبدأ في التبادل",
       "OrderCTA": "قم بالطلب لتبدأ في التبادل",
+      "OrderToUnlock": "اطلب لفك القفل",
       "WhatsAppSupport": "دعم واتساب"
     },
     "Exchange": {

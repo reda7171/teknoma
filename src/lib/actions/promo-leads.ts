@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { revalidatePath } from 'next/cache'
+import { sendWhatsAppMessageDirect } from './whatsapp-gateway'
 
 export interface SubmitPromoLeadInput {
     phone?: string
@@ -99,11 +100,9 @@ export async function submitPromoLead(data: SubmitPromoLeadInput) {
                             .replaceAll('{discount}', '10')
                             .replaceAll('{siteUrl}', siteUrl)
 
-                        const gatewayUrl = process.env.WHATSAPP_GATEWAY_URL || 'http://127.0.0.1:3000'
-                        await fetch(`${gatewayUrl}/send`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ to: phone, message })
+                        await sendWhatsAppMessageDirect(phone, message, {
+                            type: 'PROMO_LEAD',
+                            metadata: { promoCode, source: 'cart_popup' }
                         }).catch(() => null)
                     }
                 } catch {

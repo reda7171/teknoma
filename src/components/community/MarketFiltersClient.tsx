@@ -74,35 +74,35 @@ export default function MarketFiltersClient({ onPendingChange, embedded = false 
     }, [debouncedSearch, debouncedCity, pathname, router, searchParams])
 
     return (
-        <div className={`flex flex-col md:flex-row gap-3 md:gap-4 ${embedded ? 'm-0 rounded-[1.5rem] bg-white/90 p-2.5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl' : 'mb-8'}`}>
+        <div className={`flex flex-col sm:flex-row gap-2.5 sm:gap-4 ${embedded ? 'm-0 rounded-2xl sm:rounded-[1.5rem] bg-white/95 p-2 sm:p-2.5 shadow-xl sm:shadow-2xl ring-1 ring-black/5 backdrop-blur-xl border border-gray-100 sm:border-transparent' : 'mb-8'}`}>
             <div className="flex-1 lg:max-w-2xl relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute ltr:left-4 ltr:right-auto rtl:right-4 rtl:left-auto top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                 <input
                     type="text"
                     placeholder={t('SearchPlaceholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-12 pr-12 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:border-black focus:ring-0 outline-none transition-all font-bold text-sm"
+                    className="w-full ltr:pl-11 ltr:pr-10 rtl:pr-11 rtl:pl-10 py-3 sm:py-4 bg-white border border-gray-100 rounded-xl sm:rounded-2xl shadow-sm focus:border-black focus:ring-0 outline-none transition-all font-bold text-xs sm:text-sm"
                 />
                 {isPending && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-5 h-5 text-black animate-spin" />
+                    <div className="absolute ltr:right-4 ltr:left-auto rtl:left-4 rtl:right-auto top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 text-black animate-spin" />
                     </div>
                 )}
             </div>
-            <div className="w-full md:w-64 relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+            <div className="w-full sm:w-56 md:w-64 relative">
+                <MapPin className="absolute ltr:left-4 ltr:right-auto rtl:right-4 rtl:left-auto top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none z-10" />
                 <select aria-label="Champ de sélection"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full pl-12 pr-10 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:border-black focus:ring-0 outline-none transition-all font-bold text-sm appearance-none cursor-pointer"
+                    className="w-full ltr:pl-11 ltr:pr-9 rtl:pr-11 rtl:pl-9 py-3 sm:py-4 bg-white border border-gray-100 rounded-xl sm:rounded-2xl shadow-sm focus:border-black focus:ring-0 outline-none transition-all font-bold text-xs sm:text-sm appearance-none cursor-pointer"
                 >
                     <option value="">{t('AllCities')}</option>
                     {MOROCCO_CITIES.map((cityName) => (
                         <option key={cityName} value={cityName}>{cityName}</option>
                     ))}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <div className="absolute ltr:right-4 ltr:left-auto rtl:left-4 rtl:right-auto top-1/2 -translate-y-1/2 pointer-events-none">
                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>

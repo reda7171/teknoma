@@ -93,6 +93,11 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
                         name: p.name,
                         description: p.description || p.name,
                         image: img,
+                        sku: p.id,
+                        brand: {
+                            '@type': 'Brand',
+                            name: 'Riwaya'
+                        },
                         offers: {
                             '@type': 'Offer',
                             priceCurrency: 'MAD',
@@ -102,6 +107,44 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
                             seller: {
                                 '@type': 'Organization',
                                 name: 'Riwaya'
+                            },
+                            hasMerchantReturnPolicy: {
+                                '@type': 'MerchantReturnPolicy',
+                                applicableCountry: 'MA',
+                                returnPolicyCountry: 'MA',
+                                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                                merchantReturnDays: 3,
+                                returnMethod: 'https://schema.org/ReturnByMail',
+                                returnFees: 'https://schema.org/FreeReturn',
+                                refundType: 'https://schema.org/FullRefund',
+                                merchantReturnLink: `${baseUrl}/${locale}/returns`
+                            },
+                            shippingDetails: {
+                                '@type': 'OfferShippingDetails',
+                                shippingRate: {
+                                    '@type': 'MonetaryAmount',
+                                    value: 35,
+                                    currency: 'MAD'
+                                },
+                                shippingDestination: {
+                                    '@type': 'DefinedRegion',
+                                    addressCountry: 'MA'
+                                },
+                                deliveryTime: {
+                                    '@type': 'ShippingDeliveryTime',
+                                    handlingTime: {
+                                        '@type': 'QuantitativeValue',
+                                        minValue: 0,
+                                        maxValue: 1,
+                                        unitCode: 'DAY'
+                                    },
+                                    transitTime: {
+                                        '@type': 'QuantitativeValue',
+                                        minValue: 1,
+                                        maxValue: 3,
+                                        unitCode: 'DAY'
+                                    }
+                                }
                             }
                         }
                     }

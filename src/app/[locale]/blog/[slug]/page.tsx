@@ -102,6 +102,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     // Convertir markdown → HTML et réparer quelques soucis de formattage
     let rawContent = post.content || '';
+    // Remplacer les sauts de ligne littéraux échappés (\n ou \r\n stockés comme texte brut)
+    rawContent = rawContent.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
     // Si l'utilisateur a écrit des tirets directement sans saut de ligne correct
     rawContent = rawContent.replace(/<br>\s*-/g, '\n-');
     

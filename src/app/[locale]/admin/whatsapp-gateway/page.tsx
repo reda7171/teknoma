@@ -1,13 +1,33 @@
-import { getWhatsAppGatewayStatus, getWhatsAppGatewaySettings, getWhatsAppTemplates } from '@/lib/actions/whatsapp-gateway'
+import { redirect } from 'next/navigation'
+import { isAuthenticated } from '@/lib/actions/auth'
+import {
+    getWhatsAppGatewayStatus,
+    getWhatsAppGatewaySettings,
+    getWhatsAppTemplates,
+    getWhatsAppMessageLogs,
+    getWahaSessions
+} from '@/lib/actions/whatsapp-gateway'
 import { WhatsAppGatewayClient } from '@/components/admin/WhatsAppGatewayClient'
 
-export const metadata = { title: 'Passerelle WhatsApp QR | Admin Riwaya' }
+export const metadata = { title: 'Passerelle WhatsApp QR & Sessions | Admin Riwaya' }
 
-export default async function WhatsAppGatewayPage() {
-    const [statusData, settings, templates] = await Promise.all([
+export default async function WhatsAppGatewayPage({
+    params
+}: {
+    params: Promise<{ locale: string }>
+}) {
+    const { locale } = await params
+    const isAuth = await isAuthenticated()
+    if (!isAuth) {
+        redirect(`/${locale}/admin/login`)
+    }
+
+    const [statusData, settings, templates, initialLogsData, initialSessionsData] = await Promise.all([
         getWhatsAppGatewayStatus(),
         getWhatsAppGatewaySettings(),
-        getWhatsAppTemplates()
+        getWhatsAppTemplates(),
+        getWhatsAppMessageLogs({ limit: 50 }),
+        getWahaSessions()
     ])
 
     return (
@@ -19,7 +39,7 @@ export default async function WhatsAppGatewayPage() {
                         WhatsApp QR<span className="text-emerald-500">.</span>
                     </h1>
                     <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                        Passerelle WhatsApp Gratuite · Connexion Multi-Device · Relances Automatiques
+                        Passerelle WhatsApp Gratuite · Contrôle des Sessions WAHA · Traçage des Messages
                     </p>
                 </div>
             </div>
@@ -28,6 +48,8 @@ export default async function WhatsAppGatewayPage() {
                 initialStatus={statusData}
                 initialSettings={settings}
                 initialTemplates={templates}
+                initialLogsData={initialLogsData}
+                initialSessions={initialSessionsData.sessions || []}
             />
         </div>
     )

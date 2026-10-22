@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface OAuthButtonsProps {
     googleEnabled?: boolean;
@@ -9,10 +10,10 @@ interface OAuthButtonsProps {
 }
 
 export default function OAuthButtons({ googleEnabled = true, facebookEnabled = true }: OAuthButtonsProps) {
+    const t = useTranslations('Community')
     const [loadingProvider, setLoadingProvider] = useState<'google' | 'facebook' | null>(null)
 
     if (!googleEnabled && !facebookEnabled) return null;
-
 
     const handleOAuth = (provider: 'google' | 'facebook') => {
         setLoadingProvider(provider)
@@ -50,16 +51,7 @@ export default function OAuthButtons({ googleEnabled = true, facebookEnabled = t
     }
 
     return (
-        <div className="space-y-4">
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
-                    <span className="bg-white px-4 text-gray-400">Ou</span>
-                </div>
-            </div>
-
+        <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {facebookEnabled && (
                     <button
@@ -100,6 +92,15 @@ export default function OAuthButtons({ googleEnabled = true, facebookEnabled = t
                         Google
                     </button>
                 )}
+            </div>
+
+            <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
+                    <span className="bg-white px-4 text-gray-400">{t('Or')}</span>
+                </div>
             </div>
         </div>
     )

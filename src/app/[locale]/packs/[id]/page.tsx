@@ -205,6 +205,44 @@ export default async function PackDetailPage({
                 highPrice: totalOriginalPrice > displayPrice ? totalOriginalPrice : displayPrice,
                 offerCount: pack.books.length,
                 priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                hasMerchantReturnPolicy: {
+                    '@type': 'MerchantReturnPolicy',
+                    applicableCountry: 'MA',
+                    returnPolicyCountry: 'MA',
+                    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                    merchantReturnDays: 3,
+                    returnMethod: 'https://schema.org/ReturnByMail',
+                    returnFees: 'https://schema.org/FreeReturn',
+                    refundType: 'https://schema.org/FullRefund',
+                    merchantReturnLink: `${baseUrl}/${locale}/returns`
+                },
+                shippingDetails: {
+                    '@type': 'OfferShippingDetails',
+                    shippingRate: {
+                        '@type': 'MonetaryAmount',
+                        value: 35,
+                        currency: 'MAD'
+                    },
+                    shippingDestination: {
+                        '@type': 'DefinedRegion',
+                        addressCountry: 'MA'
+                    },
+                    deliveryTime: {
+                        '@type': 'ShippingDeliveryTime',
+                        handlingTime: {
+                            '@type': 'QuantitativeValue',
+                            minValue: 0,
+                            maxValue: 1,
+                            unitCode: 'DAY'
+                        },
+                        transitTime: {
+                            '@type': 'QuantitativeValue',
+                            minValue: 1,
+                            maxValue: 3,
+                            unitCode: 'DAY'
+                        }
+                    }
+                },
                 offers: [
                     {
                         '@type': 'Offer',
@@ -218,10 +256,13 @@ export default async function PackDetailPage({
                         hasMerchantReturnPolicy: {
                             '@type': 'MerchantReturnPolicy',
                             applicableCountry: 'MA',
+                            returnPolicyCountry: 'MA',
                             returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
                             merchantReturnDays: 3,
                             returnMethod: 'https://schema.org/ReturnByMail',
-                            returnFees: 'https://schema.org/FreeReturn'
+                            returnFees: 'https://schema.org/FreeReturn',
+                            refundType: 'https://schema.org/FullRefund',
+                            merchantReturnLink: `${baseUrl}/${locale}/returns`
                         },
                         shippingDetails: {
                             '@type': 'OfferShippingDetails',

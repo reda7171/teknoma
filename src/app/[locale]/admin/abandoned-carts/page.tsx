@@ -22,7 +22,7 @@ export default async function AbandonedCartsPage() {
 
     const abandonedCarts = await prisma.abandonedCart.findMany({
         where: {
-            status: 'PENDING',
+            status: { in: ['PENDING', 'REMINDED'] },
             updatedAt: { lte: tenMinutesAgo }
         },
         orderBy: { updatedAt: 'desc' }
@@ -71,7 +71,14 @@ export default async function AbandonedCartsPage() {
                                     <User className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-xl text-black tracking-tight uppercase italic">{cart.fullName || 'Client Inconnu'}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-black text-xl text-black tracking-tight uppercase italic">{cart.fullName || 'Client Inconnu'}</h3>
+                                        {cart.status === 'REMINDED' && (
+                                            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                                Relancé WAHA
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Actif il y a {formatDistanceToNow(cart.updatedAt, { locale: fr })}</p>
                                 </div>
                             </div>

@@ -1531,3 +1531,22 @@ model PromoLead {
   @@map("promo_leads")
 }
 
+model WhatsAppMessageLog {
+  id        String   @id @default(uuid())
+  phone     String   @db.VarChar(50)
+  message   String   @db.Text
+  status    String   @default("SENT") @db.VarChar(50)
+  messageId String?  @db.VarChar(255)
+  type      String   @default("DIRECT") @db.VarChar(50)
+  error     String?  @db.Text
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([phone])
+  @@index([status])
+  @@index([type])
+  @@map("whatsapp_message_logs")
+}
+
+
