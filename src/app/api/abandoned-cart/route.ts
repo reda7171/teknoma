@@ -4,6 +4,23 @@ import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
 import { resolveStorefrontChannel } from '@/lib/sales-channel'
 
+function formatCartItemsDetail(items: any[]): string {
+    if (!Array.isArray(items) || items.length === 0) return '  <i>Aucun article</i>'
+    return items.map((item, idx) => {
+        const rawTitle = item.title || item.name || 'Article'
+        const title = String(rawTitle).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const qty = item.quantity || 1
+        const price = item.price !== undefined ? `${item.price} DH` : ''
+        const typeBadge = item.type === 'PACK' ? '📦 Pack' : item.type === 'DIGITAL' ? '💻 Numérique' : item.type === 'ACCESSORY' ? '🎁 Accessoire' : '📖 Livre'
+        return `  ${idx + 1}. [${typeBadge}] <b>${title}</b> x${qty}${price ? ` - <b>${price}</b>` : ''}`
+    }).join('\n')
+}
+
+function escapeText(text?: string | null): string {
+    if (!text) return ''
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 export async function POST(req: Request) {
     try {
         const salesChannel = resolveStorefrontChannel(req.headers)
@@ -25,6 +42,7 @@ export async function POST(req: Request) {
         const safeSessionId = sessionId ? sanitizeInput(sessionId as string) : null
 
         const cartData = JSON.stringify(items)
+        const itemsDetail = formatCartItemsDetail(items)
 
         // Si ID fourni, on met à jour
         if (id) {
@@ -41,17 +59,18 @@ export async function POST(req: Request) {
                         const { sendTelegramMessage } = await import('@/lib/telegram')
                         let paymentInfo = paymentMethod === 'STRIPE' ? '💳 Carte Bancaire' : paymentMethod === 'TRANSFER' ? '🏦 Virement Bancaire' : '💵 Paiement à la livraison';
                         if (paymentMethod === 'TRANSFER' && selectedBank) {
-                            paymentInfo += ` (${selectedBank})`;
+                            paymentInfo += ` (${escapeText(selectedBank)})`;
                         }
 
-                        const message = `🛒 *Mise à jour Checkout (À Chaud)*\n\n` +
-                            `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
-                            `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
-                            `📧 *Email:* ${safeEmail || 'Non renseigné'}\n` +
-                            `${safeSessionId ? `🔑 <b>Session ID:</b> <code>${safeSessionId}</code>\n` : ''}` +
-                            `💳 *Paiement:* ${paymentInfo}\n` +
-                            `💰 *Total:* ${total} DH\n` +
-                            `\n_Contact ou mode de paiement mis à jour en temps réel._`;
+                        const message = `🛒 <b>Mise à jour Passage en Caisse (À Chaud)</b>\n\n` +
+                            `👤 <b>Client:</b> ${safeFullName ? escapeText(safeFullName) : 'Non renseigné'}\n` +
+                            `📞 <b>Tél:</b> ${safePhone ? escapeText(safePhone) : 'Non renseigné'}\n` +
+                            `📧 <b>Email:</b> ${safeEmail ? escapeText(safeEmail) : 'Non renseigné'}\n` +
+                            `${safeSessionId ? `🔑 <b>Session ID:</b> <code>${escapeText(safeSessionId)}</code>\n` : ''}` +
+                            `💳 <b>Paiement:</b> ${paymentInfo}\n` +
+                            `💰 <b>Total estimé:</b> <b>${total} DH</b>\n\n` +
+                            `📦 <b>Détails du Panier (${items.length}):</b>\n${itemsDetail}\n\n` +
+                            `<i>⚡ Coordonnées ou mode de paiement mis à jour en temps réel.</i>`;
                         let replyMarkup = undefined;
                         if (safePhone) {
                             let cleanPhone = safePhone.replace(/[^0-9]/g, '');
@@ -91,17 +110,18 @@ export async function POST(req: Request) {
             const { sendTelegramMessage } = await import('@/lib/telegram')
             let paymentInfo = paymentMethod === 'STRIPE' ? '💳 Carte Bancaire' : paymentMethod === 'TRANSFER' ? '🏦 Virement Bancaire' : '💵 Paiement à la livraison';
             if (paymentMethod === 'TRANSFER' && selectedBank) {
-                paymentInfo += ` (${selectedBank})`;
+                paymentInfo += ` (${escapeText(selectedBank)})`;
             }
 
-            const message = `🛒 *Début de Checkout (À Chaud)*\n\n` +
-                `👤 *Client:* ${safeFullName || 'Non renseigné'}\n` +
-                `📞 *Tél:* ${safePhone || 'Non renseigné'}\n` +
-                `${safeSessionId ? `🔑 <b>Session ID:</b> <code>${safeSessionId}</code>\n` : ''}` +
-                `💳 *Paiement:* ${paymentInfo}\n` +
-                `💰 *Total:* ${total} DH\n` +
-                `📦 *Articles:* ${items.length}\n` +
-                `\n_Saisi en temps réel, commande non finalisée._`;
+            const message = `🛒 <b>Début de Passage en Caisse (À Chaud)</b>\n\n` +
+                `👤 <b>Client:</b> ${safeFullName ? escapeText(safeFullName) : 'Non renseigné'}\n` +
+                `📞 <b>Tél:</b> ${safePhone ? escapeText(safePhone) : 'Non renseigné'}\n` +
+                `${safeEmail ? `📧 <b>Email:</b> ${escapeText(safeEmail)}\n` : ''}` +
+                `${safeSessionId ? `🔑 <b>Session ID:</b> <code>${escapeText(safeSessionId)}</code>\n` : ''}` +
+                `💳 <b>Paiement:</b> ${paymentInfo}\n` +
+                `💰 <b>Total estimé:</b> <b>${total} DH</b>\n\n` +
+                `📦 <b>Détails du Panier (${items.length}):</b>\n${itemsDetail}\n\n` +
+                `<i>⚡ Saisi en direct sur le checkout, commande non encore validée.</i>`;
             let replyMarkup = undefined;
             if (safePhone) {
                 let cleanPhone = safePhone.replace(/[^0-9]/g, '');

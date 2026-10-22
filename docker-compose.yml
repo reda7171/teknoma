@@ -161,6 +161,7 @@ services:
       - WAHA_DASHBOARD_ENABLED=true
       - WAHA_DASHBOARD_USERNAME=${WAHA_USER:-admin}
       - WAHA_DASHBOARD_PASSWORD=${WAHA_PASS:-admin123}
+      - WAHA_API_KEY=${WAHA_API_KEY:-riwaya_waha_api_key_2026}
     volumes:
       - waha_data:/app/.sessions
     networks:

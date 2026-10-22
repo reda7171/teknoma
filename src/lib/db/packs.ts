@@ -7,13 +7,44 @@ import { getCached } from '@/lib/cache'
 export async function getPacks() {
     return prisma.pack.findMany({
         where: { active: true },
-        include: {
+        select: {
+            id: true,
+            name: true,
+            nameFr: true,
+            nameEn: true,
+            language: true,
+            description: true,
+            price: true,
+            originalPrice: true,
+            image: true,
+            shippingFees: true,
+            createdAt: true,
             books: {
-                include: {
-                    book: true,
-                },
+                select: {
+                    book: {
+                        select: {
+                            id: true,
+                            title: true,
+                            author: true,
+                            price: true,
+                            image: true,
+                            stock: true,
+                        }
+                    }
+                }
             },
-            extraProducts: { include: { extraProduct: true } },
+            extraProducts: {
+                select: {
+                    extraProduct: {
+                        select: {
+                            id: true,
+                            name: true,
+                            price: true,
+                            image: true,
+                        }
+                    }
+                }
+            },
         },
         orderBy: {
             createdAt: 'desc',

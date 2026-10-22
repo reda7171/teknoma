@@ -61,15 +61,25 @@ export async function PacksContent({
 }) {
     const { locale } = await params;
     const packs = await getPacks()
-    const availableBooks = await prisma.book.findMany({
-        where: {
-            active: true,
-            stock: { gt: 0 }
-        },
-        orderBy: {
-            title: 'asc'
-        }
-    })
+    const availableBooks = openCustomBuilder
+        ? await prisma.book.findMany({
+            where: {
+                active: true,
+                stock: { gt: 0 }
+            },
+            select: {
+                id: true,
+                title: true,
+                author: true,
+                price: true,
+                image: true,
+                stock: true,
+            },
+            orderBy: {
+                title: 'asc'
+            }
+        })
+        : []
 
     const t = await getTranslations({ locale, namespace: 'PacksPage' })
     const tNav = await getTranslations({ locale, namespace: 'Navigation' })

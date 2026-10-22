@@ -52,19 +52,34 @@ async function getTelegramChatId(): Promise<string> {
 }
 
 
-// Envoyer une notification de nouvelle commande avec boutons de changement de statut
-export async function sendOrderNotification(order: {
+export interface TelegramOrderNotification {
     id: string
     fullName: string
     phone: string
     city: string
     total: number
-    status: string
+    status?: string
     source?: string
     salesChannel?: string
     comment?: string | null
-    items?: { quantity: number; book?: { title: string } | null; pack?: { name: string } | null }[]
-}) {
+    notes?: string | null
+    address?: string | null
+    items?: {
+        quantity: number
+        price?: number
+        type?: string
+        book?: { title: string } | null
+        pack?: { name: string } | null
+        extraProduct?: { name: string } | null
+        digitalProduct?: { title: string } | null
+        gift?: { name: string } | null
+        [key: string]: any
+    }[]
+    [key: string]: any
+}
+
+// Envoyer une notification de nouvelle commande avec boutons de changement de statut
+export async function sendOrderNotification(order: TelegramOrderNotification) {
     const botToken = await getTelegramToken()
     const chatId = await getTelegramChatId()
 
@@ -78,7 +93,12 @@ export async function sendOrderNotification(order: {
     const shortId = order.id.slice(0, 8).toUpperCase()
     const channelLabel = getSalesChannelLabel(order.salesChannel)
     const itemsList = order.items
-        ?.map(i => `  • ${escapeHtml(i.book?.title || i.pack?.name || 'Article')} x${i.quantity}`)
+        ?.map(i => {
+            const rawTitle = i.book?.title || i.pack?.name || i.extraProduct?.name || i.digitalProduct?.title || i.gift?.name || 'Article'
+            const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📖'
+            const price = i.price !== undefined ? ` (${i.price} MAD)` : ''
+            return `  • ${typeBadge} ${escapeHtml(rawTitle)} x${i.quantity}${price}`
+        })
         .join('\n') || ''
 
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_order' } })
@@ -257,7 +277,7 @@ export async function sendTelegramDocument(
                 const buf = Buffer.isBuffer(document)
                     ? document
                     : Buffer.from(document, 'base64')
-                const blob = new Blob([buf], { type: 'application/pdf' })
+                const blob = new Blob([buf as any], { type: 'application/pdf' })
                 formData.append('document', blob, filename)
                 if (caption) formData.append('caption', caption)
                 formData.append('parse_mode', 'HTML')
@@ -311,7 +331,7 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
                 } else {
                     try {
                         const fileBuffer = await fs.readFile(m.media)
-                        const blob = new Blob([fileBuffer])
+                        const blob = new Blob([fileBuffer as any])
                         const filename = path.basename(m.media)
                         formData.append(`photo${i}`, blob, filename)
                         mediaArray.push({ type: m.type, media: `attach://photo${i}`, caption: m.caption, parse_mode: 'HTML' })

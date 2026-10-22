@@ -57,7 +57,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
     const discount = Number(order.discount || 0);
     const total = Number(order.total || (subtotal + shipping - discount));
 
-    const labels = {
+    const dict = {
         fr: {
             title: "FACTURE D'ACHAT",
             orderRef: "Commande N°",
@@ -133,7 +133,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             printBtn: "Print / Save as PDF",
             closeBtn: "Close"
         }
-    }[locale as 'fr' | 'ar' | 'en'] || labels.fr;
+    }[locale as 'fr' | 'ar' | 'en'] || dict.fr;
 
     const itemsRows = order.items.map((it) => {
         const title = it.book?.title || it.pack?.name || it.extraProduct?.name || it.digitalProduct?.title || it.title || it.name || 'Livre';

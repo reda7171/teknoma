@@ -303,10 +303,10 @@ export default async function BookDetailPage({
         getAuthorProfile(book.author).catch(() => null),
         getApprovedAudioTestimonials().catch(() => ({ success: true, testimonials: [] })),
         getApprovedImageTestimonials().catch(() => ({ success: true, testimonials: [] })),
-        getTopViewedBookIds(24).catch(() => [])
+        getTopViewedBookIds(24).catch((): string[] => [])
     ])
 
-    const isTrending = topViewedIds.includes(book.id) || Boolean((book as any).views && (book as any).views >= 20)
+    const isTrending = ((topViewedIds as unknown as string[]) || []).includes(String(book.id)) || Boolean((book as any).views && (book as any).views >= 20)
 
     // Un article n'est affiché que s'il est explicitement relié au livre dans l'admin.
     // Le précédent fallback ajoutait les derniers articles, même sans rapport avec le produit.
@@ -314,9 +314,9 @@ export default async function BookDetailPage({
 
     const { average: averageRating, count: reviewCount } = ratingData
 
-    // Livres similaires (même catégorie)
+    // Livres similaires (même catégorie, limité pour optimiser le temps de rendu et le payload)
     const similarBooks = book.category
-        ? await getBooks({ category: book.category, active: true })
+        ? await getBooks({ category: book.category, active: true, limit: 6 })
         : []
     const filteredSimilarBooks = similarBooks
         .filter((b) => b.id !== book.id)

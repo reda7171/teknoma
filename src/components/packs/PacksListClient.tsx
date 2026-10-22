@@ -4,7 +4,8 @@ import { useState, useMemo, useEffect } from 'react'
 import PackCard from '@/components/PackCard'
 import { Package, Sparkles, ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import CustomPackBuilder from './CustomPackBuilder'
+import dynamic from 'next/dynamic'
+const CustomPackBuilder = dynamic(() => import('./CustomPackBuilder'), { ssr: false })
 
 interface PacksListClientProps {
     packs: any[]

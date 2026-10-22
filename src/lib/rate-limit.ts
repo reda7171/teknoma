@@ -91,6 +91,8 @@ export function cleanupRateLimitStore() {
 
 // Nettoyer toutes les 5 minutes
 if (typeof setInterval !== 'undefined') {
-    const timer = setInterval(cleanupRateLimitStore, 5 * 60 * 1000)
-    timer.unref?.()
+    const timer = setInterval(cleanupRateLimitStore, 5 * 60 * 1000);
+    if (typeof (timer as any)?.unref === 'function') {
+        (timer as any).unref();
+    }
 }
