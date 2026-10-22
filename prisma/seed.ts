@@ -184,6 +184,8 @@ async function main() {
         }
     }
 
+    // 4. WhatsApp Message Logs (only real messages are logged dynamically)
+
     console.log('Seed completed successfully.')
 }
 

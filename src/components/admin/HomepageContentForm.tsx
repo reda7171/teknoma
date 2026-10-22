@@ -19,7 +19,8 @@ const SECTIONS = [
       { key: 'hero_title_part2', label: 'Titre — Partie 2 (gris)', type: 'text', placeholder: 'Librairie.' },
       { key: 'hero_description', label: 'Description', type: 'textarea', placeholder: 'Découvrez notre sélection...' },
       { key: 'hero_btn_shop', label: 'Bouton Explorer', type: 'text', placeholder: 'Explorer la librairie' },
-      { key: 'hero_btn_packs', label: 'Bouton Packs', type: 'text', placeholder: 'Nos Packs' },
+      { key: 'hero_btn_google', label: 'Bouton Google', type: 'text', placeholder: 'Continuer avec Google' },
+      { key: 'hero_btn_google_bonus', label: 'Badge Bonus Google', type: 'text', placeholder: '+10 DH Offerts' },
     ]
   },
   {

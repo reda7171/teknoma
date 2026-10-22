@@ -145,10 +145,13 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "hasMerchantReturnPolicy": {
             "@type": "MerchantReturnPolicy",
             "applicableCountry": "MA",
+            "returnPolicyCountry": "MA",
             "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
             "merchantReturnDays": 3,
             "returnMethod": "https://schema.org/ReturnByMail",
-            "returnFees": "https://schema.org/FreeReturn"
+            "returnFees": "https://schema.org/FreeReturn",
+            "refundType": "https://schema.org/FullRefund",
+            "merchantReturnLink": `${baseUrl}/${locale}/returns`
           },
           "shippingDetails": {
             "@type": "OfferShippingDetails",

@@ -16,7 +16,9 @@ import {
     MessageSquareText,
     Save,
     RotateCcw,
-    Sparkles
+    Sparkles,
+    History,
+    Monitor
 } from 'lucide-react'
 import {
     getWhatsAppGatewayStatus,
@@ -25,24 +27,33 @@ import {
     disconnectWhatsAppGateway,
     updateWhatsAppGatewaySetting,
     updateWhatsAppTemplate,
-    type WhatsAppGatewayStatusResponse
+    type WhatsAppGatewayStatusResponse,
+    type WhatsAppLogsResponse,
+    type WahaSessionItem
 } from '@/lib/actions/whatsapp-gateway'
 import { DEFAULT_WHATSAPP_TEMPLATES } from '@/lib/constants/whatsapp-templates'
+import { WhatsAppLogsView } from './WhatsAppLogsView'
+import { WhatsAppSessionsView } from './WhatsAppSessionsView'
+import { WhatsAppPairingView } from './WhatsAppPairingView'
 
 interface Props {
     initialStatus: WhatsAppGatewayStatusResponse
     initialSettings: {
         autoPromoLead: boolean
         autoOrderConfirm: boolean
+        autoWelcome?: boolean
     }
     initialTemplates: {
         whatsapp_template_promo_lead: string
         whatsapp_template_order_confirm: string
         whatsapp_template_abandoned_cart: string
+        whatsapp_template_welcome?: string
     }
+    initialLogsData?: WhatsAppLogsResponse
+    initialSessions?: WahaSessionItem[]
 }
 
-type TemplateKey = 'whatsapp_template_promo_lead' | 'whatsapp_template_order_confirm' | 'whatsapp_template_abandoned_cart'
+type TemplateKey = 'whatsapp_template_promo_lead' | 'whatsapp_template_order_confirm' | 'whatsapp_template_abandoned_cart' | 'whatsapp_template_welcome'
 
 const TEMPLATE_CONFIG: Record<TemplateKey, {
     label: string
@@ -79,18 +90,37 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
             { code: '{promoCode}', label: 'Code promo', sample: 'RIWAYA10' },
             { code: '{cartUrl}', label: 'Lien panier direct', sample: 'https://riwaya.store/fr/cart' },
         ]
+    },
+    whatsapp_template_welcome: {
+        label: 'Accueil Client Automatique',
+        description: 'Réponse automatique immédiate envoyée à tout client qui contacte votre WhatsApp.',
+        variables: [
+            { code: '{customerName}', label: 'Nom client', sample: 'Cher lecteur' },
+            { code: '{siteUrl}', label: 'URL Boutique', sample: 'https://riwaya.store' },
+        ]
     }
 }
 
-export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialTemplates }: Props) {
+export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialTemplates, initialLogsData, initialSessions }: Props) {
+    const [mainTab, setMainTab] = useState<'gateway' | 'pairing' | 'sessions' | 'logs'>('gateway')
     const [statusData, setStatusData] = useState<WhatsAppGatewayStatusResponse>(initialStatus)
-    const [settings, setSettings] = useState(initialSettings)
-    const [templates, setTemplates] = useState(initialTemplates)
+    const [settings, setSettings] = useState({
+        autoPromoLead: initialSettings.autoPromoLead,
+        autoOrderConfirm: initialSettings.autoOrderConfirm,
+        autoWelcome: initialSettings.autoWelcome ?? true
+    })
+    const [templates, setTemplates] = useState<Record<TemplateKey, string>>({
+        whatsapp_template_promo_lead: initialTemplates.whatsapp_template_promo_lead,
+        whatsapp_template_order_confirm: initialTemplates.whatsapp_template_order_confirm,
+        whatsapp_template_abandoned_cart: initialTemplates.whatsapp_template_abandoned_cart,
+        whatsapp_template_welcome: initialTemplates.whatsapp_template_welcome || DEFAULT_WHATSAPP_TEMPLATES.whatsapp_template_welcome
+    })
     const [activeTemplateTab, setActiveTemplateTab] = useState<TemplateKey>('whatsapp_template_promo_lead')
     const [isSavingTemplate, setIsSavingTemplate] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [isRestarting, setIsRestarting] = useState(false)
     const [testPhone, setTestPhone] = useState('')
+    const [testSession, setTestSession] = useState('default')
     const [testMessage, setTestMessage] = useState('Salam ! Test de connexion WhatsApp depuis Riwaya.store réussi avec succès.')
     const [isSendingTest, setIsSendingTest] = useState(false)
     const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -148,7 +178,10 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
         }
 
         setIsSendingTest(true)
-        const res = await sendWhatsAppMessageViaGateway(testPhone, testMessage)
+        const res = await sendWhatsAppMessageViaGateway(testPhone, testMessage, {
+            session: testSession,
+            type: 'TEST'
+        })
         if (res.success) {
             showFeedback('Message de test envoyé avec succès sur WhatsApp !', 'success')
             setTestPhone('')
@@ -158,12 +191,14 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
         setIsSendingTest(false)
     }
 
-    const handleToggleSetting = async (key: 'whatsapp_auto_promo_lead' | 'whatsapp_auto_order_confirm', current: boolean) => {
+    const handleToggleSetting = async (key: 'whatsapp_auto_promo_lead' | 'whatsapp_auto_order_confirm' | 'whatsapp_auto_welcome', current: boolean) => {
         const next = !current
         if (key === 'whatsapp_auto_promo_lead') {
             setSettings(prev => ({ ...prev, autoPromoLead: next }))
-        } else {
+        } else if (key === 'whatsapp_auto_order_confirm') {
             setSettings(prev => ({ ...prev, autoOrderConfirm: next }))
+        } else if (key === 'whatsapp_auto_welcome') {
+            setSettings(prev => ({ ...prev, autoWelcome: next }))
         }
         await updateWhatsAppGatewaySetting(key, next)
         showFeedback('Paramètre d\'automatisation mis à jour', 'success')
@@ -236,8 +271,86 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                 </div>
             )}
 
-            {/* Carte Statut & Actions */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
+            {/* Onglets Principaux : Passerelle & Modèles vs Appairage vs Sessions WAHA vs Journal des Envois */}
+            <div className="flex flex-wrap items-center gap-2 p-1.5 bg-gray-100/90 rounded-2xl border border-gray-200/80 w-fit">
+                <button
+                    type="button"
+                    onClick={() => setMainTab('gateway')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        mainTab === 'gateway'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                >
+                    <Smartphone className="w-4 h-4 text-emerald-600" />
+                    <span>Passerelle & Modèles</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMainTab('pairing')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        mainTab === 'pairing'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                >
+                    <QrCode className="w-4 h-4 text-emerald-600" />
+                    <span>Appairage (Pairing)</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMainTab('sessions')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        mainTab === 'sessions'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                >
+                    <Monitor className="w-4 h-4 text-emerald-600" />
+                    <span>Sessions WAHA</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-white font-black">
+                        {initialSessions?.length ?? 0}
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMainTab('logs')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        mainTab === 'logs'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                >
+                    <History className="w-4 h-4 text-emerald-600" />
+                    <span>Journal des Envois</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-black">
+                        {initialLogsData?.stats?.total ?? 0}
+                    </span>
+                </button>
+            </div>
+
+            {mainTab === 'pairing' ? (
+                <WhatsAppPairingView
+                    sessions={initialSessions || []}
+                    onShowFeedback={showFeedback}
+                    onRefreshSessions={refreshStatus}
+                />
+            ) : mainTab === 'sessions' ? (
+                <WhatsAppSessionsView
+                    initialSessions={initialSessions || []}
+                    onShowFeedback={showFeedback}
+                />
+            ) : mainTab === 'logs' ? (
+                <WhatsAppLogsView
+                    initialLogs={initialLogsData?.logs || []}
+                    initialStats={initialLogsData?.stats || { total: 0, sent: 0, failed: 0, delivered: 0 }}
+                    initialTotal={initialLogsData?.total || 0}
+                    onShowFeedback={showFeedback}
+                />
+            ) : (
+                <>
+                    {/* Carte Statut & Actions */}
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
                     <div className="flex items-center gap-4">
                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black ${
@@ -619,6 +732,28 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                             }`} />
                         </button>
                     </div>
+
+                    <div className="py-4 flex items-center justify-between gap-4">
+                        <div>
+                            <p className="text-sm font-black text-slate-900">
+                                Réponse automatique d&apos;accueil aux messages entrants
+                            </p>
+                            <p className="text-xs text-slate-500 font-medium mt-0.5">
+                                Répond instantanément avec le message d&apos;accueil lorsqu&apos;un client vous contacte (limité à 1 envoi par 24h par contact).
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => handleToggleSetting('whatsapp_auto_welcome', settings.autoWelcome ?? true)}
+                            className={`w-12 h-7 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer ${
+                                (settings.autoWelcome ?? true) ? 'bg-emerald-600' : 'bg-gray-200'
+                            }`}
+                        >
+                            <div className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-200 ${
+                                (settings.autoWelcome ?? true) ? 'translate-x-5' : 'translate-x-0'
+                            }`} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -648,6 +783,25 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                         />
                     </div>
 
+                    {initialSessions && initialSessions.length > 1 && (
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                                Session WAHA émettrice
+                            </label>
+                            <select
+                                value={testSession}
+                                onChange={(e) => setTestSession(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                            >
+                                {initialSessions.map(s => (
+                                    <option key={s.name} value={s.name}>
+                                        {s.name} ({s.status}) {s.me?.pushName ? `- ${s.me.pushName}` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     <div>
                         <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
                             Message à envoyer
@@ -676,6 +830,8 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                     )}
                 </form>
             </div>
+                </>
+            )}
         </div>
     )
 }

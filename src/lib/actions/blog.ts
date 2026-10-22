@@ -358,12 +358,15 @@ export async function createPost(data: any) {
             return { success: false, error: 'Ce slug existe déjà' }
         }
 
+        const sanitizedContent = typeof data.content === 'string' ? data.content.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') : data.content
+        const sanitizedExcerpt = typeof data.excerpt === 'string' ? data.excerpt.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') : data.excerpt
+
         await prisma.post.create({
             data: {
                 title: data.title,
                 slug: data.slug,
-                excerpt: data.excerpt,
-                content: data.content,
+                excerpt: sanitizedExcerpt,
+                content: sanitizedContent,
                 coverImage: data.coverImage,
                 published: data.published,
                 publishedAt: data.published ? new Date() : null,
@@ -392,13 +395,16 @@ export async function updatePost(id: string, data: any) {
     try {
         await verifyAdmin()
 
+        const sanitizedContent = typeof data.content === 'string' ? data.content.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') : data.content
+        const sanitizedExcerpt = typeof data.excerpt === 'string' ? data.excerpt.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') : data.excerpt
+
         await prisma.post.update({
             where: { id },
             data: {
                 title: data.title,
                 slug: data.slug,
-                excerpt: data.excerpt,
-                content: data.content,
+                excerpt: sanitizedExcerpt,
+                content: sanitizedContent,
                 coverImage: data.coverImage,
                 published: data.published,
                 publishedAt: data.published && !data.publishedAt ? new Date() : data.publishedAt,

@@ -508,13 +508,6 @@ export default async function LocaleLayout({
             dangerouslySetInnerHTML={{ __html: injectedHeadTags }}
           />
         )}
-        {/* Trusted Types Default Policy pour CSP */}
-        <script
-          id="trusted-types-init"
-          dangerouslySetInnerHTML={{
-            __html: `if(typeof window!=='undefined'&&window.trustedTypes&&window.trustedTypes.createPolicy&&!window.trustedTypes.defaultPolicy){try{window.trustedTypes.createPolicy('default',{createHTML:function(s){return s},createScript:function(s){return s},createScriptURL:function(s){return s}})}catch(e){}}`
-          }}
-        />
       </head>
       <body
         className={`${outfit.variable} ${tajawal.variable} ${cairo.variable} ${locale === 'ar' ? 'font-cairo-var' : 'font-sans'} antialiased bg-white`}
@@ -608,7 +601,18 @@ export default async function LocaleLayout({
                 latitude: 34.0151156,
                 longitude: -6.8506771
               },
-              hasMap: 'https://www.google.com/maps/place/Riwaya/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt'
+              hasMap: 'https://www.google.com/maps/place/Riwaya/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt',
+              hasMerchantReturnPolicy: {
+                '@type': 'MerchantReturnPolicy',
+                applicableCountry: 'MA',
+                returnPolicyCountry: 'MA',
+                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                merchantReturnDays: 3,
+                returnMethod: 'https://schema.org/ReturnByMail',
+                returnFees: 'https://schema.org/FreeReturn',
+                refundType: 'https://schema.org/FullRefund',
+                merchantReturnLink: `${siteUrl}/${locale}/returns`
+              }
             })
           }}
         ></script>

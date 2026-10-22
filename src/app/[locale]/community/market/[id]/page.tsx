@@ -81,13 +81,60 @@ export default async function CommunityBookDetailPage({
         },
         description: book.description || book.title,
         image: book.image ? (book.image.startsWith('http') ? book.image.split(',')[0] : `${baseUrl}${book.image.split(',')[0]}`) : undefined,
+        sku: book.id,
+        brand: {
+            '@type': 'Brand',
+            name: 'Riwaya Community'
+        },
         offers: {
             '@type': 'Offer',
             price: 0,
             priceCurrency: 'MAD',
             availability: 'https://schema.org/InStock',
             itemCondition: book.condition === 'NEW' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
-            description: 'Livre disponible pour troc et échange entre lecteurs au Maroc'
+            description: 'Livre disponible pour troc et échange entre lecteurs au Maroc',
+            seller: {
+                '@type': 'Organization',
+                name: 'Riwaya'
+            },
+            hasMerchantReturnPolicy: {
+                '@type': 'MerchantReturnPolicy',
+                applicableCountry: 'MA',
+                returnPolicyCountry: 'MA',
+                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                merchantReturnDays: 3,
+                returnMethod: 'https://schema.org/ReturnByMail',
+                returnFees: 'https://schema.org/FreeReturn',
+                refundType: 'https://schema.org/FullRefund',
+                merchantReturnLink: `${baseUrl}/${locale}/returns`
+            },
+            shippingDetails: {
+                '@type': 'OfferShippingDetails',
+                shippingRate: {
+                    '@type': 'MonetaryAmount',
+                    value: 0,
+                    currency: 'MAD'
+                },
+                shippingDestination: {
+                    '@type': 'DefinedRegion',
+                    addressCountry: 'MA'
+                },
+                deliveryTime: {
+                    '@type': 'ShippingDeliveryTime',
+                    handlingTime: {
+                        '@type': 'QuantitativeValue',
+                        minValue: 0,
+                        maxValue: 1,
+                        unitCode: 'DAY'
+                    },
+                    transitTime: {
+                        '@type': 'QuantitativeValue',
+                        minValue: 1,
+                        maxValue: 3,
+                        unitCode: 'DAY'
+                    }
+                }
+            }
         }
     }
 

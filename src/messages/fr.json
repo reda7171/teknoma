@@ -337,6 +337,8 @@
       "Description": "Découvrez une sélection premium de livres et économisez avec nos packs exclusifs. Le savoir, avec style.",
       "ShopLibrary": "La Librairie",
       "OurBundles": "Voir les Packs les plus vendus",
+      "GoogleLogin": "Continuer avec Google",
+      "GoogleBonus": "+10 DH Offerts",
       "CustomBundle": "Créer mon Pack Perso (-30%)",
       "SocialProof": "⭐ 4.8/5 par plus de 1000 lecteurs satisfaits",
       "EditorsChoice": "Choix de l'éditeur",
@@ -550,7 +552,8 @@
     "LoginSuccess": "Connexion réussie",
     "LoginError": "Erreur de connexion",
     "UnexpectedError": "Erreur inattendue",
-    "GoogleLoginError": "Erreur Google Login"
+    "GoogleLoginError": "Erreur Google Login",
+    "ContinueWithFacebook": "Continuer avec Facebook"
   },
   "Common": {
     "Search": "Rechercher",
@@ -1028,6 +1031,7 @@
     "LoginButton": "Se connecter",
     "NoAccount": "Pas encore de compte ?",
     "AlreadyAccount": "Déjà inscrit ?",
+    "Or": "Ou",
     "MyBooks": "Mes Livres",
     "AddBook": "Proposer un livre",
     "Credits": "Solde",
@@ -1114,6 +1118,7 @@
       "UnlockDesc": "Pour voir les livres disponibles près de chez vous et commencer à échanger.",
       "SignUpCTA": "S'inscrire et passer la commande pour pouvoir échanger",
       "OrderCTA": "Passez une commande pour commencer à échanger",
+      "OrderToUnlock": "Commandez pour débloquer",
       "WhatsAppSupport": "Support WhatsApp"
     },
     "Exchange": {

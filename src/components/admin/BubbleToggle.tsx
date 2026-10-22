@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
 import BubbleView from './BubbleView'
+import { useDashboardPrivacy } from './DashboardPrivacyContext'
 
 interface BubbleToggleProps {
     stats: Array<{ name: string; value: string | number; color: string }>
@@ -10,6 +11,12 @@ interface BubbleToggleProps {
 
 export default function BubbleToggle({ stats }: BubbleToggleProps) {
     const [open, setOpen] = useState(false)
+    const { formatValue } = useDashboardPrivacy()
+
+    const formattedStats = stats.map(s => ({
+        ...s,
+        value: formatValue(s.name, s.value)
+    }))
 
     return (
         <>
@@ -29,7 +36,7 @@ export default function BubbleToggle({ stats }: BubbleToggleProps) {
             </button>
 
             {open && (
-                <BubbleView stats={stats} onClose={() => setOpen(false)} />
+                <BubbleView stats={formattedStats} onClose={() => setOpen(false)} />
             )}
         </>
     )

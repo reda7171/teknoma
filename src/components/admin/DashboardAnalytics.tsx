@@ -11,6 +11,7 @@ import Image from 'next/image'
 import ExportButton from './ExportButton'
 import { exportSalesReport } from '@/lib/actions/export'
 import { normalizeImage } from '@/lib/utils'
+import SensitiveValue from './SensitiveValue'
 
 const AccessibleTooltip = Tooltip as any;
 
@@ -53,7 +54,7 @@ export default function DashboardAnalytics() {
                             </h3>
                             {data.topProducts[0] && (
                                 <p className="text-[11px] font-black text-blue-600">
-                                    {data.topProducts[0].revenue.toLocaleString('fr-FR')} درهم
+                                    <SensitiveValue name="Top Produit CA" value={`${data.topProducts[0].revenue.toLocaleString('fr-FR')} درهم`} />
                                 </p>
                             )}
                         </div>
@@ -219,10 +220,14 @@ export default function DashboardAnalytics() {
                             <div key={idx} className="flex items-center justify-between p-3 bg-blue-50/30 rounded-lg border border-blue-50">
                                 <div className="flex flex-col">
                                     <span className="font-bold text-sm text-gray-800">{city.name}</span>
-                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{city.orders} commandes</span>
+                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                                        <SensitiveValue name="Commandes" value={`${city.orders} commandes`} />
+                                    </span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-blue-600">{city.average.toFixed(0)} درهم</p>
+                                    <p className="text-sm font-black text-blue-600">
+                                        <SensitiveValue name="Panier Moyen" value={`${city.average.toFixed(0)} درهم`} />
+                                    </p>
                                     <div className="w-16 h-1.5 bg-gray-200 rounded-full mt-1 overflow-hidden">
                                         <div
                                             className="h-full bg-blue-600 rounded-full"
@@ -292,8 +297,12 @@ export default function DashboardAnalytics() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-gray-900">{product.sales} ventes</p>
-                                    <p className="text-[11px] font-bold text-blue-600">{product.revenue.toLocaleString('fr-FR')} درهم</p>
+                                    <p className="text-sm font-black text-gray-900">
+                                        <SensitiveValue name="Ventes" value={`${product.sales} ventes`} />
+                                    </p>
+                                    <p className="text-[11px] font-bold text-blue-600">
+                                        <SensitiveValue name="CA" value={`${product.revenue.toLocaleString('fr-FR')} درهم`} />
+                                    </p>
                                 </div>
                             </div>
                         ))}

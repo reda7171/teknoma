@@ -87,6 +87,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
       "name": pack.name,
       "description": description,
       "url": packUrl,
+      "sku": pack.id,
       ...(pack.image ? { "image": pack.image } : {}),
       "brand": {
         "@type": "Brand",
@@ -117,10 +118,13 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
         "hasMerchantReturnPolicy": {
           "@type": "MerchantReturnPolicy",
           "applicableCountry": "MA",
+          "returnPolicyCountry": "MA",
           "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
           "merchantReturnDays": 3,
           "returnMethod": "https://schema.org/ReturnByMail",
-          "returnFees": "https://schema.org/FreeReturn"
+          "returnFees": "https://schema.org/FreeReturn",
+          "refundType": "https://schema.org/FullRefund",
+          "merchantReturnLink": `${baseUrl}/${locale}/returns`
         },
         "shippingDetails": {
           "@type": "OfferShippingDetails",

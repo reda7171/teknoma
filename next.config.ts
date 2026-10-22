@@ -134,8 +134,6 @@ const nextConfig: NextConfig = {
               "connect-src 'self' https: blob: https://accounts.google.com",
               "media-src 'self' blob: https:",
               "worker-src 'self' blob:",
-              "require-trusted-types-for 'script'",
-              "trusted-types default nextjs nextjs#bundler 'allow-duplicates'",
             ].join('; '),
           },
         ],

@@ -48,7 +48,8 @@
     "LoginSuccess": "Login successful",
     "LoginError": "Login error",
     "UnexpectedError": "Unexpected error",
-    "GoogleLoginError": "Google Login error"
+    "GoogleLoginError": "Google Login error",
+    "ContinueWithFacebook": "Continue with Facebook"
   },
   "HomeLeaderboard": {
     "WallOfFame": "Top Readers",
@@ -365,6 +366,8 @@
       "Description": "Discover a premium selection of books and save with our exclusive bundles. Knowledge, with style.",
       "ShopLibrary": "Shop Library",
       "OurBundles": "View best-selling bundles",
+      "GoogleLogin": "Sign in with Google",
+      "GoogleBonus": "+10 DH Free",
       "CustomBundle": "Create my Custom Bundle (-30%)",
       "SocialProof": "⭐ 4.8/5 by over 1000 satisfied readers",
       "EditorsChoice": "Editor's Choice",
@@ -1049,6 +1052,7 @@
     "LoginButton": "Login",
     "NoAccount": "No account yet?",
     "AlreadyAccount": "Already registered?",
+    "Or": "Or",
     "MyBooks": "My Books",
     "AddBook": "Add a Book",
     "Credits": "Credits",
@@ -1135,6 +1139,7 @@
       "UnlockDesc": "To see books available near you and start exchanging.",
       "SignUpCTA": "Sign up and place an order to start exchanging",
       "OrderCTA": "Place an order to start exchanging",
+      "OrderToUnlock": "Order to unlock",
       "WhatsAppSupport": "WhatsApp Support"
     },
     "Exchange": {

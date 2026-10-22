@@ -758,6 +758,11 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
             data: { price: Number(newPrice) },
         })
 
+        await prisma.extraProduct.updateMany({
+            where: { id: { in: ids } },
+            data: { price: Number(newPrice) },
+        }).catch(() => null)
+
         revalidatePath('/admin/books')
         revalidatePath('/')
 
@@ -771,6 +776,105 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour des prix en masse:', error)
         return { success: false, error: 'Impossible de mettre à jour les prix' }
+    }
+}
+
+/**
+ * Mettre à jour le stock en masse (par entrepôt ou global)
+ */
+export async function bulkUpdateBookStock(ids: string[], newStock: number, warehouseId?: string) {
+    try {
+        await verifyAdmin()
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+        const stockValue = Math.max(0, Math.floor(Number(newStock)))
+
+        const whereBook: any = { id: { in: ids } }
+        if (role === 'SELLER' && userId) {
+            whereBook.sellerId = userId
+        }
+
+        let warehouseName = 'Stock Total'
+
+        if (!warehouseId || warehouseId === 'TOTAL') {
+            await prisma.book.updateMany({
+                where: whereBook,
+                data: { stock: stockValue },
+            })
+
+            await prisma.extraProduct.updateMany({
+                where: { id: { in: ids } },
+                data: { stock: stockValue },
+            }).catch(() => null)
+        } else {
+            const warehouse = await prisma.warehouse.findUnique({ where: { id: warehouseId } })
+            if (!warehouse) throw new Error('Entrepôt introuvable')
+            warehouseName = warehouse.name
+
+            const validBooks = await prisma.book.findMany({
+                where: whereBook,
+                select: { id: true }
+            })
+            const validBookIds = validBooks.map(b => b.id)
+
+            for (const bookId of validBookIds) {
+                await prisma.inventory.upsert({
+                    where: { bookId_warehouseId: { bookId, warehouseId } },
+                    update: { quantity: stockValue },
+                    create: { bookId, warehouseId, quantity: stockValue }
+                })
+
+                const agg = await prisma.inventory.aggregate({
+                    where: { bookId },
+                    _sum: { quantity: true }
+                })
+                await prisma.book.update({
+                    where: { id: bookId },
+                    data: { stock: agg._sum.quantity ?? stockValue }
+                })
+            }
+
+            const extraProducts = await prisma.extraProduct.findMany({
+                where: { id: { in: ids } },
+                select: { id: true }
+            })
+            for (const extra of extraProducts) {
+                await prisma.inventory.upsert({
+                    where: { extraProductId_warehouseId: { extraProductId: extra.id, warehouseId } },
+                    update: { quantity: stockValue },
+                    create: { extraProductId: extra.id, warehouseId, quantity: stockValue }
+                }).catch(() => null)
+
+                const agg = await prisma.inventory.aggregate({
+                    where: { extraProductId: extra.id },
+                    _sum: { quantity: true }
+                })
+                await prisma.extraProduct.update({
+                    where: { id: extra.id },
+                    data: { stock: agg._sum.quantity ?? stockValue }
+                }).catch(() => null)
+            }
+        }
+
+        // Déclencher la synchronisation Jumia en arrière-plan si applicable
+        try {
+            const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+            syncJumiaStockForBooksBackground(ids).catch(() => null)
+        } catch {}
+
+        revalidatePath('/admin/books')
+        revalidatePath('/')
+
+        await createAuditLog({
+            action: 'BULK_UPDATE_STOCK',
+            entity: 'BOOK',
+            details: `Stock mis à jour pour ${ids.length} livres: ${stockValue} (${warehouseName})`,
+        })
+
+        return { success: true }
+    } catch (error: any) {
+        console.error('Erreur lors de la mise à jour du stock en masse:', error)
+        return { success: false, error: error.message || 'Impossible de mettre à jour le stock' }
     }
 }
 

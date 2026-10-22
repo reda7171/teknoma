@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
 import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste } from 'lucide-react'
-import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBooksFromAi } from '@/lib/actions/books'
+import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBooksFromAi } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import BookCreativeModal from '@/components/admin/BookCreativeModal'
@@ -52,10 +52,28 @@ interface ActiveFilters {
     lang: string;
     sort: string;
     condition: string;
+    category?: string;
+    subCategory?: string;
+    jumia?: string;
     seoScore?: string;
+    limit?: string | number;
 }
 
-export default function BooksTable({ books, pageNumber, totalProviderPages, activeFilters, limit = 20 }: { books: Book[], pageNumber: number, totalProviderPages: number, activeFilters: ActiveFilters, limit?: number }) {
+export default function BooksTable({ 
+    books, 
+    pageNumber, 
+    totalProviderPages, 
+    activeFilters, 
+    limit = 20,
+    warehouses = []
+}: { 
+    books: Book[], 
+    pageNumber: number, 
+    totalProviderPages: number, 
+    activeFilters: ActiveFilters, 
+    limit?: number,
+    warehouses?: { id: string; name: string }[]
+}) {
     const [loading, setLoading] = useState<string | null>(null)
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [bulkLoading, setBulkLoading] = useState(false)
@@ -76,6 +94,9 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
     const [bulkPrice, setBulkPrice] = useState<string>('')
     const [isUpdatingPrice, setIsUpdatingPrice] = useState(false)
+    const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>(warehouses[0]?.id || 'TOTAL')
+    const [bulkStock, setBulkStock] = useState<string>('')
+    const [isUpdatingStock, setIsUpdatingStock] = useState(false)
     const [isBulkPublishOpen, setIsBulkPublishOpen] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
@@ -90,20 +111,23 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         if (book.productType === 'PACK') return `/admin/packs/${book.id}/edit`
         if (book.productType === 'EXTRA') return `/admin/accessories/${book.id}`
         
-        let params: URLSearchParams
-        if (typeof window !== 'undefined' && window.location.search) {
-            params = new URLSearchParams(window.location.search)
-        } else {
-            params = new URLSearchParams()
-            if (activeFilters.search) params.set('search', activeFilters.search)
-            if (activeFilters.status) params.set('status', activeFilters.status)
-            if (activeFilters.type) params.set('type', activeFilters.type)
-            if (activeFilters.lang) params.set('lang', activeFilters.lang)
-            if (activeFilters.sort) params.set('sort', activeFilters.sort)
-            if (activeFilters.condition) params.set('condition', activeFilters.condition)
-            if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        const params = new URLSearchParams()
+        if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
+        if (activeFilters.status) params.set('status', activeFilters.status)
+        if (activeFilters.type) params.set('type', activeFilters.type)
+        if (activeFilters.lang) params.set('lang', activeFilters.lang)
+        if (activeFilters.sort) params.set('sort', activeFilters.sort)
+        if (activeFilters.condition) params.set('condition', activeFilters.condition)
+        if (activeFilters.category) params.set('category', activeFilters.category)
+        if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
+        if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
+        if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        
+        const effectiveLimit = activeFilters.limit || limit
+        if (effectiveLimit && effectiveLimit.toString() !== '20') {
+            params.set('limit', effectiveLimit.toString())
         }
-        if (!params.has('page')) params.set('page', pageNumber.toString())
+        params.set('page', pageNumber.toString())
         return `/admin/books/${book.id}/edit?${params.toString()}`
     }
 
@@ -224,9 +248,67 @@ export default function BooksTable({ books, pageNumber, totalProviderPages, acti
         setIsUpdatingPrice(false)
 
         if (result.success) {
+            setOrderedBooks(prev => prev.map(book => 
+                selectedIds.includes(book.id) 
+                    ? { ...book, price } 
+                    : book
+            ))
             setBulkPrice('')
             setSelectedIds([])
             setToast({ msg: `✅ Prix mis à jour pour ${selectedIds.length} livres`, ok: true })
+            router.refresh()
+            setTimeout(() => setToast(null), 4000)
+        } else {
+            alert(result.error)
+        }
+    }
+
+    const handleBulkStockUpdate = async () => {
+        if (selectedIds.length === 0 || !bulkStock) return
+        const stock = parseInt(bulkStock, 10)
+        if (isNaN(stock) || stock < 0) return alert('Stock invalide (doit être un entier >= 0)')
+        
+        const targetWarehouse = warehouses.find(w => w.id === selectedWarehouseId)
+        const targetLabel = selectedWarehouseId === 'TOTAL' ? 'Stock Total' : (targetWarehouse?.name || 'Entrepôt sélectionné')
+
+        if (!confirm(`Êtes-vous sûr de vouloir changer le stock (${targetLabel}) de ${selectedIds.length} livre(s) à ${stock} ?`)) return
+
+        setIsUpdatingStock(true)
+        const result = await bulkUpdateBookStock(selectedIds, stock, selectedWarehouseId)
+        setIsUpdatingStock(false)
+
+        if (result.success) {
+            setOrderedBooks(prev => prev.map(book => {
+                if (!selectedIds.includes(book.id)) return book
+
+                if (!selectedWarehouseId || selectedWarehouseId === 'TOTAL') {
+                    return { ...book, stock }
+                }
+
+                let updatedWarehouseStocks = (book.warehouseStocks || []).map(ws => 
+                    ws.warehouseId === selectedWarehouseId
+                        ? { ...ws, quantity: stock }
+                        : ws
+                )
+                if (!updatedWarehouseStocks.some(ws => ws.warehouseId === selectedWarehouseId)) {
+                    updatedWarehouseStocks.push({
+                        warehouseId: selectedWarehouseId,
+                        warehouseName: targetWarehouse?.name || 'Entrepôt',
+                        quantity: stock
+                    })
+                }
+
+                const newTotal = updatedWarehouseStocks.reduce((sum, ws) => sum + (ws.quantity || 0), 0)
+                return {
+                    ...book,
+                    stock: newTotal,
+                    warehouseStocks: updatedWarehouseStocks
+                }
+            }))
+            setBulkStock('')
+            setSelectedIds([])
+            setToast({ msg: `✅ Stock (${targetLabel}) mis à jour pour ${selectedIds.length} livres`, ok: true })
+            router.refresh()
             setTimeout(() => setToast(null), 4000)
         } else {
             alert(result.error)
@@ -613,6 +695,7 @@ Do not add explanatory text outside the JSON array or code block.`
     }
 
     const buildUrl = (page: number, newLimit?: number) => {
+        const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
         const params = new URLSearchParams()
         if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
         if (activeFilters.status) params.set('status', activeFilters.status)
@@ -620,7 +703,15 @@ Do not add explanatory text outside the JSON array or code block.`
         if (activeFilters.lang) params.set('lang', activeFilters.lang)
         if (activeFilters.sort) params.set('sort', activeFilters.sort)
         if (activeFilters.condition) params.set('condition', activeFilters.condition)
-        if (newLimit || limit !== 20) params.set('limit', (newLimit || limit).toString())
+        if (activeFilters.category) params.set('category', activeFilters.category)
+        if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
+        if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
+        if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+
+        const effectiveLimit = newLimit || activeFilters.limit || limit || currentUrlParams.get('limit')
+        if (effectiveLimit && effectiveLimit.toString() !== '20') {
+            params.set('limit', effectiveLimit.toString())
+        }
         params.set('page', page.toString())
         return `${pathname}?${params.toString()}`
     }
@@ -631,14 +722,23 @@ Do not add explanatory text outside the JSON array or code block.`
             newSort = `${column}-asc`;
         }
         
+        const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
         const params = new URLSearchParams()
         if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
         if (activeFilters.status) params.set('status', activeFilters.status)
         if (activeFilters.type) params.set('type', activeFilters.type)
         if (activeFilters.lang) params.set('lang', activeFilters.lang)
         if (activeFilters.condition) params.set('condition', activeFilters.condition)
+        if (activeFilters.category) params.set('category', activeFilters.category)
+        if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
+        if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
+        if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
         params.set('sort', newSort)
-        params.set('limit', limit.toString())
+        
+        const effectiveLimit = activeFilters.limit || limit || currentUrlParams.get('limit')
+        if (effectiveLimit && effectiveLimit.toString() !== '20') {
+            params.set('limit', effectiveLimit.toString())
+        }
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
     }
@@ -753,9 +853,42 @@ Do not add explanatory text outside the JSON array or code block.`
                                 <button
                                     onClick={handleBulkPriceUpdate}
                                     disabled={isUpdatingPrice || !bulkPrice}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm disabled:opacity-50"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm disabled:opacity-50 cursor-pointer"
                                 >
                                     {isUpdatingPrice ? 'Mise à jour...' : 'Changer Prix'}
+                                </button>
+                            </div>
+
+                            <div className="h-6 w-px bg-gray-300 mx-2 hidden sm:block"></div>
+
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <select
+                                    value={selectedWarehouseId}
+                                    onChange={(e) => setSelectedWarehouseId(e.target.value)}
+                                    className="px-3 py-2 text-xs font-bold border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white cursor-pointer shadow-sm"
+                                    title="Choisir l'entrepôt à modifier"
+                                >
+                                    {warehouses.map(w => (
+                                        <option key={w.id} value={w.id}>
+                                            {w.name}
+                                        </option>
+                                    ))}
+                                    <option value="TOTAL">Stock Total (Direct)</option>
+                                </select>
+                                <input 
+                                    type="number" 
+                                    min="0"
+                                    placeholder="Nouveau stock..."
+                                    value={bulkStock}
+                                    onChange={(e) => setBulkStock(e.target.value)}
+                                    className="w-28 px-3 py-2 text-xs font-bold border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                                />
+                                <button
+                                    onClick={handleBulkStockUpdate}
+                                    disabled={isUpdatingStock || !bulkStock}
+                                    className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition shadow-sm disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                                >
+                                    {isUpdatingStock ? 'Mise à jour...' : 'Changer Stock'}
                                 </button>
                             </div>
 

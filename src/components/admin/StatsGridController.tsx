@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useDashboardPrivacy } from './DashboardPrivacyContext'
 
 // Résolution des icônes côté client (évite de passer des classes depuis Server Components)
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -29,6 +30,7 @@ interface StatsGridControllerProps {
 const STORAGE_KEY = 'riwaya_dashboard_cards_visibility'
 
 export default function StatsGridController({ cards, colorClasses }: StatsGridControllerProps) {
+    const { isMasked, togglePrivacy, formatValue, isSensitive, toggleKeyPrivacy } = useDashboardPrivacy()
     const [visible, setVisible] = useState<Record<string, boolean>>({})
     const [panelOpen, setPanelOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
@@ -92,8 +94,24 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
 
     return (
         <div>
-            {/* Bouton contrôle + badge */}
-            <div className="flex justify-end mb-4 relative" ref={panelRef}>
+            {/* Boutons contrôle (Privacy + Cartes) */}
+            <div className="flex items-center justify-end gap-3 mb-4 relative" ref={panelRef}>
+                <button
+                    id="stats-grid-privacy-toggle"
+                    type="button"
+                    onClick={togglePrivacy}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95 ${
+                        isMasked
+                            ? 'border-blue-200 bg-blue-50/70 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
+                            : 'border-gray-200 bg-white text-gray-500 hover:border-black hover:text-black'
+                    }`}
+                    title={isMasked ? 'Afficher les données sensibles' : 'Masquer les données sensibles (**)'}
+                    aria-label={isMasked ? 'Afficher les données sensibles' : 'Masquer les données sensibles'}
+                >
+                    {isMasked ? <Eye className="w-3.5 h-3.5 text-blue-600" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    <span>{isMasked ? 'Afficher chiffres' : 'Masquer (**)'}</span>
+                </button>
+
                 <button
                     id="stats-grid-toggle"
                     onClick={() => setPanelOpen(v => !v)}
@@ -141,6 +159,7 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
                         <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
                             {cards.map(card => {
                                 const isVisible = visible[card.name] !== false
+                                const formattedVal = formatValue(card.name, card.value)
                                 return (
                                     <button
                                         key={card.name}
@@ -152,7 +171,7 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[10px] font-black text-black uppercase tracking-wider truncate">{card.name}</p>
-                                            <p className="text-[9px] text-gray-400 font-bold">{card.value}</p>
+                                            <p className="text-[9px] text-gray-400 font-bold">{formattedVal}</p>
                                         </div>
                                         <div className={`flex-shrink-0 w-8 h-4 rounded-full transition-colors ${isVisible ? 'bg-black' : 'bg-gray-200'}`}>
                                             <div className={`w-3 h-3 rounded-full bg-white shadow-sm mt-0.5 transition-transform ${isVisible ? 'translate-x-4' : 'translate-x-0.5'}`} />
@@ -176,6 +195,10 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 {visibleCards.map((stat) => {
                     const Icon = ICON_MAP[stat.iconName] || BookOpen
+                    const isCardSensitive = isSensitive(stat.name)
+                    const displayValue = formatValue(stat.name, stat.value)
+                    const isCardHidden = isCardSensitive && displayValue === '**'
+
                     const hasTrend = typeof stat.trend === 'number' && Number.isFinite(stat.trend)
                     const trendIsPositive = hasTrend && stat.trend! > 0
                     const trendIsNegative = hasTrend && stat.trend! < 0
@@ -186,14 +209,35 @@ export default function StatsGridController({ cards, colorClasses }: StatsGridCo
                             }`}
                         >
                             <div className="flex flex-col relative z-10">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">{stat.name}</p>
-                                <p className="text-3xl font-black text-black tracking-tighter mb-4">{stat.value}</p>
+                                <div className="flex items-center justify-between mb-3 gap-1">
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{stat.name}</p>
+                                    {isCardSensitive && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                toggleKeyPrivacy(stat.name)
+                                            }}
+                                            className="p-1 rounded-md text-gray-300 hover:text-black hover:bg-gray-100 transition-colors shrink-0"
+                                            title={isCardHidden ? 'Afficher cette valeur' : 'Masquer (**)'}
+                                            aria-label={isCardHidden ? 'Afficher cette valeur' : 'Masquer cette valeur'}
+                                        >
+                                            {isCardHidden ? <Eye className="w-3.5 h-3.5 text-blue-600" /> : <EyeOff className="w-3.5 h-3.5 text-gray-400" />}
+                                        </button>
+                                    )}
+                                </div>
+                                <p className={`text-3xl font-black text-black tracking-tighter mb-4 ${isCardHidden ? 'tracking-widest font-mono text-gray-700' : ''}`}>
+                                    {displayValue}
+                                </p>
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg ${colorClasses[stat.color as keyof typeof colorClasses]} shadow-current/10`}>
                                     <Icon className="w-5 h-5" />
                                 </div>
                             </div>
                             <div className="mt-6 pt-4 border-t border-gray-50 flex items-center gap-2">
-                                {hasTrend ? (
+                                {isCardHidden ? (
+                                    <span className="text-[9px] font-bold text-gray-300 uppercase tracking-tighter">Données masquées</span>
+                                ) : hasTrend ? (
                                     <>
                                         <span className={`text-[10px] font-black italic ${trendIsPositive ? 'text-emerald-500' : trendIsNegative ? 'text-red-500' : 'text-gray-400'}`}>
                                             {trendIsPositive ? '+' : ''}{stat.trend!.toFixed(1)}%

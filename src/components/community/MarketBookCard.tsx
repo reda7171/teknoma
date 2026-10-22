@@ -37,11 +37,11 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
     const cardHref = isBlurred ? undefined : `/community/market/${book.id}`
 
     return (
-        <div className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+        <div className="bg-white rounded-2xl sm:rounded-[2rem] p-4 sm:p-5 border border-gray-100 shadow-sm relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
             {/* Owner Info (Top) */}
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
                         {book.owner.image && !isBlurred ? (
                             <img src={book.owner.image} alt={ownerName || 'User'} className="w-full h-full object-cover" />
                         ) : (
@@ -50,23 +50,23 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
                             </div>
                         )}
                     </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">{t('Owner')}</p>
-                        <p className="text-xs font-bold text-black truncate max-w-[100px]">{ownerName}</p>
+                    <div className="min-w-0">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">{t('Owner')}</p>
+                        <p className="text-xs font-bold text-black truncate max-w-[90px] xs:max-w-[120px] sm:max-w-[100px]">{ownerName}</p>
                     </div>
                 </div>
-                <div className="flex flex-col items-end">
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-full mb-1">
-                        <MapPin className="w-3 h-3" /> {book.owner.city}
+                <div className="flex flex-col items-end rtl:items-start shrink-0">
+                    <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 sm:py-1 rounded-full mb-1">
+                        <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" /> {book.owner.city}
                     </span>
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">
-                        <Star className="w-3 h-3 fill-yellow-500" /> {book.owner.rating.toFixed(1)}
+                    <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 sm:py-1 rounded-full">
+                        <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-yellow-500 shrink-0" /> {book.owner.rating.toFixed(1)}
                     </span>
                 </div>
             </div>
 
             {/* Book Image */}
-            <CardWrapper href={cardHref as any} className="block aspect-[2/3] bg-gray-50 rounded-2xl mb-4 overflow-hidden relative shadow-inner group-hover:shadow-md transition-shadow">
+            <CardWrapper href={cardHref as any} className="block aspect-[2/3] bg-gray-50 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden relative shadow-inner group-hover:shadow-md transition-shadow">
                 {book.image ? (
                     <img src={getPrimaryImage(book.image)} alt={title} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isBlurred ? 'blur-xl' : ''}`} />
                 ) : (
@@ -76,13 +76,13 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
                 )}
 
                 {/* Condition Badge */}
-                <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
-                    <div className="bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20 shadow-lg">
+                <div className="absolute top-2.5 ltr:right-2.5 rtl:left-2.5 flex flex-col items-end rtl:items-start gap-1 z-10">
+                    <div className="bg-black/80 backdrop-blur-sm text-white px-2.5 sm:px-3 py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-white/20 shadow-lg">
                         {tbf(`Conditions.${book.condition}`)}
                     </div>
                     {isSmartMatch && (
-                        <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg animate-pulse">
-                            <Sparkles className="w-2.5 h-2.5" /> {t('Mutual')}
+                        <div className="bg-amber-500 text-white px-2.5 sm:px-3 py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg animate-pulse">
+                            <Sparkles className="w-2.5 h-2.5 shrink-0" /> {t('Mutual')}
                         </div>
                     )}
                 </div>
@@ -92,21 +92,21 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
             <div className="flex-grow flex flex-col justify-between relative">
                 <div>
                     <CardWrapper href={cardHref as any}>
-                        <h3 className="font-black text-lg text-black leading-tight mb-1 line-clamp-2 group-hover:text-amber-600 transition-colors" title={title}>
+                        <h3 className="font-black text-base sm:text-lg text-black leading-tight mb-1 line-clamp-2 group-hover:text-amber-600 transition-colors" title={title}>
                             {title}
                         </h3>
                     </CardWrapper>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 line-clamp-1">{author}</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 sm:mb-4 line-clamp-1">{author}</p>
                 </div>
 
                 {isBlurred ? (
-                    <div className="w-full bg-gray-200 text-gray-500 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-center shadow-inner cursor-not-allowed">
-                        Commandez pour débloquer
+                    <div className="w-full bg-gray-100 text-gray-500 py-2.5 sm:py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-center shadow-inner cursor-not-allowed">
+                        {t('OrderToUnlock')}
                     </div>
                 ) : (
                     <Link
                         href={`/community/market/${book.id}`}
-                        className="w-full bg-black text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-center shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
+                        className="w-full bg-black text-white py-2.5 sm:py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-center shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
                     >
                         {t('Request')}
                     </Link>

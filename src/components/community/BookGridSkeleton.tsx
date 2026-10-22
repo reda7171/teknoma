@@ -1,8 +1,8 @@
 export default function BookSelectionSkeleton() {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm animate-pulse lg:animate-none">
+                <div key={i} className="bg-white rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-gray-100 shadow-sm animate-pulse lg:animate-none">
                     {/* Image skeleton */}
                     <div className="aspect-[2/3] bg-gray-200 rounded-2xl mb-4 shadow-inner" />
 

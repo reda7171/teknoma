@@ -107,8 +107,8 @@ export default function BookCard({
                             </span>
                         </div>
                     )}
-                    {/* Badges en haut à gauche (Langue & Tendance) */}
-                    <div className="absolute top-3 left-3 z-20 flex flex-col items-start gap-1.5">
+                    {/* Badges en haut à gauche (Langue & Tendance) — décalés sous le ruban d'angle si présent */}
+                    <div className={`absolute left-3 z-20 flex flex-row items-center gap-1.5 flex-wrap max-w-[calc(100%-4rem)] ${(isUsed && stock > 0) || stock === 0 ? 'top-[4.25rem]' : 'top-3'}`}>
                         {language && (
                             <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md shadow-sm ${
                                 language === 'ar' ? 'bg-emerald-800 text-white' :
