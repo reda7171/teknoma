@@ -41,10 +41,10 @@ export async function notifyOrderStatus(orderId: string, newStatus: string) {
   if (!msg) return;
 
   // Récupère le token push de la commande
-  const order = await prisma.order.findUnique({
+  const order = await (prisma.order as any).findUnique({
     where: { id: orderId },
     select: { pushToken: true, fullName: true },
-  });
+  }) as { pushToken?: string; fullName?: string } | null;
 
   if (!order?.pushToken) return;
 

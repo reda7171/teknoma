@@ -1,0 +1,27 @@
+name: Restart WAHA WhatsApp Gateway
+
+on:
+  workflow_dispatch:
+
+jobs:
+  restart-waha:
+    name: Restart WAHA on VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Restart WAHA
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 2222
+          command_timeout: 10m
+          script: |
+            cd /var/www/riwayama
+            echo "Redémarrage du conteneur WAHA..."
+            if [ -f "scripts/restart-waha.sh" ]; then
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/restart-waha.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/restart-waha.sh
+            else
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --force-recreate whatsapp || echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker-compose up -d --force-recreate whatsapp
+            fi

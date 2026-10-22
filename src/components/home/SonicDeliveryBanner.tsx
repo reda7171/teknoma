@@ -24,7 +24,7 @@ export default function SonicDeliveryBanner({ locale, title, subtitle, descripti
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                     
-                    <ScrollReveal animation="animate-reveal-right" className="order-2 lg:order-1 flex flex-col space-y-5">
+                    <ScrollReveal animation="animate-reveal-right" className="order-1 flex flex-col space-y-5">
                         <h2 className="text-4xl md:text-5xl font-black leading-tight">
                             {title}
                             <br/>
@@ -60,15 +60,14 @@ export default function SonicDeliveryBanner({ locale, title, subtitle, descripti
                         </div>
                     </ScrollReveal>
 
-                    <ScrollReveal animation="animate-reveal-left" className="order-1 lg:order-2 flex justify-center lg:justify-end relative">
+                    <ScrollReveal animation="animate-reveal-left" className="order-2 flex justify-center lg:justify-end relative">
                         <div className="relative w-full max-w-[380px] aspect-[4/3] rounded-3xl flex items-center justify-center rotate-[-2deg] hover:rotate-0 transition-all duration-500 hover:scale-105">
                             {/* Fast motion lines background effect */}
                             <div className="absolute inset-0 bg-blue-400 rounded-3xl opacity-10 blur-2xl animate-pulse"></div>
                             <Image 
-                                src="/images/sonic_delivery.jpg" 
+                                src="/images/sonic_delivery.webp" 
                                 alt="Sonic Delivery Rabat" 
                                 fill 
-                                priority={false}
                                 sizes="(max-width: 768px) 100vw, 380px"
                                 className="object-cover rounded-3xl shadow-2xl border-4 border-yellow-400/80 relative z-10"
                             />

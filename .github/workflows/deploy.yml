@@ -169,3 +169,12 @@ jobs:
             # Rechargement direct du service
             echo "Rechargement du service..."
             echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps app || echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker-compose up -d --no-deps app
+
+            # Rechargement et contrôle du conteneur WhatsApp (WAHA)
+            echo "Rechargement de la passerelle WhatsApp (WAHA)..."
+            if [ -f "scripts/restart-waha.sh" ]; then
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/restart-waha.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/restart-waha.sh || true
+            else
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d whatsapp || echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker-compose up -d whatsapp || true
+            fi
