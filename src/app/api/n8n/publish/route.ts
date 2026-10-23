@@ -258,7 +258,8 @@ export async function POST(req: NextRequest) {
                         finalCaption,
                         item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain,
                         pinterestBoardId,
-                        pinterestAccessToken
+                        pinterestAccessToken,
+                        customImageBase64 || undefined // base64 prioritaire si disponible
                     )
                     const pinId = pinRes?.id
                     const pinUrl = pinId ? `https://www.pinterest.com/pin/${pinId}/` : undefined
