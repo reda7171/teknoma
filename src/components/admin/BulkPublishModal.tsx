@@ -124,7 +124,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
         const storeLink = domain === 'jumia.ma' ? null : `https://${domain}/${lang}/books/${book.id}`
         const sku = book.sellerSku?.trim()
         const jumiaUrl = sku
-            ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(sku)}`
+            ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`
             : `https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`
         const showJumia = domain === 'jumia.ma' || (withJumia && (logoChoice === 'jumia' || !!sku || domain === 'jumia.ma'))
 
@@ -354,7 +354,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4">
-            <div className="bg-white w-full max-w-2xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[94vh] sm:max-h-[90vh]">
+            <div className="bg-white w-full max-w-6xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden h-[94vh] sm:h-[90vh]">
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-5 border-b border-gray-100 flex-shrink-0">
@@ -370,9 +370,10 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     </button>
                 </div>
 
+                <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2">
                 {/* Config */}
                 {!isRunning && statuses.length === 0 && (
-                    <div className="px-4 sm:px-8 py-3.5 sm:py-5 space-y-3.5 sm:space-y-4 border-b border-gray-100 overflow-y-auto max-h-[46vh] sm:max-h-none">
+                    <div className="px-4 sm:px-6 py-3.5 sm:py-5 space-y-3.5 sm:space-y-4 border-b lg:border-b-0 lg:border-r border-gray-100 overflow-y-auto min-h-0">
                         <div>
                             <label className="block text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 sm:mb-2">Plateforme</label>
                             <div className="flex flex-wrap gap-1 sm:gap-1.5">
@@ -543,6 +544,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                     </div>
                 )}
 
+                <div className={`min-h-0 flex flex-col ${isRunning || isDone ? 'lg:col-span-2' : ''}`}>
                 {/* Progress bar */}
                 {(isRunning || isDone) && (
                     <div className="px-4 sm:px-8 py-3 sm:py-4 border-b border-gray-100 flex-shrink-0">
@@ -688,6 +690,8 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                             </div>
                         )
                     })}
+                </div>
+                </div>
                 </div>
 
                 {/* Footer actions */}

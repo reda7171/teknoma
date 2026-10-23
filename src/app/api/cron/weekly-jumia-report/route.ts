@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { JumiaAPI } from "@/lib/jumia-api"
 import { sendTelegramMessage } from "@/lib/telegram"
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
+import { summarizeJumiaOrders } from '@/lib/jumia-reporting'
 
 // Rapport hebdomadaire Jumia — à appeler chaque lundi à 8h
 export async function GET(req: Request) {
@@ -26,33 +27,27 @@ export async function GET(req: Request) {
         const response = await jumia.getOrders(100, undefined, undefined, weekStart, weekEnd)
         const orders = response?.orders || response?.data?.orders || []
 
-        const statusCounts: Record<string, number> = {}
-        let revenue = 0
-
-        orders.forEach((o: any) => {
-            const status = (o.status || 'UNKNOWN').toUpperCase()
-            statusCounts[status] = (statusCounts[status] || 0) + 1
-            revenue += parseFloat(o.totalAmountLocal?.value || '0')
-        })
+        const summary = summarizeJumiaOrders(orders)
 
         const statusEmojis: Record<string, string> = {
             PENDING: '⏳', READY_TO_SHIP: '📦', SHIPPED: '🚚',
             DELIVERED: '✅', CANCELED: '❌', RETURNED: '🔄'
         }
 
-        const lines = Object.entries(statusCounts)
+        const lines = Object.entries(summary.statusCounts)
             .map(([s, c]) => `${statusEmojis[s] || '📦'} ${s}: <b>${c}</b>`)
             .join('\n')
 
         const weekStr = `${lastMonday.toLocaleDateString('fr-FR')} → ${now.toLocaleDateString('fr-FR')}`
         const msg = `📊 <b>Rapport Hebdomadaire Jumia</b>\n📅 Semaine du ${weekStr}\n\n` +
-            `📦 <b>Total commandes :</b> ${orders.length}\n` +
-            `💰 <b>CA estimé :</b> <b>${revenue.toFixed(2)} درهم</b>\n\n` +
+            `📦 <b>Commandes valides :</b> ${summary.valid} / ${summary.total}\n` +
+            `❌ <b>Annulées/retournées :</b> ${summary.excluded}\n` +
+            `💰 <b>CA net :</b> <b>${summary.revenue.toFixed(2)} درهم</b>\n\n` +
             `<b>Répartition :</b>\n${lines}`
 
         await sendTelegramMessage(msg)
 
-        return NextResponse.json({ success: true, total: orders.length, revenue })
+        return NextResponse.json({ success: true, total: summary.total, valid: summary.valid, excluded: summary.excluded, revenue: summary.revenue })
     } catch (e: any) {
         return NextResponse.json({ success: false, error: e.message }, { status: 500 })
     }

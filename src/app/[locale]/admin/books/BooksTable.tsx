@@ -1337,7 +1337,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 {book.sellerSku ? (
                                                                     <a
-                                                                        href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.sellerSku)}`}
+                                                                        href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         onClick={(e) => e.stopPropagation()}
@@ -1606,7 +1606,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                             <span>{book.author}</span>
                                             {book.sellerSku && (
                                                 <a
-                                                    href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.sellerSku)}`}
+                                                    href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}

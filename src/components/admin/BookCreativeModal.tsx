@@ -757,8 +757,10 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
                                     alt={logoVariant === 'jumia' ? 'Jumia' : 'Riwaya'}
                                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                    className={`object-contain filter brightness-0 invert origin-top-right ${
-                                        logoVariant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
+                                    className={`object-contain origin-top-right ${
+                                        logoVariant === 'jumia'
+                                            ? 'h-7 sm:h-8 max-w-[140px]'
+                                            : 'h-9 sm:h-11 max-w-[120px] filter brightness-0 invert'
                                     }`}
                                     style={{ 
                                         transform: `scale(${logoScale})`,
@@ -906,8 +908,10 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             src={variant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
                             alt={variant === 'jumia' ? 'Jumia Logo' : 'Riwaya Logo'}
                             crossOrigin="anonymous"
-                            className={`object-contain filter brightness-0 invert transition-transform origin-top-right select-none ${
-                                variant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
+                            className={`object-contain transition-transform origin-top-right select-none ${
+                                variant === 'jumia'
+                                    ? 'h-7 sm:h-8 max-w-[140px]'
+                                    : 'h-9 sm:h-11 max-w-[120px] filter brightness-0 invert'
                             }`}
                             style={{ 
                                 transform: `scale(${logoScale})`,

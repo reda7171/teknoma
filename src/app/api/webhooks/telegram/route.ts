@@ -5,6 +5,8 @@ import { OrderStatus } from '@prisma/client'
 import fs from 'fs/promises'
 import path from 'path'
 import { isAuthorizedTelegramWebhook } from '@/lib/telegram-webhook-auth'
+import { getCronSecret } from '@/lib/cron-auth'
+import { getJumiaOrderStatus, isJumiaRevenueOrder, summarizeJumiaOrders } from '@/lib/jumia-reporting'
 
 const STATUS_LABELS: Record<string, string> = {
     PENDING: 'En attente',
@@ -19,14 +21,21 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 async function callProtectedCron(pathname: string) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
-    const cronSecret = process.env.CRON_SECRET
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
+    const cronSecret = getCronSecret()
     if (!appUrl || !cronSecret) throw new Error('Configuration cron incomplète')
 
-    return fetch(new URL(pathname, appUrl), {
+    const response = await fetch(new URL(pathname, appUrl), {
         headers: { Authorization: `Bearer ${cronSecret}` },
-        cache: 'no-store'
+        cache: 'no-store',
+        redirect: 'error'
     })
+
+    if (!response.ok) {
+        throw new Error(`API cron indisponible (${response.status})`)
+    }
+
+    return response
 }
 
 export async function POST(req: Request) {
@@ -426,14 +435,8 @@ export async function POST(req: Request) {
                             if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
                         }
                         
-                        const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
-                        const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
-                        const delivered = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
-                        const canceled = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'CANCELED').length
-                        const failed = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'FAILED').length
-                        const shipped = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'SHIPPED').length
-                        const readyToShip = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'READY_TO_SHIP').length
-                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} درهم</b>`
+                        const summary = summarizeJumiaOrders(allOrders)
+                        const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Commandes valides: <b>${summary.valid}</b> / ${summary.total}\n⏳ En attente: <b>${summary.statusCounts.PENDING || 0}</b>\n✅ Prêt à expédier: <b>${summary.statusCounts.READY_TO_SHIP || 0}</b>\n🚚 Expédiées: <b>${summary.statusCounts.SHIPPED || 0}</b>\n🏁 Livrées: <b>${summary.statusCounts.DELIVERED || 0}</b>\n❌ Annulées/retournées/échouées: <b>${summary.excluded}</b>\n\n💰 CA net: <b>${summary.revenue.toFixed(2)} درهم</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                     } else if (action === 'yearly_stats') {
@@ -464,14 +467,8 @@ export async function POST(req: Request) {
                             }
                         }));
 
-                        const revenue = allOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmountLocal?.value || '0'), 0)
-                        const pending = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
-                        const delivered = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'DELIVERED').length
-                        const canceled = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'CANCELED').length
-                        const failed = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'FAILED').length
-                        const shipped = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'SHIPPED').length
-                        const readyToShip = allOrders.filter((o: any) => (o.status || '').toUpperCase() === 'READY_TO_SHIP').length
-                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Total: <b>${allOrders.length}</b>\n⏳ En attente: <b>${pending}</b>\n✅ Prêt à expédier: <b>${readyToShip}</b>\n🚚 Expédiées: <b>${shipped}</b>\n🏁 Livrées: <b>${delivered}</b>\n❌ Annulées: <b>${canceled}</b>\n⚠️ Échouées: <b>${failed}</b>\n\n💰 CA: <b>${revenue.toFixed(2)} درهم</b>`
+                        const summary = summarizeJumiaOrders(allOrders)
+                        const text = `📅 <b>Bilan Jumia — Année ${now.getFullYear()}</b>\n\n📦 Commandes valides: <b>${summary.valid}</b> / ${summary.total}\n⏳ En attente: <b>${summary.statusCounts.PENDING || 0}</b>\n✅ Prêt à expédier: <b>${summary.statusCounts.READY_TO_SHIP || 0}</b>\n🚚 Expédiées: <b>${summary.statusCounts.SHIPPED || 0}</b>\n🏁 Livrées: <b>${summary.statusCounts.DELIVERED || 0}</b>\n❌ Annulées/retournées/échouées: <b>${summary.excluded}</b>\n\n💰 CA net: <b>${summary.revenue.toFixed(2)} درهم</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia annuel chargé', token)
                         await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                     } else if (action === 'yearly_chart') {
@@ -511,9 +508,9 @@ export async function POST(req: Request) {
                                 const month = new Date(o.createdAt).getMonth()
                                 monthlyTotalOrders[month]++
                                 
-                                if (o.status.toUpperCase() === 'CANCELED') {
+                                if (!isJumiaRevenueOrder(o)) {
                                     monthlyCanceledOrders[month]++
-                                } else if (o.status.toUpperCase() !== 'RETURNED') {
+                                } else {
                                     const amount = parseFloat(o.totalAmountLocal?.value || '0')
                                     monthlyRevenue[month] += amount
                                 }
@@ -595,7 +592,7 @@ export async function POST(req: Request) {
 
                         const monthlyJumiaRevenue = Array(12).fill(0)
                         allJumiaOrders.forEach(o => {
-                            if (o.createdAt && o.status && (o.status.toUpperCase() !== 'CANCELED' && o.status.toUpperCase() !== 'RETURNED')) {
+                            if (o.createdAt && o.status && isJumiaRevenueOrder(o)) {
                                 const month = new Date(o.createdAt).getMonth()
                                 const amount = parseFloat(o.totalAmountLocal?.value || '0')
                                 monthlyJumiaRevenue[month] += amount
@@ -1464,21 +1461,14 @@ export async function POST(req: Request) {
                             // On demande jusqu'à 500 commandes pour couvrir un mois entier
                             const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
                             const jumiaOrders = response?.orders || response?.data?.orders || []
-                            
-                            for (const o of jumiaOrders) {
-                                const status = (o.status || o.Status || '').toLowerCase()
-                                
-                                jumiaStats.count++
-                                
-                                const isCanceled = status === 'canceled' || status === 'cancelled' || status === 'failed' || status === 'returned';
-                                if (!isCanceled) {
-                                    jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
-                                }
-                                
-                                if (status === 'pending') jumiaStats.pending++
-                                else if (status === 'shipped' || status === 'ready-to-ship' || status === 'ready_to_ship') jumiaStats.shipped++
-                                else if (status === 'delivered') jumiaStats.delivered++
-                                else if (isCanceled) jumiaStats.canceled++
+                            const summary = summarizeJumiaOrders(jumiaOrders)
+                            jumiaStats = {
+                                count: summary.valid,
+                                revenue: summary.revenue,
+                                pending: summary.statusCounts.PENDING || 0,
+                                shipped: (summary.statusCounts.SHIPPED || 0) + (summary.statusCounts.READY_TO_SHIP || 0),
+                                delivered: summary.statusCounts.DELIVERED || 0,
+                                canceled: summary.excluded
                             }
                         }
                     } catch (e) {
@@ -1495,8 +1485,8 @@ export async function POST(req: Request) {
                                `❌ Annulées/Retours : ${siteStats.canceled}`
                     
                     text += `\n\n🟠 <b>JUMIA :</b>\n` +
-                            `📦 Commandes Total : <b>${jumiaStats.count}</b>\n` +
-                            `💰 CA Total : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
+                            `📦 Commandes valides : <b>${jumiaStats.count}</b>\n` +
+                            `💰 CA net : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
                             `⏳ En attente : ${jumiaStats.pending}\n` +
                             `🚚 En expédition : ${jumiaStats.shipped}\n` +
                             `✅ Livrées : ${jumiaStats.delivered}\n` +
@@ -1570,7 +1560,7 @@ export async function POST(req: Request) {
                     const shortId = o.id.slice(0, 8).toUpperCase()
                     const date = new Date(o.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
                     const trackingLine = o.trackingID?.trim()
-                        ? `\n   ↳ 🚚 <b>WithYou:</b> <code>${escapeHtml(o.trackingID.trim())}</code>`
+                        ? `\n   ↳ 🚚 <b>Code suivi WithYou :</b> <code>${escapeHtml(o.trackingID.trim())}</code>`
                         : `\n   ↳ <i>Sans suivi WithYou</i>`
                     return `${icon} <b>#${shortId}</b> — ${escapeHtml(o.fullName)} (${escapeHtml(o.city || 'Maroc')}) — <b>${o.total.toFixed(0)} DH</b> — ${date}${trackingLine}`
                 }).join('\n\n')
@@ -1686,16 +1676,8 @@ export async function POST(req: Request) {
                             }
                         }));
                         
-                        for (const o of allOrders) {
-                            const status = (o.status || o.Status || '').toLowerCase()
-                            jumiaStats.count++
-                            const isCanceled = status === 'canceled' || status === 'failed' || status === 'returned'
-                            if (!isCanceled) {
-                                jumiaStats.revenue += Number(o.totalAmountLocal?.value || o.Price || o.GrandTotal || 0)
-                            } else {
-                                jumiaStats.canceled++
-                            }
-                        }
+                        const summary = summarizeJumiaOrders(allOrders)
+                        jumiaStats = { count: summary.valid, revenue: summary.revenue, canceled: summary.excluded }
                     }
                 } catch (e) {
                     console.error('Erreur stats globales Jumia:', e)
@@ -1714,8 +1696,9 @@ export async function POST(req: Request) {
                     `📦 Commandes Site : ${totalSite}\n` +
                     `💰 CA Site : <b>${revenueSite.toFixed(2)} درهم</b>\n` +
                     `\n🟠 <b>JUMIA :</b>\n` +
-                    `📦 Commandes Jumia : ${jumiaStats.count}\n` +
-                    `💰 CA Jumia : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
+                    `📦 Commandes Jumia valides : ${jumiaStats.count}\n` +
+                    `❌ Annulées/retournées Jumia : ${jumiaStats.canceled}\n` +
+                    `💰 CA net Jumia : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
                     `\n📊 <b>Détail Site par statut :</b>\n${statusLines}`
 
                 await answerCallbackQuery(callbackId, '🗂️ Stats globales chargées', token)
@@ -1845,57 +1828,90 @@ export async function POST(req: Request) {
             else if (text.startsWith('/COMMANDES_MOIS') || text === 'COMMANDES_MOIS') {
                 const now = new Date()
                 const start = new Date(now.getFullYear(), now.getMonth(), 1)
-                const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+                const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+                const end = new Date(nextMonth.getTime() - 1)
                 
                 const siteOrders = await prisma.order.findMany({
                     where: { createdAt: { gte: start, lte: end } },
                     orderBy: { createdAt: 'desc' },
                     select: { id: true, status: true }
                 })
-                
-                let orderText = `📦 <b>Toutes les Commandes du Mois</b>\n\n`
-                orderText += `🔵 <b>SITE WEB :</b>\n`
-                let siteCount = 0
-                
-                for (const o of siteOrders) {
-                    if (orderText.length > 3700) {
-                        orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
-                        break
-                    }
-                    orderText += `• #${o.id.substring(0, 8)} - ${o.status}\n`
-                    siteCount++
-                }
-                orderText += `\nTotal Site: <b>${siteOrders.length}</b> commandes\n\n`
 
+                let jumiaOrders: any[] = []
+                let jumiaError: string | null = null
                 try {
                     const { JumiaAPI } = await import('@/lib/jumia-api')
                     const jumia = await JumiaAPI.getInstance()
                     if (jumia) {
-                        orderText += `🟠 <b>JUMIA :</b>\n`
-                        const createdAfter = start.toISOString().split('T')[0]
-                        const createdBefore = end.toISOString().split('T')[0]
-                        const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
-                        const jumiaOrders = response?.orders || response?.data?.orders || []
-                        
-                        let jumiaCount = 0
-                        for (const o of jumiaOrders) {
-                            if (orderText.length > 3700) {
-                                orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
-                                break
-                            }
-                            const status = (o.status || o.Status || '').toUpperCase()
-                            orderText += `• ${o.OrderNumber || o.orderNumber} - ${status}\n`
-                            jumiaCount++
+                        const formatLocalDate = (date: Date) => {
+                            const year = date.getFullYear()
+                            const month = String(date.getMonth() + 1).padStart(2, '0')
+                            const day = String(date.getDate()).padStart(2, '0')
+                            return `${year}-${month}-${day}`
                         }
-                        orderText += `\nTotal Jumia: <b>${jumiaOrders.length}</b> commandes\n\n`
-                        orderText += `Total Global: <b>${siteOrders.length + jumiaOrders.length}</b> commandes`
+                        const createdAfter = formatLocalDate(start)
+                        const createdBefore = formatLocalDate(nextMonth)
+                        let nextToken: string | undefined
+
+                        do {
+                            const response = await jumia.getOrders(100, nextToken, undefined, createdAfter, createdBefore)
+                            const pageOrders = response?.orders || response?.data?.orders || []
+                            jumiaOrders.push(...pageOrders)
+                            nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                            if (pageOrders.length === 0 || jumiaOrders.length >= 10000) nextToken = undefined
+                        } while (nextToken)
+                    } else {
+                        jumiaError = 'Jumia non configuré'
                     }
                 } catch (e) {
                     console.error('Erreur stats Jumia:', e)
-                    orderText += `\n⚠️ Impossible de charger les commandes Jumia.`
+                    jumiaError = 'Impossible de charger les commandes Jumia'
                 }
-                
-                await sendTelegramMessage(orderText, chatId.toString(), token)
+
+                const jumiaSummary = summarizeJumiaOrders(jumiaOrders)
+                await sendTelegramMessage(
+                    `📦 <b>Commandes du mois — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n` +
+                    `🔵 Site: <b>${siteOrders.length}</b>\n` +
+                    `🟠 Jumia reçues: <b>${jumiaSummary.total}</b>\n` +
+                    `✅ Jumia valides: <b>${jumiaSummary.valid}</b>\n` +
+                    `❌ Jumia annulées/retournées: <b>${jumiaSummary.excluded}</b>\n` +
+                    `📊 Total reçu Site + Jumia: <b>${siteOrders.length + jumiaSummary.total}</b>` +
+                    (jumiaError ? `\n\n⚠️ ${jumiaError}` : ''),
+                    chatId.toString(),
+                    token
+                )
+
+                const sendOrderChunks = async (title: string, lines: string[]) => {
+                    if (lines.length === 0) {
+                        await sendTelegramMessage(`${title}\n\nAucune commande.`, chatId.toString(), token)
+                        return
+                    }
+
+                    let chunk = `${title}\n\n`
+                    for (const line of lines) {
+                        if (chunk.length + line.length + 1 > 3800) {
+                            await sendTelegramMessage(chunk, chatId.toString(), token)
+                            chunk = `${title} <i>(suite)</i>\n\n`
+                        }
+                        chunk += `${line}\n`
+                    }
+                    if (chunk.trim()) await sendTelegramMessage(chunk, chatId.toString(), token)
+                }
+
+                await sendOrderChunks(
+                    '🔵 <b>Commandes Site</b>',
+                    siteOrders.map(order => `• #${order.id.substring(0, 8)} - ${order.status}`)
+                )
+
+                if (!jumiaError) {
+                    await sendOrderChunks(
+                        '🟠 <b>Commandes Jumia</b>',
+                        jumiaOrders.map(order => {
+                            const number = order.number || order.OrderNumber || order.orderNumber || order.id || order.orderId || 'N/A'
+                            return `• ${number} - ${getJumiaOrderStatus(order)}`
+                        })
+                    )
+                }
             }
             else if (text.match(/^\/20\d\d$/)) {
                 const year = text.substring(1)

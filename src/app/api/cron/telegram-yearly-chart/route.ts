@@ -4,6 +4,7 @@ import { sendTelegramDocument } from '@/lib/telegram'
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 import { prisma } from '@/lib/prisma'
 import pdfMake from 'pdfmake'
+import { getJumiaOrderAmount, isJumiaRevenueOrder } from '@/lib/jumia-reporting'
 
 export const maxDuration = 60 // Allow longer execution time if fetching many pages
 
@@ -38,6 +39,7 @@ export async function GET(req: Request) {
         const monthlyCanceledOrders = Array(12).fill(0)
         
         let jumiaOrdersCurrentMonth = 0
+        let jumiaTotalCurrentMonth = 0
         let jumiaRevenueCurrentMonth = 0
         let jumiaCanceledCurrentMonth = 0
 
@@ -46,27 +48,29 @@ export async function GET(req: Request) {
                 const month = new Date(o.createdAt).getMonth()
                 monthlyTotalOrders[month]++
                 
-                const isCanceled = o.status.toUpperCase() === 'CANCELED'
-                const isReturned = o.status.toUpperCase() === 'RETURNED'
+                const isExcluded = !isJumiaRevenueOrder(o)
                 let amount = 0
                 
-                if (isCanceled) {
+                if (isExcluded) {
                     monthlyCanceledOrders[month]++
-                } else if (!isReturned) {
-                    amount = parseFloat(o.totalAmountLocal?.value || '0')
+                } else {
+                    amount = getJumiaOrderAmount(o)
                     monthlyRevenue[month] += amount
                 }
 
                 if (month === currentMonthIndex) {
-                    jumiaOrdersCurrentMonth++
-                    if (isCanceled) jumiaCanceledCurrentMonth++
-                    if (!isCanceled && !isReturned) jumiaRevenueCurrentMonth += amount
+                    jumiaTotalCurrentMonth++
+                    if (isExcluded) jumiaCanceledCurrentMonth++
+                    else {
+                        jumiaOrdersCurrentMonth++
+                        jumiaRevenueCurrentMonth += amount
+                    }
                 }
             }
         })
 
         const cancellationRate = monthlyTotalOrders.map((total, i) => total > 0 ? Math.round((monthlyCanceledOrders[i] / total) * 100) : 0)
-        const cancelRateMonth = jumiaOrdersCurrentMonth > 0 ? Math.round((jumiaCanceledCurrentMonth / jumiaOrdersCurrentMonth) * 100) : 0
+        const cancelRateMonth = jumiaTotalCurrentMonth > 0 ? Math.round((jumiaCanceledCurrentMonth / jumiaTotalCurrentMonth) * 100) : 0
 
         // Fetch Store Orders
         const storeOrders = await prisma.order.findMany({

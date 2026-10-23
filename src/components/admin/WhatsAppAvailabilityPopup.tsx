@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Loader2, MessageCircle, Wifi, WifiOff, X, Check, Settings, Zap } from 'lucide-react'
+import { MessageCircle, WifiOff, X, Check, Settings, Zap } from 'lucide-react'
 import {
     getWhatsAppAvailabilityPrompt,
     heartbeatWhatsAppAvailability,
@@ -10,33 +10,51 @@ import {
     AgentPresenceItem,
 } from '@/lib/actions/whatsapp-presence'
 
+const WHATSAPP_PROMPT_STORAGE_KEY = 'riwaya-admin-whatsapp-prompt-last-shown'
+const WHATSAPP_PROMPT_INTERVAL_MS = 6 * 60 * 60 * 1000
+
 export default function WhatsAppAvailabilityPopup() {
     const [agents, setAgents] = useState<AgentPresenceItem[]>([])
     const [open, setOpen] = useState(false)
     const [savingId, setSavingId] = useState<string | null>(null)
     const [feedback, setFeedback] = useState<string | null>(null)
 
-    const fetchAgents = () => {
+    const fetchAgents = useCallback((forceOpen = false) => {
         getWhatsAppAvailabilityPrompt()
             .then(res => {
                 if (res?.agents && res.agents.length > 0) {
                     setAgents(res.agents)
-                    setOpen(true)
+
+                    let shouldOpen = forceOpen
+                    if (!forceOpen) {
+                        try {
+                            const lastShown = Number(window.localStorage.getItem(WHATSAPP_PROMPT_STORAGE_KEY) || 0)
+                            shouldOpen = !Number.isFinite(lastShown) || Date.now() - lastShown >= WHATSAPP_PROMPT_INTERVAL_MS
+                        } catch {
+                            shouldOpen = true
+                        }
+                    }
+
+                    if (shouldOpen) {
+                        setOpen(true)
+                        try {
+                            window.localStorage.setItem(WHATSAPP_PROMPT_STORAGE_KEY, Date.now().toString())
+                        } catch {}
+                    }
                 }
             })
             .catch(() => {})
-    }
+    }, [])
 
     useEffect(() => {
         fetchAgents()
 
         const handleReopen = () => {
-            fetchAgents()
-            setOpen(true)
+            fetchAgents(true)
         }
         window.addEventListener('open-whatsapp-availability-popup', handleReopen)
         return () => window.removeEventListener('open-whatsapp-availability-popup', handleReopen)
-    }, [])
+    }, [fetchAgents])
 
     // Fermeture avec la touche Entrée ou Échap
     useEffect(() => {
