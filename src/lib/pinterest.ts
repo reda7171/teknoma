@@ -22,8 +22,15 @@ export async function publishPin(
         base64Data = match ? match[2] : imageBase64
     }
 
+    // Détecter le content_type depuis le prefix base64 ou l'extension URL
+    let contentType = 'image/jpeg'
+    if (imageBase64?.startsWith('data:image/png')) contentType = 'image/png'
+    else if (imageBase64?.startsWith('data:image/webp')) contentType = 'image/webp'
+    else if (imageUrl.toLowerCase().endsWith('.png')) contentType = 'image/png'
+    else if (imageUrl.toLowerCase().endsWith('.webp')) contentType = 'image/webp'
+
     const mediaSource = base64Data
-        ? { source_type: 'image_base64', data: base64Data }
+        ? { source_type: 'image_base64', content_type: contentType, data: base64Data }
         : { source_type: 'image_url', url: imageUrl }
 
     const data = {
