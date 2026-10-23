@@ -74,7 +74,8 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     const [plusScale, setPlusScale] = useState(1)
     const [rotations, setRotations] = useState<Record<string, number>>({})
     const [shadows, setShadows] = useState<Record<string, boolean>>({})
-    const [logoScale, setLogoScale] = useState(3)
+    const [logoScale, setLogoScale] = useState(1)
+    const [logoVariant, setLogoVariant] = useState<'riwaya' | 'jumia'>('riwaya')
     const [showLogo, setShowLogo] = useState(true)
     const [showFreeDelivery, setShowFreeDelivery] = useState(pack?.isFreeDelivery || false)
     const [showPlus, setShowPlus] = useState(false)
@@ -1082,15 +1083,20 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         onTouchStart={(e) => handleTouchStart(e, 'logo')}
                                     >
                                         <div
-                                            className="opacity-90"
+                                            className="opacity-95 origin-top-right flex justify-end items-center"
                                         >
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
-                                                src="/logo-riwaya.png?v=riwaya2"
-                                                alt="Riwaya Logo"
+                                                src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
+                                                alt={logoVariant === 'jumia' ? 'Jumia Logo' : 'Riwaya Logo'}
                                                 crossOrigin="anonymous"
-                                                className="h-6 sm:h-8 object-contain filter brightness-0 invert transition-transform"
-                                                style={{ transform: `scale(${logoScale})` }}
+                                                className={`object-contain filter brightness-0 invert transition-transform origin-top-right select-none ${
+                                                    logoVariant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
+                                                }`}
+                                                style={{ 
+                                                    transform: `scale(${logoScale})`,
+                                                    transformOrigin: 'top right'
+                                                }}
                                             />
                                         </div>
                                     </div>
@@ -1680,13 +1686,60 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                             </div>
                         </div>
 
+                        {showLogo && (
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+                                    Logo du visuel
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 mb-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setLogoVariant('riwaya')
+                                            setLogoScale(1)
+                                            positionsRef.current['logo'] = { x: 0, y: 0 }
+                                            if (dragElemsRef.current['logo']) dragElemsRef.current['logo']!.style.transform = 'translate(0px, 0px)'
+                                            setPositions(prev => ({ ...prev, logo: { x: 0, y: 0 } }))
+                                        }}
+                                        className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
+                                            logoVariant === 'riwaya'
+                                                ? 'bg-black text-white border-black shadow-md'
+                                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'riwaya' ? 'bg-amber-400' : 'bg-gray-400'}`} />
+                                        Riwaya
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setLogoVariant('jumia')
+                                            setLogoScale(1)
+                                            positionsRef.current['logo'] = { x: 0, y: 0 }
+                                            if (dragElemsRef.current['logo']) dragElemsRef.current['logo']!.style.transform = 'translate(0px, 0px)'
+                                            setPositions(prev => ({ ...prev, logo: { x: 0, y: 0 } }))
+                                        }}
+                                        className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
+                                            logoVariant === 'jumia'
+                                                ? 'bg-[#F68B1E] text-white border-[#F68B1E] shadow-md shadow-orange-500/20'
+                                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'jumia' ? 'bg-white' : 'bg-[#F68B1E]'}`} />
+                                        Jumia
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Taille du logo
+                            <label className="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                <span>Taille du logo</span>
+                                <span>{Math.round(logoScale * 100)}%</span>
                             </label>
                             <input
                                 type="range"
-                                min="0.5" max="3" step="0.1"
+                                min="0.5" max="2" step="0.05"
                                 value={logoScale}
                                 onChange={(e) => setLogoScale(parseFloat(e.target.value))}
                                 disabled={!showLogo}

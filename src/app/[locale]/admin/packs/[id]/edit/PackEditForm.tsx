@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste, Zap, X } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImageIcon, Wand2, Languages, AlertTriangle, CheckCircle2, Bot, ClipboardPaste, Zap, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { updatePack, type PackInput } from '@/lib/actions/packs'
 import { publishPacksToJumia, checkJumiaLinkBySkuExact, checkPackJumiaCompositionDuplicate } from '@/lib/actions/jumia'
 import PackCreativeModal from '@/components/admin/PackCreativeModal'
@@ -260,10 +260,23 @@ interface PackEditFormProps {
     }
     books: Book[]
     whatsappPhone?: string
+    prevPack?: { id: string; name: string } | null
+    nextPack?: { id: string; name: string } | null
+    positionInfo?: { current: number; total: number }
 }
 
-export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFormProps) {
+export default function PackEditForm({ 
+    pack, 
+    books, 
+    whatsappPhone,
+    prevPack,
+    nextPack,
+    positionInfo
+}: PackEditFormProps) {
     const router = useRouter()
+    const pathname = usePathname()
+    const localeMatch = pathname.match(/^\/(fr|ar|en)/)
+    const localePrefix = localeMatch ? localeMatch[0] : ''
     const formRef = useRef<HTMLFormElement>(null)
     const [loading, setLoading] = useState(false)
     const [isPushingJumia, setIsPushingJumia] = useState(false)
@@ -297,6 +310,23 @@ export default function PackEditForm({ pack, books, whatsappPhone }: PackEditFor
             })
         }
     }, [pack.sellerSku, pack.jumiaProductSid])
+
+    // Raccourcis clavier flèche gauche / droite pour naviguer entre les produits
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+                return
+            }
+            if (e.key === 'ArrowLeft' && prevPack) {
+                router.push(`${localePrefix}/admin/packs/${prevPack.id}/edit`)
+            } else if (e.key === 'ArrowRight' && nextPack) {
+                router.push(`${localePrefix}/admin/packs/${nextPack.id}/edit`)
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [prevPack, nextPack, localePrefix, router])
 
     useEffect(() => {
         if (selectedBooks.length > 0) {
@@ -944,7 +974,67 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
     }
 
     return (
-        <div>
+        <div className="relative">
+            {/* Flèche fixe gauche : Produit précédent */}
+            {prevPack ? (
+                <Link
+                    href={`${localePrefix}/admin/packs/${prevPack.id}/edit`}
+                    className="fixed left-3 md:left-6 top-1/2 -translate-y-1/2 z-50 flex items-center group cursor-pointer"
+                    title={`Produit précédent : ${prevPack.name}`}
+                >
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/95 hover:bg-black text-gray-700 hover:text-white shadow-2xl border border-gray-200/90 backdrop-blur-md flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-active:scale-95 group-hover:shadow-indigo-500/20">
+                        <ChevronLeft className="w-6 h-6 md:w-7 md:h-7 transition-transform group-hover:-translate-x-0.5" />
+                    </div>
+                    {/* Infobulle nom du pack au survol */}
+                    <div className="hidden lg:group-hover:flex flex-col absolute left-full ml-3 px-3.5 py-2.5 bg-gray-950 text-white text-xs rounded-xl shadow-2xl whitespace-nowrap max-w-[260px] pointer-events-none animate-in fade-in zoom-in-95 border border-white/10">
+                        <div className="flex items-center gap-1.5 text-[10px] uppercase font-black text-amber-400">
+                            <ChevronLeft className="w-3 h-3" />
+                            <span>Produit précédent</span>
+                        </div>
+                        <span className="font-semibold text-gray-100 truncate mt-0.5">{prevPack.name}</span>
+                    </div>
+                </Link>
+            ) : (
+                <div
+                    className="fixed left-3 md:left-6 top-1/2 -translate-y-1/2 z-50 opacity-25 cursor-not-allowed select-none"
+                    title="Premier produit"
+                >
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/60 text-gray-400 shadow-md border border-gray-200 flex items-center justify-center">
+                        <ChevronLeft className="w-6 h-6 md:w-7 md:h-7" />
+                    </div>
+                </div>
+            )}
+
+            {/* Flèche fixe droite : Produit suivant */}
+            {nextPack ? (
+                <Link
+                    href={`${localePrefix}/admin/packs/${nextPack.id}/edit`}
+                    className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 flex items-center justify-end group cursor-pointer"
+                    title={`Produit suivant : ${nextPack.name}`}
+                >
+                    {/* Infobulle nom du pack au survol */}
+                    <div className="hidden lg:group-hover:flex flex-col absolute right-full mr-3 px-3.5 py-2.5 bg-gray-950 text-white text-xs rounded-xl shadow-2xl whitespace-nowrap max-w-[260px] pointer-events-none animate-in fade-in zoom-in-95 border border-white/10 text-right">
+                        <div className="flex items-center justify-end gap-1.5 text-[10px] uppercase font-black text-amber-400">
+                            <span>Produit suivant</span>
+                            <ChevronRight className="w-3 h-3" />
+                        </div>
+                        <span className="font-semibold text-gray-100 truncate mt-0.5">{nextPack.name}</span>
+                    </div>
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/95 hover:bg-black text-gray-700 hover:text-white shadow-2xl border border-gray-200/90 backdrop-blur-md flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-active:scale-95 group-hover:shadow-indigo-500/20">
+                        <ChevronRight className="w-6 h-6 md:w-7 md:h-7 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                </Link>
+            ) : (
+                <div
+                    className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 opacity-25 cursor-not-allowed select-none"
+                    title="Dernier produit"
+                >
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/60 text-gray-400 shadow-md border border-gray-200 flex items-center justify-center">
+                        <ChevronRight className="w-6 h-6 md:w-7 md:h-7" />
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="mb-8">
                 <Link href="/admin/packs" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
@@ -953,6 +1043,11 @@ Ensure all descriptions and highlights are formatted properly. Never use the ver
                 </Link>
                 <div className="flex items-center gap-4">
                     <h1 className="text-3xl font-bold text-gray-900">Modifier le pack</h1>
+                    {positionInfo && (
+                        <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold border border-gray-200">
+                            {positionInfo.current} / {positionInfo.total}
+                        </span>
+                    )}
                     <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-2">
                         <span className="text-sm font-medium text-gray-500">État du Pack :</span>
                         {selectedBooksData.length === 0 ? (

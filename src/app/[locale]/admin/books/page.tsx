@@ -88,10 +88,13 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             isSyncedWithJumia: false
         }),
         ...(jumiaParam.split(',').includes('has-sku') && {
-            sellerSku: { not: null }
+            sellerSku: { not: null, notIn: [''] }
         }),
         ...(jumiaParam.split(',').includes('no-sku') && {
-            sellerSku: null
+            OR: [
+                { sellerSku: null },
+                { sellerSku: '' }
+            ]
         }),
         ...(categoryParam && {
             category: { in: categoryParam.split(',') }
@@ -247,8 +250,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (statusParam.split(',').includes('no-image')) extraWhere.image = { in: ['', '/book-placeholder.png'] }
         if (jumiaParam.split(',').includes('synced')) extraWhere.isSyncedWithJumia = true
         if (jumiaParam.split(',').includes('not-synced')) extraWhere.isSyncedWithJumia = false
-        if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null }
-        if (jumiaParam.split(',').includes('no-sku')) extraWhere.sellerSku = null
+        if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null, notIn: [''] }
+        if (jumiaParam.split(',').includes('no-sku')) extraWhere.OR = [{ sellerSku: null }, { sellerSku: '' }]
         
         if (!productTypes.includes('all') && accessoryTypes.length > 0) {
             extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }

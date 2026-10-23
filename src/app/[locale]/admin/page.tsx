@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon, ExternalLink, ShoppingBag as JumiaIcon, Zap, Link2, DollarSign } from 'lucide-react'
+import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon, ExternalLink, ShoppingBag as JumiaIcon, Zap, Link2, DollarSign, Sparkles, Coins } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBadgeStats } from '@/lib/actions/analytics'
@@ -16,6 +16,7 @@ import SeoAlertBanner from '@/components/admin/seo/SeoAlertBanner'
 import { DashboardPrivacyProvider } from '@/components/admin/DashboardPrivacyContext'
 import DashboardPrivacyToggle from '@/components/admin/DashboardPrivacyToggle'
 import SensitiveValue from '@/components/admin/SensitiveValue'
+import { getCoverCacheStats } from '@/lib/actions/gemini-cache'
 
 
 async function getStats(role: string | null, userId: string | null) {
@@ -54,9 +55,13 @@ async function getStats(role: string | null, userId: string | null) {
             : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }),
         prisma.order.groupBy({
             by: ['salesChannel'],
-            where: sellerOrderWhere,
+            where: {
+                ...sellerOrderWhere,
+                status: { notIn: ['CANCELLED', 'RETURNED'] }
+            },
             _count: { id: true },
-            _sum: { total: true }
+            _sum: { total: true },
+            orderBy: { salesChannel: 'asc' }
         })
     ])
 
@@ -87,15 +92,31 @@ async function getStats(role: string | null, userId: string | null) {
 
     if (role === 'SELLER' && userId) {
         const allItems = await prisma.orderItem.aggregate({
-            where: { sellerId: userId },
+            where: {
+                sellerId: userId,
+                order: { status: { notIn: ['CANCELLED', 'RETURNED'] } }
+            },
             _sum: { price: true, quantity: true }
         })
         const monthItems = await prisma.orderItem.aggregate({
-            where: { order: { createdAt: { gte: firstDayOfMonth } }, sellerId: userId },
+            where: {
+                order: {
+                    createdAt: { gte: firstDayOfMonth },
+                    status: { notIn: ['CANCELLED', 'RETURNED'] }
+                },
+                sellerId: userId
+            },
             _sum: { price: true, quantity: true }
         })
         const todayItems = await prisma.orderItem.aggregate({
-            where: { order: { createdAt: { gte: today } }, sellerId: userId, type: 'BOOK' },
+            where: {
+                order: {
+                    createdAt: { gte: today },
+                    status: { notIn: ['CANCELLED', 'RETURNED'] }
+                },
+                sellerId: userId,
+                type: 'BOOK'
+            },
             _sum: { quantity: true }
         })
 
@@ -103,10 +124,25 @@ async function getStats(role: string | null, userId: string | null) {
         revenueMois = monthItems._sum.price || 0
         booksSoldToday = todayItems._sum.quantity || 0
     } else {
-        const tr = await prisma.order.aggregate({ _sum: { total: true } })
-        const rm = await prisma.order.aggregate({ where: { createdAt: { gte: firstDayOfMonth } }, _sum: { total: true } })
+        const tr = await prisma.order.aggregate({
+            where: { status: { notIn: ['CANCELLED', 'RETURNED'] } },
+            _sum: { total: true }
+        })
+        const rm = await prisma.order.aggregate({
+            where: {
+                createdAt: { gte: firstDayOfMonth },
+                status: { notIn: ['CANCELLED', 'RETURNED'] }
+            },
+            _sum: { total: true }
+        })
         const bst = await prisma.orderItem.aggregate({
-            where: { order: { createdAt: { gte: today } }, type: 'BOOK' },
+            where: {
+                order: {
+                    createdAt: { gte: today },
+                    status: { notIn: ['CANCELLED', 'RETURNED'] }
+                },
+                type: 'BOOK'
+            },
             _sum: { quantity: true }
         })
         totalRev = tr._sum.total || 0
@@ -114,16 +150,16 @@ async function getStats(role: string | null, userId: string | null) {
         booksSoldToday = bst._sum.quantity || 0
     }
 
-    const panierMoyen = totalOrdersCount > 0 ? totalRev / totalOrdersCount : 0
+    const panierMoyen = ordersCount > 0 ? totalRev / ordersCount : 0
     const tauxConversion = totalOrdersCount > 0 ? (deliveredCount / totalOrdersCount) * 100 : 0
     const tauxAnnulation = totalOrdersCount > 0 ? (cancelledCount / totalOrdersCount) * 100 : 0
     const stockTotal = stockValueRaw._sum.stock || 0
     const uniqueCustomersCount = uniqueCustomersResult.length || 0
     const ltv = uniqueCustomersCount > 0 ? totalRev / uniqueCustomersCount : 0
     const netRevenue = role === 'SELLER' ? totalRev * 0.85 : totalRev // 15% commission par défaut
-    const salesChannels = Object.fromEntries(salesChannelsRaw.map(channel => [channel.salesChannel, {
-        orders: channel._count.id,
-        revenue: channel._sum.total || 0
+    const salesChannels = Object.fromEntries(salesChannelsRaw.map((channel: any) => [channel.salesChannel, {
+        orders: channel._count?.id || 0,
+        revenue: channel._sum?.total || 0
     }]))
 
     return {
@@ -366,6 +402,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         new Promise<typeof emptyJumiaStats>((resolve) => setTimeout(() => resolve(emptyJumiaStats), 3000))
     ])
 
+    const geminiStats = await getCoverCacheStats().catch(() => ({
+        totalEntries: 0,
+        totalHits: 0,
+        estimatedTokensSaved: 0,
+        estimatedCostSavedUsd: 0,
+        entries: []
+    }))
+
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
 
     const currency = locale === 'ar' ? 'درهم' : 'MAD'
@@ -373,6 +417,8 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const statCards = [
         { name: 'Livres Actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
         { name: 'Score SEO ≤ 80', value: stats.seoScoreLte80Count, iconName: 'Sparkles', color: 'amber', roles: ['ADMIN', 'SELLER'], href: `/${locale}/admin/books?seoScore=lte80` },
+        { name: 'Solde Tokens Économisés', value: `${geminiStats.estimatedTokensSaved.toLocaleString()} tkn`, iconName: 'Cpu', color: 'amber', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
+        { name: 'Économie IA ($)', value: `$${geminiStats.estimatedCostSavedUsd.toFixed(3)}`, iconName: 'Coins', color: 'emerald', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
         { name: 'Commandes', value: stats.ordersCount, iconName: 'ShoppingCart', color: 'green', roles: ['ADMIN', 'SELLER'] },
         { name: 'Commandes (Store)', value: stats.salesChannels.RIWAYA_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },

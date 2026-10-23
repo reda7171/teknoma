@@ -143,13 +143,35 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
 
         // Notification WhatsApp client automatique si Expédié ou Livré
         if (status === 'SHIPPED' || status === 'DELIVERED') {
+            const companyName = order.shippingCompany
+                ? await prisma.shippingCompany.findUnique({ where: { id: order.shippingCompany }, select: { name: true } }).then(c => c?.name).catch(() => null)
+                : null
+
             sendWhatsAppNotification({
                 orderId,
                 fullName: order.fullName,
                 phone: order.phone,
                 status,
-                trackingID: order.trackingID
+                trackingID: order.trackingID,
+                shippingCompanyName: companyName
             }).catch(console.error)
+
+            if (order.email) {
+                const customerEmail = order.email
+                const triggerKey = status === 'SHIPPED' ? 'order_shipped' : 'order_delivered'
+                import('@/lib/actions/email-templates').then(({ sendTriggerEmail }) => {
+                    sendTriggerEmail(triggerKey, customerEmail, {
+                        client_nom: order.fullName,
+                        customer_name: order.fullName,
+                        order_id: order.id.slice(0, 8),
+                        total: order.total,
+                        adresse: order.address,
+                        ville: order.city,
+                        telephone: order.phone,
+                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/track/${order.id}`
+                    }).catch(console.error)
+                }).catch(console.error)
+            }
         }
 
         return {

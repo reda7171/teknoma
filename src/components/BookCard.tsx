@@ -119,7 +119,7 @@ export default function BookCard({
                                 {language.toUpperCase()}
                             </span>
                         )}
-                        {(isTrending || (views !== undefined && views >= 20)) && (
+                        {(isTrending || (views !== undefined && views >= 450)) && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
                                 <TrendingUp className="w-2.5 h-2.5" />
                                 <span>{t('Trending')}</span>

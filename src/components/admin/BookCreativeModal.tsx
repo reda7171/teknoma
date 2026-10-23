@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useState, useEffect } from 'react'
-import { X, Download, ImageIcon, Facebook, Instagram, Eye, Clock, Send, Music, Sparkles } from 'lucide-react'
+import { X, Download, ImageIcon, Facebook, Instagram, Eye, Clock, Send, Music, Sparkles, Maximize2, ZoomIn } from 'lucide-react'
 import * as htmlToImage from 'html-to-image'
 import { injectXMPToPNG } from '@/lib/pngXmpInjector'
 import { normalizeImage } from '@/lib/utils'
@@ -19,13 +19,26 @@ interface BookCreativeModalProps {
     } | null
     format?: 'post' | 'story'
     onAutoCapture?: (uploadUrl: string) => void  // pub en boucle : capture auto
+    initialLogoVariant?: 'riwaya' | 'jumia'
 }
 
-export default function BookCreativeModal({ isOpen, onClose, book, format = 'post', onAutoCapture }: BookCreativeModalProps) {
+export default function BookCreativeModal({ isOpen, onClose, book, format = 'post', onAutoCapture, initialLogoVariant }: BookCreativeModalProps) {
     const posterRef = useRef<HTMLDivElement>(null)
+    const posterRefRiwaya = useRef<HTMLDivElement>(null)
+    const posterRefJumia = useRef<HTMLDivElement>(null)
+    const [previewTab, setPreviewTab] = useState<'both' | 'riwaya' | 'jumia'>('both')
+    const [fullscreenVariant, setFullscreenVariant] = useState<'riwaya' | 'jumia' | null>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [isPublishing, setIsPublishing] = useState(false)
     const [theme, setTheme] = useState<'dark' | 'light' | 'orange' | 'magenta' | 'emerald' | 'gold' | 'purple'>('dark')
+    const [logoVariant, setLogoVariant] = useState<'riwaya' | 'jumia'>(initialLogoVariant || 'riwaya')
+
+    useEffect(() => {
+        if (initialLogoVariant) {
+            setLogoVariant(initialLogoVariant)
+            setPreviewTab(initialLogoVariant)
+        }
+    }, [initialLogoVariant, isOpen])
 
     // Interactive States
     const [positions, setPositions] = useState({
@@ -46,7 +59,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const [editing, setEditing] = useState<string | null>(null)
     const [imageScale, setImageScale] = useState(1)
     const [imageRotation, setImageRotation] = useState(0)
-    const [logoScale, setLogoScale] = useState(3)
+    const [logoScale, setLogoScale] = useState(1)
     const [showLogo, setShowLogo] = useState(true)
     const [showFreeDelivery, setShowFreeDelivery] = useState(false)
     const [showShadow, setShowShadow] = useState(true)
@@ -131,7 +144,18 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     }, [dragging, offset])
 
     useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && fullscreenVariant) {
+                setFullscreenVariant(null)
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [fullscreenVariant])
+
+    useEffect(() => {
         if (!isOpen) {
+            setFullscreenVariant(null)
             setTheme('dark') // reset
             setPositions({ badge: { x: 0, y: 0 }, logo: { x: 0, y: 0 }, book: { x: 0, y: -60 }, title: { x: 0, y: 0 }, author: { x: 0, y: 0 }, price: { x: 0, y: 0 }, delivery: { x: 0, y: 0 }, bg: { x: 0, y: 0 }, whatsapp: { x: 0, y: 0 }, socials: { x: 0, y: 0 } })
             setImageScale(1)
@@ -197,32 +221,55 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
     // Auto-capture pour la publication en boucle
     useEffect(() => {
-        if (!onAutoCapture || !isOpen || !book || !posterRef.current) return
+        if (!onAutoCapture || !isOpen || !book) return
+        let isMounted = true
+
         const run = async () => {
             await new Promise(r => setTimeout(r, 1200)) // attendre le rendu
-            if (!posterRef.current) return
+            if (!isMounted) return
+
+            const node = posterRef.current
+            if (!node || !node.ownerDocument || !node.isConnected) {
+                console.warn('[AutoCapture] Poster element not ready or disconnected')
+                return
+            }
+
             try {
-                const originals = await patchImagesBase64(posterRef.current)
+                const originals = await patchImagesBase64(node)
                 await new Promise(r => setTimeout(r, 500))
+
+                if (!isMounted || !node.isConnected) {
+                    restoreImages(originals)
+                    return
+                }
                 
-                let dataUrl: string;
+                let dataUrl: string = ''
                 try {
-                    dataUrl = await htmlToImage.toPng(posterRef.current, { quality: 1, pixelRatio: 2, cacheBust: false })
+                    dataUrl = await htmlToImage.toPng(node, { quality: 1, pixelRatio: 2, cacheBust: false })
                 } catch (e) {
                     console.warn('[AutoCapture] First attempt failed, retrying with skipFonts: true', e);
-                    dataUrl = await htmlToImage.toPng(posterRef.current, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: true })
+                    if (isMounted && node && node.isConnected) {
+                        dataUrl = await htmlToImage.toPng(node, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: true })
+                    }
                 }
                 
                 restoreImages(originals)
-                // Retourner le base64 directement — le serveur le sauvegardera
-                onAutoCapture(dataUrl)
+                if (isMounted && dataUrl) {
+                    onAutoCapture(dataUrl)
+                }
             } catch (e) {
                 console.error('[AutoCapture] Fatal Error:', e)
-                onAutoCapture('')
+                if (isMounted) {
+                    onAutoCapture('')
+                }
             }
         }
         run()
-    }, [isOpen, book, format])
+
+        return () => {
+            isMounted = false
+        }
+    }, [isOpen, book, format, onAutoCapture])
 
     // Convertit une URL image en base64 via canvas pour contourner CORS
     const toBase64 = async (url: string): Promise<string> => {
@@ -249,20 +296,26 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     }
 
     const patchImagesBase64 = async (node: HTMLDivElement) => {
+        if (!node) return []
         const imgs = node.querySelectorAll('img')
         const originals: { el: HTMLImageElement, src: string }[] = []
         await Promise.all(Array.from(imgs).map(async (img) => {
-            const original = img.src
-            originals.push({ el: img, src: original })
-            const b64 = await toBase64(original)
-            
-            await new Promise((resolve) => {
-                const imgCopy = new Image();
-                imgCopy.onload = resolve;
-                imgCopy.onerror = resolve;
-                imgCopy.src = b64;
-            });
-            img.src = b64;
+            try {
+                const original = img.src
+                originals.push({ el: img, src: original })
+                const b64 = await toBase64(original)
+                if (b64 && b64.startsWith('data:')) {
+                    await new Promise((resolve) => {
+                        const imgCopy = new Image();
+                        imgCopy.onload = resolve;
+                        imgCopy.onerror = resolve;
+                        imgCopy.src = b64;
+                    });
+                    img.src = b64;
+                }
+            } catch (err) {
+                console.warn('patchImagesBase64 failed for image:', err)
+            }
         }))
         return originals
     }
@@ -274,42 +327,126 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     if (!isOpen || !book) return null
 
 
-    const handleDownload = async () => {
-        if (!posterRef.current) return
-        let originals: { el: HTMLImageElement, src: string }[] = []
-        try {
-            setIsGenerating(true)
-            originals = await patchImagesBase64(posterRef.current)
-            await new Promise(resolve => setTimeout(resolve, 800))
+    const capturePosterNode = async (node: HTMLDivElement | null): Promise<string> => {
+        if (!node || !node.ownerDocument || !node.isConnected) throw new Error('Poster introuvable')
+        const originals = await patchImagesBase64(node)
+        await new Promise(resolve => setTimeout(resolve, 800))
 
-            const dataUrl = await htmlToImage.toPng(posterRef.current, {
+        if (!node || !node.ownerDocument || !node.isConnected) {
+            restoreImages(originals)
+            throw new Error('Poster introuvable')
+        }
+
+        let dataUrl: string
+        try {
+            dataUrl = await htmlToImage.toPng(node, {
                 quality: 1,
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
                 cacheBust: false,
                 skipFonts: false,
             })
-
-            restoreImages(originals)
-
-            let finalDataUrl = dataUrl;
-            try {
-                const keywords = ['Riwaya', 'Livre', book.title, book.author, 'Lecture', 'Maroc']
-                finalDataUrl = injectXMPToPNG(dataUrl, book.title, keywords.filter(Boolean))
-            } catch (err) {
-                console.error("XMP injection failed:", err)
+        } catch (e) {
+            if (!node || !node.ownerDocument || !node.isConnected) {
+                restoreImages(originals)
+                throw new Error('Poster introuvable')
             }
+            dataUrl = await htmlToImage.toPng(node, {
+                quality: 1,
+                pixelRatio: 2,
+                backgroundColor: 'transparent',
+                cacheBust: false,
+                skipFonts: true,
+            })
+        }
 
-            const link = document.createElement('a')
-            link.href = finalDataUrl
-            link.download = `${book.title.replace(/[\/\\?%*:|"<>]/g, '-')}.png`
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
+        restoreImages(originals)
+
+        let finalDataUrl = dataUrl
+        try {
+            const keywords = ['Riwaya', 'Jumia', 'Livre', book.title, book.author, 'Lecture', 'Maroc']
+            finalDataUrl = injectXMPToPNG(dataUrl, book.title, keywords.filter(Boolean))
+        } catch (err) {
+            console.error("XMP injection failed:", err)
+        }
+        return finalDataUrl
+    }
+
+    const captureCurrentPoster = async (): Promise<string> => {
+        const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefRiwaya.current || posterRef.current)) || posterRef.current
+        return capturePosterNode(target)
+    }
+
+    const downloadDataUrl = (dataUrl: string, suffix: string) => {
+        const cleanTitle = book.title.replace(/[\/\\?%*:|"<>]/g, '-')
+        const link = document.createElement('a')
+        link.href = dataUrl
+        link.download = `${cleanTitle} - ${suffix}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
+    const handleDownload = async () => {
+        try {
+            setIsGenerating(true)
+            const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefRiwaya.current || posterRef.current)) || posterRef.current
+            const finalDataUrl = await capturePosterNode(target)
+            downloadDataUrl(finalDataUrl, logoVariant === 'jumia' ? 'Jumia' : 'Riwaya')
         } catch (error: any) {
-            if (originals.length) restoreImages(originals)
             console.error('Erreur lors de la génération:', error)
             const errorMsg = error instanceof Error ? error.message : 'Une erreur est survenue lors de la création de l\'image.'
+            alert(errorMsg)
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
+    const handleDownloadRiwaya = async () => {
+        try {
+            setIsGenerating(true)
+            const target = posterRefRiwaya.current || posterRef.current
+            const url = await capturePosterNode(target)
+            downloadDataUrl(url, 'Riwaya')
+        } catch (err: any) {
+            alert(err?.message || 'Erreur lors du téléchargement Riwaya')
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
+    const handleDownloadJumia = async () => {
+        try {
+            setIsGenerating(true)
+            const target = posterRefJumia.current || posterRef.current
+            const url = await capturePosterNode(target)
+            downloadDataUrl(url, 'Jumia')
+        } catch (err: any) {
+            alert(err?.message || 'Erreur lors du téléchargement Jumia')
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
+    const handleDownloadBoth = async () => {
+        try {
+            setIsGenerating(true)
+            const targetRiwaya = posterRefRiwaya.current || posterRef.current
+            const targetJumia = posterRefJumia.current || posterRef.current
+
+            if (targetRiwaya) {
+                const riwayaUrl = await capturePosterNode(targetRiwaya)
+                downloadDataUrl(riwayaUrl, 'Riwaya')
+                await new Promise(resolve => setTimeout(resolve, 600))
+            }
+
+            if (targetJumia) {
+                const jumiaUrl = await capturePosterNode(targetJumia)
+                downloadDataUrl(jumiaUrl, 'Jumia')
+            }
+        } catch (error: any) {
+            console.error('Erreur lors du téléchargement des 2 images:', error)
+            const errorMsg = error instanceof Error ? error.message : 'Une erreur est survenue lors du téléchargement des 2 images.'
             alert(errorMsg)
         } finally {
             setIsGenerating(false)
@@ -611,7 +748,25 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     {!bgImage && (<><div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)' }} /><div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%)' }} /></>)}
                     <div className="pt-8 px-8 flex justify-between items-start z-10">
                         <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}><p className={`text-[10px] font-black tracking-[0.2em] uppercase ${currentTheme.text} opacity-90`}>{editableTexts.badge}</p></div>
-                        {showLogo && <img src="/logo-riwaya.png?v=riwaya2" alt="Riwaya" onError={(e) => { e.currentTarget.style.display = 'none'; }} className="h-8 object-contain filter brightness-0 invert" style={{ transform: `scale(${logoScale})` }} />}
+                        {showLogo && (
+                            <div
+                                className="flex items-center justify-end origin-top-right"
+                                style={{ transform: `translate(${positions.logo.x}px, ${positions.logo.y}px)` }}
+                            >
+                                <img
+                                    src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
+                                    alt={logoVariant === 'jumia' ? 'Jumia' : 'Riwaya'}
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                    className={`object-contain filter brightness-0 invert origin-top-right ${
+                                        logoVariant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
+                                    }`}
+                                    style={{ 
+                                        transform: `scale(${logoScale})`,
+                                        transformOrigin: 'top right'
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30`}>
                         <div 
@@ -673,255 +828,495 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         )
     }
 
+    const handleCardClick = (variant: 'riwaya' | 'jumia', e: React.MouseEvent) => {
+        const target = e.target as HTMLElement
+        if (dragging || target.isContentEditable || target.closest('button') || target.closest('input')) {
+            return
+        }
+        setFullscreenVariant(variant)
+    }
+
+    const renderPoster = (
+        variant: 'riwaya' | 'jumia',
+        containerRef?: React.RefObject<HTMLDivElement | null> | null,
+        isInteractive = true,
+        customClassName?: string
+    ) => (
+        <div
+            ref={containerRef || undefined}
+            className={`relative ${customClassName ? customClassName : (format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[480px] h-[480px] max-w-full')} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col transition-all duration-300 shadow-2xl rounded-2xl select-none`}
+            style={{
+                aspectRatio: format === 'story' ? '9/16' : '1/1',
+            }}
+        >
+            {/* Custom Background Image Layer */}
+            {bgImage && (
+                <div
+                    className={`absolute inset-0 z-0 cursor-move ${dragging === 'bg' ? '' : 'transition-transform'}`}
+                    style={{
+                        backgroundImage: `url(${bgImage})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        opacity: bgOpacity,
+                        transform: `translate(${positions.bg.x}px, ${positions.bg.y}px) scale(1.1)`,
+                        touchAction: 'none'
+                    }}
+                    onMouseDown={(e) => isInteractive && handleMouseDown(e, 'bg')}
+                    onTouchStart={(e) => isInteractive && handleTouchStart(e, 'bg')}
+                />
+            )}
+            {/* Background Decor (Only if no custom bg) */}
+            {!bgImage && (
+                <>
+                    <div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)' }}></div>
+                    <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%)' }}></div>
+                </>
+            )}
+
+            {/* Top Label & Logo */}
+            <div className="pt-8 px-8 flex justify-between items-start z-10 select-none">
+                <div
+                    className={`cursor-move ${dragging === 'badge' ? '' : 'transition-transform active:scale-95'}`}
+                    style={{ transform: `translate(${positions.badge.x}px, ${positions.badge.y}px)`, touchAction: 'none' }}
+                    onMouseDown={(e) => isInteractive && handleMouseDown(e, 'badge')}
+                    onTouchStart={(e) => isInteractive && handleTouchStart(e, 'badge')}
+                >
+                    <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}>
+                        <p
+                            contentEditable={isInteractive}
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleTextChange('badge', e.currentTarget.textContent || '')}
+                            className={`text-[10px] font-black tracking-[0.2em] uppercase ${currentTheme.text} opacity-90 outline-none`}
+                        >
+                            {editableTexts.badge}
+                        </p>
+                    </div>
+                </div>
+
+                {showLogo && (
+                    <div
+                        className={`cursor-move ${dragging === 'logo' ? '' : 'transition-transform active:scale-95'} opacity-95 flex items-center justify-end origin-top-right`}
+                        style={{ transform: `translate(${positions.logo.x}px, ${positions.logo.y}px)`, touchAction: 'none' }}
+                        onMouseDown={(e) => isInteractive && handleMouseDown(e, 'logo')}
+                        onTouchStart={(e) => isInteractive && handleTouchStart(e, 'logo')}
+                        title="Déplacer le logo"
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={variant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
+                            alt={variant === 'jumia' ? 'Jumia Logo' : 'Riwaya Logo'}
+                            crossOrigin="anonymous"
+                            className={`object-contain filter brightness-0 invert transition-transform origin-top-right select-none ${
+                                variant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
+                            }`}
+                            style={{ 
+                                transform: `scale(${logoScale})`,
+                                transformOrigin: 'top right'
+                            }}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {showFreeDelivery && (
+                <div
+                    className={`flex flex-col items-center select-none absolute top-32 right-8 cursor-move z-20 ${dragging === 'delivery' ? '' : 'transition-transform active:scale-95'}`}
+                    style={{ transform: `translate(${positions.delivery.x}px, ${positions.delivery.y}px)`, touchAction: 'none' }}
+                    onMouseDown={(e) => {
+                        if (!isInteractive) return
+                        e.stopPropagation();
+                        handleMouseDown(e, 'delivery');
+                    }}
+                    onTouchStart={(e) => {
+                        if (!isInteractive) return
+                        e.stopPropagation();
+                        handleTouchStart(e, 'delivery');
+                    }}
+                >
+                    <span className="text-5xl mb-1 filter drop-shadow-2xl">🚚</span>
+                    <div className="flex flex-col items-center leading-tight">
+                        <span
+                            contentEditable={isInteractive}
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleTextChange('delivery_line1', e.currentTarget.textContent || '')}
+                            className="text-[8px] font-black uppercase tracking-[0.3em] text-white/50 outline-none"
+                        >
+                            {editableTexts.delivery_line1}
+                        </span>
+                        <span
+                            contentEditable={isInteractive}
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleTextChange('delivery_line2', e.currentTarget.textContent || '')}
+                            className="text-xs font-black uppercase tracking-widest text-green-400 outline-none"
+                        >
+                            {editableTexts.delivery_line2}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {/* Center Content (Book Cover) */}
+            <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30 pointer-events-none`}>
+                <div
+                    className={`relative w-full ${format === 'story' ? 'max-w-[220px]' : 'max-w-[200px]'} mx-auto perspective-1000 cursor-move pointer-events-auto ${dragging === 'book' ? '' : 'transition-transform active:scale-95'}`}
+                    style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)`, touchAction: 'none' }}
+                    onMouseDown={(e) => isInteractive && handleMouseDown(e, 'book')}
+                    onTouchStart={(e) => isInteractive && handleTouchStart(e, 'book')}
+                >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={(() => {
+                            const img = normalizeImage(book.image);
+                            if (img.startsWith('http') && !img.includes(typeof window !== 'undefined' ? window.location.host : '')) {
+                                return `/api/proxy/image?url=${encodeURIComponent(img)}`;
+                            }
+                            return img;
+                        })() || '/book-placeholder.png'}
+                        alt={book.title}
+                        crossOrigin="anonymous"
+                        className="relative w-full h-auto object-cover rounded shadow-2xl transition-transform"
+                        style={{
+                            boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none',
+                            transform: `scale(${imageScale}) rotate(${imageRotation}deg)`,
+                            opacity: imageOpacity
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Prix */}
+            {showPrice && (
+                <div
+                    className={`absolute bottom-16 left-1/2 z-10 ${editing === 'price' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'price' ? '' : 'transition-transform active:scale-95'}`}
+                    style={{ transform: `translate(calc(-50% + ${positions.price.x}px), ${positions.price.y}px)`, touchAction: 'none' }}
+                    onMouseDown={(e) => isInteractive && handleMouseDown(e, 'price')}
+                    onTouchStart={(e) => isInteractive && handleTouchStart(e, 'price')}
+                    onDoubleClick={() => isInteractive && setEditing('price')}
+                    title="Double-clic pour éditer"
+                >
+                    <div className="flex items-center justify-center gap-3">
+                        {showSolde && (
+                            <div className="text-red-500 font-bold text-xl line-through drop-shadow-md flex items-baseline gap-1">
+                                <span
+                                    contentEditable={isInteractive && editing === 'price'}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => { handleTextChange('oldPrice', e.currentTarget.textContent || ''); setEditing(null) }}
+                                    className={`outline-none ${editing === 'price' ? 'ring-2 ring-white/50 rounded px-0.5' : ''}`}
+                                >
+                                    {editableTexts.oldPrice}
+                                </span>
+                                <span className="text-sm">درهم</span>
+                            </div>
+                        )}
+                        <div className={`${currentTheme.accent} font-black text-3xl drop-shadow-lg flex items-baseline gap-1`}>
+                            <span
+                                contentEditable={isInteractive && editing === 'price'}
+                                suppressContentEditableWarning
+                                onBlur={(e) => { handleTextChange('price', e.currentTarget.textContent || ''); setEditing(null) }}
+                                className={`outline-none ${editing === 'price' ? 'ring-2 ring-white/50 rounded px-0.5' : ''}`}
+                            >
+                                {editableTexts.price}
+                            </span>
+                            <span className="text-xl">درهم</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* WhatsApp */}
+            {showWhatsapp && (
+                <div
+                    className={`absolute bottom-4 right-4 z-10 ${editing === 'whatsapp' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 origin-bottom-right`}
+                    style={{ transform: `translate(${positions.whatsapp.x}px, ${positions.whatsapp.y}px) scale(${whatsappScale})`, touchAction: 'none' }}
+                    onMouseDown={(e) => isInteractive && handleMouseDown(e, 'whatsapp')}
+                    onTouchStart={(e) => isInteractive && handleTouchStart(e, 'whatsapp')}
+                    onDoubleClick={() => isInteractive && setEditing('whatsapp')}
+                    title="Double-clic pour éditer"
+                >
+                    <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-white rounded-full shadow-lg">
+                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                        <span
+                            contentEditable={isInteractive && editing === 'whatsapp'}
+                            suppressContentEditableWarning
+                            onBlur={(e) => { handleTextChange('whatsapp', e.currentTarget.textContent || ''); setEditing(null) }}
+                            className={`font-bold text-sm outline-none ${editing === 'whatsapp' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
+                        >
+                            {editableTexts.whatsapp}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {/* Social Icons */}
+            {showSocials && (
+                <div
+                    className={`absolute bottom-4 left-4 z-10 ${editing === 'socials' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 flex flex-col items-center gap-2 origin-bottom-left`}
+                    style={{ transform: `translate(${positions.socials.x}px, ${positions.socials.y}px) scale(${socialsScale})`, touchAction: 'none' }}
+                    onMouseDown={(e) => isInteractive && handleMouseDown(e, 'socials')}
+                    onTouchStart={(e) => isInteractive && handleTouchStart(e, 'socials')}
+                    onDoubleClick={() => isInteractive && setEditing('socials')}
+                    title="Double-clic pour éditer"
+                >
+                    <span
+                        contentEditable={isInteractive && editing === 'socials'}
+                        suppressContentEditableWarning
+                        onBlur={(e) => { handleTextChange('socialHandle', e.currentTarget.textContent || ''); setEditing(null) }}
+                        className={`text-white font-bold text-sm tracking-wide outline-none ${editing === 'socials' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
+                    >
+                        {variant === 'jumia' ? '@jumia.ma' : editableTexts.socialHandle}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white">
+                            <Instagram className="w-4 h-4" />
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                            <Facebook className="w-4 h-4" fill="currentColor" strokeWidth={0} />
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-[#E60023] flex items-center justify-center text-white border border-white/20">
+                            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.163 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.624 0 12.017 0z"/>
+                            </svg>
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white border border-white/20">
+                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.44 3.29-1.43 4.54-1.03 1.3-2.58 2.16-4.25 2.38-1.74.22-3.56-.05-5.06-1.02-1.48-.96-2.54-2.5-2.85-4.23-.33-1.84.14-3.79 1.25-5.26 1.13-1.48 2.87-2.39 4.74-2.53V13c-.94.04-1.87.35-2.61.94-.74.57-1.18 1.44-1.28 2.37-.11 1.05.21 2.14.9 2.92.68.78 1.75 1.2 2.81 1.14 1.04-.06 2.02-.6 2.53-1.47.38-.66.56-1.42.56-2.18V.02z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black backdrop-blur-md">
             <div className="bg-white w-full h-full flex flex-col md:flex-row overflow-hidden shadow-2xl">
-
                 {/* Left side: Preview Area */}
-                <div className="flex-1 bg-gray-100 p-8 flex items-center justify-center overflow-auto">
-                    {/* The Poster Container */}
-                    <div
-                        ref={posterRef}
-                        className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden font-sans flex flex-col transition-all duration-300`}
-                        style={{
-                            aspectRatio: format === 'story' ? '9/16' : '1/1',
-                            boxShadow: 'none',
-                        }}
-                    >
-                        {/* Custom Background Image Layer */}
-                        {bgImage && (
-                            <div
-                                className={`absolute inset-0 z-0 cursor-move ${dragging === 'bg' ? '' : 'transition-transform'}`}
-                                style={{
-                                    backgroundImage: `url(${bgImage})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                    opacity: bgOpacity,
-                                    transform: `translate(${positions.bg.x}px, ${positions.bg.y}px) scale(1.1)`,
-                                    touchAction: 'none'
-                                }}
-                                onMouseDown={(e) => handleMouseDown(e, 'bg')}
-                                onTouchStart={(e) => handleTouchStart(e, 'bg')}
-                            />
-                        )}
-                        {/* Background Decor (Only if no custom bg) */}
-                        {!bgImage && (
-                            <>
-                                <div className="absolute top-[-50px] right-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)' }}></div>
-                                <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%)' }}></div>
-                            </>
-                        )}
-
-                        {/* Top Label & Logo */}
-                        <div className="pt-8 px-8 flex justify-between items-start z-10 select-none">
-                            <div
-                                className={`cursor-move ${dragging === 'badge' ? '' : 'transition-transform active:scale-95'}`}
-                                style={{ transform: `translate(${positions.badge.x}px, ${positions.badge.y}px)`, touchAction: 'none' }}
-                                onMouseDown={(e) => handleMouseDown(e, 'badge')}
-                                onTouchStart={(e) => handleTouchStart(e, 'badge')}
-                            >
-                                <div className={`${currentTheme.cardBg} px-4 py-1.5 rounded-full ${currentTheme.border} border backdrop-blur-md`}>
-                                    <p
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => handleTextChange('badge', e.currentTarget.textContent || '')}
-                                        className={`text-[10px] font-black tracking-[0.2em] uppercase ${currentTheme.text} opacity-90 outline-none`}
-                                    >
-                                        {editableTexts.badge}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {showLogo && (
-                                <div
-                                    className={`cursor-move ${dragging === 'logo' ? '' : 'transition-transform active:scale-95'} opacity-90`}
-                                    style={{ transform: `translate(${positions.logo.x}px, ${positions.logo.y}px)`, touchAction: 'none' }}
-                                    onMouseDown={(e) => handleMouseDown(e, 'logo')}
-                                    onTouchStart={(e) => handleTouchStart(e, 'logo')}
+                <div className="flex-1 bg-gray-100 p-4 md:p-6 flex flex-col items-center overflow-auto">
+                    {/* Top switcher: Les 2 images vs 1 image */}
+                    <div className="w-full max-w-5xl flex flex-wrap items-center justify-between gap-3 mb-4 bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-gray-200/80 shadow-xs shrink-0">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Affichage :</span>
+                            <div className="flex items-center bg-gray-100 p-1 rounded-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewTab('both')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${
+                                        previewTab === 'both' ? 'bg-black text-white shadow-xs' : 'text-gray-600 hover:text-black'
+                                    }`}
                                 >
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src="/logo-riwaya.png?v=riwaya2"
-                                        alt="Riwaya Logo"
-                                        crossOrigin="anonymous"
-                                        className="h-6 sm:h-8 object-contain filter brightness-0 invert transition-transform"
-                                        style={{ transform: `scale(${logoScale})` }}
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        {showFreeDelivery && (
-                            <div
-                                className={`flex flex-col items-center select-none absolute top-32 right-8 cursor-move z-20 ${dragging === 'delivery' ? '' : 'transition-transform active:scale-95'}`}
-                                style={{ transform: `translate(${positions.delivery.x}px, ${positions.delivery.y}px)`, touchAction: 'none' }}
-                                onMouseDown={(e) => {
-                                    e.stopPropagation();
-                                    handleMouseDown(e, 'delivery');
-                                }}
-                                onTouchStart={(e) => {
-                                    e.stopPropagation();
-                                    handleTouchStart(e, 'delivery');
-                                }}
-                            >
-                                <span className="text-5xl mb-1 filter drop-shadow-2xl">🚚</span>
-                                <div className="flex flex-col items-center leading-tight">
-                                    <span
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => handleTextChange('delivery_line1', e.currentTarget.textContent || '')}
-                                        className="text-[8px] font-black uppercase tracking-[0.3em] text-white/50 outline-none"
-                                    >
-                                        {editableTexts.delivery_line1}
-                                    </span>
-                                    <span
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => handleTextChange('delivery_line2', e.currentTarget.textContent || '')}
-                                        className="text-xs font-black uppercase tracking-widest text-green-400 outline-none"
-                                    >
-                                        {editableTexts.delivery_line2}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Center Content (Book Cover) */}
-                        <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30 pointer-events-none`}>
-                            <div
-                                className={`relative w-full ${format === 'story' ? 'max-w-[220px]' : 'max-w-[200px]'} mx-auto perspective-1000 cursor-move pointer-events-auto ${dragging === 'book' ? '' : 'transition-transform active:scale-95'}`}
-                                style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)`, touchAction: 'none' }}
-                                onMouseDown={(e) => handleMouseDown(e, 'book')}
-                                onTouchStart={(e) => handleTouchStart(e, 'book')}
-                            >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                    src={(() => {
-                                        const img = normalizeImage(book.image);
-                                        if (img.startsWith('http') && !img.includes(window.location.host)) {
-                                            return `/api/proxy/image?url=${encodeURIComponent(img)}`;
-                                        }
-                                        return img;
-                                    })() || '/book-placeholder.png'}
-                                    alt={book.title}
-                                    crossOrigin="anonymous"
-                                    className="relative w-full h-auto object-cover rounded shadow-2xl transition-transform"
-                                    style={{
-                                        boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none',
-                                        transform: `scale(${imageScale}) rotate(${imageRotation}deg)`,
-                                        opacity: imageOpacity
-                                    }}
-                                />
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                                    Les 2 Images (Riwaya + Jumia)
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setPreviewTab('riwaya'); setLogoVariant('riwaya') }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                                        previewTab === 'riwaya' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-black'
+                                    }`}
+                                >
+                                    Image Riwaya
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setPreviewTab('jumia'); setLogoVariant('jumia') }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                                        previewTab === 'jumia' ? 'bg-[#F68B1E] text-white shadow-xs' : 'text-gray-600 hover:text-black'
+                                    }`}
+                                >
+                                    Image Jumia
+                                </button>
                             </div>
                         </div>
 
-
-
-
-                        {/* Prix - déplacer par glisser, éditer par double-clic */}
-                        {showPrice && (
-                            <div
-                                className={`absolute bottom-16 left-1/2 z-10 ${editing === 'price' ? 'cursor-text' : 'cursor-move'} select-none ${dragging === 'price' ? '' : 'transition-transform active:scale-95'}`}
-                                style={{ transform: `translate(calc(-50% + ${positions.price.x}px), ${positions.price.y}px)`, touchAction: 'none' }}
-                                onMouseDown={(e) => handleMouseDown(e, 'price')}
-                                onTouchStart={(e) => handleTouchStart(e, 'price')}
-                                onDoubleClick={() => setEditing('price')}
-                                title="Double-clic pour éditer"
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={handleDownloadBoth}
+                                disabled={isGenerating}
+                                className="px-4 py-2 bg-gradient-to-r from-black via-gray-900 to-[#F68B1E] text-white rounded-xl text-xs font-black hover:opacity-90 transition-all flex items-center gap-2 shadow-xs disabled:opacity-50"
+                                title="Télécharger les 2 images en 1 clic"
                             >
-                                <div className="flex items-center justify-center gap-3">
-                                    {showSolde && (
-                                        <div className="text-red-500 font-bold text-xl line-through drop-shadow-md flex items-baseline gap-1">
-                                            <span
-                                                contentEditable={editing === 'price'}
-                                                suppressContentEditableWarning
-                                                onBlur={(e) => { handleTextChange('oldPrice', e.currentTarget.textContent || ''); setEditing(null) }}
-                                                className={`outline-none ${editing === 'price' ? 'ring-2 ring-white/50 rounded px-0.5' : ''}`}
-                                            >
-                                                {editableTexts.oldPrice}
-                                            </span>
-                                            <span className="text-sm">درهم</span>
-                                        </div>
-                                    )}
-                                    <div className={`${currentTheme.accent} font-black text-3xl drop-shadow-lg flex items-baseline gap-1`}>
-                                        <span
-                                            contentEditable={editing === 'price'}
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => { handleTextChange('price', e.currentTarget.textContent || ''); setEditing(null) }}
-                                            className={`outline-none ${editing === 'price' ? 'ring-2 ring-white/50 rounded px-0.5' : ''}`}
+                                <Download className="w-3.5 h-3.5 text-amber-300" />
+                                {isGenerating ? 'Téléchargement...' : 'Télécharger les 2'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mode "Les 2 Images" côte à côte */}
+                    {previewTab === 'both' && (
+                        <div className="w-full max-w-6xl grid grid-cols-1 xl:grid-cols-2 gap-6 items-start justify-items-center py-2">
+                            {/* Card 1 : Image Riwaya */}
+                            <div className="flex flex-col items-center bg-white p-4 rounded-3xl shadow-sm border border-gray-200/80 w-full max-w-[520px]">
+                                <div className="flex items-center justify-between w-full mb-3 px-2">
+                                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black text-white flex items-center gap-1.5">
+                                        <span className="w-2 h-2 rounded-full bg-amber-400" />
+                                        Image 1 : Riwaya Store
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFullscreenVariant('riwaya')}
+                                            className="px-2.5 py-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                                            title="Aperçu plein écran"
                                         >
-                                            {editableTexts.price}
-                                        </span>
-                                        <span className="text-xl">درهم</span>
+                                            <Maximize2 className="w-3.5 h-3.5 text-gray-600" />
+                                            Plein écran
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleDownloadRiwaya}
+                                            disabled={isGenerating}
+                                            className="px-3 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-1"
+                                        >
+                                            <Download className="w-3.5 h-3.5" />
+                                            Télécharger
+                                        </button>
+                                    </div>
+                                </div>
+                                <div 
+                                    className="relative group cursor-pointer"
+                                    onClick={(e) => handleCardClick('riwaya', e)}
+                                    title="Cliquer pour prévisualiser en plein écran"
+                                >
+                                    {renderPoster('riwaya', posterRefRiwaya, true)}
+                                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
+                                        <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                                        <span>Plein écran</span>
                                     </div>
                                 </div>
                             </div>
-                        )}
 
-                        {/* WhatsApp — drag + double-clic pour éditer */}
-                        {showWhatsapp && (
-                            <div
-                                className={`absolute bottom-4 right-4 z-10 ${editing === 'whatsapp' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 origin-bottom-right`}
-                                style={{ transform: `translate(${positions.whatsapp.x}px, ${positions.whatsapp.y}px) scale(${whatsappScale})`, touchAction: 'none' }}
-                                onMouseDown={(e) => handleMouseDown(e, 'whatsapp')}
-                                onTouchStart={(e) => handleTouchStart(e, 'whatsapp')}
-                                onDoubleClick={() => setEditing('whatsapp')}
-                                title="Double-clic pour éditer"
-                            >
-                                <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-white rounded-full shadow-lg">
-                                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                    </svg>
-                                    <span
-                                        contentEditable={editing === 'whatsapp'}
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => { handleTextChange('whatsapp', e.currentTarget.textContent || ''); setEditing(null) }}
-                                        className={`font-bold text-sm outline-none ${editing === 'whatsapp' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
-                                    >
-                                        {editableTexts.whatsapp}
+                            {/* Card 2 : Image Jumia */}
+                            <div className="flex flex-col items-center bg-white p-4 rounded-3xl shadow-sm border border-gray-200/80 w-full max-w-[520px]">
+                                <div className="flex items-center justify-between w-full mb-3 px-2">
+                                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#F68B1E] text-white flex items-center gap-1.5 shadow-sm shadow-orange-500/20">
+                                        <span className="w-2 h-2 rounded-full bg-white" />
+                                        Image 2 : Jumia Maroc
                                     </span>
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFullscreenVariant('jumia')}
+                                            className="px-2.5 py-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                                            title="Aperçu plein écran"
+                                        >
+                                            <Maximize2 className="w-3.5 h-3.5 text-gray-600" />
+                                            Plein écran
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleDownloadJumia}
+                                            disabled={isGenerating}
+                                            className="px-3 py-1 text-xs font-bold text-[#F68B1E] hover:bg-orange-50 rounded-lg transition-all flex items-center gap-1"
+                                        >
+                                            <Download className="w-3.5 h-3.5" />
+                                            Télécharger
+                                        </button>
+                                    </div>
+                                </div>
+                                <div 
+                                    className="relative group cursor-pointer"
+                                    onClick={(e) => handleCardClick('jumia', e)}
+                                    title="Cliquer pour prévisualiser en plein écran"
+                                >
+                                    {renderPoster('jumia', posterRefJumia, true)}
+                                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
+                                        <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                                        <span>Plein écran</span>
+                                    </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Social Icons — drag + double-clic pour éditer */}
-                        {showSocials && (
-                            <div
-                                className={`absolute bottom-4 left-4 z-10 ${editing === 'socials' ? 'cursor-text' : 'cursor-move'} select-none transition-transform active:scale-95 flex flex-col items-center gap-2 origin-bottom-left`}
-                                style={{ transform: `translate(${positions.socials.x}px, ${positions.socials.y}px) scale(${socialsScale})`, touchAction: 'none' }}
-                                onMouseDown={(e) => handleMouseDown(e, 'socials')}
-                                onTouchStart={(e) => handleTouchStart(e, 'socials')}
-                                onDoubleClick={() => setEditing('socials')}
-                                title="Double-clic pour éditer"
-                            >
-                                <span
-                                    contentEditable={editing === 'socials'}
-                                    suppressContentEditableWarning
-                                    onBlur={(e) => { handleTextChange('socialHandle', e.currentTarget.textContent || ''); setEditing(null) }}
-                                    className={`text-white font-bold text-sm tracking-wide outline-none ${editing === 'socials' ? 'ring-2 ring-white/50 rounded px-1' : ''}`}
-                                >
-                                    {editableTexts.socialHandle}
+                    {/* Mode Image Riwaya seule */}
+                    {previewTab === 'riwaya' && (
+                        <div className="flex flex-col items-center bg-white p-5 rounded-3xl shadow-sm border border-gray-200/80">
+                            <div className="flex items-center justify-between w-full mb-3 px-2">
+                                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black text-white flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                                    Image Riwaya Store
                                 </span>
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white">
-                                        <Instagram className="w-4 h-4" />
-                                    </div>
-                                    <div className="w-7 h-7 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
-                                        <Facebook className="w-4 h-4" fill="currentColor" strokeWidth={0} />
-                                    </div>
-                                    <div className="w-7 h-7 rounded-full bg-[#E60023] flex items-center justify-center text-white border border-white/20">
-                                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.163 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.624 0 12.017 0z"/>
-                                        </svg>
-                                    </div>
-                                    <div className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white border border-white/20">
-                                        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.44 3.29-1.43 4.54-1.03 1.3-2.58 2.16-4.25 2.38-1.74.22-3.56-.05-5.06-1.02-1.48-.96-2.54-2.5-2.85-4.23-.33-1.84.14-3.79 1.25-5.26 1.13-1.48 2.87-2.39 4.74-2.53V13c-.94.04-1.87.35-2.61.94-.74.57-1.18 1.44-1.28 2.37-.11 1.05.21 2.14.9 2.92.68.78 1.75 1.2 2.81 1.14 1.04-.06 2.02-.6 2.53-1.47.38-.66.56-1.42.56-2.18V.02z" />
-                                        </svg>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFullscreenVariant('riwaya')}
+                                        className="px-2.5 py-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                                        title="Aperçu plein écran"
+                                    >
+                                        <Maximize2 className="w-3.5 h-3.5 text-gray-600" />
+                                        Plein écran
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleDownloadRiwaya}
+                                        disabled={isGenerating}
+                                        className="px-3 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-1"
+                                    >
+                                        <Download className="w-3.5 h-3.5" />
+                                        Télécharger
+                                    </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                            <div 
+                                className="relative group cursor-pointer"
+                                onClick={(e) => handleCardClick('riwaya', e)}
+                                title="Cliquer pour prévisualiser en plein écran"
+                            >
+                                {renderPoster('riwaya', posterRefRiwaya, true)}
+                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
+                                    <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                                    <span>Plein écran</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Mode Image Jumia seule */}
+                    {previewTab === 'jumia' && (
+                        <div className="flex flex-col items-center bg-white p-5 rounded-3xl shadow-sm border border-gray-200/80">
+                            <div className="flex items-center justify-between w-full mb-3 px-2">
+                                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#F68B1E] text-white flex items-center gap-1.5 shadow-sm shadow-orange-500/20">
+                                    <span className="w-2 h-2 rounded-full bg-white" />
+                                    Image Jumia Maroc
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFullscreenVariant('jumia')}
+                                        className="px-2.5 py-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                                        title="Aperçu plein écran"
+                                    >
+                                        <Maximize2 className="w-3.5 h-3.5 text-gray-600" />
+                                        Plein écran
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleDownloadJumia}
+                                        disabled={isGenerating}
+                                        className="px-3 py-1 text-xs font-bold text-[#F68B1E] hover:bg-orange-50 rounded-lg transition-all flex items-center gap-1"
+                                    >
+                                        <Download className="w-3.5 h-3.5" />
+                                        Télécharger
+                                    </button>
+                                </div>
+                            </div>
+                            <div 
+                                className="relative group cursor-pointer"
+                                onClick={(e) => handleCardClick('jumia', e)}
+                                title="Cliquer pour prévisualiser en plein écran"
+                            >
+                                {renderPoster('jumia', posterRefJumia, true)}
+                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
+                                    <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
+                                    <span>Plein écran</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right side: Controls */}
@@ -1087,13 +1482,56 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             />
                         </div>
 
+                        {showLogo && (
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+                                    Logo du visuel
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setLogoVariant('riwaya')
+                                            setLogoScale(1)
+                                            setPositions(p => ({ ...p, logo: { x: 0, y: 0 } }))
+                                        }}
+                                        className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
+                                            logoVariant === 'riwaya'
+                                                ? 'bg-black text-white border-black shadow-md'
+                                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'riwaya' ? 'bg-amber-400' : 'bg-gray-400'}`} />
+                                        Riwaya
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setLogoVariant('jumia')
+                                            setLogoScale(1)
+                                            setPositions(p => ({ ...p, logo: { x: 0, y: 0 } }))
+                                        }}
+                                        className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
+                                            logoVariant === 'jumia'
+                                                ? 'bg-[#F68B1E] text-white border-[#F68B1E] shadow-md shadow-orange-500/20'
+                                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'jumia' ? 'bg-white' : 'bg-[#F68B1E]'}`} />
+                                        Jumia
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Taille du logo
+                            <label className="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                <span>Taille du logo</span>
+                                <span>{Math.round(logoScale * 100)}%</span>
                             </label>
                             <input
                                 type="range"
-                                min="0.5" max="3" step="0.1"
+                                min="0.5" max="2" step="0.05"
                                 value={logoScale}
                                 onChange={(e) => setLogoScale(parseFloat(e.target.value))}
                                 disabled={!showLogo}
@@ -1290,19 +1728,29 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
                         <div className="grid grid-cols-2 gap-3">
                             <button
+                                type="button"
+                                onClick={handleDownloadBoth}
+                                disabled={isGenerating}
+                                className="col-span-2 flex items-center justify-center px-4 py-3 bg-gradient-to-r from-black via-gray-900 to-[#F68B1E] text-white font-black rounded-xl hover:opacity-95 transition-all shadow-md active:scale-95 text-xs uppercase tracking-wider gap-2 disabled:opacity-70"
+                                title="Télécharger les 2 images : 1 avec logo Riwaya et 1 avec logo Jumia"
+                            >
+                                <Sparkles className="w-4 h-4 text-amber-300" />
+                                {isGenerating ? 'Génération en cours...' : 'Télécharger les 2 (Riwaya + Jumia)'}
+                            </button>
+                            <button
                                 onClick={handleDownload}
                                 disabled={isGenerating}
-                                className="flex items-center justify-center px-4 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-70 shadow-lg active:scale-95"
+                                className="flex items-center justify-center px-3 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-70 shadow-lg active:scale-95 text-xs"
                             >
-                                <Download className="w-5 h-5 mr-2" />
-                                {isGenerating ? '...' : 'Télécharger'}
+                                <Download className="w-4 h-4 mr-1.5" />
+                                {isGenerating ? '...' : `Télécharger (${logoVariant === 'jumia' ? 'Jumia' : 'Riwaya'})`}
                             </button>
                             <button
                                 onClick={handlePreview}
                                 disabled={isGenerating}
-                                className="flex items-center justify-center px-4 py-3 bg-gray-800 text-white font-medium rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-70 shadow-lg active:scale-95"
+                                className="flex items-center justify-center px-3 py-3 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-70 shadow-lg active:scale-95 text-xs"
                             >
-                                <Eye className="w-5 h-5 mr-2" />
+                                <Eye className="w-4 h-4 mr-1.5" />
                                 Visualiser
                             </button>
                             <button
@@ -1382,6 +1830,90 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 </div>
 
             </div>
+
+            {/* Modal de prévisualisation plein écran */}
+            {fullscreenVariant && (
+                <div
+                    className="fixed inset-0 z-[600] flex flex-col items-center justify-between bg-black/92 backdrop-blur-lg p-4 md:p-6 animate-in fade-in duration-200"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setFullscreenVariant(null)
+                    }}
+                >
+                    {/* Top Control Bar */}
+                    <div className="w-full max-w-5xl flex items-center justify-between px-2 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <span className={`px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-white flex items-center gap-2 shadow-md ${fullscreenVariant === 'jumia' ? 'bg-[#F68B1E]' : 'bg-black border border-white/20'}`}>
+                                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                                {fullscreenVariant === 'jumia' ? 'Image Jumia Maroc' : 'Image Riwaya Store'}
+                            </span>
+                            {/* Basculeur direct Riwaya / Jumia */}
+                            <div className="flex items-center bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 text-xs">
+                                <button
+                                    type="button"
+                                    onClick={() => setFullscreenVariant('riwaya')}
+                                    className={`px-3 py-1 rounded-lg font-bold transition-all ${fullscreenVariant === 'riwaya' ? 'bg-white text-black shadow' : 'text-white/80 hover:text-white'}`}
+                                >
+                                    Riwaya
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFullscreenVariant('jumia')}
+                                    className={`px-3 py-1 rounded-lg font-bold transition-all ${fullscreenVariant === 'jumia' ? 'bg-[#F68B1E] text-white shadow' : 'text-white/80 hover:text-white'}`}
+                                >
+                                    Jumia
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (fullscreenVariant === 'riwaya') handleDownloadRiwaya()
+                                    else handleDownloadJumia()
+                                }}
+                                disabled={isGenerating}
+                                className="px-4 py-2 bg-white text-gray-900 hover:bg-gray-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg active:scale-95 cursor-pointer"
+                            >
+                                <Download className="w-4 h-4 text-indigo-600" />
+                                Télécharger cette créative
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFullscreenVariant(null)}
+                                className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10 cursor-pointer"
+                                title="Fermer (Échap)"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Poster en plein écran */}
+                    <div 
+                        className="flex-1 flex items-center justify-center w-full max-h-[82vh] my-auto py-2 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="transition-transform drop-shadow-2xl">
+                            {renderPoster(
+                                fullscreenVariant,
+                                null,
+                                false,
+                                format === 'story'
+                                    ? 'w-[420px] min-h-[746px] max-w-[90vw] max-h-[78vh]'
+                                    : 'w-[560px] h-[560px] max-w-[85vw] max-h-[78vh]'
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer helper */}
+                    <div className="shrink-0 text-xs text-white/60 flex items-center gap-2 pt-2">
+                        <span>Cliquez en dehors ou appuyez sur</span>
+                        <kbd className="px-2 py-0.5 rounded bg-white/10 text-white font-mono text-[10px] border border-white/20">Échap</kbd>
+                        <span>pour fermer</span>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

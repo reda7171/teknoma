@@ -3,11 +3,15 @@
 import { prisma } from '@/lib/prisma'
 import { getCached } from '@/lib/cache'
 import { getCommunityUser } from './community-auth'
+import { calculateDistanceKm, getBookCoordinates } from '@/lib/utils/geo'
 
 export type MarketFilters = {
     search?: string
     city?: string
     condition?: string
+    lat?: number
+    lng?: number
+    radiusKm?: number
 }
 
 export async function getMarketBooks(filters: MarketFilters = {}) {
@@ -22,7 +26,7 @@ export async function getMarketBooks(filters: MarketFilters = {}) {
 
     if (filters.search) {
         where.OR = [
-            { title: { contains: filters.search } }, // Case insensitive usually handled by DB collation or mode: 'insensitive' in Postgres
+            { title: { contains: filters.search } },
             { author: { contains: filters.search } },
         ]
     }
@@ -34,7 +38,7 @@ export async function getMarketBooks(filters: MarketFilters = {}) {
     }
 
     try {
-        const books = await (prisma as any).exchangeBook.findMany({
+        let books = await (prisma as any).exchangeBook.findMany({
             where,
             include: {
                 owner: {
@@ -48,10 +52,38 @@ export async function getMarketBooks(filters: MarketFilters = {}) {
                 }
             },
             orderBy: { createdAt: 'desc' },
-            take: 50,
+            take: 100,
         })
 
-        return books
+        // Calcul de distance et filtrage de proximité si coordonnées fournies
+        if (typeof filters.lat === 'number' && typeof filters.lng === 'number' && !isNaN(filters.lat) && !isNaN(filters.lng)) {
+            const userLat = filters.lat
+            const userLng = filters.lng
+            const radius = typeof filters.radiusKm === 'number' && filters.radiusKm > 0 ? filters.radiusKm : 50
+
+            books = books
+                .map((book: any) => {
+                    const coords = getBookCoordinates(book)
+                    if (!coords) return { ...book, distanceKm: undefined }
+                    const dist = calculateDistanceKm(userLat, userLng, coords.lat, coords.lng)
+                    return { ...book, distanceKm: dist }
+                })
+                .filter((book: any) => book.distanceKm !== undefined && book.distanceKm <= radius)
+                .sort((a: any, b: any) => (a.distanceKm ?? 99999) - (b.distanceKm ?? 99999))
+        } else if (filters.city) {
+            // Calculer la distance indicative par rapport à la ville sélectionnée
+            const cityCoords = getBookCoordinates({ owner: { city: filters.city } })
+            if (cityCoords) {
+                books = books.map((book: any) => {
+                    const coords = getBookCoordinates(book)
+                    if (!coords) return book
+                    const dist = calculateDistanceKm(cityCoords.lat, cityCoords.lng, coords.lat, coords.lng)
+                    return { ...book, distanceKm: dist }
+                })
+            }
+        }
+
+        return books.slice(0, 50)
     } catch (error) {
         return []
     }

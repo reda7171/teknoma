@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles } from 'lucide-react'
+import { SlidersHorizontal, X, Eye, EyeOff, RotateCcw, BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff, Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles, Cpu, Coins } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useDashboardPrivacy } from './DashboardPrivacyContext'
 
@@ -10,7 +10,7 @@ import { useDashboardPrivacy } from './DashboardPrivacyContext'
 const ICON_MAP: Record<string, LucideIcon> = {
     BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag,
     Users, Clock, AlertTriangle, XOctagon, Truck, RefreshCw, ImageOff,
-    Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles,
+    Archive, CalendarDays, CheckCircle, DollarSign, Link2, Sparkles, Cpu, Coins
 }
 
 interface StatCard {

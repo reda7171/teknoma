@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json()
-        const { bookId, packId, extraId, format, scheduleAt, platform, useDescription, customImageUrl, customImageBase64 } = body
+        const { bookId, packId, extraId, format, scheduleAt, platform, useDescription, customImageUrl, customImageBase64, domain } = body
 
         // URL du webhook n8n (Priorité à la DB, puis .env)
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
@@ -172,14 +172,36 @@ export async function POST(req: NextRequest) {
         const title = body.packName || body.title || (item ? (itemType === 'BOOK' ? item.title : item.name) : 'Riwaya');
         const price = body.price || item?.price || 0;
 
+        const jumiaSku = body.sellerSku || (item as any)?.sellerSku || '';
+        const jumiaLink = jumiaSku
+            ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(jumiaSku)}`
+            : (item?.title ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(item.title)}` : '');
+
+        const storeDomain = domain === 'riwaya.ma'
+            ? 'https://riwaya.ma'
+            : (domain === 'riwaya.store'
+                ? 'https://riwaya.store'
+                : (domain === 'jumia.ma'
+                    ? (jumiaLink || 'https://www.jumia.ma')
+                    : (baseUrl.includes('localhost') ? 'https://riwaya.store' : baseUrl)));
+
         // Texte à publier avec lien intégré
         let finalCaption = body.customCaption || (itemType === 'BOOK' ? (item?.description || title) : (item?.description ? `${title}\n\n${item.description}` : title));
         
         if (finalCaption === 'Riwaya' || !finalCaption) {
-            finalCaption = `📚 Découvrez notre sélection de livres sur Riwaya !\n\n🔗 ${baseUrl}`;
+            finalCaption = `📚 Découvrez notre sélection de livres sur Riwaya !\n\n🔗 ${domain === 'jumia.ma' ? jumiaLink : storeDomain}`;
         } else if (!finalCaption.includes('http')) {
-            const linkToAppend = item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl;
-            finalCaption += `\n\n🔗 Découvrez-le ici : ${linkToAppend}`;
+            if (domain === 'jumia.ma') {
+                finalCaption += `\n\n🛒 Commander sur Jumia : ${jumiaLink}`;
+            } else {
+                const linkToAppend = item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain;
+                finalCaption += `\n\n🔗 Découvrez-le ici : ${linkToAppend}`;
+                if ((body.includeJumiaLink || body.logoVariant === 'jumia') && jumiaLink) {
+                    finalCaption += `\n🛒 Aussi disponible sur Jumia : ${jumiaLink}`;
+                }
+            }
+        } else if (domain && domain !== 'jumia.ma') {
+            finalCaption = finalCaption.replace(/https?:\/\/(www\.)?riwaya\.(store|ma)/gi, storeDomain);
         }
 
         // Construire le payload envoyé à n8n
@@ -195,9 +217,11 @@ export async function POST(req: NextRequest) {
             isVideo: isVideo,
             isPack: itemType === 'PACK',
             booksList: body.books || (itemType === 'PACK' ? (item as any)?.books?.map((b: any) => b.book?.title || b.title) || [] : []),
-            bookUrl: itemType === 'BOOK' && item?.id ? `${baseUrl}/fr/books/${item.id}` : '',
-            packUrl: itemType === 'PACK' ? `${baseUrl}/fr/packs` : '',
-            itemUrl: item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
+            bookUrl: domain === 'jumia.ma' ? (jumiaLink || '') : (itemType === 'BOOK' && item?.id ? `${storeDomain}/fr/books/${item.id}` : ''),
+            packUrl: itemType === 'PACK' ? `${storeDomain}/fr/packs` : '',
+            itemUrl: domain === 'jumia.ma' ? (jumiaLink || '') : (item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain),
+            jumiaUrl: jumiaLink || '',
+            domain: domain || (storeDomain.includes('riwaya.ma') ? 'riwaya.ma' : (domain === 'jumia.ma' ? 'jumia.ma' : 'riwaya.store')),
             caption: finalCaption,
             description: body.customCaption || item?.description || '',
             longDescription: item?.longDescription || '',
@@ -229,10 +253,10 @@ export async function POST(req: NextRequest) {
             if (pinterestAccessToken && pinterestBoardId && imageUrl) {
                 try {
                     const pinRes = await publishPin(
-                        imageUrl.startsWith('http') ? imageUrl : `https://riwaya.store${imageUrl}`,
+                        imageUrl.startsWith('http') ? imageUrl : `${storeDomain}${imageUrl}`,
                         title,
                         finalCaption,
-                        item ? (itemType === 'BOOK' ? `${baseUrl}/fr/books/${item.id}` : `${baseUrl}/fr/packs`) : baseUrl,
+                        item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain,
                         pinterestBoardId,
                         pinterestAccessToken
                     )

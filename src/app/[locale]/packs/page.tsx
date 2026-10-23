@@ -1,7 +1,7 @@
 import { getPacks } from '@/lib/db/packs'
+import { getAvailableBooksForCustomPack } from '@/lib/actions/packs'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
-import { prisma } from '@/lib/prisma'
 import PacksListClient from '@/components/packs/PacksListClient'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
@@ -60,26 +60,10 @@ export async function PacksContent({
     openCustomBuilder?: boolean
 }) {
     const { locale } = await params;
-    const packs = await getPacks()
-    const availableBooks = openCustomBuilder
-        ? await prisma.book.findMany({
-            where: {
-                active: true,
-                stock: { gt: 0 }
-            },
-            select: {
-                id: true,
-                title: true,
-                author: true,
-                price: true,
-                image: true,
-                stock: true,
-            },
-            orderBy: {
-                title: 'asc'
-            }
-        })
-        : []
+    const [packs, availableBooks] = await Promise.all([
+        getPacks(),
+        getAvailableBooksForCustomPack()
+    ])
 
     const t = await getTranslations({ locale, namespace: 'PacksPage' })
     const tNav = await getTranslations({ locale, namespace: 'Navigation' })

@@ -7,7 +7,7 @@ interface Book {
     id: string
     title: string
     price: number
-    description: string
+    description?: string | null
     longDescription?: string | null
     category?: string | null
 }

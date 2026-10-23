@@ -6,6 +6,7 @@ interface BookJsonLdProps {
     title: string;
     author: string;
     isbn?: string | null;
+    sellerSku?: string | null;
     language: string;
     image: string;
     price: number;
@@ -95,7 +96,8 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "@type": "Person",
           "name": book.author
         },
-        "sku": book.id,
+        "sku": (book as any).sellerSku || book.id,
+        ...((book as any).sellerSku ? { "mpn": (book as any).sellerSku } : {}),
         ...(showIsbn ? { "isbn": validIsbn } : {}),
         ...(showIsbn && validIsbn?.length === 13 ? { "gtin13": validIsbn } : {}),
         ...(showIsbn && validIsbn?.length === 10 ? { "gtin10": validIsbn } : {}),

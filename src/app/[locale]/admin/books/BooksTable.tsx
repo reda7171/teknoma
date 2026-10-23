@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste } from 'lucide-react'
-import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBooksFromAi } from '@/lib/actions/books'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste, Barcode } from 'lucide-react'
+import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBooksFromAi, bulkGenerateSkus } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import BookCreativeModal from '@/components/admin/BookCreativeModal'
@@ -97,7 +97,9 @@ export default function BooksTable({
     const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>(warehouses[0]?.id || 'TOTAL')
     const [bulkStock, setBulkStock] = useState<string>('')
     const [isUpdatingStock, setIsUpdatingStock] = useState(false)
+    const [isGeneratingSku, setIsGeneratingSku] = useState(false)
     const [isBulkPublishOpen, setIsBulkPublishOpen] = useState(false)
+    const [hoveredImage, setHoveredImage] = useState<{ src: string; title: string; rect: { top: number; left: number; right: number; bottom: number } } | null>(null)
     const router = useRouter()
     const pathname = usePathname()
 
@@ -312,6 +314,51 @@ export default function BooksTable({
             setTimeout(() => setToast(null), 4000)
         } else {
             alert(result.error)
+        }
+    }
+
+    const handleGenerateSkusSelected = async () => {
+        if (selectedIds.length === 0) return
+        if (!confirm(`Générer automatiquement un SKU unique pour les ${selectedIds.length} livre(s) sélectionné(s) ?`)) return
+
+        setIsGeneratingSku(true)
+        try {
+            const res = await bulkGenerateSkus(selectedIds)
+            if (res.success && res.updatedMap) {
+                const map = res.updatedMap
+                setOrderedBooks(prev => prev.map(book => 
+                    map[book.id] ? { ...book, sellerSku: map[book.id] } : book
+                ))
+                setToast({ msg: `✅ SKU générés avec succès pour ${res.count || Object.keys(map).length} livre(s)`, ok: true })
+                router.refresh()
+                setTimeout(() => setToast(null), 4000)
+            } else {
+                alert(res.error || 'Erreur lors de la génération des SKU')
+            }
+        } finally {
+            setIsGeneratingSku(false)
+        }
+    }
+
+    const handleGenerateAllMissingSkus = async () => {
+        if (!confirm('Voulez-vous générer automatiquement un SKU unique pour TOUS les livres sans SKU du catalogue ?')) return
+
+        setIsGeneratingSku(true)
+        try {
+            const res = await bulkGenerateSkus()
+            if (res.success && res.updatedMap) {
+                const map = res.updatedMap
+                setOrderedBooks(prev => prev.map(book => 
+                    map[book.id] ? { ...book, sellerSku: map[book.id] } : book
+                ))
+                setToast({ msg: `✅ ${res.count || Object.keys(map).length} SKU générés avec succès pour l'ensemble du catalogue !`, ok: true })
+                router.refresh()
+                setTimeout(() => setToast(null), 5000)
+            } else {
+                alert(res.error || 'Erreur lors de la génération des SKU')
+            }
+        } finally {
+            setIsGeneratingSku(false)
         }
     }
 
@@ -836,6 +883,33 @@ Do not add explanatory text outside the JSON array or code block.`
                 </div>
             ) : (
                 <>
+                    {activeFilters.jumia?.includes('no-sku') && (
+                        <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 flex-shrink-0">
+                                    <Barcode className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black text-amber-900">
+                                        Livres sans SKU Jumia détectés
+                                    </p>
+                                    <p className="text-[11px] text-amber-700">
+                                        Attribuez un code SKU unique à ces livres pour activer la synchronisation Jumia et Google Shopping.
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleGenerateAllMissingSkus}
+                                disabled={isGeneratingSku}
+                                className="flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                            >
+                                <Barcode className="w-4 h-4" />
+                                {isGeneratingSku ? 'Génération en cours...' : 'Générer tous les SKU manquants'}
+                            </button>
+                        </div>
+                    )}
+
                     {selectedIds.length > 0 && (
                         <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200 mx-4 mt-4 flex-wrap">
                             <span className="text-sm font-black text-gray-900">{selectedIds.length} livre(s) sélectionnés</span>
@@ -959,6 +1033,16 @@ Do not add explanatory text outside the JSON array or code block.`
                                 Coller réponse
                             </button>
                             <button
+                                type="button"
+                                onClick={handleGenerateSkusSelected}
+                                disabled={bulkLoading || isGeneratingSku}
+                                className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 transition shadow-sm disabled:opacity-50 cursor-pointer"
+                                title="Générer automatiquement des SKU pour les livres sélectionnés sans SKU"
+                            >
+                                <Barcode className="w-4 h-4" />
+                                {isGeneratingSku ? 'Génération...' : 'Générer SKU'}
+                            </button>
+                            <button
                                 onClick={handleBulkDelete}
                                 disabled={bulkLoading}
                                 className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition"
@@ -1022,6 +1106,9 @@ Do not add explanatory text outside the JSON array or code block.`
                                             Jumia
                                         </th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Lien Jumia
+                                        </th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Lié à un article
                                         </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1059,7 +1146,18 @@ Do not add explanatory text outside the JSON array or code block.`
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <div className="flex items-center">
-                                                                    <div className="h-12 w-10 flex-shrink-0">
+                                                                    <div 
+                                                                        className="h-12 w-10 flex-shrink-0 cursor-pointer relative rounded overflow-hidden group/thumb transition-transform hover:scale-105 hover:ring-2 hover:ring-indigo-500/60 shadow-xs"
+                                                                        onMouseEnter={(e) => {
+                                                                            const rect = e.currentTarget.getBoundingClientRect()
+                                                                            setHoveredImage({
+                                                                                src: normalizeImage(book.image),
+                                                                                title: displayTitle,
+                                                                                rect: { top: rect.top, left: rect.left, right: rect.right, bottom: rect.bottom }
+                                                                            })
+                                                                        }}
+                                                                        onMouseLeave={() => setHoveredImage(null)}
+                                                                    >
                                                                         <img
                                                                             src={normalizeImage(book.image)}
                                                                             alt={displayTitle}
@@ -1235,6 +1333,33 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                         {book.isSyncedWithJumia ? 'Linké' : 'Non Linké'}
                                                                     </span>
                                                                 </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                                {book.sellerSku ? (
+                                                                    <a
+                                                                        href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.sellerSku)}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-orange-50 text-[#F68B1E] border border-orange-200 hover:bg-[#F68B1E] hover:text-white transition shadow-xs group"
+                                                                        title={`Ouvrir le produit sur Jumia (${book.sellerSku})`}
+                                                                    >
+                                                                        <span className="font-mono text-[11px] truncate max-w-[85px]">{book.sellerSku}</span>
+                                                                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                                                                    </a>
+                                                                ) : (
+                                                                    <a
+                                                                        href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold text-gray-400 hover:text-[#F68B1E] hover:bg-orange-50 transition"
+                                                                        title="Rechercher ce titre sur Jumia"
+                                                                    >
+                                                                        <span>Rechercher</span>
+                                                                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                                                    </a>
+                                                                )}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <span className={book.hasArticle ? 'text-green-600' : 'text-red-600'}>
@@ -1441,7 +1566,18 @@ Do not add explanatory text outside the JSON array or code block.`
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100">
+                                    <div 
+                                        className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100 cursor-pointer group/thumb hover:ring-2 hover:ring-indigo-500/60 transition-all"
+                                        onMouseEnter={(e) => {
+                                            const rect = e.currentTarget.getBoundingClientRect()
+                                            setHoveredImage({
+                                                src: normalizeImage(book.image),
+                                                title: displayTitle,
+                                                rect: { top: rect.top, left: rect.left, right: rect.right, bottom: rect.bottom }
+                                            })
+                                        }}
+                                        onMouseLeave={() => setHoveredImage(null)}
+                                    >
                                         <img src={normalizeImage(book.image)} alt={displayTitle} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} />
                                     </div>
                                     <div className="flex-1 flex flex-col">
@@ -1466,9 +1602,21 @@ Do not add explanatory text outside the JSON array or code block.`
                                                 </span>
                                             </div>
                                         )}
-                                        <p className="text-xs text-gray-500 mt-1 truncate">
-                                            {book.author}
-                                            {book.sellerSku && <span className="ml-2 font-mono text-[9px] px-1 bg-gray-100 rounded">SKU: {book.sellerSku}</span>}
+                                        <p className="text-xs text-gray-500 mt-1 truncate flex items-center flex-wrap gap-1">
+                                            <span>{book.author}</span>
+                                            {book.sellerSku && (
+                                                <a
+                                                    href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.sellerSku)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="inline-flex items-center gap-1 font-mono text-[9px] px-1.5 py-0.5 bg-orange-50 text-[#F68B1E] hover:bg-[#F68B1E] hover:text-white rounded border border-orange-200 transition"
+                                                    title="Ouvrir sur Jumia"
+                                                >
+                                                    <span>Jumia: {book.sellerSku}</span>
+                                                    <ExternalLink className="w-2.5 h-2.5" />
+                                                </a>
+                                            )}
                                         </p>
                                         <div className="mt-auto pt-3 flex items-center justify-between">
                                             <span className="font-black text-sm text-gray-900">{book.price} <span className="text-[10px] text-gray-500">درهم</span></span>
@@ -1550,6 +1698,37 @@ Do not add explanatory text outside the JSON array or code block.`
                 onClose={() => setVideoStudioBook(null)}
                 book={videoStudioBook}
             />
+
+            {/* Aperçu agrandi au survol de l'image produit */}
+            {hoveredImage && (
+                <div
+                    className="fixed z-[9999] pointer-events-none bg-white p-2.5 rounded-2xl shadow-2xl border border-gray-200/90 transition-opacity duration-150 animate-in fade-in zoom-in-95"
+                    style={{
+                        top: typeof window !== 'undefined' ? Math.min(Math.max(12, hoveredImage.rect.top - 80), window.innerHeight - 360) : 12,
+                        left: typeof window !== 'undefined' && hoveredImage.rect.right + 16 < window.innerWidth - 270
+                            ? hoveredImage.rect.right + 16
+                            : typeof window !== 'undefined' ? Math.max(12, hoveredImage.rect.left - 270) : 12,
+                        width: '250px',
+                    }}
+                >
+                    <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shadow-inner">
+                        <img
+                            src={hoveredImage.src}
+                            alt={hoveredImage.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
+                        />
+                    </div>
+                    <div className="mt-2.5 px-1 pb-0.5">
+                        <p className="text-xs font-bold text-gray-900 line-clamp-2 leading-snug">
+                            {hoveredImage.title}
+                        </p>
+                        <p className="text-[10px] text-gray-500 font-medium mt-0.5 uppercase tracking-wider">
+                            Aperçu produit
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

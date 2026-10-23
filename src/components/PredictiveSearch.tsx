@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search as SearchIcon, Loader2, BookOpen, X, ArrowRight, Clock } from 'lucide-react'
-import { searchBooksPredictive, getPopularSearches } from '@/lib/actions/search'
+import { Search as SearchIcon, Loader2, BookOpen, X, ArrowRight, Clock, Mic, Camera, Sparkles } from 'lucide-react'
+import { searchBooksPredictive, getPopularSearches, recognizeBookCover } from '@/lib/actions/search'
 import Image from 'next/image'
 // import Link from 'next/link' <-- use i18n link
 import { Link, useRouter } from '@/i18n/routing'
@@ -52,7 +52,14 @@ export default function PredictiveSearch() {
     const [popularSearches, setPopularSearches] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
+    const [isListening, setIsListening] = useState(false)
+    const [hasSpeechRecognition, setHasSpeechRecognition] = useState(false)
+    const [isAnalyzingCover, setIsAnalyzingCover] = useState(false)
+    const [detectedCoverTitle, setDetectedCoverTitle] = useState<string | null>(null)
     const searchRef = useRef<HTMLDivElement>(null)
+    const inputRef = useRef<HTMLInputElement>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const clientCache = useRef<Map<string, { results: any[]; suggestion: string | null }>>(new Map())
     const router = useRouter()
     const t = useTranslations('PredictiveSearch');
     const locale = useLocale();
@@ -64,18 +71,133 @@ export default function PredictiveSearch() {
             setHistory(JSON.parse(savedHistory))
         }
 
-
         // Charger les recherches populaires
         getPopularSearches().then((data: any) => setPopularSearches(data))
+
+        // Détection de la compatibilité Web Speech API
+        if (typeof window !== 'undefined') {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+            if (SpeechRecognition) {
+                setHasSpeechRecognition(true)
+            }
+        }
 
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setIsOpen(false)
             }
         }
+
+        // Raccourci clavier global Ctrl+K / Cmd+K
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault()
+                inputRef.current?.focus()
+                setIsOpen(true)
+            }
+        }
+
         document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        window.addEventListener('keydown', handleGlobalKeyDown)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+            window.removeEventListener('keydown', handleGlobalKeyDown)
+        }
     }, [])
+
+    const handleVoiceSearch = () => {
+        if (typeof window === 'undefined') return
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        if (!SpeechRecognition) return
+
+        if (isListening) {
+            setIsListening(false)
+            return
+        }
+
+        try {
+            const recognition = new SpeechRecognition()
+            recognition.lang = locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR'
+            recognition.interimResults = false
+            recognition.maxAlternatives = 1
+
+            recognition.onstart = () => setIsListening(true)
+            recognition.onend = () => setIsListening(false)
+            recognition.onerror = () => setIsListening(false)
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0]?.[0]?.transcript
+                if (transcript) {
+                    setQuery(transcript)
+                    inputRef.current?.focus()
+                    setIsOpen(true)
+                }
+            }
+
+            recognition.start()
+        } catch {
+            setIsListening(false)
+        }
+    }
+
+    // Limite : 2 recherches par couverture max par session
+    const COVER_SEARCH_LIMIT = 2
+    const COVER_SEARCH_KEY = 'riwaya_cover_search_count'
+
+    const getCoverSearchCount = (): number => {
+        try {
+            return parseInt(sessionStorage.getItem(COVER_SEARCH_KEY) || '0', 10)
+        } catch { return 0 }
+    }
+
+    const incrementCoverSearchCount = () => {
+        try {
+            sessionStorage.setItem(COVER_SEARCH_KEY, String(getCoverSearchCount() + 1))
+        } catch { /* ignore */ }
+    }
+
+    const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // Vérifier la limite par session
+        if (getCoverSearchCount() >= COVER_SEARCH_LIMIT) {
+            alert(t('CoverLimitReached') || 'Vous avez atteint la limite de recherche par couverture pour cette session.')
+            if (fileInputRef.current) fileInputRef.current.value = ''
+            return
+        }
+
+        try {
+            setIsAnalyzingCover(true)
+            setDetectedCoverTitle(null)
+            setIsOpen(true)
+
+            const formData = new FormData()
+            formData.append('image', file)
+
+            const res = await recognizeBookCover(formData)
+            incrementCoverSearchCount()
+
+            if (res.success && res.title) {
+                setQuery(res.title)
+                setDetectedCoverTitle(res.title)
+                if (res.results && res.results.length > 0) {
+                    setResults(res.results)
+                }
+                saveToHistory(res.title)
+                inputRef.current?.focus()
+            } else {
+                alert(res.error || t('CoverError'))
+            }
+        } catch (err: any) {
+            console.error('Erreur upload couverture:', err)
+            alert(t('CoverError'))
+        } finally {
+            setIsAnalyzingCover(false)
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+            }
+        }
+    }
 
     const saveToHistory = (searchTerm: string) => {
         if (!searchTerm.trim() || searchTerm.length < 2) return
@@ -96,12 +218,24 @@ export default function PredictiveSearch() {
     }
 
     useEffect(() => {
+        const cleanQuery = query.toLowerCase().trim()
+        if (cleanQuery.length >= 2 && clientCache.current.has(cleanQuery)) {
+            const cached = clientCache.current.get(cleanQuery)!
+            setResults(cached.results)
+            setSuggestion(cached.suggestion)
+            setSelectedIndex(-1)
+            setIsLoading(false)
+            setIsOpen(true)
+            return
+        }
+
         const timer = setTimeout(async () => {
             if (query.length >= 2) {
                 setIsLoading(true)
                 const data = await searchBooksPredictive(query)
                 const items = Array.isArray(data) ? data : (data?.results || [])
                 const didYouMean = Array.isArray(data) ? null : (data?.suggestion || null)
+                clientCache.current.set(cleanQuery, { results: items, suggestion: didYouMean })
                 setResults(items)
                 setSuggestion(didYouMean)
                 setSelectedIndex(-1)
@@ -170,33 +304,133 @@ export default function PredictiveSearch() {
 
     return (
         <div ref={searchRef} className="relative w-full max-w-xl mx-auto group">
-            {/* Form standard inspiré par Pixio */}
-            <form onSubmit={handleSearch} className="relative group/input">
+            {/* Form standard modernisé avec commandes interactives */}
+            <form onSubmit={handleSearch} className="relative group/input flex items-center" role="search">
                 <input
-                    type="search"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleCoverUpload}
+                />
+
+                <input
+                    ref={inputRef}
+                    type="text"
+                    role="searchbox"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    aria-label={t('Placeholder')}
+                    aria-expanded={isOpen}
+                    aria-autocomplete="list"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onFocus={() => (query.length >= 2 || history.length > 0) && setIsOpen(true)}
-                    placeholder={t('Placeholder')}
-                    className="w-full bg-white border-2 border-gray-100 focus:border-black rounded-[2rem] py-4 pl-14 pr-10 rtl:pr-14 rtl:pl-10 font-bold text-base text-gray-900 transition-all outline-none placeholder:text-gray-400 shadow-sm focus:shadow-xl group-hover/input:border-gray-200"
+                    placeholder={isAnalyzingCover ? t('AnalyzingCover') : isListening ? t('Listening') : t('Placeholder')}
+                    className={`w-full bg-white border-2 rounded-[2rem] py-3.5 pl-12 pr-28 rtl:pr-12 rtl:pl-28 sm:pr-36 sm:rtl:pl-36 font-bold text-base text-gray-900 transition-all outline-none placeholder:text-gray-400 shadow-sm hover:border-gray-300 focus:shadow-xl focus:border-black focus:ring-4 focus:ring-black/5 ${
+                        isListening ? 'border-red-500 ring-4 ring-red-100' : isAnalyzingCover ? 'border-amber-500 ring-4 ring-amber-100' : 'border-gray-100'
+                    }`}
                 />
-                <SearchIcon className={`absolute left-5 rtl:right-5 rtl:left-auto top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${isOpen ? 'text-black' : 'text-gray-300'}`} />
 
-                {query && (
-                    <button
-                        type="button"
-                        onClick={() => setQuery('')}
-                        className="absolute right-5 rtl:left-5 rtl:right-auto top-1/2 -translate-y-1/2 text-gray-300 hover:text-black transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                {isLoading || isAnalyzingCover ? (
+                    <Loader2 className="absolute left-4.5 rtl:right-4.5 rtl:left-auto top-1/2 -translate-y-1/2 w-5 h-5 text-black animate-spin pointer-events-none" />
+                ) : (
+                    <SearchIcon className={`absolute left-4.5 rtl:right-4.5 rtl:left-auto top-1/2 -translate-y-1/2 w-5 h-5 transition-all duration-200 pointer-events-none ${isOpen ? 'text-black scale-110' : 'text-gray-400 group-hover/input:text-gray-700'}`} />
                 )}
+
+                <div className="absolute right-2.5 rtl:left-2.5 rtl:right-auto top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                    {/* Bouton effacer unique et bien positionné */}
+                    {query && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setQuery('')
+                                setDetectedCoverTitle(null)
+                                inputRef.current?.focus()
+                            }}
+                            className="p-1.5 rounded-full text-gray-400 hover:text-black hover:bg-gray-100 transition-colors"
+                            aria-label={t('Clear')}
+                            title={t('Clear')}
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
+
+                    {/* Switcher multimodal : Photo (couverture) & Audio (voix) */}
+                    <div className="flex items-center bg-gray-100/90 hover:bg-gray-100 p-0.5 rounded-full border border-gray-200/80 shadow-xs transition-colors">
+                        {/* Bouton Reconnaissance Couverture (Image) */}
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isAnalyzingCover}
+                            title={t('CoverSearch')}
+                            aria-label={t('CoverSearch')}
+                            className={`p-1.5 sm:p-2 rounded-full transition-all ${
+                                isAnalyzingCover 
+                                    ? 'bg-amber-500 text-white shadow-xs' 
+                                    : 'text-gray-500 hover:text-black hover:bg-white'
+                            }`}
+                        >
+                            {isAnalyzingCover ? (
+                                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                            ) : (
+                                <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            )}
+                        </button>
+
+                        {/* Bouton Recherche Vocale (Audio) */}
+                        {hasSpeechRecognition && (
+                            <button
+                                type="button"
+                                onClick={handleVoiceSearch}
+                                title={t('VoiceSearch')}
+                                aria-label={t('VoiceSearch')}
+                                className={`p-1.5 sm:p-2 rounded-full transition-all ${
+                                    isListening 
+                                        ? 'bg-red-500 text-white animate-pulse shadow-xs' 
+                                        : 'text-gray-500 hover:text-black hover:bg-white'
+                                }`}
+                            >
+                                <Mic className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {query && (
+                        <button
+                            type="submit"
+                            className="w-8 h-8 rounded-full bg-black hover:bg-gray-800 text-white flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-sm"
+                            aria-label={t('Placeholder')}
+                        >
+                            <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                        </button>
+                    )}
+                </div>
             </form>
 
             {/* Dropdown Results - Style Pixio */}
             {isOpen && (
                 <div className="absolute top-full inset-x-0 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-[120%] sm:min-w-[500px] mt-4 bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
+
+                    {/* Bannière de confirmation de reconnaissance visuelle */}
+                    {detectedCoverTitle && (
+                        <div className="mx-4 mt-3 mb-1 px-3.5 py-2 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/60 rounded-2xl flex items-center justify-between gap-2 text-xs font-bold text-amber-900 animate-in fade-in">
+                            <div className="flex items-center gap-2 truncate">
+                                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
+                                <span className="truncate">{t('CoverDetected', { title: detectedCoverTitle })}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setDetectedCoverTitle(null)}
+                                className="text-amber-700/60 hover:text-amber-900 p-0.5 rounded-full"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
 
                     {/* Suggestions si query vide */}
                     {query.length === 0 && (

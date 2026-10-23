@@ -159,6 +159,18 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             console.warn('[IndexNow] Erreur notification création livre:', idxErr)
         }
 
+        if (book.image) {
+            try {
+                const { getImageBuffer, indexCoverBuffer } = await import('@/lib/actions/gemini-cache')
+                const imgBuffer = await getImageBuffer(book.image)
+                if (imgBuffer) {
+                    await indexCoverBuffer(imgBuffer, book.title, book.author || undefined)
+                }
+            } catch (cacheErr) {
+                console.warn('[GeminiCache] Erreur indexation auto couverture création livre:', cacheErr)
+            }
+        }
+
         return {
             success: true,
             bookId: book.id,
@@ -358,6 +370,18 @@ export async function updateBook(
             submitBookToIndexNow(id)
         } catch (idxErr) {
             console.warn('[IndexNow] Erreur notification mise à jour livre:', idxErr)
+        }
+
+        if (validatedData.image) {
+            try {
+                const { getImageBuffer, indexCoverBuffer } = await import('@/lib/actions/gemini-cache')
+                const imgBuffer = await getImageBuffer(validatedData.image)
+                if (imgBuffer) {
+                    await indexCoverBuffer(imgBuffer, validatedData.title, validatedData.author || undefined)
+                }
+            } catch (cacheErr) {
+                console.warn('[GeminiCache] Erreur indexation auto couverture mise à jour livre:', cacheErr)
+            }
         }
 
         return {
@@ -983,6 +1007,74 @@ export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour bulk IA:', error)
         return { success: false, error: error.message || 'Impossible de mettre à jour les livres depuis l\'IA' }
+    }
+}
+
+/**
+ * Générer automatiquement des SKU uniques pour les livres sans SKU
+ */
+export async function bulkGenerateSkus(ids?: string[]): Promise<{
+    success: boolean
+    count?: number
+    error?: string
+    updatedMap?: Record<string, string>
+}> {
+    try {
+        await verifyAdmin()
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+
+        const where: any = {
+            OR: [
+                { sellerSku: null },
+                { sellerSku: '' }
+            ]
+        }
+        if (ids && ids.length > 0) {
+            where.id = { in: ids }
+        }
+        if (role === 'SELLER' && userId) {
+            where.sellerId = userId
+        }
+
+        const booksWithoutSku = await prisma.book.findMany({
+            where,
+            select: { id: true, title: true }
+        })
+
+        if (booksWithoutSku.length === 0) {
+            return { success: true, count: 0, updatedMap: {} }
+        }
+
+        const updatedMap: Record<string, string> = {}
+        const nowBase = Date.now().toString(36).toUpperCase()
+
+        for (let i = 0; i < booksWithoutSku.length; i++) {
+            const b = booksWithoutSku[i]
+            const indexHex = (i + 1).toString(16).padStart(4, '0').toUpperCase()
+            const randHex = Math.random().toString(36).substring(2, 5).toUpperCase()
+            const generatedSku = `RIW-${nowBase}-${indexHex}${randHex}`
+
+            await prisma.book.update({
+                where: { id: b.id },
+                data: { sellerSku: generatedSku }
+            })
+            updatedMap[b.id] = generatedSku
+        }
+
+        revalidatePath('/admin/books')
+        revalidatePath('/')
+
+        await createAuditLog({
+            action: 'BULK_GENERATE_SKU',
+            entity: 'BOOK',
+            details: `Génération automatique de SKU pour ${booksWithoutSku.length} livre(s)`,
+        })
+
+        return { success: true, count: booksWithoutSku.length, updatedMap }
+    } catch (error: any) {
+        console.error('Erreur lors de la génération automatique des SKU:', error)
+        return { success: false, error: error.message || 'Impossible de générer les SKU' }
     }
 }
 

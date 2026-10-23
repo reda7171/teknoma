@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/routing'
-import { BookOpen, MapPin, User, Star, Sparkles } from 'lucide-react'
+import { BookOpen, MapPin, User, Star, Sparkles, Navigation } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { getPrimaryImage } from '@/lib/utils/image'
 
@@ -22,6 +22,7 @@ interface MarketBook {
     status: string
     createdAt: Date
     owner?: MarketUser | null
+    distanceKm?: number
 }
 
 export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book: MarketBook; isSmartMatch?: boolean; isBlurred?: boolean }) {
@@ -59,6 +60,12 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
                     <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 sm:py-1 rounded-full mb-1">
                         <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" /> {book.owner.city}
                     </span>
+                    {typeof book.distanceKm === 'number' && !isBlurred && (
+                        <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 sm:py-1 rounded-full mb-1 border border-emerald-100/60 shadow-xs">
+                            <Navigation className="w-2.5 h-2.5 shrink-0 text-emerald-600" />
+                            {book.distanceKm < 1 ? '< 1 km' : `à ${book.distanceKm} km`}
+                        </span>
+                    )}
                     <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 sm:py-1 rounded-full">
                         <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-yellow-500 shrink-0" /> {book.owner.rating.toFixed(1)}
                     </span>
@@ -68,7 +75,11 @@ export default function MarketBookCard({ book, isSmartMatch, isBlurred }: { book
             {/* Book Image */}
             <CardWrapper href={cardHref as any} className="block aspect-[2/3] bg-gray-50 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden relative shadow-inner group-hover:shadow-md transition-shadow">
                 {book.image ? (
-                    <img src={getPrimaryImage(book.image)} alt={title} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isBlurred ? 'blur-xl' : ''}`} />
+                    <img
+                        src={getPrimaryImage(book.image)}
+                        alt={isBlurred ? "Livre d'occasion à échanger au Maroc" : `Livre d'occasion : ${book.title}${book.author ? ` par ${book.author}` : ''} | Troc et échange au Maroc`}
+                        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isBlurred ? 'blur-xl' : ''}`}
+                    />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <BookOpen className="w-10 h-10 opacity-20" />

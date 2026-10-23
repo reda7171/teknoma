@@ -35,22 +35,22 @@ export function getWhatsAppStatusMessage(payload: WhatsAppNotificationPayload): 
     if (status === 'SHIPPED') {
         const carrierInfo = shippingCompanyName ? ` via ${shippingCompanyName}` : ''
         const trackingInfo = trackingID ? ` (N° suivi: ${trackingID})` : ''
-        return `Bonjour ${fullName}, bonne nouvelle ! Votre commande Riwaya #${shortId} a été expédiée${carrierInfo}${trackingInfo} 📦.\n\nVous pouvez suivre votre livraison ici : ${trackingLink}\nLe livreur vous contactera par téléphone pour la remise du colis. Merci de votre confiance ! 📚✨`
+        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis Riwaya #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.\n\nLe livreur vous contactera par téléphone pour la livraison à domicile (Paiement à la livraison 💵).\n\nVous pouvez suivre votre livraison en direct : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe Riwaya.store`
     }
 
     if (status === 'DELIVERED') {
-        return `Bonjour ${fullName}, votre commande Riwaya #${shortId} a été livrée avec succès ! 🎉\n\nNous espérons que vos livres vous plairont. N'hésitez pas à nous laisser un avis sur le site : https://riwaya.store\nBonne lecture et à très bientôt ! 📚`
+        return `Salam ${fullName} ! 🎉\n\nVotre commande Riwaya #${shortId} a été livrée avec succès !\n\nToute l'équipe Riwaya vous remercie chaleureusement pour votre confiance. Nous espérons que vos livres vous apporteront beaucoup de plaisir et d'inspiration 📖✨.\n\nN'hésitez pas à nous laisser votre avis sur le site : https://riwaya.store\n\nMerci de votre confiance et à très bientôt pour de nouvelles lectures ! 📚`
     }
 
     if (status === 'CONFIRMED') {
-        return `Bonjour ${fullName}, votre commande Riwaya #${shortId} est confirmée et en cours de préparation dans notre dépôt.\nSuivi : ${trackingLink}`
+        return `Salam ${fullName} !\n\nVotre commande Riwaya #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.\n\nSuivi de commande : ${trackingLink}\nMerci de votre confiance ! 📚✨`
     }
 
-    return `Bonjour ${fullName}, statut de votre commande Riwaya #${shortId} mis à jour : ${status}.\nSuivi : ${trackingLink}`
+    return `Salam ${fullName} !\n\nLe statut de votre commande Riwaya #${shortId} a été mis à jour : ${status}.\nSuivi : ${trackingLink}\nMerci de votre confiance ! 📚`
 }
 
 /**
- * Envoie la notification WhatsApp au client (via Webhook n8n/Gateway et lien Telegram admin)
+ * Envoie la notification WhatsApp au client (via WAHA direct, Webhook et Telegram)
  */
 export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayload) {
     try {
@@ -61,7 +61,31 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
         const message = getWhatsAppStatusMessage(payload)
         const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 
-        // 1. Récupérer l'URL webhook configurée (n8n ou passerelle WhatsApp)
+        // 1. Envoi direct automatique via WAHA (WhatsApp HTTP API connecté)
+        let wahaSent = false
+        let wahaError: string | null = null
+        try {
+            const { sendWhatsAppMessageDirect } = await import('@/lib/actions/whatsapp-gateway')
+            const directRes = await sendWhatsAppMessageDirect(cleanPhone, message, {
+                type: 'NOTIFICATION',
+                metadata: {
+                    orderId,
+                    status,
+                    trackingID: trackingID || null,
+                    source: 'automated_order_status_update'
+                }
+            })
+            if (directRes && (directRes.success || (directRes as any).id || (directRes as any).key)) {
+                wahaSent = true
+            } else if (directRes && (directRes as any).error) {
+                wahaError = (directRes as any).error
+            }
+        } catch (wahaErr: any) {
+            console.error('[WhatsApp WAHA Direct Error]:', wahaErr)
+            wahaError = wahaErr?.message || 'Erreur passerelle WAHA'
+        }
+
+        // 2. Appel du Webhook optionnel (n8n ou autre passerelle externe)
         const webhookSetting = await prisma.siteSettings.findUnique({
             where: { key: 'whatsapp_webhook_url' }
         }).catch(() => null)
@@ -91,9 +115,15 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
             }
         }
 
-        // 2. Notification Telegram avec bouton 1-clic pour l'admin
-        const statusLabel = status === 'SHIPPED' ? '🚚 Commande Expédiée' : status === 'DELIVERED' ? '✅ Commande Livrée' : `Statut: ${status}`
-        const telegramText = `📱 *Notification WhatsApp Client*\n\n${statusLabel}\n🆔 \`#${orderId.slice(0, 8)}\`\n👤 ${fullName}\n📞 \`+${cleanPhone}\`${trackingID ? `\n🏷️ Suivi : \`${trackingID}\`` : ''}\n\n${webhookSent ? '✅ *Message envoyé automatiquement via passerelle*' : 'ℹ️ *Cliquer ci-dessous pour ouvrir WhatsApp* :'}`
+        // 3. Notification Telegram récapitulative pour l'administrateur
+        const statusLabel = status === 'SHIPPED' ? '🚚 Colis Expédié' : status === 'DELIVERED' ? '✅ Commande Livrée' : `Statut: ${status}`
+        const deliveryNotice = wahaSent
+            ? '✅ *Message WhatsApp envoyé automatiquement au client via WAHA*'
+            : webhookSent
+            ? '✅ *Message WhatsApp transmis via Webhook*'
+            : '⚠️ *Passerelle WAHA indisponible - Cliquer ci-dessous pour envoyer manuellement :*'
+
+        const telegramText = `📱 *Notification WhatsApp Client*\n\n${statusLabel}\n🆔 \`#${orderId.slice(0, 8)}\`\n👤 ${fullName}\n📞 \`+${cleanPhone}\`${trackingID ? `\n🏷️ Suivi : \`${trackingID}\`` : ''}\n\n${deliveryNotice}`
 
         const keyboard = {
             inline_keyboard: [
@@ -105,7 +135,7 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
 
         await sendTelegramMessage(telegramText, undefined, undefined, keyboard).catch(() => null)
 
-        return { success: true, webhookSent, waLink }
+        return { success: true, wahaSent, webhookSent, wahaError, waLink }
     } catch (error: any) {
         console.error('[WhatsApp Notification] Erreur:', error)
         return { success: false, error: error.message }

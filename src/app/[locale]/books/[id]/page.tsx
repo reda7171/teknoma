@@ -1,11 +1,11 @@
-import { getBookById, getBooks, getCustomersAlsoLikedBooks, getTopViewedBookIds } from '@/lib/db/books'
+import { getBookById, getBooks, getCustomersAlsoLikedBooks, getTopViewedBookIds, getAdjacentCategoryBooks } from '@/lib/db/books'
+import BookNavArrows from '@/components/books/BookNavArrows'
 import { getAuthorProfile } from '@/lib/db/authors'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import WishlistButton from '@/components/WishlistButton'
-import { normalizeImage, getOgImageUrl, getBaseUrl } from '@/lib/utils'
-import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2, Eye, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Star, Truck, Shield, Package, MessageSquare, Quote, Sparkles, CheckCircle2, Edit2, Eye, TrendingUp, ExternalLink } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import AddToCartButton from '@/components/AddToCartButton'
 import ReviewForm from '@/components/ReviewForm'
@@ -37,6 +37,7 @@ import PredictiveSearch from '@/components/PredictiveSearch'
 import ScrollDownIndicator from '@/components/ScrollDownIndicator'
 
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
+import { getBaseUrl, getOgImageUrl, normalizeImage } from '@/lib/utils'
 
 export const revalidate = 3600; // Cache d'une heure pour le SEO et la vitesse
 
@@ -286,7 +287,7 @@ export default async function BookDetailPage({
     const displayLongDescription = getLocalizedLongDescription(book, locale);
 
     // Récupérer les avis, la note et les recommandations issues des commandes réelles
-    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, audioTestimonialsResult, imageTestimonialsResult, topViewedIds] = await Promise.all([
+    const [reviews, ratingData, categoryConfig, coPurchasedBooks, whatsappPhone, announcementEnabled, announcementMessage, announcementBgColor, announcementTextColor, relatedPostsRaw, adsenseEnabled, adsensePublisherId, adsenseSidebarSlot, authorProfile, audioTestimonialsResult, imageTestimonialsResult, topViewedIds, adjacentCategoryBooks] = await Promise.all([
         getBookReviews(bookId).catch(() => []),
         getBookAverageRating(bookId).catch(() => ({ average: 5, count: 0 })),
         book.category ? getCategoryConfigByName(book.category).catch(() => null) : Promise.resolve(null),
@@ -303,10 +304,11 @@ export default async function BookDetailPage({
         getAuthorProfile(book.author).catch(() => null),
         getApprovedAudioTestimonials().catch(() => ({ success: true, testimonials: [] })),
         getApprovedImageTestimonials().catch(() => ({ success: true, testimonials: [] })),
-        getTopViewedBookIds(24).catch((): string[] => [])
+        getTopViewedBookIds(24).catch((): string[] => []),
+        getAdjacentCategoryBooks(bookId, book.category).catch(() => ({ prevBook: null, nextBook: null, category: null, currentIndex: 0, totalInCategory: 0 }))
     ])
 
-    const isTrending = ((topViewedIds as unknown as string[]) || []).includes(String(book.id)) || Boolean((book as any).views && (book as any).views >= 20)
+    const isTrending = ((topViewedIds as unknown as string[]) || []).includes(String(book.id)) || Boolean((book as any).views && (book as any).views >= 450)
 
     // Un article n'est affiché que s'il est explicitement relié au livre dans l'admin.
     // Le précédent fallback ajoutait les derniers articles, même sans rapport avec le produit.
@@ -328,6 +330,7 @@ export default async function BookDetailPage({
             candidate.id !== book.id && books.findIndex(item => item.id === candidate.id) === index
         )
         .slice(0, 2)
+
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
     const normalizedImage = normalizeImage(book.image)
@@ -458,6 +461,15 @@ export default async function BookDetailPage({
 
                 <Header />
                 <ScrollDownIndicator />
+
+                <BookNavArrows
+                    prevBook={adjacentCategoryBooks.prevBook}
+                    nextBook={adjacentCategoryBooks.nextBook}
+                    locale={locale}
+                    category={book.category || null}
+                    currentIndex={adjacentCategoryBooks.currentIndex}
+                    totalInCategory={adjacentCategoryBooks.totalInCategory}
+                />
 
                 <BookSubNav 
                     bookTitle={book.title}
@@ -705,6 +717,7 @@ export default async function BookDetailPage({
                                                 {locale === 'ar' ? 'الدفع عند الاستلام' : locale === 'en' ? 'Cash on Delivery' : 'Paiement à la livraison'}
                                             </p>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -822,6 +835,7 @@ export default async function BookDetailPage({
                                             Lire un extrait
                                         </a>
                                     )}
+
                                 </StickyBottomActions>
 
                                 {book.stock <= 0 && (

@@ -78,6 +78,11 @@ export async function POST(req: Request) {
       },
     });
 
+    // Déclencher les alertes automatiques wishlist (Email, WhatsApp, Push)
+    import('@/lib/community-wishlist-alerts')
+      .then(m => m.notifyWishlistUsersOnNewBook(book.id))
+      .catch(err => console.error('[WishlistAlerts] Mobile background trigger error:', err));
+
     return NextResponse.json({ message: 'Livre ajouté avec succès', book });
   } catch (error) {
     console.error('Error adding exchange book:', error);

@@ -12,6 +12,7 @@ import OrderEditModal from '@/components/admin/OrderEditModal'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 import OrderItemsEditor from '@/components/admin/OrderItemsEditor'
 import OrderInvoiceModal from '@/components/admin/OrderInvoiceModal'
+import OrderNavArrows from '@/components/admin/OrderNavArrows'
 import { Receipt, CheckCircle2, AlertCircle } from 'lucide-react'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
@@ -33,6 +34,29 @@ export default async function OrderDetailsPage({
     if (!order) {
         notFound()
     }
+
+    const [prevOrder, nextOrder] = await Promise.all([
+        prisma.order.findFirst({
+            where: {
+                OR: [
+                    { createdAt: { gt: order.createdAt } },
+                    { createdAt: order.createdAt, id: { gt: order.id } }
+                ]
+            },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+            select: { id: true, fullName: true, total: true }
+        }),
+        prisma.order.findFirst({
+            where: {
+                OR: [
+                    { createdAt: { lt: order.createdAt } },
+                    { createdAt: order.createdAt, id: { lt: order.id } }
+                ]
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            select: { id: true, fullName: true, total: true }
+        })
+    ])
 
     const paidAmount = Number((order as any).paidAmount) || (order.isPaid ? Number(order.total) : 0)
     const remainingAmount = (order as any).remainingAmount !== null && (order as any).remainingAmount !== undefined
@@ -61,7 +85,9 @@ export default async function OrderDetailsPage({
     })
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 relative">
+            <OrderNavArrows prevOrder={prevOrder} nextOrder={nextOrder} locale={locale} />
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">

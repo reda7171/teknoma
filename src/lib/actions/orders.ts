@@ -487,11 +487,31 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                     }).then(() => {}).catch(console.error)
                 }
 
+                let autoEmailPromise = Promise.resolve()
+                if (fullOrder.email) {
+                    const articlesList = (fullOrder.items || []).map((i: any) => 
+                        `• ${i.quantity}x ${i.book?.title || i.pack?.name || 'Article'} (${i.price} DH)`
+                    ).join('<br/>')
+
+                    const { sendTriggerEmail } = await import('@/lib/actions/email-templates')
+                    autoEmailPromise = sendTriggerEmail('order_created', fullOrder.email, {
+                        client_nom: fullOrder.fullName,
+                        customer_name: fullOrder.fullName,
+                        order_id: fullOrder.id.slice(0, 8),
+                        total: fullOrder.total,
+                        adresse: fullOrder.address,
+                        ville: fullOrder.city,
+                        telephone: fullOrder.phone,
+                        articles: articlesList,
+                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/track/${fullOrder.id}`
+                    }).then(() => {}).catch(console.error)
+                }
+
                 // Attendre la fin des requêtes asynchrones pour éviter qu'elles ne soient coupées par l'environnement Serverless (Vercel)
-                await Promise.all([telegramPromise, fbPromise, lowStockPromise, jumiaSyncPromise])
+                await Promise.all([telegramPromise, fbPromise, lowStockPromise, jumiaSyncPromise, autoEmailPromise])
             }
         } catch (e) {
-            console.error('Erreur Telegram Notification / CAPI / Stock Sync:', e)
+            console.error('Erreur Telegram Notification / CAPI / Stock Sync / AutoEmail:', e)
         }
 
         return { success: true, orderId: order.id }

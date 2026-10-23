@@ -9,6 +9,7 @@ import { JWT_SECRET } from '@/lib/jwt-secret'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { OAuth2Client } from 'google-auth-library'
 import { getCached } from '@/lib/cache'
+import { addGmailReaderToGoogleReviews } from '@/lib/actions/site-settings'
 
 const RegisterSchema = z.object({
     fullName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -128,6 +129,9 @@ export async function register(formData: FormData): Promise<AuthResult> {
         }
 
         // Auto-login
+        if (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com'))) {
+            addGmailReaderToGoogleReviews(user.email).catch(console.error)
+        }
         await createSession(user.id)
 
         return { success: true, redirect: '/community?registered=true' }
@@ -266,6 +270,9 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
                 console.error('Error adding new OAuth user to newsletter:', e)
             }
 
+            if (provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))) {
+                addGmailReaderToGoogleReviews(user.email).catch(console.error)
+            }
             await createSession(user.id)
             return { success: true, redirect: '/community?registered=true' }
         }
@@ -299,6 +306,9 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
             console.error('Error adding OAuth user to newsletter:', e)
         }
 
+        if (provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))) {
+            addGmailReaderToGoogleReviews(user.email).catch(console.error)
+        }
         await createSession(user.id)
 
         if (user.role === 'SELLER') {

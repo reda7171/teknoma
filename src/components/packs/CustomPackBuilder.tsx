@@ -1,39 +1,66 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Book as BookType } from '@prisma/client'
-import { X, Search, Check, ShoppingBag, Plus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { X, Search, Check, ShoppingBag, Plus, Loader2 } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import Image from 'next/image'
+import { getLocalizedTitle } from '@/lib/i18n-utils'
+import { getAvailableBooksForCustomPack } from '@/lib/actions/packs'
 
 interface CustomPackBuilderProps {
-    availableBooks: BookType[]
+    availableBooks?: any[]
     initialOpen?: boolean
 }
 
-export default function CustomPackBuilder({ availableBooks, initialOpen = false }: CustomPackBuilderProps) {
+export default function CustomPackBuilder({ availableBooks = [], initialOpen = false }: CustomPackBuilderProps) {
     const t = useTranslations('Packs')
     const tCommon = useTranslations('Common')
+    const locale = useLocale()
     const [isOpen, setIsOpen] = useState(initialOpen)
+    const [books, setBooks] = useState<any[]>(availableBooks)
+    const [isLoading, setIsLoading] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
-    const [selectedBooks, setSelectedBooks] = useState<BookType[]>([])
+    const [selectedBooks, setSelectedBooks] = useState<any[]>([])
     
     const addItem = useCartStore((state) => state.addItem)
     const showNotification = useUIStore((state) => state.showNotification)
 
-    const filteredBooks = useMemo(() => {
-        if (!searchQuery.trim()) return availableBooks
-        const query = searchQuery.toLowerCase()
-        return availableBooks.filter(b => 
-            b.title.toLowerCase().includes(query) || 
-            b.author.toLowerCase().includes(query)
-        )
-    }, [availableBooks, searchQuery])
+    useEffect(() => {
+        if (availableBooks && availableBooks.length > 0) {
+            setBooks(availableBooks)
+        }
+    }, [availableBooks])
 
-    const toggleBook = (book: BookType) => {
+    useEffect(() => {
+        if (isOpen && books.length === 0 && !isLoading) {
+            setIsLoading(true)
+            getAvailableBooksForCustomPack()
+                .then((res) => {
+                    if (res && res.length > 0) {
+                        setBooks(res)
+                    }
+                })
+                .catch((err) => console.error('Error fetching custom pack books:', err))
+                .finally(() => setIsLoading(false))
+        }
+    }, [isOpen, books.length, isLoading])
+
+    const filteredBooks = useMemo(() => {
+        if (!searchQuery.trim()) return books
+        const query = searchQuery.toLowerCase().trim()
+        return books.filter(b => {
+            const locTitle = getLocalizedTitle(b, locale).toLowerCase()
+            const origTitle = (b.title || '').toLowerCase()
+            const author = (b.author || '').toLowerCase()
+            return locTitle.includes(query) || origTitle.includes(query) || author.includes(query)
+        })
+    }, [books, searchQuery, locale])
+
+    const toggleBook = (book: any) => {
         setSelectedBooks(prev => {
             const isSelected = prev.some(b => b.id === book.id)
             if (isSelected) {
@@ -65,9 +92,10 @@ export default function CustomPackBuilder({ availableBooks, initialOpen = false 
                 remainingTotal = roundToHalfDirham(remainingTotal - itemPrice)
             }
             
+            const bookTitle = getLocalizedTitle(book, locale)
             addItem({
                 id: book.id,
-                title: `${t('CustomPack.CartPrefix')} ${book.title}`,
+                title: `${t('CustomPack.CartPrefix')} ${bookTitle}`,
                 price: itemPrice,
                 image: book.image || '',
                 type: 'BOOK'
@@ -148,7 +176,19 @@ export default function CustomPackBuilder({ availableBooks, initialOpen = false 
                                     </div>
                                 </div>
                                 <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-6 scrollbar-thin scrollbar-thumb-gray-200">
-                                    {filteredBooks.length === 0 ? (
+                                    {isLoading ? (
+                                        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 pb-2 animate-pulse">
+                                            {[...Array(8)].map((_, i) => (
+                                                <div key={i} className="rounded-xl sm:rounded-2xl border-2 border-transparent bg-gray-50 overflow-hidden">
+                                                    <div className="aspect-[2/3] bg-gray-200" />
+                                                    <div className="p-2 sm:p-3 space-y-2">
+                                                        <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto" />
+                                                        <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto" />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : filteredBooks.length === 0 ? (
                                         <div className="text-center py-12">
                                             <p className="text-gray-400 font-medium">{t('CustomPack.NoBooksFound')}</p>
                                         </div>
@@ -156,6 +196,7 @@ export default function CustomPackBuilder({ availableBooks, initialOpen = false 
                                         <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 pb-2">
                                             {filteredBooks.map(book => {
                                                 const isSelected = selectedBooks.some(b => b.id === book.id)
+                                                const displayTitle = getLocalizedTitle(book, locale)
                                                 return (
                                                     <div 
                                                         key={book.id}
@@ -167,7 +208,7 @@ export default function CustomPackBuilder({ availableBooks, initialOpen = false 
                                                         <div className="aspect-[2/3] relative bg-gray-100">
                                                             <ImageWithFallback 
                                                                 src={book.image || ''} 
-                                                                alt={book.title}
+                                                                alt={displayTitle}
                                                                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
                                                             />
                                                             {isSelected && (
@@ -179,7 +220,7 @@ export default function CustomPackBuilder({ availableBooks, initialOpen = false 
                                                             )}
                                                         </div>
                                                         <div className="p-2 sm:p-3 text-center">
-                                                            <p className="text-[10px] sm:text-xs font-bold text-black line-clamp-2 leading-tight mb-1 min-h-6 sm:min-h-8">{book.title}</p>
+                                                            <p className="text-[10px] sm:text-xs font-bold text-black line-clamp-2 leading-tight mb-1 min-h-6 sm:min-h-8">{displayTitle}</p>
                                                             <p className="hidden sm:block text-[10px] text-gray-500 truncate">{book.author}</p>
                                                             <p className="text-xs font-black text-black mt-2">{book.price} درهم</p>
                                                         </div>
@@ -207,24 +248,27 @@ export default function CustomPackBuilder({ availableBooks, initialOpen = false 
                                             <p className="text-sm font-medium text-center">{t('CustomPack.SelectBooks')}</p>
                                         </div>
                                     ) : (
-                                        selectedBooks.map(book => (
-                                            <div key={`selected-${book.id}`} className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
-                                                <div className="w-12 h-16 relative bg-gray-100 rounded-md overflow-hidden shrink-0">
-                                                    <ImageWithFallback src={book.image || ''} alt={book.title} className="absolute inset-0 w-full h-full object-cover" />
+                                        selectedBooks.map(book => {
+                                            const displayTitle = getLocalizedTitle(book, locale)
+                                            return (
+                                                <div key={`selected-${book.id}`} className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                                                    <div className="w-12 h-16 relative bg-gray-100 rounded-md overflow-hidden shrink-0">
+                                                        <ImageWithFallback src={book.image || ''} alt={displayTitle} className="absolute inset-0 w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-bold text-black truncate">{displayTitle}</p>
+                                                        <p className="text-[10px] text-gray-500 truncate">{book.author}</p>
+                                                        <p className="text-sm font-black text-black mt-1">{book.price} درهم</p>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleBook(book)}
+                                                        className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-bold text-black truncate">{book.title}</p>
-                                                    <p className="text-[10px] text-gray-500 truncate">{book.author}</p>
-                                                    <p className="text-sm font-black text-black mt-1">{book.price} درهم</p>
-                                                </div>
-                                                <button 
-                                                    onClick={() => toggleBook(book)}
-                                                    className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))
+                                            )
+                                        })
                                     )}
                                 </div>
 

@@ -3,8 +3,9 @@ import { getAllSettings } from '@/lib/actions/site-settings'
 import { redirect } from 'next/navigation'
 import SiteSettingsForm from '@/components/admin/SiteSettingsForm'
 import AdvancedSettingsForm from '@/components/admin/AdvancedSettingsForm'
-import { Settings, Zap, Mail } from 'lucide-react'
 import EmailTemplatesTab from '@/components/admin/EmailTemplatesTab'
+import GeminiCacheManager from '@/components/admin/GeminiCacheManager'
+import { Settings, Zap, Mail, Sparkles } from 'lucide-react'
 
 export const metadata = {
     title: 'Paramètres du Site | Admin Riwaya',
@@ -23,7 +24,13 @@ export default async function AdminSettingsPage({
     }
 
     const sp = await searchParams
-    const activeTab = sp?.tab === 'advanced' ? 'advanced' : sp?.tab === 'templates' ? 'templates' : 'general'
+    const activeTab = sp?.tab === 'advanced' 
+        ? 'advanced' 
+        : sp?.tab === 'templates' 
+        ? 'templates' 
+        : sp?.tab === 'gemini-cache'
+        ? 'gemini-cache'
+        : 'general'
     const settings = await getAllSettings()
 
     return (
@@ -46,10 +53,10 @@ export default async function AdminSettingsPage({
                     </div>
 
                     {/* Onglets */}
-                    <div className="flex gap-2 border-b border-gray-200 pb-0">
+                    <div className="flex gap-2 border-b border-gray-200 pb-0 overflow-x-auto">
                         <a
                             href="?tab=general"
-                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors ${activeTab === 'general'
+                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors whitespace-nowrap ${activeTab === 'general'
                                 ? 'border-black text-black bg-white'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -59,7 +66,7 @@ export default async function AdminSettingsPage({
                         </a>
                         <a
                             href="?tab=templates"
-                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors ${activeTab === 'templates'
+                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors whitespace-nowrap ${activeTab === 'templates'
                                 ? 'border-black text-black bg-white'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -68,8 +75,18 @@ export default async function AdminSettingsPage({
                             Templates d'Emails
                         </a>
                         <a
+                            href="?tab=gemini-cache"
+                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors whitespace-nowrap ${activeTab === 'gemini-cache'
+                                ? 'border-black text-black bg-white'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                            Cache Gemini
+                        </a>
+                        <a
                             href="?tab=advanced"
-                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors ${activeTab === 'advanced'
+                            className={`flex items-center gap-2 px-5 py-3 text-sm font-black rounded-t-xl border-b-2 transition-colors whitespace-nowrap ${activeTab === 'advanced'
                                 ? 'border-black text-black bg-white'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -85,6 +102,8 @@ export default async function AdminSettingsPage({
                     <SiteSettingsForm initialSettings={settings} />
                 ) : activeTab === 'templates' ? (
                     <EmailTemplatesTab />
+                ) : activeTab === 'gemini-cache' ? (
+                    <GeminiCacheManager />
                 ) : (
                     <AdvancedSettingsForm initialSettings={settings} />
                 )}

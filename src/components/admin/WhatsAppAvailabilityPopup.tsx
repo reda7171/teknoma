@@ -38,6 +38,21 @@ export default function WhatsAppAvailabilityPopup() {
         return () => window.removeEventListener('open-whatsapp-availability-popup', handleReopen)
     }, [])
 
+    // Fermeture avec la touche Entrée ou Échap
+    useEffect(() => {
+        if (!open) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                e.preventDefault()
+                setOpen(false)
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [open])
+
     useEffect(() => {
         const onlineAgents = agents.filter(a => a.online)
         if (onlineAgents.length === 0) return
@@ -90,7 +105,12 @@ export default function WhatsAppAvailabilityPopup() {
         .sort((a, b) => a.priority - b.priority)[0]
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+        <div
+            onClick={(e) => {
+                if (e.target === e.currentTarget) setOpen(false)
+            }}
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+        >
             <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-100">
                 <button
                     type="button"
@@ -215,6 +235,7 @@ export default function WhatsAppAvailabilityPopup() {
 
                     <button
                         type="button"
+                        autoFocus
                         onClick={() => setOpen(false)}
                         className="rounded-xl bg-black px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white hover:bg-slate-800 transition"
                     >

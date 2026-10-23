@@ -159,3 +159,124 @@ export async function isFeatureEnabled(featureKey: string, defaultValue: boolean
     if (value === null) return defaultValue
     return value === 'true'
 }
+
+export interface GoogleReviewEmailItem {
+    email: string
+    used: boolean
+    source?: string
+}
+
+/**
+ * Ajoute automatiquement l'email d'un lecteur Gmail à la liste des avis Google
+ */
+export async function addGmailReaderToGoogleReviews(email: string) {
+    if (!email || !email.includes('@')) return
+    const cleanEmail = email.toLowerCase().trim()
+    if (!cleanEmail.endsWith('@gmail.com') && !cleanEmail.endsWith('@googlemail.com')) return
+
+    try {
+        const setting = await prisma.siteSettings.findUnique({
+            where: { key: 'google_reviews_emails' }
+        })
+
+        let currentList: GoogleReviewEmailItem[] = []
+        if (setting?.value) {
+            try {
+                currentList = JSON.parse(setting.value)
+            } catch {
+                currentList = []
+            }
+        }
+
+        const alreadyExists = currentList.some(item => item.email.toLowerCase().trim() === cleanEmail)
+        if (!alreadyExists) {
+            currentList.push({ email: cleanEmail, used: false, source: 'gmail_login' })
+            await prisma.siteSettings.upsert({
+                where: { key: 'google_reviews_emails' },
+                update: { value: JSON.stringify(currentList) },
+                create: {
+                    key: 'google_reviews_emails',
+                    value: JSON.stringify(currentList),
+                    category: 'general',
+                    description: 'Liste des emails utilisés pour Google Customer Reviews'
+                }
+            })
+            invalidateSettingsCache(['google_reviews_emails'])
+        }
+    } catch (err) {
+        console.error('Erreur addGmailReaderToGoogleReviews:', err)
+    }
+}
+
+/**
+ * Synchronise et importe tous les lecteurs inscrits avec un compte Gmail
+ */
+export async function syncGmailReadersToGoogleReviews() {
+    try {
+        await verifyAdmin()
+
+        // 1. Récupérer tous les lecteurs ayant un email Gmail
+        const gmailUsers = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { email: { endsWith: '@gmail.com' } },
+                    { email: { endsWith: '@googlemail.com' } }
+                ]
+            },
+            select: { email: true }
+        })
+
+        // 2. Récupérer la liste actuelle
+        const setting = await prisma.siteSettings.findUnique({
+            where: { key: 'google_reviews_emails' }
+        })
+
+        let currentList: GoogleReviewEmailItem[] = []
+        if (setting?.value) {
+            try {
+                currentList = JSON.parse(setting.value)
+            } catch {
+                currentList = []
+            }
+        }
+
+        const existingEmails = new Set(currentList.map(item => item.email.toLowerCase().trim()))
+
+        let addedCount = 0
+        for (const user of gmailUsers) {
+            const clean = user.email.toLowerCase().trim()
+            if (clean && !existingEmails.has(clean)) {
+                currentList.push({ email: clean, used: false, source: 'community_reader' })
+                existingEmails.add(clean)
+                addedCount++
+            }
+        }
+
+        if (addedCount > 0) {
+            await prisma.siteSettings.upsert({
+                where: { key: 'google_reviews_emails' },
+                update: { value: JSON.stringify(currentList) },
+                create: {
+                    key: 'google_reviews_emails',
+                    value: JSON.stringify(currentList),
+                    category: 'general',
+                    description: 'Liste des emails utilisés pour Google Customer Reviews'
+                }
+            })
+
+            invalidateSettingsCache(['google_reviews_emails'])
+            revalidatePath('/admin/settings')
+        }
+
+        return {
+            success: true,
+            addedCount,
+            totalCount: currentList.length,
+            availableCount: currentList.filter(e => !e.used).length,
+            emails: currentList
+        }
+    } catch (error: any) {
+        console.error('Erreur lors de la synchronisation des emails Gmail:', error)
+        return { success: false, error: error.message || 'Erreur de synchronisation' }
+    }
+}

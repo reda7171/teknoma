@@ -67,6 +67,24 @@ export async function addExchangeBook(formData: FormData): Promise<BookResult> {
             console.error("SEO generation failed", e);
         }
 
+        // S'assurer que le Customer existe pour satisfaire la clé étrangère ownerId
+        await prisma.customer.upsert({
+            where: { phone: user.phone || `temp_${user.id.slice(0, 10)}` },
+            update: {
+                id: user.id,
+                fullName: user.fullName || 'Lecteur',
+                email: user.email,
+                city: user.city || undefined,
+            },
+            create: {
+                id: user.id,
+                fullName: user.fullName || 'Lecteur',
+                email: user.email,
+                phone: user.phone || `06000000${user.id.slice(0, 2)}`,
+                city: user.city || 'Casablanca',
+            }
+        }).catch(() => null)
+
         const book = await prisma.exchangeBook.create({
             data: {
                 ownerId: user.id,
@@ -81,6 +99,11 @@ export async function addExchangeBook(formData: FormData): Promise<BookResult> {
                 status: 'AVAILABLE',
             }
         })
+
+        // Déclencher les alertes automatiques (Email, WhatsApp, Push) pour les utilisateurs ayant ce livre dans leur wishlist dans la même ville
+        import('@/lib/community-wishlist-alerts')
+            .then(m => m.notifyWishlistUsersOnNewBook(book.id))
+            .catch(err => console.error('[WishlistAlerts] Background trigger error:', err))
 
         revalidatePath('/community')
         return { success: true, bookId: book.id }

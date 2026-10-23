@@ -759,3 +759,101 @@ export async function getHomepageStats() {
         ])
     }, 300)
 }
+
+export interface AdjacentBookItem {
+    id: string
+    title: string
+    titleFr?: string | null
+    titleEn?: string | null
+    author: string
+    price: number
+    image: string
+    category?: string | null
+    language?: string | null
+}
+
+export interface AdjacentCategoryBooksResult {
+    prevBook: AdjacentBookItem | null
+    nextBook: AdjacentBookItem | null
+    category: string | null
+    currentIndex: number
+    totalInCategory: number
+}
+
+/**
+ * Récupère le livre précédent et suivant dans la MÊME catégorie
+ */
+export async function getAdjacentCategoryBooks(currentBookId: string, category?: string | null): Promise<AdjacentCategoryBooksResult> {
+    if (!category || !category.trim()) {
+        return { prevBook: null, nextBook: null, category: null, currentIndex: 0, totalInCategory: 0 }
+    }
+
+    const cleanCategory = category.trim()
+
+    return getCached(
+        `books:adjacent:${cleanCategory}:${currentBookId}`,
+        async () => {
+            try {
+                const books = await prisma.book.findMany({
+                    where: {
+                        category: cleanCategory,
+                        active: true,
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        titleFr: true,
+                        titleEn: true,
+                        author: true,
+                        price: true,
+                        image: true,
+                        category: true,
+                        language: true,
+                    },
+                    orderBy: [
+                        { displayOrder: 'asc' },
+                        { createdAt: 'desc' }
+                    ]
+                })
+
+                if (!books || books.length <= 1) {
+                    return {
+                        prevBook: null,
+                        nextBook: null,
+                        category: cleanCategory,
+                        currentIndex: books.length === 1 ? 1 : 0,
+                        totalInCategory: books.length
+                    }
+                }
+
+                const currentIndex = books.findIndex(b => b.id === currentBookId)
+                if (currentIndex === -1) {
+                    return {
+                        prevBook: books[books.length - 1],
+                        nextBook: books[0],
+                        category: cleanCategory,
+                        currentIndex: 1,
+                        totalInCategory: books.length
+                    }
+                }
+
+                // Navigation circulaire au sein de la catégorie
+                const prevIndex = (currentIndex - 1 + books.length) % books.length
+                const nextIndex = (currentIndex + 1) % books.length
+
+                return {
+                    prevBook: books[prevIndex],
+                    nextBook: books[nextIndex],
+                    category: cleanCategory,
+                    currentIndex: currentIndex + 1,
+                    totalInCategory: books.length
+                }
+            } catch (error) {
+                console.error('Erreur getAdjacentCategoryBooks:', error)
+                return { prevBook: null, nextBook: null, category: cleanCategory, currentIndex: 0, totalInCategory: 0 }
+            }
+        },
+        300 // Cache 5 min
+    )
+}
+

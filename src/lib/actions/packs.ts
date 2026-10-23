@@ -394,3 +394,35 @@ export async function togglePackStatus(
         }
     }
 }
+
+/**
+ * Récupérer les livres disponibles en stock pour le constructeur de pack sur mesure
+ */
+export async function getAvailableBooksForCustomPack() {
+    try {
+        const books = await prisma.book.findMany({
+            where: {
+                active: true,
+                stock: { gt: 0 }
+            },
+            select: {
+                id: true,
+                title: true,
+                titleFr: true,
+                titleEn: true,
+                language: true,
+                author: true,
+                price: true,
+                image: true,
+                stock: true,
+            },
+            orderBy: {
+                title: 'asc'
+            }
+        })
+        return books
+    } catch (error: any) {
+        console.error('Erreur getAvailableBooksForCustomPack:', error)
+        return []
+    }
+}
