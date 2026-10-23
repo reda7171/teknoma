@@ -99,16 +99,16 @@ export async function login(formData: FormData): Promise<LoginResult> {
                 }
             })
 
-            const text = `🔐 *Demande d'accès Admin*\n\n` +
-            `👤 *Utilisateur:* ${user.email}\n` +
-            `🕒 *Date:* ${new Date().toLocaleString('fr-FR')}\n` +
-            `🌐 *IP:* ${ip || 'Inconnue'}`
+            const text = `🔐 <b>Demande d'accès Admin</b>\n\n` +
+            `👤 <b>Utilisateur:</b> ${user.email}\n` +
+            `🕒 <b>Date:</b> ${new Date().toLocaleString('fr-FR')}\n` +
+            `🌐 <b>IP:</b> ${ip || 'Inconnue'}`
             
             const replyMarkup = {
                 inline_keyboard: [
                     [
                         { text: '✅ Approuver', callback_data: `auth_approve:${request.id}` },
-                        { text: '❌ Dis approuver', callback_data: `auth_reject:${request.id}` }
+                        { text: '❌ Refuser', callback_data: `auth_reject:${request.id}` }
                     ]
                 ]
             }

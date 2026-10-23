@@ -15,9 +15,12 @@ export async function POST(req: Request) {
         }
 
         const parsedWebhookUrl = new URL(webhookUrl)
-        const configuredOrigin = new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store')
-        if (parsedWebhookUrl.protocol !== 'https:' || parsedWebhookUrl.origin !== configuredOrigin.origin) {
-            return NextResponse.json({ ok: false, error: 'URL de webhook non autoris\u00e9e' }, { status: 400 })
+        // Accepter toute URL HTTPS pointant vers notre endpoint (ngrok, IP publique, domaine custom)
+        if (parsedWebhookUrl.protocol !== 'https:') {
+            return NextResponse.json({ ok: false, error: 'L\'URL doit \u00eatre en HTTPS' }, { status: 400 })
+        }
+        if (!parsedWebhookUrl.pathname.includes('/api/webhooks/telegram')) {
+            return NextResponse.json({ ok: false, error: 'URL doit pointer vers /api/webhooks/telegram' }, { status: 400 })
         }
 
         const res = await setTelegramWebhook(webhookUrl, botToken)
