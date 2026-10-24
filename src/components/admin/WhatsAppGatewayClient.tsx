@@ -18,7 +18,11 @@ import {
     RotateCcw,
     Sparkles,
     History,
-    Monitor
+    Monitor,
+    Radio,
+    Megaphone,
+    MessageCircle,
+    ContactRound
 } from 'lucide-react'
 import {
     getWhatsAppGatewayStatus,
@@ -35,6 +39,10 @@ import { DEFAULT_WHATSAPP_TEMPLATES } from '@/lib/constants/whatsapp-templates'
 import { WhatsAppLogsView } from './WhatsAppLogsView'
 import { WhatsAppSessionsView } from './WhatsAppSessionsView'
 import { WhatsAppPairingView } from './WhatsAppPairingView'
+import { WhatsAppStatusView } from './WhatsAppStatusView'
+import { WhatsAppChannelsView } from './WhatsAppChannelsView'
+import { WhatsAppChatsView } from './WhatsAppChatsView'
+import { WhatsAppContactsView } from './WhatsAppContactsView'
 
 interface Props {
     initialStatus: WhatsAppGatewayStatusResponse
@@ -102,7 +110,7 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
 }
 
 export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialTemplates, initialLogsData, initialSessions }: Props) {
-    const [mainTab, setMainTab] = useState<'gateway' | 'pairing' | 'sessions' | 'logs'>('gateway')
+    const [mainTab, setMainTab] = useState<'gateway' | 'pairing' | 'sessions' | 'statuses' | 'channels' | 'chats' | 'contacts' | 'logs'>('gateway')
     const [statusData, setStatusData] = useState<WhatsAppGatewayStatusResponse>(initialStatus)
     const [settings, setSettings] = useState({
         autoPromoLead: initialSettings.autoPromoLead,
@@ -273,6 +281,32 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
 
             {/* Onglets Principaux : Passerelle & Modèles vs Appairage vs Sessions WAHA vs Journal des Envois */}
             <div className="flex flex-wrap items-center gap-2 p-1.5 bg-gray-100/90 rounded-2xl border border-gray-200/80 w-fit">
+                <button type="button" onClick={() => setMainTab('contacts')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${mainTab === 'contacts' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}>
+                    <ContactRound className="w-4 h-4 text-emerald-600" /><span>Contacts</span>
+                </button>
+                <button type="button" onClick={() => setMainTab('chats')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${mainTab === 'chats' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}>
+                    <MessageCircle className="w-4 h-4 text-emerald-600" /><span>Chats</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMainTab('channels')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${mainTab === 'channels' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}
+                >
+                    <Megaphone className="w-4 h-4 text-emerald-600" />
+                    <span>Chaînes</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMainTab('statuses')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        mainTab === 'statuses'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-gray-500 hover:text-slate-900'
+                    }`}
+                >
+                    <Radio className="w-4 h-4 text-emerald-600" />
+                    <span>Statuts</span>
+                </button>
                 <button
                     type="button"
                     onClick={() => setMainTab('gateway')}
@@ -338,6 +372,26 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
             ) : mainTab === 'sessions' ? (
                 <WhatsAppSessionsView
                     initialSessions={initialSessions || []}
+                    onShowFeedback={showFeedback}
+                />
+            ) : mainTab === 'statuses' ? (
+                <WhatsAppStatusView
+                    sessions={initialSessions || []}
+                    onShowFeedback={showFeedback}
+                />
+            ) : mainTab === 'channels' ? (
+                <WhatsAppChannelsView
+                    sessions={initialSessions || []}
+                    onShowFeedback={showFeedback}
+                />
+            ) : mainTab === 'chats' ? (
+                <WhatsAppChatsView
+                    sessions={initialSessions || []}
+                    onShowFeedback={showFeedback}
+                />
+            ) : mainTab === 'contacts' ? (
+                <WhatsAppContactsView
+                    sessions={initialSessions || []}
                     onShowFeedback={showFeedback}
                 />
             ) : mainTab === 'logs' ? (

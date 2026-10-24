@@ -1,6 +1,11 @@
 export type JumiaReportOrder = {
     status?: unknown
     Status?: unknown
+    createdAt?: unknown
+    CreatedAt?: unknown
+    created_at?: unknown
+    orderDate?: unknown
+    OrderDate?: unknown
     totalAmountLocal?: { value?: unknown } | null
     Price?: unknown
     GrandTotal?: unknown
