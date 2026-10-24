@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { JumiaAPI } from '@/lib/jumia-api';
+import { verifyAdmin } from '@/lib/actions/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
+        await verifyAdmin();
+
         const jumia = await JumiaAPI.getInstance();
         if (!jumia) {
             return NextResponse.json({ error: "Jumia non configuré" });
@@ -33,6 +36,16 @@ export async function GET() {
             response2
         });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message, stack: e.stack });
+        if (e?.message?.includes('autorisé') || e?.message?.includes('administrateur')) {
+            return NextResponse.json(
+                { error: 'Authentification administrateur requise' },
+                { status: 401, headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
+            );
+        }
+        console.error('[DEBUG JUMIA] Test failed:', e)
+        return NextResponse.json(
+            { error: 'Test Jumia indisponible' },
+            { status: 500, headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
+        );
     }
 }

@@ -6,7 +6,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { isAuthorizedTelegramWebhook } from '@/lib/telegram-webhook-auth'
 import { getCronSecret } from '@/lib/cron-auth'
-import { getJumiaOrderStatus, isJumiaRevenueOrder, summarizeJumiaOrders } from '@/lib/jumia-reporting'
+import { getJumiaOrderStatus, isJumiaRevenueOrder, summarizeJumiaOrders, type JumiaReportOrder } from '@/lib/jumia-reporting'
 
 const STATUS_LABELS: Record<string, string> = {
     PENDING: 'En attente',
@@ -32,7 +32,9 @@ async function callProtectedCron(pathname: string) {
     })
 
     if (!response.ok) {
-        throw new Error(`API cron indisponible (${response.status})`)
+        const payload = await response.clone().json().catch(() => null)
+        const detail = typeof payload?.error === 'string' ? payload.error : `HTTP ${response.status}`
+        throw new Error(`API cron indisponible (${detail})`)
     }
 
     return response
@@ -371,7 +373,131 @@ export async function POST(req: Request) {
             else if (data && data.startsWith('jumia:')) {
                 const action = data.split(':')[1]
                 try {
-                    if (action === 'pending_orders') {
+                    if (action === 'product_counts') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+
+                        const catalogProducts: any[] = []
+                        let nextToken: string | undefined
+                        let pageCount = 0
+                        do {
+                            const response = await jumia.getProducts({ size: 50, token: nextToken })
+                            const products = response?.products || response?.data?.products || []
+                            catalogProducts.push(...products)
+                            nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                            pageCount++
+                            if (products.length === 0 || catalogProducts.length >= 20000 || pageCount >= 400) {
+                                nextToken = undefined
+                            }
+                        } while (nextToken)
+
+                        const [linkedBooks, linkedPacks, linkedAccessories] = await Promise.all([
+                            prisma.book.count({ where: { isSyncedWithJumia: true, sellerSku: { not: null } } }),
+                            prisma.pack.count({ where: { isSyncedWithJumia: true, sellerSku: { not: null } } }),
+                            prisma.extraProduct.count({ where: { isSyncedWithJumia: true, sellerSku: { not: null } } })
+                        ])
+                        const linkedTotal = linkedBooks + linkedPacks + linkedAccessories
+                        const activeCount = catalogProducts.filter(product => {
+                            const status = String(product.status || product.Status || product.qcStatus || '').toUpperCase()
+                            return ['ACTIVE', 'APPROVED', 'LIVE', 'VALID'].includes(status)
+                        }).length
+
+                        await answerCallbackQuery(callbackId, `${catalogProducts.length} produit(s) Jumia`, token)
+                        await sendTelegramMessage(
+                            `🔢 <b>NOMBRE DE PRODUITS JUMIA</b>\n\n` +
+                            `🟠 Catalogue API Jumia : <b>${catalogProducts.length}</b>\n` +
+                            (activeCount > 0 ? `✅ Actifs/approuvés détectés : <b>${activeCount}</b>\n` : '') +
+                            `\n🔗 <b>Produits liés dans Riwaya : ${linkedTotal}</b>\n` +
+                            `📚 Livres : <b>${linkedBooks}</b>\n` +
+                            `🎁 Packs : <b>${linkedPacks}</b>\n` +
+                            `🛍️ Accessoires : <b>${linkedAccessories}</b>\n\n` +
+                            `📊 Écart catalogue/liaisons : <b>${catalogProducts.length - linkedTotal}</b>`,
+                            message?.chat?.id.toString(),
+                            token
+                        )
+                    } else if (action === 'low_stock') {
+                        const lowStockWhere = {
+                            isSyncedWithJumia: true,
+                            sellerSku: { not: null as null },
+                            jumiaStock: { not: null as null, lte: 3 }
+                        }
+                        const [books, packs, accessories] = await Promise.all([
+                            prisma.book.findMany({
+                                where: lowStockWhere,
+                                orderBy: { jumiaStock: 'asc' },
+                                take: 20,
+                                select: { title: true, sellerSku: true, jumiaStock: true, stock: true }
+                            }),
+                            prisma.pack.findMany({
+                                where: lowStockWhere,
+                                orderBy: { jumiaStock: 'asc' },
+                                take: 20,
+                                select: { name: true, sellerSku: true, jumiaStock: true, stock: true }
+                            }),
+                            prisma.extraProduct.findMany({
+                                where: lowStockWhere,
+                                orderBy: { jumiaStock: 'asc' },
+                                take: 20,
+                                select: { name: true, sellerSku: true, jumiaStock: true, stock: true }
+                            })
+                        ])
+
+                        const products = [
+                            ...books.map(product => ({ name: product.title, ...product })),
+                            ...packs.map(product => ({ name: product.name, ...product })),
+                            ...accessories.map(product => ({ name: product.name, ...product }))
+                        ].sort((a, b) => (a.jumiaStock ?? 0) - (b.jumiaStock ?? 0)).slice(0, 30)
+
+                        if (products.length === 0) {
+                            await answerCallbackQuery(callbackId, '✅ Aucun stock Jumia faible', token)
+                            await sendTelegramMessage('✅ <b>Stock Jumia</b>\n\nAucun produit synchronisé avec un stock inférieur ou égal à 3.', message?.chat?.id.toString(), token)
+                        } else {
+                            const lines = products.map(product => {
+                                const icon = (product.jumiaStock ?? 0) === 0 ? '🔴' : '🟠'
+                                return `${icon} <b>${escapeHtml(product.name)}</b>\n   SKU: <code>${escapeHtml(product.sellerSku || 'N/A')}</code> | Jumia: <b>${product.jumiaStock ?? 0}</b> | Local: <b>${product.stock}</b>`
+                            })
+                            await answerCallbackQuery(callbackId, `${products.length} produit(s) en stock faible`, token)
+                            await sendTelegramMessage(
+                                `⚠️ <b>STOCK FAIBLE JUMIA (≤ 3)</b>\n\n${lines.join('\n\n')}`,
+                                message?.chat?.id.toString(),
+                                token
+                            )
+                        }
+                    } else if (action === 'recent_labels') {
+                        const { JumiaAPI } = await import('@/lib/jumia-api')
+                        const jumia = await JumiaAPI.getInstance()
+                        if (!jumia) throw new Error('Jumia non configuré')
+
+                        const response = await jumia.getOrders(5, undefined, undefined, undefined, undefined, 'createdAt', 'DESC')
+                        const orders = (response?.orders || response?.data?.orders || []).slice(0, 5)
+                        if (orders.length === 0) {
+                            await answerCallbackQuery(callbackId, 'Aucune commande Jumia trouvée', token)
+                            await sendTelegramMessage('🏷️ <b>Étiquettes Jumia</b>\n\nAucune commande récente trouvée.', message?.chat?.id.toString(), token)
+                        } else {
+                            const lines = orders.map((order: any, index: number) => {
+                                const number = order.number || order.orderNumber || order.OrderNumber || order.id || 'N/A'
+                                const status = getJumiaOrderStatus(order)
+                                const date = order.createdAt ? new Date(order.createdAt).toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' }) : 'Date inconnue'
+                                return `${index + 1}. <b>#${escapeHtml(String(number))}</b> — ${escapeHtml(status)}\n   📅 ${escapeHtml(date)}`
+                            })
+                            const keyboard = orders.map((order: any) => {
+                                const number = order.number || order.orderNumber || order.OrderNumber || order.id || 'Commande'
+                                const internalId = order.id || order.orderId || order.OrderId || number
+                                return [{
+                                    text: `🏷️ Étiquette #${String(number).slice(-18)}`,
+                                    callback_data: `jumia_label:${internalId}`
+                                }]
+                            })
+                            await answerCallbackQuery(callbackId, `${orders.length} étiquette(s) disponible(s)`, token)
+                            await sendTelegramMessage(
+                                `🏷️ <b>5 DERNIÈRES ÉTIQUETTES JUMIA</b>\n\n${lines.join('\n\n')}\n\nChoisissez une commande :`,
+                                message?.chat?.id.toString(),
+                                token,
+                                { inline_keyboard: keyboard }
+                            )
+                        }
+                    } else if (action === 'pending_orders') {
                         const { JumiaAPI } = await import('@/lib/jumia-api')
                         const jumia = await JumiaAPI.getInstance()
                         if (!jumia) throw new Error('Jumia non configuré')
@@ -1440,27 +1566,60 @@ export async function POST(req: Request) {
                     }
 
                     let jumiaStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
+                    let jumiaStatsError: string | null = null
                     try {
                         const { JumiaAPI } = await import('@/lib/jumia-api')
                         const jumia = await JumiaAPI.getInstance()
                         if (jumia) {
-                            // Jumia utilise une borne de fin exclusive. Pour aujourd'hui,
-                            // envoyer la même date en début et fin renvoie une liste vide.
                             const formatLocalDate = (date: Date) => {
                                 const year = date.getFullYear()
                                 const month = String(date.getMonth() + 1).padStart(2, '0')
                                 const day = String(date.getDate()).padStart(2, '0')
                                 return `${year}-${month}-${day}`
                             }
-                            const exclusiveEnd = new Date(end)
-                            exclusiveEnd.setDate(exclusiveEnd.getDate() + 1)
-                            exclusiveEnd.setHours(0, 0, 0, 0)
                             const createdAfter = formatLocalDate(start)
-                            const createdBefore = formatLocalDate(exclusiveEnd)
+                            const createdBefore = formatLocalDate(end)
+                            const isToday = period === 'today'
+                            const allJumiaOrders: JumiaReportOrder[] = []
+                            let nextToken: string | undefined
+                            let pageCount = 0
 
-                            // On demande jusqu'à 500 commandes pour couvrir un mois entier
-                            const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
-                            const jumiaOrders = response?.orders || response?.data?.orders || []
+                            do {
+                                // Une borne future peut faire renvoyer une liste vide par Jumia.
+                                // Pour aujourd'hui, charger les plus récentes puis filtrer au Maroc.
+                                const response = await jumia.getOrders(
+                                    100,
+                                    nextToken,
+                                    undefined,
+                                    isToday ? undefined : createdAfter,
+                                    isToday ? undefined : createdBefore,
+                                    'createdAt',
+                                    'DESC'
+                                )
+                                const pageOrders = response?.orders || response?.data?.orders || []
+                                allJumiaOrders.push(...pageOrders)
+                                nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                                pageCount++
+                                if (pageOrders.length === 0 || allJumiaOrders.length >= 10000 || pageCount >= 20) {
+                                    nextToken = undefined
+                                }
+                            } while (nextToken)
+
+                            const moroccoDate = new Intl.DateTimeFormat('en-CA', {
+                                timeZone: 'Africa/Casablanca',
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                            })
+                            const targetDay = moroccoDate.format(new Date())
+                            const jumiaOrders = isToday
+                                ? allJumiaOrders.filter(order => {
+                                    const rawDate = order.createdAt || order.CreatedAt || order.created_at || order.orderDate || order.OrderDate
+                                    if (typeof rawDate !== 'string' && typeof rawDate !== 'number' && !(rawDate instanceof Date)) return false
+                                    const orderDate = new Date(rawDate)
+                                    return !Number.isNaN(orderDate.getTime()) && moroccoDate.format(orderDate) === targetDay
+                                })
+                                : allJumiaOrders
                             const summary = summarizeJumiaOrders(jumiaOrders)
                             jumiaStats = {
                                 count: summary.valid,
@@ -1470,9 +1629,12 @@ export async function POST(req: Request) {
                                 delivered: summary.statusCounts.DELIVERED || 0,
                                 canceled: summary.excluded
                             }
+                        } else {
+                            jumiaStatsError = 'Jumia non configuré'
                         }
                     } catch (e) {
                         console.error('Erreur stats Jumia:', e)
+                        jumiaStatsError = 'Données Jumia indisponibles'
                     }
 
                     let text = `📊 <b>RAPPORT : ${label.toUpperCase()}</b>\n\n` +
@@ -1490,7 +1652,8 @@ export async function POST(req: Request) {
                             `⏳ En attente : ${jumiaStats.pending}\n` +
                             `🚚 En expédition : ${jumiaStats.shipped}\n` +
                             `✅ Livrées : ${jumiaStats.delivered}\n` +
-                            `❌ Annulées/Retours : ${jumiaStats.canceled}`
+                            `❌ Annulées/Retours : ${jumiaStats.canceled}` +
+                            (jumiaStatsError ? `\n⚠️ ${jumiaStatsError}` : '')
                     
                     if (showVisitors) text += `\n👥 Visiteurs Uniques : <b>${visitors}</b>`
                     if (showRegistrations) text += `\n👤 Inscriptions : <b>${registrations}</b>`
@@ -1771,7 +1934,8 @@ export async function POST(req: Request) {
                     `/2026 — Lister les commandes par mois pour l'année 2026\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
                     `<b>🟠 Jumia</b>\n` +
-                    `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n\n` +
+                    `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n` +
+                    `/jumia_top — Top 10 des livres Jumia et CA par produit pour le mois\n\n` +
                     `<b>📦 Marketing & Réseaux Sociaux</b>\n` +
                     `/generer — Liste des créatives, prévisualisation et publication (IG, FB, TT, TG)\n` +
                     `#legende [votre texte] — Définir une légende personnalisée pour la prochaine publication Facebook/Instagram\n\n` +
@@ -2205,12 +2369,82 @@ export async function POST(req: Request) {
                     }
                 }
             }
+            else if (text.startsWith('/JUMIA_TOP') || text === 'JUMIA_TOP') {
+                try {
+                    const { JumiaAPI } = await import('@/lib/jumia-api')
+                    const jumia = await JumiaAPI.getInstance()
+                    if (!jumia) throw new Error('Jumia non configuré')
+
+                    const now = new Date()
+                    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+                    const monthEnd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`
+                    const orders: any[] = []
+                    let nextToken: string | undefined
+
+                    do {
+                        const response = await jumia.getOrders(100, nextToken, undefined, monthStart, monthEnd)
+                        const pageOrders = response?.orders || response?.data?.orders || []
+                        orders.push(...pageOrders)
+                        nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                        if (pageOrders.length === 0 || orders.length >= 10000) nextToken = undefined
+                    } while (nextToken)
+
+                    const productStats = new Map<string, { name: string; quantity: number; revenue: number }>()
+                    for (const order of orders.filter(isJumiaRevenueOrder)) {
+                        const orderId = String(order.id || order.number || order.OrderId || order.OrderNumber || '')
+                        if (!orderId) continue
+                        try {
+                            const response = await jumia.getOrderItems(orderId)
+                            const data = Array.isArray(response) ? response[0] : response
+                            const rawItems = data?.orderItems || data?.items || data?.data?.orderItems || data?.data?.items || (Array.isArray(response) ? response : [])
+                            const items = Array.isArray(rawItems) ? rawItems : []
+                            for (const item of items) {
+                                const sku = String(item.product?.sellerSku || item.sellerSku || item.Sku || item.sku || item.id || 'inconnu')
+                                const name = String(item.product?.name || item.name || item.Name || item.productName || sku)
+                                const quantity = Math.max(1, Number(item.quantity || item.Quantity || 1))
+                                const rawPrice = item.itemPriceLocal?.value ?? item.itemPriceLocal ?? item.price?.value ?? item.price ?? item.Price ?? item.unitPrice ?? 0
+                                const price = Number(rawPrice) || 0
+                                const current = productStats.get(sku) || { name, quantity: 0, revenue: 0 }
+                                current.quantity += quantity
+                                current.revenue += price * quantity
+                                productStats.set(sku, current)
+                            }
+                        } catch (error) {
+                            console.error(`[JUMIA TOP] Articles indisponibles pour ${orderId}:`, error)
+                        }
+                    }
+
+                    const ranking = [...productStats.values()]
+                        .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
+                        .slice(0, 10)
+                    const lines = ranking.map((product, index) =>
+                        `${index + 1}. <b>${escapeHtml(product.name)}</b>\n   📚 ${product.quantity} vendu(s) — 💰 ${product.revenue.toFixed(2)} درهم`
+                    )
+                    const totalRevenue = [...productStats.values()].reduce((sum, product) => sum + product.revenue, 0)
+                    const messageText = `🏆 <b>TOP VENTES JUMIA — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' }).toUpperCase()}</b>\n\n` +
+                        (lines.length > 0 ? lines.join('\n\n') : 'Aucune vente Jumia valide trouvée ce mois-ci.') +
+                        `\n\n📦 Commandes valides analysées : <b>${orders.filter(isJumiaRevenueOrder).length}</b>\n💰 CA produits : <b>${totalRevenue.toFixed(2)} درهم</b>`
+                    await sendTelegramMessage(messageText, chatId.toString(), token)
+                } catch (error) {
+                    console.error('[JUMIA TOP] Erreur:', error)
+                    await sendTelegramMessage('❌ Impossible de charger le classement Jumia.', chatId.toString(), token)
+                }
+            }
             else if (text.startsWith('/JUMIA')) {
                 // Menu rapide Jumia
                 const replyMarkup = {
                     inline_keyboard: [
                         [
                             { text: '📦 Commandes Jumia Pending', callback_data: 'jumia:pending_orders' }
+                        ],
+                        [
+                            { text: '🏷️ 5 dernières étiquettes', callback_data: 'jumia:recent_labels' }
+                        ],
+                        [
+                            { text: '⚠️ Stock faible Jumia', callback_data: 'jumia:low_stock' }
+                        ],
+                        [
+                            { text: '🔢 Nombre de produits Jumia', callback_data: 'jumia:product_counts' }
                         ],
                         [
                             { text: '💰 3 derniers Paiements', callback_data: 'jumia:last_3_payouts' }

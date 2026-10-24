@@ -119,6 +119,12 @@ async function extractWahaQr(baseUrl: string, sessionName: string): Promise<stri
             const contentType = qrRes.headers.get('content-type') || ''
             if (contentType.includes('application/json')) {
                 const qrJson = await qrRes.json().catch(() => null)
+                // WAHA image JSON: { mimetype: "image/png", data: "base64..." }
+                if (qrJson?.data && typeof qrJson.data === 'string' && typeof qrJson?.mimetype === 'string' && qrJson.mimetype.startsWith('image/')) {
+                    return qrJson.data.startsWith('data:')
+                        ? qrJson.data
+                        : `data:${qrJson.mimetype};base64,${qrJson.data}`
+                }
                 // WAHA peut retourner la clé qrcode
                 if (qrJson?.qrcode && typeof qrJson.qrcode === 'string') {
                     return qrJson.qrcode.startsWith('data:')
@@ -941,14 +947,48 @@ export async function deleteWahaSession(name: string): Promise<{ success: boolea
     }
 }
 
-export async function getWahaSessionQrCode(name: string): Promise<{ success: boolean; qr: string | null; error?: string }> {
+export async function getWahaSessionQrCode(name: string): Promise<{ success: boolean; qr: string | null; status?: string; error?: string }> {
     await verifyAdmin()
     const gateway = await detectGateway()
     if (!gateway) return { success: false, qr: null, error: 'Passerelle indisponible' }
 
     try {
-        const qr = await extractWahaQr(gateway.baseUrl, name)
-        return { success: true, qr }
+        let qr = await extractWahaQr(gateway.baseUrl, name)
+        if (qr) {
+            return { success: true, qr, status: 'SCAN_QR_CODE' }
+        }
+
+        const headers = getWahaHeaders()
+        const sessionRes = await fetch(`${gateway.baseUrl}/api/sessions/${encodeURIComponent(name)}`, {
+            headers,
+            cache: 'no-store'
+        }).catch(() => null)
+
+        let sessionStatus: string | undefined
+        if (sessionRes && sessionRes.ok) {
+            const sessionData = await sessionRes.json().catch(() => null)
+            sessionStatus = sessionData?.status
+        }
+
+        if (sessionStatus === 'FAILED' || sessionStatus === 'STOPPED') {
+            await fetch(`${gateway.baseUrl}/api/sessions/${encodeURIComponent(name)}/restart`, {
+                method: 'POST',
+                headers
+            }).catch(() => null)
+
+            await new Promise(r => setTimeout(r, 2200))
+            qr = await extractWahaQr(gateway.baseUrl, name)
+            if (qr) {
+                return { success: true, qr, status: 'SCAN_QR_CODE' }
+            }
+        }
+
+        return {
+            success: Boolean(qr),
+            qr,
+            status: sessionStatus,
+            error: qr ? undefined : (sessionStatus === 'WORKING' ? 'Session déjà connectée' : 'Initialisation WAHA en cours...')
+        }
     } catch (err: any) {
         return { success: false, qr: null, error: err.message }
     }
@@ -989,7 +1029,20 @@ export async function getWahaSessionQrFormatted(
         const contentType = res.headers.get('content-type') || ''
         if (format === 'raw' || contentType.includes('application/json')) {
             const json = await res.json().catch(() => null)
-            const raw = json?.raw || json?.qr || json?.value || json?.data || (typeof json === 'string' ? json : JSON.stringify(json))
+            if (format === 'image' && json?.data && typeof json.data === 'string' && typeof json?.mimetype === 'string' && json.mimetype.startsWith('image/')) {
+                return {
+                    success: true,
+                    data: json.data.startsWith('data:') ? json.data : `data:${json.mimetype};base64,${json.data}`,
+                    format: 'image'
+                }
+            }
+            const raw = json?.raw || json?.qr || json?.value || json?.data || (typeof json === 'string' ? json : null)
+            if (!raw || typeof raw !== 'string') {
+                return { success: false, format, error: 'Réponse QR WAHA non reconnue' }
+            }
+            if (format === 'image') {
+                return { success: true, data: await QRCode.toDataURL(raw, { margin: 2, scale: 7 }), format: 'image' }
+            }
             return { success: true, data: raw, format: 'raw' }
         }
 
@@ -1211,6 +1264,563 @@ export async function confirmWahaPasskey(
     } catch (err: any) {
         return { success: false, error: err.message || 'Erreur confirmation passkey' }
     }
+}
+
+export type WahaStatusType = 'text' | 'image' | 'video'
+
+export interface WahaStatusPayload {
+    text?: string
+    fileUrl?: string
+    caption?: string
+    backgroundColor?: string
+    font?: number
+}
+
+export async function sendWahaStatus(
+    sessionName: string,
+    type: WahaStatusType,
+    payload: WahaStatusPayload
+): Promise<{ success: boolean; error?: string }> {
+    await verifyAdmin()
+
+    const cleanSession = sessionName.trim()
+    if (!cleanSession || cleanSession.length > 100) {
+        return { success: false, error: 'Session WAHA invalide' }
+    }
+
+    const backgroundColor = payload.backgroundColor || '#38b42f'
+    if (!/^#[0-9a-fA-F]{6}$/.test(backgroundColor)) {
+        return { success: false, error: 'Couleur de fond invalide' }
+    }
+
+    let body: Record<string, unknown>
+    if (type === 'text') {
+        const statusText = payload.text?.trim()
+        if (!statusText) return { success: false, error: 'Le texte du statut est obligatoire' }
+        if (statusText.length > 5000) return { success: false, error: 'Le texte est trop long' }
+
+        body = {
+            text: statusText,
+            backgroundColor,
+            font: Math.min(5, Math.max(0, Math.trunc(payload.font ?? 1)))
+        }
+    } else {
+        const fileUrl = payload.fileUrl?.trim()
+        if (!fileUrl) return { success: false, error: `L\'URL ${type === 'image' ? 'de l\'image' : 'de la vidéo'} est obligatoire` }
+
+        try {
+            const parsedUrl = new URL(fileUrl)
+            if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error('invalid protocol')
+        } catch {
+            return { success: false, error: 'URL de fichier invalide (HTTP/HTTPS requis)' }
+        }
+
+        body = {
+            file: {
+                mimetype: type === 'image' ? 'image/jpeg' : 'video/mp4',
+                url: fileUrl
+            },
+            ...(type === 'image'
+                ? { caption: payload.caption?.trim() || '' }
+                : { backgroundColor })
+        }
+    }
+
+    const gateway = await detectGateway()
+    if (!gateway) return { success: false, error: 'Passerelle WhatsApp indisponible' }
+    if (gateway.engine !== 'waha') {
+        return { success: false, error: 'La publication de statuts nécessite une passerelle WAHA' }
+    }
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000)
+    try {
+        const response = await fetch(
+            `${gateway.baseUrl}/api/${encodeURIComponent(cleanSession)}/status/${type}`,
+            {
+                method: 'POST',
+                headers: { ...getWahaHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                signal: controller.signal,
+                cache: 'no-store'
+            }
+        )
+        const result = await response.json().catch(() => ({}))
+        if (!response.ok) {
+            const apiMessage = result?.message || result?.error
+            return {
+                success: false,
+                error: typeof apiMessage === 'string'
+                    ? apiMessage
+                    : `Publication refusée par WAHA (HTTP ${response.status})`
+            }
+        }
+        return { success: true }
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : ''
+        const isTimeout = error instanceof Error && error.name === 'AbortError'
+        return {
+            success: false,
+            error: isTimeout || message === 'This operation was aborted'
+                ? 'Délai dépassé pendant la publication du statut'
+                : message || 'Impossible de publier le statut WhatsApp'
+        }
+    } finally {
+        clearTimeout(timeoutId)
+    }
+}
+
+export interface WahaChannel {
+    id: string
+    name: string
+    description?: string
+    invite?: string
+    picture?: string
+    role?: string
+}
+
+function readWahaApiError(result: unknown): string | null {
+    if (!result || typeof result !== 'object') return null
+    const value = result as { message?: unknown; error?: unknown }
+    return typeof value.message === 'string'
+        ? value.message
+        : typeof value.error === 'string' ? value.error : null
+}
+
+export async function getWahaChannels(
+    sessionName: string = 'default'
+): Promise<{ success: boolean; channels: WahaChannel[]; error?: string }> {
+    await verifyAdmin()
+    const cleanSession = sessionName.trim()
+    if (!cleanSession || cleanSession.length > 100) {
+        return { success: false, channels: [], error: 'Session WAHA invalide' }
+    }
+
+    const gateway = await detectGateway()
+    if (!gateway) return { success: false, channels: [], error: 'Passerelle WhatsApp indisponible' }
+    if (gateway.engine !== 'waha') return { success: false, channels: [], error: 'La gestion des chaînes nécessite WAHA' }
+
+    try {
+        const response = await fetch(`${gateway.baseUrl}/api/${encodeURIComponent(cleanSession)}/channels`, {
+            headers: getWahaHeaders(),
+            cache: 'no-store'
+        })
+        const result: unknown = await response.json().catch(() => null)
+        if (!response.ok) {
+            return { success: false, channels: [], error: readWahaApiError(result) || `Erreur WAHA HTTP ${response.status}` }
+        }
+        const rawChannels: unknown[] = Array.isArray(result)
+            ? result
+            : result && typeof result === 'object' && Array.isArray((result as { channels?: unknown }).channels)
+                ? (result as { channels: unknown[] }).channels
+                : []
+        const channels = rawChannels.flatMap((item): WahaChannel[] => {
+            if (!item || typeof item !== 'object') return []
+            const value = item as Record<string, unknown>
+            if (typeof value.id !== 'string' || !value.id.endsWith('@newsletter')) return []
+            return [{
+                id: value.id,
+                name: typeof value.name === 'string' && value.name.trim() ? value.name : value.id,
+                description: typeof value.description === 'string' ? value.description : undefined,
+                invite: typeof value.invite === 'string' ? value.invite : undefined,
+                picture: typeof value.picture === 'string' ? value.picture : undefined,
+                role: typeof value.role === 'string' ? value.role : undefined
+            }]
+        })
+        return { success: true, channels }
+    } catch (error: unknown) {
+        return { success: false, channels: [], error: error instanceof Error ? error.message : 'Impossible de récupérer les chaînes WhatsApp' }
+    }
+}
+
+export async function sendWahaChannelMessage(
+    sessionName: string,
+    channelId: string,
+    text: string
+): Promise<{ success: boolean; error?: string }> {
+    await verifyAdmin()
+    const cleanSession = sessionName.trim()
+    const cleanChannelId = channelId.trim()
+    const cleanText = text.trim()
+    if (!cleanSession || cleanSession.length > 100) return { success: false, error: 'Session WAHA invalide' }
+    if (!/^\d+@newsletter$/.test(cleanChannelId)) return { success: false, error: 'Identifiant de chaîne invalide' }
+    if (!cleanText) return { success: false, error: 'Le message est obligatoire' }
+    if (cleanText.length > 5000) return { success: false, error: 'Le message est trop long' }
+
+    const gateway = await detectGateway()
+    if (!gateway) return { success: false, error: 'Passerelle WhatsApp indisponible' }
+    if (gateway.engine !== 'waha') return { success: false, error: 'La gestion des chaînes nécessite WAHA' }
+
+    try {
+        const response = await fetch(`${gateway.baseUrl}/api/sendText`, {
+            method: 'POST',
+            headers: { ...getWahaHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session: cleanSession, chatId: cleanChannelId, text: cleanText }),
+            cache: 'no-store'
+        })
+        const result: unknown = await response.json().catch(() => null)
+        if (!response.ok) {
+            return { success: false, error: readWahaApiError(result) || `Publication refusée par WAHA (HTTP ${response.status})` }
+        }
+        return { success: true }
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : 'Impossible de publier dans la chaîne' }
+    }
+}
+
+export interface WahaChatSummary {
+    id: string
+    name?: string
+    picture?: string | null
+    unreadCount?: number
+    archived?: boolean
+    lastMessage?: WahaChatMessage | null
+    [key: string]: unknown
+}
+
+export interface WahaChatMessage {
+    id: string
+    timestamp?: number
+    from?: string
+    fromMe?: boolean
+    body?: string
+    hasMedia?: boolean
+    ack?: number
+    ackName?: string
+    [key: string]: unknown
+}
+
+type WahaChatAction = 'delete' | 'clear' | 'read' | 'archive' | 'unarchive' | 'unread'
+type WahaMessageAction = 'delete' | 'edit' | 'pin' | 'unpin'
+
+async function callWahaChatApi(
+    path: string,
+    init?: RequestInit
+): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const gateway = await detectGateway()
+    if (!gateway) return { success: false, error: 'Passerelle WhatsApp indisponible' }
+    if (gateway.engine !== 'waha') return { success: false, error: 'La gestion des chats nécessite WAHA' }
+
+    try {
+        const response = await fetch(`${gateway.baseUrl}${path}`, {
+            ...init,
+            headers: {
+                ...getWahaHeaders(),
+                ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+                ...(init?.headers || {})
+            },
+            cache: 'no-store'
+        })
+        const data: unknown = await response.json().catch(() => null)
+        if (!response.ok) return { success: false, error: readWahaApiError(data) || `Erreur WAHA HTTP ${response.status}` }
+        return { success: true, data }
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : 'Erreur de communication avec WAHA' }
+    }
+}
+
+function validWahaId(value: string, maxLength: number = 300): boolean {
+    return Boolean(value.trim()) && value.length <= maxLength && !/[\r\n]/.test(value)
+}
+
+function toChatArray(data: unknown): WahaChatSummary[] {
+    const values = Array.isArray(data)
+        ? data
+        : data && typeof data === 'object' && Array.isArray((data as { chats?: unknown }).chats)
+            ? (data as { chats: unknown[] }).chats
+            : []
+    return values.filter((item): item is WahaChatSummary => Boolean(item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string'))
+}
+
+function toMessageArray(data: unknown): WahaChatMessage[] {
+    const values = Array.isArray(data)
+        ? data
+        : data && typeof data === 'object' && Array.isArray((data as { messages?: unknown }).messages)
+            ? (data as { messages: unknown[] }).messages
+            : []
+    return values.filter((item): item is WahaChatMessage => Boolean(item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string'))
+}
+
+export async function getWahaChats(
+    sessionName: string,
+    mode: 'all' | 'overview' = 'overview',
+    limit: number = 30,
+    offset: number = 0
+): Promise<{ success: boolean; chats: WahaChatSummary[]; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100)) return { success: false, chats: [], error: 'Session WAHA invalide' }
+    const safeLimit = Math.min(100, Math.max(1, Math.trunc(limit)))
+    const safeOffset = Math.max(0, Math.trunc(offset))
+    const suffix = mode === 'overview' ? '/overview' : ''
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/chats${suffix}?limit=${safeLimit}&offset=${safeOffset}`)
+    return result.success
+        ? { success: true, chats: toChatArray(result.data) }
+        : { success: false, chats: [], error: result.error }
+}
+
+export async function getWahaChatsOverviewByIds(
+    sessionName: string,
+    ids: string[],
+    limit: number = 100,
+    offset: number = 0
+): Promise<{ success: boolean; chats: WahaChatSummary[]; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100)) return { success: false, chats: [], error: 'Session WAHA invalide' }
+    const safeIds = ids.map(id => id.trim()).filter(id => validWahaId(id)).slice(0, 500)
+    if (!safeIds.length) return { success: false, chats: [], error: 'Ajoutez au moins un identifiant de chat' }
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/chats/overview`, {
+        method: 'POST',
+        body: JSON.stringify({ ids: safeIds, limit: Math.min(500, Math.max(1, Math.trunc(limit))), offset: Math.max(0, Math.trunc(offset)) })
+    })
+    return result.success
+        ? { success: true, chats: toChatArray(result.data) }
+        : { success: false, chats: [], error: result.error }
+}
+
+export async function getWahaChatPicture(
+    sessionName: string,
+    chatId: string,
+    refresh: boolean = false
+): Promise<{ success: boolean; url?: string | null; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100) || !validWahaId(chatId)) return { success: false, error: 'Session ou chat invalide' }
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/chats/${encodeURIComponent(chatId.trim())}/picture?refresh=${refresh}`)
+    const url = result.data && typeof result.data === 'object' && typeof (result.data as { url?: unknown }).url === 'string'
+        ? (result.data as { url: string }).url : null
+    return result.success ? { success: true, url } : { success: false, error: result.error }
+}
+
+export async function getWahaChatMessages(
+    sessionName: string,
+    chatId: string,
+    limit: number = 30,
+    offset: number = 0
+): Promise<{ success: boolean; messages: WahaChatMessage[]; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100) || !validWahaId(chatId)) return { success: false, messages: [], error: 'Session ou chat invalide' }
+    const query = `limit=${Math.min(100, Math.max(1, Math.trunc(limit)))}&offset=${Math.max(0, Math.trunc(offset))}&downloadMedia=false`
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/chats/${encodeURIComponent(chatId.trim())}/messages?${query}`)
+    return result.success ? { success: true, messages: toMessageArray(result.data) } : { success: false, messages: [], error: result.error }
+}
+
+export async function getWahaChatMessage(
+    sessionName: string,
+    chatId: string,
+    messageId: string
+): Promise<{ success: boolean; message?: WahaChatMessage; error?: string }> {
+    await verifyAdmin()
+    if (![sessionName, chatId, messageId].every(value => validWahaId(value))) return { success: false, error: 'Identifiant invalide' }
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/chats/${encodeURIComponent(chatId.trim())}/messages/${encodeURIComponent(messageId.trim())}?downloadMedia=false`)
+    return result.success && result.data && typeof result.data === 'object'
+        ? { success: true, message: result.data as WahaChatMessage }
+        : { success: false, error: result.error || 'Message introuvable' }
+}
+
+export async function runWahaChatAction(
+    sessionName: string,
+    chatId: string,
+    action: WahaChatAction
+): Promise<{ success: boolean; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100) || !validWahaId(chatId)) return { success: false, error: 'Session ou chat invalide' }
+    const base = `/api/${encodeURIComponent(sessionName.trim())}/chats/${encodeURIComponent(chatId.trim())}`
+    const requests: Record<WahaChatAction, { path: string; init: RequestInit }> = {
+        delete: { path: base, init: { method: 'DELETE' } },
+        clear: { path: `${base}/messages`, init: { method: 'DELETE' } },
+        read: { path: `${base}/messages/read`, init: { method: 'POST', body: JSON.stringify({ messages: 100, days: 30 }) } },
+        archive: { path: `${base}/archive`, init: { method: 'POST', body: JSON.stringify({}) } },
+        unarchive: { path: `${base}/unarchive`, init: { method: 'POST', body: JSON.stringify({}) } },
+        unread: { path: `${base}/unread`, init: { method: 'POST', body: JSON.stringify({}) } }
+    }
+    const request = requests[action]
+    if (!request) return { success: false, error: 'Action non autorisée' }
+    const result = await callWahaChatApi(request.path, request.init)
+    return result.success ? { success: true } : { success: false, error: result.error }
+}
+
+export async function runWahaMessageAction(
+    sessionName: string,
+    chatId: string,
+    messageId: string,
+    action: WahaMessageAction,
+    value?: string | number
+): Promise<{ success: boolean; error?: string }> {
+    await verifyAdmin()
+    if (![sessionName, chatId, messageId].every(item => validWahaId(item))) return { success: false, error: 'Identifiant invalide' }
+    const base = `/api/${encodeURIComponent(sessionName.trim())}/chats/${encodeURIComponent(chatId.trim())}/messages/${encodeURIComponent(messageId.trim())}`
+    let init: RequestInit
+    let path = base
+    if (action === 'delete') init = { method: 'DELETE' }
+    else if (action === 'edit') {
+        const text = String(value || '').trim()
+        if (!text || text.length > 5000) return { success: false, error: 'Texte modifié invalide' }
+        init = { method: 'PUT', body: JSON.stringify({ text }) }
+    } else if (action === 'pin') {
+        const allowedDurations = [86400, 604800, 2592000]
+        const duration = Number(value)
+        if (!allowedDurations.includes(duration)) return { success: false, error: 'Durée d’épinglage invalide' }
+        path = `${base}/pin`
+        init = { method: 'POST', body: JSON.stringify({ duration }) }
+    } else {
+        path = `${base}/unpin`
+        init = { method: 'POST', body: JSON.stringify({}) }
+    }
+    const result = await callWahaChatApi(path, init)
+    return result.success ? { success: true } : { success: false, error: result.error }
+}
+
+export interface WahaContact {
+    id: string
+    number?: string
+    name?: string
+    pushname?: string
+    shortName?: string
+    isMe?: boolean
+    isGroup?: boolean
+    isWAContact?: boolean
+    isMyContact?: boolean
+    isBlocked?: boolean
+    [key: string]: unknown
+}
+
+export interface WahaLidMapping {
+    lid: string | null
+    pn: string | null
+}
+
+function normalizeContactId(contactId: string): string | null {
+    const value = contactId.trim().replace(/^\+/, '')
+    return /^(\d+|\d+@(c\.us|lid))$/.test(value) ? value : null
+}
+
+export async function getWahaContacts(
+    sessionName: string,
+    limit: number = 100,
+    offset: number = 0,
+    sortBy: 'id' | 'name' = 'name',
+    sortOrder: 'asc' | 'desc' = 'asc'
+): Promise<{ success: boolean; contacts: WahaContact[]; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100)) return { success: false, contacts: [], error: 'Session WAHA invalide' }
+    const query = new URLSearchParams({
+        session: sessionName.trim(),
+        limit: String(Math.min(500, Math.max(1, Math.trunc(limit)))),
+        offset: String(Math.max(0, Math.trunc(offset))),
+        sortBy,
+        sortOrder
+    })
+    const result = await callWahaChatApi(`/api/contacts/all?${query}`)
+    const values = Array.isArray(result.data) ? result.data : []
+    const contacts = values.filter((item): item is WahaContact => Boolean(item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string'))
+    return result.success ? { success: true, contacts } : { success: false, contacts: [], error: result.error }
+}
+
+export async function getWahaContact(
+    sessionName: string,
+    contactId: string,
+    routeStyle: 'query' | 'session' = 'query'
+): Promise<{ success: boolean; contact?: WahaContact; error?: string }> {
+    await verifyAdmin()
+    const id = normalizeContactId(contactId)
+    if (!validWahaId(sessionName, 100) || !id) return { success: false, error: 'Session ou contact invalide' }
+    const path = routeStyle === 'session'
+        ? `/api/${encodeURIComponent(sessionName.trim())}/contacts/${encodeURIComponent(id)}`
+        : `/api/contacts?${new URLSearchParams({ contactId: id, session: sessionName.trim() })}`
+    const result = await callWahaChatApi(path)
+    return result.success && result.data && typeof result.data === 'object'
+        ? { success: true, contact: result.data as WahaContact }
+        : { success: false, error: result.error || 'Contact introuvable' }
+}
+
+export async function inspectWahaContact(
+    sessionName: string,
+    contactId: string,
+    type: 'exists' | 'about' | 'picture',
+    refresh: boolean = false
+): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    await verifyAdmin()
+    const id = normalizeContactId(contactId)
+    if (!validWahaId(sessionName, 100) || !id) return { success: false, error: 'Session ou contact invalide' }
+    const endpoint = type === 'exists' ? 'check-exists' : type === 'about' ? 'about' : 'profile-picture'
+    const query = new URLSearchParams({ session: sessionName.trim() })
+    query.set(type === 'exists' ? 'phone' : 'contactId', id)
+    if (type === 'picture') query.set('refresh', String(refresh))
+    return callWahaChatApi(`/api/contacts/${endpoint}?${query}`)
+}
+
+export async function updateWahaContact(
+    sessionName: string,
+    contactId: string,
+    firstName: string,
+    lastName: string
+): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    await verifyAdmin()
+    const id = normalizeContactId(contactId)
+    const first = firstName.trim()
+    const last = lastName.trim()
+    if (!validWahaId(sessionName, 100) || !id) return { success: false, error: 'Session ou contact invalide' }
+    if (!first || first.length > 100 || last.length > 100) return { success: false, error: 'Nom du contact invalide' }
+    return callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/contacts/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ firstName: first, lastName: last })
+    })
+}
+
+export async function setWahaContactBlocked(
+    sessionName: string,
+    contactId: string,
+    blocked: boolean
+): Promise<{ success: boolean; error?: string }> {
+    await verifyAdmin()
+    const id = normalizeContactId(contactId)
+    if (!validWahaId(sessionName, 100) || !id) return { success: false, error: 'Session ou contact invalide' }
+    const result = await callWahaChatApi(`/api/contacts/${blocked ? 'block' : 'unblock'}`, {
+        method: 'POST',
+        body: JSON.stringify({ contactId: id, session: sessionName.trim() })
+    })
+    return result.success ? { success: true } : { success: false, error: result.error }
+}
+
+export async function getWahaLids(
+    sessionName: string,
+    limit: number = 100,
+    offset: number = 0
+): Promise<{ success: boolean; mappings: WahaLidMapping[]; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100)) return { success: false, mappings: [], error: 'Session WAHA invalide' }
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/lids?limit=${Math.min(500, Math.max(1, Math.trunc(limit)))}&offset=${Math.max(0, Math.trunc(offset))}`)
+    const values = Array.isArray(result.data) ? result.data : []
+    const mappings = values.flatMap((item): WahaLidMapping[] => {
+        if (!item || typeof item !== 'object') return []
+        const value = item as { lid?: unknown; pn?: unknown }
+        return [{ lid: typeof value.lid === 'string' ? value.lid : null, pn: typeof value.pn === 'string' ? value.pn : null }]
+    })
+    return result.success ? { success: true, mappings } : { success: false, mappings: [], error: result.error }
+}
+
+export async function getWahaLidsCount(
+    sessionName: string
+): Promise<{ success: boolean; count?: number; error?: string }> {
+    await verifyAdmin()
+    if (!validWahaId(sessionName, 100)) return { success: false, error: 'Session WAHA invalide' }
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/lids/count`)
+    const count = result.data && typeof result.data === 'object' ? Number((result.data as { count?: unknown }).count) : NaN
+    return result.success && Number.isFinite(count) ? { success: true, count } : { success: false, error: result.error || 'Comptage LID indisponible' }
+}
+
+export async function resolveWahaLid(
+    sessionName: string,
+    value: string,
+    direction: 'lid-to-phone' | 'phone-to-lid'
+): Promise<{ success: boolean; mapping?: WahaLidMapping; error?: string }> {
+    await verifyAdmin()
+    const cleanValue = value.trim().replace(/^\+/, '')
+    if (!validWahaId(sessionName, 100) || !/^(\d+|\d+@(lid|c\.us))$/.test(cleanValue)) return { success: false, error: 'Identifiant LID ou numéro invalide' }
+    const suffix = direction === 'phone-to-lid' ? `/pn/${encodeURIComponent(cleanValue)}` : `/${encodeURIComponent(cleanValue)}`
+    const result = await callWahaChatApi(`/api/${encodeURIComponent(sessionName.trim())}/lids${suffix}`)
+    if (!result.success || !result.data || typeof result.data !== 'object') return { success: false, error: result.error || 'Correspondance introuvable' }
+    const data = result.data as { lid?: unknown; pn?: unknown }
+    return { success: true, mapping: { lid: typeof data.lid === 'string' ? data.lid : null, pn: typeof data.pn === 'string' ? data.pn : null } }
 }
 
 
