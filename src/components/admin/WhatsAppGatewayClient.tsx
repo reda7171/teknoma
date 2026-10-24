@@ -22,7 +22,8 @@ import {
     Radio,
     Megaphone,
     MessageCircle,
-    ContactRound
+    ContactRound,
+    Braces
 } from 'lucide-react'
 import {
     getWhatsAppGatewayStatus,
@@ -43,6 +44,7 @@ import { WhatsAppStatusView } from './WhatsAppStatusView'
 import { WhatsAppChannelsView } from './WhatsAppChannelsView'
 import { WhatsAppChatsView } from './WhatsAppChatsView'
 import { WhatsAppContactsView } from './WhatsAppContactsView'
+import { WhatsAppApiExplorer } from './WhatsAppApiExplorer'
 
 interface Props {
     initialStatus: WhatsAppGatewayStatusResponse
@@ -110,7 +112,7 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
 }
 
 export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialTemplates, initialLogsData, initialSessions }: Props) {
-    const [mainTab, setMainTab] = useState<'gateway' | 'pairing' | 'sessions' | 'statuses' | 'channels' | 'chats' | 'contacts' | 'logs'>('gateway')
+    const [mainTab, setMainTab] = useState<'gateway' | 'pairing' | 'sessions' | 'statuses' | 'channels' | 'chats' | 'contacts' | 'api' | 'logs'>('gateway')
     const [statusData, setStatusData] = useState<WhatsAppGatewayStatusResponse>(initialStatus)
     const [settings, setSettings] = useState({
         autoPromoLead: initialSettings.autoPromoLead,
@@ -284,6 +286,9 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                 <button type="button" onClick={() => setMainTab('contacts')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${mainTab === 'contacts' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}>
                     <ContactRound className="w-4 h-4 text-emerald-600" /><span>Contacts</span>
                 </button>
+                <button type="button" onClick={() => setMainTab('api')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${mainTab === 'api' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}>
+                    <Braces className="w-4 h-4 text-emerald-600" /><span>API complète</span>
+                </button>
                 <button type="button" onClick={() => setMainTab('chats')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${mainTab === 'chats' ? 'bg-white text-slate-900 shadow-sm' : 'text-gray-500 hover:text-slate-900'}`}>
                     <MessageCircle className="w-4 h-4 text-emerald-600" /><span>Chats</span>
                 </button>
@@ -394,6 +399,8 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                     sessions={initialSessions || []}
                     onShowFeedback={showFeedback}
                 />
+            ) : mainTab === 'api' ? (
+                <WhatsAppApiExplorer sessions={initialSessions || []} />
             ) : mainTab === 'logs' ? (
                 <WhatsAppLogsView
                     initialLogs={initialLogsData?.logs || []}

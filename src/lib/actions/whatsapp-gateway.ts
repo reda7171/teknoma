@@ -32,6 +32,16 @@ interface ActiveGateway {
     baseUrl: string
 }
 
+const NOWEB_STORE_CONFIG = {
+    noweb: {
+        store: {
+            enabled: true,
+            full_sync: true,
+            fullSync: true,
+        },
+    },
+}
+
 function getWahaHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
         'Accept': 'application/json, image/png, */*',
@@ -236,7 +246,11 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
             await fetch(`${gateway.baseUrl}/api/sessions`, {
                 method: 'POST',
                 headers: { ...headers, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: sessionName, start: true })
+                body: JSON.stringify({
+                    name: sessionName,
+                    start: true,
+                    config: NOWEB_STORE_CONFIG,
+                })
             }).catch(() => null)
         } else if (session.status === 'STOPPED' || session.status === 'FAILED') {
             // Si la session existe mais est arrêtée, on la démarre
@@ -849,7 +863,8 @@ export async function createWahaSession(name: string, start: boolean = true): Pr
             headers: { ...headers, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 name: cleanName,
-                start
+                start,
+                config: NOWEB_STORE_CONFIG,
             })
         })
         const data = await res.json().catch(() => ({}))
@@ -870,6 +885,16 @@ export async function startWahaSession(name: string): Promise<{ success: boolean
 
     try {
         const headers = getWahaHeaders()
+        // Appliquer config NOWEB store avant de démarrer
+        await fetch(`${gateway.baseUrl}/api/sessions/${encodeURIComponent(name)}`, {
+            method: 'PUT',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name,
+                config: NOWEB_STORE_CONFIG,
+            })
+        }).catch(() => null)
+
         const res = await fetch(`${gateway.baseUrl}/api/sessions/${encodeURIComponent(name)}/start`, {
             method: 'POST',
             headers
@@ -910,6 +935,16 @@ export async function restartWahaSessionByName(name: string): Promise<{ success:
 
     try {
         const headers = getWahaHeaders()
+        // Appliquer config NOWEB store
+        await fetch(`${gateway.baseUrl}/api/sessions/${encodeURIComponent(name)}`, {
+            method: 'PUT',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name,
+                config: NOWEB_STORE_CONFIG,
+            })
+        }).catch(() => null)
+
         const res = await fetch(`${gateway.baseUrl}/api/sessions/${encodeURIComponent(name)}/restart`, {
             method: 'POST',
             headers
@@ -1823,5 +1858,259 @@ export async function resolveWahaLid(
     return { success: true, mapping: { lid: typeof data.lid === 'string' ? data.lid : null, pn: typeof data.pn === 'string' ? data.pn : null } }
 }
 
+export interface WahaApiParameter {
+    name: string
+    in: 'query' | 'path' | 'header'
+    required?: boolean
+    description?: string
+    schema?: any
+    example?: any
+}
 
+export interface WahaApiOperation {
+    tag: string
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    path: string
+    operationId: string
+    summary: string
+    description?: string
+    deprecated: boolean
+    parameters?: WahaApiParameter[]
+    requestBodySample?: string
+}
 
+export interface WahaApiExplorerResponse {
+    success: boolean
+    status?: number
+    statusText?: string
+    contentType?: string
+    data?: unknown
+    text?: string
+    base64?: string
+    truncated?: boolean
+    error?: string
+}
+
+const WAHA_EXPLORER_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+const WAHA_EXPLORER_ROOTS = ['/api', '/health', '/mcp', '/ping', '/observability', '/dashboard']
+const WAHA_EXPLORER_MAX_RESPONSE_BYTES = 4 * 1024 * 1024
+
+function validateWahaExplorerPath(input: string): string | null {
+    const value = input.trim()
+    if (!value.startsWith('/') || value.length > 2000 || /[\r\n\\]/.test(value)) return null
+    try {
+        const url = new URL(value, 'http://waha.local')
+        if (url.origin !== 'http://waha.local' || url.pathname.includes('..')) return null
+        const allowed = WAHA_EXPLORER_ROOTS.some(root => url.pathname === root || url.pathname.startsWith(`${root}/`))
+        return allowed ? `${url.pathname}${url.search}` : null
+    } catch {
+        return null
+    }
+}
+
+function extractSampleFromSchema(schema: any, rootDoc: any, depth = 0): any {
+    if (!schema || depth > 5) return null
+    if (schema['$ref'] && typeof schema['$ref'] === 'string') {
+        const parts = schema['$ref'].replace(/^#\//, '').split('/')
+        let current = rootDoc
+        for (const p of parts) {
+            current = current?.[p]
+        }
+        if (current && current !== schema) {
+            return extractSampleFromSchema(current, rootDoc, depth + 1)
+        }
+    }
+    if (schema.example !== undefined && schema.example !== null) return schema.example
+    if (schema.default !== undefined && schema.default !== null) return schema.default
+    if (schema.type === 'string') return ''
+    if (schema.type === 'number' || schema.type === 'integer') return 0
+    if (schema.type === 'boolean') return true
+    if (schema.type === 'array') {
+        const item = extractSampleFromSchema(schema.items, rootDoc, depth + 1)
+        return item !== null ? [item] : []
+    }
+    if (schema.type === 'object' || schema.properties) {
+        const res: Record<string, any> = {}
+        for (const [k, v] of Object.entries(schema.properties || {})) {
+            res[k] = extractSampleFromSchema(v, rootDoc, depth + 1)
+        }
+        return res
+    }
+    return null
+}
+
+export async function getWahaOpenApiCatalog(): Promise<{
+    success: boolean
+    operations: WahaApiOperation[]
+    version?: string
+    error?: string
+}> {
+    await verifyAdmin()
+    const gateway = await detectGateway()
+    if (!gateway || gateway.engine !== 'waha') {
+        return { success: false, operations: [], error: 'Passerelle WAHA indisponible' }
+    }
+
+    try {
+        const response = await fetch(`${gateway.baseUrl}/swagger-ui-init.js`, {
+            headers: getWahaHeaders(),
+            cache: 'no-store',
+            signal: AbortSignal.timeout(15000)
+        })
+        if (!response.ok) return { success: false, operations: [], error: `Swagger WAHA HTTP ${response.status}` }
+        const script = await response.text()
+        const prefix = 'let options = '
+        const start = script.indexOf(prefix)
+        const searchPattern = 'url = options.swaggerUrl'
+        const urlIndex = script.indexOf(searchPattern, start)
+        const semiIndex = script.lastIndexOf(';', urlIndex)
+        if (start < 0 || urlIndex < 0 || semiIndex < 0) {
+            return { success: false, operations: [], error: 'Schéma Swagger WAHA illisible' }
+        }
+
+        let rawJson = script.slice(start + prefix.length, semiIndex).trim()
+        if (rawJson.endsWith(';')) rawJson = rawJson.slice(0, -1).trim()
+        const options = JSON.parse(rawJson) as {
+            swaggerDoc?: {
+                openapi?: string
+                paths?: Record<string, Record<string, any>>
+                components?: { schemas?: Record<string, any> }
+            }
+        }
+        const doc = options.swaggerDoc || {}
+        const operations: WahaApiOperation[] = []
+
+        for (const [path, pathItem] of Object.entries(doc.paths || {})) {
+            for (const [rawMethod, rawOperation] of Object.entries(pathItem || {})) {
+                const method = rawMethod.toUpperCase()
+                if (!WAHA_EXPLORER_METHODS.has(method) || !rawOperation || typeof rawOperation !== 'object') continue
+                const operation = rawOperation as Record<string, any>
+
+                // Paramètres
+                const params: WahaApiParameter[] = []
+                if (Array.isArray(operation.parameters)) {
+                    for (const p of operation.parameters) {
+                        if (p && typeof p === 'object' && p.name) {
+                            params.push({
+                                name: String(p.name),
+                                in: p.in || 'query',
+                                required: Boolean(p.required),
+                                description: typeof p.description === 'string' ? p.description : undefined,
+                                schema: p.schema,
+                                example: p.example,
+                            })
+                        }
+                    }
+                }
+
+                // Corps de requête (sample)
+                let requestBodySample: string | undefined
+                const jsonContent = operation.requestBody?.content?.['application/json']
+                if (jsonContent) {
+                    if (jsonContent.examples && typeof jsonContent.examples === 'object') {
+                        const exampleKey = Object.keys(jsonContent.examples)[0]
+                        const sampleVal = jsonContent.examples[exampleKey]?.value
+                        if (sampleVal) {
+                            requestBodySample = JSON.stringify(sampleVal, null, 2)
+                        }
+                    }
+                    if (!requestBodySample && jsonContent.schema) {
+                        const sample = extractSampleFromSchema(jsonContent.schema, doc)
+                        if (sample && typeof sample === 'object' && Object.keys(sample).length > 0) {
+                            requestBodySample = JSON.stringify(sample, null, 2)
+                        }
+                    }
+                }
+
+                operations.push({
+                    tag: Array.isArray(operation.tags) && typeof operation.tags[0] === 'string' ? operation.tags[0] : 'Autres',
+                    method: method as WahaApiOperation['method'],
+                    path,
+                    operationId: typeof operation.operationId === 'string' ? operation.operationId : '',
+                    summary: typeof operation.summary === 'string' ? operation.summary : '',
+                    description: typeof operation.description === 'string' ? operation.description : undefined,
+                    deprecated: operation.deprecated === true,
+                    parameters: params.length > 0 ? params : undefined,
+                    requestBodySample,
+                })
+            }
+        }
+        operations.sort((a, b) => a.tag.localeCompare(b.tag) || a.path.localeCompare(b.path) || a.method.localeCompare(b.method))
+        return { success: true, operations, version: options.swaggerDoc?.openapi }
+    } catch (error: unknown) {
+        return { success: false, operations: [], error: error instanceof Error ? error.message : 'Impossible de charger Swagger WAHA' }
+    }
+}
+
+export async function executeWahaApiOperation(input: {
+    method: string
+    path: string
+    jsonBody?: string
+}): Promise<WahaApiExplorerResponse> {
+    await verifyAdmin()
+    const method = input.method.trim().toUpperCase()
+    const path = validateWahaExplorerPath(input.path)
+    if (!WAHA_EXPLORER_METHODS.has(method)) return { success: false, error: 'Méthode HTTP non autorisée' }
+    if (!path) return { success: false, error: 'Chemin WAHA invalide ou non autorisé' }
+
+    let body: string | undefined
+    if (method !== 'GET' && input.jsonBody?.trim()) {
+        if (input.jsonBody.length > 250_000) return { success: false, error: 'Corps JSON trop volumineux' }
+        try {
+            body = JSON.stringify(JSON.parse(input.jsonBody))
+        } catch {
+            return { success: false, error: 'Le corps de la requête doit être un JSON valide' }
+        }
+    }
+
+    const gateway = await detectGateway()
+    if (!gateway || gateway.engine !== 'waha') return { success: false, error: 'Passerelle WAHA indisponible' }
+
+    try {
+        const response = await fetch(`${gateway.baseUrl}${path}`, {
+            method,
+            headers: {
+                ...getWahaHeaders(),
+                ...(body ? { 'Content-Type': 'application/json' } : {})
+            },
+            body,
+            cache: 'no-store',
+            signal: AbortSignal.timeout(30000)
+        })
+        const contentType = response.headers.get('content-type') || 'application/octet-stream'
+        const contentLength = Number(response.headers.get('content-length') || 0)
+        if (contentLength > WAHA_EXPLORER_MAX_RESPONSE_BYTES) {
+            return {
+                success: false,
+                status: response.status,
+                statusText: response.statusText,
+                contentType,
+                error: 'Réponse WAHA trop volumineuse pour la console (limite 2 Mo)'
+            }
+        }
+
+        const bytes = new Uint8Array(await response.arrayBuffer())
+        const truncated = bytes.byteLength > WAHA_EXPLORER_MAX_RESPONSE_BYTES
+        const safeBytes = truncated ? bytes.slice(0, WAHA_EXPLORER_MAX_RESPONSE_BYTES) : bytes
+        const base = {
+            success: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            truncated
+        }
+        if (contentType.includes('application/json')) {
+            const text = new TextDecoder().decode(safeBytes)
+            const data: unknown = JSON.parse(text || 'null')
+            return response.ok ? { ...base, data } : { ...base, data, error: readWahaApiError(data) || `WAHA HTTP ${response.status}` }
+        }
+        if (contentType.startsWith('text/')) {
+            const text = new TextDecoder().decode(safeBytes)
+            return response.ok ? { ...base, text } : { ...base, text, error: `WAHA HTTP ${response.status}` }
+        }
+        const base64 = Buffer.from(safeBytes).toString('base64')
+        return response.ok ? { ...base, base64 } : { ...base, error: `WAHA HTTP ${response.status}` }
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : 'Erreur de communication avec WAHA' }
+    }
+}

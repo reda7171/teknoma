@@ -120,7 +120,7 @@ export default function InstantOfferPopup() {
                     </p>
                     
                     <a 
-                        href="https://wa.me/212621752251?text=Bonjour,%20j%27ai%20besoin%20d%27aide%20pour%20ma%20commande" 
+                        href="https://wa.me/212702220575?text=Bonjour,%20j%27ai%20besoin%20d%27aide%20pour%20ma%20commande"
                         target="_blank" 
                         rel="noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-3 px-4 mb-4 rounded-xl font-bold bg-[#E8F8EE] text-[#1EBE5D] hover:bg-[#D1F2DD] transition-colors"
