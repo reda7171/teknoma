@@ -462,44 +462,9 @@ export default function CheckoutClient({
 
             <h1 className="text-3xl sm:text-5xl font-black text-black mb-6 sm:mb-10 lg:mb-16 tracking-tighter">{t('YourDetails')}<span className="text-gray-200">.</span></h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16 pb-24 lg:pb-0">
                 {/* Formulaire Principal */}
                 <div className="lg:col-span-2 space-y-6 sm:space-y-10 lg:space-y-12">
-                    <div className="lg:hidden bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 shadow-sm border border-gray-100">
-                        <h2 className="text-xl font-black text-black tracking-tight mb-5">
-                            {t('SelectionSummary')} ({items.reduce((total, item) => total + item.quantity, 0)})
-                        </h2>
-                        <div className="space-y-4">
-                            {items.map((item) => (
-                                <div key={`${item.type}-${item.id}`} className="flex items-center gap-4 rounded-2xl bg-pixio-cream/50 p-3">
-                                    <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-white shrink-0 border border-gray-100">
-                                        {item.image ? (
-                                            <img
-                                                src={normalizeImage(item.image)}
-                                                alt={item.title}
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <Package className="w-5 h-5 text-gray-300" />
-                                            </div>
-                                        )}
-                                        <span className="absolute top-1 right-1 rtl:left-1 rtl:right-auto min-w-5 h-5 px-1 bg-black text-white text-[10px] font-black rounded-full flex items-center justify-center">
-                                            {item.quantity}
-                                        </span>
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-black text-black line-clamp-2 leading-tight">{item.title}</p>
-                                        <p className="text-xs font-black text-gray-500 mt-2">
-                                            {(item.price * item.quantity).toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
                     <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-10 lg:space-y-12">
                         <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-sm border border-gray-100">
                             <h2 className="text-xl sm:text-2xl font-black text-black mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4">
@@ -812,8 +777,8 @@ export default function CheckoutClient({
                 </div>
 
                 {/* Résumé Panier & Code Promo */}
-                <div className="hidden lg:block lg:col-span-1">
-                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-xl border border-gray-100 sticky top-24 space-y-6 sm:space-y-10">
+                <div className="lg:col-span-1">
+                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-xl border border-gray-100 lg:sticky lg:top-24 space-y-6 sm:space-y-10">
                         <div>
                             <h2 className="text-xl font-black text-black tracking-tight mb-4 sm:mb-8">{t('SelectionSummary')}</h2>
                             <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1010,6 +975,40 @@ export default function CheckoutClient({
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Barre flottante mobile pour valider la commande immédiatement */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 shadow-[0_-10px_25px_rgba(0,0,0,0.1)] flex items-center justify-between gap-4">
+                <div>
+                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider block">{t('TotalAmount')}</span>
+                    <span className="text-xl font-black text-black">{finalTotal.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                </div>
+                <button
+                    form="checkout-form"
+                    type="submit"
+                    onClick={() => {
+                        const formEl = document.getElementById('checkout-form') as HTMLFormElement | null
+                        if (formEl && typeof formEl.requestSubmit === 'function') {
+                            formEl.requestSubmit()
+                        } else {
+                            handleSubmit(onSubmit)()
+                        }
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-black text-white font-black py-3.5 px-6 rounded-full shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>{t('Processing')}</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>{t('CompletePurchase')}</span>
+                            <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                        </>
+                    )}
+                </button>
             </div>
 
             {/* Modal Banque Sélectionnée */}

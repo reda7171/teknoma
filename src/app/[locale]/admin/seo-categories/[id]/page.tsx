@@ -1,13 +1,13 @@
 import SeoCategoryForm from '../SeoCategoryForm'
 import { getSeoCategory } from '@/lib/actions/seo-categories'
-import { getBooks } from '@/lib/db/books'
+import { getSeoCategoryBookOptions } from '@/lib/db/books'
 import { notFound } from 'next/navigation'
 
 export default async function EditSeoCategoryPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const [category, books] = await Promise.all([
         getSeoCategory(id),
-        getBooks({ active: true })
+        getSeoCategoryBookOptions()
     ])
     
     if (!category) notFound()

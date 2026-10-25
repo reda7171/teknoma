@@ -11,7 +11,7 @@ export default function CatalogButton() {
         <>
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
+                className="inline-flex items-center px-4 py-2 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-900 transition-colors shadow-sm"
                 title="Générer un catalogue PDF"
             >
                 <FileDown className="w-5 h-5 mr-2" />

@@ -174,6 +174,15 @@ export async function login(formData: FormData): Promise<LoginResult> {
             console.error('Error recording login history:', e)
         }
 
+        if (user.role === 'SELLER') {
+            try {
+                const { notifyAdminOnSellerLogin } = await import('@/lib/whatsapp')
+                notifyAdminOnSellerLogin(user, ip).catch(console.error)
+            } catch (notifyErr) {
+                console.error('Error triggering seller login notification:', notifyErr)
+            }
+        }
+
         return {
             success: true,
             redirect: user.role === 'INFLUENCER' ? '/influencer' : (user.role === 'SELLER' ? '/seller' : '/admin'),

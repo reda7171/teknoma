@@ -54,7 +54,8 @@ import {
     Network,
     Bell,
     Mail,
-    PhoneCall
+    PhoneCall,
+    Briefcase
 } from 'lucide-react'
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
@@ -172,6 +173,7 @@ export default function AdminLayout({
             icon: Users,
             children: [
                 { name: 'Clients', href: `/${lang}/admin/customers`, icon: Users },
+                { name: 'Fournisseurs & Autres', href: `/${lang}/admin/suppliers`, icon: Briefcase },
                 { name: 'Vendeurs / Partenaires', href: `/${lang}/admin/vendeurs`, icon: Store, featureKey: 'feature_seller' },
                 { name: 'Équipe / Staff', href: `/${lang}/admin/users`, icon: ShieldCheck },
             ]

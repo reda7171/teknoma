@@ -12,10 +12,11 @@ import ExportButton from './ExportButton'
 import { exportSalesReport } from '@/lib/actions/export'
 import { normalizeImage } from '@/lib/utils'
 import SensitiveValue from './SensitiveValue'
+import CategorySalesChart from './CategorySalesChart'
 
 const AccessibleTooltip = Tooltip as any;
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#0088fe', '#00c49f', '#ff8042']
+const COLORS = ['#059669', '#2563eb', '#d97706', '#0284c7', '#0d9488', '#ea580c']
 
 export default function DashboardAnalytics() {
     const [data, setData] = useState<any>(null)
@@ -116,37 +117,7 @@ export default function DashboardAnalytics() {
                 </div>
 
                 {/* Graphique Répartition par Catégorie */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                        <Package size={20} className="text-secondary" />
-                        Ventes par Catégorie
-                    </h3>
-                    <div className="h-[300px] w-full min-w-0">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                            <PieChart>
-                                <Pie
-                                    data={data.categoryRevenue}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={100}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                >
-                                    {data.categoryRevenue.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <AccessibleTooltip
-                                    wrapperProps={{ 'aria-label': 'Détails de la répartition' }}
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                                    formatter={(value: any) => [`${value} درهم`, 'Revenu']}
-                                />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
+                <CategorySalesChart data={data.categoryRevenue} />
 
                 {/* Graphique Ventes par Ville */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">

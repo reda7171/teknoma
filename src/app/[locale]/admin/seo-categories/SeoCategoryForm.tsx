@@ -1,13 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveSeoCategory, createSeoCategory, updateSeoCategoryBooks } from '@/lib/actions/seo-categories'
-import { Save, Plus, Trash2, ArrowLeft } from 'lucide-react'
+import { Save, Plus, Trash2, ArrowLeft, ChevronDown } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
 
-export default function SeoCategoryForm({ category, books }: { category?: any, books: any[] }) {
+interface SeoCategoryBookOption {
+    id: string
+    title: string
+    titleFr?: string | null
+    titleEn?: string | null
+    author: string
+    image: string
+    language: string
+    active: boolean
+}
+
+export default function SeoCategoryForm({ category, books }: { category?: any, books: SeoCategoryBookOption[] }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
@@ -35,11 +46,24 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
     )
 
     const [searchTerm, setSearchTerm] = useState('')
+    const [visibleCount, setVisibleCount] = useState(60)
 
-    const filteredBooks = books.filter(b => 
-        b.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        b.author.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const filteredBooks = useMemo(() => {
+        const query = searchTerm.trim().toLocaleLowerCase()
+        const matchingBooks = query
+            ? books.filter(book => [book.title, book.titleFr, book.titleEn, book.author]
+                .some(value => value?.toLocaleLowerCase().includes(query)))
+            : books
+
+        return [...matchingBooks].sort((first, second) => {
+            const firstSelected = selectedBooks.includes(first.id)
+            const secondSelected = selectedBooks.includes(second.id)
+            if (firstSelected !== secondSelected) return firstSelected ? -1 : 1
+            return first.title.localeCompare(second.title, formData.locale)
+        })
+    }, [books, formData.locale, searchTerm, selectedBooks])
+
+    const visibleBooks = filteredBooks.slice(0, visibleCount)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -97,8 +121,12 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Informations Principales */}
-                <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-900 border-b pb-2">Informations Générales</h2>
+                <details className="group self-start rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-lg font-bold text-gray-900">
+                        Informations Générales
+                        <ChevronDown className="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="space-y-6 border-t border-gray-100 p-4">
                     
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -167,11 +195,16 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
                             onChange={(e) => setFormData({...formData, keyword: e.target.value})}
                         />
                     </div>
-                </div>
+                    </div>
+                </details>
 
                 {/* Contenu et Accueil */}
-                <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-900 border-b pb-2">Contenu et Affichage</h2>
+                <details className="group self-start rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-lg font-bold text-gray-900">
+                        Contenu et Affichage
+                        <ChevronDown className="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="space-y-6 border-t border-gray-100 p-4">
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Introduction (Intro de la page)</label>
@@ -216,11 +249,12 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
                                     value={formData.colorGradient}
                                     onChange={(e) => setFormData({...formData, colorGradient: e.target.value})}
                                 />
-                                <div className="mt-2 h-8 rounded-lg" style={{ background: formData.colorGradient ? 'none' : '#ddd' }} className={`mt-2 h-8 rounded-lg bg-gradient-to-r ${formData.colorGradient}`}></div>
+                                <div style={{ background: formData.colorGradient ? 'none' : '#ddd' }} className={`mt-2 h-8 rounded-lg bg-gradient-to-r ${formData.colorGradient}`}></div>
                             </div>
                         )}
                     </div>
-                </div>
+                    </div>
+                </details>
             </div>
 
             {/* Selection des livres */}
@@ -243,23 +277,39 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
                         placeholder="Rechercher un livre à ajouter..."
                         className="w-full p-2 border border-gray-300 rounded-lg"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value)
+                            setVisibleCount(60)
+                        }}
                     />
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
+                        <span>{filteredBooks.length} livre(s) trouvé(s) sur {books.length} · {selectedBooks.length} sélectionné(s)</span>
+                        {selectedBooks.length > 0 && (
+                            <button type="button" onClick={() => setSelectedBooks([])} className="font-bold text-red-600 hover:text-red-700">
+                                Désélectionner tout
+                            </button>
+                        )}
+                    </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-h-96 overflow-y-auto p-2 border border-gray-200 rounded-lg bg-gray-50">
-                    {filteredBooks.map(book => {
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-h-[42rem] overflow-y-auto p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    {visibleBooks.map(book => {
                         const isSelected = selectedBooks.includes(book.id)
                         return (
                             <div 
                                 key={book.id} 
                                 onClick={() => toggleBook(book.id)}
-                                className={`cursor-pointer border-2 rounded-lg p-2 text-center transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-transparent bg-white hover:border-gray-300'}`}
+                                className={`relative cursor-pointer border-2 rounded-lg p-2 text-center transition-all ${isSelected ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-transparent bg-white hover:border-gray-300'}`}
                             >
                                 <div className="relative w-full aspect-[2/3] mb-2 rounded overflow-hidden">
                                     <Image src={book.image} alt={book.title} fill className="object-cover" />
                                 </div>
                                 <p className="text-xs font-bold line-clamp-1">{book.title}</p>
+                                <p className="mt-1 text-[10px] text-gray-500 line-clamp-1">{book.author}</p>
+                                <div className="mt-1 flex items-center justify-center gap-1 text-[9px] font-bold uppercase">
+                                    <span className="rounded bg-gray-100 px-1.5 py-0.5 text-gray-600">{book.language}</span>
+                                    {!book.active && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700">Inactif</span>}
+                                </div>
                                 {isSelected && (
                                     <div className="absolute top-2 right-2 bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
                                         ✓
@@ -268,7 +318,21 @@ export default function SeoCategoryForm({ category, books }: { category?: any, b
                             </div>
                         )
                     })}
+                    {visibleBooks.length === 0 && (
+                        <p className="col-span-full py-12 text-center text-sm text-gray-500">Aucun livre ne correspond à cette recherche.</p>
+                    )}
                 </div>
+                {visibleBooks.length < filteredBooks.length && (
+                    <div className="flex justify-center">
+                        <button
+                            type="button"
+                            onClick={() => setVisibleCount(count => count + 60)}
+                            className="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
+                        >
+                            Afficher 60 livres supplémentaires ({filteredBooks.length - visibleBooks.length} restants)
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* FAQ */}

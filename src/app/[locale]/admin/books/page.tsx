@@ -224,6 +224,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 productType: 'PACK',
                 orderCount: p._count?.orderItems || 0,
                 sellerSku: p.sellerSku,
+                isSyncedWithJumia: p.isSyncedWithJumia,
                 jumiaStock: p.jumiaStock,
                 createdAt: p.createdAt
             }
@@ -283,7 +284,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             productType: 'EXTRA',
             orderCount: e._count?.orderItems || 0,
             sellerSku: e.sellerSku,
-            jumiaStock: null,
+            isSyncedWithJumia: e.isSyncedWithJumia,
+            jumiaStock: e.jumiaStock,
             createdAt: e.createdAt
         })))
     }
@@ -317,8 +319,20 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     else if (sortParam === 'price-desc') allProducts.sort((a, b) => b.price - a.price)
     else if (sortParam === 'stock-asc') allProducts.sort((a, b) => a.stock - b.stock)
     else if (sortParam === 'stock-desc') allProducts.sort((a, b) => b.stock - a.stock)
-    else if (sortParam === 'title-asc') allProducts.sort((a, b) => a.title.localeCompare(b.title))
-    else if (sortParam === 'title-desc') allProducts.sort((a, b) => b.title.localeCompare(a.title))
+    else if (sortParam === 'title-asc' || sortParam === 'a-z') {
+        allProducts.sort((a, b) => {
+            const titleA = ((a.language === 'fr' ? (a.titleFr || a.title) : a.language === 'en' ? (a.titleEn || a.title) : a.title) || '').trim()
+            const titleB = ((b.language === 'fr' ? (b.titleFr || b.title) : b.language === 'en' ? (b.titleEn || b.title) : b.title) || '').trim()
+            return titleA.localeCompare(titleB, undefined, { sensitivity: 'base', numeric: true })
+        })
+    }
+    else if (sortParam === 'title-desc' || sortParam === 'z-a') {
+        allProducts.sort((a, b) => {
+            const titleA = ((a.language === 'fr' ? (a.titleFr || a.title) : a.language === 'en' ? (a.titleEn || a.title) : a.title) || '').trim()
+            const titleB = ((b.language === 'fr' ? (b.titleFr || b.title) : b.language === 'en' ? (b.titleEn || b.title) : b.title) || '').trim()
+            return titleB.localeCompare(titleA, undefined, { sensitivity: 'base', numeric: true })
+        })
+    }
     else if (sortParam === 'orders-asc') allProducts.sort((a, b) => a.orderCount - b.orderCount)
     else if (sortParam === 'orders-desc') allProducts.sort((a, b) => b.orderCount - a.orderCount)
     else if (sortParam === 'seo-asc') allProducts.sort((a, b) => (a.seoScore || 0) - (b.seoScore || 0))

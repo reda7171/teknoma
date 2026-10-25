@@ -1473,35 +1473,35 @@ export async function POST(req: Request) {
             else if (data && data.startsWith('stats:') && !['stats:recent_orders', 'stats:compare_months', 'stats:all_time', 'stats:yearly_chart'].includes(data)) {
                 const [, period] = data.split(':')
                 const now = new Date()
-                let start = new Date(now.setHours(0, 0, 0, 0))
-                let end = new Date(now.setHours(23, 59, 59, 999))
+                let start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+                let end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
                 let label = "Aujourd'hui"
 
                 if (period === 'yesterday') {
-                    start = new Date(now.setDate(now.getDate() - 1))
-                    start.setHours(0,0,0,0)
-                    end = new Date(start)
-                    end.setHours(23,59,59,999)
+                    const yesterday = new Date(now)
+                    yesterday.setDate(yesterday.getDate() - 1)
+                    start = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0)
+                    end = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999)
                     label = "Hier"
                 } else if (period === 'month') {
-                    start = new Date(now.getFullYear(), now.getMonth(), 1)
+                    start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
                     label = "Ce Mois"
                 } else if (period === '30days') {
-                    const thirtyDaysAgo = new Date()
+                    const thirtyDaysAgo = new Date(now)
                     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-                    thirtyDaysAgo.setHours(0,0,0,0)
+                    thirtyDaysAgo.setHours(0, 0, 0, 0)
                     start = thirtyDaysAgo
                     label = "30 Derniers Jours"
                 } else if (period === '3months') {
-                    const threeMonthsAgo = new Date()
+                    const threeMonthsAgo = new Date(now)
                     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
-                    threeMonthsAgo.setHours(0,0,0,0)
+                    threeMonthsAgo.setHours(0, 0, 0, 0)
                     start = threeMonthsAgo
                     label = "3 Derniers Mois"
                 } else if (period === '1year') {
-                    const oneYearAgo = new Date()
+                    const oneYearAgo = new Date(now)
                     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-                    oneYearAgo.setHours(0,0,0,0)
+                    oneYearAgo.setHours(0, 0, 0, 0)
                     start = oneYearAgo
                     label = "1 An"
                 }
@@ -1577,33 +1577,84 @@ export async function POST(req: Request) {
                                 const day = String(date.getDate()).padStart(2, '0')
                                 return `${year}-${month}-${day}`
                             }
-                            const createdAfter = formatLocalDate(start)
-                            const createdBefore = formatLocalDate(end)
                             const isToday = period === 'today'
                             const allJumiaOrders: JumiaReportOrder[] = []
-                            let nextToken: string | undefined
-                            let pageCount = 0
 
-                            do {
-                                // Une borne future peut faire renvoyer une liste vide par Jumia.
-                                // Pour aujourd'hui, charger les plus récentes puis filtrer au Maroc.
-                                const response = await jumia.getOrders(
-                                    100,
-                                    nextToken,
-                                    undefined,
-                                    isToday ? undefined : createdAfter,
-                                    isToday ? undefined : createdBefore,
-                                    'createdAt',
-                                    'DESC'
-                                )
-                                const pageOrders = response?.orders || response?.data?.orders || []
-                                allJumiaOrders.push(...pageOrders)
-                                nextToken = response?.nextToken || response?.data?.nextToken || undefined
-                                pageCount++
-                                if (pageOrders.length === 0 || allJumiaOrders.length >= 10000 || pageCount >= 20) {
-                                    nextToken = undefined
+                            if (isToday) {
+                                let nextToken: string | undefined
+                                let pageCount = 0
+                                do {
+                                    // Une borne future peut faire renvoyer une liste vide par Jumia.
+                                    // Pour aujourd'hui, charger les plus récentes puis filtrer au Maroc.
+                                    const response = await jumia.getOrders(
+                                        100,
+                                        nextToken,
+                                        undefined,
+                                        undefined,
+                                        undefined,
+                                        'createdAt',
+                                        'DESC'
+                                    )
+                                    const pageOrders = response?.orders || response?.data?.orders || []
+                                    allJumiaOrders.push(...pageOrders)
+                                    nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                                    pageCount++
+                                    if (pageOrders.length === 0 || allJumiaOrders.length >= 10000 || pageCount >= 20) {
+                                        nextToken = undefined
+                                    }
+                                } while (nextToken)
+                            } else {
+                                // Jumia limite les requêtes à un intervalle maximal de 90 jours (erreur HTTP 400).
+                                // On découpe la période en sous-tranches de 70 jours max.
+                                const ranges: { start: string; end: string }[] = []
+                                let curStart = new Date(start)
+                                while (curStart <= end) {
+                                    let curEnd = new Date(curStart)
+                                    curEnd.setDate(curEnd.getDate() + 70)
+                                    if (curEnd > end) {
+                                        curEnd = new Date(end)
+                                    }
+                                    ranges.push({
+                                        start: formatLocalDate(curStart),
+                                        end: formatLocalDate(curEnd)
+                                    })
+                                    curStart = new Date(curEnd)
+                                    curStart.setDate(curStart.getDate() + 1)
                                 }
-                            } while (nextToken)
+
+                                const seenOrders = new Set<string>()
+                                for (const r of ranges) {
+                                    let nextToken: string | undefined
+                                    let pageCount = 0
+                                    do {
+                                        const response: any = await jumia.getOrders(
+                                            100,
+                                            nextToken,
+                                            undefined,
+                                            r.start,
+                                            r.end,
+                                            'createdAt',
+                                            'DESC'
+                                        ).catch((err: any) => {
+                                            console.error(`Erreur stats Jumia [${r.start} - ${r.end}]:`, err)
+                                            return null
+                                        })
+                                        const pageOrders = response?.orders || response?.data?.orders || []
+                                        for (const o of pageOrders) {
+                                            const orderKey = String(o.id || o.orderId || o.OrderNumber || o.orderNumber || JSON.stringify(o))
+                                            if (!seenOrders.has(orderKey)) {
+                                                seenOrders.add(orderKey)
+                                                allJumiaOrders.push(o)
+                                            }
+                                        }
+                                        nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                                        pageCount++
+                                        if (!response || pageOrders.length === 0 || allJumiaOrders.length >= 15000 || pageCount >= 25) {
+                                            nextToken = undefined
+                                        }
+                                    } while (nextToken)
+                                }
+                            }
 
                             const moroccoDate = new Intl.DateTimeFormat('en-CA', {
                                 timeZone: 'Africa/Casablanca',

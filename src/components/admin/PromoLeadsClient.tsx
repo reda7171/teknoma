@@ -87,33 +87,55 @@ export function PromoLeadsClient({ initialLeads, initialStats }: Props) {
         setIsDeleting(null)
     }
 
-    const exportToCSV = () => {
+    const exportToExcel = () => {
         if (!leads.length) return
 
-        const headers = ['ID', 'Téléphone', 'Email', 'Code Promo', 'Source', 'Contacté', 'Date']
-        const rows = leads.map((l) => [
-            l.id,
-            l.phone || '',
-            l.email || '',
-            l.promoCode || 'RIWAYA10',
-            l.source || 'cart_popup',
-            l.contacted ? 'Oui' : 'Non',
-            new Date(l.createdAt).toLocaleDateString('fr-FR'),
-        ])
+        const headers = ['ID', 'Téléphone', 'Email', 'Code Promo', 'Source', 'Statut Relance', 'Date Récolte']
+        const tableRows = leads.map((l) => `
+            <tr>
+                <td style="mso-number-format:'\\@'; text-align: center;">#${l.id.slice(0, 8)}</td>
+                <td style="mso-number-format:'\\@'; font-weight: bold;">${l.phone || '-'}</td>
+                <td>${l.email || '-'}</td>
+                <td style="text-align: center; font-weight: bold;">${l.promoCode || 'RIWAYA10'}</td>
+                <td style="text-align: center;">${l.source || 'cart_popup'}</td>
+                <td style="text-align: center;">${l.contacted ? 'Contacté' : 'Non contacté'}</td>
+                <td style="text-align: center;">${new Date(l.createdAt).toLocaleDateString('fr-FR')}</td>
+            </tr>
+        `).join('')
 
-        const csvContent =
-            'data:text/csv;charset=utf-8,\uFEFF' +
-            [headers.join(';'), ...rows.map((e) => e.join(';'))].join('\n')
+        const excelTemplate = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+                table { border-collapse: collapse; width: 100%; }
+                th { background-color: #059669; color: #ffffff; font-weight: bold; padding: 10px 8px; border: 1px solid #047857; text-align: center; }
+                td { padding: 8px; border: 1px solid #e5e7eb; vertical-align: middle; }
+                tr:nth-child(even) td { background-color: #f9fafb; }
+            </style>
+        </head>
+        <body>
+            <table>
+                <thead>
+                    <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </body>
+        </html>`
 
-        const encodedUri = encodeURI(csvContent)
+        const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
-        link.setAttribute('href', encodedUri)
-        link.setAttribute('download', `leads_panier_riwaya_${new Date().toISOString().split('T')[0]}.csv`)
+        link.setAttribute('href', url)
+        link.setAttribute('download', `leads_panier_riwaya_${new Date().toISOString().split('T')[0]}.xls`)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
+        URL.revokeObjectURL(url)
 
-        showFeedback('Fichier CSV exporté avec succès')
+        showFeedback('Fichier Excel exporté avec succès')
     }
 
     const formatWhatsAppUrl = (rawPhone: string) => {
@@ -224,11 +246,11 @@ export function PromoLeadsClient({ initialLeads, initialStats }: Props) {
                     </div>
 
                     <button
-                        onClick={exportToCSV}
+                        onClick={exportToExcel}
                         className="inline-flex items-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black shadow-sm transition-all shrink-0 cursor-pointer"
                     >
                         <Download className="w-4 h-4" />
-                        <span>Exporter CSV</span>
+                        <span>Exporter Excel</span>
                     </button>
                 </div>
             </div>
