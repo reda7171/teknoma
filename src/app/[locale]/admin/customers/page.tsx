@@ -329,14 +329,14 @@ export default async function AdminCustomersPage() {
                         Lecteurs<span className="text-gray-200">.</span>
                     </h1>
                     <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                        Base de données centralisée ({customers.length})
+                        Base de données centralisée (**)
                     </p>
                 </div>
                 
                 <div className="flex items-center gap-4">
                     <div className="bg-black text-white px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10">
                         <Users className="w-4 h-4 text-gray-400" />
-                        <span>Total {customers.length} Profils</span>
+                        <span>Total ** Profils</span>
                     </div>
                 </div>
             </div>
@@ -344,10 +344,10 @@ export default async function AdminCustomersPage() {
             {/* Statistiques rapides */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: 'Volume Ventes', value: `${customers.reduce((acc, c) => acc + c.totalSpent, 0).toLocaleString()} درهم` },
-                    { label: 'Commandes', value: `${customers.reduce((acc, c) => acc + c.totalOrders, 0)} Total` },
-                    { label: 'Panier Moyen', value: `${(customers.reduce((acc, c) => acc + c.totalSpent, 0) / (customers.reduce((acc, c) => acc + c.totalOrders, 0) || 1)).toFixed(0)} درهم` },
-                    { label: 'LTV Moyen', value: `${(customers.reduce((acc, c) => acc + c.totalSpent, 0) / (customers.length || 1)).toFixed(0)} درهم` }
+                    { label: 'Volume Ventes', value: '** درهم' },
+                    { label: 'Commandes', value: '** Total' },
+                    { label: 'Panier Moyen', value: '** درهم' },
+                    { label: 'LTV Moyen', value: '** درهم' }
                 ].map((stat, i) => (
                     <div key={i} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">{stat.label}</p>

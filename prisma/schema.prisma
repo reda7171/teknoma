@@ -1549,4 +1549,24 @@ model WhatsAppMessageLog {
   @@map("whatsapp_message_logs")
 }
 
+model SupplierContact {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(255)
+  company     String?  @db.VarChar(255)
+  domain      String   @db.VarChar(100)
+  phone       String   @db.VarChar(50)
+  email       String?  @db.VarChar(255)
+  city        String?  @db.VarChar(100)
+  address     String?  @db.VarChar(255)
+  website     String?  @db.VarChar(255)
+  notes       String?  @db.Text
+  rating      Int?     @default(5)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
+  @@index([domain])
+  @@index([name])
+  @@index([phone])
+  @@map("supplier_contacts")
+}

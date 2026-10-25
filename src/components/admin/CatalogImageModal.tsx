@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { X, Download, ImageIcon, Loader2, Type, Palette, LayoutGrid, Book as BookIcon, CheckCircle2, Globe } from 'lucide-react'
+import { X, Download, ImageIcon, Loader2, Type, Palette, LayoutGrid, Book as BookIcon, CheckCircle2, Globe, Warehouse, ArrowUpDown, Layers } from 'lucide-react'
 import { getAllBooksForCatalog } from '@/lib/actions/books'
+import { getWarehouses } from '@/lib/actions/warehouse'
 import { normalizeImage } from '@/lib/utils'
 import { getLocalizedTitle } from '@/lib/i18n-utils'
 import * as htmlToImage from 'html-to-image'
@@ -24,16 +25,20 @@ const BG_COLORS = [
 export default function CatalogImageModal({ isOpen, onClose, onSelect }: CatalogImageModalProps) {
     const [isGenerating, setIsGenerating] = useState(false)
     const [allBooks, setAllBooks] = useState<any[]>([])
+    const [warehouses, setWarehouses] = useState<any[]>([])
     const [currentChunkIdx, setCurrentChunkIdx] = useState(0)
     const [statusText, setStatusText] = useState('')
     const [config, setConfig] = useState({
         title: 'Collection Riwaya',
-        primaryColor: '#8b5cf6',
+        primaryColor: '#2563eb',
         backgroundColor: '#ffffff',
         textColor: '#111827',
         pattern: 'none',
         columns: 3,
         selectedCategory: 'all',
+        selectedWarehouse: 'all',
+        sortBy: 'date_desc',
+        grouping: 'none',
         groupByLanguage: false,
         booksPerPage: 24,
         format: 'catalog',
@@ -48,8 +53,12 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     useEffect(() => {
         if (isOpen) {
             const loadData = async () => {
-                const result = await getAllBooksForCatalog()
+                const [result, whResult] = await Promise.all([
+                    getAllBooksForCatalog(),
+                    getWarehouses().catch(() => [])
+                ])
                 if (result.success && result.data) setAllBooks(result.data)
+                if (Array.isArray(whResult)) setWarehouses(whResult)
             }
             loadData()
         }
@@ -57,10 +66,38 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
     if (!isOpen) return null
 
-    const availableBooks = allBooks
+    const availableBooks = allBooks.filter(b => {
+        if (config.selectedWarehouse && config.selectedWarehouse !== 'all') {
+            return b.inventories?.some((inv: any) => inv.warehouseId === config.selectedWarehouse && inv.quantity > 0)
+        }
+        return true
+    })
     const filteredBooks = config.selectedCategory === 'all' 
         ? availableBooks 
         : availableBooks.filter(b => b.category === config.selectedCategory)
+
+    const sortedBooks = [...filteredBooks].sort((a, b) => {
+        if (config.sortBy === 'date_desc') {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+            return timeB - timeA
+        }
+        if (config.sortBy === 'date_asc') {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+            return timeA - timeB
+        }
+        if (config.sortBy === 'price_asc') {
+            return (a.price || 0) - (b.price || 0)
+        }
+        if (config.sortBy === 'price_desc') {
+            return (b.price || 0) - (a.price || 0)
+        }
+        if (config.sortBy === 'title_desc') {
+            return (getLocalizedTitle(b) || '').localeCompare(getLocalizedTitle(a) || '')
+        }
+        return (getLocalizedTitle(a) || '').localeCompare(getLocalizedTitle(b) || '')
+    })
 
     const languageNames: { [key: string]: string } = {
         fr: 'Langue : Français',
@@ -69,40 +106,58 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     }
 
     const getChunkedBooks = () => {
-        const chunkedBooksBase = Array.from({ length: Math.ceil(filteredBooks.length / BOOKS_PER_PAGE) }, (_, i) =>
-            filteredBooks.slice(i * BOOKS_PER_PAGE, i * BOOKS_PER_PAGE + BOOKS_PER_PAGE)
-        )
+        if (config.grouping === 'category') {
+            const booksByCategory: { [cat: string]: any[] } = {}
+            sortedBooks.forEach(book => {
+                const cat = book.category || 'Non classé'
+                if (!booksByCategory[cat]) booksByCategory[cat] = []
+                booksByCategory[cat].push(book)
+            })
 
-        if (!config.groupByLanguage) {
-            return chunkedBooksBase.map(chunk => ({
-                language: 'all',
-                books: chunk
-            }))
+            const chunks: { groupSubtitle: string; books: any[] }[] = []
+            const sortedCats = Object.keys(booksByCategory).sort((a, b) => a.localeCompare(b))
+            sortedCats.forEach(cat => {
+                const list = booksByCategory[cat]
+                const count = Math.ceil(list.length / BOOKS_PER_PAGE)
+                for (let i = 0; i < count; i++) {
+                    chunks.push({
+                        groupSubtitle: `Catégorie : ${cat}${count > 1 ? ` (${i + 1}/${count})` : ''}`,
+                        books: list.slice(i * BOOKS_PER_PAGE, i * BOOKS_PER_PAGE + BOOKS_PER_PAGE)
+                    })
+                }
+            })
+            return chunks
         }
 
-        const booksByLanguage: { [key: string]: any[] } = {}
-        filteredBooks.forEach(book => {
-            const lang = book.language || 'fr'
-            if (!booksByLanguage[lang]) {
-                booksByLanguage[lang] = []
-            }
-            booksByLanguage[lang].push(book)
-        })
+        if (config.grouping === 'language' || config.groupByLanguage) {
+            const booksByLanguage: { [key: string]: any[] } = {}
+            sortedBooks.forEach(book => {
+                const lang = book.language || 'fr'
+                if (!booksByLanguage[lang]) {
+                    booksByLanguage[lang] = []
+                }
+                booksByLanguage[lang].push(book)
+            })
 
-        const chunks: { language: string; books: any[] }[] = []
-        const sortedLanguages = Object.keys(booksByLanguage).sort()
-        sortedLanguages.forEach(lang => {
-            const list = booksByLanguage[lang]
-            const count = Math.ceil(list.length / BOOKS_PER_PAGE)
-            for (let i = 0; i < count; i++) {
-                chunks.push({
-                    language: lang,
-                    books: list.slice(i * BOOKS_PER_PAGE, i * BOOKS_PER_PAGE + BOOKS_PER_PAGE)
-                })
-            }
-        })
+            const chunks: { groupSubtitle: string; books: any[] }[] = []
+            const sortedLanguages = Object.keys(booksByLanguage).sort()
+            sortedLanguages.forEach(lang => {
+                const list = booksByLanguage[lang]
+                const count = Math.ceil(list.length / BOOKS_PER_PAGE)
+                for (let i = 0; i < count; i++) {
+                    chunks.push({
+                        groupSubtitle: `${languageNames[lang] || lang}${count > 1 ? ` (${i + 1}/${count})` : ''}`,
+                        books: list.slice(i * BOOKS_PER_PAGE, i * BOOKS_PER_PAGE + BOOKS_PER_PAGE)
+                    })
+                }
+            })
+            return chunks
+        }
 
-        return chunks
+        return Array.from({ length: Math.ceil(sortedBooks.length / BOOKS_PER_PAGE) }, (_, i) => ({
+            groupSubtitle: '',
+            books: sortedBooks.slice(i * BOOKS_PER_PAGE, i * BOOKS_PER_PAGE + BOOKS_PER_PAGE)
+        }))
     }
 
     const chunkedBooks = getChunkedBooks()
@@ -185,9 +240,9 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black backdrop-blur-md">
             <div className="bg-white w-full h-full flex flex-col overflow-hidden shadow-2xl">
-                <div className="bg-purple-600 p-6 flex items-center justify-between text-white shadow-lg">
+                <div className="bg-slate-900 p-6 flex items-center justify-between text-white border-b border-slate-800 shadow-lg">
                     <div className="flex items-center gap-3">
-                        <ImageIcon className="w-6 h-6" />
+                        <ImageIcon className="w-6 h-6 text-blue-400" />
                         <h2 className="text-xl font-bold uppercase tracking-tight">Générateur IMAGE</h2>
                     </div>
                     <button aria-label="Fermer" onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold text-xl"><X className="w-6 h-6" /></button>
@@ -203,7 +258,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         <button 
                                             key={bg.color}
                                             onClick={() => setConfig({...config, backgroundColor: bg.color, textColor: bg.text})}
-                                            className={`w-full aspect-square rounded-xl border-2 transition-all ${config.backgroundColor === bg.color ? 'border-purple-600 scale-110 shadow-lg' : 'border-gray-100 hover:scale-110'}`}
+                                            className={`w-full aspect-square rounded-xl border-2 transition-all ${config.backgroundColor === bg.color ? 'border-blue-600 scale-110 shadow-lg' : 'border-gray-100 hover:scale-110'}`}
                                             style={{ backgroundColor: bg.color }}
                                         />
                                     ))}
@@ -217,7 +272,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         <button 
                                             key={p}
                                             onClick={() => setConfig({...config, pattern: p})}
-                                            className={`py-3 rounded-2xl text-[9px] font-black border-2 transition-all uppercase ${config.pattern === p ? 'bg-purple-600 text-white border-purple-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}
+                                            className={`py-3 rounded-2xl text-[9px] font-black border-2 transition-all uppercase ${config.pattern === p ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}
                                         >
                                             {p === 'none' ? 'Pur' : p === 'dots' ? 'Points' : p === 'stripes' ? 'Lignes' : 'Grille'}
                                         </button>
@@ -228,7 +283,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                             <div className="space-y-4 text-gray-900">
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest">Thème</label>
                                 <div className="flex gap-2.5">
-                                    {['#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#111827'].map(c => (
+                                    {['#2563eb', '#059669', '#d97706', '#dc2626', '#0f172a'].map(c => (
                                         <button 
                                             key={c}
                                             onClick={() => setConfig({...config, primaryColor: c})}
@@ -247,7 +302,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         type="text" 
                                         value={config.title}
                                         onChange={(e) => setConfig({...config, title: e.target.value})}
-                                        className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-sm font-bold text-gray-900 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all outline-none"
+                                        className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
                                         placeholder="Ex: Nouveautés"
                                     />
                                 </div>
@@ -268,12 +323,29 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                                 setConfig({...config, format: f.id, booksPerPage: newBooks, columns: newCols}); 
                                                 setCurrentChunkIdx(0); 
                                             }}
-                                            className={`py-3 rounded-2xl text-[9px] font-black border-2 transition-all uppercase ${config.format === f.id ? 'bg-purple-600 text-white border-purple-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}
+                                            className={`py-3 rounded-2xl text-[9px] font-black border-2 transition-all uppercase ${config.format === f.id ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}
                                         >
                                             {f.label}
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Catalogue de quel entrepôt</label>
+                                <select aria-label="Catalogue de quel entrepôt" 
+                                    value={config.selectedWarehouse}
+                                    onChange={(e) => {
+                                        setConfig({...config, selectedWarehouse: e.target.value});
+                                        setCurrentChunkIdx(0);
+                                    }}
+                                    className="w-full bg-white border border-gray-200 rounded-2xl py-3 px-4 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                >
+                                    <option value="all">Tous les entrepôts</option>
+                                    {warehouses.map((w: any) => (
+                                        <option key={w.id} value={w.id}>{w.name} {w.location ? `(${w.location})` : ''}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>
@@ -284,7 +356,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         setConfig({...config, selectedCategory: e.target.value});
                                         setCurrentChunkIdx(0);
                                     }}
-                                    className="w-full bg-white border border-gray-200 rounded-2xl py-3 px-4 text-sm font-bold text-gray-900 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all outline-none"
+                                    className="w-full bg-white border border-gray-200 rounded-2xl py-3 px-4 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
                                 >
                                     <option value="all">Toutes les catégories</option>
                                     {categories.map((c: any) => (
@@ -294,16 +366,46 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                             </div>
 
                             <div>
-                                <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Langue</label>
-                                <label className="flex items-center gap-2 cursor-pointer py-1">
-                                    <input 
-                                        type="checkbox"
-                                        checked={config.groupByLanguage}
-                                        onChange={(e) => setConfig({...config, groupByLanguage: e.target.checked})}
-                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                                    />
-                                    <span className="text-sm font-semibold text-gray-700">Regrouper par langue</span>
+                                <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3 flex items-center gap-1.5">
+                                    <ArrowUpDown className="w-3.5 h-3.5 text-blue-600" />
+                                    Trier par
                                 </label>
+                                <select 
+                                    aria-label="Trier par"
+                                    value={config.sortBy}
+                                    onChange={(e) => {
+                                        setConfig({...config, sortBy: e.target.value});
+                                        setCurrentChunkIdx(0);
+                                    }}
+                                    className="w-full bg-white border border-gray-200 rounded-2xl py-3 px-4 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                >
+                                    <option value="date_desc">Date d&apos;ajout (plus récents)</option>
+                                    <option value="date_asc">Date d&apos;ajout (plus anciens)</option>
+                                    <option value="title_asc">Titre (A à Z)</option>
+                                    <option value="title_desc">Titre (Z à A)</option>
+                                    <option value="price_asc">Prix (croissant)</option>
+                                    <option value="price_desc">Prix (décroissant)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3 flex items-center gap-1.5">
+                                    <Layers className="w-3.5 h-3.5 text-blue-600" />
+                                    Regrouper par
+                                </label>
+                                <select 
+                                    aria-label="Regrouper par"
+                                    value={config.grouping}
+                                    onChange={(e) => {
+                                        setConfig({...config, grouping: e.target.value as 'none' | 'category' | 'language', groupByLanguage: e.target.value === 'language'});
+                                        setCurrentChunkIdx(0);
+                                    }}
+                                    className="w-full bg-white border border-gray-200 rounded-2xl py-3 px-4 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+                                >
+                                    <option value="none">Aucun regroupement</option>
+                                    <option value="category">Par Catégorie</option>
+                                    <option value="language">Par Langue</option>
+                                </select>
                             </div>
 
                             <div>
@@ -313,7 +415,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         type="checkbox"
                                         checked={config.showPrice}
                                         onChange={(e) => setConfig({...config, showPrice: e.target.checked})}
-                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
                                     <span className="text-sm font-semibold text-gray-700">Afficher le prix</span>
                                 </label>
@@ -326,7 +428,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         <button 
                                             key={num}
                                             onClick={() => { setConfig({...config, booksPerPage: num}); setCurrentChunkIdx(0); }}
-                                            className={`py-2 rounded-xl text-[10px] font-black border-2 transition-all ${config.booksPerPage === num ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-400 border-gray-100'}`}
+                                            className={`py-2 rounded-xl text-[10px] font-black border-2 transition-all ${config.booksPerPage === num ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 border-gray-100'}`}
                                         >
                                             {num}
                                         </button>
@@ -337,7 +439,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
                         <div className="pt-8 space-y-4">
                             {statusText && (
-                                <div className="p-4 bg-purple-50 rounded-2xl flex items-center gap-3 text-purple-600 font-bold text-xs">
+                                <div className="p-4 bg-blue-50 rounded-2xl flex items-center gap-3 text-blue-600 font-bold text-xs">
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                     {statusText}
                                 </div>
@@ -345,7 +447,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                             <button
                                 onClick={handleExportAll}
                                 disabled={isGenerating || allBooks.length === 0}
-                                className="w-full py-5 bg-purple-600 text-white font-black rounded-3xl shadow-xl hover:bg-purple-700 transition-all disabled:opacity-50"
+                                className="w-full py-5 bg-blue-600 text-white font-black rounded-3xl shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50"
                             >
                                 {isGenerating ? <Loader2 className="w-6 h-6 animate-spin" /> : 'TÉLÉCHARGER'}
                             </button>
@@ -364,7 +466,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                     step="0.05" 
                                     value={config.scaleX} 
                                     onChange={(e) => setConfig({...config, scaleX: parseFloat(e.target.value)})}
-                                    className="w-32 accent-purple-600"
+                                    className="w-32 accent-blue-600"
                                 />
                                 <span className="text-[10px] font-black text-gray-600 w-8">{Math.round(config.scaleX * 100)}%</span>
                             </div>
@@ -377,7 +479,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                     step="0.05" 
                                     value={config.scaleY} 
                                     onChange={(e) => setConfig({...config, scaleY: parseFloat(e.target.value)})}
-                                    className="w-32 accent-purple-600"
+                                    className="w-32 accent-blue-600"
                                 />
                                 <span className="text-[10px] font-black text-gray-600 w-8">{Math.round(config.scaleY * 100)}%</span>
                             </div>
@@ -390,9 +492,9 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <div style={{ transform: `scale(${config.scaleX}, ${config.scaleY})`, transformOrigin: 'top center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'transform 0.2s' }}>
                                     <div className="relative z-10 w-full flex flex-col items-center">
                                     <h1 dir="auto" className="font-black uppercase text-center mb-6" style={{ color: config.primaryColor, fontSize: config.format === 'post' ? '100px' : '140px', lineHeight: 1.1 }}>{config.title}</h1>
-                                    {config.groupByLanguage && chunkedBooks[currentChunkIdx]?.language !== 'all' && (
+                                    {chunkedBooks[currentChunkIdx]?.groupSubtitle && (
                                         <p className="font-black mb-10 uppercase tracking-wider text-center" style={{ color: config.primaryColor, fontSize: config.format === 'post' ? '28px' : '36px' }}>
-                                            {languageNames[chunkedBooks[currentChunkIdx]?.language]}
+                                            {chunkedBooks[currentChunkIdx]?.groupSubtitle}
                                         </p>
                                     )}
                                     <div className="w-full grid" style={{ gridTemplateColumns: `repeat(${config.format === 'post' && config.booksPerPage <= 4 ? 2 : config.columns}, minmax(0, 1fr))`, gap: config.format === 'post' ? '30px' : '48px', alignItems: 'start' }}>
@@ -434,7 +536,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <button
                                     key={i}
                                     onClick={() => setCurrentChunkIdx(i)}
-                                    className={`w-3 h-3 rounded-full transition-all ${currentChunkIdx === i ? 'bg-purple-600 scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
+                                    className={`w-3 h-3 rounded-full transition-all ${currentChunkIdx === i ? 'bg-blue-600 scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
                                 />
                             ))}
                         </div>
@@ -487,10 +589,10 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <h1 dir="auto" style={{ fontSize: isPost ? '110px' : '180px', fontWeight: '950', color: config.primaryColor, textTransform: 'uppercase', letterSpacing: '-4px', margin: '0 0 20px 0', lineHeight: '1', textAlign: 'center' }}>
                                     {config.title}
                                 </h1>
-                                {config.groupByLanguage && chunk.language !== 'all' && (
+                                {chunk.groupSubtitle && (
                                     <div style={{ marginBottom: isPost ? '30px' : '50px' }}>
                                         <span style={{ fontSize: isPost ? '32px' : '48px', fontWeight: '950', color: config.textColor, letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.8 }}>
-                                            {languageNames[chunk.language]}
+                                            {chunk.groupSubtitle}
                                         </span>
                                     </div>
                                 )}

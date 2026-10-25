@@ -223,6 +223,29 @@ export async function getBooks(filters?: BookFilters) {
 }
 
 /**
+ * Liste légère du catalogue destinée au sélecteur des catégories SEO.
+ * La route admin qui l'utilise est responsable du contrôle d'accès.
+ */
+export async function getSeoCategoryBookOptions() {
+    return prisma.book.findMany({
+        orderBy: [
+            { active: 'desc' },
+            { title: 'asc' },
+        ],
+        select: {
+            id: true,
+            title: true,
+            titleFr: true,
+            titleEn: true,
+            author: true,
+            image: true,
+            language: true,
+            active: true,
+        },
+    })
+}
+
+/**
  * Compte le nombre total de livres correspondant aux filtres
  */
 export async function getBooksCount(filters?: BookFilters) {

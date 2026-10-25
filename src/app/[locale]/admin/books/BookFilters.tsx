@@ -549,23 +549,28 @@ export default function BookFilters({
                                     { id: 'price-desc', label: 'Prix Décroissant' },
                                     { id: 'stock-asc', label: 'Stock Faible' },
                                     { id: 'stock-desc', label: 'Stock Élevé' },
-                                    { id: 'title-asc', label: 'Nom (A-Z)' },
-                                    { id: 'title-desc', label: 'Nom (Z-A)' },
+                                    { id: 'title-asc', label: 'Titre (A-Z)' },
+                                    { id: 'title-desc', label: 'Titre (Z-A)' },
                                     { id: 'seo-asc', label: 'Score SEO Croissant' },
                                     { id: 'seo-desc', label: 'Score SEO Décroissant' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ sort: f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                                            activeFilters.sort === f.id 
-                                            ? 'bg-blue-600 text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const isSelected = activeFilters.sort === f.id ||
+                                        (f.id === 'title-asc' && activeFilters.sort === 'a-z') ||
+                                        (f.id === 'title-desc' && activeFilters.sort === 'z-a')
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => handleApplyFilters({ sort: f.id })}
+                                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                                                isSelected 
+                                                ? 'bg-blue-600 text-white shadow-sm' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>

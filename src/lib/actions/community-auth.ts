@@ -195,6 +195,12 @@ export async function login(formData: FormData): Promise<AuthResult> {
         await createSession(user.id)
 
         if (user.role === 'SELLER') {
+            try {
+                const { notifyAdminOnSellerLogin } = await import('@/lib/whatsapp')
+                notifyAdminOnSellerLogin(user, ip).catch(console.error)
+            } catch (notifyErr) {
+                console.error('Error triggering seller login notification:', notifyErr)
+            }
             return { success: true, redirect: '/seller' }
         }
         if (user.role === 'INFLUENCER' || user.role === 'influencer' as any) {
@@ -312,6 +318,12 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
         await createSession(user.id)
 
         if (user.role === 'SELLER') {
+            try {
+                const { notifyAdminOnSellerLogin } = await import('@/lib/whatsapp')
+                notifyAdminOnSellerLogin(user, ip).catch(console.error)
+            } catch (notifyErr) {
+                console.error('Error triggering seller login notification:', notifyErr)
+            }
             return { success: true, redirect: '/seller' }
         }
         if (user.role === 'INFLUENCER' || user.role === 'influencer' as any) {
