@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { FileText, X, Printer, LayoutList, Type, Loader2, ImageIcon, Book as BookIcon, Filter, Palette, Grid3X3, Globe, Warehouse, ArrowUpDown, Layers } from 'lucide-react'
 import { getAllBooksForCatalog } from '@/lib/actions/books'
 import { getWarehouses } from '@/lib/actions/warehouse'
@@ -35,6 +35,19 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
         groupByLanguage: false
     })
 
+    const printWhenReady = async () => {
+        if ('fonts' in document) await document.fonts.ready
+        const images = Array.from(document.querySelectorAll<HTMLImageElement>('.catalog-print-root img'))
+        await Promise.all(images.map(image => {
+            if (image.complete) return Promise.resolve()
+            return new Promise<void>(resolve => {
+                image.addEventListener('load', () => resolve(), { once: true })
+                image.addEventListener('error', () => resolve(), { once: true })
+            })
+        }))
+        window.print()
+    }
+
     useEffect(() => {
         if (!triggerEvent) return
         
@@ -50,9 +63,9 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
     // Auto-download for visitors
     useEffect(() => {
         if (isVisitor && isOpen && allBooks.length > 0) {
-            setTimeout(() => {
-                window.print()
-                setTimeout(() => setIsOpen(false), 1000)
+            setTimeout(async () => {
+                await printWhenReady()
+                setIsOpen(false)
             }, 1500)
         }
     }, [isVisitor, isOpen, allBooks])
@@ -123,16 +136,17 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
         )
     }
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         if (sortedBooks.length === 0) {
             alert('Aucun livre trouvé.')
             return
         }
         setIsGenerating(true)
-        setTimeout(() => {
-            window.print()
+        try {
+            await printWhenReady()
+        } finally {
             setIsGenerating(false)
-        }, 500)
+        }
     }
 
     const languageNames: { [key: string]: string } = {
@@ -191,7 +205,6 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
 
     const bookPages = getBookPages()
     const numRows = Math.ceil(config.booksPerPage / 2)
-    const rowHeight = (25 / numRows).toFixed(2)
 
     // Définition des styles de motifs
     const getPatternStyle = () => {
@@ -387,7 +400,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
             </div>
 
             {/* Print Area */}
-            <div className="hidden print:block absolute top-0 left-0 w-full" style={{ backgroundColor: config.backgroundColor, ...getPatternStyle() }}>
+            <div className="catalog-print-root hidden print:block absolute top-0 left-0 w-full" style={{ backgroundColor: config.backgroundColor, ...getPatternStyle() }}>
                 <style dangerouslySetInnerHTML={{ __html: `
                     @media print {
                         @page { margin: 0; size: A4; }
@@ -396,16 +409,55 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                         .catalog-print-area .lucide { display: block !important; }
                         .pl-64 { padding-left: 0 !important; }
                         main { padding: 0 !important; }
-                        .page-break { page-break-after: always; display: block; position: relative; }
+                        .catalog-print-root { position: absolute !important; inset: 0 !important; width: 210mm !important; }
+                        .catalog-page {
+                            width: 210mm !important;
+                            height: 297mm !important;
+                            padding: 12mm !important;
+                            box-sizing: border-box !important;
+                            overflow: hidden !important;
+                            position: relative !important;
+                            break-after: page !important;
+                            page-break-after: always !important;
+                        }
+                        .catalog-page:last-child { break-after: auto !important; page-break-after: auto !important; }
+                        .catalog-cover { display: flex !important; flex-direction: column !important; padding: 0 !important; }
+                        .catalog-cover-hero { height: 119mm !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+                        .catalog-cover-body { height: 178mm !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 10mm !important; box-sizing: border-box !important; }
+                        .catalog-page-header { height: 11mm !important; box-sizing: border-box !important; margin: 0 0 4mm !important; }
+                        .catalog-grid {
+                            display: grid !important;
+                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                            grid-template-rows: repeat(var(--catalog-rows), minmax(0, 1fr)) !important;
+                            gap: 3mm 4mm !important;
+                            height: 258mm !important;
+                            min-height: 0 !important;
+                        }
+                        .catalog-card {
+                            display: flex !important;
+                            min-width: 0 !important;
+                            min-height: 0 !important;
+                            height: auto !important;
+                            padding: 3mm !important;
+                            gap: 3mm !important;
+                            box-sizing: border-box !important;
+                            overflow: hidden !important;
+                            break-inside: avoid !important;
+                            page-break-inside: avoid !important;
+                        }
+                        .catalog-card-image { width: 35% !important; height: 100% !important; flex: 0 0 35% !important; padding: 1.5mm !important; box-sizing: border-box !important; overflow: hidden !important; }
+                        .catalog-card-image img { display: block !important; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; }
+                        .catalog-card-content { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; min-width: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+                        .catalog-card-footer { margin-top: auto !important; flex-shrink: 0 !important; }
                     }
                 `}} />
 
                 {/* Cover Page */}
-                <div className="relative w-full h-[29.7cm] flex flex-col page-break overflow-hidden" style={{ ...getPatternStyle() }}>
-                    <div className="h-[40%] w-full flex items-center justify-center shadow-lg" style={{ backgroundColor: config.primaryColor }}>
+                <div className="catalog-page catalog-cover" style={{ ...getPatternStyle() }}>
+                    <div className="catalog-cover-hero w-full shadow-lg" style={{ backgroundColor: config.primaryColor }}>
                         <div className="catalog-print-area"><BookIcon className="w-32 h-32 text-white/30 lucide" /></div>
                     </div>
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
+                    <div className="catalog-cover-body">
                         <h1 className="text-6xl font-black text-gray-900 mb-4 tracking-tighter uppercase">{config.title}</h1>
                         <p className="text-2xl text-gray-400 italic mb-10">
                             {config.selectedCategory !== 'all' ? `Collection : ${config.selectedCategory}` : config.subtitle}
@@ -417,38 +469,38 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
 
                 {/* Book Pages */}
                 {bookPages.map(({ groupTitle, books }, pageIdx) => (
-                    <div key={pageIdx} className="w-full h-[29.7cm] p-10 page-break overflow-hidden flex flex-col pt-12" style={{ ...getPatternStyle() }}>
-                        {groupTitle && (
-                            <div className="flex items-center justify-between border-b pb-2 mb-4" style={{ borderColor: config.primaryColor + '33' }}>
+                    <div key={pageIdx} className="catalog-page" style={{ ...getPatternStyle() }}>
+                        <div className="catalog-page-header flex items-center justify-between border-b pb-2" style={{ borderColor: config.primaryColor + '33' }}>
+                            {groupTitle ? (
                                 <span className="text-xs font-black uppercase tracking-widest" style={{ color: config.primaryColor }}>
                                     {groupTitle}
                                 </span>
+                            ) : <span />}
                                 <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                                     Partie {pageIdx + 1} / {bookPages.length}
                                 </span>
-                            </div>
-                        )}
-                        <div className="grid grid-cols-2 gap-6 flex-1">
+                        </div>
+                        <div className="catalog-grid" style={{ '--catalog-rows': numRows } as CSSProperties}>
                             {books.map((book, idx) => (
                                 <div 
                                     key={idx} 
-                                    className="flex gap-4 border border-gray-100 rounded-2xl p-4 break-inside-avoid shadow-sm"
-                                    style={{ height: `${rowHeight}cm`, backgroundColor: 'white' }}
+                                    className="catalog-card border border-gray-100 rounded-2xl shadow-sm"
+                                    style={{ backgroundColor: 'white' }}
                                 >
-                                    <div className="w-[35%] h-full flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
+                                    <div className="catalog-card-image bg-gray-100 rounded-xl flex items-center justify-center">
                                         {book.image ? (
                                             <img src={normalizeImage(book.image)} alt={getLocalizedTitle(book)} className="h-full w-full object-contain" />
                                         ) : (
                                             <div className="catalog-print-area"><ImageIcon className="w-8 h-8 text-gray-200 lucide" /></div>
                                         )}
                                     </div>
-                                    <div className="flex-1 flex flex-col py-1 overflow-hidden h-full">
+                                    <div className="catalog-card-content py-1">
                                         <div className="flex-1 overflow-hidden">
                                             <h3 className="text-sm font-black text-gray-900 uppercase line-clamp-2 mb-1">{getLocalizedTitle(book)}</h3>
                                             <p className="text-[10px] text-blue-600 font-bold truncate mb-2">{book.author}</p>
                                             <p className="text-[9px] text-gray-400 line-clamp-3 leading-relaxed italic">{book.description || "Sélectionné par nos soins."}</p>
                                         </div>
-                                        <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-auto">
+                                        <div className="catalog-card-footer flex items-center justify-between pt-2 border-t border-gray-50">
                                             {config.showPrice && <span className="text-base font-black text-gray-900">{book.price} درهم</span>}
                                             {book.category && <span className="text-[8px] font-bold text-gray-400 uppercase border border-gray-200 px-2 py-0.5 rounded truncate">{book.category}</span>}
                                         </div>

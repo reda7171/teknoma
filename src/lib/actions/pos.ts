@@ -28,6 +28,7 @@ export async function createPOSOrder(data: {
     type: 'BOOK' | 'PACK' | 'ACCESSORY';
     quantity: number;
     price: number;
+    isMissing?: boolean;
   }[];
   total: number;
   subtotal: number;
@@ -84,6 +85,7 @@ export async function createPOSOrder(data: {
             quantity: item.quantity,
             price: item.price,
             costPrice: item.costPrice,
+            isMissing: Boolean(item.isMissing),
             bookId: item.type === 'BOOK' ? item.id : null,
             packId: item.type === 'PACK' ? item.id : null,
             extraProductId: item.type === 'ACCESSORY' ? item.id : null,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut, Camera } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut, Camera, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import BarcodeScanner from './BarcodeScanner';
@@ -99,6 +99,7 @@ interface CartItem extends Product {
   cartItemId: string;
   quantity: number;
   type: 'BOOK' | 'PACK' | 'ACCESSORY';
+  isMissing: boolean;
 }
 
 interface POSClientProps {
@@ -433,7 +434,7 @@ export default function POSClient({
             : item
         );
       }
-      return [...prev, { ...product, type, quantity: 1, cartItemId: Math.random().toString() }];
+      return [...prev, { ...product, type, quantity: 1, isMissing: false, cartItemId: Math.random().toString() }];
     });
   };
 
@@ -457,6 +458,10 @@ export default function POSClient({
     setCart(prev => prev.filter(item => item.cartItemId !== cartItemId));
   };
 
+  const toggleMissing = (cartItemId: string) => {
+    setCart(prev => prev.map(item => item.cartItemId === cartItemId ? { ...item, isMissing: !item.isMissing } : item));
+  };
+
   const itemsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const finalTotal = itemsTotal + Number(shippingFees) - Number(discount);
 
@@ -475,7 +480,8 @@ export default function POSClient({
         id: c.id,
         type: c.type,
         quantity: c.quantity,
-        price: c.price
+        price: c.price,
+        isMissing: c.isMissing
       })),
       subtotal: itemsTotal,
       total: finalTotal,
@@ -888,7 +894,7 @@ export default function POSClient({
             </div>
           ) : (
             cart.map(item => (
-              <div key={item.cartItemId} className="flex items-center gap-5 p-5 bg-gray-50/50 rounded-[2rem] border border-gray-100 group transition-all hover:bg-white hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1">
+              <div key={item.cartItemId} className={`flex items-center gap-5 p-5 rounded-[2rem] border group transition-all hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1 ${item.isMissing ? 'bg-red-50 border-red-200' : 'bg-gray-50/50 border-gray-100 hover:bg-white'}`}>
                 <div className="w-16 h-20 bg-white rounded-2xl border border-gray-100 overflow-hidden relative shrink-0 shadow-lg group-hover:scale-105 transition-transform">
                   {item.image ? (
                     <img 
@@ -909,6 +915,14 @@ export default function POSClient({
                       Stock: {item.stock}
                     </p>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => toggleMissing(item.cartItemId)}
+                    className={`mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${item.isMissing ? 'bg-red-600 text-white' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    {item.isMissing ? 'Manquant' : 'Signaler manquant'}
+                  </button>
                   
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-1.5 bg-white border border-gray-100 px-3 py-1.5 rounded-xl shadow-sm">

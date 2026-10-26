@@ -497,6 +497,7 @@ model OrderItem {
   quantity         Int             @default(1)
   price            Float
   costPrice        Float           @default(0)
+  isMissing        Boolean         @default(false)
   bookId           String?
   packId           String?
   giftId           String?
@@ -524,6 +525,7 @@ model OrderItem {
   @@index([digitalProductId], map: "order_items_digitalProductId_fkey")
   @@index([sellerId], map: "order_items_sellerId_fkey")
   @@index([warehouseId])
+  @@index([isMissing])
   @@map("order_items")
 }
 
