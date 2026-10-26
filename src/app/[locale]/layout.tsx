@@ -332,8 +332,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(siteUrl),
     alternates: {
       types: {
-        'application/rss+xml': `${siteUrl}/feed.xml`,
-        'application/atom+xml': `${siteUrl}/atom.xml`,
+        'application/rss+xml': `${siteUrl}/nouveautes.xml`,
+        'application/atom+xml': `${siteUrl}/nouveautes.atom`,
       },
       canonical: `${siteUrl}/${locale}`,
       languages: {

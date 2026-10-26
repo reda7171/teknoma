@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
+import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 // Schéma de validation pour un livre
 import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/books'
@@ -129,9 +130,20 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             }
         }
 
+        const classification = autoClassifyBook({
+            title: validatedData.title,
+            author: validatedData.author,
+            description: validatedData.description,
+            language: validatedData.language,
+            category: validatedData.category,
+            subCategory: validatedData.subCategory
+        })
+
         const book = await prisma.book.create({
             data: {
                 ...validatedData,
+                category: classification.category,
+                subCategory: classification.subCategory,
                 isbn: cleanIsbn,
                 active: validatedData.active ?? true,
                 isOriginal: validatedData.isOriginal ?? true,

@@ -27,6 +27,39 @@ function escapeXml(unsafe: string): string {
     })
 }
 
+async function loadBookImage(image: string, publicDir: string): Promise<Buffer | null> {
+    if (image.startsWith('data:image/')) {
+        const match = image.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/)
+        return match ? Buffer.from(match[1], 'base64') : null
+    }
+
+    if (!image.startsWith('http')) {
+        const relativePath = image.replace(/^\/+/, '')
+        const localPath = path.resolve(publicDir, relativePath)
+        const publicRoot = path.resolve(publicDir) + path.sep
+        if (localPath.startsWith(publicRoot) && fs.existsSync(localPath)) {
+            return fsPromises.readFile(localPath)
+        }
+    }
+
+    const imageUrl = image.startsWith('http')
+        ? image
+        : `https://riwaya.store/${image.replace(/^\/+/, '')}`
+
+    try {
+        const response = await fetch(imageUrl, { signal: AbortSignal.timeout(20_000) })
+        if (!response.ok) return null
+        const contentType = response.headers.get('content-type') || ''
+        if (!contentType.startsWith('image/')) return null
+        const contentLength = Number(response.headers.get('content-length') || 0)
+        if (contentLength > 20 * 1024 * 1024) return null
+        const imageBuffer = Buffer.from(await response.arrayBuffer())
+        return imageBuffer.length <= 20 * 1024 * 1024 ? imageBuffer : null
+    } catch {
+        return null
+    }
+}
+
 export async function generateFacebookWatermarkedImage(
     book: { id: string, title: string, price: number, image: string | null },
     config: FacebookWatermarkConfig
@@ -34,32 +67,16 @@ export async function generateFacebookWatermarkedImage(
     if (!book.image) return null
 
     const publicDir = path.join(process.cwd(), 'public')
-    const rawImagePath = path.join(publicDir, book.image.replace(/^\/+/, ''))
-
-    // Télécharger depuis riwaya.store si manquant en local
-    if (!fs.existsSync(rawImagePath)) {
-        try {
-            const prodUrl = `https://riwaya.store${book.image.startsWith('/') ? book.image : '/' + book.image}`
-            const res = await fetch(prodUrl)
-            if (res.ok) {
-                const buffer = await res.arrayBuffer()
-                const dir = path.dirname(rawImagePath)
-                await fsPromises.mkdir(dir, { recursive: true })
-                await fsPromises.writeFile(rawImagePath, Buffer.from(buffer))
-            } else {
-                return null
-            }
-        } catch {
-            return null
-        }
-    }
-
-    if (!fs.existsSync(rawImagePath)) return null
+    const sourceImage = await loadBookImage(book.image, publicDir)
+    if (!sourceImage) return null
 
     try {
-        const metadata = await sharp(rawImagePath).metadata()
-        const width = metadata.width || 800
-        const height = metadata.height || 1200
+        const resized = await sharp(sourceImage)
+            .rotate()
+            .resize({ width: 1400, height: 1400, fit: 'inside', withoutEnlargement: true })
+            .toBuffer({ resolveWithObject: true })
+        const width = resized.info.width || 800
+        const height = resized.info.height || 1200
 
         const bannerHeight = Math.round(height * 0.15)
         const bannerColor = config.color || '#0f172a'
@@ -158,8 +175,7 @@ export async function generateFacebookWatermarkedImage(
         const outputFileName = `watermarked_${book.id}.jpg`
         const outputPath = path.join(outputDir, outputFileName)
 
-        await sharp(rawImagePath)
-            .resize({ width: Math.min(width, 1400), height: Math.min(height, 1400), fit: 'inside' })
+        await sharp(resized.data)
             .composite([{ input: svgBuffer, blend: 'over' }])
             .jpeg({ quality: 92 })
             .toFile(outputPath)

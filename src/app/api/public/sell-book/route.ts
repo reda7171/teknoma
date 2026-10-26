@@ -6,6 +6,7 @@ import { createHash } from 'crypto'
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
+import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 // Configurations
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
@@ -107,13 +108,22 @@ export async function POST(request: NextRequest) {
             })
         }
 
-        // 2. Create the Book
+        // 2. Auto-classification & Create the Book
+        const classification = autoClassifyBook({
+            title,
+            author,
+            description,
+            language: 'fr',
+            category
+        })
+
         const book = await prisma.book.create({
             data: {
                 title,
                 author,
                 description,
-                category,
+                category: classification.category,
+                subCategory: classification.subCategory,
                 condition: condition as any,
                 price,
                 stock: 1, // Only 1 copy for used books usually

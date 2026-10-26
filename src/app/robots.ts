@@ -74,6 +74,8 @@ export default function robots(): MetadataRoute.Robots {
         sitemap: [
             `${baseUrl}/sitemap.xml`,
             `${baseUrl}/feed.xml`,
+            `${baseUrl}/nouveautes.xml`,
+            `${baseUrl}/nouveautes.atom`,
         ],
     }
 }
