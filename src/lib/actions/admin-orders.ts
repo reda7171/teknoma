@@ -223,6 +223,32 @@ export async function updateOrderDetails(orderId: string, data: any) {
     }
 }
 
+/** Signaler ou resoudre un article manquant sans modifier le contenu de la commande. */
+export async function updateOrderItemMissing(orderId: string, itemId: string, isMissing: boolean) {
+    try {
+        await verifyAdmin()
+        const item = await prisma.orderItem.findFirst({ where: { id: itemId, orderId }, select: { id: true } })
+        if (!item) return { success: false, error: 'Article introuvable dans cette commande' }
+
+        await prisma.$transaction([
+            prisma.orderItem.update({ where: { id: itemId }, data: { isMissing } }),
+            prisma.orderStatusHistory.create({
+                data: {
+                    orderId,
+                    status: 'ITEM_MISSING',
+                    comment: isMissing ? `Article ${itemId} signale comme manquant` : `Article ${itemId} marque comme retrouve`,
+                    createdBy: 'ADMIN'
+                }
+            })
+        ])
+        revalidatePath(`/admin/orders/${orderId}`)
+        return { success: true }
+    } catch (error) {
+        console.error('Erreur mise a jour article manquant:', error)
+        return { success: false, error: 'Impossible de modifier le signalement' }
+    }
+}
+
 /**
  * Modifier manuellement le Tracking ID (Code Colis) d'une commande
  */
@@ -1070,6 +1096,7 @@ export async function updateOrderItems(orderId: string, items: {
     quantity: number;
     price: number;
     warehouseId?: string | null;
+    isMissing?: boolean;
 }[]) {
     try {
         await verifyAdmin()
@@ -1154,6 +1181,7 @@ export async function updateOrderItems(orderId: string, items: {
                         data: {
                             quantity: newItem.quantity,
                             price: newItem.price,
+                            isMissing: Boolean(newItem.isMissing),
                         }
                     })
                 }
@@ -1221,6 +1249,7 @@ export async function updateOrderItems(orderId: string, items: {
                         quantity: newItem.quantity,
                         price: newItem.price,
                         costPrice: costPrice,
+                        isMissing: Boolean(newItem.isMissing),
                         warehouseId: assignedWarehouseId,
                         bookId: newItem.type === 'BOOK' ? newItem.productId : null,
                         packId: newItem.type === 'PACK' ? newItem.productId : null,

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTelegramPhoto, sendTelegramMediaGroup } from '@/lib/telegram'
+import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTelegramPhoto, sendTelegramMediaGroup, escapeHtml } from '@/lib/telegram'
 import { OrderStatus } from '@prisma/client'
 import fs from 'fs/promises'
 import path from 'path'
@@ -1984,6 +1984,7 @@ export async function POST(req: Request) {
                     `/commandes_mois — Toutes les commandes du mois (Site & Jumia)\n` +
                     `/2026 — Lister les commandes par mois pour l'année 2026\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
+                    `/manque — Articles signalés manquants avec les détails des commandes\n\n` +
                     `<b>🟠 Jumia</b>\n` +
                     `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n` +
                     `/jumia_top — Top 10 des livres Jumia et CA par produit pour le mois\n\n` +
@@ -2019,6 +2020,58 @@ export async function POST(req: Request) {
                     `CSV commandes Jumia → <code>/api/admin/jumia/export</code>\n\n` +
                     `<i>💡 Toutes les commandes sont insensibles à la casse</i>`
                 await sendTelegramMessage(helpText, chatId.toString(), token)
+            }
+            else if (text === '/MANQUE' || text === 'MANQUE' || text.startsWith('/MANQUE@')) {
+                const missingItems = await prisma.orderItem.findMany({
+                    where: { isMissing: true },
+                    orderBy: { order: { createdAt: 'desc' } },
+                    include: {
+                        book: { select: { title: true } },
+                        pack: { select: { name: true } },
+                        extraProduct: { select: { name: true } },
+                        order: {
+                            select: {
+                                id: true, fullName: true, phone: true, address: true, city: true,
+                                status: true, total: true, createdAt: true
+                            }
+                        }
+                    }
+                })
+
+                if (missingItems.length === 0) {
+                    await sendTelegramMessage('✅ <b>Aucun article manquant signalé.</b>', chatId.toString(), token)
+                } else {
+                    const grouped = new Map<string, typeof missingItems>()
+                    for (const item of missingItems) {
+                        const group = grouped.get(item.orderId) || []
+                        group.push(item)
+                        grouped.set(item.orderId, group)
+                    }
+
+                    const blocks = Array.from(grouped.values()).map(items => {
+                        const order = items[0].order
+                        const products = items.map(item => {
+                            const name = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article sans nom'
+                            return `  • ${item.quantity} × <b>${escapeHtml(name)}</b>`
+                        }).join('\n')
+                        const date = order.createdAt.toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' })
+                        return `📦 <b>Commande #${order.id.slice(0, 8).toUpperCase()}</b> — ${escapeHtml(order.status)}\n` +
+                            `🗓 ${escapeHtml(date)} | 💰 ${order.total.toFixed(2)} DH\n` +
+                            `👤 ${escapeHtml(order.fullName)} | 📞 ${escapeHtml(order.phone)}\n` +
+                            `📍 ${escapeHtml(order.address)}, ${escapeHtml(order.city)}\n` +
+                            `⚠️ <b>Article(s) manquant(s)</b>\n${products}`
+                    })
+
+                    let chunk = `⚠️ <b>Articles manquants — ${missingItems.length} article(s), ${grouped.size} commande(s)</b>\n\n`
+                    for (const block of blocks) {
+                        if (chunk.length + block.length + 2 > 3800) {
+                            await sendTelegramMessage(chunk, chatId.toString(), token)
+                            chunk = '<b>Articles manquants (suite)</b>\n\n'
+                        }
+                        chunk += `${block}\n\n`
+                    }
+                    if (chunk.trim()) await sendTelegramMessage(chunk, chatId.toString(), token)
+                }
             }
             else if (text.startsWith('/RUPTURE') || text === 'RUPTURE') {
                 const outOfStockBooks = await prisma.book.findMany({
