@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Globe, TrendingUp } from 'lucide-react'
+import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Link2, TrendingUp, Globe } from 'lucide-react'
 import { Link, useRouter, usePathname } from '@/i18n/routing'
 
 interface ActiveFilters {
@@ -492,11 +492,11 @@ export default function BookFilters({
                             })()
                         )}
 
-                        {/* SEO collection link filter */}
+                        {/* Jumia link filter */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                <Globe className="w-3 h-3 text-violet-600" />
-                                Collection SEO
+                                <Link2 className="w-3 h-3 text-[#f68b1e]" />
+                                Liaison Jumia
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[

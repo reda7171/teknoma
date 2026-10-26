@@ -104,10 +104,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             subCategory: { in: subCategoryParam.split(',') }
         }),
         ...(linkedParam === 'linked' && {
-            seoCategoryBooks: { some: {} }
+            isSyncedWithJumia: true
         }),
         ...(linkedParam === 'unlinked' && {
-            seoCategoryBooks: { none: {} }
+            isSyncedWithJumia: false
         })
     }
 
@@ -163,7 +163,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     // 2. Fetch Packs
-    if (!linkedParam && (productTypes.includes('all') || productTypes.includes('pack'))) {
+    if (productTypes.includes('all') || productTypes.includes('pack')) {
         const packWhere: any = {}
         if (searchQuery) {
             packWhere.OR = [ { name: { contains: searchQuery } }, { nameFr: { contains: searchQuery } }, { nameEn: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
@@ -174,6 +174,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('not-synced')) packWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) packWhere.sellerSku = { not: null }
         if (jumiaParam.split(',').includes('no-sku')) packWhere.sellerSku = null
+        if (linkedParam === 'linked') packWhere.isSyncedWithJumia = true
+        if (linkedParam === 'unlinked') packWhere.isSyncedWithJumia = false
         
         if (statusParam.split(',').includes('no-image')) {
             packWhere.image = { in: ['', '/book-placeholder.png'] }
@@ -246,7 +248,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
     // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
     const accessoryTypes = productTypes.filter(t => ['kids', 'usb', 'bookmarks'].includes(t))
-    if (!linkedParam && (productTypes.includes('all') || accessoryTypes.length > 0)) {
+    if (productTypes.includes('all') || accessoryTypes.length > 0) {
         const extraWhere: any = {}
         if (searchQuery) {
             extraWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
@@ -260,6 +262,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('not-synced')) extraWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null, notIn: [''] }
         if (jumiaParam.split(',').includes('no-sku')) extraWhere.OR = [{ sellerSku: null }, { sellerSku: '' }]
+        if (linkedParam === 'linked') extraWhere.isSyncedWithJumia = true
+        if (linkedParam === 'unlinked') extraWhere.isSyncedWithJumia = false
         
         if (!productTypes.includes('all') && accessoryTypes.length > 0) {
             extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }
