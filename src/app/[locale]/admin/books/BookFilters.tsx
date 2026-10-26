@@ -15,6 +15,7 @@ interface ActiveFilters {
     category?: string;
     subCategory?: string;
     seoScore?: string;
+    linked?: string;
     limit?: string | number;
 }
 
@@ -68,6 +69,7 @@ export default function BookFilters({
         if (newFilters.category) params.set('category', newFilters.category)
         if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
         if (newFilters.seoScore) params.set('seoScore', newFilters.seoScore)
+        if (newFilters.linked) params.set('linked', newFilters.linked)
         
         const effectiveLimit = newFilters.limit || currentUrlParams.get('limit')
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
@@ -99,7 +101,8 @@ export default function BookFilters({
         activeFilters.condition,
         activeFilters.category,
         activeFilters.subCategory,
-        activeFilters.seoScore
+        activeFilters.seoScore,
+        activeFilters.linked
     ].some(v => !!v)
 
     return (
@@ -488,6 +491,33 @@ export default function BookFilters({
                                 )
                             })()
                         )}
+
+                        {/* SEO collection link filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Globe className="w-3 h-3 text-violet-600" />
+                                Collection SEO
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: '', label: 'Tous' },
+                                    { id: 'linked', label: 'Linké' },
+                                    { id: 'unlinked', label: 'Non linké' }
+                                ].map((filter) => (
+                                    <button
+                                        key={filter.id}
+                                        onClick={() => handleApplyFilters({ linked: filter.id })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            activeFilters.linked === filter.id
+                                                ? 'bg-violet-600 text-white shadow-sm'
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
                         {/* Jumia Filter */}
                         <div className="space-y-3">

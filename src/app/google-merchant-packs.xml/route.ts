@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isProductInStock } from '@/lib/product-availability'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalider toutes les heures
@@ -40,7 +41,7 @@ export async function GET() {
             include: {
                 books: {
                     include: {
-                        book: true
+                        book: { include: { inventories: { include: { warehouse: true } } } }
                     }
                 }
             },
@@ -88,7 +89,7 @@ export async function GET() {
             const shippingFee = isFreeShipping ? 0 : 35
 
             // Vérifier si le stock de tous les livres du pack est disponible
-            const allInStock = pack.books.length > 0 && pack.books.every(pb => (pb.book?.stock ?? 0) > 0)
+            const allInStock = pack.active && pack.books.length > 0 && pack.books.every(pb => isProductInStock(pb.book))
             const availability = allInStock ? 'in_stock' : 'out_of_stock'
 
             xml += `    <item>\n`
@@ -155,7 +156,7 @@ export async function GET() {
             status: 200,
             headers: {
                 'Content-Type': 'application/xml; charset=utf-8',
-                'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400',
+                'Cache-Control': 'no-store, max-age=0',
                 'X-Robots-Tag': 'noindex, follow' // Permet à Google Merchant d'extraire le XML sans indexer le flux brut en page de recherche
             }
         })

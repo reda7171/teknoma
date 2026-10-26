@@ -18,7 +18,7 @@ import { DashboardPrivacyProvider } from '@/components/admin/DashboardPrivacyCon
 import DashboardPrivacyToggle from '@/components/admin/DashboardPrivacyToggle'
 import SensitiveValue from '@/components/admin/SensitiveValue'
 
-export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string, seoScore?: string }> }) {
+export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string, seoScore?: string, linked?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
@@ -32,6 +32,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const categoryParam = params.category || ''
     const subCategoryParam = params.subCategory || ''
     const seoScoreParam = params.seoScore || ''
+    const linkedParam = params.linked || ''
 
     const categoryTreePromise = getCategoryTree()
     const [role, userId, warehouses] = await Promise.all([
@@ -101,6 +102,12 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }),
         ...(subCategoryParam && {
             subCategory: { in: subCategoryParam.split(',') }
+        }),
+        ...(linkedParam === 'linked' && {
+            seoCategoryBooks: { some: {} }
+        }),
+        ...(linkedParam === 'unlinked' && {
+            seoCategoryBooks: { none: {} }
         })
     }
 
@@ -156,7 +163,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     // 2. Fetch Packs
-    if (productTypes.includes('all') || productTypes.includes('pack')) {
+    if (!linkedParam && (productTypes.includes('all') || productTypes.includes('pack'))) {
         const packWhere: any = {}
         if (searchQuery) {
             packWhere.OR = [ { name: { contains: searchQuery } }, { nameFr: { contains: searchQuery } }, { nameEn: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
@@ -239,7 +246,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
     // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
     const accessoryTypes = productTypes.filter(t => ['kids', 'usb', 'bookmarks'].includes(t))
-    if (productTypes.includes('all') || accessoryTypes.length > 0) {
+    if (!linkedParam && (productTypes.includes('all') || accessoryTypes.length > 0)) {
         const extraWhere: any = {}
         if (searchQuery) {
             extraWhere.OR = [ { name: { contains: searchQuery } }, { description: { contains: searchQuery } }, { sellerSku: { contains: searchQuery } } ]
@@ -361,6 +368,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         category: categoryParam,
         subCategory: subCategoryParam,
         seoScore: seoScoreParam,
+        linked: linkedParam,
         limit: params.limit || ''
     }
 

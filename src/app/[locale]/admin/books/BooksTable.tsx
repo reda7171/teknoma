@@ -56,6 +56,7 @@ interface ActiveFilters {
     subCategory?: string;
     jumia?: string;
     seoScore?: string;
+    linked?: string;
     limit?: string | number;
 }
 
@@ -126,6 +127,7 @@ export default function BooksTable({
         if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        if (activeFilters.linked) params.set('linked', activeFilters.linked)
         
         const effectiveLimit = activeFilters.limit || limit
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
@@ -786,6 +788,7 @@ Do not add explanatory text outside the JSON array or code block.`
         if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        if (activeFilters.linked) params.set('linked', activeFilters.linked)
 
         const effectiveLimit = newLimit || activeFilters.limit || limit || currentUrlParams.get('limit')
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
@@ -817,6 +820,7 @@ Do not add explanatory text outside the JSON array or code block.`
         if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        if (activeFilters.linked) params.set('linked', activeFilters.linked)
         params.set('sort', newSort)
         
         const effectiveLimit = activeFilters.limit || limit || currentUrlParams.get('limit')

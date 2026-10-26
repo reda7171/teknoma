@@ -7,6 +7,7 @@ import BookCard from '@/components/BookCard'
 import { CheckCircle2, Truck, Shield, Star, BookOpen, ChevronRight, ChevronDown, Languages } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { getBaseUrl, normalizeImage } from '@/lib/utils'
+import { getSchemaAvailability } from '@/lib/product-availability'
 
 import { getSeoCategoryPage } from '@/lib/actions/seo-categories'
 import { getTranslations } from 'next-intl/server'
@@ -312,7 +313,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
             '@type': 'Offer',
             priceCurrency: 'MAD',
             price: book.price,
-            availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            availability: getSchemaAvailability(book),
             itemCondition: 'https://schema.org/NewCondition',
             seller: {
               '@type': 'Organization',

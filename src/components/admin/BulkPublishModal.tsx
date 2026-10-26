@@ -44,7 +44,8 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
     const [logoChoice, setLogoChoice] = useState<'riwaya' | 'jumia'>('riwaya')
     const [includeStoreLink, setIncludeStoreLink] = useState(true)
     const [includeJumiaLink, setIncludeJumiaLink] = useState(true)
-    const [delaySeconds, setDelaySeconds] = useState(5)
+    const [publishingMode, setPublishingMode] = useState<'now' | 'scheduled'>('scheduled')
+    const [intervalMinutes, setIntervalMinutes] = useState<15 | 20 | 24>(20)
     const [isRunning, setIsRunning] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
     const [statuses, setStatuses] = useState<BookStatus[]>([])
@@ -188,6 +189,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
         setIsRunning(true)
         stopRef.current = false
         pauseRef.current = false
+        const scheduleBaseTime = Date.now() + 2 * 60 * 1000
 
         for (let i = 0; i < books.length; i++) {
             if (stopRef.current) break
@@ -274,6 +276,9 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
 
                 const bookDomain = getBookDomain(book.id)
                 const customCaption = buildCaptionWithLinks(book, bookDomain, 'fr', includeJumiaLink, includeStoreLink)
+                const scheduleAt = publishingMode === 'scheduled'
+                    ? new Date(scheduleBaseTime + i * intervalMinutes * 60 * 1000).toISOString()
+                    : null
 
                 const res = await fetch('/api/n8n/publish', {
                     method: 'POST',
@@ -288,13 +293,19 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                         sellerSku: book.sellerSku,
                         customCaption,
                         useDescription: 'short',
-                        scheduleAt: null,
+                        scheduleAt,
                         ...(customImageUrl ? { customImageUrl } : {})
                     })
                 })
                 const data = await res.json()
                 if (data.success) {
-                    updateStatus(book.id, 'success', '✅ Publié avec succès')
+                    updateStatus(
+                        book.id,
+                        'success',
+                        scheduleAt
+                            ? `📅 Programmé à ${new Date(scheduleAt).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}`
+                            : '✅ Publié avec succès'
+                    )
                 } else {
                     updateStatus(book.id, 'error', data.error || 'Erreur n8n')
                 }
@@ -302,11 +313,6 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                 updateStatus(book.id, 'error', 'Erreur réseau')
             }
 
-            // Délai entre chaque publication (sauf dernier)
-            if (i < books.length - 1 && !stopRef.current) {
-                updateStatus(book.id, 'success', '✅ Terminé. Attente...')
-                await sleep(delaySeconds * 1000)
-            }
         }
 
         setIsRunning(false)
@@ -547,13 +553,44 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 </button>
                             </div>
 
-                            {/* Delai */}
-                            <div>
-                                <label className="block text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 sm:mb-2">
-                                    Delai entre publications : <span className="text-black">{delaySeconds}s</span>
+                            {/* Planification anti-spam */}
+                            <div className="space-y-3">
+                                <label className="block text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-widest">
+                                    Planification Facebook / réseaux
                                 </label>
-                                <input type="range" min={3} max={60} value={delaySeconds} onChange={e => setDelaySeconds(Number(e.target.value))} className="w-full accent-black" />
-                                <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>3s</span><span>60s</span></div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPublishingMode('scheduled')}
+                                        className={`rounded-xl border px-3 py-2 text-xs font-bold ${publishingMode === 'scheduled' ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-200 bg-white text-gray-600'}`}
+                                    >
+                                        Espacer automatiquement
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPublishingMode('now')}
+                                        className={`rounded-xl border px-3 py-2 text-xs font-bold ${publishingMode === 'now' ? 'border-black bg-black text-white' : 'border-gray-200 bg-white text-gray-600'}`}
+                                    >
+                                        Publier maintenant
+                                    </button>
+                                </div>
+                                {publishingMode === 'scheduled' && (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {([15, 20, 24] as const).map(minutes => (
+                                            <button
+                                                key={minutes}
+                                                type="button"
+                                                onClick={() => setIntervalMinutes(minutes)}
+                                                className={`rounded-xl border px-3 py-2 text-xs font-black ${intervalMinutes === minutes ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-500'}`}
+                                            >
+                                                {minutes} min
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                <p className="text-[11px] text-gray-500">
+                                    Chaque annonce reçoit une heure distincte. Intervalle recommandé : 20 minutes.
+                                </p>
                             </div>
                         </div>
                     )}
@@ -636,7 +673,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Livres</p><p className="text-xl font-black text-gray-900 mt-1">{books.length}</p></div>
                                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Plateforme</p><p className="text-sm font-black text-gray-900 mt-1 truncate">{platform === 'all' ? 'Toutes' : platform === 'both' ? 'FB + Insta' : platform}</p></div>
                                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Format</p><p className="text-sm font-black text-gray-900 mt-1">{format === 'post' ? 'Post' : format === 'story' ? 'Story' : format === 'video' ? 'Video' : 'Court'}</p></div>
-                                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Delai</p><p className="text-sm font-black text-gray-900 mt-1">{delaySeconds}s</p></div>
+                                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Planification</p><p className="text-sm font-black text-gray-900 mt-1">{publishingMode === 'scheduled' ? `${intervalMinutes} min` : 'Immédiate'}</p></div>
                                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Logo</p><p className="text-sm font-black text-gray-900 mt-1 capitalize">{logoChoice}</p></div>
                                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100"><p className="text-[10px] text-gray-400 font-bold uppercase">Apercu</p><p className={`text-sm font-black mt-1 ${showPreviewStep ? 'text-green-600' : 'text-gray-400'}`}>{showPreviewStep ? 'Actif' : 'Desactive'}</p></div>
                             </div>

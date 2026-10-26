@@ -27,6 +27,7 @@ const HomeLeaderboard = dynamic(() => import('@/components/home/HomeLeaderboard'
 import { Suspense } from 'react'
 import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download, Headphones, Star } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { getSchemaAvailability } from '@/lib/product-availability'
 import { Metadata } from 'next'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { getPrimaryImage } from '@/lib/utils/image'
@@ -366,7 +367,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               validFrom: book.createdAt
                 ? new Date(book.createdAt).toISOString().split('T')[0]
                 : '2025-01-01',
-              availability: book.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+              availability: getSchemaAvailability(book),
               itemCondition: 'https://schema.org/NewCondition',
               seller: {
                 '@id': 'https://riwaya.store/#organization',

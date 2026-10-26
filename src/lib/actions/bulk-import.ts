@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import ExcelJS from 'exceljs'
 import { verifyAdmin } from './auth'
+import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 export type RejectedRow = {
     line: number
@@ -316,6 +317,18 @@ export async function importBooksFromExcel(
                     }
                 }
 
+                const rawCategory = extractCellValue(getField(row, ['category', 'Catégorie', 'categorie', 'Category'])) || null
+                const rawSubCategory = extractCellValue(getField(row, ['subCategory', 'Sous-catégorie', 'sous_categorie', 'SubCategory'])) || null
+
+                const classification = autoClassifyBook({
+                    title: String(titleStr),
+                    author: String(authorStr),
+                    description: String(descriptionStr),
+                    language: language,
+                    category: rawCategory,
+                    subCategory: rawSubCategory
+                })
+
                 await prisma.book.create({
                     data: {
                         title: String(titleStr),
@@ -326,7 +339,8 @@ export async function importBooksFromExcel(
                         originalPrice: parsedOldPrice > 0 ? parsedOldPrice : null,
                         stock: finalStock,
                         image: String(imageStr),
-                        category: extractCellValue(getField(row, ['category', 'Catégorie', 'categorie'])) || null,
+                        category: classification.category,
+                        subCategory: classification.subCategory,
                         language: language,
                         previewUrl: urlVal || null,
                         active: true,

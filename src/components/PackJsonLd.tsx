@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSchemaAvailability, isProductInStock } from '@/lib/product-availability';
 
 interface PackJsonLdProps {
   pack: {
@@ -8,7 +9,8 @@ interface PackJsonLdProps {
     description?: string | null;
     image?: string | null;
     createdAt?: Date | string;
-    books?: Array<{ title: string; author: string }>;
+    active?: boolean;
+    books?: Array<{ title: string; author: string; stock?: number; active?: boolean }>;
   };
   locale: string;
   baseUrl?: string;
@@ -19,6 +21,9 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
   const validFrom = pack.createdAt
     ? new Date(pack.createdAt).toISOString().split('T')[0]
     : '2025-01-01';
+  const packInStock = pack.active !== false
+    && Boolean(pack.books?.length)
+    && pack.books!.every(book => isProductInStock(book));
 
   // Description auto si absente
   const description = pack.description ||
@@ -103,7 +108,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
         "price": pack.price,
         "priceCurrency": "MAD",
         "validFrom": validFrom,
-        "availability": "https://schema.org/InStock",
+        "availability": getSchemaAvailability({ stock: packInStock ? 1 : 0, active: pack.active }),
         "url": packUrl,
         "seller": {
           "@type": "Organization",

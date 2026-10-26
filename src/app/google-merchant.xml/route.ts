@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateBookUrl } from '@/lib/i18n-utils'
+import { getGoogleAvailability, isProductInStock } from '@/lib/product-availability'
+
+export const dynamic = 'force-dynamic'
 
 function escapeXml(unsafe: string) {
     if (!unsafe) return ''
@@ -58,12 +61,19 @@ export async function GET() {
                 title: { not: '' },
                 image: { not: '' },
                 id: { notIn: [...merchantExcludedBookIds] },
-            }
+            },
+            include: { inventories: { include: { warehouse: true } } }
         })
         
         const packs = await prisma.pack.findMany({
             where: { active: true, name: { not: '' } },
-            include: { books: { include: { book: true } } }
+            include: {
+                books: {
+                    include: {
+                        book: { include: { inventories: { include: { warehouse: true } } } }
+                    }
+                }
+            }
         })
         
         const now = new Date()
@@ -90,7 +100,7 @@ export async function GET() {
             // Version the URL when the generated asset changes so Google does
             // not keep serving the former 500x500 image from its cache.
             const imageUrl = encodeURI(`${baseUrl}/api/merchant-image/${book.id}?v=1500`)
-            const availability = book.stock > 0 ? 'in_stock' : 'out_of_stock'
+            const availability = getGoogleAvailability(book)
             const condition = book.isOriginal ? 'new' : 'used'
             
             xml += `    <item>\n`
@@ -139,7 +149,7 @@ export async function GET() {
             const locale = 'fr' // Par défaut on utilise la version fr pour les packs
             const productUrl = `${baseUrl}/${locale}/packs/${pack.id}`
             const imageUrl = `${baseUrl}/api/merchant-pack-image/${pack.id}?v=1500`
-            const allInStock = pack.books.length > 0 && pack.books.every(pb => (pb.book?.stock ?? 0) > 0)
+            const allInStock = pack.active && pack.books.length > 0 && pack.books.every(pb => isProductInStock(pb.book))
             const availability = allInStock ? 'in_stock' : 'out_of_stock'
             const condition = 'new'
             const title = `Pack ${pack.name} (${pack.books.length} Livres)`
@@ -201,7 +211,7 @@ export async function GET() {
             status: 200,
             headers: {
                 'Content-Type': 'application/xml; charset=utf-8',
-                'Cache-Control': 's-maxage=86400, stale-while-revalidate'
+                'Cache-Control': 'no-store, max-age=0'
             }
         })
     } catch (error) {
