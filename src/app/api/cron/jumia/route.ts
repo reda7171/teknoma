@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { JumiaAPI } from "@/lib/jumia-api"
 import { prisma } from "@/lib/prisma"
 import { sendTelegramMessage } from "@/lib/telegram"
-import { isAuthorizedCronRequest } from '@/lib/cron-auth'
+import { getCronSecret, isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 export async function GET(req: Request) {
     try {
@@ -114,7 +114,7 @@ export async function GET(req: Request) {
 
         // Déclencher discrètement la vérification des livraisons (sans attendre)
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-        const cronSecret = process.env.CRON_SECRET
+        const cronSecret = getCronSecret()
         if (baseUrl && cronSecret) {
             fetch(new URL('/api/cron/jumia-delivered-alert', baseUrl), {
                 headers: { Authorization: `Bearer ${cronSecret}` },

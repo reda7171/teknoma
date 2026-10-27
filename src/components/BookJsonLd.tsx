@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSchemaAvailability } from '@/lib/product-availability';
 
 interface BookJsonLdProps {
   book: {
@@ -11,6 +12,11 @@ interface BookJsonLdProps {
     image: string;
     price: number;
     stock: number;
+    active?: boolean;
+    inventories?: Array<{
+      quantity: number;
+      warehouse?: { name: string; location?: string | null; active?: boolean } | null;
+    }>;
     category?: string | null;
     numberOfPages?: number | null;
     createdAt?: Date | string;
@@ -41,6 +47,9 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
 
   const ratingVal = Number((averageRating > 0 ? averageRating : 4.9).toFixed(1));
   const countVal = reviewCount > 0 ? reviewCount : Math.max(reviews.length, 14);
+  const localWarehouses = (book.inventories || []).filter(inventory =>
+    inventory.quantity > 0 && inventory.warehouse?.active !== false
+  );
 
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const validFrom = book.createdAt
@@ -128,9 +137,30 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "price": book.price,
           "priceCurrency": "MAD",
           "validFrom": validFrom,
-          "availability": book.stock > 0
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
+          "availability": getSchemaAvailability(book),
+          "inventoryLevel": {
+            "@type": "QuantitativeValue",
+            "value": localWarehouses.length > 0
+              ? localWarehouses.reduce((total, inventory) => total + inventory.quantity, 0)
+              : Math.max(0, book.stock),
+            "unitCode": "C62"
+          },
+          "areaServed": {
+            "@type": "Country",
+            "name": "Maroc",
+            "identifier": "MA"
+          },
+          ...(localWarehouses.length > 0 ? {
+            "availableAtOrFrom": localWarehouses.map(inventory => ({
+              "@type": "Place",
+              "name": inventory.warehouse?.name || "Entrepôt Riwaya",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": inventory.warehouse?.location || undefined,
+                "addressCountry": "MA"
+              }
+            }))
+          } : {}),
           "priceValidUntil": priceValidUntil,
           "itemCondition": "https://schema.org/NewCondition",
           "url": bookUrl,

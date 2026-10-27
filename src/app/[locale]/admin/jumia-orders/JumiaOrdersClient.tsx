@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState, useEffect } from 'react'
 import { ShoppingBag, AlertCircle, ChevronLeft, ChevronRight, Truck, CheckCircle2, TrendingUp, RefreshCw, Package, Eye, XCircle, Printer, Send, FileText, ExternalLink, Search, Filter, BookOpen, X, SlidersHorizontal } from 'lucide-react'
@@ -767,7 +767,7 @@ export default function JumiaOrdersClient() {
                                                     </span>
                                                 </td>
                                                 <td className="p-4 font-bold text-slate-900 text-right">
-                                                    {order.totalAmountLocal?.value || order.Price || order.GrandTotal || '0'} درهم
+                                                    <span className="font-mono text-slate-400 tracking-widest text-xs">****</span>
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     {(() => {
@@ -918,8 +918,8 @@ export default function JumiaOrdersClient() {
                                                                                             </div>
                                                                                         )}
                                                                                         <span className="font-medium text-slate-700 line-clamp-2 max-w-[250px]">
-                                                                                            <a 
-                                                                                                href={item.ProductUrl || `https://www.jumia.ma/catalog/?q=${item.product?.sellerSku || item.Sku}`} 
+                                                                                             <a 
+                                                                                                href={item.productUrl || item.ProductUrl || (item.product?.name ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(item.product.name)}` : 'https://www.jumia.ma')} 
                                                                                                 target="_blank" 
                                                                                                 rel="noreferrer"
                                                                                                 className="hover:text-orange-500 hover:underline inline-flex items-center gap-1 transition-colors"
@@ -941,7 +941,7 @@ export default function JumiaOrdersClient() {
                                                                                             {item.status || item.Status || 'N/A'}
                                                                                         </span>
                                                                                     </td>
-                                                                                    <td className="p-3 font-bold text-slate-900">{item.itemPriceLocal || item.Price} {item.country?.currencyCode || 'درهم'}</td>
+                                                                                    <td className="p-3 font-bold text-slate-900"><span className="font-mono text-slate-400 tracking-widest text-xs">****</span></td>
                                                                                     <td className="p-3">
                                                                                         {item.trackingNumber || item.TrackingCode ? (
                                                                                             <a href={item.trackingUrl || '#'} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 hover:underline font-mono text-[10px] bg-blue-50 px-2 py-1 rounded-md">

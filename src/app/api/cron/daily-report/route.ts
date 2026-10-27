@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { sendTelegramMessage } from "@/lib/telegram"
 import { JumiaAPI } from "@/lib/jumia-api"
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
+import { summarizeJumiaOrders } from '@/lib/jumia-reporting'
 
 // Rapport quotidien — à appeler via cron chaque matin à 8h
 export async function GET(req: Request) {
@@ -50,11 +51,9 @@ export async function GET(req: Request) {
                 const todayStr = now.toISOString().split('T')[0]
                 const jResponse = await jumia.getOrders(100, undefined, undefined, yesterdayStr, todayStr)
                 const jOrders = jResponse?.orders || jResponse?.data?.orders || []
-                const jRevenue = jOrders.reduce((sum: number, o: any) => {
-                    return sum + parseFloat(o.totalAmountLocal?.value || o.Price || '0')
-                }, 0)
-                const jPending = jOrders.filter((o: any) => (o.status || '').toUpperCase() === 'PENDING').length
-                jumiaSection = `\n\n🟠 <b>Jumia Hier</b>\n📦 Commandes: <b>${jOrders.length}</b>\n⏳ En attente: <b>${jPending}</b>\n💰 CA: <b>${jRevenue.toFixed(2)} درهم</b>`
+                const summary = summarizeJumiaOrders(jOrders)
+                const jPending = summary.statusCounts.PENDING || 0
+                jumiaSection = `\n\n🟠 <b>Jumia Hier</b>\n📦 Commandes valides: <b>${summary.valid}</b> / ${summary.total}\n❌ Annulées/retournées: <b>${summary.excluded}</b>\n⏳ En attente: <b>${jPending}</b>\n💰 CA net: <b>${summary.revenue.toFixed(2)} درهم</b>`
             }
         } catch {}
 

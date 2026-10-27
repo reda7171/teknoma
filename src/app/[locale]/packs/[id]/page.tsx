@@ -20,6 +20,7 @@ import TestimonialsTabs from '@/components/home/TestimonialsTabs'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 import { getLocalizedTitle, getLocalizedPackTitle, getLocalizedPackDescription } from '@/lib/i18n-utils'
+import { getSchemaAvailability, isProductInStock } from '@/lib/product-availability'
 
 export async function generateMetadata({
     params,
@@ -74,6 +75,9 @@ export async function generateMetadata({
             : `⚡ Prix: ${displayPrice} DH ${hasDiscount ? `au lieu de ${totalOriginalPrice} DH` : ''}. Pack de ${pack.books.length} livres avec Paiement à la livraison (COD) partout au Maroc.`)
 
     const dynamicOgImageUrl = `${baseUrl}/${locale}/packs/${pack.id}/opengraph-image`
+    const facebookAppId = await getSetting('facebook_app_id')
+        || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
+        || process.env.FACEBOOK_CLIENT_ID
 
     return {
         title: `${displayName} - Pack de ${pack.books.length} Livres | Riwaya`,
@@ -110,13 +114,16 @@ export async function generateMetadata({
             'product:retailer_item_id': `PACK-${pack.id}`,
             'og:price:amount': `${displayPrice}`,
             'og:price:currency': 'MAD',
+            'og:image:alt': displayName,
+            ...(facebookAppId ? { 'fb:app_id': facebookAppId } : {}),
         },
         alternates: {
-            canonical: `/${locale}/packs/${pack.id}`,
+            canonical: `${baseUrl}/${locale}/packs/${pack.id}`,
             languages: {
-                'fr': `/fr/packs/${pack.id}`,
-                'ar': `/ar/packs/${pack.id}`,
-                'en': `/en/packs/${pack.id}`,
+                'fr': `${baseUrl}/fr/packs/${pack.id}`,
+                'ar': `${baseUrl}/ar/packs/${pack.id}`,
+                'en': `${baseUrl}/en/packs/${pack.id}`,
+                'x-default': `${baseUrl}/ar/packs/${pack.id}`,
             },
         },
     }
@@ -149,6 +156,7 @@ export default async function PackDetailPage({
 
     const displayName = getLocalizedPackTitle(pack, locale)
     const displayDescription = getLocalizedPackDescription(pack, locale)
+    const packInStock = pack.active && pack.books.length > 0 && pack.books.every(pb => isProductInStock(pb.book))
 
     const totalOriginalPrice = Math.round(pack.originalPrice || pack.books.reduce((sum, pb) => sum + pb.book.price, 0))
     const displayPrice = Math.round(pack.price)
@@ -251,7 +259,7 @@ export default async function PackDetailPage({
                         validFrom: new Date(pack.createdAt).toISOString().split('T')[0],
                         priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                         itemCondition: 'https://schema.org/NewCondition',
-                        availability: 'https://schema.org/InStock',
+                        availability: getSchemaAvailability({ stock: packInStock ? 1 : 0, active: pack.active }),
                         url: `${baseUrl}/${locale}/packs/${pack.id}`,
                         hasMerchantReturnPolicy: {
                             '@type': 'MerchantReturnPolicy',

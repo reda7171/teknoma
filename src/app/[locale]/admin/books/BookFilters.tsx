@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Globe, TrendingUp } from 'lucide-react'
+import { Search, Filter, X, ChevronDown, SlidersHorizontal, Eye, EyeOff, Package, Link2, TrendingUp, Globe } from 'lucide-react'
 import { Link, useRouter, usePathname } from '@/i18n/routing'
 
 interface ActiveFilters {
@@ -15,6 +15,7 @@ interface ActiveFilters {
     category?: string;
     subCategory?: string;
     seoScore?: string;
+    linked?: string;
     limit?: string | number;
 }
 
@@ -68,6 +69,7 @@ export default function BookFilters({
         if (newFilters.category) params.set('category', newFilters.category)
         if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
         if (newFilters.seoScore) params.set('seoScore', newFilters.seoScore)
+        if (newFilters.linked) params.set('linked', newFilters.linked)
         
         const effectiveLimit = newFilters.limit || currentUrlParams.get('limit')
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
@@ -99,7 +101,8 @@ export default function BookFilters({
         activeFilters.condition,
         activeFilters.category,
         activeFilters.subCategory,
-        activeFilters.seoScore
+        activeFilters.seoScore,
+        activeFilters.linked
     ].some(v => !!v)
 
     return (
@@ -489,6 +492,33 @@ export default function BookFilters({
                             })()
                         )}
 
+                        {/* Jumia link filter */}
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <Link2 className="w-3 h-3 text-[#f68b1e]" />
+                                Liaison Jumia
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: '', label: 'Tous' },
+                                    { id: 'linked', label: 'Linké' },
+                                    { id: 'unlinked', label: 'Non linké' }
+                                ].map((filter) => (
+                                    <button
+                                        key={filter.id}
+                                        onClick={() => handleApplyFilters({ linked: filter.id })}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            activeFilters.linked === filter.id
+                                                ? 'bg-violet-600 text-white shadow-sm'
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Jumia Filter */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -549,23 +579,28 @@ export default function BookFilters({
                                     { id: 'price-desc', label: 'Prix Décroissant' },
                                     { id: 'stock-asc', label: 'Stock Faible' },
                                     { id: 'stock-desc', label: 'Stock Élevé' },
-                                    { id: 'title-asc', label: 'Nom (A-Z)' },
-                                    { id: 'title-desc', label: 'Nom (Z-A)' },
+                                    { id: 'title-asc', label: 'Titre (A-Z)' },
+                                    { id: 'title-desc', label: 'Titre (Z-A)' },
                                     { id: 'seo-asc', label: 'Score SEO Croissant' },
                                     { id: 'seo-desc', label: 'Score SEO Décroissant' }
-                                ].map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => handleApplyFilters({ sort: f.id })}
-                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                                            activeFilters.sort === f.id 
-                                            ? 'bg-blue-600 text-white' 
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
+                                ].map((f) => {
+                                    const isSelected = activeFilters.sort === f.id ||
+                                        (f.id === 'title-asc' && activeFilters.sort === 'a-z') ||
+                                        (f.id === 'title-desc' && activeFilters.sort === 'z-a')
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => handleApplyFilters({ sort: f.id })}
+                                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                                                isSelected 
+                                                ? 'bg-blue-600 text-white shadow-sm' 
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>

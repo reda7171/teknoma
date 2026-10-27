@@ -35,7 +35,9 @@ export async function POST(req: NextRequest) {
 
         // 2. Traçage des réponses entrantes du client & Auto-Welcome
         if (event === 'message' && payload && !payload.fromMe) {
-            const phone = (payload.from || payload.author || '').replace(/\D/g, '')
+            const sourceId = String(payload.from || payload.author || '')
+            const isChannelPost = sourceId.endsWith('@newsletter')
+            const phone = sourceId.replace(/\D/g, '')
             const text = payload.body || ''
 
             if (phone && text) {
@@ -45,17 +47,18 @@ export async function POST(req: NextRequest) {
                         message: text,
                         status: 'RECEIVED',
                         messageId: payload.id || null,
-                        type: 'INCOMING',
+                        type: isChannelPost ? 'CHANNEL_INCOMING' : 'INCOMING',
                         metadata: JSON.stringify({
                             session: session || 'default',
+                            channelId: isChannelPost ? sourceId : null,
                             pushName: payload.pushName || null,
                             timestamp: payload.timestamp || Date.now()
                         })
                     }
                 }).catch(() => null)
 
-                // Vérifier si la réponse automatique de bienvenue est activée
-                try {
+                // Une publication de chaîne est enregistrée, mais ne doit jamais déclencher l'auto-welcome.
+                if (!isChannelPost) try {
                     const autoWelcomeSetting = await prisma.siteSettings.findUnique({
                         where: { key: 'whatsapp_auto_welcome' }
                     })
@@ -110,9 +113,12 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ success: true, processed: event || 'unknown' })
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error('[WhatsApp Webhook Error]', err)
-        return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+        return NextResponse.json({
+            success: false,
+            error: err instanceof Error ? err.message : 'Erreur webhook WhatsApp'
+        }, { status: 500 })
     }
 }
 

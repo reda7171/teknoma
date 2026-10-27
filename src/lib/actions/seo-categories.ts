@@ -124,6 +124,76 @@ export async function getSeoCategoryBySlug(slug: string) {
   })
 }
 
+export async function getSeoCategoryPage(slug: string, locale: string) {
+  const requested = await prisma.seoCategory.findUnique({
+    where: { slug },
+    include: {
+      books: {
+        include: { book: true },
+        orderBy: { order: 'asc' }
+      }
+    }
+  })
+
+  if (!requested) return null
+
+  const supportedLocale = ['fr', 'ar', 'en'].includes(locale) ? locale : 'fr'
+  const requestedBookIds = new Set(requested.books.map(item => item.bookId))
+  const canResolveTranslations = requestedBookIds.size > 0 && (requested.showOnHome || requested.displayOrder > 0)
+  const candidates = canResolveTranslations
+    ? await prisma.seoCategory.findMany({
+        where: {
+          displayOrder: requested.displayOrder,
+          isActive: true,
+          locale: { in: ['fr', 'ar', 'en'] }
+        },
+        orderBy: { updatedAt: 'desc' },
+        select: {
+          slug: true,
+          locale: true,
+          books: { select: { bookId: true } }
+        }
+      })
+    : []
+
+  const translations = new Map<string, { slug: string; score: number }>()
+  translations.set(requested.locale, { slug: requested.slug, score: 1 })
+
+  for (const candidate of candidates) {
+    const candidateBookIds = new Set(candidate.books.map(item => item.bookId))
+    const intersection = [...requestedBookIds].filter(id => candidateBookIds.has(id)).length
+    const union = new Set([...requestedBookIds, ...candidateBookIds]).size
+    const score = union > 0 ? intersection / union : 0
+    const current = translations.get(candidate.locale)
+    if (score >= 0.8 && (!current || score > current.score)) {
+      translations.set(candidate.locale, { slug: candidate.slug, score })
+    }
+  }
+
+  const slugsByLocale = Object.fromEntries(
+    [...translations].map(([translationLocale, item]) => [translationLocale, item.slug])
+  ) as Partial<Record<'fr' | 'ar' | 'en', string>>
+
+  if (requested.locale === supportedLocale) {
+    return { category: requested, slugsByLocale }
+  }
+
+  const translatedSlug = slugsByLocale[supportedLocale as 'fr' | 'ar' | 'en']
+  if (!translatedSlug) return null
+
+  const category = await prisma.seoCategory.findUnique({
+    where: { slug: translatedSlug },
+    include: {
+      books: {
+        include: { book: true },
+        orderBy: { order: 'asc' }
+      }
+    }
+  })
+
+  return category ? { category, slugsByLocale } : null
+}
+
 export async function getHomeSeoCategories(locale: string) {
   return await prisma.seoCategory.findMany({
     where: {

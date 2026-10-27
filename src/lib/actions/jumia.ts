@@ -5,6 +5,7 @@ import { JumiaAPI } from '@/lib/jumia-api'
 import { verifyAdmin } from './auth'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getSetting } from './site-settings'
+import { getSellableStock } from '@/lib/product-availability'
 
 export async function fetchPaidPayoutStatements() {
     try {
@@ -65,8 +66,16 @@ export async function syncBooksStockToJumia() {
 
         // Récupérer les livres avec ISBN ou ID (en fonction de ce qui est utilisé comme SellerSku sur Jumia)
         const books = await prisma.book.findMany({
-            where: { active: true, sellerSku: { not: null }, isSyncedWithJumia: true },
-            select: { id: true, sellerSku: true, stock: true, jumiaProductSid: true, jumiaQcStatus: true }
+            where: { sellerSku: { not: null }, isSyncedWithJumia: true },
+            select: {
+                id: true,
+                sellerSku: true,
+                stock: true,
+                active: true,
+                jumiaProductSid: true,
+                jumiaQcStatus: true,
+                inventories: { include: { warehouse: true } }
+            }
         })
 
         if (books.length === 0) {
@@ -98,7 +107,7 @@ export async function syncBooksStockToJumia() {
                     updates.push({
                         id: sid,
                         sellerSku: sellerSku,
-                        stock: book.stock
+                        stock: getSellableStock(book)
                     })
                 }
             } catch (err) {
@@ -113,6 +122,10 @@ export async function syncBooksStockToJumia() {
         const result = await jumia.updateProductsStock(updates)
 
         if (result?.feedId || result?.SuccessResponse) {
+            await Promise.all(books.map(book => prisma.book.updateMany({
+                where: { id: book.id },
+                data: { jumiaStock: getSellableStock(book) }
+            })))
             return { success: true, message: `${books.length} livres synchronisés avec succès avec Jumia.` }
         } else {
             return { success: false, message: result?.error || result?.ErrorResponse?.Head?.ErrorMessage || "Erreur de synchronisation Jumia" }
@@ -131,7 +144,8 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
         }
 
         const books = await prisma.book.findMany({
-            where: { id: { in: bookIds }, sellerSku: { not: null } }
+            where: { id: { in: bookIds }, sellerSku: { not: null } },
+            include: { inventories: { include: { warehouse: true } } }
         })
 
         if (books.length === 0) {
@@ -163,7 +177,7 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
                     updates.push({
                         id: sid,
                         sellerSku: sellerSku,
-                        stock: book.stock
+                        stock: getSellableStock(book)
                     })
                 }
             } catch (err) {
@@ -182,7 +196,7 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
             for (const book of books) {
                 await prisma.book.updateMany({
                     where: { id: book.id },
-                    data: { jumiaStock: book.stock }
+                    data: { jumiaStock: getSellableStock(book) }
                 })
             }
             return { success: true, message: "Stock synchronisé avec Jumia" }
@@ -230,7 +244,8 @@ export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' |
         }
 
         const books = await prisma.book.findMany({
-            where: { id: { in: bookIds } }
+            where: { id: { in: bookIds } },
+            include: { inventories: { include: { warehouse: true } } }
         })
 
         if (books.length === 0) {
@@ -348,7 +363,7 @@ export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' |
                         endAt: new Date(Date.now() + 31536000000).toISOString().split('T')[0]
                     } : undefined
                 },
-                stock: book.stock,
+                stock: getSellableStock(book),
                 attributes: [
                     {
                         name: "isbn",
@@ -1090,7 +1105,16 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
 
         const books = await prisma.book.findMany({
             where: { id: { in: bookIds }, sellerSku: { not: null } },
-            select: { id: true, sellerSku: true, stock: true, isSyncedWithJumia: true, jumiaProductSid: true, jumiaQcStatus: true }
+            select: {
+                id: true,
+                sellerSku: true,
+                stock: true,
+                active: true,
+                isSyncedWithJumia: true,
+                jumiaProductSid: true,
+                jumiaQcStatus: true,
+                inventories: { include: { warehouse: true } }
+            }
         });
 
         const validBooks = books.filter(b => b.sellerSku && b.isSyncedWithJumia);
@@ -1135,7 +1159,7 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
                     updates.push({
                         id: sid,
                         sellerSku: sellerSku,
-                        stock: book.stock
+                        stock: getSellableStock(book)
                     })
                 }
             } catch (err) {
@@ -1146,6 +1170,10 @@ export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
         console.log("Background syncing stock to Jumia for:", updates);
         if (updates.length > 0) {
             await jumia.updateProductsStock(updates);
+            await Promise.all(validBooks.map(book => prisma.book.updateMany({
+                where: { id: book.id },
+                data: { jumiaStock: getSellableStock(book) }
+            })));
         }
     } catch (err) {
         console.error("Error in syncJumiaStockForBooksBackground:", err);

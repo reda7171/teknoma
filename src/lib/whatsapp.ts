@@ -141,3 +141,69 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
         return { success: false, error: error.message }
     }
 }
+
+/**
+ * Notifie l'administrateur par WhatsApp (+212666038129) et Telegram lorsqu'un vendeur se connecte
+ */
+export async function notifyAdminOnSellerLogin(seller: {
+    id: string
+    email: string
+    fullName?: string | null
+    phone?: string | null
+    city?: string | null
+}, ip?: string) {
+    try {
+        const adminPhone = '212666038129'
+        const dateStr = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' })
+        const adminUrl = 'http://localhost:3000/fr/admin/vendeurs'
+
+        const message = `[Riwaya] Connexion Vendeur détectée\n\n` +
+            `Nom: ${seller.fullName || 'Non renseigné'}\n` +
+            `Email: ${seller.email}\n` +
+            `Téléphone: ${seller.phone || 'Non renseigné'}\n` +
+            `Ville: ${seller.city || 'Non renseignée'}\n` +
+            `Date: ${dateStr}\n` +
+            `IP: ${ip || 'Inconnue'}\n\n` +
+            `Accéder à la gestion vendeurs:\n${adminUrl}`
+
+        let wahaSent = false
+        try {
+            const { sendWhatsAppMessageDirect } = await import('@/lib/actions/whatsapp-gateway')
+            const directRes = await sendWhatsAppMessageDirect(adminPhone, message, {
+                type: 'NOTIFICATION',
+                metadata: {
+                    event: 'seller_login',
+                    sellerId: seller.id,
+                    email: seller.email,
+                    ip: ip || null,
+                    timestamp: new Date().toISOString()
+                }
+            })
+            if (directRes && (directRes.success || (directRes as any).id || (directRes as any).key)) {
+                wahaSent = true
+            }
+        } catch (wahaErr) {
+            console.error('[Seller Login WhatsApp Error]:', wahaErr)
+        }
+
+        try {
+            const telegramMsg = `🔔 *Connexion Vendeur*\n\n` +
+                `👤 Nom: ${seller.fullName || 'Non renseigné'}\n` +
+                `📧 Email: \`${seller.email}\`\n` +
+                `📞 Tél: \`${seller.phone || 'Non renseigné'}\`\n` +
+                `📍 Ville: ${seller.city || 'Non renseignée'}\n` +
+                `🕒 Date: ${dateStr}\n` +
+                `🌐 IP: \`${ip || 'Inconnue'}\`\n\n` +
+                `🔗 [Gérer les vendeurs](${adminUrl})`
+            await sendTelegramMessage(telegramMsg).catch(() => null)
+        } catch (e) {
+            console.error('[Seller Login Telegram Error]:', e)
+        }
+
+        return { success: true, wahaSent }
+    } catch (err: any) {
+        console.error('[notifyAdminOnSellerLogin Error]:', err)
+        return { success: false, error: err?.message || 'Erreur inconnue' }
+    }
+}
+

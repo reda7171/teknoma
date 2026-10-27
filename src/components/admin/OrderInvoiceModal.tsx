@@ -163,7 +163,7 @@ export default function OrderInvoiceModal({
 
     const removeItem = (index: number) => {
         if (items.length <= 1) {
-            showNotification('La facture doit comporter au moins un article', 'warning')
+            showNotification('La facture doit comporter au moins un article', 'error')
             return
         }
         const next = items.filter((_, i) => i !== index)
@@ -440,7 +440,7 @@ export default function OrderInvoiceModal({
     // Share Invoice details via WhatsApp
     const handleShareWhatsApp = () => {
         if (!phone) {
-            showNotification('Veuillez renseigner le numéro de téléphone du client', 'warning')
+            showNotification('Veuillez renseigner le numéro de téléphone du client', 'error')
             return
         }
 

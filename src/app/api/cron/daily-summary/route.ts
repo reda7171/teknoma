@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { getSetting } from '@/lib/actions/site-settings'
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
+import { JumiaAPI } from '@/lib/jumia-api'
+import { summarizeJumiaOrders, type JumiaReportOrder } from '@/lib/jumia-reporting'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,11 +41,6 @@ export async function GET(req: NextRequest) {
             }
         })
 
-        if (orders.length === 0) {
-            await sendTelegramMessage(`📊 <b>Résumé Journalier</b>\n\nAucune commande enregistrée aujourd'hui.`)
-            return NextResponse.json({ success: true, orders: 0 })
-        }
-
         // 4. Calculer CA et Stats
         const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0)
         
@@ -65,17 +62,58 @@ export async function GET(req: NextRequest) {
 
         const bestSeller = Object.values(bookStats).sort((a, b) => b.qty - a.qty)[0]
 
+        let jumiaSection = '\n\n🟠 <b>Jumia</b>\n⚠️ Données indisponibles'
+        let jumiaValidOrders = 0
+        try {
+            const jumia = await JumiaAPI.getInstance()
+            if (jumia) {
+                const allOrders: JumiaReportOrder[] = []
+                let nextToken: string | undefined
+                let pageCount = 0
+                do {
+                    const response = await jumia.getOrders(100, nextToken, undefined, undefined, undefined, 'createdAt', 'DESC')
+                    const pageOrders = response?.orders || response?.data?.orders || []
+                    allOrders.push(...pageOrders)
+                    nextToken = response?.nextToken || response?.data?.nextToken || undefined
+                    pageCount++
+                    if (pageOrders.length === 0 || pageCount >= 20) nextToken = undefined
+                } while (nextToken)
+
+                const formatter = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: 'Africa/Casablanca', year: 'numeric', month: '2-digit', day: '2-digit'
+                })
+                const today = formatter.format(now)
+                const todayOrders = allOrders.filter(order => {
+                    const rawDate = order.createdAt || order.CreatedAt || order.created_at || order.orderDate || order.OrderDate
+                    if (typeof rawDate !== 'string' && typeof rawDate !== 'number' && !(rawDate instanceof Date)) return false
+                    const date = new Date(rawDate)
+                    return !Number.isNaN(date.getTime()) && formatter.format(date) === today
+                })
+                const summary = summarizeJumiaOrders(todayOrders)
+                jumiaValidOrders = summary.valid
+                jumiaSection = `\n\n🟠 <b>Jumia</b>\n` +
+                    `📦 Commandes valides : <b>${summary.valid}</b> / ${summary.total}\n` +
+                    `⏳ En attente : <b>${summary.statusCounts.PENDING || 0}</b>\n` +
+                    `🚚 En expédition : <b>${(summary.statusCounts.READY_TO_SHIP || 0) + (summary.statusCounts.SHIPPED || 0)}</b>\n` +
+                    `✅ Livrées : <b>${summary.statusCounts.DELIVERED || 0}</b>\n` +
+                    `❌ Annulées/retournées : <b>${summary.excluded}</b>\n` +
+                    `💰 CA net : <b>${summary.revenue.toFixed(2)} درهم</b>`
+            }
+        } catch (error) {
+            console.error('Erreur résumé Jumia:', error)
+        }
+
         // 5. Envoyer le message
         const text = `📊 <b>Résumé Journalier - Riwaya</b>\n\n` +
             `📅 <b>Date:</b> ${startOfDay.toLocaleDateString('fr-FR')}\n` +
             `📦 <b>Commandes:</b> ${orders.length}\n` +
             `💰 <b>Chiffre d'Affaires:</b> ${totalRevenue.toFixed(2)} درهم\n\n` +
             (bestSeller ? `🔥 <b>Top Vente:</b> ${bestSeller.title} (${bestSeller.qty} expl.)\n` : '') +
-            `🚀 <i>Continuez comme ça !</i>`
+            jumiaSection + `\n\n🚀 <i>Continuez comme ça !</i>`
 
         await sendTelegramMessage(text)
 
-        return NextResponse.json({ success: true, orders: orders.length, revenue: totalRevenue })
+        return NextResponse.json({ success: true, orders: orders.length, revenue: totalRevenue, jumiaOrders: jumiaValidOrders })
 
     } catch (error) {
         console.error('Erreur Résumé Journalier:', error)

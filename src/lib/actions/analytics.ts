@@ -53,17 +53,24 @@ export async function getDashboardAnalytics() {
         })
 
         const revenueByCategory = orderItems.reduce((acc: any, curr) => {
-            const category = curr.book?.category || 'Non classé'
+            const raw = (curr.book?.category || 'Non classé').trim()
+            const category = raw.toLowerCase() === 'développement personnel'
+                ? 'Développement Personnel'
+                : raw.toLowerCase() === 'sciences humaines'
+                ? 'Sciences Humaines'
+                : raw
             const revenue = curr.price * curr.quantity
             if (!acc[category]) acc[category] = 0
             acc[category] += revenue
             return acc
         }, {})
 
-        const formattedCategoryRevenue = Object.entries(revenueByCategory).map(([name, value]) => ({
-            name,
-            value
-        }))
+        const formattedCategoryRevenue = Object.entries(revenueByCategory)
+            .map(([name, value]) => ({
+                name,
+                value: Math.round(Number(value) * 100) / 100
+            }))
+            .sort((a, b) => b.value - a.value)
 
         // 3. Alerte stocks faibles (< 5)
         const lowStockBooks = await prisma.book.findMany({

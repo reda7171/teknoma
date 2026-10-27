@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
 import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste, Barcode } from 'lucide-react'
-import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBooksFromAi, bulkGenerateSkus } from '@/lib/actions/books'
+import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBookLanguages, bulkUpdateBooksFromAi, bulkGenerateSkus } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import BookCreativeModal from '@/components/admin/BookCreativeModal'
@@ -56,6 +56,7 @@ interface ActiveFilters {
     subCategory?: string;
     jumia?: string;
     seoScore?: string;
+    linked?: string;
     limit?: string | number;
 }
 
@@ -97,6 +98,8 @@ export default function BooksTable({
     const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>(warehouses[0]?.id || 'TOTAL')
     const [bulkStock, setBulkStock] = useState<string>('')
     const [isUpdatingStock, setIsUpdatingStock] = useState(false)
+    const [bulkLanguage, setBulkLanguage] = useState<'fr' | 'ar' | 'en'>('fr')
+    const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false)
     const [isGeneratingSku, setIsGeneratingSku] = useState(false)
     const [isBulkPublishOpen, setIsBulkPublishOpen] = useState(false)
     const [hoveredImage, setHoveredImage] = useState<{ src: string; title: string; rect: { top: number; left: number; right: number; bottom: number } } | null>(null)
@@ -124,6 +127,7 @@ export default function BooksTable({
         if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        if (activeFilters.linked) params.set('linked', activeFilters.linked)
         
         const effectiveLimit = activeFilters.limit || limit
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
@@ -310,6 +314,36 @@ export default function BooksTable({
             setBulkStock('')
             setSelectedIds([])
             setToast({ msg: `✅ Stock (${targetLabel}) mis à jour pour ${selectedIds.length} livres`, ok: true })
+            router.refresh()
+            setTimeout(() => setToast(null), 4000)
+        } else {
+            alert(result.error)
+        }
+    }
+
+    const handleBulkLanguageUpdate = async () => {
+        if (selectedIds.length === 0) return
+
+        const languageLabels = { fr: 'Français', ar: 'Arabe', en: 'Anglais' }
+        const selectedBookIds = orderedBooks
+            .filter(book => selectedIds.includes(book.id) && book.productType !== 'PACK' && book.productType !== 'EXTRA')
+            .map(book => book.id)
+
+        if (selectedBookIds.length === 0) {
+            return alert('La sélection ne contient aucun livre.')
+        }
+        if (!confirm(`Changer la langue de ${selectedBookIds.length} livre(s) en ${languageLabels[bulkLanguage]} ?`)) return
+
+        setIsUpdatingLanguage(true)
+        const result = await bulkUpdateBookLanguages(selectedBookIds, bulkLanguage)
+        setIsUpdatingLanguage(false)
+
+        if (result.success) {
+            setOrderedBooks(current => current.map(book =>
+                selectedBookIds.includes(book.id) ? { ...book, language: bulkLanguage } : book
+            ))
+            setSelectedIds([])
+            setToast({ msg: `✅ Langue mise à jour pour ${result.count ?? selectedBookIds.length} livre(s)`, ok: true })
             router.refresh()
             setTimeout(() => setToast(null), 4000)
         } else {
@@ -754,6 +788,7 @@ Do not add explanatory text outside the JSON array or code block.`
         if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        if (activeFilters.linked) params.set('linked', activeFilters.linked)
 
         const effectiveLimit = newLimit || activeFilters.limit || limit || currentUrlParams.get('limit')
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
@@ -763,10 +798,15 @@ Do not add explanatory text outside the JSON array or code block.`
         return `${pathname}?${params.toString()}`
     }
 
-    const handleSort = (column: 'price' | 'stock' | 'orders') => {
+    const handleSort = (column: 'price' | 'stock' | 'orders' | 'title') => {
         let newSort = `${column}-desc`;
-        if (activeFilters.sort === `${column}-desc`) {
-            newSort = `${column}-asc`;
+        if (column === 'title') {
+            const isCurrentAsc = activeFilters.sort === 'title-asc' || activeFilters.sort === 'a-z'
+            newSort = isCurrentAsc ? 'title-desc' : 'title-asc'
+        } else {
+            if (activeFilters.sort === `${column}-desc`) {
+                newSort = `${column}-asc`;
+            }
         }
         
         const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
@@ -780,6 +820,7 @@ Do not add explanatory text outside the JSON array or code block.`
         if (activeFilters.subCategory) params.set('subCategory', activeFilters.subCategory)
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
+        if (activeFilters.linked) params.set('linked', activeFilters.linked)
         params.set('sort', newSort)
         
         const effectiveLimit = activeFilters.limit || limit || currentUrlParams.get('limit')
@@ -790,9 +831,11 @@ Do not add explanatory text outside the JSON array or code block.`
         router.push(`${pathname}?${params.toString()}`)
     }
 
-    const getSortIcon = (column: 'price' | 'stock' | 'orders') => {
-        if (activeFilters.sort === `${column}-asc`) return <ArrowUp className="w-3 h-3 ml-1" />
-        if (activeFilters.sort === `${column}-desc`) return <ArrowDown className="w-3 h-3 ml-1" />
+    const getSortIcon = (column: 'price' | 'stock' | 'orders' | 'title') => {
+        const isAsc = activeFilters.sort === `${column}-asc` || (column === 'title' && activeFilters.sort === 'a-z')
+        const isDesc = activeFilters.sort === `${column}-desc` || (column === 'title' && activeFilters.sort === 'z-a')
+        if (isAsc) return <ArrowUp className="w-3 h-3 ml-1 text-blue-600" />
+        if (isDesc) return <ArrowDown className="w-3 h-3 ml-1 text-blue-600" />
         return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />
     }
 
@@ -968,6 +1011,29 @@ Do not add explanatory text outside the JSON array or code block.`
 
                             <div className="h-6 w-px bg-gray-300 mx-2 hidden sm:block"></div>
 
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={bulkLanguage}
+                                    onChange={(event) => setBulkLanguage(event.target.value as 'fr' | 'ar' | 'en')}
+                                    className="px-3 py-2 text-xs font-bold border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 bg-white cursor-pointer shadow-sm"
+                                    aria-label="Nouvelle langue des livres sélectionnés"
+                                >
+                                    <option value="fr">Français</option>
+                                    <option value="ar">Arabe</option>
+                                    <option value="en">Anglais</option>
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={handleBulkLanguageUpdate}
+                                    disabled={isUpdatingLanguage}
+                                    className="bg-violet-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-violet-700 transition shadow-sm disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                                >
+                                    {isUpdatingLanguage ? 'Mise à jour...' : 'Changer Langue'}
+                                </button>
+                            </div>
+
+                            <div className="h-6 w-px bg-gray-300 mx-2 hidden sm:block"></div>
+
                             {/* Bouton export Jumia */}
                             <button
                                 onClick={handleExportJumia}
@@ -1066,8 +1132,12 @@ Do not add explanatory text outside the JSON array or code block.`
                                             />
                                         </th>
                                         <th className="px-4 py-3 w-8"></th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Livre
+                                        <th 
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() => handleSort('title')}
+                                            title="Trier par ordre alphabétique (A-Z / Z-A)"
+                                        >
+                                            <div className="flex items-center">Livre {getSortIcon('title')}</div>
                                         </th>
                                         <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Catégorie
@@ -1337,7 +1407,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 {book.sellerSku ? (
                                                                     <a
-                                                                        href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.sellerSku)}`}
+                                                                        href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         onClick={(e) => e.stopPropagation()}
@@ -1606,7 +1676,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                             <span>{book.author}</span>
                                             {book.sellerSku && (
                                                 <a
-                                                    href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.sellerSku)}`}
+                                                    href={`https://www.jumia.ma/catalog/?q=${encodeURIComponent(book.title)}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}

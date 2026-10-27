@@ -252,17 +252,47 @@ export async function POST(req: NextRequest) {
         if (platformsArray.includes('pinterest')) {
             if (pinterestAccessToken && pinterestBoardId && imageUrl) {
                 try {
+                    // Résoudre le base64 pour Pinterest (ne peut pas fetcher les URLs de notre serveur)
+                    let pinterestBase64 = customImageBase64 || null
+                    if (!pinterestBase64 && imageUrl) {
+                        try {
+                            const fsPromises = await import('fs/promises')
+                            const pathMod = await import('path')
+                            // Extraire le chemin local depuis l'URL
+                            let localPath: string
+                            if (imageUrl.startsWith('http')) {
+                                const urlObj = new URL(imageUrl)
+                                const pathname = decodeURIComponent(urlObj.pathname)
+                                // Gérer /api/uploads/... → public/uploads/...
+                                localPath = pathname.startsWith('/api/uploads/')
+                                    ? pathMod.default.join(process.cwd(), 'public', pathname.replace('/api/uploads/', '/uploads/'))
+                                    : pathMod.default.join(process.cwd(), 'public', pathname)
+                            } else {
+                                localPath = pathMod.default.join(process.cwd(), 'public', imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`)
+                            }
+                            const fileBuffer = await fsPromises.readFile(localPath)
+                            const ext = pathMod.default.extname(localPath).toLowerCase().replace('.', '') || 'jpeg'
+                            const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg'
+                            pinterestBase64 = `data:${mimeType};base64,${fileBuffer.toString('base64')}`
+                            void(`[PINTEREST] Image convertie en base64 depuis: ${localPath}`)
+                        } catch (readErr) {
+                            console.error('[PINTEREST] Impossible de lire image locale, fallback URL:', readErr)
+                        }
+                    }
+
                     const pinRes = await publishPin(
                         imageUrl.startsWith('http') ? imageUrl : `${storeDomain}${imageUrl}`,
                         title,
                         finalCaption,
                         item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain,
                         pinterestBoardId,
-                        pinterestAccessToken
+                        pinterestAccessToken,
+                        pinterestBase64 || undefined
                     )
                     const pinId = pinRes?.id
                     const pinUrl = pinId ? `https://www.pinterest.com/pin/${pinId}/` : undefined
                     pinterestResult = { success: true, pinId, pinUrl }
+
 
                     try {
                         await prisma.scheduledPost.create({

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Package, Plus, Minus, Trash2, Search, Loader2, Warehouse } from 'lucide-react'
+import { Package, Plus, Minus, Trash2, Search, Loader2, Warehouse, AlertTriangle } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import Link from 'next/link'
-import { updateOrderItems, searchProductsForOrder } from '@/lib/actions/admin-orders'
+import { updateOrderItems, searchProductsForOrder, updateOrderItemMissing } from '@/lib/actions/admin-orders'
 import { useRouter } from 'next/navigation'
 
 export default function OrderItemsEditor({
@@ -46,6 +46,7 @@ export default function OrderItemsEditor({
     const [searchResults, setSearchResults] = useState<any[]>([])
     const [isSearching, startSearchTransition] = useTransition()
     const [isSaving, startSaveTransition] = useTransition()
+    const [pendingMissingId, setPendingMissingId] = useState<string | null>(null)
     const router = useRouter()
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +117,9 @@ export default function OrderItemsEditor({
             type: item.type,
             productId: item.productId,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            warehouseId: item.warehouseId || null,
+            isMissing: Boolean(item.isMissing)
         }))
 
         startSaveTransition(async () => {
@@ -128,6 +131,25 @@ export default function OrderItemsEditor({
                 alert(res?.error || 'Erreur lors de la mise à jour')
             }
         })
+    }
+
+    const toggleMissing = async (index: number) => {
+        const item = items[index]
+        const nextValue = !item.isMissing
+        if (!item.id || item.isNew) {
+            setItems(current => current.map((entry, i) => i === index ? { ...entry, isMissing: nextValue } : entry))
+            return
+        }
+
+        setPendingMissingId(item.id)
+        const result = await updateOrderItemMissing(orderId, item.id, nextValue)
+        setPendingMissingId(null)
+        if (!result.success) {
+            alert(result.error || 'Impossible de modifier le signalement')
+            return
+        }
+        setItems(current => current.map((entry, i) => i === index ? { ...entry, isMissing: nextValue } : entry))
+        router.refresh()
     }
 
     // Calculs
@@ -173,7 +195,7 @@ export default function OrderItemsEditor({
                             : `/${locale}/admin/books/${product?.id}/edit`
 
                     return (
-                        <div key={item.id || `new-${index}`} className="p-6 flex gap-4 relative group">
+                        <div key={item.id || `new-${index}`} className={`p-6 flex gap-4 relative group ${item.isMissing ? 'bg-red-50/70' : ''}`}>
                             <Link href={editLink} target="_blank" className="relative w-16 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 hover:ring-2 hover:ring-blue-500 transition-all block">
                                 {product?.image ? (
                                     <ImageWithFallback
@@ -252,6 +274,15 @@ export default function OrderItemsEditor({
                                     </div>
 
                                     <div className="flex items-center gap-4">
+                                        <button
+                                            onClick={() => toggleMissing(index)}
+                                            disabled={pendingMissingId === item.id}
+                                            className={`px-3 py-2 rounded-lg text-xs font-black flex items-center gap-1.5 transition-colors ${item.isMissing ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'}`}
+                                            title={item.isMissing ? 'Marquer comme retrouve' : 'Signaler comme manquant'}
+                                        >
+                                            {pendingMissingId === item.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+                                            {item.isMissing ? 'Manquant' : 'Signaler manquant'}
+                                        </button>
                                         <span className="text-sm font-bold text-blue-600">
                                             Total: {item.price * item.quantity} درهم
                                         </span>

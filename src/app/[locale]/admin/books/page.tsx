@@ -18,7 +18,7 @@ import { DashboardPrivacyProvider } from '@/components/admin/DashboardPrivacyCon
 import DashboardPrivacyToggle from '@/components/admin/DashboardPrivacyToggle'
 import SensitiveValue from '@/components/admin/SensitiveValue'
 
-export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string, seoScore?: string }> }) {
+export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string, seoScore?: string, linked?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
@@ -32,6 +32,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const categoryParam = params.category || ''
     const subCategoryParam = params.subCategory || ''
     const seoScoreParam = params.seoScore || ''
+    const linkedParam = params.linked || ''
 
     const categoryTreePromise = getCategoryTree()
     const [role, userId, warehouses] = await Promise.all([
@@ -101,6 +102,12 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }),
         ...(subCategoryParam && {
             subCategory: { in: subCategoryParam.split(',') }
+        }),
+        ...(linkedParam === 'linked' && {
+            isSyncedWithJumia: true
+        }),
+        ...(linkedParam === 'unlinked' && {
+            isSyncedWithJumia: false
         })
     }
 
@@ -167,6 +174,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('not-synced')) packWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) packWhere.sellerSku = { not: null }
         if (jumiaParam.split(',').includes('no-sku')) packWhere.sellerSku = null
+        if (linkedParam === 'linked') packWhere.isSyncedWithJumia = true
+        if (linkedParam === 'unlinked') packWhere.isSyncedWithJumia = false
         
         if (statusParam.split(',').includes('no-image')) {
             packWhere.image = { in: ['', '/book-placeholder.png'] }
@@ -224,6 +233,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 productType: 'PACK',
                 orderCount: p._count?.orderItems || 0,
                 sellerSku: p.sellerSku,
+                isSyncedWithJumia: p.isSyncedWithJumia,
                 jumiaStock: p.jumiaStock,
                 createdAt: p.createdAt
             }
@@ -252,6 +262,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('not-synced')) extraWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null, notIn: [''] }
         if (jumiaParam.split(',').includes('no-sku')) extraWhere.OR = [{ sellerSku: null }, { sellerSku: '' }]
+        if (linkedParam === 'linked') extraWhere.isSyncedWithJumia = true
+        if (linkedParam === 'unlinked') extraWhere.isSyncedWithJumia = false
         
         if (!productTypes.includes('all') && accessoryTypes.length > 0) {
             extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }
@@ -283,7 +295,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             productType: 'EXTRA',
             orderCount: e._count?.orderItems || 0,
             sellerSku: e.sellerSku,
-            jumiaStock: null,
+            isSyncedWithJumia: e.isSyncedWithJumia,
+            jumiaStock: e.jumiaStock,
             createdAt: e.createdAt
         })))
     }
@@ -317,8 +330,20 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     else if (sortParam === 'price-desc') allProducts.sort((a, b) => b.price - a.price)
     else if (sortParam === 'stock-asc') allProducts.sort((a, b) => a.stock - b.stock)
     else if (sortParam === 'stock-desc') allProducts.sort((a, b) => b.stock - a.stock)
-    else if (sortParam === 'title-asc') allProducts.sort((a, b) => a.title.localeCompare(b.title))
-    else if (sortParam === 'title-desc') allProducts.sort((a, b) => b.title.localeCompare(a.title))
+    else if (sortParam === 'title-asc' || sortParam === 'a-z') {
+        allProducts.sort((a, b) => {
+            const titleA = ((a.language === 'fr' ? (a.titleFr || a.title) : a.language === 'en' ? (a.titleEn || a.title) : a.title) || '').trim()
+            const titleB = ((b.language === 'fr' ? (b.titleFr || b.title) : b.language === 'en' ? (b.titleEn || b.title) : b.title) || '').trim()
+            return titleA.localeCompare(titleB, undefined, { sensitivity: 'base', numeric: true })
+        })
+    }
+    else if (sortParam === 'title-desc' || sortParam === 'z-a') {
+        allProducts.sort((a, b) => {
+            const titleA = ((a.language === 'fr' ? (a.titleFr || a.title) : a.language === 'en' ? (a.titleEn || a.title) : a.title) || '').trim()
+            const titleB = ((b.language === 'fr' ? (b.titleFr || b.title) : b.language === 'en' ? (b.titleEn || b.title) : b.title) || '').trim()
+            return titleB.localeCompare(titleA, undefined, { sensitivity: 'base', numeric: true })
+        })
+    }
     else if (sortParam === 'orders-asc') allProducts.sort((a, b) => a.orderCount - b.orderCount)
     else if (sortParam === 'orders-desc') allProducts.sort((a, b) => b.orderCount - a.orderCount)
     else if (sortParam === 'seo-asc') allProducts.sort((a, b) => (a.seoScore || 0) - (b.seoScore || 0))
@@ -347,6 +372,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         category: categoryParam,
         subCategory: subCategoryParam,
         seoScore: seoScoreParam,
+        linked: linkedParam,
         limit: params.limit || ''
     }
 

@@ -223,6 +223,29 @@ export async function getBooks(filters?: BookFilters) {
 }
 
 /**
+ * Liste légère du catalogue destinée au sélecteur des catégories SEO.
+ * La route admin qui l'utilise est responsable du contrôle d'accès.
+ */
+export async function getSeoCategoryBookOptions() {
+    return prisma.book.findMany({
+        orderBy: [
+            { active: 'desc' },
+            { title: 'asc' },
+        ],
+        select: {
+            id: true,
+            title: true,
+            titleFr: true,
+            titleEn: true,
+            author: true,
+            image: true,
+            language: true,
+            active: true,
+        },
+    })
+}
+
+/**
  * Compte le nombre total de livres correspondant aux filtres
  */
 export async function getBooksCount(filters?: BookFilters) {
@@ -315,7 +338,11 @@ export async function getBookById(id: string) {
     try {
         const book = await prisma.book.findUnique({
             where: { id },
-            include: { customerSeller: true, seller: true },
+            include: {
+                customerSeller: true,
+                seller: true,
+                inventories: { include: { warehouse: true } },
+            },
         })
         if (book) return book
 
@@ -323,7 +350,11 @@ export async function getBookById(id: string) {
         if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
             return await prisma.book.findFirst({
                 where: { active: true },
-                include: { customerSeller: true, seller: true },
+                include: {
+                    customerSeller: true,
+                    seller: true,
+                    inventories: { include: { warehouse: true } },
+                },
             })
         }
         return null
@@ -332,7 +363,11 @@ export async function getBookById(id: string) {
         if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
             return await prisma.book.findFirst({
                 where: { active: true },
-                include: { customerSeller: true, seller: true },
+                include: {
+                    customerSeller: true,
+                    seller: true,
+                    inventories: { include: { warehouse: true } },
+                },
             }).catch(() => null)
         }
         return null

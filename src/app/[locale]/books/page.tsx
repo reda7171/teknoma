@@ -14,6 +14,7 @@ import KidsProductsClient from '../mon-enfant/KidsProductsClient'
 import { Filter, SlidersHorizontal, Quote, Banknote, Globe, User } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { getTranslations } from 'next-intl/server'
+import { getSchemaAvailability } from '@/lib/product-availability'
 import { Metadata } from 'next'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { headers } from 'next/headers'
@@ -207,7 +208,7 @@ export default async function BooksPage({
                             '@type': 'Offer',
                             priceCurrency: 'MAD',
                             price: b.price,
-                            availability: b.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                            availability: getSchemaAvailability(b),
                             itemCondition: 'https://schema.org/UsedCondition',
                             seller: {
                                 '@type': 'Organization',

@@ -462,7 +462,7 @@ export default function CheckoutClient({
 
             <h1 className="text-3xl sm:text-5xl font-black text-black mb-6 sm:mb-10 lg:mb-16 tracking-tighter">{t('YourDetails')}<span className="text-gray-200">.</span></h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-16 pb-24 lg:pb-0">
                 {/* Formulaire Principal */}
                 <div className="lg:col-span-2 space-y-6 sm:space-y-10 lg:space-y-12">
                     <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-10 lg:space-y-12">
@@ -778,7 +778,7 @@ export default function CheckoutClient({
 
                 {/* Résumé Panier & Code Promo */}
                 <div className="lg:col-span-1">
-                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-xl border border-gray-100 sticky top-24 space-y-6 sm:space-y-10">
+                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-xl border border-gray-100 lg:sticky lg:top-24 space-y-6 sm:space-y-10">
                         <div>
                             <h2 className="text-xl font-black text-black tracking-tight mb-4 sm:mb-8">{t('SelectionSummary')}</h2>
                             <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -975,6 +975,40 @@ export default function CheckoutClient({
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Barre flottante mobile pour valider la commande immédiatement */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 shadow-[0_-10px_25px_rgba(0,0,0,0.1)] flex items-center justify-between gap-4">
+                <div>
+                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider block">{t('TotalAmount')}</span>
+                    <span className="text-xl font-black text-black">{finalTotal.toFixed(0)} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                </div>
+                <button
+                    form="checkout-form"
+                    type="submit"
+                    onClick={() => {
+                        const formEl = document.getElementById('checkout-form') as HTMLFormElement | null
+                        if (formEl && typeof formEl.requestSubmit === 'function') {
+                            formEl.requestSubmit()
+                        } else {
+                            handleSubmit(onSubmit)()
+                        }
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-black text-white font-black py-3.5 px-6 rounded-full shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>{t('Processing')}</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>{t('CompletePurchase')}</span>
+                            <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                        </>
+                    )}
+                </button>
             </div>
 
             {/* Modal Banque Sélectionnée */}

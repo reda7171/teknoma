@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
 import { revalidatePath } from 'next/cache'
+import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 /**
  * Récupère les stats du dashboard vendeur
@@ -87,9 +88,20 @@ export async function createSellerBook(data: any) {
     const role = await getAdminRole()
     if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
 
+    const classification = autoClassifyBook({
+        title: data.title,
+        author: data.author,
+        description: data.description,
+        language: data.language,
+        category: data.category,
+        subCategory: data.subCategory
+    })
+
     const book = await prisma.book.create({
         data: {
             ...data,
+            category: classification.category,
+            subCategory: classification.subCategory,
             sellerId: userId,
             active: false,
             status: 'PENDING'

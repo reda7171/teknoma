@@ -29,6 +29,7 @@ import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react
 import BookSubNav from '@/components/BookSubNav'
 import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
+import { getGoogleAvailability } from '@/lib/product-availability'
 import AdBanner from '@/components/AdBanner'
 import TestimonialsTabs from '@/components/home/TestimonialsTabs'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
@@ -39,7 +40,8 @@ import ScrollDownIndicator from '@/components/ScrollDownIndicator'
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 import { getBaseUrl, getOgImageUrl, normalizeImage } from '@/lib/utils'
 
-export const revalidate = 3600; // Cache d'une heure pour le SEO et la vitesse
+// Availability must be read at request time to match external inventory feeds.
+export const dynamic = 'force-dynamic'
 
 function plainText(value?: string | null) {
     return (value || '')
@@ -183,6 +185,9 @@ export async function generateMetadata({
             : `⚡ Prix: ${book.price} DH. Paiement à la livraison (COD) partout au Maroc. ${localizedDescriptionText ? localizedDescriptionText.slice(0, 100) + '...' : ''}`
 
     const dynamicOgImageUrl = `${baseUrl}/${locale}/books/${id}/opengraph-image`
+    const facebookAppId = await getSetting('facebook_app_id')
+        || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID
+        || process.env.FACEBOOK_CLIENT_ID
 
     return {
         title: siteTitle,
@@ -212,11 +217,13 @@ export async function generateMetadata({
         other: {
             'product:price:amount': `${book.price}`,
             'product:price:currency': 'MAD',
-            'product:availability': book.stock > 0 ? 'in stock' : 'out of stock',
+            'product:availability': getGoogleAvailability(book).replace('_', ' '),
             'product:condition': 'new',
             'product:retailer_item_id': book.id,
             'og:price:amount': `${book.price}`,
             'og:price:currency': 'MAD',
+            'og:image:alt': localizedTitle,
+            ...(facebookAppId ? { 'fb:app_id': facebookAppId } : {}),
         },
         alternates: {
             canonical: `${baseUrl}/${locale}${generateBookUrl(book, locale)}`,

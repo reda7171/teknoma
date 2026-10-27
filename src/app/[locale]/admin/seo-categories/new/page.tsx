@@ -1,8 +1,8 @@
 import SeoCategoryForm from '../SeoCategoryForm'
-import { getBooks } from '@/lib/db/books'
+import { getSeoCategoryBookOptions } from '@/lib/db/books'
 
 export default async function NewSeoCategoryPage() {
-    const books = await getBooks({ active: true })
+    const books = await getSeoCategoryBookOptions()
     
     return (
         <div>

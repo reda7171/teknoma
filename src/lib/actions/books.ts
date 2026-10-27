@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
+import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 // Schéma de validation pour un livre
 import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/books'
@@ -129,9 +130,20 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             }
         }
 
+        const classification = autoClassifyBook({
+            title: validatedData.title,
+            author: validatedData.author,
+            description: validatedData.description,
+            language: validatedData.language,
+            category: validatedData.category,
+            subCategory: validatedData.subCategory
+        })
+
         const book = await prisma.book.create({
             data: {
                 ...validatedData,
+                category: classification.category,
+                subCategory: classification.subCategory,
                 isbn: cleanIsbn,
                 active: validatedData.active ?? true,
                 isOriginal: validatedData.isOriginal ?? true,
@@ -683,13 +695,25 @@ export async function bulkDeleteBooks(ids: string[]) {
 }
 
 /**
- * Récupérer tous les livres actifs pour le catalogue PDF
+ * Récupérer tous les livres actifs pour le catalogue PDF ou Image (avec support entrepôt)
  */
-export async function getAllBooksForCatalog() {
+export async function getAllBooksForCatalog(warehouseId?: string) {
     try {
         await verifyAdmin()
+        const whereClause: any = { active: true }
+        if (warehouseId && warehouseId !== 'all') {
+            whereClause.inventories = {
+                some: {
+                    warehouseId,
+                    quantity: { gt: 0 }
+                }
+            }
+        } else {
+            whereClause.stock = { gt: 0 }
+        }
+
         const books = await prisma.book.findMany({
-            where: { active: true, stock: { gt: 0 } },
+            where: whereClause,
             orderBy: { title: 'asc' },
             select: {
                 id: true,
@@ -704,6 +728,14 @@ export async function getAllBooksForCatalog() {
                 descriptionEn: true,
                 category: true,
                 language: true,
+                stock: true,
+                createdAt: true,
+                inventories: {
+                    select: {
+                        warehouseId: true,
+                        quantity: true
+                    }
+                }
             }
         })
 
@@ -800,6 +832,51 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour des prix en masse:', error)
         return { success: false, error: 'Impossible de mettre à jour les prix' }
+    }
+}
+
+/**
+ * Mettre à jour la langue de plusieurs livres.
+ */
+export async function bulkUpdateBookLanguages(ids: string[], language: string) {
+    try {
+        await verifyAdmin()
+
+        const validLanguages = ['fr', 'ar', 'en'] as const
+        if (!validLanguages.includes(language as typeof validLanguages[number])) {
+            return { success: false, error: 'Langue invalide' }
+        }
+
+        const uniqueIds = [...new Set(ids.filter(id => typeof id === 'string' && id.trim()))]
+        if (uniqueIds.length === 0 || uniqueIds.length > 500) {
+            return { success: false, error: 'Sélection de livres invalide' }
+        }
+
+        const role = await getAdminRole()
+        const userId = await getAdminUser()
+        const where = {
+            id: { in: uniqueIds },
+            ...(role === 'SELLER' && userId ? { sellerId: userId } : {}),
+        }
+
+        const result = await prisma.book.updateMany({
+            where,
+            data: { language },
+        })
+
+        revalidatePath('/admin/books')
+        revalidatePath('/')
+
+        await createAuditLog({
+            action: 'BULK_UPDATE_LANGUAGE',
+            entity: 'BOOK',
+            details: `Langue mise à jour pour ${result.count} livre(s) : ${language}`,
+        })
+
+        return { success: true, count: result.count }
+    } catch (error: unknown) {
+        console.error('Erreur lors de la mise à jour des langues en masse:', error)
+        return { success: false, error: 'Impossible de mettre à jour les langues' }
     }
 }
 

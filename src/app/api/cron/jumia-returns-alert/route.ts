@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { JumiaAPI } from "@/lib/jumia-api"
 import { sendTelegramMessage } from "@/lib/telegram"
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
+import { getJumiaOrderStatus } from '@/lib/jumia-reporting'
 
 // Alerte commandes Jumia retournées/remboursées
 export async function GET(req: Request) {
@@ -12,24 +13,38 @@ export async function GET(req: Request) {
 
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) {
-            return NextResponse.json({ success: false, error: "Jumia non configuré" })
+            return NextResponse.json({ success: false, error: "Jumia non configuré ou authentification indisponible" }, { status: 503 })
         }
 
         const threeDaysAgo = new Date()
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
-        const createdAfter = threeDaysAgo.toISOString().split('T')[0]
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        const createdBefore = tomorrow.toISOString().split('T')[0]
+        const updatedAfter = threeDaysAgo.toISOString()
+        const updatedBefore = new Date().toISOString()
+        const updatedOrders: any[] = []
+        let nextToken: string | undefined
+        let pageCount = 0
 
-        // Vérifier les commandes retournées récentes
-        const [returnedResponse, canceledResponse] = await Promise.all([
-            jumia.getOrders(50, undefined, 'returned', createdAfter, createdBefore),
-            jumia.getOrders(50, undefined, 'canceled', createdAfter, createdBefore)
-        ])
+        do {
+            const response = await jumia.getOrdersUpdated({
+                size: 300,
+                token: nextToken,
+                updatedAfter,
+                updatedBefore,
+                sort: 'ASC'
+            })
+            const pageOrders = response?.orders || response?.data?.orders || []
+            updatedOrders.push(...pageOrders)
+            nextToken = response?.nextToken || response?.data?.nextToken || undefined
+            pageCount++
+            if (pageOrders.length === 0 || updatedOrders.length >= 10000 || pageCount >= 40) {
+                nextToken = undefined
+            }
+        } while (nextToken)
 
-        const returnedOrders = returnedResponse?.orders || returnedResponse?.data?.orders || []
-        const canceledOrders = canceledResponse?.orders || canceledResponse?.data?.orders || []
+        const returnedStatuses = new Set(['RETURNED', 'RETURNED_TO_SELLER', 'REFUNDED'])
+        const canceledStatuses = new Set(['CANCELED', 'CANCELLED', 'FAILED', 'DELIVERY_FAILED'])
+        const returnedOrders = updatedOrders.filter(order => returnedStatuses.has(getJumiaOrderStatus(order)))
+        const canceledOrders = updatedOrders.filter(order => canceledStatuses.has(getJumiaOrderStatus(order)))
 
         if (returnedOrders.length === 0 && canceledOrders.length === 0) {
             return NextResponse.json({ success: true, message: 'Aucun retour/annulation récent.' })
@@ -119,6 +134,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({ success: true, returned: returnedOrders.length, canceled: canceledOrders.length, restored: unprocessedOrders.length })
     } catch (e: any) {
-        return NextResponse.json({ success: false, error: e.message }, { status: 500 })
+        console.error('[JUMIA RETURNS] Vérification impossible:', e)
+        return NextResponse.json({ success: false, error: e?.message || 'Erreur Jumia inconnue' }, { status: 500 })
     }
 }
