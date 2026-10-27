@@ -1,0 +1,1370 @@
+[
+  {
+    "ville": "Casablanca",
+    "prix": 25
+  },
+  {
+    "ville": "Rabat",
+    "prix": 25
+  },
+  {
+    "ville": "Sale",
+    "prix": 25
+  },
+  {
+    "ville": "Temara",
+    "prix": 25
+  },
+  {
+    "ville": "Kenitra",
+    "prix": 25
+  },
+  {
+    "ville": "Ain El Aouda",
+    "prix": 35
+  },
+  {
+    "ville": "Ain Attig",
+    "prix": 35
+  },
+  {
+    "ville": "Sala El Jadida",
+    "prix": 35
+  },
+  {
+    "ville": "Skhirat",
+    "prix": 35
+  },
+  {
+    "ville": "Tamesna",
+    "prix": 35
+  },
+  {
+    "ville": "Mers El Kheir",
+    "prix": 35
+  },
+  {
+    "ville": "Harhoura",
+    "prix": 35
+  },
+  {
+    "ville": "Mehdia",
+    "prix": 35
+  },
+  {
+    "ville": "Sidi Allal El Bahraoui",
+    "prix": 35
+  },
+  {
+    "ville": "Sidi Kacem",
+    "prix": 35
+  },
+  {
+    "ville": "Sidi Slimane",
+    "prix": 35
+  },
+  {
+    "ville": "Souk El Arbaa Du Gharb",
+    "prix": 35
+  },
+  {
+    "ville": "Sidi Yahya El Gharb",
+    "prix": 35
+  },
+  {
+    "ville": "Mechra Bel Ksiri",
+    "prix": 35
+  },
+  {
+    "ville": "Lalla Mimouna",
+    "prix": 35
+  },
+  {
+    "ville": "Sidi Allal Tazi",
+    "prix": 35
+  },
+  {
+    "ville": "Bouskoura",
+    "prix": 35
+  },
+  {
+    "ville": "Errahma",
+    "prix": 35
+  },
+  {
+    "ville": "Mohammedia",
+    "prix": 35
+  },
+  {
+    "ville": "Mediouna",
+    "prix": 35
+  },
+  {
+    "ville": "Nouacer",
+    "prix": 35
+  },
+  {
+    "ville": "Ain Harrouda",
+    "prix": 35
+  },
+  {
+    "ville": "Tit Melil",
+    "prix": 35
+  },
+  {
+    "ville": "Deroua",
+    "prix": 35
+  },
+  {
+    "ville": "Tamaris",
+    "prix": 35
+  },
+  {
+    "ville": "Beni Mellal",
+    "prix": 35
+  },
+  {
+    "ville": "Khouribga",
+    "prix": 35
+  },
+  {
+    "ville": "Dar Bouaza",
+    "prix": 35
+  },
+  {
+    "ville": "Berrechid",
+    "prix": 35
+  },
+  {
+    "ville": "Settat",
+    "prix": 35
+  },
+  {
+    "ville": "Had Soualem",
+    "prix": 35
+  },
+  {
+    "ville": "Bouznika",
+    "prix": 35
+  },
+  {
+    "ville": "Sidi rahal",
+    "prix": 35
+  },
+  {
+    "ville": "El jadida",
+    "prix": 35
+  },
+  {
+    "ville": "Benslimane",
+    "prix": 35
+  },
+  {
+    "ville": "Chellalat Mohammedia",
+    "prix": 35
+  },
+  {
+    "ville": "Bni yakhlef",
+    "prix": 35
+  },
+  {
+    "ville": "El Mansouria",
+    "prix": 35
+  },
+  {
+    "ville": "Oulad Azzouz Dar 16",
+    "prix": 35
+  },
+  {
+    "ville": "Fes",
+    "prix": 35
+  },
+  {
+    "ville": "Meknes",
+    "prix": 35
+  },
+  {
+    "ville": "Ouislane",
+    "prix": 35
+  },
+  {
+    "ville": "Nador",
+    "prix": 35
+  },
+  {
+    "ville": "Oujda",
+    "prix": 35
+  },
+  {
+    "ville": "Marrakech",
+    "prix": 35
+  },
+  {
+    "ville": "Essaouira",
+    "prix": 35
+  },
+  {
+    "ville": "Safi",
+    "prix": 35
+  },
+  {
+    "ville": "zaer",
+    "prix": 35
+  },
+  {
+    "ville": "Agadir",
+    "prix": 35
+  },
+  {
+    "ville": "Aït Melloul",
+    "prix": 35
+  },
+  {
+    "ville": "Inzegane",
+    "prix": 35
+  },
+  {
+    "ville": "Tikiwin",
+    "prix": 35
+  },
+  {
+    "ville": "Tanger",
+    "prix": 35
+  },
+  {
+    "ville": "Bejaad",
+    "prix": 39
+  },
+  {
+    "ville": "Boujniba",
+    "prix": 39
+  },
+  {
+    "ville": "Kasba Tadla",
+    "prix": 39
+  },
+  {
+    "ville": "Khenifra",
+    "prix": 39
+  },
+  {
+    "ville": "Mrirt",
+    "prix": 39
+  },
+  {
+    "ville": "Oued Zem",
+    "prix": 39
+  },
+  {
+    "ville": "Zaouiat Cheikh",
+    "prix": 39
+  },
+  {
+    "ville": "Bounoir",
+    "prix": 39
+  },
+  {
+    "ville": "Hettan",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Yaich",
+    "prix": 39
+  },
+  {
+    "ville": "Ighrem Laâlam",
+    "prix": 39
+  },
+  {
+    "ville": "Tagzirt",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Youssef",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Ali",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Zmam",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Jaber",
+    "prix": 39
+  },
+  {
+    "ville": "Souk Sebt",
+    "prix": 39
+  },
+  {
+    "ville": "Dar Ould Zidouh",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Ayad",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Aïssa",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad M'barek",
+    "prix": 39
+  },
+  {
+    "ville": "Afourar",
+    "prix": 39
+  },
+  {
+    "ville": "Timoulilt",
+    "prix": 39
+  },
+  {
+    "ville": "Beni Ayat",
+    "prix": 39
+  },
+  {
+    "ville": "Ouaouizeght",
+    "prix": 39
+  },
+  {
+    "ville": "Aguelmous",
+    "prix": 39
+  },
+  {
+    "ville": "Tighassaline",
+    "prix": 39
+  },
+  {
+    "ville": "Aït Ishaq",
+    "prix": 39
+  },
+  {
+    "ville": "Bradia",
+    "prix": 39
+  },
+  {
+    "ville": "Had Boumoussa",
+    "prix": 39
+  },
+  {
+    "ville": "Foum Oudi",
+    "prix": 39
+  },
+  {
+    "ville": "Laayayta",
+    "prix": 39
+  },
+  {
+    "ville": "Azemmour",
+    "prix": 39
+  },
+  {
+    "ville": "Khemis Des Zemamra",
+    "prix": 39
+  },
+  {
+    "ville": "Moulay Abdellah",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Bennour",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Bouzid",
+    "prix": 39
+  },
+  {
+    "ville": "Ben Ahmed",
+    "prix": 39
+  },
+  {
+    "ville": "El Gara",
+    "prix": 39
+  },
+  {
+    "ville": "Dakhla",
+    "prix": 39
+  },
+  {
+    "ville": "Ouarzazate",
+    "prix": 39
+  },
+  {
+    "ville": "Taza",
+    "prix": 39
+  },
+  {
+    "ville": "Haj Kaddour",
+    "prix": 39
+  },
+  {
+    "ville": "Ifran",
+    "prix": 39
+  },
+  {
+    "ville": "Moulay Idriss zerhouni",
+    "prix": 39
+  },
+  {
+    "ville": "Taounate",
+    "prix": 39
+  },
+  {
+    "ville": "Boufakrane",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Tayeb",
+    "prix": 39
+  },
+  {
+    "ville": "Mejat \"Région de Fès-Meknès\"",
+    "prix": 39
+  },
+  {
+    "ville": "Ain chkaf",
+    "prix": 39
+  },
+  {
+    "ville": "Moulay Yâcoub",
+    "prix": 39
+  },
+  {
+    "ville": "Saiss",
+    "prix": 39
+  },
+  {
+    "ville": "Oued Amlil",
+    "prix": 39
+  },
+  {
+    "ville": "Aknoul",
+    "prix": 39
+  },
+  {
+    "ville": "Guelmim",
+    "prix": 39
+  },
+  {
+    "ville": "Beni Ensar",
+    "prix": 39
+  },
+  {
+    "ville": "Berkane",
+    "prix": 39
+  },
+  {
+    "ville": "Selouane",
+    "prix": 39
+  },
+  {
+    "ville": "Guercif",
+    "prix": 39
+  },
+  {
+    "ville": "Saidia",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Hrazem",
+    "prix": 39
+  },
+  {
+    "ville": "Zeghanghane",
+    "prix": 39
+  },
+  {
+    "ville": "Ras El Ma - Cap de l'eau",
+    "prix": 39
+  },
+  {
+    "ville": "Madagh",
+    "prix": 39
+  },
+  {
+    "ville": "Bouarg",
+    "prix": 39
+  },
+  {
+    "ville": "Afra",
+    "prix": 39
+  },
+  {
+    "ville": "Jaadar",
+    "prix": 39
+  },
+  {
+    "ville": "Laâyoune",
+    "prix": 39
+  },
+  {
+    "ville": "Benguerir",
+    "prix": 39
+  },
+  {
+    "ville": "Chichaoua",
+    "prix": 39
+  },
+  {
+    "ville": "El Kelaa Des Sraghna",
+    "prix": 39
+  },
+  {
+    "ville": "Laattaouia",
+    "prix": 39
+  },
+  {
+    "ville": "Sebt Gzoula",
+    "prix": 39
+  },
+  {
+    "ville": "Tamansourt",
+    "prix": 39
+  },
+  {
+    "ville": "Youssoufia",
+    "prix": 39
+  },
+  {
+    "ville": "Dar Essalam",
+    "prix": 39
+  },
+  {
+    "ville": "Tssoultante",
+    "prix": 39
+  },
+  {
+    "ville": "Douar Lahna",
+    "prix": 39
+  },
+  {
+    "ville": "Tamellalt",
+    "prix": 39
+  },
+  {
+    "ville": "Echemmaia",
+    "prix": 39
+  },
+  {
+    "ville": "Oualidia",
+    "prix": 39
+  },
+  {
+    "ville": "Souira Guedima",
+    "prix": 39
+  },
+  {
+    "ville": "Tlat Bouguedra",
+    "prix": 39
+  },
+  {
+    "ville": "Tahanaout",
+    "prix": 39
+  },
+  {
+    "ville": "Loudaya",
+    "prix": 39
+  },
+  {
+    "ville": "Ghazoua",
+    "prix": 39
+  },
+  {
+    "ville": "El-afak",
+    "prix": 39
+  },
+  {
+    "ville": "Bassatine El Menzeh",
+    "prix": 39
+  },
+  {
+    "ville": "Khemisset",
+    "prix": 39
+  },
+  {
+    "ville": "Tiflet",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Bouknadel",
+    "prix": 39
+  },
+  {
+    "ville": "Biougra",
+    "prix": 39
+  },
+  {
+    "ville": "Anza",
+    "prix": 39
+  },
+  {
+    "ville": "Drarga",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Teima",
+    "prix": 39
+  },
+  {
+    "ville": "Taroudant",
+    "prix": 39
+  },
+  {
+    "ville": "Tiznit",
+    "prix": 39
+  },
+  {
+    "ville": "Temsia",
+    "prix": 39
+  },
+  {
+    "ville": "Ait Amira",
+    "prix": 39
+  },
+  {
+    "ville": "Chtouka",
+    "prix": 39
+  },
+  {
+    "ville": "Aourir \"Région Agadir\"",
+    "prix": 39
+  },
+  {
+    "ville": "Tarast",
+    "prix": 39
+  },
+  {
+    "ville": "Leqliaa",
+    "prix": 39
+  },
+  {
+    "ville": "Dcheira El Jihadia",
+    "prix": 39
+  },
+  {
+    "ville": "Jebila",
+    "prix": 39
+  },
+  {
+    "ville": "Khandagour",
+    "prix": 39
+  },
+  {
+    "ville": "Cabo Negro",
+    "prix": 39
+  },
+  {
+    "ville": "Rencon",
+    "prix": 39
+  },
+  {
+    "ville": "Al Hoceima",
+    "prix": 39
+  },
+  {
+    "ville": "Fnideq",
+    "prix": 39
+  },
+  {
+    "ville": "Martil",
+    "prix": 39
+  },
+  {
+    "ville": "Assilah",
+    "prix": 39
+  },
+  {
+    "ville": "Bab Berred",
+    "prix": 39
+  },
+  {
+    "ville": "Chefchaouen",
+    "prix": 39
+  },
+  {
+    "ville": "Ksar El Kebir",
+    "prix": 39
+  },
+  {
+    "ville": "Laarache",
+    "prix": 39
+  },
+  {
+    "ville": "Mdiq",
+    "prix": 39
+  },
+  {
+    "ville": "Tetouan",
+    "prix": 39
+  },
+  {
+    "ville": "Azilal",
+    "prix": 39
+  },
+  {
+    "ville": "Fquih Ben Salah",
+    "prix": 39
+  },
+  {
+    "ville": "Sebt Oulad Nemma",
+    "prix": 39
+  },
+  {
+    "ville": "El Ksiba",
+    "prix": 39
+  },
+  {
+    "ville": "El Kebab",
+    "prix": 39
+  },
+  {
+    "ville": "Ras El Ain \"Région de Settat\"",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi El Ayedi",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Said",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Abbou",
+    "prix": 39
+  },
+  {
+    "ville": "El Borouj",
+    "prix": 39
+  },
+  {
+    "ville": "Guisser",
+    "prix": 39
+  },
+  {
+    "ville": "Bir Jdid",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Frej",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Smaïl",
+    "prix": 39
+  },
+  {
+    "ville": "Messawerr Rasso",
+    "prix": 39
+  },
+  {
+    "ville": "El Haouzia",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Amrane \"Région El Jadida\"",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Hajjaj \"Région de Settat\"",
+    "prix": 39
+  },
+  {
+    "ville": "Arfoud",
+    "prix": 39
+  },
+  {
+    "ville": "Er-Rich",
+    "prix": 39
+  },
+  {
+    "ville": "Errachidia",
+    "prix": 39
+  },
+  {
+    "ville": "Kelaat M'Gouna",
+    "prix": 39
+  },
+  {
+    "ville": "Merzouga",
+    "prix": 39
+  },
+  {
+    "ville": "Midelt",
+    "prix": 39
+  },
+  {
+    "ville": "Rissani",
+    "prix": 39
+  },
+  {
+    "ville": "Tinghir",
+    "prix": 39
+  },
+  {
+    "ville": "Zagoura",
+    "prix": 39
+  },
+  {
+    "ville": "Goulmima",
+    "prix": 39
+  },
+  {
+    "ville": "Skoura",
+    "prix": 39
+  },
+  {
+    "ville": "Taznakht",
+    "prix": 39
+  },
+  {
+    "ville": "Agds",
+    "prix": 39
+  },
+  {
+    "ville": "Tinejdad",
+    "prix": 39
+  },
+  {
+    "ville": "Boumalen dades",
+    "prix": 39
+  },
+  {
+    "ville": "Zaida",
+    "prix": 39
+  },
+  {
+    "ville": "Boumia",
+    "prix": 39
+  },
+  {
+    "ville": "Missour",
+    "prix": 39
+  },
+  {
+    "ville": "Aoufous",
+    "prix": 39
+  },
+  {
+    "ville": "Ait Aissa Ou Brahim",
+    "prix": 39
+  },
+  {
+    "ville": "Aït Tarzout",
+    "prix": 39
+  },
+  {
+    "ville": "Alnif",
+    "prix": 39
+  },
+  {
+    "ville": "Ait Sedrate Sahl Gharbia",
+    "prix": 39
+  },
+  {
+    "ville": "Ayt Ihya",
+    "prix": 39
+  },
+  {
+    "ville": "Boulman",
+    "prix": 39
+  },
+  {
+    "ville": "Outat El Haj",
+    "prix": 39
+  },
+  {
+    "ville": "Agourai",
+    "prix": 39
+  },
+  {
+    "ville": "Boured",
+    "prix": 39
+  },
+  {
+    "ville": "Tizi Ouasli",
+    "prix": 39
+  },
+  {
+    "ville": "Tahla",
+    "prix": 39
+  },
+  {
+    "ville": "Ghafsai",
+    "prix": 39
+  },
+  {
+    "ville": "Ain Leuh",
+    "prix": 39
+  },
+  {
+    "ville": "Tissa",
+    "prix": 39
+  },
+  {
+    "ville": "Ain Aicha",
+    "prix": 39
+  },
+  {
+    "ville": "Bani Walid",
+    "prix": 39
+  },
+  {
+    "ville": "Bouhouda",
+    "prix": 39
+  },
+  {
+    "ville": "Ain Mediouna",
+    "prix": 39
+  },
+  {
+    "ville": "Marnissa",
+    "prix": 39
+  },
+  {
+    "ville": "Bab Marzouka",
+    "prix": 39
+  },
+  {
+    "ville": "Timahdite",
+    "prix": 39
+  },
+  {
+    "ville": "Bouderbala",
+    "prix": 39
+  },
+  {
+    "ville": "Sebt Jahjouhe",
+    "prix": 39
+  },
+  {
+    "ville": "Ain Taoujdate",
+    "prix": 39
+  },
+  {
+    "ville": "Azrou \"Région de Fès-Meknès\"",
+    "prix": 39
+  },
+  {
+    "ville": "Imouzzer du Kandar",
+    "prix": 39
+  },
+  {
+    "ville": "Sefrou",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Addi",
+    "prix": 39
+  },
+  {
+    "ville": "El Hajeb",
+    "prix": 39
+  },
+  {
+    "ville": "Skhinate",
+    "prix": 39
+  },
+  {
+    "ville": "Ain-Cheggag",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Ifni",
+    "prix": 39
+  },
+  {
+    "ville": "Tan-Tan",
+    "prix": 39
+  },
+  {
+    "ville": "Ahfir",
+    "prix": 39
+  },
+  {
+    "ville": "Al Aaroui",
+    "prix": 39
+  },
+  {
+    "ville": "Taourirt",
+    "prix": 39
+  },
+  {
+    "ville": "Jerada",
+    "prix": 39
+  },
+  {
+    "ville": "Zaio",
+    "prix": 39
+  },
+  {
+    "ville": "Aklim",
+    "prix": 39
+  },
+  {
+    "ville": "El Aïoun Charqiya",
+    "prix": 39
+  },
+  {
+    "ville": "Aïn-Béni-Mathar",
+    "prix": 39
+  },
+  {
+    "ville": "Touima",
+    "prix": 39
+  },
+  {
+    "ville": "farkhana",
+    "prix": 39
+  },
+  {
+    "ville": "Driouch",
+    "prix": 39
+  },
+  {
+    "ville": "Midar",
+    "prix": 39
+  },
+  {
+    "ville": "Ben Taieb",
+    "prix": 39
+  },
+  {
+    "ville": "Tiztoutine",
+    "prix": 39
+  },
+  {
+    "ville": "Beni Chiker",
+    "prix": 39
+  },
+  {
+    "ville": "Figuig",
+    "prix": 39
+  },
+  {
+    "ville": "Bouârfa",
+    "prix": 39
+  },
+  {
+    "ville": "Tendrara",
+    "prix": 39
+  },
+  {
+    "ville": "Beni Drar",
+    "prix": 39
+  },
+  {
+    "ville": "Aïn Erreggada",
+    "prix": 39
+  },
+  {
+    "ville": "Dar-El Kebdani",
+    "prix": 39
+  },
+  {
+    "ville": "Boudinar",
+    "prix": 39
+  },
+  {
+    "ville": "Tamsamane",
+    "prix": 39
+  },
+  {
+    "ville": "Telat Azlaf",
+    "prix": 39
+  },
+  {
+    "ville": "Kassita",
+    "prix": 39
+  },
+  {
+    "ville": "Tafersit",
+    "prix": 39
+  },
+  {
+    "ville": "Ouled Settout",
+    "prix": 39
+  },
+  {
+    "ville": "Kariat Arekmane",
+    "prix": 39
+  },
+  {
+    "ville": "Beni Sidal Jbel",
+    "prix": 39
+  },
+  {
+    "ville": "Mariouari",
+    "prix": 39
+  },
+  {
+    "ville": "Afsou",
+    "prix": 39
+  },
+  {
+    "ville": "Boujdour",
+    "prix": 39
+  },
+  {
+    "ville": "Essemara",
+    "prix": 39
+  },
+  {
+    "ville": "Sakia El hamra",
+    "prix": 39
+  },
+  {
+    "ville": "Demnate",
+    "prix": 39
+  },
+  {
+    "ville": "Jamaat Shaim",
+    "prix": 39
+  },
+  {
+    "ville": "Tameslouht",
+    "prix": 39
+  },
+  {
+    "ville": "Chwiter",
+    "prix": 39
+  },
+  {
+    "ville": "Souihla",
+    "prix": 39
+  },
+  {
+    "ville": "Ouled Hassoune",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Moussa \"Région de Marrakech\"",
+    "prix": 39
+  },
+  {
+    "ville": "Lahbichat",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Abdellah Ghiyat",
+    "prix": 39
+  },
+  {
+    "ville": "Ait ourir",
+    "prix": 39
+  },
+  {
+    "ville": "Ourika",
+    "prix": 39
+  },
+  {
+    "ville": "Assahrij",
+    "prix": 39
+  },
+  {
+    "ville": "Imintanout",
+    "prix": 39
+  },
+  {
+    "ville": "Sid L'Mokhtar",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi bou zid Chichaoua",
+    "prix": 39
+  },
+  {
+    "ville": "Mzoudia",
+    "prix": 39
+  },
+  {
+    "ville": "Mejjat - Région de Marrakech",
+    "prix": 39
+  },
+  {
+    "ville": "Ait hadi",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi chiker",
+    "prix": 39
+  },
+  {
+    "ville": "Ighoud",
+    "prix": 39
+  },
+  {
+    "ville": "Bouaboud",
+    "prix": 39
+  },
+  {
+    "ville": "Agouidir",
+    "prix": 39
+  },
+  {
+    "ville": "Ouled Moumna",
+    "prix": 39
+  },
+  {
+    "ville": "Timezgadiouine",
+    "prix": 39
+  },
+  {
+    "ville": "Jorf El Melha",
+    "prix": 39
+  },
+  {
+    "ville": "Khenichet",
+    "prix": 39
+  },
+  {
+    "ville": "Moulay Bousselham",
+    "prix": 39
+  },
+  {
+    "ville": "El Aarjate",
+    "prix": 39
+  },
+  {
+    "ville": "Oulmès",
+    "prix": 39
+  },
+  {
+    "ville": "Tiddas",
+    "prix": 39
+  },
+  {
+    "ville": "Belfaa",
+    "prix": 39
+  },
+  {
+    "ville": "Sebt El Guerdane",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Bibi",
+    "prix": 39
+  },
+  {
+    "ville": "Aoulouz",
+    "prix": 39
+  },
+  {
+    "ville": "Ait Aiaaza",
+    "prix": 39
+  },
+  {
+    "ville": "Lagfifat",
+    "prix": 39
+  },
+  {
+    "ville": "Massa",
+    "prix": 39
+  },
+  {
+    "ville": "Oulad Berhil",
+    "prix": 39
+  },
+  {
+    "ville": "Taliouine",
+    "prix": 39
+  },
+  {
+    "ville": "Tamraght",
+    "prix": 39
+  },
+  {
+    "ville": "Ouled Dahhou",
+    "prix": 39
+  },
+  {
+    "ville": "Taghazout",
+    "prix": 39
+  },
+  {
+    "ville": "Azrou \"Aït Melloul\"",
+    "prix": 39
+  },
+  {
+    "ville": "Ouazzane",
+    "prix": 39
+  },
+  {
+    "ville": "Oued law",
+    "prix": 39
+  },
+  {
+    "ville": "Imzouren",
+    "prix": 39
+  },
+  {
+    "ville": "Bab Taza",
+    "prix": 39
+  },
+  {
+    "ville": "Gueznaia",
+    "prix": 39
+  },
+  {
+    "ville": "Sidi Hssain",
+    "prix": 39
+  },
+  {
+    "ville": "Mnar",
+    "prix": 39
+  },
+  {
+    "ville": "Laaouamera",
+    "prix": 39
+  },
+  {
+    "ville": "Ajdir",
+    "prix": 39
+  },
+  {
+    "ville": "Boukidaren",
+    "prix": 39
+  },
+  {
+    "ville": "Ait-Kamara",
+    "prix": 39
+  },
+  {
+    "ville": "Bni Hadifa",
+    "prix": 39
+  },
+  {
+    "ville": "Targuist",
+    "prix": 39
+  },
+  {
+    "ville": "Issaguen",
+    "prix": 39
+  },
+  {
+    "ville": "Bni Bouayach",
+    "prix": 39
+  },
+  {
+    "ville": "Khemis du Sahel",
+    "prix": 39
+  },
+  {
+    "ville": "Zouada",
+    "prix": 39
+  },
+  {
+    "ville": "Dlalha",
+    "prix": 39
+  },
+  {
+    "ville": "Ksar Sghir",
+    "prix": 39
+  }
+]

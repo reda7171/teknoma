@@ -171,9 +171,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
             const accessoryIds = data.items.filter(i => i.type === 'ACCESSORY').map(i => i.productId)
 
             const [books, packs, accessories] = await Promise.all([
-                bookIds.length > 0 ? tx.book.findMany({ where: { id: { in: bookIds } }, select: { id: true, costPrice: true, sellerId: true } }) : [],
+                bookIds.length > 0 ? tx.book.findMany({ where: { id: { in: bookIds } }, select: { id: true, costPrice: true, sellerId: true, stock: true } }) : [],
                 packIds.length > 0 ? tx.pack.findMany({ where: { id: { in: packIds } }, select: { id: true, costPrice: true, shippingFees: true, books: true, extraProducts: true } }) : [],
-                accessoryIds.length > 0 ? tx.extraProduct.findMany({ where: { id: { in: accessoryIds } }, select: { id: true, costPrice: true } }) : []
+                accessoryIds.length > 0 ? tx.extraProduct.findMany({ where: { id: { in: accessoryIds } }, select: { id: true, costPrice: true, stock: true } }) : []
             ])
 
             const bookMap = new Map(books.map(b => [b.id, b]))
@@ -182,15 +182,19 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
 
             let hasFreeShippingItem = false
 
-            // Récupérer les prix de revient (costPrice) et sellerId pour chaque article
+            // Récupérer les prix de revient (costPrice), sellerId et vérifier si le produit est en rupture (manquant)
             const itemsWithCost = data.items.map(item => {
                 let costPrice = 0
                 let sellerId: string | null = null
+                let isMissing = false
                 
                 if (item.type === 'BOOK') {
                     const book = bookMap.get(item.productId)
                     costPrice = book?.costPrice || 0
                     sellerId = book?.sellerId || null
+                    if (book && book.stock <= 0) {
+                        isMissing = true
+                    }
                 } else if (item.type === 'PACK') {
                     const pack = packMap.get(item.productId)
                     costPrice = pack?.costPrice || 0
@@ -200,8 +204,11 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 } else if (item.type === 'ACCESSORY') {
                     const ext = accessoryMap.get(item.productId)
                     costPrice = ext?.costPrice || 0
+                    if (ext && (ext as any).stock <= 0) {
+                        isMissing = true
+                    }
                 }
-                return { ...item, costPrice, sellerId }
+                return { ...item, costPrice, sellerId, isMissing }
             })
 
             // Logique de livraison synchronisée avec le client
@@ -391,7 +398,8 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                             warehouseId: item.warehouseId || null,
                             quantity: item.quantity,
                             price: item.price,
-                            costPrice: item.costPrice
+                            costPrice: item.costPrice,
+                            isMissing: Boolean(item.isMissing)
                         }))
                     }
                 }
