@@ -26,21 +26,52 @@ export async function POST(req: Request) {
             });
             recipients = customers as { email: string; fullName: string }[];
         } else if (audience === 'TEST_ONLY') {
+            const adminUser = await prisma.user.findFirst({
+                where: { email: admin.email },
+                select: { name: true }
+            });
             recipients = [
-                { email: admin.email, fullName: 'Admin' }
+                { email: admin.email, fullName: adminUser?.name || 'Admin' }
             ];
         } else if (audience === 'NEWSLETTER_SUBSCRIBERS') {
             const subscribers = await prisma.newsletterSubscriber.findMany({
                 select: { email: true }
             });
-            recipients = subscribers.map(sub => ({ email: sub.email, fullName: 'Abonné(e)' }));
+            const subEmails = subscribers.map(s => s.email).filter(Boolean);
+            const customers = await prisma.customer.findMany({
+                where: { email: { in: subEmails } },
+                select: { email: true, fullName: true }
+            });
+            const nameMap = new Map<string, string>();
+            customers.forEach(c => { if (c.email && c.fullName) nameMap.set(c.email.toLowerCase(), c.fullName); });
+            recipients = subscribers.map(sub => ({
+                email: sub.email,
+                fullName: nameMap.get(sub.email.toLowerCase()) || sub.email.split('@')[0] || 'Cher lecteur'
+            }));
         } else if (audience === 'TARGETED_CLIENTS') {
             const { targetedEmails } = body;
             if (!targetedEmails || targetedEmails.trim() === '') {
                 return NextResponse.json({ error: 'Aucun email fourni pour les clients ciblés' }, { status: 400 });
             }
             const emails = targetedEmails.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
-            recipients = emails.map((email: string) => ({ email, fullName: 'Client' }));
+            const [customers, orders] = await Promise.all([
+                prisma.customer.findMany({
+                    where: { email: { in: emails } },
+                    select: { email: true, fullName: true }
+                }),
+                prisma.order.findMany({
+                    where: { email: { in: emails } },
+                    select: { email: true, fullName: true },
+                    orderBy: { createdAt: 'desc' }
+                })
+            ]);
+            const nameMap = new Map<string, string>();
+            customers.forEach(c => { if (c.email && c.fullName) nameMap.set(c.email.toLowerCase(), c.fullName); });
+            orders.forEach(o => { if (o.email && o.fullName && !nameMap.has(o.email.toLowerCase())) nameMap.set(o.email.toLowerCase(), o.fullName); });
+            recipients = emails.map((email: string) => ({
+                email,
+                fullName: nameMap.get(email.toLowerCase()) || email.split('@')[0] || 'Cher lecteur'
+            }));
         } else {
             return NextResponse.json({ error: 'Invalid audience' }, { status: 400 });
         }
@@ -49,31 +80,40 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'No recipients found' }, { status: 404 });
         }
 
+        // Récupérer le code coupon à appliquer (depuis le formulaire ou le premier coupon actif en base)
+        let couponCode = (body.couponCode || '').trim();
+        if (!couponCode) {
+            const activeCoupon = await prisma.coupon.findFirst({
+                where: { isActive: true },
+                orderBy: { createdAt: 'desc' },
+                select: { code: true }
+            });
+            couponCode = activeCoupon?.code || 'RIWAYA10';
+        }
+
         // Sending via Hostinger Mail API
         let successCount = 0;
         let failCount = 0;
-
-        // In a real bulk scenario, Hostinger might support bulk sending or we send individually.
-        // The hostinger-mail-api-sdk typically allows sending a single email or batch.
-        // For simplicity and safety within limits, we'll map them to SendMessage objects
-        // The exact structure depends on the SDK, but typical usage:
-        
-        // Since we are iterating, we send emails one by one. (In a true background job, this should not block)
-        // Note: For thousands of emails, this should be offloaded to a queue (like BullMQ or Trigger.dev),
-        // or we should use chunking. We'll chunk to avoid taking too long.
 
         const MAX_PER_BATCH = 100; // Limit for a single sync request to not timeout
         const limitedRecipients = recipients.slice(0, MAX_PER_BATCH);
 
         for (const recipient of limitedRecipients) {
             try {
-                const personalizedHtml = html
-                    .replace(/{{name}}/gi, recipient.fullName || 'Cher lecteur')
-                    .replace(/{{client_nom}}/gi, recipient.fullName || 'Cher lecteur');
-                
-                const personalizedSubject = subject
-                    .replace(/{{name}}/gi, recipient.fullName || 'Cher lecteur')
-                    .replace(/{{client_nom}}/gi, recipient.fullName || 'Cher lecteur');
+                const clientNom = recipient.fullName && recipient.fullName !== 'Client'
+                    ? recipient.fullName
+                    : (recipient.email.split('@')[0] || 'Cher lecteur');
+
+                const replaceTags = (text: string) => {
+                    return text
+                        .replace(/{{\s*(?:client_nom|customer_name|nom|name|client)\s*}}/gi, clientNom)
+                        .replace(/{{\s*(?:coupon_code|coupon|code_coupon|code_promo|promo_code)\s*}}/gi, couponCode)
+                        .replace(/(&#123;|&lbrace;|\{)\s*(\{|&#123;|&lbrace;)\s*(client_nom|customer_name|nom|name|client)\s*(\}|&#125;|&rbrace;)\s*(\}|&#125;|&rbrace;)/gi, clientNom)
+                        .replace(/(&#123;|&lbrace;|\{)\s*(\{|&#123;|&lbrace;)\s*(coupon_code|coupon|code_coupon|code_promo|promo_code)\s*(\}|&#125;|&rbrace;)\s*(\}|&#125;|&rbrace;)/gi, couponCode);
+                };
+
+                const personalizedHtml = replaceTags(html);
+                const personalizedSubject = replaceTags(subject);
 
                 await transporter.sendMail({
                     from: '"Riwaya" <contact@riwaya.store>',

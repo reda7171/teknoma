@@ -1,12 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Plus, Upload } from 'lucide-react'
+import { Plus, Upload, AlertTriangle } from 'lucide-react'
 import BooksTable from './BooksTable'
 import { normalizeImage } from '@/lib/utils'
 import CatalogButton from '@/components/admin/CatalogButton'
 import CatalogImageButton from '@/components/admin/CatalogImageButton'
 import EmptyLibraryButton from '@/components/admin/EmptyLibraryButton'
 import SyncJumiaStockButton from '@/components/admin/SyncJumiaStockButton'
+import CheckJumiaAvailabilityButton from '@/components/admin/CheckJumiaAvailabilityButton'
 
 import { Prisma } from '@prisma/client'
 
@@ -35,7 +36,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     const linkedParam = params.linked || ''
 
     const categoryTreePromise = getCategoryTree()
-    const [role, userId, warehouses] = await Promise.all([
+    const [role, userId, warehouses, anomalyCount] = await Promise.all([
         getAdminRole(),
         getAdminUser(),
         prisma.warehouse.findMany({
@@ -43,6 +44,12 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             select: { id: true, name: true },
             orderBy: { name: 'asc' },
         }),
+        prisma.book.count({
+            where: {
+                sellerSku: { not: null, notIn: [''] },
+                isSyncedWithJumia: false
+            }
+        })
     ])
 
     const mapWarehouseStocks = (inventories: { warehouseId: string, quantity: number }[] = []) =>
@@ -97,6 +104,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 { sellerSku: '' }
             ]
         }),
+        ...(jumiaParam.split(',').includes('anomaly') && {
+            sellerSku: { not: null, notIn: [''] },
+            isSyncedWithJumia: false
+        }),
         ...(categoryParam && {
             category: { in: categoryParam.split(',') }
         }),
@@ -107,6 +118,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             isSyncedWithJumia: true
         }),
         ...(linkedParam === 'unlinked' && {
+            isSyncedWithJumia: false
+        }),
+        ...(linkedParam === 'anomaly' && {
+            sellerSku: { not: null, notIn: [''] },
             isSyncedWithJumia: false
         })
     }
@@ -174,6 +189,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('not-synced')) packWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) packWhere.sellerSku = { not: null }
         if (jumiaParam.split(',').includes('no-sku')) packWhere.sellerSku = null
+        if (jumiaParam.split(',').includes('anomaly') || linkedParam === 'anomaly') {
+            packWhere.sellerSku = { not: null, notIn: [''] }
+            packWhere.isSyncedWithJumia = false
+        }
         if (linkedParam === 'linked') packWhere.isSyncedWithJumia = true
         if (linkedParam === 'unlinked') packWhere.isSyncedWithJumia = false
         
@@ -262,6 +281,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (jumiaParam.split(',').includes('not-synced')) extraWhere.isSyncedWithJumia = false
         if (jumiaParam.split(',').includes('has-sku')) extraWhere.sellerSku = { not: null, notIn: [''] }
         if (jumiaParam.split(',').includes('no-sku')) extraWhere.OR = [{ sellerSku: null }, { sellerSku: '' }]
+        if (jumiaParam.split(',').includes('anomaly') || linkedParam === 'anomaly') {
+            extraWhere.sellerSku = { not: null, notIn: [''] }
+            extraWhere.isSyncedWithJumia = false
+        }
         if (linkedParam === 'linked') extraWhere.isSyncedWithJumia = true
         if (linkedParam === 'unlinked') extraWhere.isSyncedWithJumia = false
         
@@ -398,7 +421,20 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                         >
                             En attente
                         </Link>
+                        <Link
+                            href={linkedParam === 'anomaly' ? '/admin/books' : '/admin/books?linked=anomaly'}
+                            className={`inline-flex items-center px-4 py-2.5 font-bold text-xs rounded-xl border transition-all ${
+                                linkedParam === 'anomaly' || jumiaParam.split(',').includes('anomaly')
+                                    ? 'bg-red-600 text-white border-red-700 shadow-md ring-2 ring-red-200'
+                                    : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                            }`}
+                            title="Afficher uniquement les produits avec SKU renseigné mais non trouvés sur Jumia"
+                        >
+                            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" />
+                            SKU en anomalie {anomalyCount > 0 && `(${anomalyCount})`}
+                        </Link>
                         <div className="flex gap-2">
+                            <CheckJumiaAvailabilityButton />
                             <SyncJumiaStockButton />
                             <CatalogButton />
                             <CatalogImageButton />

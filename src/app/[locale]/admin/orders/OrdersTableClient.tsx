@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Eye, Search, Trash2, Phone, CheckCircle2, XCircle, Plus, MessageCircle, Mail, Truck } from 'lucide-react'
 import { bulkDeleteOrders, syncDeliveryStatus, updateOrderStatus, togglePaymentStatus } from '@/lib/actions/admin-orders'
+import { updateReturnRecoveryStatus } from '@/lib/actions/return-reminders'
 import { useRouter } from 'next/navigation'
+import ExportOrdersButton from '@/components/admin/ExportOrdersButton'
 
 const ADMIN_TIME_ZONE = 'Africa/Casablanca'
 
@@ -102,6 +104,7 @@ interface Order {
     isPaid: boolean
     invoiceNumber?: string | null
     expense?: { title: string } | null
+    isRecovered?: boolean | null
     items: OrderItem[]
 }
 
@@ -117,6 +120,8 @@ interface OrdersTableClientProps {
     productTitleFilter?: string
     salesChannelFilter?: string
     deliveryInvoices?: any[]
+    selectedIds?: string[]
+    onSelectionChange?: (ids: string[]) => void
 }
 
 export default function OrdersTableClient({
@@ -130,11 +135,28 @@ export default function OrdersTableClient({
     cityFilter = '',
     productTitleFilter = '',
     salesChannelFilter = '',
-    deliveryInvoices = []
+    deliveryInvoices = [],
+    selectedIds: propsSelectedIds,
+    onSelectionChange
 }: OrdersTableClientProps) {
     const router = useRouter()
     const [localOrders, setLocalOrders] = useState<Order[]>(orders)
-    const [selectedIds, setSelectedIds] = useState<string[]>([])
+    const [internalSelectedIds, setInternalSelectedIds] = useState<string[]>([])
+    const selectedIds = propsSelectedIds ?? internalSelectedIds
+
+    const updateSelectedIds = (updater: string[] | ((prev: string[]) => string[])) => {
+        const next = typeof updater === 'function' ? updater(selectedIds) : updater
+        if (onSelectionChange) {
+            onSelectionChange(next)
+        } else {
+            setInternalSelectedIds(next)
+        }
+    }
+
+    const selectedOrders = useMemo(() => {
+        return localOrders.filter(o => selectedIds.includes(o.id))
+    }, [localOrders, selectedIds])
+
     const [isDeleting, setIsDeleting] = useState(false)
     const [syncingId, setSyncingId] = useState<string | null>(null)
 
@@ -184,6 +206,26 @@ export default function OrdersTableClient({
             }
         } catch (error) {
             alert('Erreur serveur')
+        }
+    }
+
+    const [togglingRecoveryId, setTogglingRecoveryId] = useState<string | null>(null)
+
+    const handleToggleRecovery = async (orderId: string, currentStatus?: boolean | null) => {
+        const nextStatus = !currentStatus
+        setTogglingRecoveryId(orderId)
+        try {
+            const res = await updateReturnRecoveryStatus(orderId, nextStatus)
+            if (res.success) {
+                setLocalOrders(prev => prev.map(o => o.id === orderId ? {
+                    ...o,
+                    isRecovered: nextStatus
+                } : o))
+            }
+        } catch (error) {
+            console.error('Error updating recovery status:', error)
+        } finally {
+            setTogglingRecoveryId(null)
         }
     }
 
@@ -254,17 +296,17 @@ export default function OrdersTableClient({
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            setSelectedIds(filteredOrders.map(o => o.id))
+            updateSelectedIds(filteredOrders.map(o => o.id))
         } else {
-            setSelectedIds([])
+            updateSelectedIds([])
         }
     }
 
     const handleSelectOne = (id: string) => {
         if (selectedIds.includes(id)) {
-            setSelectedIds(prev => prev.filter(i => i !== id))
+            updateSelectedIds(selectedIds.filter(i => i !== id))
         } else {
-            setSelectedIds(prev => [...prev, id])
+            updateSelectedIds([...selectedIds, id])
         }
     }
 
@@ -277,7 +319,7 @@ export default function OrdersTableClient({
             const res = await bulkDeleteOrders(selectedIds)
             if (res.success) {
                 setLocalOrders(prev => prev.filter(o => !selectedIds.includes(o.id)))
-                setSelectedIds([])
+                updateSelectedIds([])
                 router.refresh()
             } else {
                 alert(res.error || 'Erreur lors de la suppression')
@@ -297,14 +339,17 @@ export default function OrdersTableClient({
                         Total: <span className="text-gray-900 font-black">{filteredOrders.length}</span> / {localOrders.length}
                     </p>
                     {selectedIds.length > 0 && (
-                        <button
-                            onClick={handleDeleteBulk}
-                            disabled={isDeleting}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors disabled:opacity-50"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                            Supprimer ({selectedIds.length})
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <ExportOrdersButton orders={selectedOrders} totalSelected={selectedIds.length} />
+                            <button
+                                onClick={handleDeleteBulk}
+                                disabled={isDeleting}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors disabled:opacity-50"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Supprimer ({selectedIds.length})
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -504,6 +549,23 @@ export default function OrdersTableClient({
                                                         <span className="block text-[9px] font-black text-amber-800 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded text-center mt-1">
                                                             ⚠️ Retour &gt; 7j
                                                         </span>
+                                                    )}
+                                                    {(isOldReturn || order.status === 'RETURNED') && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={togglingRecoveryId === order.id}
+                                                            onClick={() => handleToggleRecovery(order.id, order.isRecovered)}
+                                                            className={`block text-[9px] font-black px-1.5 py-0.5 rounded text-center mt-1 border transition-all cursor-pointer ${
+                                                                order.isRecovered
+                                                                    ? 'text-emerald-800 bg-emerald-50 border-emerald-300 hover:bg-emerald-100'
+                                                                    : 'text-rose-800 bg-rose-50 border-rose-300 hover:bg-rose-100'
+                                                            } ${togglingRecoveryId === order.id ? 'opacity-50 cursor-wait' : ''}`}
+                                                            title={locale === 'ar' ? 'انقر لتغيير حالة الاسترداد' : locale === 'en' ? 'Click to toggle recovery status' : 'Cliquer pour basculer : Récupéré / Non Récupéré'}
+                                                        >
+                                                            {order.isRecovered
+                                                                ? (locale === 'ar' ? '✓ تم الاسترداد' : locale === 'en' ? '✓ Recovered' : '✓ Récupéré')
+                                                                : (locale === 'ar' ? '✗ لم يسترد' : locale === 'en' ? '✗ Not Recovered' : '✗ Non Récupéré')}
+                                                        </button>
                                                     )}
                                                 </div>
                                             )

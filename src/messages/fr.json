@@ -2080,7 +2080,12 @@
     "OrderDetails": "Détails de la commande",
     "ShowList": "Voir les {count} colis",
     "HideList": "Masquer la liste",
-    "NoOverdueReturns": "Aucun retour en attente (> 7 jours)"
+    "NoOverdueReturns": "Aucun retour en attente (> 7 jours)",
+    "TabPending": "En attente",
+    "TabRecovered": "Déjà récupérés",
+    "EmptyPending": "Aucun retour en attente",
+    "EmptyRecovered": "Aucun colis récupéré pour le moment",
+    "RecoveredBadge": "Colis récupéré"
   },
   "CleanImages": {
     "Title": "Nettoyage des images orphelines",
@@ -2221,5 +2226,12 @@
     "Subtotal": "Sous-total",
     "WhatsAppRelance": "Relance WhatsApp Panier",
     "Close": "Fermer"
+  },
+  "JumiaStatus": {
+    "linked": "Linké",
+    "unlinked": "Non Linké",
+    "verifySellerSku": "Vérifier par Seller SKU",
+    "auditLinks": "Audit Liens Jumia",
+    "anomaly": "SKU en anomalie"
   }
 }

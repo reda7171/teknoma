@@ -68,8 +68,8 @@ export interface TelegramOrderNotification {
         quantity: number
         price?: number
         type?: string
-        book?: { title: string } | null
-        pack?: { name: string } | null
+        book?: { title: string; titleEn?: string | null; titleFr?: string | null; language?: string | null } | null
+        pack?: { name: string; nameFr?: string | null; nameEn?: string | null } | null
         extraProduct?: { name: string } | null
         digitalProduct?: { title: string } | null
         gift?: { name: string } | null
@@ -94,7 +94,25 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     const channelLabel = getSalesChannelLabel(order.salesChannel)
     const itemsList = order.items
         ?.map(i => {
-            const rawTitle = i.book?.title || i.pack?.name || i.extraProduct?.name || i.digitalProduct?.title || i.gift?.name || 'Article'
+            let rawTitle = 'Article'
+            if (i.book) {
+                const lang = (i.book.language || '').toLowerCase().trim()
+                if (lang === 'en' && i.book.titleEn) {
+                    rawTitle = i.book.titleEn
+                } else if (lang === 'fr' && i.book.titleFr) {
+                    rawTitle = i.book.titleFr
+                } else {
+                    rawTitle = i.book.title || i.book.titleEn || i.book.titleFr || 'Livre'
+                }
+            } else if (i.pack) {
+                rawTitle = i.pack.name || i.pack.nameFr || i.pack.nameEn || 'Pack'
+            } else if (i.extraProduct) {
+                rawTitle = i.extraProduct.name || 'Produit'
+            } else if (i.digitalProduct) {
+                rawTitle = i.digitalProduct.title || 'Produit Numérique'
+            } else if (i.gift) {
+                rawTitle = i.gift.name || 'Cadeau'
+            }
             const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📖'
             const price = i.price !== undefined ? ` (${i.price} MAD)` : ''
             return `  • ${typeBadge} ${escapeHtml(rawTitle)} x${i.quantity}${price}`

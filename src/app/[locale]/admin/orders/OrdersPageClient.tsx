@@ -46,6 +46,11 @@ export default function OrdersPageClient({
     const [cityFilter, setCityFilter] = useState('')
     const [productTitleFilter, setProductTitleFilter] = useState('')
     const [salesChannelFilter, setSalesChannelFilter] = useState('')
+    const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+    const selectedOrders = useMemo(() => {
+        return orders.filter(o => selectedIds.includes(o.id))
+    }, [orders, selectedIds])
 
     const uniqueCities = useMemo(() => {
         const cities = orders.map(o => o.city?.trim()).filter(Boolean)
@@ -95,7 +100,7 @@ export default function OrdersPageClient({
                     <ScanRetourButton className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-900 transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95" />
                     <BulkSyncDeliveryButton />
                     <ImportOrdersButton />
-                    <ExportOrdersButton orders={orders} />
+                    <ExportOrdersButton orders={selectedOrders} totalSelected={selectedIds.length} />
                 </div>
             </div>
 
@@ -164,6 +169,8 @@ export default function OrdersPageClient({
                         productTitleFilter={productTitleFilter}
                         salesChannelFilter={salesChannelFilter}
                         deliveryInvoices={deliveryInvoices}
+                        selectedIds={selectedIds}
+                        onSelectionChange={setSelectedIds}
                     />
                 </div>
             </div>
