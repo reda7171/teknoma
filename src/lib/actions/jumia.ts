@@ -444,8 +444,8 @@ export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' |
                     value: primaryDesc,
                     translations: descTranslations
                 },
-                parentSku: book.id,
-                sellerSku: book.sellerSku || book.isbn || book.id,
+                parentSku: book.sellerSku || book.isbn || `RIW-${book.id.substring(0, 8).toUpperCase()}`,
+                sellerSku: book.sellerSku || book.isbn || `RIW-${book.id.substring(0, 8).toUpperCase()}`,
                 gtinBarcode: book.isbn || undefined,
                 variation: "1",
                 brand: {
@@ -919,8 +919,8 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
                         { language: "FR", value: descFr }
                     ]
                 },
-                parentSku: accessory.id,
-                sellerSku: accessory.sellerSku || `ACC-${accessory.id.substring(0, 8)}`,
+                parentSku: accessory.sellerSku || `ACC-${accessory.id.substring(0, 8).toUpperCase()}`,
+                sellerSku: accessory.sellerSku || `ACC-${accessory.id.substring(0, 8).toUpperCase()}`,
                 variation: "1",
                 brand: {
                     code: 1045133,
@@ -1221,7 +1221,7 @@ export async function checkJumiaAvailability() {
     }
 }
 
-export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
+export async function verifyJumiaSku(bookId: string, sellerSku: string | null | undefined) {
     try {
         await verifyAdmin().catch(() => null)
         const jumia = await JumiaAPI.getInstance()

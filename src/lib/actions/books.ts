@@ -1124,19 +1124,28 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
         }
 
         const updatedMap: Record<string, string> = {}
-        const nowBase = Date.now().toString(36).toUpperCase()
+
+        // SKUs deja utilises pour eviter les doublons
+        const allExistingSkus = await prisma.book.findMany({
+            where: { sellerSku: { not: null } },
+            select: { sellerSku: true }
+        })
+        const usedSkus = new Set(allExistingSkus.map(b => b.sellerSku?.toUpperCase()))
 
         for (let i = 0; i < booksWithoutSku.length; i++) {
             const b = booksWithoutSku[i]
-            const indexHex = (i + 1).toString(16).padStart(4, '0').toUpperCase()
-            const randHex = Math.random().toString(36).substring(2, 5).toUpperCase()
-            const generatedSku = `RIW-${nowBase}-${indexHex}${randHex}`
-
+            // SKU = 8 premiers chars UUID sans tirets en majuscules (ex: D8EC428A)
+            let generatedSku = b.id.replace(/-/g, '').substring(0, 8).toUpperCase()
+            // Collision rare : prendre les 8 suivants
+            if (usedSkus.has(generatedSku)) {
+                generatedSku = b.id.replace(/-/g, '').substring(8, 16).toUpperCase()
+            }
             await prisma.book.update({
                 where: { id: b.id },
                 data: { sellerSku: generatedSku }
             })
             updatedMap[b.id] = generatedSku
+            usedSkus.add(generatedSku)
         }
 
         revalidatePath('/admin/books')
