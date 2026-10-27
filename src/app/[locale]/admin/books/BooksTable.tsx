@@ -353,7 +353,12 @@ export default function BooksTable({
 
     const handleGenerateSkusSelected = async () => {
         if (selectedIds.length === 0) return
-        if (!confirm(`Générer automatiquement un SKU unique pour les ${selectedIds.length} livre(s) sélectionné(s) ?`)) return
+        const hasExistingSkus = orderedBooks.some(b => selectedIds.includes(b.id) && Boolean(b.sellerSku))
+        const confirmMsg = hasExistingSkus
+            ? `Régénérer / changer le SKU pour les ${selectedIds.length} produit(s) sélectionné(s) ? (Les SKU existants seront remplacés par de nouveaux codes uniques)`
+            : `Générer un SKU unique pour les ${selectedIds.length} produit(s) sélectionné(s) ?`
+
+        if (!confirm(confirmMsg)) return
 
         setIsGeneratingSku(true)
         try {
@@ -363,7 +368,8 @@ export default function BooksTable({
                 setOrderedBooks(prev => prev.map(book => 
                     map[book.id] ? { ...book, sellerSku: map[book.id] } : book
                 ))
-                setToast({ msg: `✅ SKU générés avec succès pour ${res.count || Object.keys(map).length} livre(s)`, ok: true })
+                setSelectedIds([])
+                setToast({ msg: `✅ SKU générés / modifiés avec succès pour ${res.count || Object.keys(map).length} produit(s)`, ok: true })
                 router.refresh()
                 setTimeout(() => setToast(null), 4000)
             } else {
@@ -371,6 +377,32 @@ export default function BooksTable({
             }
         } finally {
             setIsGeneratingSku(false)
+        }
+    }
+
+    const handleGenerateSingleSku = async (e: React.MouseEvent, bookId: string, currentSku?: string | null) => {
+        e.stopPropagation()
+        const confirmMsg = currentSku 
+            ? `Changer le SKU actuel (${currentSku}) par un nouveau code SKU unique ?` 
+            : 'Générer un code SKU unique pour ce produit ?'
+        if (!confirm(confirmMsg)) return
+
+        setLoading(bookId + '-sku')
+        try {
+            const res = await bulkGenerateSkus([bookId])
+            if (res.success && res.updatedMap && res.updatedMap[bookId]) {
+                const newSku = res.updatedMap[bookId]
+                setOrderedBooks(prev => prev.map(b => b.id === bookId ? { ...b, sellerSku: newSku } : b))
+                setToast({ msg: `✅ SKU mis à jour : ${newSku}`, ok: true })
+                router.refresh()
+            } else {
+                setToast({ msg: `❌ ${res.error || 'Erreur lors de la génération du SKU'}`, ok: false })
+            }
+        } catch {
+            setToast({ msg: '❌ Erreur réseau', ok: false })
+        } finally {
+            setLoading(null)
+            setTimeout(() => setToast(null), 4000)
         }
     }
 
@@ -1249,10 +1281,10 @@ Do not add explanatory text outside the JSON array or code block.`
                                 onClick={handleGenerateSkusSelected}
                                 disabled={bulkLoading || isGeneratingSku}
                                 className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 transition shadow-sm disabled:opacity-50 cursor-pointer"
-                                title="Générer automatiquement des SKU pour les livres sélectionnés sans SKU"
+                                title="Générer ou changer le SKU pour les produits sélectionnés (même si un SKU existe déjà)"
                             >
                                 <Barcode className="w-4 h-4" />
-                                {isGeneratingSku ? 'Génération...' : 'Générer SKU'}
+                                {isGeneratingSku ? 'Génération...' : 'Générer / Changer SKU'}
                             </button>
                             <button
                                 onClick={handleBulkDelete}
@@ -1417,10 +1449,26 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                                     SEO {book.seoScore}%
                                                                                 </span>
                                                                             )}
-                                                                            {book.sellerSku && (
-                                                                                <span className="max-w-[145px] truncate rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[9px] text-gray-600" title={`SKU: ${book.sellerSku}`}>
-                                                                                    SKU: {book.sellerSku}
-                                                                                </span>
+                                                                            {book.sellerSku ? (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={(e) => handleGenerateSingleSku(e, book.id, book.sellerSku)}
+                                                                                    className="max-w-[155px] truncate rounded bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-transparent px-1.5 py-0.5 font-mono text-[9px] text-gray-600 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                                                                    title={`SKU actuel: ${book.sellerSku} — Cliquer pour changer`}
+                                                                                >
+                                                                                    <Barcode className="w-2.5 h-2.5 text-gray-400 group-hover:text-indigo-600" />
+                                                                                    <span>SKU: {book.sellerSku}</span>
+                                                                                </button>
+                                                                            ) : (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={(e) => handleGenerateSingleSku(e, book.id, null)}
+                                                                                    className="rounded bg-amber-50 hover:bg-amber-100 border border-amber-200 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 transition-colors cursor-pointer inline-flex items-center gap-1"
+                                                                                    title="Cliquer pour générer un SKU unique"
+                                                                                >
+                                                                                    <Barcode className="w-2.5 h-2.5 text-amber-600" />
+                                                                                    <span>Générer SKU</span>
+                                                                                </button>
                                                                             )}
                                                                         </div>
                                                                     </div>
@@ -1752,6 +1800,15 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                                         >
                                                                                             <Sparkles className={`w-4 h-4 text-emerald-500 ${loading === book.id + '-clean-sku' ? 'animate-spin' : ''}`} />
                                                                                             Nettoyer SKU Jumia (Marketplace)
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={(e) => { handleGenerateSingleSku(e, book.id, book.sellerSku); setOpenDropdown(null) }}
+                                                                                            disabled={loading === book.id + '-sku'}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors disabled:opacity-40"
+                                                                                            title="Générer ou régénérer un nouveau code SKU"
+                                                                                        >
+                                                                                            <Barcode className={`w-4 h-4 text-indigo-500 ${loading === book.id + '-sku' ? 'animate-spin' : ''}`} />
+                                                                                            {book.sellerSku ? 'Changer / Régénérer SKU' : 'Générer SKU'}
                                                                                         </button>
 
                                                                                         <div className="border-t border-gray-100 my-1" />
