@@ -2170,7 +2170,12 @@
     "OrderDetails": "Order Details",
     "ShowList": "View {count} packages",
     "HideList": "Hide list",
-    "NoOverdueReturns": "No pending returns (> 7 days)"
+    "NoOverdueReturns": "No pending returns (> 7 days)",
+    "TabPending": "Pending",
+    "TabRecovered": "Recovered",
+    "EmptyPending": "No pending returns",
+    "EmptyRecovered": "No recovered packages yet",
+    "RecoveredBadge": "Package recovered"
   },
   "CleanImages": {
     "Title": "Orphan Images Cleanup",
@@ -2311,5 +2316,12 @@
     "Subtotal": "Subtotal",
     "WhatsAppRelance": "WhatsApp Cart Follow-up",
     "Close": "Close"
+  },
+  "JumiaStatus": {
+    "linked": "Linked",
+    "unlinked": "Not Linked",
+    "verifySellerSku": "Verify by Seller SKU",
+    "auditLinks": "Audit Jumia Links",
+    "anomaly": "SKU Anomaly"
   }
 }

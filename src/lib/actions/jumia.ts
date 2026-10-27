@@ -598,7 +598,7 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
             }
 
             const calculatedStock = pack.books.length > 0
-                ? Math.min(...pack.books.map(b => b.book.stock))
+                ? Math.min(...pack.books.map((b: any) => b.book.stock))
                 : 0;
 
             // Vérification et fallback de l'image principale pour Jumia (évite le rejet 404 si image locale)
@@ -912,6 +912,7 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
 
 export async function checkJumiaAvailability() {
     try {
+        await verifyAdmin().catch(() => null)
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) {
             return { success: false, message: "Jumia n'est pas configuré." }
@@ -919,16 +920,23 @@ export async function checkJumiaAvailability() {
 
         let hasNextPage = true
         let token: string | undefined
-        const syncedSkus = new Map<string, number>()
+        const syncedSkus = new Set<string>()
 
-        // 1. Fetch all stock from Jumia
+        // 1. Fetch all catalog products directly from Jumia Vendor (by pages of 100)
         while (hasNextPage) {
-            const data = await jumia.getCatalogStock({ size: 100, token })
+            const data = await jumia.getProducts({ size: 100, token })
             if (!data || !data.products) break
 
             for (const item of data.products) {
-                if (item.sellerSku && item.globalStock !== undefined) {
-                    syncedSkus.set(item.sellerSku, item.globalStock)
+                if (item.sellerSku) {
+                    syncedSkus.add(item.sellerSku.trim().toLowerCase())
+                }
+                if (item.variations && Array.isArray(item.variations)) {
+                    for (const v of item.variations) {
+                        if (v.sellerSku) {
+                            syncedSkus.add(v.sellerSku.trim().toLowerCase())
+                        }
+                    }
                 }
             }
 
@@ -940,44 +948,104 @@ export async function checkJumiaAvailability() {
         }
 
         if (syncedSkus.size === 0) {
-            return { success: false, message: "Aucun produit trouvé sur Jumia." }
+            return { success: false, message: "Aucun produit trouvé sur Jumia Vendor." }
         }
 
-        // 2. Update all Books in database
-        // Reset all to false/null first
-        await prisma.book.updateMany({
-            data: { isSyncedWithJumia: false, jumiaStock: null }
+        // 2. Fetch all books from database and evaluate link status
+        const books = await prisma.book.findMany({
+            select: { id: true, sellerSku: true }
         })
 
-        // Then update the ones that exist on Jumia
-        let updatedCount = 0
-        const skuArray = Array.from(syncedSkus.entries())
+        const linkedBookIds: string[] = []
+        const unlinkedBookIds: string[] = []
 
-        for (const [sku, stock] of skuArray) {
-            const result = await prisma.book.updateMany({
-                where: {
-                    OR: [
-                        { sellerSku: sku },
-                        { id: sku } // Some fallbacks to book.id
-                    ]
-                },
-                data: { isSyncedWithJumia: true, jumiaStock: stock }
+        for (const book of books) {
+            const s = book.sellerSku?.trim().toLowerCase()
+            if (s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) {
+                linkedBookIds.push(book.id)
+            } else {
+                unlinkedBookIds.push(book.id)
+            }
+        }
+
+        // Bulk update books in DB
+        if (linkedBookIds.length > 0) {
+            await prisma.book.updateMany({
+                where: { id: { in: linkedBookIds } },
+                data: { isSyncedWithJumia: true }
             })
-            updatedCount += result.count
+        }
+        if (unlinkedBookIds.length > 0) {
+            await prisma.book.updateMany({
+                where: { id: { in: unlinkedBookIds } },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
         }
 
-        // Also do the same for Packs just in case
-        await prisma.pack.updateMany({
-            data: { isSyncedWithJumia: false, jumiaStock: null }
+        // 3. Same for Packs
+        const packs = await prisma.pack.findMany({
+            select: { id: true, sellerSku: true }
         })
-        for (const [sku, stock] of skuArray) {
+        const linkedPackIds: string[] = []
+        const unlinkedPackIds: string[] = []
+
+        for (const pack of packs) {
+            const s = pack.sellerSku?.trim().toLowerCase()
+            if (s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) {
+                linkedPackIds.push(pack.id)
+            } else {
+                unlinkedPackIds.push(pack.id)
+            }
+        }
+
+        if (linkedPackIds.length > 0) {
             await prisma.pack.updateMany({
-                where: { sellerSku: sku },
-                data: { isSyncedWithJumia: true, jumiaStock: stock }
+                where: { id: { in: linkedPackIds } },
+                data: { isSyncedWithJumia: true }
+            })
+        }
+        if (unlinkedPackIds.length > 0) {
+            await prisma.pack.updateMany({
+                where: { id: { in: unlinkedPackIds } },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
             })
         }
 
-        return { success: true, message: `Synchronisation terminée. ${updatedCount} produits trouvés sur Jumia.` }
+        // 4. Same for Extra Accessories
+        const extras = await prisma.extraProduct.findMany({
+            select: { id: true, sellerSku: true }
+        })
+        const linkedExtraIds: string[] = []
+        const unlinkedExtraIds: string[] = []
+
+        for (const extra of extras) {
+            const s = extra.sellerSku?.trim().toLowerCase()
+            if (s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) {
+                linkedExtraIds.push(extra.id)
+            } else {
+                unlinkedExtraIds.push(extra.id)
+            }
+        }
+
+        if (linkedExtraIds.length > 0) {
+            await prisma.extraProduct.updateMany({
+                where: { id: { in: linkedExtraIds } },
+                data: { isSyncedWithJumia: true }
+            })
+        }
+        if (unlinkedExtraIds.length > 0) {
+            await prisma.extraProduct.updateMany({
+                where: { id: { in: unlinkedExtraIds } },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+        }
+
+        return { 
+            success: true, 
+            message: `Vérification terminée : ${linkedBookIds.length} livre(s) Linké(s), ${unlinkedBookIds.length} Non Linké(s) sur Jumia Vendor (${syncedSkus.size} SKU Jumia trouvés).`,
+            linkedCount: linkedBookIds.length,
+            unlinkedCount: unlinkedBookIds.length
+        }
     } catch (error: any) {
         console.error("Erreur checkJumiaAvailability:", error)
         return { success: false, message: `Erreur: ${error.message}` }
@@ -986,47 +1054,174 @@ export async function checkJumiaAvailability() {
 
 export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
     try {
+        await verifyAdmin().catch(() => null)
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, isLinked: false, message: "Jumia n'est pas configuré." }
+        }
+
+        const cleanSku = sellerSku?.trim()
+        if (!cleanSku) {
+            await prisma.book.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+            await prisma.pack.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+            await prisma.extraProduct.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+            return { 
+                success: true, 
+                isLinked: false, 
+                message: "Aucun Seller SKU défini. Marqué Non Linké." 
+            }
+        }
+
+        // Query Jumia Vendor Catalog by Seller SKU
+        let dataProd = await jumia.getProducts({ sellerSku: cleanSku })
+        let products = dataProd?.products || dataProd?.data || []
+        if (!Array.isArray(products)) products = [products]
+
+        const matchSku = (prods: any[], targetSku: string) => {
+            const targetLower = targetSku.toLowerCase()
+            for (const p of prods) {
+                if (!p) continue
+                if (p.sellerSku?.trim().toLowerCase() === targetLower) {
+                    return { product: p, variation: null, foundSku: p.sellerSku }
+                }
+                if (p.variations && Array.isArray(p.variations)) {
+                    for (const v of p.variations) {
+                        if (v.sellerSku?.trim().toLowerCase() === targetLower) {
+                            return { product: p, variation: v, foundSku: v.sellerSku }
+                        }
+                    }
+                }
+            }
+            return null
+        }
+
+        let match = matchSku(products, cleanSku)
+        if (!match) {
+            // Also check with fallback suffix _v2
+            const dataProdV2 = await jumia.getProducts({ sellerSku: cleanSku + '_v2' })
+            let productsV2 = dataProdV2?.products || dataProdV2?.data || []
+            if (!Array.isArray(productsV2)) productsV2 = [productsV2]
+            match = matchSku(productsV2, cleanSku + '_v2') || matchSku(productsV2, cleanSku)
+        }
+
+        if (match) {
+            const sid = match.variation?.id || match.product?.id
+            let stock: number | null = null
+            if (sid) {
+                try {
+                    const stockData = await jumia.getCatalogStock({ productSids: [sid] })
+                    const pStock = stockData?.products?.[0]
+                    if (pStock?.globalStock !== undefined) {
+                        stock = pStock.globalStock
+                    }
+                } catch {
+                    // Ignorer les erreurs secondaires sur le stock
+                }
+            }
+
+            await prisma.book.updateMany({
+                where: { id: bookId },
+                data: { 
+                    isSyncedWithJumia: true, 
+                    ...(stock !== null ? { jumiaStock: stock } : {}) 
+                }
+            })
+            await prisma.pack.updateMany({
+                where: { id: bookId },
+                data: { 
+                    isSyncedWithJumia: true, 
+                    ...(stock !== null ? { jumiaStock: stock } : {}) 
+                }
+            })
+            await prisma.extraProduct.updateMany({
+                where: { id: bookId },
+                data: { 
+                    isSyncedWithJumia: true, 
+                    ...(stock !== null ? { jumiaStock: stock } : {}) 
+                }
+            })
+
+            return { 
+                success: true, 
+                isLinked: true, 
+                message: `Trouvé sur Jumia Vendor (${match.foundSku})${stock !== null ? ` | Stock: ${stock}` : ''} ! Marqué Linké.`,
+                stock 
+            }
+        } else {
+            await prisma.book.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+            await prisma.pack.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+            await prisma.extraProduct.updateMany({
+                where: { id: bookId },
+                data: { isSyncedWithJumia: false, jumiaStock: null }
+            })
+
+            return { 
+                success: true, 
+                isLinked: false, 
+                message: `Introuvable sur Jumia Vendor (${cleanSku}). Marqué Non Linké.`,
+                stock: null 
+            }
+        }
+    } catch (error: any) {
+        console.error("Erreur verifyJumiaSku:", error)
+        return { success: false, isLinked: false, message: `Erreur: ${error.message}` }
+    }
+}
+
+export async function verifyBulkBooksJumiaSku(bookIds: string[]) {
+    try {
+        await verifyAdmin().catch(() => null)
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) {
             return { success: false, message: "Jumia n'est pas configuré." }
         }
 
-        const skuToVerify = sellerSku || bookId;
+        const books = await prisma.book.findMany({
+            where: { id: { in: bookIds } },
+            select: { id: true, title: true, sellerSku: true }
+        })
 
-        // Use getProducts to find the variation, then getCatalogStock to get its stock
-        const dataProd = await jumia.getProducts({ sellerSku: skuToVerify })
-        const productData = dataProd?.products?.[0] || dataProd?.data?.[0] || dataProd?.[0]
-        const variation = productData?.variations?.find((v: any) => v.sellerSku === skuToVerify || v.sellerSku === skuToVerify + '_v2')
-        const sid = variation?.id || productData?.id
+        let linkedCount = 0
+        let unlinkedCount = 0
+        const results: { id: string; isLinked: boolean; stock: number | null }[] = []
 
-        if (sid) {
-            const stockData = await jumia.getCatalogStock({ productSids: [sid] })
-            const product = stockData?.products?.[0]
-            const stock = product?.globalStock !== undefined ? product.globalStock : null;
+        for (const b of books) {
+            const check = await verifyJumiaSku(b.id, b.sellerSku)
+            const isLinked = !!check.isLinked
+            if (isLinked) {
+                linkedCount++
+                results.push({ id: b.id, isLinked: true, stock: check.stock ?? null })
+            } else {
+                unlinkedCount++
+                results.push({ id: b.id, isLinked: false, stock: null })
+            }
+            await new Promise(r => setTimeout(r, 200))
+        }
 
-            await prisma.book.updateMany({
-                where: { id: bookId },
-                data: { isSyncedWithJumia: true, jumiaStock: stock }
-            });
-            await prisma.pack.updateMany({
-                where: { id: bookId },
-                data: { isSyncedWithJumia: true, jumiaStock: stock }
-            });
-
-            return { success: true, message: `SKU trouvé ! Stock Jumia: ${stock}`, stock }
-        } else {
-            await prisma.book.updateMany({
-                where: { id: bookId },
-                data: { isSyncedWithJumia: false, jumiaStock: null }
-            });
-            await prisma.pack.updateMany({
-                where: { id: bookId },
-                data: { isSyncedWithJumia: false, jumiaStock: null }
-            });
-            return { success: false, message: "SKU introuvable sur Jumia." }
+        return {
+            success: true,
+            total: books.length,
+            linkedCount,
+            unlinkedCount,
+            results,
+            message: `Vérification terminée : ${linkedCount} Linké(s), ${unlinkedCount} Non Linké(s).`
         }
     } catch (error: any) {
-        console.error("Erreur verifyJumiaSku:", error)
         return { success: false, message: `Erreur: ${error.message}` }
     }
 }

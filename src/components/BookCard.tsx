@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/routing'
 import { useState } from 'react'
-import { ShoppingCart, Star, Check, TrendingUp } from 'lucide-react'
+import { ShoppingCart, Star, Check, TrendingUp, Sparkles } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useTranslations, useLocale } from 'next-intl'
 import { useUIStore } from '@/store/ui'
@@ -30,6 +30,7 @@ interface BookCardProps {
     priority?: boolean
     views?: number
     isTrending?: boolean
+    isBestSeller?: boolean
 }
 
 export default function BookCard({
@@ -48,11 +49,13 @@ export default function BookCard({
     priority = false,
     views,
     isTrending,
+    isBestSeller,
 }: BookCardProps) {
     const t = useTranslations('Common');
     const locale = useLocale();
     const isCompact = variant === 'compact'
     const isFeatured = variant === 'featured'
+    const showBestSeller = Boolean(isBestSeller || isFeatured)
     const isUsed = condition === 'USED' || condition === 'GOOD'
     const addItem = useCartStore((state) => state.addItem)
     const sessionId = useCartStore((state) => state.sessionId)
@@ -107,7 +110,7 @@ export default function BookCard({
                             </span>
                         </div>
                     )}
-                    {/* Badges en haut à gauche (Langue & Tendance) — décalés sous le ruban d'angle si présent */}
+                    {/* Badges en haut à gauche (Langue, Tendance & Meilleure vente) — décalés sous le ruban d'angle si présent */}
                     <div className={`absolute left-3 z-20 flex flex-row items-center gap-1.5 flex-wrap max-w-[calc(100%-4rem)] ${(isUsed && stock > 0) || stock === 0 ? 'top-[4.25rem]' : 'top-3'}`}>
                         {language && (
                             <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md shadow-sm ${
@@ -123,6 +126,12 @@ export default function BookCard({
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
                                 <TrendingUp className="w-2.5 h-2.5" />
                                 <span>{t('Trending')}</span>
+                            </span>
+                        )}
+                        {showBestSeller && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-600 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                <span>{t('BestSeller')}</span>
                             </span>
                         )}
                     </div>
@@ -225,15 +234,6 @@ export default function BookCard({
                     )}
                 </div>
             </div>
-
-            {/* Featured Badge */}
-            {isFeatured && (
-                <div className="absolute top-6 left-6">
-                    <div className="bg-pixio-yellow text-black px-5 py-2 rounded-full text-[9px] rtl:text-xs font-black uppercase tracking-[0.2em] rtl:tracking-normal border border-yellow-300 shadow-xl">
-                        ✨ {t('BestSeller')}
-                    </div>
-                </div>
-            )}
 
             {/* Ribbon Occasion - livres d'occasion ou bon état */}
             {isUsed && stock > 0 && (

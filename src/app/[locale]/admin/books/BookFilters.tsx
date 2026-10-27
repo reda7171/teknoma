@@ -502,14 +502,15 @@ export default function BookFilters({
                                 {[
                                     { id: '', label: 'Tous' },
                                     { id: 'linked', label: 'Linké' },
-                                    { id: 'unlinked', label: 'Non linké' }
+                                    { id: 'unlinked', label: 'Non linké' },
+                                    { id: 'anomaly', label: '⚠️ Anomalie SKU' }
                                 ].map((filter) => (
                                     <button
                                         key={filter.id}
                                         onClick={() => handleApplyFilters({ linked: filter.id })}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                             activeFilters.linked === filter.id
-                                                ? 'bg-violet-600 text-white shadow-sm'
+                                                ? (filter.id === 'anomaly' ? 'bg-red-600 text-white shadow-sm ring-2 ring-red-300' : 'bg-violet-600 text-white shadow-sm')
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
                                     >
@@ -530,7 +531,8 @@ export default function BookFilters({
                                     { id: 'synced', label: 'Synchronisé' },
                                     { id: 'not-synced', label: 'Non Synchronisé' },
                                     { id: 'has-sku', label: 'Avec SKU' },
-                                    { id: 'no-sku', label: 'Sans SKU' }
+                                    { id: 'no-sku', label: 'Sans SKU' },
+                                    { id: 'anomaly', label: '⚠️ SKU en anomalie' }
                                 ].map((f) => {
                                     const currentJumiaArray = activeFilters.jumia ? activeFilters.jumia.split(',') : [];
                                     const isActive = currentJumiaArray.includes(f.id);

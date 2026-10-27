@@ -229,7 +229,7 @@ export async function sendTestEmailTemplate(templateId: string, recipientEmail: 
         let body = template.body
 
         for (const [key, value] of Object.entries(sampleVariables)) {
-            const regex = new RegExp(`{{${key}}}`, 'gi')
+            const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'gi')
             subject = subject.replace(regex, value)
             body = body.replace(regex, value)
         }
@@ -293,14 +293,43 @@ export async function sendTriggerEmail(triggerKey: string, recipientEmail?: stri
             return { success: false, error: 'Aucun template associé à ce déclencheur' }
         }
 
+        let resolvedClientNom = data.client_nom || data.customer_name || data.nom || data.name
+        if (!resolvedClientNom && recipientEmail) {
+            const customer = await prisma.customer.findFirst({ where: { email: recipientEmail }, select: { fullName: true } })
+            const order = !customer ? await prisma.order.findFirst({ where: { email: recipientEmail }, select: { fullName: true }, orderBy: { createdAt: 'desc' } }) : null
+            resolvedClientNom = customer?.fullName || order?.fullName || 'Cher lecteur'
+        }
+        if (!resolvedClientNom) resolvedClientNom = 'Cher lecteur'
+
+        let resolvedCouponCode = data.coupon_code || data.code_promo || data.coupon
+        if (!resolvedCouponCode) {
+            const activeCoupon = await prisma.coupon.findFirst({
+                where: { isActive: true },
+                orderBy: { createdAt: 'desc' },
+                select: { code: true }
+            })
+            resolvedCouponCode = activeCoupon?.code || 'RIWAYA10'
+        }
+
+        data.client_nom = resolvedClientNom
+        data.customer_name = resolvedClientNom
+        data.coupon_code = resolvedCouponCode
+
         let subject = template.subject
         let body = template.body
 
         for (const [key, value] of Object.entries(data)) {
-            const regex = new RegExp(`{{${key}}}`, 'gi')
+            const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'gi')
             subject = subject.replace(regex, String(value || ''))
             body = body.replace(regex, String(value || ''))
         }
+
+        subject = subject
+            .replace(/{{\s*(?:client_nom|customer_name|nom|name|client)\s*}}/gi, String(resolvedClientNom))
+            .replace(/{{\s*(?:coupon_code|coupon|code_coupon|code_promo|promo_code)\s*}}/gi, String(resolvedCouponCode))
+        body = body
+            .replace(/{{\s*(?:client_nom|customer_name|nom|name|client)\s*}}/gi, String(resolvedClientNom))
+            .replace(/{{\s*(?:coupon_code|coupon|code_coupon|code_promo|promo_code)\s*}}/gi, String(resolvedCouponCode))
 
         const { transporter } = await import('@/lib/email')
         await transporter.sendMail({

@@ -2167,7 +2167,12 @@
     "OrderDetails": "تفاصيل الطلب",
     "ShowList": "عرض الطرود ({count})",
     "HideList": "إخفاء القائمة",
-    "NoOverdueReturns": "لا توجد مرتجعات معلقة (> 7 أيام)"
+    "NoOverdueReturns": "لا توجد مرتجعات معلقة (> 7 أيام)",
+    "TabPending": "في الانتظار",
+    "TabRecovered": "تم استردادها",
+    "EmptyPending": "لا توجد مرتجعات معلقة",
+    "EmptyRecovered": "لم يتم استرداد أي طرد بعد",
+    "RecoveredBadge": "تم الاستلام"
   },
   "CleanImages": {
     "Title": "تنظيف الصور غير الموجودة",
@@ -2308,5 +2313,12 @@
     "Subtotal": "المجموع الفرعي",
     "WhatsAppRelance": "متابعة عبر واتساب",
     "Close": "إغلاق"
+  },
+  "JumiaStatus": {
+    "linked": "مرتبط",
+    "unlinked": "غير مرتبط",
+    "verifySellerSku": "التحقق بواسطة Seller SKU",
+    "auditLinks": "تدقيق روابط جوميا",
+    "anomaly": "خلل في Seller SKU"
   }
 }

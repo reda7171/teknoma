@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste, Barcode } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste, Barcode, AlertCircle } from 'lucide-react'
 import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBookLanguages, bulkUpdateBooksFromAi, bulkGenerateSkus } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -542,13 +542,20 @@ export default function BooksTable({
             const { verifyJumiaSku } = await import('@/lib/actions/jumia');
             const result = await verifyJumiaSku(bookId, sellerSku);
             if (result.success) {
-                setToast({ msg: `✅ ${result.message}`, ok: true });
+                const isLinked = !!result.isLinked;
+                setToast({ 
+                    msg: isLinked ? `✅ ${result.message}` : `ℹ️ ${result.message}`, 
+                    ok: isLinked 
+                });
                 setOrderedBooks(prev => prev.map(book => 
                     book.id === bookId 
-                        ? { ...book, isSyncedWithJumia: true, jumiaStock: result.stock !== undefined ? result.stock : book.jumiaStock } 
+                        ? { 
+                            ...book, 
+                            isSyncedWithJumia: isLinked, 
+                            jumiaStock: isLinked ? (result.stock !== undefined ? result.stock : book.jumiaStock) : null 
+                          } 
                         : book
                 ));
-                router.refresh();
             } else {
                 setToast({ msg: `❌ ${result.message}`, ok: false });
             }
@@ -556,7 +563,39 @@ export default function BooksTable({
             setToast({ msg: '❌ Erreur lors de la vérification Jumia', ok: false });
         } finally {
             setLoading(null);
-            setTimeout(() => setToast(null), 3000);
+            setTimeout(() => setToast(null), 4000);
+        }
+    }
+
+    // Vérifier les livres sélectionnés sur Jumia par Seller SKU
+    const handleBulkVerifyJumiaSku = async () => {
+        if (selectedIds.length === 0) return;
+        setBulkLoading(true);
+        try {
+            const { verifyBulkBooksJumiaSku } = await import('@/lib/actions/jumia');
+            const result = await verifyBulkBooksJumiaSku(selectedIds);
+            if (result.success && result.results) {
+                const resultMap = new Map(result.results.map(r => [r.id, r]));
+                setOrderedBooks(prev => prev.map(book => {
+                    const found = resultMap.get(book.id);
+                    if (found) {
+                        return {
+                            ...book,
+                            isSyncedWithJumia: found.isLinked,
+                            jumiaStock: found.isLinked ? (found.stock !== undefined ? found.stock : book.jumiaStock) : null
+                        };
+                    }
+                    return book;
+                }));
+                setToast({ msg: `✅ ${result.message}`, ok: true });
+            } else {
+                setToast({ msg: `❌ ${result.message || 'Erreur lors de la vérification bulk'}`, ok: false });
+            }
+        } catch (err: any) {
+            setToast({ msg: '❌ Erreur lors de la vérification', ok: false });
+        } finally {
+            setBulkLoading(false);
+            setTimeout(() => setToast(null), 5000);
         }
     }
 
@@ -953,6 +992,36 @@ Do not add explanatory text outside the JSON array or code block.`
                         </div>
                     )}
 
+                    {(activeFilters.jumia?.includes('anomaly') || activeFilters.linked === 'anomaly') && (
+                        <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-red-100 border border-red-300 flex items-center justify-center text-red-800 flex-shrink-0">
+                                    <AlertCircle className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black text-red-900">
+                                        Filtre actif : Produits en anomalie Jumia ({books.length})
+                                    </p>
+                                    <p className="text-[11px] text-red-700">
+                                        Ces produits possèdent un Seller SKU mais sont introuvables ou marqués non linkés sur Jumia Vendor.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const allIds = books.map(b => b.id);
+                                        setSelectedIds(allIds);
+                                    }}
+                                    className="px-3.5 py-2 bg-white border border-red-200 text-red-800 hover:bg-red-50 text-xs font-bold rounded-xl transition shadow-xs whitespace-nowrap cursor-pointer"
+                                >
+                                    Sélectionner tout ({books.length})
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {selectedIds.length > 0 && (
                         <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200 mx-4 mt-4 flex-wrap">
                             <span className="text-sm font-black text-gray-900">{selectedIds.length} livre(s) sélectionnés</span>
@@ -1069,6 +1138,15 @@ Do not add explanatory text outside the JSON array or code block.`
                             >
                                 <RefreshCw className="w-4 h-4" />
                                 Synch all quantity
+                            </button>
+                            <button
+                                onClick={handleBulkVerifyJumiaSku}
+                                disabled={bulkLoading}
+                                className="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition disabled:opacity-50"
+                                title="Vérifier sur Jumia Vendor par Seller SKU pour chaque livre sélectionné"
+                            >
+                                <RefreshCw className={`w-4 h-4 ${bulkLoading ? 'animate-spin' : ''}`} />
+                                Vérifier Link Jumia ({selectedIds.length})
                             </button>
                             <button
                                 onClick={() => setIsBulkPublishOpen(true)}
@@ -1399,9 +1477,31 @@ Do not add explanatory text outside the JSON array or code block.`
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                                 <div className="flex justify-center items-center h-6">
-                                                                    <span className={`px-2 py-1 text-[10px] font-bold rounded-full ${book.isSyncedWithJumia ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                                        {book.isSyncedWithJumia ? 'Linké' : 'Non Linké'}
-                                                                    </span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => handleVerifyJumiaSku(e, book.id, book.sellerSku)}
+                                                                        disabled={loading === book.id + '-verify'}
+                                                                        title={`Cliquer pour vérifier sur Jumia Vendor par Seller SKU (${book.sellerSku || 'Aucun SKU'})`}
+                                                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs border ${
+                                                                            loading === book.id + '-verify'
+                                                                                ? 'bg-gray-100 text-gray-600 border-gray-300 animate-pulse'
+                                                                                : book.isSyncedWithJumia
+                                                                                    ? 'bg-green-50 text-green-700 border-green-300 hover:bg-green-100'
+                                                                                    : 'bg-red-50 text-red-700 border-red-300 hover:bg-red-100'
+                                                                        }`}
+                                                                    >
+                                                                        {loading === book.id + '-verify' ? (
+                                                                            <>
+                                                                                <RefreshCw className="w-3 h-3 animate-spin text-gray-500" />
+                                                                                <span>Vérif...</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <span className={`w-1.5 h-1.5 rounded-full ${book.isSyncedWithJumia ? 'bg-green-500 ring-2 ring-green-200' : 'bg-red-500 ring-2 ring-red-200'}`} />
+                                                                                <span>{book.isSyncedWithJumia ? 'Linké' : 'Non Linké'}</span>
+                                                                            </>
+                                                                        )}
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -1567,6 +1667,14 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                                         >
                                                                                             <Zap className="w-4 h-4 text-orange-500" />
                                                                                             {quickPublishing === book.id ? 'Publication...' : 'Publier maintenant'}
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={(e) => { handleVerifyJumiaSku(e, book.id, book.sellerSku); setOpenDropdown(null) }}
+                                                                                            disabled={loading === book.id + '-verify'}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors disabled:opacity-40"
+                                                                                        >
+                                                                                            <RefreshCw className={`w-4 h-4 text-amber-500 ${loading === book.id + '-verify' ? 'animate-spin' : ''}`} />
+                                                                                            Vérifier Link Jumia (Seller SKU)
                                                                                         </button>
 
                                                                                         <div className="border-t border-gray-100 my-1" />

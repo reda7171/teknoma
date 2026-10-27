@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Search, Filter, Eye, Usb, Baby, BookOpen } from 'lucide-react'
 import Link from 'next/link'
-import ExportOrdersButton from '@/components/admin/ExportOrdersButton'
 import ImportOrdersButton from '@/components/admin/ImportOrdersButton'
 import { isAuthenticated, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
@@ -35,23 +34,32 @@ async function getOrders(status?: string, role?: string | null, userId?: string 
         }
     }
 
-    const orders = await prisma.order.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        include: {
-            items: {
-                include: {
-                    book: { select: { title: true, titleFr: true, titleEn: true, image: true, price: true } },
-                    pack: { select: { name: true, nameFr: true, nameEn: true, price: true } },
-                    extraProduct: { select: { name: true, image: true, price: true } }
-                }
+    const [orders, companies, recoverySetting] = await Promise.all([
+        prisma.order.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                items: {
+                    include: {
+                        book: { select: { title: true, titleFr: true, titleEn: true, image: true, price: true } },
+                        pack: { select: { name: true, nameFr: true, nameEn: true, price: true } },
+                        extraProduct: { select: { name: true, image: true, price: true } }
+                    }
+                },
+                expense: { select: { title: true } }
             },
-            expense: { select: { title: true } }
-        },
-    })
+        }),
+        prisma.shippingCompany.findMany(),
+        prisma.siteSettings.findUnique({ where: { key: 'return_recovery_statuses' } })
+    ])
 
-    // Charger les sociétés de livraison pour enrichir les commandes
-    const companies = await prisma.shippingCompany.findMany()
+    let recoveryStatuses: Record<string, boolean> = {}
+    try {
+        recoveryStatuses = recoverySetting?.value ? JSON.parse(recoverySetting.value) : {}
+    } catch {
+        recoveryStatuses = {}
+    }
+
     const companyMap = new Map(companies.map(c => [c.id, c]))
 
     return orders.map(order => ({
@@ -62,6 +70,7 @@ async function getOrders(status?: string, role?: string | null, userId?: string 
         shippingCompanyName: order.shippingCompany ? companyMap.get(order.shippingCompany)?.name || order.shippingCompany : null,
         shippingCompanySupportPhone: order.shippingCompany ? companyMap.get(order.shippingCompany)?.supportPhone || null : null,
         shippingCompanyLogo: order.shippingCompany ? companyMap.get(order.shippingCompany)?.logo || null : null,
+        isRecovered: typeof recoveryStatuses[order.id] === 'boolean' ? recoveryStatuses[order.id] : false
     }))
 }
 

@@ -19,6 +19,7 @@ export default function MailingPage() {
     const [htmlContent, setHtmlContent] = useState('')
     const [audience, setAudience] = useState('TEST_ONLY')
     const [targetedEmails, setTargetedEmails] = useState('')
+    const [couponCode, setCouponCode] = useState('RIWAYA10')
     const [isHtmlMode, setIsHtmlMode] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const [result, setResult] = useState<any>(null)
@@ -96,7 +97,8 @@ export default function MailingPage() {
                     subject,
                     html: htmlContent,
                     audience,
-                    targetedEmails: audience === 'TARGETED_CLIENTS' ? targetedEmails : undefined
+                    targetedEmails: audience === 'TARGETED_CLIENTS' ? targetedEmails : undefined,
+                    couponCode: couponCode.trim() || 'RIWAYA10'
                 })
             })
 
@@ -227,6 +229,25 @@ export default function MailingPage() {
                                     {isHtmlMode ? 'Passer à l\'éditeur visuel' : 'Passer à l\'éditeur de code HTML'}
                                 </button>
                             </div>
+                            <div className="flex flex-wrap items-center gap-2 mb-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                                <span className="text-xs text-slate-600 font-bold">Balises disponibles :</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setHtmlContent(prev => prev + ' {{client_nom}}')}
+                                    className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 rounded-lg font-mono text-xs font-black shadow-sm transition-colors"
+                                    title="Cliquer pour insérer {{client_nom}}"
+                                >
+                                    {"{{client_nom}}"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setHtmlContent(prev => prev + ' {{coupon_code}}')}
+                                    className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-lg font-mono text-xs font-black shadow-sm transition-colors"
+                                    title="Cliquer pour insérer {{coupon_code}}"
+                                >
+                                    {"{{coupon_code}}"}
+                                </button>
+                            </div>
                             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                                 {isHtmlMode ? (
                                     <textarea 
@@ -265,6 +286,22 @@ export default function MailingPage() {
                                 <Settings className="h-5 w-5 text-slate-400" />
                                 Configuration
                             </h2>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                    Code Coupon (remplace {"{{coupon_code}}"})
+                                </label>
+                                <input 
+                                    type="text" 
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                    placeholder="Ex: RIWAYA10"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-pixio-yellow uppercase font-mono font-bold text-sm tracking-wider"
+                                />
+                                <p className="text-[11px] text-slate-500 mt-1">
+                                    Remplacera automatiquement toute mention de <code className="text-black font-bold">{"{{coupon_code}}"}</code> dans le message.
+                                </p>
+                            </div>
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">

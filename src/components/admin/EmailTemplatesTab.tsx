@@ -461,7 +461,7 @@ export default function EmailTemplatesTab() {
                             <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-2">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Contenu (HTML)</label>
                                 <span className="text-[11px] text-gray-500 bg-gray-50 px-3 py-1 rounded-lg border border-gray-150">
-                                    Balises : <code className="text-black font-bold">{"{{client_nom}}"}</code>, <code className="text-black font-bold">{"{{order_id}}"}</code>, <code className="text-black font-bold">{"{{total}}"}</code>, <code className="text-black font-bold">{"{{articles}}"}</code>, <code className="text-black font-bold">{"{{tracking_url}}"}</code>
+                                    Balises : <code className="text-black font-bold">{"{{client_nom}}"}</code>, <code className="text-black font-bold">{"{{coupon_code}}"}</code>, <code className="text-black font-bold">{"{{order_id}}"}</code>, <code className="text-black font-bold">{"{{total}}"}</code>, <code className="text-black font-bold">{"{{articles}}"}</code>, <code className="text-black font-bold">{"{{tracking_url}}"}</code>
                                 </span>
                             </div>
                             <textarea
