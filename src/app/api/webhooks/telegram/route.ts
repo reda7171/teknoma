@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTelegramPhoto, sendTelegramMediaGroup, escapeHtml } from '@/lib/telegram'
+import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTelegramPhoto, sendTelegramMediaGroup, escapeHtml, formatOrderItemsList, buildOrderKeyboard } from '@/lib/telegram'
 import { OrderStatus } from '@prisma/client'
 import fs from 'fs/promises'
 import path from 'path'
@@ -157,6 +157,219 @@ export async function POST(req: Request) {
                 
                 await answerCallbackQuery(callbackId, '❌ Erreur ID livre', token)
                 return NextResponse.json({ ok: true })
+            }
+            // ─── Bouton Déclarer / Gérer Manquant ───────────────────────────
+            if (data && data.startsWith('toggle_missing:')) {
+                const orderId = data.split(':')[1]
+                try {
+                    const existingOrder = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: {
+                            items: {
+                                include: {
+                                    book: true,
+                                    pack: true,
+                                    extraProduct: true,
+                                    digitalProduct: true
+                                }
+                            }
+                        }
+                    })
+
+                    if (!existingOrder) {
+                        await answerCallbackQuery(callbackId, '❌ Commande introuvable', token)
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    if (existingOrder.items.length === 0) {
+                        await answerCallbackQuery(callbackId, '❌ Aucun article dans la commande', token)
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    // Si la commande n'a qu'un seul article, on bascule directement son statut
+                    if (existingOrder.items.length === 1) {
+                        const item = existingOrder.items[0]
+                        const nextMissing = !item.isMissing
+                        await prisma.orderItem.update({
+                            where: { id: item.id },
+                            data: { isMissing: nextMissing }
+                        })
+
+                        const rawTitle = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article'
+                        await prisma.orderStatusHistory.create({
+                            data: {
+                                orderId,
+                                status: existingOrder.status,
+                                comment: nextMissing 
+                                    ? `Article "${rawTitle}" signalé comme MANQUANT via Telegram Bot` 
+                                    : `Article "${rawTitle}" retiré des manquants via Telegram Bot`,
+                                createdBy: 'TELEGRAM'
+                            }
+                        })
+
+                        const alertMsg = nextMissing 
+                            ? `⚠️ Article marqué comme MANQUANT !` 
+                            : `✅ Article marqué comme DISPONIBLE !`
+                        await answerCallbackQuery(callbackId, alertMsg, token)
+
+                        const shortId = orderId.slice(0, 8).toUpperCase()
+                        const notifText = nextMissing
+                            ? `⚠️ <b>Article Déclaré MANQUANT</b>\n\n📦 <b>Commande #${shortId}</b>\n📖 <b>${escapeHtml(rawTitle)}</b>\n🔴 Statut: <b>MANQUANT</b>\n👤 Client: ${escapeHtml(existingOrder.fullName)} (${escapeHtml(existingOrder.city)})`
+                            : `✅ <b>Article Déclaré DISPONIBLE</b>\n\n📦 <b>Commande #${shortId}</b>\n📖 <b>${escapeHtml(rawTitle)}</b>\n🟢 Statut: <b>EN STOCK</b>`
+
+                        if (message?.chat?.id) {
+                            await sendTelegramMessage(notifText, message.chat.id.toString(), token)
+                        }
+
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    // Si plusieurs articles, proposer de choisir l'article à basculer
+                    const itemButtons = existingOrder.items.map(item => {
+                        const title = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article'
+                        const isMissing = Boolean(item.isMissing)
+                        const icon = isMissing ? '🔴' : '⚪'
+                        const statusBadge = isMissing ? '[MANQUANT]' : '[En stock]'
+                        return [{
+                            text: `${icon} ${title.slice(0, 25)} ${statusBadge}`,
+                            callback_data: `toggle_item_missing:${orderId}:${item.id}`
+                        }]
+                    })
+
+                    itemButtons.push([
+                        { text: '🔙 Terminer / Retour', callback_data: `show_order_menu:${orderId}` }
+                    ])
+
+                    await answerCallbackQuery(callbackId, 'Sélectionnez l\'article à déclarer', token)
+                    if (message?.chat?.id && message?.message_id) {
+                        const shortId = orderId.slice(0, 8).toUpperCase()
+                        const promptText = `⚠️ <b>Gestion des Manquants — Commande #${shortId}</b>\n\n` +
+                            `Cliquez sur un article pour basculer son statut (🔴 Manquant / ⚪ En stock) :`
+                        await editTelegramMessage(message.chat.id, message.message_id, promptText, token, { inline_keyboard: itemButtons })
+                    }
+
+                    return NextResponse.json({ ok: true })
+                } catch (e: any) {
+                    console.error('[TELEGRAM TOGGLE MISSING ERROR]', e)
+                    await answerCallbackQuery(callbackId, '❌ Erreur traitement', token)
+                    return NextResponse.json({ ok: true })
+                }
+            }
+
+            // ─── Basculer un article spécifique dans une commande multi-articles ─
+            if (data && data.startsWith('toggle_item_missing:')) {
+                const [, orderId, itemId] = data.split(':')
+                try {
+                    const item = await prisma.orderItem.findUnique({
+                        where: { id: itemId },
+                        include: { book: true, pack: true, extraProduct: true }
+                    })
+
+                    if (!item) {
+                        await answerCallbackQuery(callbackId, '❌ Article introuvable', token)
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    const nextMissing = !item.isMissing
+                    await prisma.orderItem.update({
+                        where: { id: itemId },
+                        data: { isMissing: nextMissing }
+                    })
+
+                    const rawTitle = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article'
+                    const existingOrder = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: { items: { include: { book: true, pack: true, extraProduct: true } } }
+                    })
+
+                    if (existingOrder) {
+                        await prisma.orderStatusHistory.create({
+                            data: {
+                                orderId,
+                                status: existingOrder.status,
+                                comment: nextMissing 
+                                    ? `Article "${rawTitle}" signalé comme MANQUANT via Telegram Bot` 
+                                    : `Article "${rawTitle}" retiré des manquants via Telegram Bot`,
+                                createdBy: 'TELEGRAM'
+                            }
+                        })
+                    }
+
+                    const alertMsg = nextMissing 
+                        ? `🔴 ${rawTitle.slice(0, 20)} marqué MANQUANT` 
+                        : `🟢 ${rawTitle.slice(0, 20)} marqué EN STOCK`
+                    await answerCallbackQuery(callbackId, alertMsg, token)
+
+                    // Reconstruire les boutons mis à jour
+                    if (existingOrder && message?.chat?.id && message?.message_id) {
+                        const itemButtons = existingOrder.items.map(it => {
+                            const title = it.book?.title || it.pack?.name || it.extraProduct?.name || 'Article'
+                            const isMissing = it.id === itemId ? nextMissing : Boolean(it.isMissing)
+                            const icon = isMissing ? '🔴' : '⚪'
+                            const statusBadge = isMissing ? '[MANQUANT]' : '[En stock]'
+                            return [{
+                                text: `${icon} ${title.slice(0, 25)} ${statusBadge}`,
+                                callback_data: `toggle_item_missing:${orderId}:${it.id}`
+                            }]
+                        })
+
+                        itemButtons.push([
+                            { text: '🔙 Terminer / Retour', callback_data: `show_order_menu:${orderId}` }
+                        ])
+
+                        const shortId = orderId.slice(0, 8).toUpperCase()
+                        const promptText = `⚠️ <b>Gestion des Manquants — Commande #${shortId}</b>\n\n` +
+                            `Cliquez sur un article pour basculer son statut (🔴 Manquant / ⚪ En stock) :`
+                        await editTelegramMessage(message.chat.id, message.message_id, promptText, token, { inline_keyboard: itemButtons })
+                    }
+
+                    return NextResponse.json({ ok: true })
+                } catch (e: any) {
+                    console.error('[TELEGRAM TOGGLE ITEM ERROR]', e)
+                    await answerCallbackQuery(callbackId, '❌ Erreur', token)
+                    return NextResponse.json({ ok: true })
+                }
+            }
+
+            // ─── Restaurer le menu principal de la commande ─────────────────
+            if (data && data.startsWith('show_order_menu:')) {
+                const orderId = data.split(':')[1]
+                try {
+                    const order = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: { items: { include: { book: true, pack: true, extraProduct: true, digitalProduct: true } } }
+                    })
+
+                    if (order && message?.chat?.id && message?.message_id) {
+                        const { itemsList, hasMissing } = formatOrderItemsList(order.items)
+                        const shortId = order.id.slice(0, 8).toUpperCase()
+                        
+                        let cleanPhone = order.phone.replace(/[^0-9]/g, '')
+                        if (cleanPhone.startsWith('0')) cleanPhone = '212' + cleanPhone.substring(1)
+                        else if (!cleanPhone.startsWith('212') && cleanPhone.length === 9) cleanPhone = '212' + cleanPhone
+                        const whatsappMsg = encodeURIComponent(`Bonjour ${order.fullName},\n\nVotre commande #${shortId} sur Riwaya a bien été reçue.`)
+                        const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
+
+                        const activeShipping = order.shippingCompany ? [order.shippingCompany] : []
+                        const keyboard = buildOrderKeyboard(order.id, whatsappUrl, activeShipping, hasMissing)
+
+                        const banner = hasMissing ? `🚨 <b>ATTENTION : ARTICLE(S) MANQUANT(S) DÉTECTÉ(S) !</b>\n\n` : ''
+                        const updatedText = `${banner}🛒 <b>Commande #${shortId}</b>\n\n` +
+                            `👤 <b>Client:</b> ${escapeHtml(order.fullName)}\n` +
+                            `📞 <b>Téléphone:</b> ${escapeHtml(order.phone)}\n` +
+                            `📍 <b>Ville:</b> ${escapeHtml(order.city)}\n` +
+                            `💰 <b>Total:</b> ${order.total.toFixed(2)} MAD\n` +
+                            `📌 <b>Statut:</b> ${order.status}\n\n` +
+                            `📦 <b>Articles:</b>\n${itemsList}\n\n` +
+                            `🔗 <a href="${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}">Voir la commande</a>`
+
+                        await answerCallbackQuery(callbackId, 'Menu restauré', token)
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, keyboard)
+                        return NextResponse.json({ ok: true })
+                    }
+                } catch (e: any) {
+                    console.error('[TELEGRAM RESTORE MENU ERROR]', e)
+                }
             }
             // ─────────────────────────────────────────────────────────────────
 
@@ -1531,12 +1744,29 @@ export async function POST(req: Request) {
                     const showRegistrations = (await prisma.siteSettings.findUnique({ where: { key: 'telegram_stats_registrations' } }))?.value === 'true'
                     const showViews = (await prisma.siteSettings.findUnique({ where: { key: 'telegram_stats_top_views' } }))?.value === 'true'
 
-                    const [orderStats, visitors, registrations] = await Promise.all([
+                    // Charger les tarifs de livraison depuis la table CityDelivery
+                    const cityDeliveryPrices = await (prisma as any).cityDelivery.findMany({
+                        where: { active: true },
+                        select: { city: true, price: true }
+                    })
+                    const cityPriceMap = new Map<string, number>()
+                    for (const cd of cityDeliveryPrices) {
+                        const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        cityPriceMap.set(key, cd.price)
+                    }
+                    const defaultDeliveryFee = 30
+
+                    const [orderStats, ordersForDelivery, visitors, registrations] = await Promise.all([
                         prisma.order.groupBy({
                             by: ['status'],
                             where: { createdAt: { gte: start, lte: end } },
                             _count: true,
                             _sum: { total: true }
+                        }),
+                        // Récupérer les commandes non annulées pour calculer les frais via CityDelivery
+                        prisma.order.findMany({
+                            where: { createdAt: { gte: start, lte: end }, status: { not: 'CANCELLED' } },
+                            select: { city: true, total: true }
                         }),
                         showVisitors ? prisma.pageView.groupBy({
                             by: ['sessionId'],
@@ -1547,7 +1777,24 @@ export async function POST(req: Request) {
                         }) : Promise.resolve(0)
                     ])
 
-                    let siteStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
+                    // Calculer les frais de livraison depuis la table CityDelivery
+                    let totalDeliveryFees = 0
+                    for (const order of ordersForDelivery) {
+                        const cleanCity = (order.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        let fee = cityPriceMap.get(cleanCity)
+                        if (fee === undefined) {
+                            // Recherche partielle
+                            for (const [key, price] of cityPriceMap) {
+                                if (key.includes(cleanCity) || cleanCity.includes(key)) {
+                                    fee = price
+                                    break
+                                }
+                            }
+                        }
+                        totalDeliveryFees += fee ?? defaultDeliveryFee
+                    }
+
+                    let siteStats = { count: 0, revenue: 0, revenueNet: 0, deliveryFees: totalDeliveryFees, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
                     for (const stat of orderStats) {
                         const status = stat.status;
                         const count = stat._count;
@@ -1564,6 +1811,7 @@ export async function POST(req: Request) {
                         else if (status === 'DELIVERED') siteStats.delivered += count;
                         else if (status === 'CANCELLED') siteStats.canceled += count;
                     }
+                    siteStats.revenueNet = siteStats.revenue - siteStats.deliveryFees
 
                     let jumiaStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
                     let jumiaStatsError: string | null = null
@@ -1691,7 +1939,9 @@ export async function POST(req: Request) {
                     let text = `📊 <b>RAPPORT : ${label.toUpperCase()}</b>\n\n` +
                                `🔵 <b>SITE WEB :</b>\n` +
                                `📦 Commandes Total : <b>${siteStats.count}</b>\n` +
-                               `💰 CA Total : <b>${siteStats.revenue.toFixed(2)} درهم</b>\n` +
+                               `💰 CA Brut : <b>${siteStats.revenue.toFixed(2)} درهم</b>\n` +
+                               `🚚 Frais Livraison : <b>-${siteStats.deliveryFees.toFixed(2)} درهم</b>\n` +
+                               `💵 CA Net : <b>${siteStats.revenueNet.toFixed(2)} درهم</b>\n` +
                                `⏳ En attente : ${siteStats.pending}\n` +
                                `🚚 En expédition : ${siteStats.shipped}\n` +
                                `✅ Livrées : ${siteStats.delivered}\n` +
@@ -1787,14 +2037,23 @@ export async function POST(req: Request) {
             // Format: stats:compare_months
             else if (data === 'stats:compare_months') {
                 const now = new Date()
-                // Mois actuel
                 const startCurrent = new Date(now.getFullYear(), now.getMonth(), 1)
                 const endCurrent = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-                // Mois précédent
                 const startPrev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
                 const endPrev = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
 
-                const [current, prev] = await Promise.all([
+                // Charger les tarifs CityDelivery
+                const cityDeliveryPricesCmp = await (prisma as any).cityDelivery.findMany({
+                    where: { active: true },
+                    select: { city: true, price: true }
+                })
+                const cityPriceMapCmp = new Map<string, number>()
+                for (const cd of cityDeliveryPricesCmp) {
+                    const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    cityPriceMapCmp.set(key, cd.price)
+                }
+
+                const [current, prev, ordersCurrent, ordersPrev] = await Promise.all([
                     prisma.order.aggregate({
                         where: { createdAt: { gte: startCurrent, lte: endCurrent }, status: { not: 'CANCELLED' } },
                         _sum: { total: true },
@@ -1804,13 +2063,41 @@ export async function POST(req: Request) {
                         where: { createdAt: { gte: startPrev, lte: endPrev }, status: { not: 'CANCELLED' } },
                         _sum: { total: true },
                         _count: true
+                    }),
+                    prisma.order.findMany({
+                        where: { createdAt: { gte: startCurrent, lte: endCurrent }, status: { not: 'CANCELLED' } },
+                        select: { city: true }
+                    }),
+                    prisma.order.findMany({
+                        where: { createdAt: { gte: startPrev, lte: endPrev }, status: { not: 'CANCELLED' } },
+                        select: { city: true }
                     })
                 ])
 
-                const caMois = current._sum.total || 0
-                const caPrev = prev._sum.total || 0
-                const diff = caMois - caPrev
-                const pct = caPrev > 0 ? ((diff / caPrev) * 100).toFixed(1) : 'N/A'
+                // Calculer frais de livraison pour chaque mois
+                const calcDeliveryFees = (orders: { city: string }[]) => {
+                    let total = 0
+                    for (const o of orders) {
+                        const cleanCity = (o.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        let fee = cityPriceMapCmp.get(cleanCity)
+                        if (fee === undefined) {
+                            for (const [key, price] of cityPriceMapCmp) {
+                                if (key.includes(cleanCity) || cleanCity.includes(key)) { fee = price; break }
+                            }
+                        }
+                        total += fee ?? 30
+                    }
+                    return total
+                }
+
+                const feesCurrent = calcDeliveryFees(ordersCurrent)
+                const feesPrev = calcDeliveryFees(ordersPrev)
+                const caBrutMois = current._sum.total || 0
+                const caBrutPrev = prev._sum.total || 0
+                const caNetMois = caBrutMois - feesCurrent
+                const caNetPrev = caBrutPrev - feesPrev
+                const diff = caNetMois - caNetPrev
+                const pct = caNetPrev > 0 ? ((diff / caNetPrev) * 100).toFixed(1) : 'N/A'
                 const trend = diff >= 0 ? `📈 +${pct}%` : `📉 ${pct}%`
 
                 const moisActuel = startCurrent.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
@@ -1818,12 +2105,16 @@ export async function POST(req: Request) {
 
                 const text = `📊 <b>CA MENSUEL COMPARÉ</b>\n\n` +
                     `📅 <b>${moisActuel} :</b>\n` +
-                    `   💰 CA : <b>${caMois.toFixed(2)} درهم</b>\n` +
+                    `   💰 CA Brut : <b>${caBrutMois.toFixed(2)} درهم</b>\n` +
+                    `   🚚 Frais Livraison : <b>-${feesCurrent.toFixed(2)} درهم</b>\n` +
+                    `   💵 CA Net : <b>${caNetMois.toFixed(2)} درهم</b>\n` +
                     `   📦 Commandes : <b>${current._count}</b>\n\n` +
                     `📅 <b>${moisPrec} :</b>\n` +
-                    `   💰 CA : <b>${caPrev.toFixed(2)} درهم</b>\n` +
+                    `   💰 CA Brut : <b>${caBrutPrev.toFixed(2)} درهم</b>\n` +
+                    `   🚚 Frais Livraison : <b>-${feesPrev.toFixed(2)} درهم</b>\n` +
+                    `   💵 CA Net : <b>${caNetPrev.toFixed(2)} درهم</b>\n` +
                     `   📦 Commandes : <b>${prev._count}</b>\n\n` +
-                    `${trend} vs mois précédent`
+                    `${trend} vs mois précédent (CA Net)`
 
                 await answerCallbackQuery(callbackId, '📊 Comparaison mensuelle', token)
                 await sendTelegramMessage(text, message?.chat?.id.toString(), token)
@@ -1831,7 +2122,18 @@ export async function POST(req: Request) {
             
             // Format: stats:all_time
             else if (data === 'stats:all_time') {
-                const [total, revenue, firstOrder, byStatus] = await Promise.all([
+                // Charger les tarifs de livraison depuis la table CityDelivery
+                const cityDeliveryPricesAll = await (prisma as any).cityDelivery.findMany({
+                    where: { active: true },
+                    select: { city: true, price: true }
+                })
+                const cityPriceMapAll = new Map<string, number>()
+                for (const cd of cityDeliveryPricesAll) {
+                    const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    cityPriceMapAll.set(key, cd.price)
+                }
+
+                const [total, revenue, firstOrder, byStatus, allSiteOrders] = await Promise.all([
                     prisma.order.count(),
                     prisma.order.aggregate({
                         where: { status: { not: 'CANCELLED' } },
@@ -1844,8 +2146,28 @@ export async function POST(req: Request) {
                     prisma.order.groupBy({
                         by: ['status'],
                         _count: { status: true }
+                    }),
+                    prisma.order.findMany({
+                        where: { status: { not: 'CANCELLED' } },
+                        select: { city: true }
                     })
                 ])
+
+                // Calculer les frais de livraison depuis CityDelivery
+                let totalDeliveryFeesAll = 0
+                for (const order of allSiteOrders) {
+                    const cleanCity = (order.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    let fee = cityPriceMapAll.get(cleanCity)
+                    if (fee === undefined) {
+                        for (const [key, price] of cityPriceMapAll) {
+                            if (key.includes(cleanCity) || cleanCity.includes(key)) {
+                                fee = price
+                                break
+                            }
+                        }
+                    }
+                    totalDeliveryFeesAll += fee ?? 30
+                }
 
                 const statusIcons: Record<string, string> = {
                     PENDING: '⏳', CONFIRMED: '✅', SHIPPED: '🚚',
@@ -1899,16 +2221,19 @@ export async function POST(req: Request) {
 
                 const totalSite = total
                 const revenueSite = revenue._sum.total || 0
+                const revenueSiteNet = revenueSite - totalDeliveryFeesAll
                 const totalCombined = totalSite + jumiaStats.count
-                const revenueCombined = revenueSite + jumiaStats.revenue
+                const revenueCombinedNet = revenueSiteNet + jumiaStats.revenue
 
                 const text = `🗂️ <b>STATISTIQUES GLOBALES</b>\n\n` +
                     `📅 <b>Depuis :</b> ${since}\n` +
                     `📦 <b>Total commandes (Site + Jumia) :</b> ${totalCombined}\n` +
-                    `💰 <b>CA total (Site + Jumia) :</b> <b>${revenueCombined.toFixed(2)} درهم</b>\n\n` +
+                    `💵 <b>CA Net total (Site + Jumia) :</b> <b>${revenueCombinedNet.toFixed(2)} درهم</b>\n\n` +
                     `🔵 <b>SITE WEB :</b>\n` +
                     `📦 Commandes Site : ${totalSite}\n` +
-                    `💰 CA Site : <b>${revenueSite.toFixed(2)} درهم</b>\n` +
+                    `💰 CA Brut Site : <b>${revenueSite.toFixed(2)} درهم</b>\n` +
+                    `🚚 Frais Livraison : <b>-${totalDeliveryFeesAll.toFixed(2)} درهم</b>\n` +
+                    `💵 CA Net Site : <b>${revenueSiteNet.toFixed(2)} درهم</b>\n` +
                     `\n🟠 <b>JUMIA :</b>\n` +
                     `📦 Commandes Jumia valides : ${jumiaStats.count}\n` +
                     `❌ Annulées/retournées Jumia : ${jumiaStats.canceled}\n` +
@@ -1925,6 +2250,17 @@ export async function POST(req: Request) {
                 const year = now.getFullYear()
                 const startYear = new Date(year, 0, 1)
                 const endYear = new Date(year, 11, 31, 23, 59, 59)
+
+                // Charger les tarifs CityDelivery
+                const cityDeliveryPricesChart = await (prisma as any).cityDelivery.findMany({
+                    where: { active: true },
+                    select: { city: true, price: true }
+                })
+                const cityPriceMapChart = new Map<string, number>()
+                for (const cd of cityDeliveryPricesChart) {
+                    const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    cityPriceMapChart.set(key, cd.price)
+                }
                 
                 const orders = await prisma.order.findMany({
                     where: {
@@ -1933,31 +2269,48 @@ export async function POST(req: Request) {
                     },
                     select: {
                         total: true,
+                        city: true,
                         createdAt: true
                     }
                 })
                 
                 const monthlyCA = Array(12).fill(0)
+                const monthlyFees = Array(12).fill(0)
                 for (const o of orders) {
                     const month = new Date(o.createdAt).getMonth()
                     monthlyCA[month] += o.total
+                    // Calculer les frais de livraison depuis CityDelivery
+                    const cleanCity = (o.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    let fee = cityPriceMapChart.get(cleanCity)
+                    if (fee === undefined) {
+                        for (const [key, price] of cityPriceMapChart) {
+                            if (key.includes(cleanCity) || cleanCity.includes(key)) { fee = price; break }
+                        }
+                    }
+                    monthlyFees[month] += fee ?? 30
                 }
                 
+                const monthlyNet = monthlyCA.map((ca, i) => ca - monthlyFees[i])
                 const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
-                let maxCA = Math.max(...monthlyCA, 1) // avoid div by 0
+                let maxCA = Math.max(...monthlyNet, 1)
                 
-                let chartText = `📈 <b>CA ANNUEL ${year} (Site Web)</b>\n\n`
+                let chartText = `📈 <b>CA NET ANNUEL ${year} (Site Web)</b>\n\n`
                 let totalYearCA = 0
+                let totalYearFees = 0
                 
                 for (let i = 0; i <= now.getMonth(); i++) {
-                    const val = monthlyCA[i]
-                    totalYearCA += val
-                    const blocks = Math.round((val / maxCA) * 10)
+                    const netVal = monthlyNet[i]
+                    totalYearCA += monthlyCA[i]
+                    totalYearFees += monthlyFees[i]
+                    const blocks = Math.round((Math.max(netVal, 0) / maxCA) * 10)
                     const bar = '█'.repeat(blocks) + '▒'.repeat(10 - blocks)
-                    chartText += `<code>${months[i].padEnd(4)} |</code> ${bar} <b>${val.toFixed(0)}</b>\n`
+                    chartText += `<code>${months[i].padEnd(4)} |</code> ${bar} <b>${netVal.toFixed(0)}</b>\n`
                 }
                 
-                chartText += `\n💰 <b>Total : ${totalYearCA.toFixed(2)} درهم</b>`
+                const totalNetYear = totalYearCA - totalYearFees
+                chartText += `\n💰 <b>CA Brut : ${totalYearCA.toFixed(2)} درهم</b>`
+                chartText += `\n🚚 <b>Frais Livraison : -${totalYearFees.toFixed(2)} درهم</b>`
+                chartText += `\n💵 <b>CA Net : ${totalNetYear.toFixed(2)} درهم</b>`
                 
                 await answerCallbackQuery(callbackId, '📈 Graphique Annuel chargé', token)
                 await sendTelegramMessage(chartText, message?.chat?.id.toString(), token)
@@ -1984,7 +2337,8 @@ export async function POST(req: Request) {
                     `/commandes_mois — Toutes les commandes du mois (Site & Jumia)\n` +
                     `/2026 — Lister les commandes par mois pour l'année 2026\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
-                    `/manque — Articles signalés manquants avec les détails des commandes\n\n` +
+                    `/manque — Articles signalés manquants avec les détails des commandes\n` +
+                    `/manquant [ID ou Titre] — Déclarer un article ou livre comme manquant\n\n` +
                     `<b>🟠 Jumia</b>\n` +
                     `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n` +
                     `/jumia_top — Top 10 des livres Jumia et CA par produit pour le mois\n\n` +
@@ -2020,6 +2374,148 @@ export async function POST(req: Request) {
                     `CSV commandes Jumia → <code>/api/admin/jumia/export</code>\n\n` +
                     `<i>💡 Toutes les commandes sont insensibles à la casse</i>`
                 await sendTelegramMessage(helpText, chatId.toString(), token)
+            }
+            else if (text.startsWith('/MANQUANT') || text === 'MANQUANT' || text.startsWith('MANQUANT ')) {
+                const query = rawText.replace(/^\/manquant\s*/i, '').replace(/^manquant\s*/i, '').trim()
+
+                if (!query) {
+                    // Sans paramètre : afficher l'aide et les dernières commandes avec boutons
+                    const recentOrders = await prisma.order.findMany({
+                        take: 5,
+                        orderBy: { createdAt: 'desc' },
+                        include: {
+                            items: {
+                                include: { book: true, pack: true, extraProduct: true }
+                            }
+                        }
+                    })
+
+                    const keyboardButtons = recentOrders.map(o => {
+                        const shortId = o.id.slice(0, 8).toUpperCase()
+                        const clientName = o.fullName.split(' ')[0]
+                        const hasMissing = o.items.some(i => i.isMissing)
+                        const icon = hasMissing ? '🔴' : '⚪'
+                        return [{
+                            text: `${icon} #${shortId} (${clientName}) — Déclarer`,
+                            callback_data: `toggle_missing:${o.id}`
+                        }]
+                    })
+
+                    const helpMsg = `⚠️ <b>DÉCLARATION D'ARTICLE MANQUANT</b>\n\n` +
+                        `<b>Comment déclarer un article manquant :</b>\n` +
+                        `1️⃣ Cliquez sur le bouton <b>⚠️ Déclarer Manquant</b> sous une commande\n` +
+                        `2️⃣ Ou tapez : <code>/manquant [ID Commande]</code> (ex: <code>/manquant #A1B2C3D4</code>)\n` +
+                        `3️⃣ Ou tapez : <code>/manquant [Nom du livre]</code> pour déclarer une rupture générale\n` +
+                        `4️⃣ Pour voir la liste complète : <code>/manque</code>\n\n` +
+                        `📋 <b>5 Dernières Commandes :</b>`
+
+                    await sendTelegramMessage(helpMsg, chatId.toString(), token, { inline_keyboard: keyboardButtons })
+                } else {
+                    const cleanQuery = query.replace('#', '').trim()
+                    let targetOrder = await prisma.order.findFirst({
+                        where: {
+                            OR: [
+                                { id: cleanQuery },
+                                { id: { startsWith: cleanQuery } }
+                            ]
+                        },
+                        include: {
+                            items: {
+                                include: { book: true, pack: true, extraProduct: true }
+                            }
+                        }
+                    })
+
+                    if (targetOrder) {
+                        const shortId = targetOrder.id.slice(0, 8).toUpperCase()
+                        if (targetOrder.items.length === 1) {
+                            const it = targetOrder.items[0]
+                            await prisma.orderItem.update({
+                                where: { id: it.id },
+                                data: { isMissing: true }
+                            })
+
+                            const rawTitle = it.book?.title || it.pack?.name || it.extraProduct?.name || 'Article'
+                            await prisma.orderStatusHistory.create({
+                                data: {
+                                    orderId: targetOrder.id,
+                                    status: targetOrder.status,
+                                    comment: `Article "${rawTitle}" signalé comme MANQUANT via commande /manquant`,
+                                    createdBy: 'TELEGRAM'
+                                }
+                            })
+
+                            const confirmMsg = `⚠️ <b>Article Déclaré MANQUANT avec Succès !</b>\n\n` +
+                                `📦 <b>Commande #${shortId}</b>\n` +
+                                `👤 Client: <b>${escapeHtml(targetOrder.fullName)}</b> (${escapeHtml(targetOrder.city)})\n` +
+                                `📞 Tél: <code>${targetOrder.phone}</code>\n` +
+                                `📖 Article: <b>${escapeHtml(rawTitle)}</b>\n` +
+                                `🔴 Statut: <b>MANQUANT</b>\n\n` +
+                                `<i>L'article portera désormais le libellé [MANQUANT] sur les notifications et la commande.</i>`
+
+                            await sendTelegramMessage(confirmMsg, chatId.toString(), token)
+                        } else {
+                            const itemButtons = targetOrder.items.map(it => {
+                                const title = it.book?.title || it.pack?.name || it.extraProduct?.name || 'Article'
+                                const isMissing = Boolean(it.isMissing)
+                                const icon = isMissing ? '🔴' : '⚪'
+                                const statusBadge = isMissing ? '[MANQUANT]' : '[En stock]'
+                                return [{
+                                    text: `${icon} ${title.slice(0, 25)} ${statusBadge}`,
+                                    callback_data: `toggle_item_missing:${targetOrder!.id}:${it.id}`
+                                }]
+                            })
+
+                            itemButtons.push([
+                                { text: '🔙 Terminer / Retour', callback_data: `show_order_menu:${targetOrder.id}` }
+                            ])
+
+                            const promptText = `⚠️ <b>Commande #${shortId} (${targetOrder.items.length} articles)</b>\n\n` +
+                                `Sélectionnez l'article à déclarer comme <b>MANQUANT</b> :`
+
+                            await sendTelegramMessage(promptText, chatId.toString(), token, { inline_keyboard: itemButtons })
+                        }
+                    } else {
+                        const book = await prisma.book.findFirst({
+                            where: {
+                                OR: [
+                                    { title: { contains: cleanQuery } },
+                                    { isbn: cleanQuery },
+                                    { id: cleanQuery }
+                                ]
+                            }
+                        })
+
+                        if (book) {
+                            await prisma.book.update({
+                                where: { id: book.id },
+                                data: { stock: 0 }
+                            })
+
+                            const updateResult = await prisma.orderItem.updateMany({
+                                where: {
+                                    bookId: book.id,
+                                    order: { status: { in: ['PENDING', 'CONFIRMED'] } }
+                                },
+                                data: { isMissing: true }
+                            })
+
+                            const msg = `⚠️ <b>Livre Déclaré MANQUANT (Rupture Immédiate)</b>\n\n` +
+                                `📖 <b>${escapeHtml(book.title)}</b>\n` +
+                                `📉 Stock passé à <b>0</b>\n` +
+                                `🔔 <b>${updateResult.count}</b> commande(s) en attente marquée(s) avec le libellé <b>[MANQUANT]</b>.`
+
+                            await sendTelegramMessage(msg, chatId.toString(), token)
+                        } else {
+                            await sendTelegramMessage(
+                                `❌ <b>Introuvable :</b> Aucun livre ou commande ne correspond à <code>${escapeHtml(cleanQuery)}</code>.\n\n` +
+                                `Utilisez <code>/manquant [ID Commande]</code> ou <code>/manquant</code> pour afficher le menu.`,
+                                chatId.toString(),
+                                token
+                            )
+                        }
+                    }
+                }
             }
             else if (text === '/MANQUE' || text === 'MANQUE' || text.startsWith('/MANQUE@')) {
                 const missingItems = await prisma.orderItem.findMany({

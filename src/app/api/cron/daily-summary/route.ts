@@ -25,6 +25,17 @@ export async function GET(req: NextRequest) {
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
         const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
 
+        // Charger les tarifs de livraison depuis CityDelivery
+        const cityDeliveryPrices = await (prisma as any).cityDelivery.findMany({
+            where: { active: true },
+            select: { city: true, price: true }
+        })
+        const cityPriceMap = new Map<string, number>()
+        for (const cd of cityDeliveryPrices) {
+            const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+            cityPriceMap.set(key, cd.price)
+        }
+
         // 3. Récupérer les commandes du jour
         const orders = await prisma.order.findMany({
             where: {
@@ -43,6 +54,20 @@ export async function GET(req: NextRequest) {
 
         // 4. Calculer CA et Stats
         const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0)
+
+        // Calculer les frais de livraison depuis CityDelivery
+        let totalDeliveryFees = 0
+        for (const order of orders) {
+            const cleanCity = (order.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+            let fee = cityPriceMap.get(cleanCity)
+            if (fee === undefined) {
+                for (const [key, price] of cityPriceMap) {
+                    if (key.includes(cleanCity) || cleanCity.includes(key)) { fee = price; break }
+                }
+            }
+            totalDeliveryFees += fee ?? 30
+        }
+        const caNet = totalRevenue - totalDeliveryFees
         
         // Trouver le livre le plus vendu
         const bookStats: Record<string, { title: string, qty: number }> = {}
@@ -107,7 +132,9 @@ export async function GET(req: NextRequest) {
         const text = `📊 <b>Résumé Journalier - Riwaya</b>\n\n` +
             `📅 <b>Date:</b> ${startOfDay.toLocaleDateString('fr-FR')}\n` +
             `📦 <b>Commandes:</b> ${orders.length}\n` +
-            `💰 <b>Chiffre d'Affaires:</b> ${totalRevenue.toFixed(2)} درهم\n\n` +
+            `💰 <b>CA Brut:</b> ${totalRevenue.toFixed(2)} درهم\n` +
+            `🚚 <b>Frais Livraison:</b> -${totalDeliveryFees.toFixed(2)} درهم\n` +
+            `💵 <b>CA Net:</b> ${caNet.toFixed(2)} درهم\n\n` +
             (bestSeller ? `🔥 <b>Top Vente:</b> ${bestSeller.title} (${bestSeller.qty} expl.)\n` : '') +
             jumiaSection + `\n\n🚀 <i>Continuez comme ça !</i>`
 
