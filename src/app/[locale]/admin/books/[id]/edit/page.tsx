@@ -1047,7 +1047,8 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const newSku = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+                                    // SKU = 8 premiers chars UUID sans tirets en majuscules (ex: D8EC428A)
+                                    const newSku = bookId.replace(/-/g, '').substring(0, 8).toUpperCase()
                                     setSellerSkuValue(newSku)
                                     setHasSkuParasiteChars(false)
                                 }}

@@ -535,7 +535,7 @@ export default function BooksTable({
     }
 
 
-    const handleVerifyJumiaSku = async (e: React.MouseEvent, bookId: string, sellerSku: string | null) => {
+    const handleVerifyJumiaSku = async (e: React.MouseEvent, bookId: string, sellerSku: string | null | undefined) => {
         e.stopPropagation();
         setLoading(bookId + '-verify');
         try {
