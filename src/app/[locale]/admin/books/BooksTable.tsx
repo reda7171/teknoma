@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from '@/i18n/routing'
-import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste, Barcode, AlertCircle } from 'lucide-react'
+import { Edit, Trash2, Eye, EyeOff, Search, Check, X, Edit3, ImageIcon, FileDown, GripVertical, LayoutGrid, List, Upload, Send, MessageSquare, MoreVertical, ExternalLink, Video, Zap, FileText, Image, Layers, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, RefreshCw, Bot, ClipboardPaste, Barcode, AlertCircle, Sparkles } from 'lucide-react'
 import { deleteBook, toggleBookStatus, bulkDeleteBooks, updateBookQuick, updateBookOrder, bulkUpdateBookPrices, bulkUpdateBookStock, bulkUpdateBookLanguages, bulkUpdateBooksFromAi, bulkGenerateSkus } from '@/lib/actions/books'
 import { useRouter, usePathname } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallback'
@@ -599,6 +599,65 @@ export default function BooksTable({
         }
     }
 
+    // Nettoyer les espaces parasites et resynchroniser vers Jumia
+    const handleResyncCleanSku = async () => {
+        if (selectedIds.length === 0) return;
+        setBulkLoading(true);
+        try {
+            const { resyncCleanJumiaSellerSku } = await import('@/lib/actions/jumia');
+            const result = await resyncCleanJumiaSellerSku(selectedIds);
+            if (result.success && result.results) {
+                const resultMap = new Map(result.results.map(r => [r.id, r]));
+                setOrderedBooks(prev => prev.map(book => {
+                    const found = resultMap.get(book.id);
+                    if (found) {
+                        return {
+                            ...book,
+                            sellerSku: found.cleanSku,
+                            isSyncedWithJumia: found.isLinked
+                        };
+                    }
+                    return book;
+                }));
+                setToast({ msg: `✅ ${result.message}`, ok: true });
+            } else {
+                setToast({ msg: `❌ ${result.message || 'Erreur lors du nettoyage du SKU'}`, ok: false });
+            }
+        } catch (err: any) {
+            setToast({ msg: '❌ Erreur lors de la resynchronisation du SKU Jumia', ok: false });
+        } finally {
+            setBulkLoading(false);
+            setTimeout(() => setToast(null), 5000);
+        }
+    }
+
+    const handleResyncCleanSkuRow = async (e: React.MouseEvent, bookId: string) => {
+        e.stopPropagation();
+        setLoading(bookId + '-clean-sku');
+        try {
+            const { resyncCleanJumiaSellerSku } = await import('@/lib/actions/jumia');
+            const result = await resyncCleanJumiaSellerSku([bookId]);
+            if (result.success) {
+                setToast({ msg: `✅ ${result.message}`, ok: true });
+                const item = result.results?.[0];
+                if (item) {
+                    setOrderedBooks(prev => prev.map(book => 
+                        book.id === bookId 
+                            ? { ...book, sellerSku: item.cleanSku, isSyncedWithJumia: item.isLinked } 
+                            : book
+                    ));
+                }
+            } else {
+                setToast({ msg: `❌ ${result.message}`, ok: false });
+            }
+        } catch (err: any) {
+            setToast({ msg: '❌ Erreur lors du nettoyage du SKU', ok: false });
+        } finally {
+            setLoading(null);
+            setTimeout(() => setToast(null), 4000);
+        }
+    }
+
     const handleSyncQuantity = async (e: React.MouseEvent, bookId: string) => {
         e.stopPropagation();
         setLoading(bookId + '-sync');
@@ -1149,6 +1208,15 @@ Do not add explanatory text outside the JSON array or code block.`
                                 Vérifier Link Jumia ({selectedIds.length})
                             </button>
                             <button
+                                onClick={handleResyncCleanSku}
+                                disabled={bulkLoading}
+                                className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition disabled:opacity-50 shadow-sm"
+                                title="Nettoyer les espaces parasites Unicode et resynchroniser le Seller SKU vers Jumia"
+                            >
+                                <Sparkles className={`w-4 h-4 ${bulkLoading ? 'animate-spin' : ''}`} />
+                                Nettoyer SKU Jumia ({selectedIds.length})
+                            </button>
+                            <button
                                 onClick={() => setIsBulkPublishOpen(true)}
                                 disabled={bulkLoading}
                                 className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition"
@@ -1675,6 +1743,15 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                                         >
                                                                                             <RefreshCw className={`w-4 h-4 text-amber-500 ${loading === book.id + '-verify' ? 'animate-spin' : ''}`} />
                                                                                             Vérifier Link Jumia (Seller SKU)
+                                                                                        </button>
+                                                                                        <button
+                                                                                            onClick={(e) => { handleResyncCleanSkuRow(e, book.id); setOpenDropdown(null) }}
+                                                                                            disabled={loading === book.id + '-clean-sku'}
+                                                                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors disabled:opacity-40"
+                                                                                            title="Nettoyer les espaces parasites et resynchroniser le Seller SKU vers Jumia"
+                                                                                        >
+                                                                                            <Sparkles className={`w-4 h-4 text-emerald-500 ${loading === book.id + '-clean-sku' ? 'animate-spin' : ''}`} />
+                                                                                            Nettoyer SKU Jumia (Marketplace)
                                                                                         </button>
 
                                                                                         <div className="border-t border-gray-100 my-1" />

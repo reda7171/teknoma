@@ -303,6 +303,10 @@ export class JumiaAPI {
         createdAtTo?: string;
         sellerSku?: string;
         shopId?: string;
+        status?: 'ACTIVE' | 'INACTIVE';
+        qcStatus?: string;
+        visible?: boolean;
+        latestFirst?: boolean;
     } = {}) {
         const query = new URLSearchParams()
         if (params.token) query.append('token', params.token)
@@ -313,6 +317,10 @@ export class JumiaAPI {
         if (params.createdAtTo) query.append('createdAtTo', params.createdAtTo)
         if (params.sellerSku) query.append('sellerSku', params.sellerSku)
         if (params.shopId) query.append('shopId', params.shopId)
+        if (params.status) query.append('status', params.status)
+        if (params.qcStatus) query.append('qcStatus', params.qcStatus)
+        if (params.visible !== undefined) query.append('visible', params.visible.toString())
+        if (params.latestFirst !== undefined) query.append('latestFirst', params.latestFirst.toString())
 
         const queryString = query.toString()
         return this.request(`/catalog/products${queryString ? `?${queryString}` : ''}`)

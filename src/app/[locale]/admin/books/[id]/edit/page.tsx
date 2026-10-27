@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { Link, useRouter } from '@/i18n/routing'
-import { ArrowLeft, Save, Loader2, Languages, Warehouse, Bot, ClipboardPaste, ShoppingBag, ShoppingCart, Eye, Sparkles, FileJson, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Languages, Warehouse, Bot, ClipboardPaste, ShoppingBag, ShoppingCart, Eye, Sparkles, FileJson, CheckCircle2, AlertCircle } from 'lucide-react'
 import { getBookById, updateBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { publishBooksToJumia, checkJumiaLinkBySkuExact, syncBooksQuantityToJumia } from '@/lib/actions/jumia'
@@ -91,6 +91,9 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const [isBoostSeoOpen, setIsBoostSeoOpen] = useState(false)
     const [boostSeoInitialTab, setBoostSeoInitialTab] = useState<'prompt' | 'inject'>('prompt')
     const [toastMessage, setToastMessage] = useState<string | null>(null)
+    const [sellerSkuValue, setSellerSkuValue] = useState<string>('')
+    const [hasSkuParasiteChars, setHasSkuParasiteChars] = useState<boolean>(false)
+    const hasInvisibleUnicode = (val: string) => /[\u00A0\u200B-\u200D\uFEFF]/.test(val) || (val.length > 0 && val.trim() !== val)
     const mainCategories = Object.keys(categoryTree)
 
     interface WarehouseStock {
@@ -174,6 +177,10 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setSelectedSubCategory(result.data.subCategory || '')
                 setSeoKeywordsState((result.data as any).seoKeywords || '')
                 
+                const initialSku = result.data.sellerSku || ''
+                setSellerSkuValue(initialSku)
+                setHasSkuParasiteChars(hasInvisibleUnicode(initialSku))
+
                 if (result.data.sellerSku) {
                     void('Checking Jumia link for SKU:', result.data.sellerSku);
                     checkJumiaLinkBySkuExact(result.data.sellerSku, (result.data as any).jumiaProductSid).then(linked => {
@@ -298,7 +305,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             isBestSeller: formData.get('isBestSeller') === 'true',
             previewUrl: formData.get('previewUrl') as string || undefined,
             isOriginal: formData.get('isOriginal') !== 'false',
-            sellerSku: formData.get('sellerSku') as string || undefined,
+            sellerSku: ((formData.get('sellerSku') as string) || sellerSkuValue || '').replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, '').trim() || undefined,
             jumiaPriceMarkup: parseInt(formData.get('jumiaPriceMarkup') as string) || 0,
             isSyncedWithJumia: formData.get('isSyncedWithJumia') === 'true',
             jumiaHighlights: formData.get('jumiaHighlights') as string || undefined,
@@ -1008,29 +1015,69 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
 
                     {/* Seller SKU */}
                     <div>
-                        <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700 mb-2">
-                            Seller SKU (Jumia)
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700">
+                                Seller SKU (Jumia)
+                            </label>
+                            {hasSkuParasiteChars && (
+                                <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                                    Caractères invisibles détectés (\u00A0)
+                                </span>
+                            )}
+                        </div>
                         <div className="flex gap-2">
                             <input
                                 type="text"
                                 id="sellerSku"
                                 name="sellerSku"
-                                defaultValue={book.sellerSku || ''}
-                                className="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                value={sellerSkuValue}
+                                onChange={(e) => {
+                                    const val = e.target.value
+                                    setSellerSkuValue(val)
+                                    setHasSkuParasiteChars(hasInvisibleUnicode(val))
+                                }}
+                                className={`flex-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                    hasSkuParasiteChars
+                                        ? 'border-amber-400 bg-amber-50/40 text-amber-950 focus:ring-amber-500'
+                                        : 'border-gray-300 focus:ring-orange-500'
+                                }`}
                                 placeholder="SKU vendeur pour synchronisation"
                             />
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const input = document.getElementById('sellerSku') as HTMLInputElement;
-                                    if (input) input.value = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                                    const newSku = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+                                    setSellerSkuValue(newSku)
+                                    setHasSkuParasiteChars(false)
                                 }}
                                 className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                             >
                                 Générer
                             </button>
                         </div>
+
+                        {hasSkuParasiteChars && (
+                            <div className="mt-2.5 flex items-center justify-between gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 shadow-sm animate-in fade-in slide-in-from-top-1">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                    <span>
+                                        Attention : des <strong>espaces invisibles Unicode (<code className="font-mono font-bold bg-amber-100 px-1 py-0.5 rounded">\u00A0</code>)</strong> sont présents. Cela bloque la recherche exacte sur Jumia Vendor.
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const cleaned = sellerSkuValue.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, '').trim()
+                                        setSellerSkuValue(cleaned)
+                                        setHasSkuParasiteChars(false)
+                                    }}
+                                    className="shrink-0 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition shadow-sm"
+                                >
+                                    Nettoyer le SKU
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Prix */}

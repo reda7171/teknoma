@@ -2232,6 +2232,9 @@
     "unlinked": "Non Linké",
     "verifySellerSku": "Vérifier par Seller SKU",
     "auditLinks": "Audit Liens Jumia",
-    "anomaly": "SKU en anomalie"
+    "anomaly": "SKU en anomalie",
+    "cleanSkuBulk": "Nettoyer SKU Jumia ({count})",
+    "cleanSkuRow": "Nettoyer SKU Jumia (Marketplace)",
+    "cleanSkuTooltip": "Nettoyer les espaces parasites et resynchroniser vers Jumia"
   }
 }

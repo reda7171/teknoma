@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Bot, ClipboardPaste, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Bot, ClipboardPaste, Loader2, AlertCircle } from 'lucide-react'
 import { createBook, fetchAllAuthors, type BookInput } from '@/lib/actions/books'
 import { getPurchaseLots } from '@/lib/actions/finance'
 import { getCategoryTree } from '@/lib/actions/category-tree'
@@ -15,6 +15,10 @@ interface WarehouseStock {
     warehouseId: string
     name: string
     quantity: number
+}
+
+function hasInvisibleUnicode(val: string): boolean {
+    return /[\u00A0\u200B-\u200D\uFEFF]/.test(val) || (val.length > 0 && val.trim() !== val)
 }
 
 function BookFormContent() {
@@ -49,6 +53,8 @@ function BookFormContent() {
     const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
     const [warehouseStocks, setWarehouseStocks] = useState<WarehouseStock[]>([])
+    const [sellerSkuValue, setSellerSkuValue] = useState<string>('')
+    const [hasSkuParasiteChars, setHasSkuParasiteChars] = useState<boolean>(false)
     const mainCategories = Object.keys(categoryTree)
 
     useEffect(() => {
@@ -138,7 +144,7 @@ function BookFormContent() {
             language: formData.get('language') as string || 'fr',
             previewUrl: formData.get('previewUrl') as string || undefined,
             isOriginal: formData.get('isOriginal') !== 'false', // Par défaut true
-            sellerSku: formData.get('sellerSku') as string || undefined,
+            sellerSku: (formData.get('sellerSku') as string || '').replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, '').trim() || undefined,
             jumiaPriceMarkup: parseInt(formData.get('jumiaPriceMarkup') as string) || 0,
             isAffiliate: formData.get('isAffiliate') === 'true',
             affiliateLink: formData.get('affiliateLink') as string || undefined,
@@ -476,28 +482,69 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
 
                     {/* Seller SKU */}
                     <div>
-                        <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700 mb-2">
-                            Seller SKU (Jumia)
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label htmlFor="sellerSku" className="block text-sm font-medium text-gray-700">
+                                Seller SKU (Jumia)
+                            </label>
+                            {hasSkuParasiteChars && (
+                                <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                                    Caractères invisibles détectés (\u00A0)
+                                </span>
+                            )}
+                        </div>
                         <div className="flex gap-2">
                             <input
                                 type="text"
                                 id="sellerSku"
                                 name="sellerSku"
-                                className="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                value={sellerSkuValue}
+                                onChange={(e) => {
+                                    const val = e.target.value
+                                    setSellerSkuValue(val)
+                                    setHasSkuParasiteChars(hasInvisibleUnicode(val))
+                                }}
+                                className={`flex-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                    hasSkuParasiteChars
+                                        ? 'border-amber-400 bg-amber-50/40 text-amber-950 focus:ring-amber-500'
+                                        : 'border-gray-300 focus:ring-orange-500'
+                                }`}
                                 placeholder="SKU vendeur pour synchronisation"
                             />
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const input = document.getElementById('sellerSku') as HTMLInputElement;
-                                    if (input) input.value = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                                    const newSku = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+                                    setSellerSkuValue(newSku)
+                                    setHasSkuParasiteChars(false)
                                 }}
                                 className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                             >
                                 Générer
                             </button>
                         </div>
+
+                        {hasSkuParasiteChars && (
+                            <div className="mt-2.5 flex items-center justify-between gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 shadow-sm animate-in fade-in slide-in-from-top-1">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                    <span>
+                                        Attention : des <strong>espaces invisibles Unicode (<code className="font-mono font-bold bg-amber-100 px-1 py-0.5 rounded">\u00A0</code>)</strong> sont présents. Cela bloque la recherche exacte sur Jumia Vendor.
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const cleaned = sellerSkuValue.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, '').trim()
+                                        setSellerSkuValue(cleaned)
+                                        setHasSkuParasiteChars(false)
+                                    }}
+                                    className="shrink-0 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition shadow-sm"
+                                >
+                                    Nettoyer le SKU
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Prix */}

@@ -2319,6 +2319,9 @@
     "unlinked": "غير مرتبط",
     "verifySellerSku": "التحقق بواسطة Seller SKU",
     "auditLinks": "تدقيق روابط جوميا",
-    "anomaly": "خلل في Seller SKU"
+    "anomaly": "خلل في Seller SKU",
+    "cleanSkuBulk": "تنظيف رمز البائع جوميا ({count})",
+    "cleanSkuRow": "تنظيف رمز البائع جوميا (المتجر)",
+    "cleanSkuTooltip": "تنظيف المسافات والرموز الطفيلية وإعادة مزامنة رمز البائع مع جوميا"
   }
 }

@@ -153,12 +153,21 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
         }
 
         const updates: any[] = []
+        const catalog = await getJumiaCatalogIndex(jumia)
         for (const book of books) {
             try {
                 let sid = book.jumiaProductSid;
                 let sellerSku = book.sellerSku as string;
                 
-                if (!sid) {
+                const norm = normalizeJumiaSku(book.sellerSku)
+                const entry = (norm ? catalog.byNormalizedSku.get(norm) : null)
+                    || (norm ? catalog.byNormalizedSku.get(norm + '_v2') : null)
+                    || (sid ? catalog.bySid.get(sid) : null)
+
+                if (entry) {
+                    sid = entry.sid
+                    sellerSku = entry.rawSku
+                } else if (!sid) {
                     const cleanSku = (book.sellerSku as string).trim();
                     let data = await jumia.getProducts({ sellerSku: cleanSku })
                     let product = data?.products?.[0] || data?.data?.[0] || data?.[0]
@@ -204,6 +213,103 @@ export async function syncBooksQuantityToJumia(bookIds: string[]) {
 
         return { success: false, message: "Échec de la synchronisation du stock." }
     } catch (error: any) {
+        return { success: false, message: `Erreur: ${error.message}` }
+    }
+}
+
+export async function resyncCleanJumiaSellerSku(bookIds: string[]) {
+    try {
+        await verifyAdmin().catch(() => null)
+        const jumia = await JumiaAPI.getInstance()
+        if (!jumia) {
+            return { success: false, message: "Jumia n'est pas configuré ou activé." }
+        }
+
+        const books = await prisma.book.findMany({
+            where: { id: { in: bookIds } },
+            include: { inventories: { include: { warehouse: true } } }
+        })
+
+        if (books.length === 0) {
+            return { success: false, message: "Aucun livre sélectionné." }
+        }
+
+        const catalog = await getJumiaCatalogIndex(jumia, true)
+        const stockUpdates: Array<{ id: string; sellerSku: string; stock: number }> = []
+        let cleanedCount = 0
+        const results: Array<{ id: string; cleanSku: string; isLinked: boolean; hadParasiteSpaces: boolean }> = []
+
+        for (const book of books) {
+            const originalSku = book.sellerSku || book.isbn || book.id.substring(0, 8).toUpperCase()
+            const cleanSku = originalSku.replace(/[\s\u00A0]+/g, '').trim()
+            const hadParasiteSpaces = originalSku !== cleanSku
+
+            await prisma.book.update({
+                where: { id: book.id },
+                data: { sellerSku: cleanSku }
+            })
+
+            const norm = normalizeJumiaSku(cleanSku)
+            const sidCandidate = book.jumiaProductSid?.trim()
+            const entry = (norm ? catalog.byNormalizedSku.get(norm) : null)
+                || (norm ? catalog.byNormalizedSku.get(norm + '_v2') : null)
+                || (sidCandidate ? catalog.bySid.get(sidCandidate) : null)
+
+            if (entry) {
+                const jumiaSid = entry.sid
+                const jumiaRawSku = entry.rawSku
+                const sellableStock = getSellableStock(book)
+
+                stockUpdates.push({
+                    id: jumiaSid,
+                    sellerSku: jumiaRawSku,
+                    stock: sellableStock
+                })
+
+                await prisma.book.update({
+                    where: { id: book.id },
+                    data: {
+                        isSyncedWithJumia: true,
+                        jumiaProductSid: jumiaSid,
+                        jumiaStock: sellableStock,
+                        ...(entry.qcStatus ? { jumiaQcStatus: entry.qcStatus } : {})
+                    }
+                })
+
+                cleanedCount++
+                results.push({
+                    id: book.id,
+                    cleanSku,
+                    isLinked: true,
+                    hadParasiteSpaces
+                })
+            } else {
+                results.push({
+                    id: book.id,
+                    cleanSku,
+                    isLinked: false,
+                    hadParasiteSpaces
+                })
+            }
+        }
+
+        if (stockUpdates.length > 0) {
+            try {
+                await jumia.updateProductsStock(stockUpdates)
+            } catch (stockErr) {
+                console.error("Erreur mise à jour stock Jumia lors du nettoyage:", stockErr)
+            }
+        }
+
+        return {
+            success: true,
+            total: books.length,
+            cleanedCount,
+            results,
+            message: `${cleanedCount}/${books.length} livre(s) nettoyé(s) et resynchronisé(s) sur Jumia avec succès.`
+        }
+    } catch (error: any) {
+        console.error("Erreur resyncCleanJumiaSellerSku:", error)
         return { success: false, message: `Erreur: ${error.message}` }
     }
 }
@@ -910,6 +1016,94 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
     }
 }
 
+// --- Jumia Catalog In-Memory Index & Caching ---
+
+interface JumiaCatalogEntry {
+    product: any
+    variation: any
+    normalizedSku: string
+    rawSku: string
+    sid: string
+    qcStatus?: string | null
+}
+
+let jumiaCatalogCache: {
+    timestamp: number
+    entries: JumiaCatalogEntry[]
+    byNormalizedSku: Map<string, JumiaCatalogEntry>
+    bySid: Map<string, JumiaCatalogEntry>
+} | null = null
+
+function normalizeJumiaSku(sku: string | null | undefined): string {
+    if (!sku) return ''
+    return sku.replace(/[\s\u00A0]+/g, '').toLowerCase()
+}
+
+async function getJumiaCatalogIndex(jumia: any, forceRefresh = false) {
+    const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes cache
+    if (!forceRefresh && jumiaCatalogCache && (Date.now() - jumiaCatalogCache.timestamp < CACHE_TTL_MS)) {
+        return jumiaCatalogCache
+    }
+
+    let hasNextPage = true
+    let token: string | undefined
+    const entries: JumiaCatalogEntry[] = []
+    const byNormalizedSku = new Map<string, JumiaCatalogEntry>()
+    const bySid = new Map<string, JumiaCatalogEntry>()
+
+    while (hasNextPage) {
+        const data = await jumia.getProducts({ size: 100, token })
+        if (!data || !data.products || data.products.length === 0) break
+
+        for (const item of data.products) {
+            const variations = Array.isArray(item.variations) && item.variations.length > 0 ? item.variations : [null]
+            for (const v of variations) {
+                const rawSku = (v?.sellerSku || item.parentSku || item.sellerSku || '').trim()
+                const sid = v?.id || item.id
+                const qcStatus = v?.businessClients?.[0]?.qc?.status || null
+                if (rawSku && sid) {
+                    const norm = normalizeJumiaSku(rawSku)
+                    const entry: JumiaCatalogEntry = {
+                        product: item,
+                        variation: v,
+                        normalizedSku: norm,
+                        rawSku,
+                        sid,
+                        qcStatus
+                    }
+                    entries.push(entry)
+                    if (!byNormalizedSku.has(norm)) {
+                        byNormalizedSku.set(norm, entry)
+                    }
+                    if (norm.endsWith('_v2')) {
+                        const baseNorm = norm.replace(/_v2$/, '')
+                        if (!byNormalizedSku.has(baseNorm)) {
+                            byNormalizedSku.set(baseNorm, entry)
+                        }
+                    }
+                    if (!bySid.has(sid)) {
+                        bySid.set(sid, entry)
+                    }
+                }
+            }
+        }
+
+        if (data.isLastPage === false && data.nextToken) {
+            token = data.nextToken
+        } else {
+            hasNextPage = false
+        }
+    }
+
+    jumiaCatalogCache = {
+        timestamp: Date.now(),
+        entries,
+        byNormalizedSku,
+        bySid
+    }
+    return jumiaCatalogCache
+}
+
 export async function checkJumiaAvailability() {
     try {
         await verifyAdmin().catch(() => null)
@@ -918,34 +1112,8 @@ export async function checkJumiaAvailability() {
             return { success: false, message: "Jumia n'est pas configuré." }
         }
 
-        let hasNextPage = true
-        let token: string | undefined
-        const syncedSkus = new Set<string>()
-
-        // 1. Fetch all catalog products directly from Jumia Vendor (by pages of 100)
-        while (hasNextPage) {
-            const data = await jumia.getProducts({ size: 100, token })
-            if (!data || !data.products) break
-
-            for (const item of data.products) {
-                if (item.sellerSku) {
-                    syncedSkus.add(item.sellerSku.trim().toLowerCase())
-                }
-                if (item.variations && Array.isArray(item.variations)) {
-                    for (const v of item.variations) {
-                        if (v.sellerSku) {
-                            syncedSkus.add(v.sellerSku.trim().toLowerCase())
-                        }
-                    }
-                }
-            }
-
-            if (data.isLastPage === false && data.nextToken) {
-                token = data.nextToken
-            } else {
-                hasNextPage = false
-            }
-        }
+        const catalog = await getJumiaCatalogIndex(jumia, true)
+        const syncedSkus = catalog.byNormalizedSku
 
         if (syncedSkus.size === 0) {
             return { success: false, message: "Aucun produit trouvé sur Jumia Vendor." }
@@ -953,15 +1121,16 @@ export async function checkJumiaAvailability() {
 
         // 2. Fetch all books from database and evaluate link status
         const books = await prisma.book.findMany({
-            select: { id: true, sellerSku: true }
+            select: { id: true, sellerSku: true, jumiaProductSid: true }
         })
 
         const linkedBookIds: string[] = []
         const unlinkedBookIds: string[] = []
 
         for (const book of books) {
-            const s = book.sellerSku?.trim().toLowerCase()
-            if (s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) {
+            const s = normalizeJumiaSku(book.sellerSku)
+            const sid = book.jumiaProductSid?.trim()
+            if ((s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) || (sid && catalog.bySid.has(sid))) {
                 linkedBookIds.push(book.id)
             } else {
                 unlinkedBookIds.push(book.id)
@@ -990,7 +1159,7 @@ export async function checkJumiaAvailability() {
         const unlinkedPackIds: string[] = []
 
         for (const pack of packs) {
-            const s = pack.sellerSku?.trim().toLowerCase()
+            const s = normalizeJumiaSku(pack.sellerSku)
             if (s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) {
                 linkedPackIds.push(pack.id)
             } else {
@@ -1019,7 +1188,7 @@ export async function checkJumiaAvailability() {
         const unlinkedExtraIds: string[] = []
 
         for (const extra of extras) {
-            const s = extra.sellerSku?.trim().toLowerCase()
+            const s = normalizeJumiaSku(extra.sellerSku)
             if (s && (syncedSkus.has(s) || syncedSkus.has(s + '_v2'))) {
                 linkedExtraIds.push(extra.id)
             } else {
@@ -1060,8 +1229,16 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
             return { success: false, isLinked: false, message: "Jumia n'est pas configuré." }
         }
 
-        const cleanSku = sellerSku?.trim()
-        if (!cleanSku) {
+        const existingBook = await prisma.book.findUnique({
+            where: { id: bookId },
+            select: { id: true, sellerSku: true, jumiaProductSid: true }
+        })
+
+        const rawSku = (sellerSku || existingBook?.sellerSku)?.trim()
+        const sidCandidate = existingBook?.jumiaProductSid?.trim()
+        const normSku = normalizeJumiaSku(rawSku)
+
+        if (!normSku && !sidCandidate) {
             await prisma.book.updateMany({
                 where: { id: bookId },
                 data: { isSyncedWithJumia: false, jumiaStock: null }
@@ -1077,61 +1254,98 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
             return { 
                 success: true, 
                 isLinked: false, 
-                message: "Aucun Seller SKU défini. Marqué Non Linké." 
+                message: "Aucun Seller SKU ni Product SID défini. Marqué Non Linké." 
             }
         }
 
-        // Query Jumia Vendor Catalog by Seller SKU
-        let dataProd = await jumia.getProducts({ sellerSku: cleanSku })
-        let products = dataProd?.products || dataProd?.data || []
-        if (!Array.isArray(products)) products = [products]
+        let matchedSid: string | null = null
+        let foundSkuName = rawSku || sidCandidate || ''
+        let qcStatus: string | null = null
 
-        const matchSku = (prods: any[], targetSku: string) => {
-            const targetLower = targetSku.toLowerCase()
-            for (const p of prods) {
-                if (!p) continue
-                if (p.sellerSku?.trim().toLowerCase() === targetLower) {
-                    return { product: p, variation: null, foundSku: p.sellerSku }
+        // 1. Si jumiaProductSid existe, vérification directe par SID (supporté nativement par Jumia via sids=[])
+        if (sidCandidate) {
+            try {
+                const resSid = await jumia.getProducts({ sids: [sidCandidate] })
+                if (resSid?.products && resSid.products.length > 0) {
+                    matchedSid = sidCandidate
+                    const p = resSid.products[0]
+                    foundSkuName = p.variations?.[0]?.sellerSku || p.parentSku || rawSku || sidCandidate
+                    qcStatus = p.variations?.[0]?.businessClients?.[0]?.qc?.status || null
                 }
-                if (p.variations && Array.isArray(p.variations)) {
-                    for (const v of p.variations) {
-                        if (v.sellerSku?.trim().toLowerCase() === targetLower) {
-                            return { product: p, variation: v, foundSku: v.sellerSku }
+            } catch {
+                // Continuer vers les autres fallbacks
+            }
+        }
+
+        // 2. Si pas encore matché, requêtes directes API par sellerSku
+        if (!matchedSid && rawSku) {
+            const matchSkuInList = (prods: any[], targetNorm: string) => {
+                for (const p of prods) {
+                    if (!p) continue
+                    const pNorm = normalizeJumiaSku(p.parentSku || p.sellerSku)
+                    if (pNorm === targetNorm || pNorm === targetNorm + '_v2' || pNorm.replace(/_v2$/, '') === targetNorm) {
+                        return { sid: p.variations?.[0]?.id || p.id, foundSku: p.parentSku || p.sellerSku, qc: p.variations?.[0]?.businessClients?.[0]?.qc?.status }
+                    }
+                    if (p.variations && Array.isArray(p.variations)) {
+                        for (const v of p.variations) {
+                            const vNorm = normalizeJumiaSku(v.sellerSku)
+                            if (vNorm === targetNorm || vNorm === targetNorm + '_v2' || vNorm.replace(/_v2$/, '') === targetNorm) {
+                                return { sid: v.id || p.id, foundSku: v.sellerSku, qc: v.businessClients?.[0]?.qc?.status }
+                            }
                         }
                     }
                 }
+                return null
             }
-            return null
-        }
 
-        let match = matchSku(products, cleanSku)
-        if (!match) {
-            // Also check with fallback suffix _v2
-            const dataProdV2 = await jumia.getProducts({ sellerSku: cleanSku + '_v2' })
-            let productsV2 = dataProdV2?.products || dataProdV2?.data || []
-            if (!Array.isArray(productsV2)) productsV2 = [productsV2]
-            match = matchSku(productsV2, cleanSku + '_v2') || matchSku(productsV2, cleanSku)
-        }
-
-        if (match) {
-            const sid = match.variation?.id || match.product?.id
-            let stock: number | null = null
-            if (sid) {
+            const candidates = [rawSku, rawSku + '_v2', rawSku + '\u00A0\u00A0\u00A0\u00A0', rawSku + '    ']
+            for (const c of candidates) {
                 try {
-                    const stockData = await jumia.getCatalogStock({ productSids: [sid] })
-                    const pStock = stockData?.products?.[0]
-                    if (pStock?.globalStock !== undefined) {
-                        stock = pStock.globalStock
+                    const dataProd = await jumia.getProducts({ sellerSku: c })
+                    let products = dataProd?.products || dataProd?.data || []
+                    if (!Array.isArray(products)) products = [products]
+                    const m = matchSkuInList(products, normSku)
+                    if (m) {
+                        matchedSid = m.sid
+                        foundSkuName = m.foundSku
+                        qcStatus = m.qc || null
+                        break
                     }
-                } catch {
-                    // Ignorer les erreurs secondaires sur le stock
+                } catch {}
+            }
+        }
+
+        // 3. Si non trouvé via requêtes directes, chercher dans l'index du catalogue complet Jumia (en cache mémoire)
+        if (!matchedSid && normSku) {
+            const catalog = await getJumiaCatalogIndex(jumia)
+            const entry = catalog.byNormalizedSku.get(normSku)
+                || catalog.byNormalizedSku.get(normSku + '_v2')
+                || (sidCandidate ? catalog.bySid.get(sidCandidate) : undefined)
+            if (entry) {
+                matchedSid = entry.sid
+                foundSkuName = entry.rawSku
+                qcStatus = entry.qcStatus || null
+            }
+        }
+
+        if (matchedSid) {
+            let stock: number | null = null
+            try {
+                const stockData = await jumia.getCatalogStock({ productSids: [matchedSid] })
+                const pStock = stockData?.products?.[0]
+                if (pStock?.globalStock !== undefined) {
+                    stock = pStock.globalStock
                 }
+            } catch {
+                // Ignorer les erreurs secondaires sur le stock
             }
 
             await prisma.book.updateMany({
                 where: { id: bookId },
                 data: { 
-                    isSyncedWithJumia: true, 
+                    isSyncedWithJumia: true,
+                    jumiaProductSid: matchedSid,
+                    ...(qcStatus ? { jumiaQcStatus: qcStatus } : {}),
                     ...(stock !== null ? { jumiaStock: stock } : {}) 
                 }
             })
@@ -1153,7 +1367,7 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
             return { 
                 success: true, 
                 isLinked: true, 
-                message: `Trouvé sur Jumia Vendor (${match.foundSku})${stock !== null ? ` | Stock: ${stock}` : ''} ! Marqué Linké.`,
+                message: `Trouvé sur Jumia Vendor (${foundSkuName})${stock !== null ? ` | Stock: ${stock}` : ''} ! Marqué Linké.`,
                 stock 
             }
         } else {
@@ -1173,7 +1387,7 @@ export async function verifyJumiaSku(bookId: string, sellerSku: string | null) {
             return { 
                 success: true, 
                 isLinked: false, 
-                message: `Introuvable sur Jumia Vendor (${cleanSku}). Marqué Non Linké.`,
+                message: `Introuvable sur Jumia Vendor (${rawSku || normSku}). Marqué Non Linké.`,
                 stock: null 
             }
         }
@@ -1193,24 +1407,71 @@ export async function verifyBulkBooksJumiaSku(bookIds: string[]) {
 
         const books = await prisma.book.findMany({
             where: { id: { in: bookIds } },
-            select: { id: true, title: true, sellerSku: true }
+            select: { id: true, title: true, sellerSku: true, jumiaProductSid: true }
         })
+
+        const catalog = await getJumiaCatalogIndex(jumia)
 
         let linkedCount = 0
         let unlinkedCount = 0
         const results: { id: string; isLinked: boolean; stock: number | null }[] = []
+        const matchedBooks: { id: string; sid: string; rawSku: string; qcStatus?: string | null }[] = []
 
         for (const b of books) {
-            const check = await verifyJumiaSku(b.id, b.sellerSku)
-            const isLinked = !!check.isLinked
-            if (isLinked) {
-                linkedCount++
-                results.push({ id: b.id, isLinked: true, stock: check.stock ?? null })
+            const norm = normalizeJumiaSku(b.sellerSku)
+            const sidCandidate = b.jumiaProductSid?.trim()
+            const entry = (norm ? catalog.byNormalizedSku.get(norm) : null)
+                || (norm ? catalog.byNormalizedSku.get(norm + '_v2') : null)
+                || (sidCandidate ? catalog.bySid.get(sidCandidate) : null)
+
+            if (entry) {
+                matchedBooks.push({ id: b.id, sid: entry.sid, rawSku: entry.rawSku, qcStatus: entry.qcStatus })
             } else {
-                unlinkedCount++
-                results.push({ id: b.id, isLinked: false, stock: null })
+                const check = await verifyJumiaSku(b.id, b.sellerSku)
+                if (check.isLinked) {
+                    linkedCount++
+                    results.push({ id: b.id, isLinked: true, stock: check.stock ?? null })
+                } else {
+                    unlinkedCount++
+                    results.push({ id: b.id, isLinked: false, stock: null })
+                }
             }
-            await new Promise(r => setTimeout(r, 200))
+        }
+
+        // Récupérer le stock groupé pour les livres trouvés dans le catalogue
+        if (matchedBooks.length > 0) {
+            const sids = Array.from(new Set(matchedBooks.map(m => m.sid)))
+            const stockMap = new Map<string, number>()
+            try {
+                for (let i = 0; i < sids.length; i += 50) {
+                    const chunk = sids.slice(i, i + 50)
+                    const stockRes = await jumia.getCatalogStock({ productSids: chunk })
+                    if (stockRes?.products && Array.isArray(stockRes.products)) {
+                        for (const sp of stockRes.products) {
+                            if (sp.id && sp.globalStock !== undefined) {
+                                stockMap.set(sp.id, sp.globalStock)
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Bulk stock fetch error:", err)
+            }
+
+            for (const m of matchedBooks) {
+                const stock = stockMap.has(m.sid) ? stockMap.get(m.sid)! : null
+                await prisma.book.updateMany({
+                    where: { id: m.id },
+                    data: {
+                        isSyncedWithJumia: true,
+                        jumiaProductSid: m.sid,
+                        ...(m.qcStatus ? { jumiaQcStatus: m.qcStatus } : {}),
+                        ...(stock !== null ? { jumiaStock: stock } : {})
+                    }
+                })
+                linkedCount++
+                results.push({ id: m.id, isLinked: true, stock })
+            }
         }
 
         return {
@@ -1226,7 +1487,6 @@ export async function verifyBulkBooksJumiaSku(bookIds: string[]) {
     }
 }
 
-
 export async function checkJumiaLinkBySku(sellerSku: string) {
     if (!sellerSku) return false
     try {
@@ -1234,16 +1494,13 @@ export async function checkJumiaLinkBySku(sellerSku: string) {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return false
 
-        const res = await jumia.getProducts({ sellerSku })
-        if (res && res.products && res.products.length > 0) {
-            return true
-        }
-        return false
+        const norm = normalizeJumiaSku(sellerSku)
+        const catalog = await getJumiaCatalogIndex(jumia)
+        return catalog.byNormalizedSku.has(norm) || catalog.byNormalizedSku.has(norm + '_v2')
     } catch (e) {
         return false
     }
 }
-
 
 export async function checkJumiaLinkBySkuExact(sellerSku: string, sid?: string | null) {
     if (sellerSku) sellerSku = sellerSku.trim();
@@ -1260,36 +1517,14 @@ export async function checkJumiaLinkBySkuExact(sellerSku: string, sid?: string |
 
         if (!sellerSku) return false;
 
-        const checkSku = async (sku: string) => {
-            const res = await jumia.getProducts({ sellerSku: sku });
-            if (res.error) return false;
-            let products = res.products || res.data || res;
-            if (!Array.isArray(products)) products = [products];
-            for (const p of products) {
-                if (!p) continue;
-                if (p.sellerSku?.trim() === sku.trim()) return true;
-                if (p.variations) {
-                    for (const v of p.variations) {
-                        if (v.sellerSku?.trim() === sku.trim()) return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        const found = await checkSku(sellerSku);
-        if (found) return true;
-
-        const foundV2 = await checkSku(sellerSku + '_v2');
-        if (foundV2) return true;
-
-        return false;
+        const norm = normalizeJumiaSku(sellerSku);
+        const catalog = await getJumiaCatalogIndex(jumia);
+        return catalog.byNormalizedSku.has(norm) || catalog.byNormalizedSku.has(norm + '_v2');
     } catch (error) {
         console.error('Error checking jumia link:', error);
         return false;
     }
 }
-
 
 export async function syncJumiaStockForBooksBackground(bookIds: string[]) {
     if (!bookIds || bookIds.length === 0) return;
