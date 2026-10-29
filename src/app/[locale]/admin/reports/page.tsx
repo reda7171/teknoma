@@ -21,7 +21,7 @@ export default async function AdminReportsPage({
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style PetsUnivers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2 italic">
@@ -31,7 +31,7 @@ export default async function AdminReportsPage({
                         Modération & Sécurité de la plateforme
                     </p>
                 </div>
-                
+
                 <div className="flex gap-2 p-1.5 bg-gray-100 rounded-[2rem] w-fit shadow-inner">
                     {statusOptions.map((option) => (
                         <Link

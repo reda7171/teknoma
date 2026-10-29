@@ -156,9 +156,9 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             {settings.site_logo && (
                                 <div className="w-24 h-12 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 p-2 relative group">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img 
-                                        src={settings.site_logo} 
-                                        alt="Aperçu du logo" 
+                                    <img
+                                        src={settings.site_logo}
+                                        alt="Aperçu du logo"
                                         className="max-w-full max-h-full object-contain"
                                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                                     />
@@ -224,7 +224,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_instagram || ''}
                             onChange={(e) => handleChange('social_instagram', e.target.value)}
-                            placeholder="https://instagram.com/riwaya.book"
+                            placeholder="https://instagram.com/petsunivers.book"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -237,7 +237,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_facebook || ''}
                             onChange={(e) => handleChange('social_facebook', e.target.value)}
-                            placeholder="https://facebook.com/riwaya.book"
+                            placeholder="https://facebook.com/petsunivers.book"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -250,7 +250,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_twitter || ''}
                             onChange={(e) => handleChange('social_twitter', e.target.value)}
-                            placeholder="https://twitter.com/riwaya"
+                            placeholder="https://twitter.com/petsunivers"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -263,7 +263,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_linkedin || ''}
                             onChange={(e) => handleChange('social_linkedin', e.target.value)}
-                            placeholder="https://linkedin.com/company/riwaya"
+                            placeholder="https://linkedin.com/company/petsunivers"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -276,7 +276,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_youtube || ''}
                             onChange={(e) => handleChange('social_youtube', e.target.value)}
-                            placeholder="https://youtube.com/@riwaya"
+                            placeholder="https://youtube.com/@petsunivers"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -289,7 +289,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_threads || ''}
                             onChange={(e) => handleChange('social_threads', e.target.value)}
-                            placeholder="https://threads.net/@riwaya"
+                            placeholder="https://threads.net/@petsunivers"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -302,7 +302,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_pinterest || ''}
                             onChange={(e) => handleChange('social_pinterest', e.target.value)}
-                            placeholder="https://pinterest.com/riwaya"
+                            placeholder="https://pinterest.com/petsunivers"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -352,7 +352,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="email"
                             value={settings.contact_email || ''}
                             onChange={(e) => handleChange('contact_email', e.target.value)}
-                            placeholder="contact@riwaya.store"
+                            placeholder="contact@petsunivers.ma"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -508,7 +508,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             L'URL du Webhook n8n qui sera appelé lors du clic sur le bouton "Partager sur Facebook" dans la liste des articles.
                         </p>
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2">
                             Facebook Pixel ID
@@ -573,9 +573,9 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
             </div>
 
             {/* Emails pour Google Avis */}
-            <GoogleReviewsEmailManager 
-                value={settings.google_reviews_emails || '[]'} 
-                onChange={(val) => handleChange('google_reviews_emails', val)} 
+            <GoogleReviewsEmailManager
+                value={settings.google_reviews_emails || '[]'}
+                onChange={(val) => handleChange('google_reviews_emails', val)}
             />
 
             {/* Message de feedback */}

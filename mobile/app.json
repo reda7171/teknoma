@@ -43,7 +43,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Permettre à Riwaya d'utiliser votre position pour trouver des livres autour de vous."
+          "locationAlwaysAndWhenInUsePermission": "Permettre à PetsUnivers d'utiliser votre position pour trouver des livres autour de vous."
         }
       ],
       "expo-font"

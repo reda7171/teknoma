@@ -20,7 +20,7 @@ interface LaunchFacebookAdModalProps {
 }
 
 const MOROCCAN_CITIES = [
-    'Casablanca', 'Rabat', 'Marrakech', 'Fès', 'Tanger', 'Agadir', 
+    'Casablanca', 'Rabat', 'Marrakech', 'Fès', 'Tanger', 'Agadir',
     'Meknès', 'Oujda', 'Kenitra', 'Tétouan', 'Safi', 'Mohammedia'
 ]
 
@@ -36,10 +36,10 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
     if (!isOpen || !asset) return null
 
     const isPack = asset.type === 'PACK'
-    const linkUrl = `https://riwaya.store/fr/${isPack ? 'packs' : 'books'}/${isPack ? asset.packId : asset.bookId}`
+    const linkUrl = `https://petsunivers.ma/fr/${isPack ? 'packs' : 'books'}/${isPack ? asset.packId : asset.bookId}`
 
     const toggleCity = (city: string) => {
-        setSelectedCities(prev => 
+        setSelectedCities(prev =>
             prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
         )
     }
@@ -78,7 +78,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
             <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
-                
+
                 {/* Header */}
                 <div className="sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-100 p-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-sm font-medium resize-none"
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="flex items-center justify-between text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 ml-1">
                                     <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> Villes Cibles</span>

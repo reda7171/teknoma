@@ -19,7 +19,7 @@ const addNamespace = (file) => {
     SpeedTitle: file.includes('fr') ? 'Délais rapides :' : file.includes('ar') ? 'مواعيد سريعة :' : 'Fast processing:',
     SpeedDesc: file.includes('fr') ? 'Nous expédions dans toutes les grandes villes du Maroc en 24h à 48h. Pour les autres régions, comptez 72h maximum.' : file.includes('ar') ? 'نقوم بالشحن لجميع المدن الكبرى بالمغرب في 24-48 ساعة. للمناطق الأخرى، 72 ساعة كحد أقصى.' : 'We ship to all major cities in Morocco in 24-48h. Other regions take up to 72h.',
     GuaranteeTitle: file.includes('fr') ? 'Garantie :' : file.includes('ar') ? 'الضمان :' : 'Guarantee:',
-    GuaranteeDesc: file.includes('fr') ? 'Si l\'article ne correspond pas à la description ou présente un défaut, Riwaya s\'engage à vous le remplacer ou vous rembourser.' : file.includes('ar') ? 'إذا كان المنتج لا يتطابق مع الوصف أو به عيب، تلتزم رواية باستبداله أو إرجاع أموالك.' : 'If the item is defective or doesn\'t match, Riwaya will replace or refund it.',
+    GuaranteeDesc: file.includes('fr') ? 'Si l\'article ne correspond pas à la description ou présente un défaut, PetsUnivers s\'engage à vous le remplacer ou vous rembourser.' : file.includes('ar') ? 'إذا كان المنتج لا يتطابق مع الوصف أو به عيب، تلتزم PetsUnivers باستبداله أو إرجاع أموالك.' : 'If the item is defective or doesn\'t match, PetsUnivers will replace or refund it.',
     YouMightAlsoLike: file.includes('fr') ? 'Vous aimerez aussi...' : file.includes('ar') ? 'قد يعجبك أيضًا...' : 'You might also like...',
     StockLeft: file.includes('fr') ? 'Reste {stock}' : file.includes('ar') ? 'بقي {stock}' : '{stock} left',
     OutOfStock: file.includes('fr') ? 'Rupture de stock' : file.includes('ar') ? 'نفذت الكمية' : 'Out of stock',

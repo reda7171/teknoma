@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// The Riwaya product feeds target Morocco and publish every price in MAD.
+// The PetsUnivers product feeds target Morocco and publish every price in MAD.
 // Do not make this configurable independently: a different value causes the
 // promotion currency to disagree with both the products and the checkout.
 const MERCHANT_CURRENCY = 'MAD'
@@ -24,13 +24,13 @@ export async function GET() {
 
         const now = new Date()
         const currency = MERCHANT_CURRENCY
-        
+
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
 <channel>
-    <title>Riwaya Promotions</title>
-    <link>https://riwaya.store</link>
-    <description>Promotions et codes de réduction pour Riwaya</description>
+    <title>PetsUnivers Promotions</title>
+    <link>https://petsunivers.ma</link>
+    <description>Promotions et codes de réduction pour PetsUnivers</description>
 `
 
         for (const coupon of coupons) {
@@ -40,18 +40,18 @@ export async function GET() {
             const promoId = escapeXml(coupon.code)
             const discountFormatted = Number(coupon.discount).toFixed(2)
             const typeText = coupon.type === 'PERCENTAGE' ? `${coupon.discount}% de réduction` : `${discountFormatted} ${currency} de réduction`
-            
+
             const minAmountFormatted = coupon.minAmount ? Number(coupon.minAmount).toFixed(2) : null
             const minAmountStr = minAmountFormatted ? ` (dès ${minAmountFormatted} ${currency})` : ''
             const longTitle = escapeXml(`${typeText}${minAmountStr}`)
-            
+
             const startDate = coupon.createdAt.toISOString()
             const endDateDate = coupon.expiresAt ? new Date(coupon.expiresAt) : new Date(now.getFullYear() + 1, now.getMonth(), now.getDate())
             const endDate = endDateDate.toISOString()
 
             const minAmountXml = minAmountFormatted ? `\n        <g:minimum_purchase_amount>${minAmountFormatted} ${currency}</g:minimum_purchase_amount>` : ''
-            const discountXml = coupon.type === 'PERCENTAGE' 
-                ? `\n        <g:percent_off>${coupon.discount}</g:percent_off>` 
+            const discountXml = coupon.type === 'PERCENTAGE'
+                ? `\n        <g:percent_off>${coupon.discount}</g:percent_off>`
                 : `\n        <g:money_off_amount>${discountFormatted} ${currency}</g:money_off_amount>`
 
             xml += `

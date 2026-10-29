@@ -9,25 +9,25 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params
 
     const titles: Record<string, string> = {
-        fr: 'FAQ — Vos Questions sur Riwaya | Livraison, Paiement, Retours',
-        ar: 'الأسئلة الشائعة — رواية | التوصيل، الدفع، الإرجاع',
-        en: 'FAQ — Your Questions about Riwaya | Delivery, Payment, Returns',
+        fr: 'FAQ — Vos Questions sur PetsUnivers | Livraison, Paiement, Retours',
+        ar: 'الأسئلة الشائعة — PetsUnivers | التوصيل، الدفع، الإرجاع',
+        en: 'FAQ — Your Questions about PetsUnivers | Delivery, Payment, Returns',
     }
     const descriptions: Record<string, string> = {
-        fr: 'Toutes les réponses à vos questions sur la librairie Riwaya : délais de livraison au Maroc, paiement à la livraison (COD), retours et échanges de livres, disponibilité des stocks.',
-        ar: 'إجابات على جميع أسئلتكم حول مكتبة رواية: مواعيد التوصيل في المغرب، الدفع عند الاستلام، إرجاع وتبادل الكتب، وتوفر المخزون.',
-        en: 'All answers to your questions about Riwaya bookstore: delivery times in Morocco, cash on delivery (COD), book returns and exchanges, stock availability.',
+        fr: 'Toutes les réponses à vos questions sur la librairie PetsUnivers : délais de livraison au Maroc, paiement à la livraison (COD), retours et échanges de livres, disponibilité des stocks.',
+        ar: 'إجابات على جميع أسئلتكم حول مكتبة PetsUnivers: مواعيد التوصيل في المغرب، الدفع عند الاستلام، إرجاع وتبادل الكتب، وتوفر المخزون.',
+        en: 'All answers to your questions about PetsUnivers bookstore: delivery times in Morocco, cash on delivery (COD), book returns and exchanges, stock availability.',
     }
 
     return {
         title: titles[locale] || titles.fr,
         description: descriptions[locale] || descriptions.fr,
         alternates: {
-            canonical: `https://riwaya.store/${locale}/faq`,
+            canonical: `https://petsunivers.ma/${locale}/faq`,
             languages: {
-                'fr': 'https://riwaya.store/fr/faq',
-                'ar': 'https://riwaya.store/ar/faq',
-                'en': 'https://riwaya.store/en/faq',
+                'fr': 'https://petsunivers.ma/fr/faq',
+                'ar': 'https://petsunivers.ma/ar/faq',
+                'en': 'https://petsunivers.ma/en/faq',
             }
         }
     }
@@ -126,19 +126,19 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
             ]
         },
         {
-            title: locale === 'ar' ? 'عن رواية' : locale === 'en' ? 'About Riwaya' : 'À propos de Riwaya',
+            title: locale === 'ar' ? 'عن PetsUnivers' : locale === 'en' ? 'About PetsUnivers' : 'À propos de PetsUnivers',
             icon: Users,
             questions: [
                 {
-                    q: locale === 'ar' ? 'ما هي مكتبة رواية؟' : locale === 'en' ? 'What is Riwaya bookstore?' : "Qu'est-ce que la librairie Riwaya ?",
-                    a: locale === 'ar' ? 'رواية هي أحسن مكتبة إلكترونية في المغرب. نقدم أكبر مجموعة من روايات التطوير الذاتي والأعمال والفلسفة، مع توصيل سريع في جميع أنحاء المغرب والدفع عند الاستلام.' : locale === 'en' ? "Riwaya is Morocco's best online bookstore. We offer the largest selection of personal development, business, and philosophy books, with fast delivery across Morocco and cash on delivery payment." : "Riwaya est la meilleure librairie en ligne au Maroc. Nous offrons la plus grande sélection de livres de développement personnel, business et philosophie, avec une livraison rapide partout au Maroc et le paiement à la livraison."
+                    q: locale === 'ar' ? 'ما هي مكتبة PetsUnivers؟' : locale === 'en' ? 'What is PetsUnivers bookstore?' : "Qu'est-ce que la librairie PetsUnivers ?",
+                    a: locale === 'ar' ? 'PetsUnivers هي أحسن مكتبة إلكترونية في المغرب. نقدم أكبر مجموعة من روايات التطوير الذاتي والأعمال والفلسفة، مع توصيل سريع في جميع أنحاء المغرب والدفع عند الاستلام.' : locale === 'en' ? "PetsUnivers is Morocco's best online bookstore. We offer the largest selection of personal development, business, and philosophy books, with fast delivery across Morocco and cash on delivery payment." : "PetsUnivers est la meilleure librairie en ligne au Maroc. Nous offrons la plus grande sélection de livres de développement personnel, business et philosophie, avec une livraison rapide partout au Maroc et le paiement à la livraison."
                 },
                 {
-                    q: locale === 'ar' ? 'أين يقع مقر مكتبة رواية؟' : locale === 'en' ? 'Where is Riwaya bookstore located?' : 'Où est située la librairie Riwaya ?',
+                    q: locale === 'ar' ? 'أين يقع مقر مكتبة PetsUnivers؟' : locale === 'en' ? 'Where is PetsUnivers bookstore located?' : 'Où est située la librairie PetsUnivers ?',
                     a: locale === 'ar' ? 'يقع مقرنا في الرباط، المغرب. نوصل إلى جميع مدن المغرب.' : locale === 'en' ? 'Our headquarters is located in Rabat, Morocco. We deliver to all cities in Morocco.' : "Notre siège est situé à Rabat, Maroc. Nous livrons dans toutes les villes du Maroc."
                 },
                 {
-                    q: locale === 'ar' ? 'كيف أتواصل مع مكتبة رواية؟' : locale === 'en' ? 'How do I contact Riwaya bookstore?' : 'Comment contacter la librairie Riwaya ?',
+                    q: locale === 'ar' ? 'كيف أتواصل مع مكتبة PetsUnivers؟' : locale === 'en' ? 'How do I contact PetsUnivers bookstore?' : 'Comment contacter la librairie PetsUnivers ?',
                     a: locale === 'ar' ? 'يمكنكم التواصل معنا عبر واتساب، أو البريد الإلكتروني، أو صفحاتنا على الشبكات الاجتماعية. نحن متاحون 7 أيام في الأسبوع.' : locale === 'en' ? 'You can contact us via WhatsApp, email, or our social media pages. We are available 7 days a week.' : "Vous pouvez nous contacter via WhatsApp, email, ou nos pages sur les réseaux sociaux. Nous sommes disponibles 7j/7."
                 }
             ]
@@ -191,10 +191,10 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                     </h1>
                     <p className="text-gray-500 max-w-2xl mx-auto text-lg font-medium">
                         {locale === 'ar'
-                            ? 'كل ما تحتاجون معرفته للطلب باطمئنان من مكتبة رواية.'
+                            ? 'كل ما تحتاجون معرفته للطلب باطمئنان من مكتبة PetsUnivers.'
                             : locale === 'en'
-                                ? 'Everything you need to know to order with peace of mind from Riwaya.'
-                                : 'Tout ce que vous devez savoir pour commander en toute sérénité sur Riwaya.'
+                                ? 'Everything you need to know to order with peace of mind from PetsUnivers.'
+                                : 'Tout ce que vous devez savoir pour commander en toute sérénité sur PetsUnivers.'
                         }
                     </p>
                 </div>

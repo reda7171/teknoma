@@ -6,7 +6,7 @@ function isAllowedImageUrl(value: string) {
         const url = new URL(value);
         if (url.protocol !== 'https:') return false;
 
-        const allowedHosts = new Set(['riwaya.store', 'www.riwaya.store']);
+        const allowedHosts = new Set(['petsunivers.ma', 'www.petsunivers.ma']);
         if (process.env.NEXTAUTH_URL) allowedHosts.add(new URL(process.env.NEXTAUTH_URL).hostname);
 
         return allowedHosts.has(url.hostname);

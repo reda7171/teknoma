@@ -1,93 +1,67 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { madToUsdCents, paypalClient, paypalOrigin } from '@/lib/paypal'
+import { validatePaypalOrder, type PaypalOrder } from '@/lib/paypal-validation'
 
 export async function POST(req: Request) {
     try {
-        const clientId = await getSetting('payment_paypal_client_id')
-        const clientSecret = await getSetting('payment_paypal_client_secret')
-        const mode = await getSetting('payment_paypal_mode') || 'sandbox'
-        
-        if (!clientId || !clientSecret) {
-            return NextResponse.json({ error: 'PayPal is not configured' }, { status: 500 })
-        }
-
-        const baseUrl = mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
-
-        const body = await req.json()
-        const { orderId } = body
-
-        if (!orderId) {
+        const body = await req.json().catch(() => null)
+        if (typeof body?.orderId !== 'string' || !body.orderId) {
             return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
         }
-
-        const order = await prisma.order.findUnique({
-            where: { id: orderId }
-        })
-
-        if (!order) {
-            return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+        const order = await prisma.order.findUnique({ where: { id: body.orderId } })
+        if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+        if (order.paymentMethod !== 'PAYPAL' || order.isPaid || !['PENDING', 'CONFIRMED'].includes(order.status)) {
+            return NextResponse.json({ error: 'Commande non éligible au paiement PayPal' }, { status: 409 })
         }
-
-        // Get PayPal Access Token
-        const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-        const tokenRes = await fetch(`${baseUrl}/v1/oauth2/token`, {
-            method: 'POST',
-            body: 'grant_type=client_credentials',
-            headers: {
-                Authorization: `Basic ${auth}`,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        })
-        const tokenData = await tokenRes.json()
-        
-        if (!tokenData.access_token) {
-            throw new Error('Failed to get PayPal access token')
+        const origin = paypalOrigin(req)
+        const client = await paypalClient()
+        if (!client.config.enabled) return NextResponse.json({ error: 'PayPal désactivé' }, { status: 403 })
+        const key = { orderId: order.id, mode: client.config.mode }
+        let payment = await prisma.paypalPayment.findUnique({ where: { orderId_mode: key } })
+        if (!payment) {
+            const amountUsd = await madToUsdCents(order.total)
+            payment = await prisma.paypalPayment.upsert({
+                where: { orderId_mode: key }, update: {},
+                create: { ...key, amountMad: Math.round(order.total * 100), amountUsd },
+            })
         }
-
-        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-
-        // Create PayPal Order
-        const orderRes = await fetch(`${baseUrl}/v2/checkout/orders`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${tokenData.access_token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                intent: 'CAPTURE',
-                purchase_units: [
-                    {
-                        reference_id: order.id,
-                        amount: {
-                            currency_code: 'USD', // Adjust to USD if MAD is not supported, or convert MAD to USD
-                            // Note: PayPal may not support MAD natively. You might need to convert MAD to USD/EUR. 
-                            // Here we just pass the total, assuming conversion is handled or MAD is supported (it isn't natively).
-                            // A proper implementation requires conversion. 
-                            value: (order.total / 10).toFixed(2), // Rough conversion for example: 10 MAD = 1 USD
-                        },
-                        description: `Commande ${order.id}`,
-                    },
-                ],
-                application_context: {
-                    return_url: `${origin}/api/checkout/paypal/capture?orderId=${order.id}`,
-                    cancel_url: `${origin}/checkout`,
-                    user_action: 'PAY_NOW',
-                },
-            }),
-        })
-
-        const orderData = await orderRes.json()
-
-        if (orderData.id) {
-            const approveLink = orderData.links.find((link: any) => link.rel === 'approve')
-            return NextResponse.json({ url: approveLink.href })
+        if (payment.amountMad !== Math.round(order.total * 100) || payment.status !== 'CREATED') {
+            return NextResponse.json({ error: 'Cette tentative de paiement ne peut plus être utilisée' }, { status: 409 })
+        }
+        let remote: PaypalOrder
+        if (payment.paypalOrderId) {
+            remote = await client.request<PaypalOrder>(`/v2/checkout/orders/${payment.paypalOrderId}`)
         } else {
-            throw new Error(orderData.message || 'Error creating PayPal order')
+            remote = await client.request<PaypalOrder>('/v2/checkout/orders', {
+                requestId: payment.id,
+                body: {
+                    intent: 'CAPTURE',
+                    purchase_units: [{
+                        reference_id: order.id, custom_id: payment.id,
+                        amount: { currency_code: 'USD', value: (payment.amountUsd / 100).toFixed(2) },
+                        description: `Commande ${order.id} - ${order.total.toFixed(2)} MAD`,
+                    }],
+                    application_context: {
+                        return_url: `${origin}/api/checkout/paypal/capture?orderId=${encodeURIComponent(order.id)}`,
+                        cancel_url: `${origin}/fr/checkout?error=paypal_cancelled`, user_action: 'PAY_NOW',
+                    },
+                },
+            })
+            if (!remote.id) throw new Error('Réponse PayPal invalide')
+            payment = await prisma.paypalPayment.update({ where: { id: payment.id }, data: { paypalOrderId: remote.id } })
         }
-
-    } catch (error: any) {
-        console.error('PayPal Checkout error:', error)
-        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+        validatePaypalOrder(remote, payment)
+        const approval = remote.links?.find(link => link.rel === 'approve' || link.rel === 'payer-action')
+        if (!approval || !['CREATED', 'PAYER_ACTION_REQUIRED', 'APPROVED'].includes(remote.status)) {
+            return NextResponse.json({ error: 'Paiement expiré ou déjà traité. Veuillez contacter le support.' }, { status: 409 })
+        }
+        const approvalUrl = new URL(approval.href)
+        const expectedHost = client.config.mode === 'live' ? 'www.paypal.com' : 'www.sandbox.paypal.com'
+        if (approvalUrl.protocol !== 'https:' || approvalUrl.hostname !== expectedHost) throw new Error('Lien PayPal invalide')
+        return NextResponse.json({ url: approval.href, amountUsd: (payment.amountUsd / 100).toFixed(2) })
+    } catch (error) {
+        console.error('PayPal checkout:', error instanceof Error ? error.message : 'Unknown error')
+        return NextResponse.json({ error: 'Impossible de démarrer PayPal. Veuillez réessayer.' }, { status: 502 })
     }
 }

@@ -10,7 +10,7 @@ export async function migrateSeoPagesToDb() {
       let order = 0
       for (const slug of Object.keys(pages)) {
         const page = pages[slug]
-        
+
         // Use predefined gradients from SeoCategoriesSection if they don't have one
         const gradients = [
           'from-[#4A25E1] to-[#7A5AF8]', // Deep Purple
@@ -22,20 +22,20 @@ export async function migrateSeoPagesToDb() {
           'from-[#334155] to-[#0F172A]', // Slate Dark
           'from-[#0284C7] to-[#0369A1]'  // Sky Blue
         ]
-        
+
         // Only show on home if it's one of the new 8 categories
         const newCategoriesSlugs = [
-          'romans-arabes', 'romans-romantiques', 'romans-thriller-suspense', 
-          'livres-developpement-personnel', 'livres-business-investissement', 
+          'romans-arabes', 'romans-romantiques', 'romans-thriller-suspense',
+          'livres-developpement-personnel', 'livres-business-investissement',
           'romans-marocains', 'idees-cadeaux-livres', 'livres-pas-chers',
-          'riwayat-arabia', 'riwayat-romansiya', 'riwayat-tachwiq',
-          'kotob-tatwir-adat', 'kotob-mal-istithmar', 'riwayat-maghribia',
+          'petsuniverst-arabia', 'petsuniverst-romansiya', 'petsuniverst-tachwiq',
+          'kotob-tatwir-adat', 'kotob-mal-istithmar', 'petsuniverst-maghribia',
           'kotob-hadaya', 'kotob-arabia-mounasiba',
           'arabic-novels', 'romantic-novels', 'thriller-suspense-novels',
           'self-help-books', 'business-investing-books', 'moroccan-novels',
           'book-gift-ideas', 'cheap-books'
         ]
-        
+
         const showOnHome = newCategoriesSlugs.includes(slug)
         const color = showOnHome ? gradients[order % gradients.length] : null
 
@@ -317,7 +317,7 @@ export async function updateSeoCategoryBooks(categoryId: string, bookIds: string
         }
       })
     }
-    
+
     return { success: true }
   } catch (error) {
     return { success: false, error }

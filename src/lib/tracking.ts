@@ -24,7 +24,7 @@ export function trackPurchase(data: PurchaseData) {
     if (typeof window === 'undefined') return
 
     // 1. Déduplication par ID de commande (évite les rafraîchissements de page)
-    const storageKey = `riwaya_purchase_${data.id}`
+    const storageKey = `petsunivers_purchase_${data.id}`
     try {
         if (sessionStorage.getItem(storageKey)) {
             return

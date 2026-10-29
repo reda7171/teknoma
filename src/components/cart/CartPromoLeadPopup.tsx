@@ -8,9 +8,9 @@ import { submitPromoLead } from '@/lib/actions/promo-leads'
 import { Tag, X, Check, Copy, Phone, Mail, Sparkles, Percent, ShieldCheck } from 'lucide-react'
 import Confetti from 'react-confetti'
 
-const POPUP_DISMISS_KEY = 'riwaya_promo_popup_dismissed_until'
-const POPUP_SUBSCRIBED_KEY = 'riwaya_promo_subscribed'
-const POPUP_SAVED_PHONE_KEY = 'riwaya_user_phone'
+const POPUP_DISMISS_KEY = 'petsunivers_promo_popup_dismissed_until'
+const POPUP_SUBSCRIBED_KEY = 'petsunivers_promo_subscribed'
+const POPUP_SAVED_PHONE_KEY = 'petsunivers_user_phone'
 const DELAY_AFTER_ADD_MS = 3000 // 3 secondes après l'ajout au panier
 const DISMISS_DAYS = 7 // Ne pas réafficher avant 7 jours si fermé sans soumission
 
@@ -128,8 +128,8 @@ export default function CartPromoLeadPopup() {
                 try {
                     localStorage.setItem(POPUP_SUBSCRIBED_KEY, 'true')
                     if (cleanPhone) localStorage.setItem(POPUP_SAVED_PHONE_KEY, cleanPhone)
-                    if (cleanEmail) localStorage.setItem('riwaya_user_email', cleanEmail)
-                    localStorage.setItem('riwaya_pending_coupon', res.promoCode)
+                    if (cleanEmail) localStorage.setItem('petsunivers_user_email', cleanEmail)
+                    localStorage.setItem('petsunivers_pending_coupon', res.promoCode)
                 } catch {
                     // Ignore
                 }

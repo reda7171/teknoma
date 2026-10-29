@@ -11,10 +11,10 @@ import DigitalProductCard from '@/components/DigitalProductCard'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations('DigitalBooks')
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
 
   return {
-    title: `${t('seo.Title')} | Riwaya`,
+    title: `${t('seo.Title')} | PetsUnivers`,
     description: t('seo.Description'),
     alternates: {
       canonical: `${baseUrl}/${locale}/livres-numeriques`,
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       },
     },
     openGraph: {
-      title: `${t('seo.Title')} | Riwaya`,
+      title: `${t('seo.Title')} | PetsUnivers`,
       description: t('seo.Description'),
       images: ['/og-image.jpg'],
     }

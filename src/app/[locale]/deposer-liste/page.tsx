@@ -8,19 +8,19 @@ import { getTranslations } from 'next-intl/server'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
-        title: locale === 'ar' ? 'ضع قائمتك المدرسية | رواية' : locale === 'en' ? 'Drop your school list | Riwaya' : 'Déposer ma liste scolaire | Riwaya',
+        title: locale === 'ar' ? 'ضع قائمتك المدرسية | PetsUnivers' : locale === 'en' ? 'Drop your school list | PetsUnivers' : 'Déposer ma liste scolaire | PetsUnivers',
         description: locale === 'ar' ? 'ضع قائمتك المدرسية وسنتكفل بالباقي.' : locale === 'en' ? 'Drop your school list and we will take care of the rest.' : 'Déposez votre liste scolaire : on s\'occupe de tout ! Liste complète garantie.',
     }
 }
 
 export default async function DeposerListePage() {
     const t = await getTranslations('DeposerListe')
-    
+
     return (
         <div className="min-h-screen bg-[#FDFBF7] overflow-hidden">
             <Header />
-            
-            <section 
+
+            <section
                 className="relative py-12 md:py-24 px-4 border-b border-gray-100 min-h-[calc(100vh-120px)] md:min-h-[calc(100vh-80px)] flex flex-col justify-center bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/back-to-school-bg.png')" }}
             >
@@ -32,9 +32,9 @@ export default async function DeposerListePage() {
                         <Sparkles className="w-3 h-3 text-[#10b981]" />
                         {t('tag')}
                     </div>
-                    
+
                     <h1 className="text-5xl md:text-7xl font-black text-black tracking-tighter leading-tight mb-8" dangerouslySetInnerHTML={{ __html: t.raw('pageTitle') }}></h1>
-                    
+
                     <div className="flex items-center justify-center gap-3 text-lg md:text-2xl font-bold text-gray-600 mb-16">
                         <CheckCircle2 className="w-8 h-8 text-[#10b981]" />
                         <p>{t('subtitle')}</p>
@@ -43,7 +43,7 @@ export default async function DeposerListePage() {
                     <div className="max-w-2xl mx-auto z-20 relative">
                         <DeposerListeForm />
                     </div>
-                    
+
                     <div className="mt-8 md:mt-16 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
                         <p className="text-xl md:text-2xl font-black text-black leading-tight" dangerouslySetInnerHTML={{ __html: t.raw('teamMsg') }}></p>
                     </div>

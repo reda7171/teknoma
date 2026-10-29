@@ -16,25 +16,25 @@ const tajawal = localFont({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://riwaya.ma'),
-  title: { default: 'Riwaya — Librairie premium au Maroc', template: '%s | Riwaya' },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://petsunivers.ma'),
+  title: { default: 'PetsUnivers — Librairie premium au Maroc', template: '%s | PetsUnivers' },
   description: 'Une sélection exigeante de livres en français, arabe et anglais, livrée partout au Maroc.',
-  applicationName: 'Riwaya',
+  applicationName: 'PetsUnivers',
   category: 'books',
-  robots: process.env.RIWAYA_MA_INDEXABLE === 'true'
+  robots: process.env.PETSUNIVERS_MA_INDEXABLE === 'true'
     ? { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } }
     : { index: false, follow: false },
-  openGraph: { type: 'website', siteName: 'Riwaya', locale: 'fr_MA' },
-  twitter: { card: 'summary_large_image', title: 'Riwaya — Librairie premium au Maroc' },
+  openGraph: { type: 'website', siteName: 'PetsUnivers', locale: 'fr_MA' },
+  twitter: { card: 'summary_large_image', title: 'PetsUnivers — Librairie premium au Maroc' },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'Organization', '@id': 'https://riwaya.ma/#organization', name: 'Riwaya', url: 'https://riwaya.ma' },
-      { '@type': 'WebSite', '@id': 'https://riwaya.ma/#website', url: 'https://riwaya.ma', name: 'Riwaya', publisher: { '@id': 'https://riwaya.ma/#organization' }, inLanguage: ['fr', 'ar', 'en'] },
-      { '@type': 'BookStore', '@id': 'https://riwaya.ma/#bookstore', name: 'Riwaya', url: 'https://riwaya.ma', areaServed: { '@type': 'Country', name: 'Morocco' }, currenciesAccepted: 'MAD', paymentAccepted: 'Cash on delivery' },
+      { '@type': 'Organization', '@id': 'https://petsunivers.ma/#organization', name: 'PetsUnivers', url: 'https://petsunivers.ma' },
+      { '@type': 'WebSite', '@id': 'https://petsunivers.ma/#website', url: 'https://petsunivers.ma', name: 'PetsUnivers', publisher: { '@id': 'https://petsunivers.ma/#organization' }, inLanguage: ['fr', 'ar', 'en'] },
+      { '@type': 'BookStore', '@id': 'https://petsunivers.ma/#bookstore', name: 'PetsUnivers', url: 'https://petsunivers.ma', areaServed: { '@type': 'Country', name: 'Morocco' }, currenciesAccepted: 'MAD', paymentAccepted: 'Cash on delivery' },
     ],
   }
   return (

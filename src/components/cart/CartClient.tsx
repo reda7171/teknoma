@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Link } from '@/i18n/routing'
 import { notifyRemoveFromCart, notifyClearCart, notifyCheckoutInitiated } from '@/lib/actions/cart-notify'
 import { withExponentialRetry } from '@/lib/retry'
-import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
+
 import { ArrowRight, Minus, Plus, Trash2, ShoppingCart, Shield, Truck, AlertCircle, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
@@ -74,10 +74,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
 
     const totalPrice = getTotalPrice()
     const totalItems = getTotalItems()
-    
+
     const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
     const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
-    
+
     const isMinAmountReached = finalTotal >= minOrderAmount
 
     return (
@@ -102,16 +102,10 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4 sm:px-0">
                         <Link
-                            href="/books"
+                            href="/products"
                             className="px-8 sm:px-12 py-5 sm:py-6 bg-black text-white text-[10px] sm:text-xs md:text-sm rtl:text-base font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:bg-gray-800 transition-all shadow-xl w-full sm:w-auto text-center"
                         >
                             {t('BrowseLibrary')}
-                        </Link>
-                        <Link
-                            href="/packs"
-                            className="px-8 sm:px-12 py-5 sm:py-6 bg-white text-black border-2 border-black/5 text-[10px] sm:text-xs md:text-sm rtl:text-base font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:border-black transition-all w-full sm:w-auto text-center"
-                        >
-                            {t('ViewBundles')}
                         </Link>
                     </div>
                 </div>
@@ -166,7 +160,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                         </div>
                                         {item.replacedBooks && Object.keys(item.replacedBooks).length > 0 && (
                                             <div className="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Livres remplacés :</p>
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Produits remplacés :</p>
                                                 <ul className="space-y-2">
                                                     {Object.values(item.replacedBooks).map((rb) => (
                                                         <li key={rb.id} className="text-xs text-black font-black flex items-center gap-3">
@@ -226,8 +220,8 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
 
                     {/* Summary */}
                     <div className="lg:col-span-1">
-                        <CartBookmarksUpsell />
-                        
+
+
                         <div className="bg-white rounded-2xl sm:rounded-[3rem] p-4 sm:p-8 md:p-12 shadow-2xl shadow-black/5 border border-gray-50 sticky top-32 mt-6 lg:mt-0">
                             <h2 className="text-sm rtl:text-xl font-black uppercase tracking-[0.3em] mb-6 sm:mb-10 pb-6 border-b border-gray-50">
                                 {t('SummaryTitle')}
@@ -301,7 +295,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                             </div>
 
                             <Link
-                                href="/books"
+                                href="/products"
                                 className="w-full text-center block text-[10px] rtl:text-sm font-black uppercase tracking-[0.3em] text-gray-500 hover:text-black transition-colors"
                             >
                                 {t('ContinueShopping')}

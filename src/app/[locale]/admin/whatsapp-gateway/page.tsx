@@ -9,7 +9,7 @@ import {
 } from '@/lib/actions/whatsapp-gateway'
 import { WhatsAppGatewayClient } from '@/components/admin/WhatsAppGatewayClient'
 
-export const metadata = { title: 'Passerelle WhatsApp QR & Sessions | Admin Riwaya' }
+export const metadata = { title: 'Passerelle WhatsApp QR & Sessions | Admin PetsUnivers' }
 
 export default async function WhatsAppGatewayPage({
     params

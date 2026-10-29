@@ -91,7 +91,7 @@ export const useCartStore = create<CartStore>()(
             clearCart: () => {
                 set({ items: [], discount: null })
             },
-            
+
             setSessionId: (id) => {
                 set({ sessionId: id })
             },
@@ -125,7 +125,7 @@ export const useCartStore = create<CartStore>()(
             },
         }),
         {
-            name: 'riwaya-cart-storage', // Nom de la clé dans localStorage
+            name: 'petsunivers-cart-storage', // Nom de la clé dans localStorage
             storage: createJSONStorage(() => localStorage),
             version: 2,
             migrate: (persistedState) => {

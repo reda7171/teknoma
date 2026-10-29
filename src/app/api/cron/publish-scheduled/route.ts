@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
         // Fire & forget : on n'attend pas la réponse de n8n
         const webhookUrl = N8N_WEBHOOK_URL
-        
+
         const facebookAccessToken = await getSetting('facebook_access_token')
         const instagramAccountId = await getSetting('instagram_account_id')
         const tiktokAccessToken = await getSetting('tiktok_access_token')
@@ -71,16 +71,16 @@ export async function GET(req: NextRequest) {
                 batch: platforms.map(platform => ({
                     itemId: post.id,
                     itemType: 'OTHER',
-                    title: 'Riwaya',
+                    title: 'PetsUnivers',
                     image: imageUrl,
                     isVideo,
                     isPack: false,
-                    caption: (!post.content || post.content === 'Riwaya') ? `📚 Découvrez notre sélection sur Riwaya !\n\n🔗 ${baseUrl}` : (post.content.includes('http') ? post.content : `${post.content}\n\n🔗 Découvrez-le ici : ${baseUrl}`),
+                    caption: (!post.content || post.content === 'PetsUnivers') ? `📚 Découvrez notre sélection sur PetsUnivers !\n\n🔗 ${baseUrl}` : (post.content.includes('http') ? post.content : `${post.content}\n\n🔗 Découvrez-le ici : ${baseUrl}`),
                     description: post.content || '',
                     format: 'post',
                     platform,
                     scheduleAt: '',
-                    source: 'riwaya-cron',
+                    source: 'petsunivers-cron',
                     postId: post.id,
                     facebook_access_token: facebookAccessToken,
                     instagram_account_id: instagramAccountId,

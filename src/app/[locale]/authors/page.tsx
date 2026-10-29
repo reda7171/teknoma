@@ -12,14 +12,14 @@ import ImageWithFallback from '@/components/ImageWithFallback'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params
     const t = await getTranslations('AuthorsPage')
-    
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
 
     return {
-        title: `${t('Title')} | Riwaya`,
+        title: `${t('Title')} | PetsUnivers`,
         description: t('Description'),
         openGraph: {
-            title: `${t('Title')} | Riwaya`,
+            title: `${t('Title')} | PetsUnivers`,
             description: t('Description'),
             images: ['/images/authors-og.png'],
         },
@@ -51,7 +51,7 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                 <section className="relative pt-10 sm:pt-16 md:pt-24 pb-8 sm:pb-14 md:pb-20 overflow-hidden bg-pixio-cream">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-yellow/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-float"></div>
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-pixio-pink/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 animate-float-slow"></div>
-                    
+
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6 md:space-y-8">
                             <ScrollReveal animation="animate-reveal-up">
@@ -60,7 +60,7 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                     <span>{t('AllAuthors')}</span>
                                 </div>
                             </ScrollReveal>
-                            
+
                             <ScrollReveal animation="animate-reveal-up" delay={200}>
                                 <h1 className="text-4xl md:text-5xl lg:text-8xl font-black text-black leading-tight tracking-tighter break-words">
                                     {t('Heading')}<span className="text-pixio-pink">.</span>
@@ -93,13 +93,13 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                     <ScrollReveal key={author.name} delay={idx * 100} animation="animate-reveal-up">
                                         <div className="group relative bg-white p-6 md:p-8 rounded-3xl md:rounded-[3rem] border border-gray-50 hover:border-black transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
                                             <div className="flex flex-col items-center text-center">
-                                                <Link 
+                                                <Link
                                                     href={`/authors/${encodeURIComponent(author.name)}`}
                                                     className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 mb-6 border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-500 block cursor-pointer"
                                                 >
                                                     {(author.image || author.sampleBookImage) ? (
-                                                        <ImageWithFallback 
-                                                            src={author.image || author.sampleBookImage} 
+                                                        <ImageWithFallback
+                                                            src={author.image || author.sampleBookImage}
                                                             alt={author.name}
                                                         />
                                                     ) : (
@@ -117,7 +117,7 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                                                         "{author.bio}"
                                                     </p>
                                                 )}
-                                                <Link 
+                                                <Link
                                                     href={`/authors/${encodeURIComponent(author.name)}`}
                                                     className="px-6 py-3 bg-pixio-cream text-black text-[10px] rtl:text-sm rtl:uppercase-none rtl:tracking-normal font-black uppercase tracking-widest rounded-full hover:bg-black hover:text-white transition-all border border-transparent hover:border-black"
                                                 >
@@ -133,8 +133,8 @@ export default async function AuthorsPage({ params }: { params: Promise<{ locale
                 )}
 
                 {/* All Authors List */}
-                <AuthorsListClient 
-                    authors={authors} 
+                <AuthorsListClient
+                    authors={authors}
                     locale={locale}
                 />
             </main>

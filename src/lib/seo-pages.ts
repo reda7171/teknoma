@@ -1,12 +1,12 @@
 export const seoPages: Record<string, Record<string, any>> = {
   fr: {
     'livre-maroc': {
-      title: 'Livre Maroc | Acheter des livres en ligne au Maroc – Riwaya Store',
-      description: 'Achetez vos livres au Maroc avec Riwaya Store. Large choix de livres, livraison rapide à domicile et paiement à la livraison (COD) partout au Maroc.',
+      title: 'Livre Maroc | Acheter des livres en ligne au Maroc – PetsUnivers Store',
+      description: 'Achetez vos livres au Maroc avec PetsUnivers Store. Large choix de livres, livraison rapide à domicile et paiement à la livraison (COD) partout au Maroc.',
       h1: 'Livre Maroc : Votre librairie en ligne de référence',
       keyword: 'livre maroc',
       searchQuery: '',
-      intro: "Bienvenue sur Riwaya Store, votre destination numéro 1 pour l'achat de livres au Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou n'importe où dans le royaume, nous vous livrons vos ouvrages préférés directement à votre porte.",
+      intro: "Bienvenue sur PetsUnivers Store, votre destination numéro 1 pour l'achat de livres au Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou n'importe où dans le royaume, nous vous livrons vos ouvrages préférés directement à votre porte.",
       categoryText: "Nous proposons une vaste sélection couvrant tous les genres : développement personnel, business, littérature classique, romans contemporains et bien plus.",
       faq: [
         { q: "Comment commander un livre au Maroc ?", a: "C'est simple ! Parcourez notre catalogue, ajoutez le livre à votre panier, renseignez votre adresse et choisissez le paiement à la livraison. Nous expédions votre commande sous 24h." },
@@ -14,12 +14,12 @@ export const seoPages: Record<string, Record<string, any>> = {
       ]
     },
     'book-maroc': {
-      title: 'Book Maroc | Buy Books Online in Morocco – Riwaya Store',
-      description: 'Looking for a book in Morocco? Riwaya Store offers a great selection of English, French and Arabic books with nationwide delivery and Cash on Delivery.',
+      title: 'Book Maroc | Buy Books Online in Morocco – PetsUnivers Store',
+      description: 'Looking for a book in Morocco? PetsUnivers Store offers a great selection of English, French and Arabic books with nationwide delivery and Cash on Delivery.',
       h1: 'Book Maroc : The Best Place to Buy Books in Morocco',
       keyword: 'book maroc',
       searchQuery: 'english',
-      intro: "Finding the right book in Morocco has never been easier. At Riwaya Store, we provide a premium selection of English, French, and Arabic books, delivered straight to your home anywhere in Morocco.",
+      intro: "Finding the right book in Morocco has never been easier. At PetsUnivers Store, we provide a premium selection of English, French, and Arabic books, delivered straight to your home anywhere in Morocco.",
       categoryText: "Discover our curated collections including Self-Help, Business & Finance, Philosophy, and bestselling novels.",
       faq: [
         { q: "Do you deliver English books in Morocco?", a: "Yes, we have a dedicated selection of the best English books and deliver them across all Moroccan cities." },
@@ -28,24 +28,24 @@ export const seoPages: Record<string, Record<string, any>> = {
     },
     'acheter-livre-au-maroc': {
       title: 'Acheter Livre au Maroc | Livraison Rapide & Paiement à la Réception',
-      description: 'Où acheter un livre au Maroc ? Riwaya Store est la meilleure librairie en ligne pour commander vos livres en toute simplicité. Paiement à la livraison.',
+      description: 'Où acheter un livre au Maroc ? PetsUnivers Store est la meilleure librairie en ligne pour commander vos livres en toute simplicité. Paiement à la livraison.',
       h1: 'Acheter un Livre au Maroc : Simple, Rapide et Sécurisé',
       keyword: 'acheter livre au maroc',
       searchQuery: '',
-      intro: "Si vous cherchez à acheter un livre au Maroc sans vous déplacer, vous êtes au bon endroit. Riwaya simplifie votre expérience de lecture en vous proposant un catalogue riche et varié accessible en quelques clics.",
+      intro: "Si vous cherchez à acheter un livre au Maroc sans vous déplacer, vous êtes au bon endroit. PetsUnivers simplifie votre expérience de lecture en vous proposant un catalogue riche et varié accessible en quelques clics.",
       categoryText: "Profitez de nos offres exclusives et de nos packs de livres à prix réduit pour enrichir votre bibliothèque.",
       faq: [
-        { q: "Pourquoi acheter sur Riwaya.store ?", a: "Nous garantissons des livres de qualité, un service client réactif, et une livraison express partout au Maroc avec option de paiement à la réception." },
+        { q: "Pourquoi acheter sur PetsUnivers ?", a: "Nous garantissons des livres de qualité, un service client réactif, et une livraison express partout au Maroc avec option de paiement à la réception." },
         { q: "Puis-je retourner un livre ?", a: "Oui, nous avons une politique de retour flexible si le livre reçu est endommagé ou non conforme à votre commande." }
       ]
     },
     'librairie-en-ligne-maroc': {
-      title: 'Librairie en Ligne Maroc | Riwaya Store',
+      title: 'Librairie en Ligne Maroc | PetsUnivers Store',
       description: 'La meilleure librairie en ligne au Maroc. Achat de livres, romans, et développement personnel avec livraison à domicile. Découvrez notre catalogue.',
-      h1: 'Riwaya : La Librairie en Ligne N°1 au Maroc',
+      h1: 'PetsUnivers : La Librairie en Ligne N°1 au Maroc',
       keyword: 'librairie en ligne maroc',
       searchQuery: '',
-      intro: "Oubliez les déplacements et les files d'attente. Riwaya est votre librairie en ligne au Maroc ouverte 24h/24 et 7j/7. Nous mettons la culture et le savoir à portée de main.",
+      intro: "Oubliez les déplacements et les files d'attente. PetsUnivers est votre librairie en ligne au Maroc ouverte 24h/24 et 7j/7. Nous mettons la culture et le savoir à portée de main.",
       categoryText: "Notre librairie virtuelle propose des milliers de références constamment mises à jour avec les dernières nouveautés mondiales.",
       faq: [
         { q: "Livrez-vous dans toutes les villes ?", a: "Oui, notre librairie en ligne dessert Casablanca, Rabat, Fès, Tanger, Agadir, et toutes les autres villes marocaines." },
@@ -53,7 +53,7 @@ export const seoPages: Record<string, Record<string, any>> = {
       ]
     },
     'roman-maroc': {
-      title: 'Roman Maroc | Acheter les meilleurs romans au Maroc – Riwaya',
+      title: 'Roman Maroc | Acheter les meilleurs romans au Maroc – PetsUnivers',
       description: 'Passionné de lecture ? Découvrez notre collection de romans au Maroc. Romans policiers, romance, fantastique et littérature classique. Livraison rapide.',
       h1: 'Roman Maroc : Plongez dans des histoires captivantes',
       keyword: 'roman maroc',
@@ -67,23 +67,23 @@ export const seoPages: Record<string, Record<string, any>> = {
     },
     'livres-francais-maroc': {
       title: 'Livres Français Maroc | Littérature & Développement Personnel',
-      description: 'Trouvez et achetez vos livres en français au Maroc sur Riwaya Store. Un grand choix de livres francophones avec paiement à la livraison.',
+      description: 'Trouvez et achetez vos livres en français au Maroc sur PetsUnivers Store. Un grand choix de livres francophones avec paiement à la livraison.',
       h1: 'Livres Français au Maroc : Votre sélection francophone',
       keyword: 'livres français maroc',
       searchQuery: 'français',
-      intro: "La lecture en langue française est profondément ancrée dans la culture marocaine. Riwaya Store vous propose la meilleure sélection de livres en français au Maroc.",
+      intro: "La lecture en langue française est profondément ancrée dans la culture marocaine. PetsUnivers Store vous propose la meilleure sélection de livres en français au Maroc.",
       categoryText: "Découvrez des auteurs français incontournables et des traductions des plus grands succès mondiaux en développement personnel et business.",
       faq: [
         { q: "Quelles catégories de livres français proposez-vous ?", a: "Nous avons des romans, des essais philosophiques, des livres de psychologie et de nombreuses œuvres de développement personnel en français." }
       ]
     },
     'livres-anglais-maroc': {
-      title: 'English Books Morocco | Livres Anglais au Maroc – Riwaya',
-      description: 'Looking for English books in Morocco? Acheter des livres en anglais au Maroc facilement avec Riwaya Store. Best sellers, Self-help & Novels.',
+      title: 'English Books Morocco | Livres Anglais au Maroc – PetsUnivers',
+      description: 'Looking for English books in Morocco? Acheter des livres en anglais au Maroc facilement avec PetsUnivers Store. Best sellers, Self-help & Novels.',
       h1: 'English Books Morocco : Livres Anglais au Maroc',
       keyword: 'livres anglais maroc',
       searchQuery: 'english',
-      intro: "Avec l'essor de la langue de Shakespeare, la demande pour des livres en anglais au Maroc est grandissante. Riwaya Store est fier de proposer une sélection pointue d'ouvrages en version originale.",
+      intro: "Avec l'essor de la langue de Shakespeare, la demande pour des livres en anglais au Maroc est grandissante. PetsUnivers Store est fier de proposer une sélection pointue d'ouvrages en version originale.",
       categoryText: "Improve your English while reading the world's bestsellers in Self-improvement, Business, and Fiction.",
       faq: [
         { q: "Are these original English books?", a: "We offer high-quality editions of the most sought-after English books globally." },
@@ -96,8 +96,8 @@ export const seoPages: Record<string, Record<string, any>> = {
       description: 'Découvrez notre collection de romans arabes. Achetez les meilleurs romans en arabe au Maroc avec paiement à la livraison.',
       h1: 'Romans Arabes : Les Chefs-d\'œuvre de la Littérature Arabe',
       keyword: 'romans arabes',
-      searchQuery: 'رواية',
-      intro: 'Plongez dans la richesse de la littérature arabe. Riwaya vous propose une sélection variée des meilleurs romans arabes, allant des classiques intemporels aux succès contemporains.',
+      searchQuery: 'PetsUnivers',
+      intro: 'Plongez dans la richesse de la littérature arabe. PetsUnivers vous propose une sélection variée des meilleurs romans arabes, allant des classiques intemporels aux succès contemporains.',
       categoryText: 'Parcourez notre collection pour trouver des histoires captivantes écrites par les plus grands auteurs du monde arabe.',
       faq: [
         { q: 'Proposez-vous des nouveautés en arabe ?', a: 'Oui, nous ajoutons régulièrement les dernières sorties littéraires du monde arabe.' }
@@ -105,7 +105,7 @@ export const seoPages: Record<string, Record<string, any>> = {
     },
     'romans-romantiques': {
       title: 'Romans Romantiques | Histoires d\'Amour & Romance',
-      description: 'Achetez des romans romantiques passionnants sur Riwaya. Les meilleures histoires d\'amour avec livraison partout au Maroc.',
+      description: 'Achetez des romans romantiques passionnants sur PetsUnivers. Les meilleures histoires d\'amour avec livraison partout au Maroc.',
       h1: 'Romans Romantiques : Laissez-vous Emporter par l\'Amour',
       keyword: 'romans romantiques',
       searchQuery: 'رومانسية',
@@ -164,7 +164,7 @@ export const seoPages: Record<string, Record<string, any>> = {
       ]
     },
     'idees-cadeaux-livres': {
-      title: 'Idées Cadeaux : Offrez des Livres | Riwaya',
+      title: 'Idées Cadeaux : Offrez des Livres | PetsUnivers',
       description: 'Vous cherchez un cadeau original ? Offrez un livre ou un pack ! Découvrez nos meilleures idées cadeaux.',
       h1: 'Idées Cadeaux : Le Livre, Le Meilleur Présent',
       keyword: 'cadeau livre',
@@ -181,7 +181,7 @@ export const seoPages: Record<string, Record<string, any>> = {
       h1: 'Livres à Petit Prix : La Lecture Accessible à Tous',
       keyword: 'livres pas chers',
       searchQuery: '',
-      intro: 'La culture ne devrait pas être un luxe. Riwaya vous propose une large sélection de livres de qualité à des prix imbattables.',
+      intro: 'La culture ne devrait pas être un luxe. PetsUnivers vous propose une large sélection de livres de qualité à des prix imbattables.',
       categoryText: 'Parcourez nos offres spéciales et packs économiques pour enrichir votre bibliothèque sans vous ruiner.',
       faq: [
         { q: 'Ces livres sont-ils neufs ?', a: 'Oui, sauf indication contraire, tous nos livres à petit prix sont totalement neufs.' }
@@ -190,22 +190,22 @@ export const seoPages: Record<string, Record<string, any>> = {
   },
   ar: {
     // NOUVELLES CATÉGORIES (AR)
-    'riwayat-arabia': {
+    'petsuniverst-arabia': {
       title: 'روايات عربية | شراء أفضل الروايات العربية في المغرب',
       description: 'اكتشف مجموعتنا الواسعة من الروايات العربية. اشترِ أفضل الروايات في المغرب مع خدمة الدفع عند الاستلام.',
       h1: 'روايات عربية : روائع الأدب العربي',
       keyword: 'روايات عربية',
-      searchQuery: 'رواية',
-      intro: 'غُص في غمار الأدب العربي مع مكتبة رواية. نقدم لك تشكيلة متنوعة من أفضل الروايات العربية، من الكلاسيكيات الخالدة إلى أحدث الإصدارات الناجحة.',
+      searchQuery: 'PetsUnivers',
+      intro: 'غُص في غمار الأدب العربي مع مكتبة PetsUnivers. نقدم لك تشكيلة متنوعة من أفضل الروايات العربية، من الكلاسيكيات الخالدة إلى أحدث الإصدارات الناجحة.',
       categoryText: 'تصفح مجموعتنا للعثور على قصص مشوقة صاغتها أقلام كبار الكتّاب في الوطن العربي.',
       faq: [
         { q: 'هل تتوفرون على أحدث الإصدارات العربية؟', a: 'نعم، نقوم باستمرار بإضافة أحدث الإصدارات الأدبية من مختلف دور النشر العربية.' },
         { q: 'هل يمكنني الدفع عند الاستلام؟', a: 'بالتأكيد! نوفر خدمة الدفع عند الاستلام في جميع المدن المغربية.' }
       ]
     },
-    'riwayat-romansiya': {
+    'petsuniverst-romansiya': {
       title: 'روايات رومانسية | أجمل قصص الحب والغرام',
-      description: 'اشترِ أجمل الروايات الرومانسية وقصص الحب عبر مكتبة رواية مع توصيل سريع في جميع أنحاء المغرب.',
+      description: 'اشترِ أجمل الروايات الرومانسية وقصص الحب عبر مكتبة PetsUnivers مع توصيل سريع في جميع أنحاء المغرب.',
       h1: 'روايات رومانسية : دع الحب يأخذك في رحلة',
       keyword: 'روايات رومانسية',
       searchQuery: 'رومانسية الحب',
@@ -215,7 +215,7 @@ export const seoPages: Record<string, Record<string, any>> = {
         { q: 'هل تتوفرون على روايات رومانسية تاريخية؟', a: 'نعم، يضم الكتالوج الخاص بنا مختلف الأنواع الرومانسية بما في ذلك التاريخية والمعاصرة.' }
       ]
     },
-    'riwayat-tachwiq': {
+    'petsuniverst-tachwiq': {
       title: 'روايات تشويق وإثارة | أفضل الروايات البوليسية والغموض',
       description: 'لعشاق الغموض والإثارة، تصفح أفضل روايات التشويق والرعب المترجمة والعربية في المغرب.',
       h1: 'روايات تشويق وإثارة : ألغاز تحبس الأنفاس',
@@ -241,7 +241,7 @@ export const seoPages: Record<string, Record<string, any>> = {
     },
     'kotob-mal-istithmar': {
       title: 'كتب المال والاستثمار | تعلم الثقافة المالية',
-      description: 'أفضل كتب إدارة المال، الاستثمار، وريادة الأعمال. اكتشف كيف تبني ثروتك مع مكتبة رواية.',
+      description: 'أفضل كتب إدارة المال، الاستثمار، وريادة الأعمال. اكتشف كيف تبني ثروتك مع مكتبة PetsUnivers.',
       h1: 'كتب المال والاستثمار : تحكم في مستقبلك المالي',
       keyword: 'المال والاستثمار',
       searchQuery: 'المال الاستثمار ثروة أعمال بيزنس',
@@ -251,7 +251,7 @@ export const seoPages: Record<string, Record<string, any>> = {
         { q: 'هل هذه الكتب مناسبة لمن لا يملك خبرة مالية؟', a: 'نعم، العديد من الكتب مثل "الأب الغني والأب الفقير" صُممت خصيصاً لتبسيط المفاهيم المالية للمبتدئين.' }
       ]
     },
-    'riwayat-maghribia': {
+    'petsuniverst-maghribia': {
       title: 'روايات مغربية | اكتشف الأدب المغربي',
       description: 'تشكيلة من أفضل الروايات والكتب المغربية. ادعم الأدب المحلي واكتشف قصصاً من صميم المجتمع.',
       h1: 'روايات مغربية : صوت كُتّابنا الأصيل',
@@ -281,7 +281,7 @@ export const seoPages: Record<string, Record<string, any>> = {
       h1: 'كتب بأثمنة مناسبة : القراءة حق للجميع',
       keyword: 'كتب رخيصة',
       searchQuery: '',
-      intro: 'نعتقد في رواية أن الثقافة يجب أن تكون في متناول الجميع. لذا نقدم لكم مجموعة واسعة من الكتب ذات الجودة العالية بأسعار لا تقبل المنافسة.',
+      intro: 'نعتقد في PetsUnivers أن الثقافة يجب أن تكون في متناول الجميع. لذا نقدم لكم مجموعة واسعة من الكتب ذات الجودة العالية بأسعار لا تقبل المنافسة.',
       categoryText: 'تصفح عروضنا الخاصة وباقات الكتب الاقتصادية لتثري مكتبتك دون إرهاق ميزانيتك.',
       faq: [
         { q: 'هل هذه الكتب جديدة أم مستعملة؟', a: 'جميع الكتب المعروضة في هذا القسم هي كتب جديدة تماماً ومطبوعة بجودة عالية.' }
@@ -295,8 +295,8 @@ export const seoPages: Record<string, Record<string, any>> = {
       description: 'Discover our collection of Arabic novels. Buy the best novels in Arabic in Morocco with Cash on Delivery.',
       h1: 'Arabic Novels: Masterpieces of Arabic Literature',
       keyword: 'arabic novels',
-      searchQuery: 'رواية',
-      intro: 'Dive into the richness of Arabic literature. Riwaya offers a diverse selection of the best Arabic novels, from timeless classics to contemporary hits.',
+      searchQuery: 'PetsUnivers',
+      intro: 'Dive into the richness of Arabic literature. PetsUnivers offers a diverse selection of the best Arabic novels, from timeless classics to contemporary hits.',
       categoryText: 'Browse our collection to find captivating stories written by the greatest authors in the Arab world.',
       faq: [
         { q: 'Do you offer new releases in Arabic?', a: 'Yes, we regularly add the latest literary releases from the Arab publishing world.' }
@@ -304,7 +304,7 @@ export const seoPages: Record<string, Record<string, any>> = {
     },
     'romantic-novels': {
       title: 'Romantic Novels | Love Stories & Romance Books',
-      description: 'Buy exciting romantic novels on Riwaya. The best love stories with delivery anywhere in Morocco.',
+      description: 'Buy exciting romantic novels on PetsUnivers. The best love stories with delivery anywhere in Morocco.',
       h1: 'Romantic Novels: Let Love Take You Away',
       keyword: 'romantic novels',
       searchQuery: 'رومانسية',
@@ -363,7 +363,7 @@ export const seoPages: Record<string, Record<string, any>> = {
       ]
     },
     'book-gift-ideas': {
-      title: 'Gift Ideas: Give Books | Riwaya',
+      title: 'Gift Ideas: Give Books | PetsUnivers',
       description: 'Looking for a unique gift? Give a book or a bundle! Discover our best gift ideas.',
       h1: 'Gift Ideas: A Book is the Best Present',
       keyword: 'book gifts',
@@ -380,7 +380,7 @@ export const seoPages: Record<string, Record<string, any>> = {
       h1: 'Affordable Books: Reading Accessible to All',
       keyword: 'cheap books',
       searchQuery: '',
-      intro: 'Culture shouldn\'t be a luxury. Riwaya offers a wide selection of quality books at unbeatable prices.',
+      intro: 'Culture shouldn\'t be a luxury. PetsUnivers offers a wide selection of quality books at unbeatable prices.',
       categoryText: 'Browse our special offers and economy packs to enrich your library without breaking the bank.',
       faq: [
         { q: 'Are these books new?', a: 'Yes, unless otherwise stated, all our affordable books are brand new.' }

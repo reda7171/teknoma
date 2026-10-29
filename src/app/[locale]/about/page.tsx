@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params;
     return {
         title: locale === 'ar' ? 'من نحن | أحسن مكتبة في المغرب' : locale === 'en' ? 'About Us | Best Bookstore in Morocco' : 'À propos | Meilleure librairie au Maroc',
-        description: locale === 'ar' ? 'تعرف على قصة مكتبة رواية، أفضل مكتبة إلكترونية في المغرب. أكثر من 10,000 عميل راضٍ وتوصيل إلى 40 مدينة مغربية.' : locale === 'en' ? 'Discover the story of Riwaya, the best online bookstore in Morocco. Over 10,000 satisfied customers and delivery to 40 Moroccan cities.' : 'Découvrez l\'histoire de Riwaya, la meilleure librairie en ligne au Maroc. Plus de 10 000 clients satisfaits et livraison dans 40 villes marocaines.',
+        description: locale === 'ar' ? 'تعرف على قصة مكتبة PetsUnivers، أفضل مكتبة إلكترونية في المغرب. أكثر من 10,000 عميل راضٍ وتوصيل إلى 40 مدينة مغربية.' : locale === 'en' ? 'Discover the story of PetsUnivers, the best online bookstore in Morocco. Over 10,000 satisfied customers and delivery to 40 Moroccan cities.' : 'Découvrez l\'histoire de PetsUnivers, la meilleure librairie en ligne au Maroc. Plus de 10 000 clients satisfaits et livraison dans 40 villes marocaines.',
     }
 }
 
@@ -28,8 +28,8 @@ export default async function AboutPage() {
                         '@type': 'AboutPage',
                         mainEntity: {
                             '@type': 'Organization',
-                            name: 'Riwaya',
-                            description: 'Riwaya est la meilleure librairie en ligne au Maroc, avec plus de 10 000 clients satisfaits et une livraison rapide dans plus de 40 villes.',
+                            name: 'PetsUnivers',
+                            description: 'PetsUnivers est la meilleure librairie en ligne au Maroc, avec plus de 10 000 clients satisfaits et une livraison rapide dans plus de 40 villes.',
                             numberOfEmployees: {
                                 '@type': 'QuantitativeValue',
                                 value: 15
@@ -59,7 +59,7 @@ export default async function AboutPage() {
                         {tAbout('OurStory')}
                     </div>
                     <h1 className="text-6xl md:text-9xl font-black text-black tracking-tighter leading-none mb-4 italic">
-                        Riwaya<span className="text-gray-200">.</span>
+                        PetsUnivers<span className="text-gray-200">.</span>
                     </h1>
                     <p className="max-w-2xl mx-auto text-lg md:text-2xl font-bold text-gray-400 uppercase tracking-tight leading-relaxed">
                         {tAbout('HeroDesc')}
@@ -78,10 +78,10 @@ export default async function AboutPage() {
                             <div className="absolute -inset-4 bg-pixio-beige rounded-[3rem] -rotate-2"></div>
                             <div className="relative aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl">
                                 <div className="absolute inset-0 bg-black/5 z-10"></div>
-                                <Image 
-                                    src="/images/about-mission.png" 
-                                    alt="Riwaya Mission" 
-                                    fill 
+                                <Image
+                                    src="/images/about-mission.png"
+                                    alt="PetsUnivers Mission"
+                                    fill
                                     className="object-cover"
                                 />
                             </div>
@@ -110,11 +110,11 @@ export default async function AboutPage() {
                 </div>
             </section>
 
-            {/* Why Riwaya */}
+            {/* Why PetsUnivers */}
             <section className="py-32 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-24">
-                        <h2 className="text-4xl md:text-7xl font-black text-black tracking-tighter mb-6 italic">{tAbout('WhyRiwaya')}<span className="text-gray-200">.</span></h2>
+                        <h2 className="text-4xl md:text-7xl font-black text-black tracking-tighter mb-6 italic">{tAbout('WhyPetsUnivers')}<span className="text-gray-200">.</span></h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                         {[
@@ -143,7 +143,7 @@ export default async function AboutPage() {
                     </div>
                     <div className="w-full h-[500px] rounded-[3rem] overflow-hidden shadow-2xl border border-gray-100 relative">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3307.1204143553496!2d-6.855548012368882!3d34.015119950525694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda76d9be04b2cdb%3A0xb283e75db60f9d37!2sRiwaya!5e0!3m2!1sfr!2sma!4v1778441297097!5m2!1sfr!2sma"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3307.1204143553496!2d-6.855548012368882!3d34.015119950525694!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda76d9be04b2cdb%3A0xb283e75db60f9d37!2sPetsUnivers!5e0!3m2!1sfr!2sma!4v1778441297097!5m2!1sfr!2sma"
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
@@ -151,7 +151,7 @@ export default async function AboutPage() {
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
                             className="absolute inset-0"
-                            title="Riwaya - Rabat, Maroc"
+                            title="PetsUnivers - Rabat, Maroc"
                         ></iframe>
                     </div>
                 </div>

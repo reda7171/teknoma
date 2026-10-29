@@ -7,14 +7,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: 'TermsPage' });
     return {
-        title: `${t('Title')} | Riwaya`
+        title: `${t('Title')} | PetsUnivers`
     }
 }
 
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: 'TermsPage' })
-    
+
     return (
         <div className="min-h-screen bg-pixio-cream">
             <Header />
@@ -23,7 +23,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-10">
                         <FileSignature className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
-                    
+
                     <h1 className="text-3xl sm:text-5xl font-black text-black tracking-tighter mb-6 sm:mb-12 italic">
                         {t('Title')}<span className="text-gray-200">.</span>
                     </h1>

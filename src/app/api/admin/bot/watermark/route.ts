@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
         }
 
         const fileBuffer = await fsPromises.readFile(result.absolutePath)
-        const filename = `riwaya_fb_${book.id}.jpg`
+        const filename = `petsunivers_fb_${book.id}.jpg`
 
         return new NextResponse(fileBuffer, {
             status: 200,

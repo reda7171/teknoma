@@ -168,7 +168,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
                         adresse: order.address,
                         ville: order.city,
                         telephone: order.phone,
-                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/track/${order.id}`
+                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma'}/track/${order.id}`
                     }).catch(console.error)
                 }).catch(console.error)
             }
@@ -457,7 +457,7 @@ export async function syncOrderToWithYou(orderId: string) {
             adressedest: order.address,
             prixcolis: order.total.toString(),
             refcolis: `RW-${order.id.slice(0, 8)}`,
-            observation: `Commande Riwaya #${order.id.slice(0, 8)}`
+            observation: `Commande PetsUnivers #${order.id.slice(0, 8)}`
         }
 
         // Créer le colis sur WithYou
@@ -489,7 +489,7 @@ export async function syncOrderToWithYou(orderId: string) {
         return {
             success: true,
             trackingID: trackingID,
-            message: syncWarning 
+            message: syncWarning
                 ? `Commande assignée à WithYou (Attention: ${syncWarning})`
                 : 'Commande envoyée à WithYou avec succès'
         }
@@ -539,7 +539,7 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
                 adressedest: order.address,
                 prixcolis: order.total.toString(),
                 refcolis: `RW-${order.id.slice(0, 8)}`,
-                observation: `Commande Riwaya #${order.id.slice(0, 8)}`
+                observation: `Commande PetsUnivers #${order.id.slice(0, 8)}`
             }
 
             try {
@@ -555,8 +555,8 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
 
             const packageData = {
                 price: order.total,
-                comment: order.comment || `Commande Riwaya #${order.id.slice(0, 8)}`,
-                description: `Commande Riwaya #${order.id.slice(0, 8)}`,
+                comment: order.comment || `Commande PetsUnivers #${order.id.slice(0, 8)}`,
+                description: `Commande PetsUnivers #${order.id.slice(0, 8)}`,
                 inventory: true,
                 name: order.fullName,
                 destination: {
@@ -566,12 +566,12 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
                     streetAddress: order.address
                 },
                 pickup_address: {
-                    streetAddress: "Adresse Riwaya",
-                    city: "Ville Riwaya",
+                    streetAddress: "Adresse PetsUnivers",
+                    city: "Ville PetsUnivers",
                     phone: "0600000000",
-                    company: "Riwaya",
-                    email: "contact@riwaya.store",
-                    website: "https://riwaya.store"
+                    company: "PetsUnivers",
+                    email: "contact@petsunivers.ma",
+                    website: "https://petsunivers.ma"
                 }
             }
 
@@ -614,7 +614,7 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
         return {
             success: true,
             trackingID: trackingID,
-            message: syncWarning 
+            message: syncWarning
                 ? `Commande assignée à ${company.name} (Attention: ${syncWarning})`
                 : `Commande envoyée à ${company.name} avec succès`
         }
@@ -670,13 +670,15 @@ export async function bulkDeleteOrders(orderIds: string[]) {
             }
         })
 
-        // Supprimer les commandes (les items et l'historique de statut seront supprimés via Cascade ou manuellement si nécessaire)
-        // Note: Dans le schéma, OrderItem et OrderStatusHistory doivent avoir onDelete: Cascade sur orderId
-        await prisma.order.deleteMany({
-            where: {
-                id: { in: orderIds }
-            }
-        })
+        // PayPal payments restrict order deletion; remove both atomically.
+        await prisma.$transaction([
+            prisma.paypalPayment.deleteMany({
+                where: { orderId: { in: orderIds } }
+            }),
+            prisma.order.deleteMany({
+                where: { id: { in: orderIds } }
+            })
+        ])
 
         revalidatePath('/admin/orders')
 

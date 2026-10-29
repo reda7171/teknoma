@@ -5,7 +5,7 @@ export const transporter = nodemailer.createTransport({
     port: parseInt(process.env.SMTP_PORT || '465'),
     secure: true,
     auth: {
-        user: process.env.SMTP_USER || 'contact@riwaya.store',
+        user: process.env.SMTP_USER || 'contact@petsunivers.ma',
         pass: process.env.SMTP_PASS || 'admin123',
     },
 })
@@ -25,7 +25,7 @@ export async function sendOrderConfirmation(order: any) {
             <h1 style="color: #000;">Merci pour votre commande !</h1>
             <p>Bonjour ${order.fullName},</p>
             <p>Nous avons bien reçu votre commande <strong>#${order.id.slice(0, 8)}</strong>.</p>
-            
+
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0;">
                 <h2>Détails de la commande</h2>
                 ${itemsHtml}
@@ -39,19 +39,19 @@ export async function sendOrderConfirmation(order: any) {
             ${order.phone}</p>
 
             <p>Nous vous contacterons très bientôt pour confirmer la livraison.</p>
-            
+
             <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
-            
+
             <p style="color: #888; font-size: 12px;">
-                Riwaya - Librairie en ligne<br/>
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}">www.riwaya.store</a>
+                PetsUnivers - Librairie en ligne<br/>
+                <a href="${process.env.NEXT_PUBLIC_APP_URL}">www.petsunivers.ma</a>
             </p>
         </div>
     `
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya" <contact@riwaya.store>',
+            from: '"PetsUnivers" <contact@petsunivers.ma>',
             to: order.email,
             subject: `Confirmation de commande #${order.id.slice(0, 8)}`,
             html,
@@ -88,7 +88,7 @@ export async function sendOrderStatusUpdate(order: any, status: string) {
             <h1 style="color: #000;">Mise à jour de votre commande</h1>
             <p>Bonjour ${order.fullName},</p>
             <p>Le statut de votre commande <strong>#${order.id.slice(0, 8)}</strong> a changé :</p>
-            
+
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
                 <h2 style="color: #000; margin: 0;">${status}</h2>
                 <p>${message}</p>
@@ -100,7 +100,7 @@ export async function sendOrderStatusUpdate(order: any, status: string) {
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya" <contact@riwaya.store>',
+            from: '"PetsUnivers" <contact@petsunivers.ma>',
             to: order.email,
             subject: `Mise à jour commande #${order.id.slice(0, 8)}: ${status}`,
             html,
@@ -119,19 +119,19 @@ export async function sendSellerBookApproved(book: any) {
             <h1 style="color: #000;">Bonne nouvelle ! Votre livre est en ligne 🎉</h1>
             <p>Bonjour ${seller.fullName || seller.email?.split('@')[0] || 'Vendeur'},</p>
             <p>Nous avons le plaisir de vous informer que votre livre <strong>"${book.title}"</strong> a été examiné et approuvé par notre équipe.</p>
-            <p>Il est désormais visible par tous les acheteurs sur la plateforme Riwaya.</p>
+            <p>Il est désormais visible par tous les acheteurs sur la plateforme PetsUnivers.</p>
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0;">
                 <p><strong>Prix de vente :</strong> ${book.price} MAD</p>
             </div>
             <p>Nous vous contacterons dès qu'un acheteur passera commande !</p>
             <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
-            <p style="color: #888; font-size: 12px;">Riwaya - Librairie en ligne</p>
+            <p style="color: #888; font-size: 12px;">PetsUnivers - Librairie en ligne</p>
         </div>
     `
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya Marketplace" <contact@riwaya.store>',
+            from: '"PetsUnivers Marketplace" <contact@petsunivers.ma>',
             to: seller.email,
             subject: `Votre livre "${book.title}" est maintenant en ligne !`,
             html,
@@ -154,13 +154,13 @@ export async function sendSellerBookRejected(book: any, reason: string = '') {
             ${reason ? `<div style="background-color: #fdf2f2; border: 1px solid #f8b4b4; padding: 15px; border-radius: 8px; margin: 20px 0;"><p style="color: #c81e1e; margin:0;"><strong>Motif :</strong> ${reason}</p></div>` : ''}
             <p>N'hésitez pas à nous soumettre d'autres livres à l'avenir.</p>
             <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
-            <p style="color: #888; font-size: 12px;">Riwaya - Librairie en ligne</p>
+            <p style="color: #888; font-size: 12px;">PetsUnivers - Librairie en ligne</p>
         </div>
     `
 
     try {
         await transporter.sendMail({
-            from: '"Riwaya Marketplace" <contact@riwaya.store>',
+            from: '"PetsUnivers Marketplace" <contact@petsunivers.ma>',
             to: seller.email,
             subject: `Information concernant votre livre "${book.title}"`,
             html,

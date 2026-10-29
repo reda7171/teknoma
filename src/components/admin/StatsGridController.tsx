@@ -27,7 +27,7 @@ interface StatsGridControllerProps {
     colorClasses: Record<string, string>
 }
 
-const STORAGE_KEY = 'riwaya_dashboard_cards_visibility'
+const STORAGE_KEY = 'petsunivers_dashboard_cards_visibility'
 
 export default function StatsGridController({ cards, colorClasses }: StatsGridControllerProps) {
     const { isMasked, togglePrivacy, formatValue, isSensitive, toggleKeyPrivacy } = useDashboardPrivacy()

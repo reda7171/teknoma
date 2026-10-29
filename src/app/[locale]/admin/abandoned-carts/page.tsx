@@ -30,7 +30,7 @@ export default async function AbandonedCartsPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style PetsUnivers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
@@ -40,9 +40,9 @@ export default async function AbandonedCartsPage() {
                         Recouvrement des paniers abandonnés
                     </p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <NotificationCenterButton 
+                    <NotificationCenterButton
                         orders={abandonedCarts.map(cart => ({
                             id: cart.id,
                             fullName: cart.fullName || 'Client Inconnu',
@@ -64,7 +64,7 @@ export default async function AbandonedCartsPage() {
             <div className="grid gap-8">
                 {abandonedCarts.map(cart => (
                     <div key={cart.id} className="group bg-white rounded-[3rem] p-10 border border-gray-100 shadow-xl shadow-black/5 flex flex-col lg:flex-row gap-10 lg:items-center justify-between hover:-translate-y-1 transition-all">
-                        
+
                         <div className="flex-1 space-y-6">
                             <div className="flex items-center gap-5">
                                 <div className="w-14 h-14 bg-black rounded-[1.5rem] flex items-center justify-center text-white shadow-lg shadow-black/10 shrink-0 transition-transform group-hover:scale-110">
@@ -82,7 +82,7 @@ export default async function AbandonedCartsPage() {
                                     <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Actif il y a {formatDistanceToNow(cart.updatedAt, { locale: fr })}</p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex flex-wrap gap-3">
                                 {cart.phone && (
                                     <div className="flex items-center gap-3 border border-gray-50 px-5 py-3 rounded-2xl bg-gray-50 shadow-inner">
@@ -114,8 +114,8 @@ export default async function AbandonedCartsPage() {
                         {/* Actions Premium */}
                         <div className="flex flex-col sm:flex-row lg:flex-col gap-4 shrink-0">
                             {cart.phone && (
-                                <a 
-                                    href={`https://wa.me/${cart.phone.replace(/^0/, '212').replace(/\s+/g, '')}?text=Bonjour ${cart.fullName || ''}, nous avons remarqué que vous n'avez pas terminé votre commande sur Riwaya. Avez-vous besoin d'aide avec un livre ou le paiement à la livraison ?`}
+                                <a
+                                    href={`https://wa.me/${cart.phone.replace(/^0/, '212').replace(/\s+/g, '')}?text=Bonjour ${cart.fullName || ''}, nous avons remarqué que vous n'avez pas terminé votre commande sur PetsUnivers. Avez-vous besoin d'aide avec un livre ou le paiement à la livraison ?`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="flex items-center justify-center gap-3 bg-[#25D366] text-white px-8 py-5 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-[#25D366]/20 hover:scale-105 active:scale-95 transition-all text-[10px] w-full"
@@ -125,8 +125,8 @@ export default async function AbandonedCartsPage() {
                                 </a>
                             )}
                             {cart.email && !cart.phone && (
-                                <a 
-                                    href={`mailto:${cart.email}?subject=Votre panier Riwaya vous attend&body=Bonjour ${cart.fullName || ''}, ...`}
+                                <a
+                                    href={`mailto:${cart.email}?subject=Votre panier PetsUnivers vous attend&body=Bonjour ${cart.fullName || ''}, ...`}
                                     className="flex items-center justify-center gap-3 bg-black text-white px-8 py-5 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-black/10 hover:scale-105 active:scale-95 transition-all text-[10px] w-full"
                                 >
                                     <Mail className="w-4 h-4" />

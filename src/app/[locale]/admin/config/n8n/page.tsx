@@ -5,7 +5,7 @@ import N8nConfigForm from './N8nConfigForm'
 import { Repeat } from 'lucide-react'
 
 export const metadata = {
-    title: 'Configuration n8n | Admin Riwaya',
+    title: 'Configuration n8n | Admin PetsUnivers',
 }
 
 export const dynamic = 'force-dynamic'
@@ -36,7 +36,7 @@ export default async function N8nConfigPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style PetsUnivers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2 italic">
@@ -59,10 +59,10 @@ export default async function N8nConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Webhooks & Tokens de réseaux sociaux</p>
                         </div>
                     </div>
-                    <N8nConfigForm 
-                        initialWebhookUrl={webhookUrl} 
+                    <N8nConfigForm
+                        initialWebhookUrl={webhookUrl}
                         initialInstagramWebhookUrl={instagramWebhookUrl}
-                        initialFacebookAccessToken={facebookAccessToken} 
+                        initialFacebookAccessToken={facebookAccessToken}
                         initialInstagramAccountId={instagramAccountId}
                         initialInstagramToken={instagramToken}
                         initialThreadsAccountId={threadsAccountId}

@@ -22,7 +22,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
     const [search, setSearch] = useState('')
     const [saving, setSaving] = useState<string | null>(null)
     const [saved, setSaved] = useState<Set<string>>(new Set())
-    
+
     // New state for EXIF
     const [injectingExif, setInjectingExif] = useState<string | null>(null)
     const [exifSuccess, setExifSuccess] = useState<Set<string>>(new Set())
@@ -40,9 +40,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
 
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(posts.map(p => [p.id, {
-            alt: p.altText || `${p.title} - ${p.authorName || 'Riwaya'} | Blog Riwaya`,
-            title: p.imageTitle || `Lire l'article ${p.title} sur le blog Riwaya`,
-            keywords: `${p.title}, ${p.authorName || 'Riwaya'}, blog, article, riwaya${p.category ? `, ${p.category}` : ''}`
+            alt: p.altText || `${p.title} - ${p.authorName || 'PetsUnivers'} | Blog PetsUnivers`,
+            title: p.imageTitle || `Lire l'article ${p.title} sur le blog PetsUnivers`,
+            keywords: `${p.title}, ${p.authorName || 'PetsUnivers'}, blog, article, petsunivers${p.category ? `, ${p.category}` : ''}`
         }]))
     )
     const [message, setMessage] = useState('')
@@ -86,12 +86,12 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ edits: chunk })
                 })
-                
+
                 const contentType = res.headers.get('content-type')
                 if (!contentType || !contentType.includes('application/json')) {
                     throw new Error(`Erreur serveur (${res.status}): Réponse non JSON.`)
                 }
-                
+
                 if (!res.ok) throw new Error('Erreur API')
                 setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Sauvegarde des métadonnées...' })
             }
@@ -287,13 +287,13 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
 
     async function downloadAll() {
         if (!confirm(`Voulez-vous vraiment télécharger ${filtered.length} images ? Votre navigateur pourrait vous demander l'autorisation de télécharger plusieurs fichiers.`)) return;
-        
+
         setIsDownloading(true);
         setMessage('');
         setProgress({ current: 0, total: filtered.length, label: 'Téléchargement en cours...' });
-        
+
         let errorCount = 0;
-        
+
         for (let i = 0; i < filtered.length; i++) {
             const post = filtered[i];
             if (!post.coverImage) continue;
@@ -304,14 +304,14 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                
+
                 let filename = post.coverImage.split('/').pop() || `${post.id}.jpg`;
                 if (filename.includes('?')) filename = filename.split('?')[0];
                 a.download = filename;
-                
+
                 document.body.appendChild(a);
                 a.click();
-                
+
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             } catch (e) {
@@ -319,11 +319,11 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                 console.error(`Erreur téléchargement ${post.coverImage}`, e);
             }
             setProgress({ current: i + 1, total: filtered.length, label: 'Téléchargement en cours...' });
-            
+
             // Attendre 250ms pour ne pas bloquer le navigateur
             await new Promise(r => setTimeout(r, 250));
         }
-        
+
         setTimeout(() => setProgress(null), 2000);
         if (errorCount > 0) {
             setMessage(`Téléchargement terminé : ${filtered.length - errorCount} succès, ${errorCount} erreurs.`);
@@ -335,10 +335,10 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
 
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
-        
-        const frKeywords = "blog lecture, articles sur les livres, conseils lecture, riwaya blog, actualité littéraire maroc, chroniques littéraires";
-        const arKeywords = "مدونة القراءة, مقالات عن الكتب, نصائح للقراءة, مدونة رواية, أخبار الأدب المغرب, مراجعات الكتب";
-        const enKeywords = "reading blog, book articles, reading tips, riwaya blog, literary news morocco, book reviews";
+
+        const frKeywords = "blog lecture, articles sur les livres, conseils lecture, petsunivers blog, actualité littéraire maroc, chroniques littéraires";
+        const arKeywords = "مدونة القراءة, مقالات عن الكتب, نصائح للقراءة, مدونة PetsUnivers, أخبار الأدب المغرب, مراجعات الكتب";
+        const enKeywords = "reading blog, book articles, reading tips, petsunivers blog, literary news morocco, book reviews";
 
         posts.forEach(p => {
             let baseKeywords = "";
@@ -347,9 +347,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
             else baseKeywords = frKeywords; // Default to French if 'fr' or undefined
 
             updated[p.id] = {
-                alt: `${p.title} - ${p.authorName || 'Riwaya'}${p.category ? ` | ${p.category}` : ''} | Blog Riwaya`,
-                title: `Lire "${p.title}" sur le blog de Riwaya`,
-                keywords: `${p.title}, ${p.authorName || 'Riwaya'}, blog, article, riwaya${p.category ? `, ${p.category}` : ''}, ${baseKeywords}`
+                alt: `${p.title} - ${p.authorName || 'PetsUnivers'}${p.category ? ` | ${p.category}` : ''} | Blog PetsUnivers`,
+                title: `Lire "${p.title}" sur le blog de PetsUnivers`,
+                keywords: `${p.title}, ${p.authorName || 'PetsUnivers'}, blog, article, petsunivers${p.category ? `, ${p.category}` : ''}, ${baseKeywords}`
             }
         })
         setEdits(updated)
@@ -383,7 +383,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                         <span className="text-xs font-bold text-gray-900">{Math.round((progress.current / progress.total) * 100)}%</span>
                     </div>
                     <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
+                        <div
                             className="h-full bg-black transition-all duration-300"
                             style={{ width: `${(progress.current / progress.total) * 100}%` }}
                         ></div>
@@ -470,7 +470,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                             {/* Image */}
                             <div className="w-24 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                 <img
-                                    src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${post.coverImage}` : post.coverImage || '/placeholder.jpg'}
+                                    src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.petsunivers.ma${post.coverImage}` : post.coverImage || '/placeholder.jpg'}
                                     alt={edits[post.id]?.alt || post.title}
                                     title={edits[post.id]?.title || post.title}
                                     className="w-full h-full object-cover"
@@ -482,7 +482,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                             <div className="flex-1 space-y-3">
                                 <div>
                                     <p className="text-xs font-black text-gray-600 uppercase tracking-widest mb-0.5">{post.title}</p>
-                                    <p className="text-xs text-gray-400">{post.authorName || 'Riwaya'}</p>
+                                    <p className="text-xs text-gray-400">{post.authorName || 'PetsUnivers'}</p>
                                 </div>
 
                                 <div>
@@ -494,7 +494,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                         value={edits[post.id]?.alt || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [post.id]: { ...prev[post.id], alt: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 outline-none bg-white"
-                                        placeholder={`${post.title} | Blog Riwaya`}
+                                        placeholder={`${post.title} | Blog PetsUnivers`}
                                     />
                                 </div>
 
@@ -519,7 +519,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                         value={edits[post.id]?.keywords || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [post.id]: { ...prev[post.id], keywords: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 outline-none bg-white"
-                                        placeholder={`Blog, Riwaya, ...`}
+                                        placeholder={`Blog, PetsUnivers, ...`}
                                     />
                                 </div>
                             </div>
@@ -542,7 +542,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                 )}
                                 {saved.has(post.id) ? 'Sauvé' : 'Sauver SEO'}
                             </button>
-                            
+
                             <button
                                 type="button"
                                 onClick={() => injectExif(post.id)}
@@ -558,7 +558,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                 )}
                                 {exifSuccess.has(post.id) ? 'Injecté !' : 'EXIF'}
                             </button>
-                            
+
                             <button
                                 type="button"
                                 onClick={() => renameImage(post.id)}

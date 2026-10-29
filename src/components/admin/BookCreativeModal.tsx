@@ -19,19 +19,19 @@ interface BookCreativeModalProps {
     } | null
     format?: 'post' | 'story'
     onAutoCapture?: (uploadUrl: string) => void  // pub en boucle : capture auto
-    initialLogoVariant?: 'riwaya' | 'jumia'
+    initialLogoVariant?: 'petsunivers' | 'jumia'
 }
 
 export default function BookCreativeModal({ isOpen, onClose, book, format = 'post', onAutoCapture, initialLogoVariant }: BookCreativeModalProps) {
     const posterRef = useRef<HTMLDivElement>(null)
-    const posterRefRiwaya = useRef<HTMLDivElement>(null)
+    const posterRefPetsUnivers = useRef<HTMLDivElement>(null)
     const posterRefJumia = useRef<HTMLDivElement>(null)
-    const [previewTab, setPreviewTab] = useState<'both' | 'riwaya' | 'jumia'>('both')
-    const [fullscreenVariant, setFullscreenVariant] = useState<'riwaya' | 'jumia' | null>(null)
+    const [previewTab, setPreviewTab] = useState<'both' | 'petsunivers' | 'jumia'>('both')
+    const [fullscreenVariant, setFullscreenVariant] = useState<'petsunivers' | 'jumia' | null>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [isPublishing, setIsPublishing] = useState(false)
     const [theme, setTheme] = useState<'dark' | 'light' | 'orange' | 'magenta' | 'emerald' | 'gold' | 'purple'>('dark')
-    const [logoVariant, setLogoVariant] = useState<'riwaya' | 'jumia'>(initialLogoVariant || 'riwaya')
+    const [logoVariant, setLogoVariant] = useState<'petsunivers' | 'jumia'>(initialLogoVariant || 'petsunivers')
 
     useEffect(() => {
         if (initialLogoVariant) {
@@ -90,7 +90,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         delivery_line1: 'Livraison',
         delivery_line2: 'Gratuite',
         whatsapp: '+212 702 220 575',
-        socialHandle: '@riwaya.book'
+        socialHandle: '@petsunivers.book'
     })
 
     const handleTextChange = (key: string, value: string) => {
@@ -179,7 +179,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                 delivery_line1: 'Livraison',
                 delivery_line2: 'Gratuite',
                 whatsapp: '+212 600 00 00 00',
-                socialHandle: '@riwaya.book'
+                socialHandle: '@petsunivers.book'
             })
             // Fetch site settings for WhatsApp phone number
             let whatsappPhone = '+212 600 00 00 00'
@@ -200,7 +200,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     const productUrl = `${window.location.origin}/fr/books/${data.book.id}`
                     const waPhone = whatsappPhone.replace(/[^0-9+]/g, '')
                     const waLink = `https://wa.me/${waPhone.startsWith('+') ? waPhone.slice(1) : waPhone}`
-                    const hashtags = `#riwaya #lecture #livre #maroc #culture ${data.book.category ? `#${data.book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
+                    const hashtags = `#petsunivers #lecture #livre #maroc #culture ${data.book.category ? `#${data.book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
                     setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${data.book.price} درهم\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
                 }
             }).catch(console.error)
@@ -214,7 +214,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             const productUrl = `${window.location.origin}/fr/books/${fullBookData.id}`
             const waPhone = editableTexts.whatsapp.replace(/[^0-9+]/g, '')
             const waLink = `https://wa.me/${waPhone.startsWith('+') ? waPhone.slice(1) : waPhone}`
-            const hashtags = `#riwaya #lecture #livre #maroc #culture ${fullBookData.category ? `#${fullBookData.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
+            const hashtags = `#petsunivers #lecture #livre #maroc #culture ${fullBookData.category ? `#${fullBookData.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
             setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${fullBookData.price} درهم\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
         }
     }, [useDescription, fullBookData, editableTexts.whatsapp])
@@ -242,7 +242,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     restoreImages(originals)
                     return
                 }
-                
+
                 let dataUrl: string = ''
                 try {
                     dataUrl = await htmlToImage.toPng(node, { quality: 1, pixelRatio: 2, cacheBust: false })
@@ -252,7 +252,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         dataUrl = await htmlToImage.toPng(node, { quality: 1, pixelRatio: 2, cacheBust: false, skipFonts: true })
                     }
                 }
-                
+
                 restoreImages(originals)
                 if (isMounted && dataUrl) {
                     onAutoCapture(dataUrl)
@@ -364,7 +364,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
 
         let finalDataUrl = dataUrl
         try {
-            const keywords = ['Riwaya', 'Jumia', 'Livre', book.title, book.author, 'Lecture', 'Maroc']
+            const keywords = ['PetsUnivers', 'Jumia', 'Livre', book.title, book.author, 'Lecture', 'Maroc']
             finalDataUrl = injectXMPToPNG(dataUrl, book.title, keywords.filter(Boolean))
         } catch (err) {
             console.error("XMP injection failed:", err)
@@ -373,7 +373,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     }
 
     const captureCurrentPoster = async (): Promise<string> => {
-        const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefRiwaya.current || posterRef.current)) || posterRef.current
+        const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefPetsUnivers.current || posterRef.current)) || posterRef.current
         return capturePosterNode(target)
     }
 
@@ -390,9 +390,9 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const handleDownload = async () => {
         try {
             setIsGenerating(true)
-            const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefRiwaya.current || posterRef.current)) || posterRef.current
+            const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefPetsUnivers.current || posterRef.current)) || posterRef.current
             const finalDataUrl = await capturePosterNode(target)
-            downloadDataUrl(finalDataUrl, logoVariant === 'jumia' ? 'Jumia' : 'Riwaya')
+            downloadDataUrl(finalDataUrl, logoVariant === 'jumia' ? 'Jumia' : 'PetsUnivers')
         } catch (error: any) {
             console.error('Erreur lors de la génération:', error)
             const errorMsg = error instanceof Error ? error.message : 'Une erreur est survenue lors de la création de l\'image.'
@@ -402,14 +402,14 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         }
     }
 
-    const handleDownloadRiwaya = async () => {
+    const handleDownloadPetsUnivers = async () => {
         try {
             setIsGenerating(true)
-            const target = posterRefRiwaya.current || posterRef.current
+            const target = posterRefPetsUnivers.current || posterRef.current
             const url = await capturePosterNode(target)
-            downloadDataUrl(url, 'Riwaya')
+            downloadDataUrl(url, 'PetsUnivers')
         } catch (err: any) {
-            alert(err?.message || 'Erreur lors du téléchargement Riwaya')
+            alert(err?.message || 'Erreur lors du téléchargement PetsUnivers')
         } finally {
             setIsGenerating(false)
         }
@@ -431,12 +431,12 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const handleDownloadBoth = async () => {
         try {
             setIsGenerating(true)
-            const targetRiwaya = posterRefRiwaya.current || posterRef.current
+            const targetPetsUnivers = posterRefPetsUnivers.current || posterRef.current
             const targetJumia = posterRefJumia.current || posterRef.current
 
-            if (targetRiwaya) {
-                const riwayaUrl = await capturePosterNode(targetRiwaya)
-                downloadDataUrl(riwayaUrl, 'Riwaya')
+            if (targetPetsUnivers) {
+                const petsuniversUrl = await capturePosterNode(targetPetsUnivers)
+                downloadDataUrl(petsuniversUrl, 'PetsUnivers')
                 await new Promise(resolve => setTimeout(resolve, 600))
             }
 
@@ -611,7 +611,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
             const productUrl = `${baseUrl}/fr/books/${book.id}`
             const text = caption || book.title
 
-            const tags = `#riwaya #lecture #livre #maroc #culture ${book.category ? `#${book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
+            const tags = `#petsunivers #lecture #livre #maroc #culture ${book.category ? `#${book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
 
             const newWindow = window.open()
             if (newWindow) {
@@ -646,7 +646,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     <div class="post-header">
                                         <div class="avatar">R</div>
                                         <div class="author-info">
-                                            <div class="author-name">Riwaya</div>
+                                            <div class="author-name">PetsUnivers</div>
                                             <div class="post-time">À l'instant • 🌐</div>
                                         </div>
                                     </div>
@@ -754,15 +754,15 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 style={{ transform: `translate(${positions.logo.x}px, ${positions.logo.y}px)` }}
                             >
                                 <img
-                                    src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
-                                    alt={logoVariant === 'jumia' ? 'Jumia' : 'Riwaya'}
+                                    src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-petsunivers.png?v=petsunivers2'}
+                                    alt={logoVariant === 'jumia' ? 'Jumia' : 'PetsUnivers'}
                                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                     className={`object-contain origin-top-right ${
                                         logoVariant === 'jumia'
                                             ? 'h-7 sm:h-8 max-w-[140px]'
                                             : 'h-9 sm:h-11 max-w-[120px] filter brightness-0 invert'
                                     }`}
-                                    style={{ 
+                                    style={{
                                         transform: `scale(${logoScale})`,
                                         transformOrigin: 'top right'
                                     }}
@@ -771,16 +771,16 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         )}
                     </div>
                     <div className={`flex-1 flex items-center justify-center px-12 ${format === 'story' ? 'py-12' : 'py-6'} relative z-30`}>
-                        <div 
+                        <div
                             className={`relative w-full ${format === 'story' ? 'max-w-[220px]' : 'max-w-[200px]'} mx-auto`}
                             style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)` }}
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={(() => { 
+                            <img src={(() => {
                                 let img = normalizeImage(book.image);
                                 // Unconditionally strip production domain so images are relative
                                 // This prevents CORS errors when fetching the image for base64 conversion
-                                img = img.replace('https://www.riwaya.store', '');
+                                img = img.replace('https://www.petsunivers.ma', '');
                                 return img.startsWith('http') && !img.includes(window.location.host) ? `/api/proxy/image?url=${encodeURIComponent(img)}` : img || '/book-placeholder.png';
                             })()} alt={book.title} onError={(e) => { e.currentTarget.src = '/book-placeholder.png'; }} className="relative w-full h-auto object-cover rounded shadow-2xl" style={{ boxShadow: showShadow ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none', transform: `scale(${imageScale}) rotate(${imageRotation}deg)`, opacity: imageOpacity }} />
                         </div>
@@ -830,7 +830,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         )
     }
 
-    const handleCardClick = (variant: 'riwaya' | 'jumia', e: React.MouseEvent) => {
+    const handleCardClick = (variant: 'petsunivers' | 'jumia', e: React.MouseEvent) => {
         const target = e.target as HTMLElement
         if (dragging || target.isContentEditable || target.closest('button') || target.closest('input')) {
             return
@@ -839,7 +839,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     }
 
     const renderPoster = (
-        variant: 'riwaya' | 'jumia',
+        variant: 'petsunivers' | 'jumia',
         containerRef?: React.RefObject<HTMLDivElement | null> | null,
         isInteractive = true,
         customClassName?: string
@@ -905,15 +905,15 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                            src={variant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
-                            alt={variant === 'jumia' ? 'Jumia Logo' : 'Riwaya Logo'}
+                            src={variant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-petsunivers.png?v=petsunivers2'}
+                            alt={variant === 'jumia' ? 'Jumia Logo' : 'PetsUnivers Logo'}
                             crossOrigin="anonymous"
                             className={`object-contain transition-transform origin-top-right select-none ${
                                 variant === 'jumia'
                                     ? 'h-7 sm:h-8 max-w-[140px]'
                                     : 'h-9 sm:h-11 max-w-[120px] filter brightness-0 invert'
                             }`}
-                            style={{ 
+                            style={{
                                 transform: `scale(${logoScale})`,
                                 transformOrigin: 'top right'
                             }}
@@ -1112,16 +1112,16 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     }`}
                                 >
                                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                                    Les 2 Images (Riwaya + Jumia)
+                                    Les 2 Images (PetsUnivers + Jumia)
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => { setPreviewTab('riwaya'); setLogoVariant('riwaya') }}
+                                    onClick={() => { setPreviewTab('petsunivers'); setLogoVariant('petsunivers') }}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
-                                        previewTab === 'riwaya' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-black'
+                                        previewTab === 'petsunivers' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-black'
                                     }`}
                                 >
-                                    Image Riwaya
+                                    Image PetsUnivers
                                 </button>
                                 <button
                                     type="button"
@@ -1152,17 +1152,17 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     {/* Mode "Les 2 Images" côte à côte */}
                     {previewTab === 'both' && (
                         <div className="w-full max-w-6xl grid grid-cols-1 xl:grid-cols-2 gap-6 items-start justify-items-center py-2">
-                            {/* Card 1 : Image Riwaya */}
+                            {/* Card 1 : Image PetsUnivers */}
                             <div className="flex flex-col items-center bg-white p-4 rounded-3xl shadow-sm border border-gray-200/80 w-full max-w-[520px]">
                                 <div className="flex items-center justify-between w-full mb-3 px-2">
                                     <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black text-white flex items-center gap-1.5">
                                         <span className="w-2 h-2 rounded-full bg-amber-400" />
-                                        Image 1 : Riwaya Store
+                                        Image 1 : PetsUnivers Store
                                     </span>
                                     <div className="flex items-center gap-1.5">
                                         <button
                                             type="button"
-                                            onClick={() => setFullscreenVariant('riwaya')}
+                                            onClick={() => setFullscreenVariant('petsunivers')}
                                             className="px-2.5 py-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
                                             title="Aperçu plein écran"
                                         >
@@ -1171,7 +1171,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={handleDownloadRiwaya}
+                                            onClick={handleDownloadPetsUnivers}
                                             disabled={isGenerating}
                                             className="px-3 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-1"
                                         >
@@ -1180,12 +1180,12 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         </button>
                                     </div>
                                 </div>
-                                <div 
+                                <div
                                     className="relative group cursor-pointer"
-                                    onClick={(e) => handleCardClick('riwaya', e)}
+                                    onClick={(e) => handleCardClick('petsunivers', e)}
                                     title="Cliquer pour prévisualiser en plein écran"
                                 >
-                                    {renderPoster('riwaya', posterRefRiwaya, true)}
+                                    {renderPoster('petsunivers', posterRefPetsUnivers, true)}
                                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
                                         <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
                                         <span>Plein écran</span>
@@ -1221,7 +1221,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         </button>
                                     </div>
                                 </div>
-                                <div 
+                                <div
                                     className="relative group cursor-pointer"
                                     onClick={(e) => handleCardClick('jumia', e)}
                                     title="Cliquer pour prévisualiser en plein écran"
@@ -1236,18 +1236,18 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         </div>
                     )}
 
-                    {/* Mode Image Riwaya seule */}
-                    {previewTab === 'riwaya' && (
+                    {/* Mode Image PetsUnivers seule */}
+                    {previewTab === 'petsunivers' && (
                         <div className="flex flex-col items-center bg-white p-5 rounded-3xl shadow-sm border border-gray-200/80">
                             <div className="flex items-center justify-between w-full mb-3 px-2">
                                 <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black text-white flex items-center gap-1.5">
                                     <span className="w-2 h-2 rounded-full bg-amber-400" />
-                                    Image Riwaya Store
+                                    Image PetsUnivers Store
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                     <button
                                         type="button"
-                                        onClick={() => setFullscreenVariant('riwaya')}
+                                        onClick={() => setFullscreenVariant('petsunivers')}
                                         className="px-2.5 py-1 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
                                         title="Aperçu plein écran"
                                     >
@@ -1256,7 +1256,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={handleDownloadRiwaya}
+                                        onClick={handleDownloadPetsUnivers}
                                         disabled={isGenerating}
                                         className="px-3 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-1"
                                     >
@@ -1265,12 +1265,12 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     </button>
                                 </div>
                             </div>
-                            <div 
+                            <div
                                 className="relative group cursor-pointer"
-                                onClick={(e) => handleCardClick('riwaya', e)}
+                                onClick={(e) => handleCardClick('petsunivers', e)}
                                 title="Cliquer pour prévisualiser en plein écran"
                             >
-                                {renderPoster('riwaya', posterRefRiwaya, true)}
+                                {renderPoster('petsunivers', posterRefPetsUnivers, true)}
                                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
                                     <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
                                     <span>Plein écran</span>
@@ -1308,7 +1308,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     </button>
                                 </div>
                             </div>
-                            <div 
+                            <div
                                 className="relative group cursor-pointer"
                                 onClick={(e) => handleCardClick('jumia', e)}
                                 title="Cliquer pour prévisualiser en plein écran"
@@ -1495,18 +1495,18 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setLogoVariant('riwaya')
+                                            setLogoVariant('petsunivers')
                                             setLogoScale(1)
                                             setPositions(p => ({ ...p, logo: { x: 0, y: 0 } }))
                                         }}
                                         className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
-                                            logoVariant === 'riwaya'
+                                            logoVariant === 'petsunivers'
                                                 ? 'bg-black text-white border-black shadow-md'
                                                 : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                                         }`}
                                     >
-                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'riwaya' ? 'bg-amber-400' : 'bg-gray-400'}`} />
-                                        Riwaya
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'petsunivers' ? 'bg-amber-400' : 'bg-gray-400'}`} />
+                                        PetsUnivers
                                     </button>
                                     <button
                                         type="button"
@@ -1736,10 +1736,10 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 onClick={handleDownloadBoth}
                                 disabled={isGenerating}
                                 className="col-span-2 flex items-center justify-center px-4 py-3 bg-gradient-to-r from-black via-gray-900 to-[#F68B1E] text-white font-black rounded-xl hover:opacity-95 transition-all shadow-md active:scale-95 text-xs uppercase tracking-wider gap-2 disabled:opacity-70"
-                                title="Télécharger les 2 images : 1 avec logo Riwaya et 1 avec logo Jumia"
+                                title="Télécharger les 2 images : 1 avec logo PetsUnivers et 1 avec logo Jumia"
                             >
                                 <Sparkles className="w-4 h-4 text-amber-300" />
-                                {isGenerating ? 'Génération en cours...' : 'Télécharger les 2 (Riwaya + Jumia)'}
+                                {isGenerating ? 'Génération en cours...' : 'Télécharger les 2 (PetsUnivers + Jumia)'}
                             </button>
                             <button
                                 onClick={handleDownload}
@@ -1747,7 +1747,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 className="flex items-center justify-center px-3 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-70 shadow-lg active:scale-95 text-xs"
                             >
                                 <Download className="w-4 h-4 mr-1.5" />
-                                {isGenerating ? '...' : `Télécharger (${logoVariant === 'jumia' ? 'Jumia' : 'Riwaya'})`}
+                                {isGenerating ? '...' : `Télécharger (${logoVariant === 'jumia' ? 'Jumia' : 'PetsUnivers'})`}
                             </button>
                             <button
                                 onClick={handlePreview}
@@ -1848,16 +1848,16 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                         <div className="flex items-center gap-3">
                             <span className={`px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-white flex items-center gap-2 shadow-md ${fullscreenVariant === 'jumia' ? 'bg-[#F68B1E]' : 'bg-black border border-white/20'}`}>
                                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                                {fullscreenVariant === 'jumia' ? 'Image Jumia Maroc' : 'Image Riwaya Store'}
+                                {fullscreenVariant === 'jumia' ? 'Image Jumia Maroc' : 'Image PetsUnivers Store'}
                             </span>
-                            {/* Basculeur direct Riwaya / Jumia */}
+                            {/* Basculeur direct PetsUnivers / Jumia */}
                             <div className="flex items-center bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 text-xs">
                                 <button
                                     type="button"
-                                    onClick={() => setFullscreenVariant('riwaya')}
-                                    className={`px-3 py-1 rounded-lg font-bold transition-all ${fullscreenVariant === 'riwaya' ? 'bg-white text-black shadow' : 'text-white/80 hover:text-white'}`}
+                                    onClick={() => setFullscreenVariant('petsunivers')}
+                                    className={`px-3 py-1 rounded-lg font-bold transition-all ${fullscreenVariant === 'petsunivers' ? 'bg-white text-black shadow' : 'text-white/80 hover:text-white'}`}
                                 >
-                                    Riwaya
+                                    PetsUnivers
                                 </button>
                                 <button
                                     type="button"
@@ -1873,7 +1873,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             <button
                                 type="button"
                                 onClick={() => {
-                                    if (fullscreenVariant === 'riwaya') handleDownloadRiwaya()
+                                    if (fullscreenVariant === 'petsunivers') handleDownloadPetsUnivers()
                                     else handleDownloadJumia()
                                 }}
                                 disabled={isGenerating}
@@ -1894,7 +1894,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                     </div>
 
                     {/* Poster en plein écran */}
-                    <div 
+                    <div
                         className="flex-1 flex items-center justify-center w-full max-h-[82vh] my-auto py-2 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >

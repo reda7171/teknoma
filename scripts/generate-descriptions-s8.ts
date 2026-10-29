@@ -48,7 +48,7 @@ async function main() {
     }
 
     const prompt = `
-Tu es un expert SEO et copywriter pour la librairie en ligne marocaine Riwaya.store.
+Tu es un expert SEO et copywriter pour la librairie en ligne marocaine petsunivers.ma.
 Rédige une courte description commerciale pour le livre suivant.
 Titre: "${book.title}"
 Auteur: "${book.author}"
@@ -65,7 +65,7 @@ Directives obligatoires:
     try {
       const result = await model.generateContent(prompt);
       let newDescription = result.response.text().trim();
-      
+
       // Cleanup des quotes potentielles au début et à la fin
       if (newDescription.startsWith('"') && newDescription.endsWith('"')) {
           newDescription = newDescription.slice(1, -1);
@@ -77,7 +77,7 @@ Directives obligatoires:
       });
 
       console.log(`✅ Succès: ${newDescription.substring(0, 80)}...`);
-      
+
       // Pause pour éviter le rate limit
       await sleep(1500);
     } catch (error) {

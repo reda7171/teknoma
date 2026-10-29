@@ -19,7 +19,7 @@ export function BookImage({ src, alt, title, className, sizes, priority = false 
     return (
       <span className="book-image-fallback" role="img" aria-label={alt || title}>
         <span>{title.slice(0, 2)}</span>
-        <small>RIWAYA</small>
+        <small>PETSUNIVERS</small>
       </span>
     )
   }

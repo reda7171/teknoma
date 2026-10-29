@@ -5,7 +5,7 @@ import { verifyAdmin } from '@/lib/actions/auth'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Gestion des Traductions | Admin Riwaya',
+    title: 'Gestion des Traductions | Admin PetsUnivers',
 }
 
 export default async function AdminTranslationsPage() {
@@ -14,7 +14,7 @@ export default async function AdminTranslationsPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style PetsUnivers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2">
@@ -24,7 +24,7 @@ export default async function AdminTranslationsPage() {
                         Internationalisation & Localisation (FR/AR/EN)
                     </p>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                     <div className="bg-black text-white px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10">
                         <Languages className="w-4 h-4 text-blue-400" />

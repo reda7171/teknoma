@@ -26,13 +26,13 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                         <span>{t('Home')}</span>
                     </Link>
                 </li>
-                
+
                 {items.map((item, index) => (
                     <li key={index} className="flex items-center gap-2">
                         <ChevronRight className="w-3 h-3 text-gray-400 shrink-0 rtl:rotate-180" />
                         {item.href ? (
-                            <Link 
-                                href={item.href as any} 
+                            <Link
+                                href={item.href as any}
                                 className="hover:text-black transition-colors"
                             >
                                 {item.label}
@@ -58,13 +58,13 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                                 '@type': 'ListItem',
                                 'position': 1,
                                 'name': t('Home'),
-                                'item': process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                                'item': process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
                             },
                             ...items.map((item, index) => ({
                                 '@type': 'ListItem',
                                 'position': index + 2,
                                 'name': item.label,
-                                'item': item.href ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'}${item.href}` : undefined
+                                'item': item.href ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'}${item.href}` : undefined
                             }))
                         ]
                     })

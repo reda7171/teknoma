@@ -25,7 +25,7 @@ export async function addExchangeBook(formData: FormData): Promise<BookResult> {
     // Vérifier l'éligibilité
     const isEligible = await checkExchangeEligibility(user)
     if (!isEligible) {
-        return { success: false, error: "Vous devez avoir effectué au moins une commande sur Riwaya pour accéder au système d'échange." }
+        return { success: false, error: "Vous devez avoir effectué au moins une commande sur PetsUnivers pour accéder au système d'échange." }
     }
 
     const rawData = {

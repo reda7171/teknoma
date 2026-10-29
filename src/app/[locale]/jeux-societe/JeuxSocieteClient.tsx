@@ -69,7 +69,7 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                     >
                         {/* Interactive hover glow */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 pointer-events-none transition-colors duration-500" />
-                        
+
                         <Link href={`/jeux-societe/${product.id}`} className="flex flex-col flex-grow z-10">
                             {/* Image */}
                             <div className="relative h-40 sm:h-52 bg-slate-50 w-full overflow-hidden p-4 flex items-center justify-center">
@@ -86,7 +86,7 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                                             <Package className="w-12 h-12 text-slate-300" />
                                         </div>
                                     );
-                                    
+
                                     if (!src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
                                         if (src.startsWith('/9j/') || src.startsWith('iVBOR') || src.length > 500) {
                                             src = src.startsWith('iVBOR') ? `data:image/png;base64,${src}` : `data:image/jpeg;base64,${src}`;
@@ -94,12 +94,12 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                                             src = `/uploads/images/${src}`;
                                         }
                                     }
-                                    
+
                                     // Load images from production in dev mode
                                     if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
-                                        src = `https://riwaya.store${src}`;
+                                        src = `https://petsunivers.ma${src}`;
                                     }
-                                    
+
                                     return (
                                         <Image
                                             src={src}
@@ -131,7 +131,7 @@ export default function JeuxSocieteClient({ products, locale }: { products: Prod
                                 )}
                             </div>
                         </Link>
-                        
+
                         <div className="p-4 sm:p-5 pt-0 mt-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 z-10">
                             <span className="text-lg sm:text-xl font-black text-slate-900 drop-shadow-sm">{product.price.toFixed(2)} <span className="text-sm text-slate-500 font-bold">DH</span></span>
                             <button

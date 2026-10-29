@@ -2,7 +2,7 @@
   "CartPromoPopup": {
     "Badge": "-10% Off",
     "Title": "Get an instant 10% discount on your cart!",
-    "Subtitle": "Enter your WhatsApp number or email to unlock your instant discount and receive private book deals.",
+    "Subtitle": "Enter your WhatsApp number or email to unlock your instant discount and receive private product deals.",
     "PhoneLabel": "WhatsApp / Phone Number",
     "PhonePlaceholder": "06 XX XX XX XX",
     "EmailLabel": "Email (optional)",
@@ -24,7 +24,7 @@
   },
   "PacksPage": {
     "Title": "Bundle Deals",
-    "Subtitle": "Save up to 30% by choosing our curated book collections. Hand-picked literature for universal minds.",
+    "Subtitle": "Save up to 30% by choosing our curated product collections. Hand-picked literature for universal minds.",
     "NoCollections": "No collections found",
     "Curating": "New arrivals are being curated.",
     "Benefits": {
@@ -55,10 +55,10 @@
     "WallOfFame": "Top Readers",
     "Subtitle": "Live Rankings",
     "Badge": "Live",
-    "Books": "Books",
+    "Books": "Products",
     "Anonymous": "Anonymous",
     "Headline": "Is your name on this list?",
-    "Body": "Every book you read earns your rank. Hundreds of readers compete every day — are you one of them?",
+    "Body": "Every product you read earns your rank. Hundreds of readers compete every day — are you one of them?",
     "CTA": "Join the race",
     "Sub": "Free · Sign in with Google or Facebook",
     "Pages": "pages",
@@ -68,20 +68,20 @@
   },
   "Seller": {
     "Sidebar": {
-      "Logo": "Riwaya",
+      "Logo": "PetsUnivers",
       "LogoSub": "Seller",
       "Dashboard": "Dashboard",
-      "MyBooks": "My Books",
+      "MyBooks": "My Products",
       "MyOrders": "My Orders",
       "MyBlog": "My Blog",
-      "NewBook": "New Book",
+      "NewBook": "New Product",
       "Logout": "Logout"
     },
     "Dashboard": {
       "Title": "Hello",
-      "Subtitle": "Your Riwaya Marketplace store",
+      "Subtitle": "Your PetsUnivers Marketplace store",
       "Stats": {
-        "Books": "My Books",
+        "Books": "My Products",
         "Orders": "Orders",
         "Revenue": "Total Revenue"
       },
@@ -90,21 +90,21 @@
       "NoOrders": "No orders yet.",
       "Tip": {
         "Title": "Sales tip",
-        "Body": "Improve your chances of selling by adding real photos of your books and detailed descriptions. Don't forget to indicate the exact condition (Like new, Good, Used).",
+        "Body": "Improve your chances of selling by adding real photos of your products and detailed descriptions. Don't forget to indicate the exact condition (Like new, Good, Used).",
         "Btn": "Learn more"
       },
-      "NewBook": "New Book"
+      "NewBook": "New Product"
     },
     "Books": {
       "Title": "My Catalogue",
       "Subtitle": "Manage your listed items",
       "Add": "Add",
-      "NewBook": "New Book",
-      "Empty": "No books yet.",
+      "NewBook": "New Product",
+      "Empty": "No products yet.",
       "EmptyTitle": "Your shop is empty",
-      "EmptyDesc": "Start now by adding your first book on the Riwaya Marketplace.",
-      "EmptyBtn": "Launch my first book",
-      "EmptyHint": "Start selling by adding your first book.",
+      "EmptyDesc": "Start now by adding your first product on the PetsUnivers Marketplace.",
+      "EmptyBtn": "Launch my first product",
+      "EmptyHint": "Start selling by adding your first product.",
       "Price": "Price",
       "Stock": "Stock",
       "InStock": "In stock",
@@ -117,28 +117,28 @@
       }
     },
     "NewBook": {
-      "Title": "Sell a book",
+      "Title": "Sell a product",
       "Back": "Back to catalogue",
-      "GoogleSearch": "Google Books Search",
+      "GoogleSearch": "Google Products Search",
       "QuickSearch": "Quick search",
-      "SearchPlaceholder": "Search by title, author or ISBN...",
+      "SearchPlaceholder": "Search by title, brand or ISBN...",
       "Search": "Search",
       "SelectBook": "Select",
-      "ImageLabel": "Book image",
+      "ImageLabel": "Product image",
       "ImageHint": "Add an image via URL",
-      "TitleLabel": "Book title",
-      "AuthorLabel": "Author",
+      "TitleLabel": "Product title",
+      "AuthorLabel": "Brand",
       "CategoryLabel": "Category",
       "LanguageLabel": "Language",
       "PriceLabel": "Selling price (MAD)",
       "StockLabel": "Stock quantity",
       "DescriptionLabel": "Detailed description",
-      "DescriptionPlaceholder": "Tell us about this book (condition, edition, content)...",
-      "Info": "By publishing this book, it will be immediately visible on the Riwaya Marketplace. Make sure the information is accurate.",
+      "DescriptionPlaceholder": "Tell us about this product (condition, edition, content)...",
+      "Info": "By publishing this product, it will be immediately visible on the PetsUnivers Marketplace. Make sure the information is accurate.",
       "Submit": "Publish on Marketplace",
       "Submitting": "Publishing...",
-      "ErrorAdd": "An error occurred while adding the book.",
-      "SearchError": "No books found.",
+      "ErrorAdd": "An error occurred while adding the product.",
+      "SearchError": "No products found.",
       "Languages": {
         "fr": "French",
         "ar": "Arabic",
@@ -177,11 +177,11 @@
     },
     "Blog": {
       "Title": "My Articles",
-      "Subtitle": "Promote your books — each article is validated before publishing",
+      "Subtitle": "Promote your products — each article is validated before publishing",
       "NewPost": "New Article",
-      "ApprovalNotice": "Your articles are subject to approval before being published on the Riwaya blog.",
+      "ApprovalNotice": "Your articles are subject to approval before being published on the PetsUnivers blog.",
       "Empty": "No articles",
-      "EmptyHint": "Start writing to promote your books",
+      "EmptyHint": "Start writing to promote your products",
       "Write": "Write an article",
       "StatusPublished": "Published",
       "StatusPending": "Pending",
@@ -201,7 +201,7 @@
       "SubCategoryLabel": "Sub-category",
       "CoverLabel": "Cover image (URL)",
       "ContentLabel": "Content",
-      "ContentPlaceholder": "Write your article here... Talk about your books, your store, share your expertise...",
+      "ContentPlaceholder": "Write your article here... Talk about your products, your store, share your expertise...",
       "ApprovalNotice": "The article will be submitted for approval before publication.",
       "Submit": "Submit article",
       "Submitting": "Sending...",
@@ -210,10 +210,10 @@
   },
   "KidsPage": {
     "Title": "My Child",
-    "Description": "Discover our magical collection of children's books, short stories, and coloring books.",
+    "Description": "Discover our magical collection of children's products, short stories, and coloring products.",
     "HeroBadge": "The little prodigies corner",
     "HeroTitle": "<span class=\"text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500\">Magical</span> worlds to explore.",
-    "HeroDesc": "Awaken their imagination with our selection of wonderful stories, original educational books, and creative coloring books.",
+    "HeroDesc": "Awaken their imagination with our selection of wonderful stories, original educational products, and creative coloring products.",
     "HeroBtnStory": "Read a story",
     "HeroBtnColoring": "Coloring",
     "SectionFeatures": {
@@ -236,22 +236,22 @@
       "Badge": "Creative Workshop",
       "Title": "Let their creativity <br/> express itself.",
       "Desc": "Our coloring albums offer hours of entertainment and creation. Simple shapes for the little ones to playful mandalas for the older ones.",
-      "Btn": "See the coloring books"
+      "Btn": "See the coloring products"
     },
     "SectionLearning": {
       "Badge": "Learning with fun",
       "Title": "From first letters <br/> to great knowledge.",
-      "Desc": "We have selected educational books that make learning exciting. Alphabets, numbers, discovering the world: everything is designed to awaken their natural curiosity."
+      "Desc": "We have selected educational products that make learning exciting. Alphabets, numbers, discovering the world: everything is designed to awaken their natural curiosity."
     },
     "SectionWisdom": {
       "Badge": "Magical Discovery",
       "Title": "A little owl <br/> full of wisdom.",
-      "Desc": "Reading from an early age reinforces concentration and empathy. Our children's books are designed to be true traveling companions in their personal development."
+      "Desc": "Reading from an early age reinforces concentration and empathy. Our children's products are designed to be true traveling companions in their personal development."
     },
     "SectionLibrary": {
       "Badge": "The Enchanted Library",
       "Title": "Build their <br/> own magic tower.",
-      "Desc": "Every book added to their library is a seed planted in their mind. Create with them a wonderful space filled with beautiful colors and infinite knowledge.",
+      "Desc": "Every product added to their library is a seed planted in their mind. Create with them a wonderful space filled with beautiful colors and infinite knowledge.",
       "Btn": "See our kids packs"
     },
     "CTA": {
@@ -271,7 +271,7 @@
   },
   "UsbPage": {
     "Title": "USB Key",
-    "Description": "The Riwaya educational USB key. Over 500 hours of educational content for children.",
+    "Description": "The PetsUnivers educational USB key. Over 500 hours of educational content for children.",
     "HeroBadge": "NEW · {seriesCount} series · {episodesCount}+ episodes",
     "HeroTitleP1": "The Educational ",
     "HeroTitleP2": "USB Key",
@@ -319,24 +319,24 @@
   },
   "Privacy": {
     "Title": "Privacy Policy",
-    "Description": "Learn how Riwaya collects, uses, and protects your personal data."
+    "Description": "Learn how PetsUnivers collects, uses, and protects your personal data."
   },
   "Terms": {
     "Title": "Terms and Conditions",
-    "Description": "Please read our terms of use carefully. They define the rules for using the Riwaya platform."
+    "Description": "Please read our terms of use carefully. They define the rules for using the PetsUnivers platform."
   },
   "AboutPage": {
     "OurStory": "Our Story",
     "HeroDesc": "More than a bookstore, a destination for curious minds and lovers of knowledge.",
     "OurMission": "Our Mission",
-    "MissionDesc": "Since our creation, we have strived to make reading accessible to everyone in Morocco. We firmly believe that each book has the power to transform a life, broaden horizons, and stimulate the imagination. Our goal is to build a bridge between authors and readers, offering a diverse selection of works that cater to all curiosities. With Riwaya, culture comes to your home, wherever you are, to nourish your mind every day.",
+    "MissionDesc": "Since our creation, we have strived to make reading accessible to everyone in Morocco. We firmly believe that each product has the power to transform a life, broaden horizons, and stimulate the imagination. Our goal is to build a bridge between authors and readers, offering a diverse selection of works that cater to all curiosities. With PetsUnivers, culture comes to your home, wherever you are, to nourish your mind every day.",
     "PassionTitle": "Passion",
-    "PassionDesc": "Carefully selected by literature enthusiasts, ensuring that every book offered is a true discovery and a source of inspiration.",
+    "PassionDesc": "Carefully selected by literature enthusiasts, ensuring that every product offered is a true discovery and a source of inspiration.",
     "CommunityTitle": "Community",
     "CommunityDesc": "Uniting Moroccan readers around a single platform, creating a space for exchange and sharing to celebrate together our common love for reading.",
-    "WhyRiwaya": "Why Riwaya?",
+    "WhyPetsUnivers": "Why PetsUnivers?",
     "QualityTitle": "Guaranteed Quality",
-    "QualityDesc": "Original books only, checked before dispatch.",
+    "QualityDesc": "Original products only, checked before dispatch.",
     "DeliveryTitle": "Fast Delivery",
     "DeliveryDesc": "Shipping everywhere in Morocco in 24/48h.",
     "SupportTitle": "Customer Service",
@@ -345,25 +345,25 @@
     "VisitUs": "Come and visit us in Rabat"
   },
   "AuthorsPage": {
-    "Title": "Our Authors | Riwaya",
-    "Description": "Discover all the authors available at Riwaya. Novels, self-development, classics — explore the writers who have captivated our readers.",
+    "Title": "Our Brands | PetsUnivers",
+    "Description": "Discover all the authors available at PetsUnivers. Novels, self-development, classics — explore the writers who have captivated our readers.",
     "Heading": "Discover our authors",
-    "Subheading": "Explore the brilliant minds behind your favorite books.",
-    "SearchPlaceholder": "Search for an author...",
+    "Subheading": "Explore the brilliant minds behind your favorite products.",
+    "SearchPlaceholder": "Search for an brand...",
     "NoResults": "No authors found for this search.",
-    "BooksCount": "{count, plural, =0 {No books} one {# book} other {# books}}",
-    "ViewBooks": "View books",
-    "Featured": "Featured Authors",
+    "BooksCount": "{count, plural, =0 {No products} one {# product} other {# products}}",
+    "ViewBooks": "View products",
+    "Featured": "Featured Brands",
     "AllAuthors": "All our authors",
-    "AuthorLabel": "Author"
+    "AuthorLabel": "Brand"
   },
   "HomePage": {
     "SeeAll": "See All",
     "hero": {
       "Badge": "Free shipping over 300 MAD + Cash on delivery anywhere in Morocco",
       "TitlePart1": "Morocco's #1 Online Bookstore",
-      "TitlePart2": "Book bundles from 100 DH",
-      "Description": "Discover a premium selection of books and save with our exclusive bundles. Knowledge, with style.",
+      "TitlePart2": "Product bundles from 100 DH",
+      "Description": "Discover a premium selection of products and save with our exclusive bundles. Knowledge, with style.",
       "ShopLibrary": "Shop Library",
       "OurBundles": "View best-selling bundles",
       "GoogleLogin": "Sign in with Google",
@@ -372,27 +372,27 @@
       "SocialProof": "⭐ 4.8/5 by over 1000 satisfied readers",
       "EditorsChoice": "Editor's Choice",
       "Select": "SELECT",
-      "PinnedBook": "Pinned Book in Hero Center",
-      "PinnedBookSubtitle": "Pin a specific book at the center of the Hero",
-      "PinnedBookAutoMode": "Automatic mode (Most visited book)",
+      "PinnedBook": "Pinned Product in Hero Center",
+      "PinnedBookSubtitle": "Pin a specific product at the center of the Hero",
+      "PinnedBookAutoMode": "Automatic mode (Most visited product)",
       "PinnedBookManual": "Manually pinned",
-      "PinnedBookSearch": "Search a book by title or author...",
+      "PinnedBookSearch": "Search a product by title or brand...",
       "PinnedBookRemove": "Unpin (return to automatic)",
-      "PinnedBookSelect": "Pin this book to Hero",
+      "PinnedBookSelect": "Pin this product to Hero",
       "PinnedBookCurrently": "Currently at Hero center"
     },
     "SearchSection": {
       "Badge": "Search",
       "TitlePart1": "Find your",
       "TitlePart2": "next read.",
-      "Description": "Use our advanced search to filter by title, author, or budget.",
-      "Placeholder": "Search for a book, keyword...",
+      "Description": "Use our advanced search to filter by title, brand, or budget.",
+      "Placeholder": "Search for a product, keyword...",
       "MoreFilters": "More filters",
       "HideFilters": "Hide filters",
       "Filters": {
         "Title": "Title",
         "TitlePlaceholder": "Ex: Alchemist",
-        "Author": "Author",
+        "Author": "Brand",
         "AuthorPlaceholder": "Ex: Paulo Coelho",
         "MinPrice": "Min Price (MAD)",
         "MaxPrice": "Max Price (MAD)"
@@ -400,15 +400,15 @@
       "Submit": "Search"
     },
     "seo": {
-      "Title": "Riwaya | Digital Literature Curators & Book Bundles",
-      "Description": "Riwaya is your premium destination for personal development, business, and philosophy books in Morocco. Nationwide delivery."
+      "Title": "PetsUnivers — Shop · Cats & Dogs",
+      "Description": "Food, accessories and care: discover everyday essentials for cats, dogs and little companions."
     },
     "Features": {
       "ShippingTitle": "Express Shipping",
       "ShippingDesc": "Pan-Morocco coverage in record time.",
       "PaymentTitle": "Cash on Delivery",
       "PaymentDesc": "Pay on delivery with full confidence.",
-      "PacksTitle": "Book Pack at 100 MAD",
+      "PacksTitle": "Product Pack at 100 MAD",
       "PacksDesc": "Curated selections at architected prices."
     },
     "Quotes": {
@@ -427,41 +427,41 @@
     "BestSellers": {
       "Subtitle": "Top Rated",
       "Title": "Best Sellers",
-      "Description": "Discover the books that our readers love the most. Proven favorites that transformed thousands of lives.",
+      "Description": "Discover the products that our readers love the most. Proven favorites that transformed thousands of lives.",
       "ViewAll": "View All",
       "NoData": "No sales data yet",
       "Soon": "Coming Soon"
     },
     "BestAuthors": {
-      "Subtitle": "Featured Authors",
-      "Title": "Best Authors",
+      "Subtitle": "Featured Brands",
+      "Title": "Best Brands",
       "Description": "Meet the authors whose works have captivated our readers. Discover their most popular titles.",
       "BooksSold": "Sold",
-      "BookSingular": "Book",
-      "BooksPlural": "Books",
-      "ViewBooks": "View Books",
-      "NoData": "No author data yet"
+      "BookSingular": "Product",
+      "BooksPlural": "Products",
+      "ViewBooks": "View Products",
+      "NoData": "No brand data yet"
     },
     "ExchangeBooks": {
       "Subtitle": "Community",
-      "Title": "Books for Exchange",
-      "Description": "Discover books available for exchange from our community. Share, swap, and connect with fellow readers.",
+      "Title": "Products for Exchange",
+      "Description": "Discover products available for exchange from our community. Share, swap, and connect with fellow readers.",
       "ViewAll": "View All",
-      "ViewMore": "View More Books",
-      "NoData": "No exchange books available yet",
+      "ViewMore": "View More Products",
+      "NoData": "No exchange products available yet",
       "JoinCommunity": "Join Community",
       "LoginWithFacebook": "Connect with Facebook"
     },
     "MobileApp": {
       "ComingSoon": "Coming Soon",
-      "Title": "Riwaya Mobile App",
+      "Title": "PetsUnivers Mobile App",
       "Subtitle": "is cooking... 🍳",
-      "Description": "Book exchanges and library management will be even simpler. Get ready for a whole new experience on iOS and Android!",
+      "Description": "Product exchanges and library management will be even simpler. Get ready for a whole new experience on iOS and Android!",
       "SoonOn": "Coming soon on"
     },
     "AEOSnippet": {
-      "Question": "Where to buy books online in Morocco?",
-      "Answer": "Riwaya is a Moroccan online bookstore that allows you to order books and novels with delivery throughout Morocco."
+      "Question": "Where to buy products online in Morocco?",
+      "Answer": "PetsUnivers is a Moroccan online bookstore that allows you to order products and novels with delivery throughout Morocco."
     },
     "CTA": {
       "TitlePart1": "Ready for your",
@@ -471,11 +471,11 @@
     "QuickSearches": {
       "Title": "Quick Searches",
       "Searches": [
-        "Self-help books",
+        "Self-help products",
         "Business strategy",
         "Philosophy classics",
         "Productivity guides",
-        "Leadership books",
+        "Leadership products",
         "Psychology bestsellers",
         "Entrepreneurship",
         "Personal finance",
@@ -505,29 +505,29 @@
     }
   },
   "Navigation": {
-    "UsedBooks": "Used Books",
+    "UsedBooks": "Used Products",
     "SellBook": "Sell",
     "Home": "Home",
-    "Books": "Books",
+    "Books": "Shop",
     "Packs": "Packs",
-    "Digital": "Digital Books",
+    "Digital": "Digital Products",
     "Kids": "Kids",
     "UsbKey": "USB Key",
     "Journal": "Journal",
-    "Community": "Book Exchange",
+    "Community": "Product Exchange",
     "BoardGames": "Board Games",
     "JoinCommunity": "Join the community!",
     "LoginToEnjoy": "Log in to enjoy:",
     "ReadingTracking": "Reading Tracking",
     "SaveProgress": "Save your progress",
-    "BookExchange": "Book Exchange",
+    "BookExchange": "Product Exchange",
     "SwapWithReaders": "Swap with other readers",
     "Wishlist": "Wishlist",
     "SaveFavorites": "Save your favorites",
     "RegisterLogin": "Register / Login",
     "Clé fameux": "Famous Key",
     "Fourniture bureau": "Office Supplies",
-    "Authors": "Authors",
+    "Authors": "Brands",
     "Categories": "Collections",
     "BLOG": "Blog",
     "Collections": "Collections",
@@ -535,11 +535,11 @@
     "Login": "Login",
     "Admin": "Admin",
     "DeposerListe": "Drop off my list",
-    "Search": "Search books...",
+    "Search": "Search products...",
     "UserMenu": {
       "Profile": "My Profile",
       "ReadingList": "My Reading List",
-      "ReadingProgress": "{completed} / {total} books",
+      "ReadingProgress": "{completed} / {total} products",
       "Orders": "My Orders",
       "Settings": "Settings",
       "Logout": "Logout",
@@ -577,8 +577,8 @@
   },
   "Common": {
     "Search": "Search",
-    "SearchPlaceholder": "Title, author, description...",
-    "UsedBook": "Used book",
+    "SearchPlaceholder": "Title, brand, description...",
+    "UsedBook": "Used product",
     "FreeShippingPromo": "Free delivery everywhere in Morocco for orders over 300 MAD!",
     "Loading": "Loading...",
     "Price": "Price",
@@ -593,14 +593,14 @@
     "AddedToCartError": "Error adding item to cart. Please try again.",
     "AddedToReadingList": "Added to my reading list!",
     "RemovedFromReadingList": "Removed from my reading list!",
-    "BookCount": "{count, plural, =0 {0 books} one {1 book} other {{count} books}}",
-    "NoResultsDesc": "No books found for this author.",
+    "BookCount": "{count, plural, =0 {0 products} one {1 product} other {{count} products}}",
+    "NoResultsDesc": "No products found for this brand.",
     "Errors": {
       "UnexpectedError": "An unexpected error occurred",
       "ImageUploadError": "Error uploading image"
     },
     "ImageUpload": {
-      "Label": "Book Photo",
+      "Label": "Product Photo",
       "Placeholder": "Click or drag an image",
       "Instructions": "JPG, PNG or WebP (max 5MB)",
       "Button": "Choose an image",
@@ -621,7 +621,7 @@
     "CustomPackCTA": {
       "Tag": "Custom",
       "Title": "Build your own Pack",
-      "Description": "Select the books of your choice and enjoy exclusive discounts on your custom pack.",
+      "Description": "Select the products of your choice and enjoy exclusive discounts on your custom pack.",
       "Button": "Create my pack"
     },
     "DiscoverPack": "Discover pack",
@@ -648,18 +648,18 @@
     "AddSelection": "Add Selection",
     "CustomPack": {
       "BannerTitle": "Create Your Own Pack",
-      "BannerDesc": "Select your favorite books and get an exclusive discount. Starting from 3 books!",
+      "BannerDesc": "Select your favorite products and get an exclusive discount. Starting from 3 products!",
       "BannerBtn": "Build my pack",
       "ModalTitle": "Build Your Custom Pack",
-      "SelectBooks": "Select your books",
+      "SelectBooks": "Select your products",
       "Selected": "Selected",
-      "Discount10": "10% discount applied (3+ books)",
-      "Discount15": "15% discount applied (5+ books)",
-      "AddMoreFor10": "Add {count} more book(s) for -10%",
-      "AddMoreFor15": "Add {count} more book(s) for -15%",
+      "Discount10": "10% discount applied (3+ products)",
+      "Discount15": "15% discount applied (5+ products)",
+      "AddMoreFor10": "Add {count} more product(s) for -10%",
+      "AddMoreFor15": "Add {count} more product(s) for -15%",
       "AddToCart": "Add pack to cart ({price} MAD)",
-      "SearchPlaceholder": "Search for a book...",
-      "NoBooksFound": "No books found.",
+      "SearchPlaceholder": "Search for a product...",
+      "NoBooksFound": "No products found.",
       "CartPrefix": "[Custom Pack]"
     }
   },
@@ -676,8 +676,8 @@
         "Answer": "We currently only accept Cash on Delivery (COD) to ensure your complete satisfaction upon receipt."
       },
       "Returns": {
-        "Question": "Can I return a book?",
-        "Answer": "Yes, you have 3 days after delivery to request a return if the book is damaged or does not correspond to your order."
+        "Question": "Can I return a product?",
+        "Answer": "Yes, you have 3 days after delivery to request a return if the product is damaged or does not correspond to your order."
       },
       "DeliveryCost": {
         "Question": "How much does delivery cost?",
@@ -692,7 +692,7 @@
     "Policy": {
       "Point1": "A return is accepted only when the delivered product is defective, damaged, or incorrect.",
       "Point2": "Report the issue within 3 calendar days of delivery and provide your order number and clear photos.",
-      "Point3": "Contact us through WhatsApp or at contact@riwaya.store before sending anything. Unauthorized returns may be refused.",
+      "Point3": "Contact us through WhatsApp or at contact@petsunivers.ma before sending anything. Unauthorized returns may be refused.",
       "Point4": "Returning a defective product is free. We do not accept exchanges. Once received and inspected, an approved return will be refunded."
     }
   },
@@ -719,7 +719,7 @@
   },
   "BookDetail": {
     "TrendingBadge": "Trending · Most Visited",
-    "AboutAuthor": "About the author",
+    "AboutAuthor": "About the brand",
     "DiscoverMore": "Discover more",
     "BackToSelection": "Back to selection",
     "OnlyLeft": "Only {stock} left",
@@ -736,7 +736,7 @@
     "Reference": "Reference",
     "Volume": "Volume",
     "Pages": "Pages",
-    "RiwayaSelect": "Riwaya Select",
+    "PetsUniversSelect": "PetsUnivers Select",
     "OriginalMasterpiece": "Original Masterpiece",
     "PremiumPaperQual": "Premium Paper Qual",
     "GlobalStandard": "Global standard",
@@ -749,8 +749,8 @@
     "FrequentlyBoughtTogether": "Buy it with",
     "ArticleMentions": "Articles about this product",
     "SoldBy": "Sold by",
-    "NoBooksFound": "No books found",
-    "NoBooksDesc": "This author hasn't published any books on our platform yet.",
+    "NoBooksFound": "No products found",
+    "NoBooksDesc": "This brand hasn't published any products on our platform yet.",
     "SellerRating": "Seller rating",
     "Views": "{count} views"
   },
@@ -759,7 +759,7 @@
     "SelectedItems": "{count} Selected Items",
     "EmptyTitle": "Your cart is empty.",
     "EmptyDesc": "Seems like you haven't discovered <br /> our treasures yet.",
-    "DiscoverBooks": "Discover Books",
+    "DiscoverBooks": "Discover Products",
     "CloseCart": "Close cart",
     "Set": "SET",
     "Titles": "Titles",
@@ -858,35 +858,35 @@
     "FullName": "Full Name",
     "YourComment": "Your Comment",
     "PlaceholderName": "Ex: John Doe",
-    "PlaceholderComment": "What did you think of this book?",
+    "PlaceholderComment": "What did you think of this product?",
     "Submit": "Submit Review"
   },
   "ReviewList": {
-    "NoReviews": "Be the first to review this book! ✨"
+    "NoReviews": "Be the first to review this product! ✨"
   },
   "PredictiveSearch": {
-    "Placeholder": "Search for a book, pack, author...",
+    "Placeholder": "Search for a product, pack, brand...",
     "VoiceSearch": "Voice search",
     "Listening": "Listening...",
-    "CoverSearch": "Search by book cover",
-    "AnalyzingCover": "Analyzing book cover...",
+    "CoverSearch": "Search by product cover",
+    "AnalyzingCover": "Analyzing product cover...",
     "CoverDetected": "Cover detected: {title}",
-    "CoverError": "Could not recognize this book cover",
+    "CoverError": "Could not recognize this product cover",
     "CoverLimitReached": "You have reached the cover search limit for this session.",
     "RecentSearches": "Recent Searches",
     "Clear": "Clear",
     "PopularThemes": "Popular Themes",
     "PopularSearches": "Popular Searches",
-    "BookCount": "{count, plural, =0 {No books} one {1 book} other {{count} books}}",
+    "BookCount": "{count, plural, =0 {No products} one {1 product} other {{count} products}}",
     "Remaining": "remaining",
     "From": "From {price} MAD",
     "Suggestions": "Suggestions",
     "DidYouMean": "Did you mean: {suggestion}?",
-    "By": "By {author}",
+    "By": "By {brand}",
     "PackBadge": "Pack",
-    "PackBooksCount": "{count, plural, =0 {Book pack} one {1 book included} other {{count} books included}}",
+    "PackBooksCount": "{count, plural, =0 {Product pack} one {1 product included} other {{count} products included}}",
     "NoResultsTitle": "Oops!",
-    "NoResultsDesc": "No books or packs match your search.",
+    "NoResultsDesc": "No products or packs match your search.",
     "ViewAll": "View all results",
     "EndsIn": "Ends in {time}",
     "Terminated": "Terminated",
@@ -907,7 +907,7 @@
     "Théâtre": "Theater",
     "Littérature marocaine": "Moroccan Literature",
     "Poésie": "Poetry",
-    "Livres en arabe": "Arabic Books",
+    "Livres en arabe": "Arabic Products",
     "English Fiction": "English Fiction",
     "Litterature in English": "Literature in English",
     "Romantasy": "Romantasy",
@@ -937,15 +937,15 @@
     "3-6 Years Old": "3-6 Years Old",
     "6-9 Years Old": "6-9 Years Old",
     "9-12 Years Old": "9-12 Years Old",
-    "Livres marocains pour enfants": "Moroccan Children Books",
-    "Livres en arabe pour enfant": "Arabic Children Books",
+    "Livres marocains pour enfants": "Moroccan Children Products",
+    "Livres en arabe pour enfant": "Arabic Children Products",
     "Arts et sciences humaines": "Arts & Humanities",
     "Musique": "Music",
     "Sciences humaines": "Humanities",
     "Arts & culture": "Arts & Culture",
     "Histoire": "History",
     "Cinéma & Photographie": "Cinema & Photography",
-    "Beaux livres": "Beautiful Books",
+    "Beaux livres": "Beautiful Products",
     "Vie pratique": "Practical Life",
     "Santé & Bien-être": "Health & Wellness",
     "Spiritualité": "Spirituality",
@@ -972,7 +972,7 @@
     "2nde Charcot": "2nd Charcot",
     "1ère Charcot": "1st Charcot",
     "Tale Charcot": "Tale Charcot",
-    "Livres en stock": "Books in Stock",
+    "Livres en stock": "Products in Stock",
     "Papeterie": "Stationery",
     "All": "All Categories"
   },
@@ -982,7 +982,7 @@
     "In": "in",
     "Filters": "Filters",
     "SearchItems": "Search items",
-    "SearchPlaceholder": "Title, author...",
+    "SearchPlaceholder": "Title, brand...",
     "Apply": "Apply",
     "Languages": "Languages",
     "AllLanguages": "All Languages",
@@ -993,7 +993,7 @@
     "EmptyCollection": "Our collection is empty for these filters.",
     "EmptyFilters": "Empty filters",
     "Results": "Results",
-    "AllAuthors": "All Authors"
+    "AllAuthors": "All Brands"
   },
   "ReviewsSection": {
     "Title": "Customer Reviews",
@@ -1011,17 +1011,17 @@
     "Title": "My Favorites",
     "Subtitle": "{count} saved item(s)",
     "EmptyTitle": "Your list is empty",
-    "EmptyDesc": "You haven't added any books to your favorites yet.",
+    "EmptyDesc": "You haven't added any products to your favorites yet.",
     "ContinueShopping": "Continue Shopping",
     "AddToCart": "Add to Cart",
     "AddAllToCart": "Add all to Cart",
     "seo": {
-      "Title": "My Favorites | Riwaya - Digital Literature Curators",
-      "Description": "Discover your personal selection of premium books and bundles. Organize your next reads on Riwaya."
+      "Title": "My Favorites | PetsUnivers - Digital Literature Curators",
+      "Description": "Discover your personal selection of premium products and bundles. Organize your next reads on PetsUnivers."
     },
-    "By": "By {author}",
-    "Quote": "The book we await is the one that changes us.",
-    "QuoteSubtitle": "Riwaya Selection • Curating Literature"
+    "By": "By {brand}",
+    "Quote": "The product we await is the one that changes us.",
+    "QuoteSubtitle": "PetsUnivers Selection • Curating Literature"
   },
   "Tracking": {
     "Title": "Order Tracking",
@@ -1044,8 +1044,8 @@
     }
   },
   "Community": {
-    "RegisterTitle": "Join Riwaya Community",
-    "RegisterSubtitle": "Exchange your favorite books with passionate readers",
+    "RegisterTitle": "Join PetsUnivers Community",
+    "RegisterSubtitle": "Exchange your favorite products with passionate readers",
     "LoginTitle": "Member Login",
     "LoginSubtitle": "Access your exchange dashboard",
     "FullName": "Full Name",
@@ -1060,8 +1060,8 @@
     "NoAccount": "No account yet?",
     "AlreadyAccount": "Already registered?",
     "Or": "Or",
-    "MyBooks": "My Books",
-    "AddBook": "Add a Book",
+    "MyBooks": "My Products",
+    "AddBook": "Add a Product",
     "Credits": "Credits",
     "ExchangesLabel": "Exchanges",
     "TopReaders": "Top Readers",
@@ -1070,40 +1070,40 @@
     "Recommendations": {
       "Title": "Reading suggestions for you",
       "Badge": "AI selection",
-      "Description": "These books are suggested from the authors in your wishlist. They offer ideas for your next read; availability in our catalog is not guaranteed.",
+      "Description": "These products are suggested from the authors in your wishlist. They offer ideas for your next read; availability in our catalog is not guaranteed.",
       "Why": "Why this recommendation?"
     },
     "Dashboard": {
       "RestrictedAccess": "Restricted access to exchanges",
-      "EligibilityDesc": "You must have placed at least one order in our shop to be able to add books or make exchange requests in the community.",
+      "EligibilityDesc": "You must have placed at least one order in our shop to be able to add products or make exchange requests in the community.",
       "BrowseShop": "Browse shop",
       "EditProfile": "Edit profile",
       "Logout": "Logout",
       "ExploreMarketTitle": "Explore Marketplace",
-      "ExploreMarketDesc": "Discover available books",
-      "ExploreMarketLong": "Browse the common library and find your next book to trade.",
+      "ExploreMarketDesc": "Discover available products",
+      "ExploreMarketLong": "Browse the common library and find your next product to trade.",
       "ManageExchangesTitle": "My Exchanges",
       "ManageExchangesDesc": "Manage your requests",
       "ManageExchangesLong": "View and respond to pending exchange requests.",
       "ManageBook": "Manage",
       "EmptyLibraryTitle": "Your library is empty",
-      "EmptyLibraryDesc": "Add the books you want to trade to earn credits or receive other books.",
+      "EmptyLibraryDesc": "Add the products you want to trade to earn credits or receive other products.",
       "StartAdding": "Get Started",
       "GenerateCard": "Generate my reading card"
     },
     "BookForm": {
-      "FormTitle": "Add a Book",
-      "EditFormTitle": "Edit Book",
-      "Title": "Book Title",
-      "Author": "Author",
+      "FormTitle": "Add a Product",
+      "EditFormTitle": "Edit Product",
+      "Title": "Product Title",
+      "Author": "Brand",
       "Condition": "Condition",
       "Description": "Description (optional)",
       "Isbn": "ISBN (optional)",
       "Submit": "Add to my library",
       "SaveChanges": "Save Changes",
-      "Delete": "Delete Book",
-      "ConfirmDelete": "Are you sure you want to delete this book from your library?",
-      "EligibilityError": "You must have placed at least one order on Riwaya to add a book to the exchange system.",
+      "Delete": "Delete Product",
+      "ConfirmDelete": "Are you sure you want to delete this product from your library?",
+      "EligibilityError": "You must have placed at least one order on PetsUnivers to add a product to the exchange system.",
       "Conditions": {
         "NEW": "New",
         "GOOD": "Good",
@@ -1118,29 +1118,29 @@
       }
     },
     "Market": {
-      "Title": "Used Book Exchange & Swap in Morocco",
-      "Subtitle": "Trade and exchange pre-loved books and novels with passionate readers across Morocco. Give your books a second life for free.",
+      "Title": "Used Product Exchange & Swap in Morocco",
+      "Subtitle": "Trade and exchange pre-loved products and novels with passionate readers across Morocco. Give your products a second life for free.",
       "Seo": {
-        "Heading": "Used Book Exchange in Morocco: How it Works",
-        "Intro": "Riwaya Community is Morocco's premier used book swap and exchange marketplace. Join a vibrant community of readers to trade pre-loved books and novels for free.",
-        "Step1Title": "1. List Your Used Books",
-        "Step1Desc": "Upload a photo of your pre-loved book, select its condition (Like New, Good, Used), and your city.",
+        "Heading": "Used Product Exchange in Morocco: How it Works",
+        "Intro": "PetsUnivers Community is Morocco's premier used product swap and exchange marketplace. Join a vibrant community of readers to trade pre-loved products and novels for free.",
+        "Step1Title": "1. List Your Used Products",
+        "Step1Desc": "Upload a photo of your pre-loved product, select its condition (Like New, Good, Used), and your city.",
         "Step2Title": "2. Connect with Local Readers",
         "Step2Desc": "Meet readers in public spots across Casablanca, Rabat, Marrakech, Tangier, and more.",
         "Step3Title": "3. Direct Swap or Credit System",
-        "Step3Desc": "Trade 1-to-1 directly or earn community credits to claim books from any other reader anytime.",
-        "CitiesTitle": "Book Swap by Moroccan Cities",
-        "FaqTitle": "Frequently Asked Questions about Book Exchange",
-        "FaqQ1": "How do I exchange a used book on Riwaya?",
-        "FaqA1": "Create an account on Riwaya, list the used books from your bookshelf, and browse the market to request a direct swap or trade with credits.",
-        "FaqQ2": "Is the book exchange free?",
-        "FaqA2": "Yes, exchanging books between community members is 100% free with zero fees. Members meet locally in public spaces.",
-        "FaqQ3": "What types of used books can be exchanged?",
-        "FaqA3": "All genres are welcome: novels, fiction, manga, self-help, non-fiction, academic and school books in French, Arabic, and English.",
-        "FaqQ4": "What if the owner has no book I want?",
-        "FaqA4": "Use Riwaya's credit system: give away your book to earn credits, then redeem them whenever you find a book you like from another reader."
+        "Step3Desc": "Trade 1-to-1 directly or earn community credits to claim products from any other reader anytime.",
+        "CitiesTitle": "Product Swap by Moroccan Cities",
+        "FaqTitle": "Frequently Asked Questions about Product Exchange",
+        "FaqQ1": "How do I exchange a used product on PetsUnivers?",
+        "FaqA1": "Create an account on PetsUnivers, list the used products from your bookshelf, and browse the market to request a direct swap or trade with credits.",
+        "FaqQ2": "Is the product exchange free?",
+        "FaqA2": "Yes, exchanging products between community members is 100% free with zero fees. Members meet locally in public spaces.",
+        "FaqQ3": "What types of used products can be exchanged?",
+        "FaqA3": "All genres are welcome: novels, fiction, manga, self-help, non-fiction, academic and school products in French, Arabic, and English.",
+        "FaqQ4": "What if the owner has no product I want?",
+        "FaqA4": "Use PetsUnivers's credit system: give away your product to earn credits, then redeem them whenever you find a product you like from another reader."
       },
-      "SearchPlaceholder": "Search by title, author...",
+      "SearchPlaceholder": "Search by title, brand...",
       "NearMe": "Near Me",
       "Locating": "Locating...",
       "Radius": "Radius: {km} km",
@@ -1149,7 +1149,7 @@
       "CityFilter": "Filter by city",
       "ConditionFilter": "Filter by condition",
       "ExchangeButton": "Request Exchange",
-      "NoResults": "No books found",
+      "NoResults": "No products found",
       "PostedBy": "Posted by",
       "In": "in",
       "Owner": "Owner",
@@ -1158,17 +1158,17 @@
       "Filter": "Filter",
       "MatchesForYou": "Matches for You",
       "BasedOnWishlist": "Based on your wishlist",
-      "AllBooks": "All Books",
-      "TryFilters": "Try adjusting your filters. The community adds books every day!",
+      "AllBooks": "All Products",
+      "TryFilters": "Try adjusting your filters. The community adds products every day!",
       "Mutual": "Mutual Match",
-      "DescriptionTitle": "Book Summary",
+      "DescriptionTitle": "Product Summary",
       "MemberSince": "Member Since",
       "Credits": "Credits",
-      "SecurityNotice": "Secure exchange guaranteed by Riwaya. Zero commission.",
-      "MapNetwork": "Riwaya Network",
-      "MapExchange": "Book Exchange",
+      "SecurityNotice": "Secure exchange guaranteed by PetsUnivers. Zero commission.",
+      "MapNetwork": "PetsUnivers Network",
+      "MapExchange": "Product Exchange",
       "UnlockMap": "Unlock the Map",
-      "UnlockDesc": "To see books available near you and start exchanging.",
+      "UnlockDesc": "To see products available near you and start exchanging.",
       "SignUpCTA": "Sign up and place an order to start exchanging",
       "OrderCTA": "Place an order to start exchanging",
       "OrderToUnlock": "Order to unlock",
@@ -1178,7 +1178,7 @@
       "Title": "Propose Exchange",
       "Subtitle": "Send a request to",
       "YourOffer": "Your Offer",
-      "SelectBook": "Select one of your books",
+      "SelectBook": "Select one of your products",
       "OrCredits": "Or use credits",
       "CreditsAvailable": "Credits available",
       "Message": "Message (optional)",
@@ -1186,13 +1186,13 @@
       "Success": "Request sent successfully!",
       "BackToMarket": "Back to Market",
       "NewExchange": "New Exchange",
-      "BookToBook": "Book for Book",
-      "BookToBookDesc": "Trade this book for one of yours.",
-      "CreditsDesc": "Use your points to get this book.",
+      "BookToBook": "Product for Product",
+      "BookToBookDesc": "Trade this product for one of yours.",
+      "CreditsDesc": "Use your points to get this product.",
       "Balance": "Balance: {count} credits",
-      "NoBooksAvailable": "You have no books available.",
+      "NoBooksAvailable": "You have no products available.",
       "AddOneFirst": "Add one first.",
-      "TotalCost": "Cost: 1 Riwaya credit",
+      "TotalCost": "Cost: 1 PetsUnivers credit",
       "InsufficientBalance": "Insufficient balance",
       "DeliveryMethods": "Delivery Details",
       "Meetup": "Hand-to-Hand",
@@ -1202,8 +1202,8 @@
       "MeetingPointPlaceholder": "ex: Casa Voyageurs Station",
       "SuggestedMeetingTime": "Preferred Time",
       "MessagePlaceholder": "Say a few words about the exchange...",
-      "EligibilityNote": "* Eligibility required: At least one order placed on Riwaya.",
-      "SelectPlaceholder": "Choose a book..."
+      "EligibilityNote": "* Eligibility required: At least one order placed on PetsUnivers.",
+      "SelectPlaceholder": "Choose a product..."
     },
     "Exchanges": {
       "Title": "My Exchanges",
@@ -1247,8 +1247,8 @@
     },
     "ReadingList": {
       "Title": "My Reading List",
-      "Subtitle": "Track your reading and progress, even for your personal books.",
-      "AddBook": "Add a book",
+      "Subtitle": "Track your reading and progress, even for your personal products.",
+      "AddBook": "Add a product",
       "Empty": "Your reading list is empty.",
       "Status": {
         "TO_READ": "To Read",
@@ -1260,7 +1260,7 @@
       "Stats": {
         "Library": "Library",
         "Completed": "{count} completed",
-        "Authors": "Authors",
+        "Authors": "Brands",
         "Explored": "Explored",
         "TotalVolume": "Total Volume",
         "PagesAccumulated": "Total Pages",
@@ -1276,11 +1276,11 @@
         "ConfirmDelete": "Are you sure?"
       },
       "ManualBook": {
-        "AddManual": "Add a custom book",
-        "NewBook": "New personal book",
+        "AddManual": "Add a custom product",
+        "NewBook": "New personal product",
         "Title": "Title",
         "TitleEx": "Ex: The Alchemist",
-        "Author": "Author",
+        "Author": "Brand",
         "AuthorEx": "Ex: Paulo Coelho",
         "TotalPages": "Total pages"
       }
@@ -1308,7 +1308,7 @@
       "Apply": "Apply",
       "Socials": "Socials",
       "Stats": {
-        "Books": "Books",
+        "Books": "Products",
         "Exchanges": "Exchanges",
         "Credits": "Credits"
       },
@@ -1350,13 +1350,13 @@
     },
     "Wishlist": {
       "Title": "My Wishlist",
-      "Subtitle": "Books I'm looking for",
+      "Subtitle": "Products I'm looking for",
       "Empty": "Your wishlist is empty.",
-      "MatchingNote": "Add books to activate matching",
+      "MatchingNote": "Add products to activate matching",
       "AddBook": "Add to my wishlist",
-      "BookTitle": "Book Title",
-      "Author": "Author (optional)",
-      "Success": "Book added to your wishlist"
+      "BookTitle": "Product Title",
+      "Author": "Brand (optional)",
+      "Success": "Product added to your wishlist"
     }
   },
   "PackDetail": {
@@ -1367,23 +1367,23 @@
     "GlobalShip": "Shipping Morocco wide",
     "SecureCOD": "Cash on Delivery",
     "VolumesInCollection": "Volumes in this Collection",
-    "ReplaceBook": "Replace Book",
-    "ChooseReplacement": "Choose an equivalent book to replace the out of stock book. The bundle price will remain unchanged.",
+    "ReplaceBook": "Replace Product",
+    "ChooseReplacement": "Choose an equivalent product to replace the out of stock product. The bundle price will remain unchanged.",
     "OutOfStock": "Out of stock",
     "Replace": "Replace",
     "Change": "Change",
-    "PleaseReplaceOutOfStock": "Please replace the out of stock book(s) to continue."
+    "PleaseReplaceOutOfStock": "Please replace the out of stock product(s) to continue."
   },
   "CartPage": {
     "Title": "Your Cart",
     "CollectionCount": "{count} Items",
     "EmptyTitle": "Your cart is empty",
-    "EmptyDesc": "It seems you haven't added any books yet. Explore our selection.",
-    "BrowseLibrary": "Browse Library",
+    "EmptyDesc": "Discover everyday essentials for your cats, dogs and little companions.",
+    "BrowseLibrary": "Explore the shop",
     "ViewBundles": "View Bundles",
     "BundleBadge": "BUNDLE",
     "ItemUnit": "item",
-    "VolumesIncluded": "{count} volumes included",
+    "VolumesIncluded": "{count} items included",
     "DeleteItem": "Delete item",
     "ClearSelection": "Clear cart",
     "SummaryTitle": "Order Summary",
@@ -1398,7 +1398,7 @@
     "Secure": "Secure",
     "FastShip": "Fast Ship",
     "RecommendedForYou": "Recommended for you",
-    "CompleteYourCollection": "Complete your collection",
+    "CompleteYourCollection": "More for your companion",
     "MinOrderWarning": "The minimum order amount is {min} MAD. Please add more items to continue."
   },
   "Blog": {
@@ -1433,25 +1433,25 @@
   "Promotion": {
     "SpecialPromotion": "Special Promotion",
     "GiftWaiting": "A gift is waiting for you",
-    "GiftDescription": "We celebrate our new readers! Receive an exclusive bookmark or a surprise book with your next order.",
+    "GiftDescription": "We celebrate our new readers! Receive an exclusive bookmark or a surprise product with your next order.",
     "BookmarksTitle": "Premium Bookmarks",
     "BookmarksDesc": "Unique designs for every type of reader.",
-    "RandomBookTitle": "Free Random Book",
-    "RandomBookDesc": "Sometimes luck smiles: receive a free book.",
+    "RandomBookTitle": "Free Random Product",
+    "RandomBookDesc": "Sometimes luck smiles: receive a free product.",
     "ExploreBtn": "Explore the Collection",
     "Offered": "Free",
     "ValidToday": "* Valid for any order today"
   },
   "DigitalBooks": {
     "seo": {
-      "Title": "Digital Books PDF",
-      "Description": "Instantly download your PDF books. Immediate access, read on all your devices."
+      "Title": "Digital Products PDF",
+      "Description": "Instantly download your PDF products. Immediate access, read on all your devices."
     },
     "hero": {
-      "Badge": "NEW · Digital Books",
+      "Badge": "NEW · Digital Products",
       "TitlePart1": "Read",
       "TitlePart2": "Instantly.",
-      "Description": "Download your PDF books in seconds. Read on mobile, tablet or computer, anywhere, anytime.",
+      "Description": "Download your PDF products in seconds. Read on mobile, tablet or computer, anywhere, anytime.",
       "BrowseCatalog": "Browse catalog",
       "LearnMore": "Learn more",
       "InstantDownload": "Instant download",
@@ -1473,14 +1473,14 @@
     "Catalog": {
       "Subtitle": "Our digital library",
       "Title": "PDF Catalog",
-      "Description": "{count} digital books available for immediate download.",
+      "Description": "{count} digital products available for immediate download.",
       "Empty": "Catalog coming soon",
-      "EmptyDesc": "Our team is preparing a premium selection of digital books."
+      "EmptyDesc": "Our team is preparing a premium selection of digital products."
     },
     "HowItWorks": {
       "Subtitle": "Simple process",
       "Title": "How it works",
-      "Step1Title": "Choose your book",
+      "Step1Title": "Choose your product",
       "Step1Desc": "Browse our catalog and select the titles that interest you.",
       "Step2Title": "Confirm your order",
       "Step2Desc": "Fill in the form. Payment by bank transfer or COD.",
@@ -1494,19 +1494,19 @@
     },
     "HomeSection": {
       "Badge": "Nouveauté",
-      "Title": "Digital Books",
-      "Description": "Download your PDF books instantly. Read on all your devices, no shipping delay.",
+      "Title": "Digital Products",
+      "Description": "Download your PDF products instantly. Read on all your devices, no shipping delay.",
       "Feature1": "Instant access",
       "Feature2": "PDF format",
       "Feature3": "Reduced prices",
-      "CTA": "View PDF books"
+      "CTA": "View PDF products"
     },
     "Reader": {
       "Title": "Immersive Reader",
       "Next": "Next",
       "Prev": "Previous",
       "Page": "Page",
-      "Loading": "Loading book...",
+      "Loading": "Loading product...",
       "Fullscreen": "Full screen",
       "Exit": "Exit",
       "Close": "Close reader"
@@ -1515,7 +1515,7 @@
   "Community_Overrides": {
     "Exchanges": {
       "Title": "My Exchanges",
-      "Subtitle": "Manage your sent and received book exchange requests.",
+      "Subtitle": "Manage your sent and received product exchange requests.",
       "Received": "Received Requests",
       "Sent": "Sent Requests",
       "Requests": "{count} request(s)",
@@ -1529,8 +1529,8 @@
       "EmptyReceived": "No requests received yet.",
       "EmptySent": "You haven't sent any exchange requests yet.",
       "ExploreMarket": "Explore Community",
-      "Requested": "Requested book",
-      "Offered": "Offered book",
+      "Requested": "Requested product",
+      "Offered": "Offered product",
       "Credits": "Virtual credits",
       "MeetingDetails": "Meeting Details",
       "Actions": {
@@ -1545,31 +1545,31 @@
     "Dashboard": {
       "EditProfile": "Edit Profile",
       "RestrictedAccess": "Restricted Exchange Access",
-      "EligibilityDesc": "To exchange books, you must have completed at least one finalized order on Riwaya.",
+      "EligibilityDesc": "To exchange products, you must have completed at least one finalized order on PetsUnivers.",
       "BrowseShop": "Browse Shop",
       "ExploreMarketTitle": "Explore Community",
-      "ExploreMarketDesc": "View available books",
-      "ExploreMarketLong": "Discover hundreds of books made available by other passionate readers.",
+      "ExploreMarketDesc": "View available products",
+      "ExploreMarketLong": "Discover hundreds of products made available by other passionate readers.",
       "ManageExchangesTitle": "Manage Exchanges",
       "ManageExchangesDesc": "Track ongoing requests",
       "ManageExchangesLong": "Accept or reject requests and stay in touch with your exchange partners.",
-      "ManageBook": "Manage Book",
+      "ManageBook": "Manage Product",
       "EmptyLibraryTitle": "Your library is empty",
-      "EmptyLibraryDesc": "You haven't added any books for exchange yet.",
-      "StartAdding": "Add my first book"
+      "EmptyLibraryDesc": "You haven't added any products for exchange yet.",
+      "StartAdding": "Add my first product"
     },
     "Credits": "Credits",
     "ExchangesLabel": "Exchanges",
     "MyBooks": "My Library",
-    "AddBook": "Add Book",
+    "AddBook": "Add Product",
     "TopReadersTitle": "Top Readers",
     "TopReadersSubtitle": "The most active members of the community.",
     "BookForm": {
-      "FormTitle": "Add a book",
-      "EditFormTitle": "Manage book",
+      "FormTitle": "Add a product",
+      "EditFormTitle": "Manage product",
       "EligibilityError": "You are not authorized",
       "Title": "Title",
-      "Author": "Author",
+      "Author": "Brand",
       "Condition": "Condition",
       "Conditions": {
         "NEW": "New",
@@ -1578,10 +1578,10 @@
       },
       "Isbn": "ISBN",
       "Description": "Description",
-      "Submit": "Publish book",
+      "Submit": "Publish product",
       "SaveChanges": "Save Changes",
       "Delete": "Delete",
-      "ConfirmDelete": "Are you sure you want to delete this book?",
+      "ConfirmDelete": "Are you sure you want to delete this product?",
       "Status": {
         "Label": "Status",
         "AVAILABLE": "Available",
@@ -1592,13 +1592,13 @@
     },
     "Wishlist": {
       "Title": "My Wishlist",
-      "Subtitle": "Books you are actively looking for",
-      "BookTitle": "Book Title",
-      "Author": "Author",
+      "Subtitle": "Products you are actively looking for",
+      "BookTitle": "Product Title",
+      "Author": "Brand",
       "AddBook": "Add to my list",
       "Success": "Successfully added",
       "Empty": "Your wishlist is empty",
-      "MatchingNote": "We will notify you if a member offers one of these books."
+      "MatchingNote": "We will notify you if a member offers one of these products."
     }
   },
   "CookieConsent": {
@@ -1608,8 +1608,8 @@
     "LearnMore": "Manage Cookies"
   },
   "KidsProductDetail": {
-    "NotFoundTitle": "Product not found | Riwaya",
-    "MetaDesc": "Discover {name} on Riwaya. Fast delivery in Morocco.",
+    "NotFoundTitle": "Product not found | PetsUnivers",
+    "MetaDesc": "Discover {name} on PetsUnivers. Fast delivery in Morocco.",
     "BackToKids": "Back to kids space",
     "StockLeft": "{stock} left",
     "OutOfStock": "Out of stock",
@@ -1666,8 +1666,8 @@
     "SeeAll": "See all",
     "ReadArticle": "Read article",
     "Edit": "Edit",
-    "AboutAuthor": "About the author",
-    "ModeratorRole": "Riwaya Editorial Team",
+    "AboutAuthor": "About the brand",
+    "ModeratorRole": "PetsUnivers Editorial Team",
     "ModeratorDescription": "Passionate about reading and literature, I share with you my discoveries, advice, and literary favorites to guide you in your next reads.",
     "ShareTitle": "Share:",
     "Copied": "Copied!",
@@ -1698,7 +1698,7 @@
     "Anonymous": "Anonymous"
   },
   "PWAInstallPrompt": {
-    "title": "Install Riwaya",
+    "title": "Install PetsUnivers",
     "description": "Access the bookstore quickly from your home screen.",
     "install": "Install",
     "later": "Later"
@@ -1726,21 +1726,21 @@
     "fileLimits": "PDF, DOCX or TXT (Max 10MB)",
     "sending": "Sending...",
     "send": "Send my list",
-    "seoText": "Riwaya.store is your online bookstore in Morocco. We offer a wide selection of books (novels, manga, fine arts, children's books, personal development, and English books) as well as all school supplies (school bags, pencil cases, and back-to-school essentials). Drop your school list online and enjoy fast home delivery anywhere in Morocco (Casablanca, Rabat, Tangier, etc.). All our products are 100% authentic with secure payment by credit card or cash on delivery."
+    "seoText": "petsunivers.ma is your online bookstore in Morocco. We offer a wide selection of products (novels, manga, fine arts, children's products, personal development, and English products) as well as all school supplies (school bags, pencil cases, and back-to-school essentials). Drop your school list online and enjoy fast home delivery anywhere in Morocco (Casablanca, Rabat, Tangier, etc.). All our products are 100% authentic with secure payment by credit card or cash on delivery."
   },
   "JoinUs": {
     "heroTag": "Job Opportunity",
     "heroTitle1": "Join",
     "heroTitle2": "the Team",
-    "heroDescription": "Riwaya blog is looking for a talented and creative blogger for an official position on the blog. If you are talented, love blogging, and have many ideas, we are looking for you. Write a sample post + an introduction about yourself and send everything to Riwaya team.",
+    "heroDescription": "PetsUnivers blog is looking for a talented and creative blogger for an official position on the blog. If you are talented, love blogging, and have many ideas, we are looking for you. Write a sample post + an introduction about yourself and send everything to PetsUnivers team.",
     "conditionsTitle": "Participation Conditions",
-    "conditionsDescription": "Thank you for choosing to contribute your topics to Riwaya blog. We invite you to read these conditions so your topic can be published:",
+    "conditionsDescription": "Thank you for choosing to contribute your topics to PetsUnivers blog. We invite you to read these conditions so your topic can be published:",
     "condition1Title": "We do not accept fully copied topics",
-    "condition1Desc": "Riwaya blog's policy over the past 31 years has been based on enriching Arabic technical content, therefore we do not accept topics copied entirely from other sites. On the other hand, we accept topics written in your own words even if they come from one or multiple sources.",
+    "condition1Desc": "PetsUnivers blog's policy over the past 31 years has been based on enriching Arabic technical content, therefore we do not accept topics copied entirely from other sites. On the other hand, we accept topics written in your own words even if they come from one or multiple sources.",
     "condition2Title": "We do not accept previously covered topics",
     "condition2Desc": "Of course, we cannot publish topics that have already been published in order to avoid repetition.",
     "condition3Title": "We do not accept topics containing activation codes or software",
-    "condition3Desc": "At Riwaya blog, we ensure not to violate intellectual property rights. However, we accept topics containing official activation codes obtained through legal means.",
+    "condition3Desc": "At PetsUnivers blog, we ensure not to violate intellectual property rights. However, we accept topics containing official activation codes obtained through legal means.",
     "condition4Title": "We do not accept poorly written topics",
     "condition4Desc": "We all make mistakes, and a few minor errors are fine, but if they make sentences incomprehensible or if there are too many spelling mistakes, it is impossible to publish.",
     "applyTitle": "How to Apply",
@@ -1752,7 +1752,7 @@
     "CustomerSupport": "Customer Support",
     "Title1": "Contact",
     "Title2": "Us",
-    "Description": "Our team is at your disposal for any questions regarding your orders or our books.",
+    "Description": "Our team is at your disposal for any questions regarding your orders or our products.",
     "DirectEmail": "Direct Email",
     "Phone": "Phone",
     "Headquarters": "Headquarters",
@@ -1781,18 +1781,18 @@
     "Section1Title": "1. Right of withdrawal",
     "Section1Desc": "In accordance with current legislation, you have a period of <bold>3 calendar days</bold> from the receipt of your order to request an exchange or a return if the product does not suit you.",
     "Section2Title": "2. Return conditions",
-    "Section2Desc": "To be eligible for a return, your book must be in the same condition as when you received it (unread, without marks, creases, or annotations). The original packaging must be kept.",
+    "Section2Desc": "To be eligible for a return, your product must be in the same condition as when you received it (unread, without marks, creases, or annotations). The original packaging must be kept.",
     "Section3Title": "3. Defective items",
-    "Section3Desc": "If you receive a damaged book or one with a manufacturing defect, we commit to replacing it free of charge as soon as possible.",
+    "Section3Desc": "If you receive a damaged product or one with a manufacturing defect, we commit to replacing it free of charge as soon as possible.",
     "Section4Title": "4. Return procedure",
-    "Section4Desc": "To initiate a return, please contact our customer service via WhatsApp or by email at contact@riwaya.store. Please include your order number and photos if the product is defective.",
+    "Section4Desc": "To initiate a return, please contact our customer service via WhatsApp or by email at contact@petsunivers.ma. Please include your order number and photos if the product is defective.",
     "Section5Title": "5. Return shipping costs",
-    "Section5Desc": "Return shipping is the customer's responsibility and costs <bold>35 MAD</bold>. If the item received is damaged, defective, or incorrect, Riwaya will replace it at no cost."
+    "Section5Desc": "Return shipping is the customer's responsibility and costs <bold>35 MAD</bold>. If the item received is damaged, defective, or incorrect, PetsUnivers will replace it at no cost."
   },
   "ShippingPolicyPage": {
     "Title": "Shipping Policy",
     "Section1Title": "1. Delivery areas",
-    "Section1Desc": "<bold>Riwaya</bold> delivers to all cities in the Kingdom of Morocco. Whether you are in Casablanca, Rabat, Marrakech, Tangier, or more remote areas, we ensure that your books arrive safely.",
+    "Section1Desc": "<bold>PetsUnivers</bold> delivers to all cities in the Kingdom of Morocco. Whether you are in Casablanca, Rabat, Marrakech, Tangier, or more remote areas, we ensure that your products arrive safely.",
     "Section2Title": "2. Delivery times",
     "Section2Desc": "Our delivery times generally vary between <bold>24h and 48h</bold> working days for major cities. For other regions, the delay can extend up to 4 working days.",
     "Section3Title": "3. Delivery costs",
@@ -1807,13 +1807,13 @@
     "Section2Title": "2. Use of Data",
     "Section2Desc": "Your information is used for shipping your orders, customer support, and improving our store. We also use this data, with your consent, to personalize your experience and offer you relevant advertisements.",
     "Section3Title": "3. Cookies and Analytics Tools",
-    "Section3Desc": "Riwaya uses cookies, <bold>Google Analytics 4</bold>, and <bold>Google Tag Manager (GTM)</bold> to understand the use of our site, measure our audience, and continuously improve our services.",
+    "Section3Desc": "PetsUnivers uses cookies, <bold>Google Analytics 4</bold>, and <bold>Google Tag Manager (GTM)</bold> to understand the use of our site, measure our audience, and continuously improve our services.",
     "Section4Title": "4. Google AdSense and Advertising",
     "Section4Desc": "Third-party vendors, including Google, use cookies to serve ads based on your prior visits. You can opt out of personalized advertising by visiting <link>Google Ads Settings</link>.",
     "Section5Title": "5. Retention Period",
     "Section5Desc": "Data related to your orders is kept for the legal duration necessary for accounting and management purposes. Browsing data and cookies are kept according to current recommendations.",
     "Section6Title": "6. Your Rights and Contact",
-    "Section6Desc": "In accordance with data protection laws, you have the right to access, rectify, and delete your personal data. To exercise these rights, contact us at <contact>contact@riwaya.store</contact>."
+    "Section6Desc": "In accordance with data protection laws, you have the right to access, rectify, and delete your personal data. To exercise these rights, contact us at <contact>contact@petsunivers.ma</contact>."
   },
   "CookieBanner": {
     "Message": "We use cookies to improve your experience on our site and personalize ads. By continuing to browse, you agree to our use of cookies.",
@@ -1824,43 +1824,43 @@
   "TermsPage": {
     "Title": "Terms and Conditions",
     "Section1Title": "1. Introduction",
-    "Section1Desc": "These Terms and Conditions govern all transactions made on the <bold>Riwaya</bold> website. By using our platform or placing an order, you agree to these terms in full.",
+    "Section1Desc": "These Terms and Conditions govern all transactions made on the <bold>PetsUnivers</bold> website. By using our platform or placing an order, you agree to these terms in full.",
     "Section2Title": "2. Orders and Payment",
     "Section2Desc": "All orders are subject to stock availability. We offer Cash on Delivery (COD). Payment is required at the time the order is handed over to the customer by our delivery service.",
     "Section3Title": "3. Delivery and Shipping",
-    "Section3Desc": "We deliver everywhere in Morocco. Delivery times vary depending on your city and product availability. Riwaya strives to meet the announced deadlines but is not responsible for delays caused by shipping companies.",
+    "Section3Desc": "We deliver everywhere in Morocco. Delivery times vary depending on your city and product availability. PetsUnivers strives to meet the announced deadlines but is not responsible for delays caused by shipping companies.",
     "Section4Title": "4. Returns and Refunds",
-    "Section4Desc": "If a received item is defective or non-compliant, you have a period defined in our return policy to contact us. Books must be returned in their original condition.",
+    "Section4Desc": "If a received item is defective or non-compliant, you have a period defined in our return policy to contact us. Products must be returned in their original condition.",
     "Section5Title": "5. Intellectual Property",
-    "Section5Desc": "All content on the riwaya.store website (texts, images, logos) is protected by copyright. Any unauthorized reproduction is strictly prohibited.",
+    "Section5Desc": "All content on the petsunivers.ma website (texts, images, logos) is protected by copyright. Any unauthorized reproduction is strictly prohibited.",
     "Section6Title": "6. Changes to Terms",
-    "Section6Desc": "Riwaya reserves the right to modify these Terms and Conditions at any time. Changes will take effect immediately upon publication on the site. We encourage you to review this page regularly."
+    "Section6Desc": "PetsUnivers reserves the right to modify these Terms and Conditions at any time. Changes will take effect immediately upon publication on the site. We encourage you to review this page regularly."
   },
   "OurServices": {
     "title": "Our Services",
-    "subtitle": "Discover all the services Riwaya offers for book lovers",
+    "subtitle": "Discover all the services PetsUnivers offers for product lovers",
     "hero_title": "Upgrade Your Reading Experience",
     "hero_desc": "From buying and exchanging to special packs and local delivery, we have everything you need.",
     "services": {
       "buy": {
-        "title": "Buy Books",
-        "desc": "Explore a wide range of popular books across various categories and genres."
+        "title": "Buy Products",
+        "desc": "Explore a wide range of popular products across various categories and genres."
       },
       "exchange": {
-        "title": "Book Exchange",
-        "desc": "Exchange books directly with other readers or earn credits for your next read."
+        "title": "Product Exchange",
+        "desc": "Exchange products directly with other readers or earn credits for your next read."
       },
       "packs": {
         "title": "Advantageous Packs",
-        "desc": "Save more by buying books in curated packs of 2, 3, or 4 books."
+        "desc": "Save more by buying products in curated packs of 2, 3, or 4 products."
       },
       "cod": {
         "title": "Cash on Delivery",
         "desc": "Pay easily and securely only when you receive your order."
       },
       "sell": {
-        "title": "Sell Your Books",
-        "desc": "Give your used books a second life by selling them on our platform."
+        "title": "Sell Your Products",
+        "desc": "Give your used products a second life by selling them on our platform."
       },
       "local": {
         "title": "Local Delivery",
@@ -1871,7 +1871,7 @@
   "MobileNav": {
     "Menu": "Menu",
     "Home": "Home",
-    "Books": "Books",
+    "Books": "Products",
     "Packs": "Packs",
     "Cart": "Cart"
   },
@@ -1879,11 +1879,11 @@
     "Delivery": "Delivery Anywhere in Morocco",
     "PaymentOnDelivery": "Cash on Delivery",
     "QualityGuaranteed": "Quality Guaranteed",
-    "WhyChooseUs": "Why choose Riwaya for your reading?",
+    "WhyChooseUs": "Why choose PetsUnivers for your reading?",
     "BrowseCollection": "Browse our collection to find captivating stories written by the greatest writers in the Arab world.",
     "Mission1": "Our mission is to democratize access to culture. By choosing",
     "Mission2": "via our platform, you benefit from an intuitive interface, responsive customer service, and personalized recommendations.",
-    "Guarantee": "Riwaya Guarantee",
+    "Guarantee": "PetsUnivers Guarantee",
     "GuaranteeText": "Satisfied or refunded within 7 days. Careful packaging and fast shipping within 24 business hours to all cities in Morocco (Casablanca, Rabat, Marrakech, Tangier, etc.).",
     "SelectionOfTheWeek": "Selection of the week",
     "ViewCatalog": "View the entire catalog",
@@ -1896,13 +1896,13 @@
     "Title": "Follow us on Instagram"
   },
   "Livraison1hRabatPage": {
-    "Title": "1-Hour Book Delivery in Rabat, Sale, Temara | Riwaya Sonic",
-    "Description": "Enjoy ultra-fast Sonic delivery! Receive your favorite books in under an hour in Rabat, Sale, and Temara. Discover our immediately available selection.",
+    "Title": "1-Hour Product Delivery in Rabat, Sale, Temara | PetsUnivers Sonic",
+    "Description": "Enjoy ultra-fast Sonic delivery! Receive your favorite products in under an hour in Rabat, Sale, and Temara. Discover our immediately available selection.",
     "Badge": "Exclusive Sonic Service",
-    "H1": "1-Hour Book Delivery in Rabat, Sale, Temara",
-    "P1": "Got a sudden urge to read? Looking for the perfect last-minute gift? Riwaya introduces <strong>Sonic</strong>, Morocco's first ultra-fast book delivery service. Now, receive your favorite novels, essays, and textbooks in <strong>under an hour</strong>.",
+    "H1": "1-Hour Product Delivery in Rabat, Sale, Temara",
+    "P1": "Got a sudden urge to read? Looking for the perfect last-minute gift? PetsUnivers introduces <strong>Sonic</strong>, Morocco's first ultra-fast product delivery service. Now, receive your favorite novels, essays, and textbooks in <strong>under an hour</strong>.",
     "P2": "Our exclusive service currently covers <strong>Rabat, Sale, and Temara</strong>. No more waiting days: thanks to our optimized network of delivery partners and our logistics hub located in the heart of the capital, culture comes to you at lightning speed.",
-    "P3": "How does it work? It's simple! Browse our complete catalog of Sonic-eligible books below. All these titles are in stock and ready to ship instantly. Confirm your order with the Sonic delivery option, and relax. Your next book is already on its way.",
+    "P3": "How does it work? It's simple! Browse our complete catalog of Sonic-eligible products below. All these titles are in stock and ready to ship instantly. Confirm your order with the Sonic delivery option, and relax. Your next product is already on its way.",
     "Feature1Title": "Under 1 hour",
     "Feature1Desc": "Record time",
     "Feature2Title": "Rabat, Sale, Temara",
@@ -1910,8 +1910,8 @@
     "Feature3Title": "Live tracking",
     "Feature3Desc": "Right to your door",
     "CatalogTitle": "Our entire catalog in immediate delivery",
-    "CatalogDesc": "Thousands of books in stock. Order now, read in 1 hour.",
-    "Empty": "No books available for Sonic delivery at the moment."
+    "CatalogDesc": "Thousands of products in stock. Order now, read in 1 hour.",
+    "Empty": "No products available for Sonic delivery at the moment."
   },
   "DevenirVendeur": {
     "ProgrammeVendeurPartenaire": "Partner Seller Program",
@@ -1920,10 +1920,10 @@
     "HeroDescription": "Reach thousands of readers across Morocco. You manage your sales, we bring you qualified traffic.",
     "BtnDevenirVendeur": "Become a seller",
     "BtnCommentCaMarche": "How does it work?",
-    "PourquoiVendre": "Why sell on Riwaya?",
+    "PourquoiVendre": "Why sell on PetsUnivers?",
     "CroissancePriorite": "Your growth, our priority.",
     "Feature1Title": "Qualified Audience",
-    "Feature1Desc": "Your books are directly presented to thousands of reading enthusiasts in Morocco.",
+    "Feature1Desc": "Your products are directly presented to thousands of reading enthusiasts in Morocco.",
     "Feature2Title": "Autonomous management",
     "Feature2Desc": "You keep full control over your shipments and delivery methods with your customers.",
     "Feature3Title": "Direct profits",
@@ -1933,7 +1933,7 @@
     "4Etapes": "Start selling in 4 simple steps.",
     "Step1Title": "Create your store",
     "Step1Desc": "Fill out the registration form to set up your seller account in less than 3 minutes.",
-    "Step2Title": "Add your books",
+    "Step2Title": "Add your products",
     "Step2Desc": "Upload your covers, set your prices, and easily manage your stock from your dashboard.",
     "Step3Title": "Receive orders",
     "Step3Desc": "Be notified instantly of every new purchase by a customer on the platform.",
@@ -1957,38 +1957,38 @@
     "CityPlaceholder": "Casablanca",
     "StockSizeLabel": "Estimated Stock Size *",
     "SelectPlaceholder": "Select...",
-    "Stock1": "1 - 50 books",
-    "Stock2": "50 - 200 books",
-    "Stock3": "200 - 1000 books",
-    "Stock4": "1000+ books",
+    "Stock1": "1 - 50 products",
+    "Stock2": "50 - 200 products",
+    "Stock3": "200 - 1000 products",
+    "Stock4": "1000+ products",
     "Submitting": "Sending...",
     "SubmitBtn": "Submit my application",
-    "Disclaimer": "By submitting this form, you agree to be contacted by the Riwaya team.",
+    "Disclaimer": "By submitting this form, you agree to be contacted by the PetsUnivers team.",
     "ThanksTitle": "Thank you!",
     "ThanksMsg": "Your application has been received. Our team will contact you shortly to finalize the creation of your store.",
     "ErrorMsg": "An error has occurred."
   },
   "SellBook": {
-    "Title": "Sell your used books",
-    "Description": "Give your books a second life. Fill out this form, we will validate your ad and it will be published on our store.",
+    "Title": "Sell your used products",
+    "Description": "Give your products a second life. Fill out this form, we will validate your ad and it will be published on our store.",
     "SuccessTitle": "Congratulations!",
-    "SuccessDesc": "Your book has been successfully submitted. Our team will review your ad and it will be published very soon.",
-    "BtnSellAnother": "Sell another book",
+    "SuccessDesc": "Your product has been successfully submitted. Our team will review your ad and it will be published very soon.",
+    "BtnSellAnother": "Sell another product",
     "BtnHome": "Back to home",
     "ErrImageSize": "The image must not exceed 5MB.",
-    "ErrMissingImage": "Please add a photo of your book.",
+    "ErrMissingImage": "Please add a photo of your product.",
     "ErrGeneral": "An error occurred",
-    "Step1": "Book Photo",
+    "Step1": "Product Photo",
     "ChangeImage": "Change image",
     "AddImage": "Add a photo",
     "ImageFormat": "JPG, PNG, WEBP (Max 5MB)",
-    "Step2": "Book Details",
-    "BookTitle": "Book Title *",
+    "Step2": "Product Details",
+    "BookTitle": "Product Title *",
     "BookTitlePlaceholder": "Ex: The Stranger",
-    "Author": "Author *",
+    "Author": "Brand *",
     "AuthorPlaceholder": "Ex: Albert Camus",
     "DescLabel": "Description or summary (optional)",
-    "DescPlaceholder": "Talk a bit about the book or why you liked it...",
+    "DescPlaceholder": "Talk a bit about the product or why you liked it...",
     "Category": "Category",
     "CatPlaceholder": "Select a category",
     "CatRomans": "Novels & Fiction",
@@ -1997,7 +1997,7 @@
     "CatBusiness": "Business",
     "CatHistoire": "History",
     "CatPhilo": "Philosophy",
-    "Condition": "Book Condition *",
+    "Condition": "Product Condition *",
     "CondGood": "Good condition (Some minor marks)",
     "CondUsed": "Used (Visible marks)",
     "Price": "Desired price (MAD) *",
@@ -2041,10 +2041,10 @@
     "EmptyTagTitle": "No quotes with this tag",
     "EmptyTagDesc": "We don't have any quotes for this topic yet. Come back soon!",
     "BrowseByTag": "Browse by tag",
-    "PromoQuote": "A well-chosen book is a friend for life.",
-    "PromoBtn": "Discover our books →",
+    "PromoQuote": "A well-chosen product is a friend for life.",
+    "PromoBtn": "Discover our products →",
     "TagQuotes": "quotes",
-    "SourceBook": "Source book",
+    "SourceBook": "Source product",
     "TagLabels": {
       "best": "Best",
       "love": "Love",
@@ -2094,35 +2094,35 @@
       "Standard": "Standard",
       "BoardGameAge": "10+ years / 2-4 players",
       "BoardGameContent": "Complete",
-      "RiwayaWarranty": "Riwaya Quality Warranty"
+      "PetsUniversWarranty": "PetsUnivers Quality Warranty"
     }
   },
   "AuthBenefits": {
-    "title": "Why join Riwaya?",
+    "title": "Why join PetsUnivers?",
     "b1_title": "Welcome Bonus",
     "b1_desc": "Get 10 DH in your wallet and a promo code upon registration.",
     "b2_title": "Cash on Delivery",
     "b2_desc": "Shop safely and pay only when you receive your order.",
     "b3_title": "Fast Delivery",
     "b3_desc": "Express delivery everywhere in Morocco.",
-    "b4_title": "Book Exchange",
-    "b4_desc": "Exchange your books with a community of readers.",
+    "b4_title": "Product Exchange",
+    "b4_desc": "Exchange your products with a community of readers.",
     "b5_title": "Economical Packs",
-    "b5_desc": "Take advantage of our exclusive offers on book packs."
+    "b5_desc": "Take advantage of our exclusive offers on product packs."
   },
   "CTA": {
     "BoardGamesTitle": "Discover our Board Games collection",
     "BoardGamesDesc": "Enjoy time with family and friends with the best board games.",
     "DiscoverBoardGames": "Browse Games",
-    "KidsWorldTitle": "Books and activities to develop your child's skills",
-    "KidsWorldDesc": "A special selection of books and stories designed specifically for kids.",
+    "KidsWorldTitle": "Products and activities to develop your child's skills",
+    "KidsWorldDesc": "A special selection of products and stories designed specifically for kids.",
     "DiscoverKidsWorld": "Discover Collection",
-    "UsedBooksTitle": "Discover our collection of used books at great prices",
-    "UsedBooksDesc": "Books in very good condition at discounted prices.",
-    "BrowseUsedBooks": "Browse Books",
+    "UsedBooksTitle": "Discover our collection of used products at great prices",
+    "UsedBooksDesc": "Products in very good condition at discounted prices.",
+    "BrowseUsedBooks": "Browse Products",
     "CustomPack": "Custom Pack",
     "CustomPackTitle": "Create your own pack",
-    "CustomPackDesc": "Select 3 or more books and enjoy great discounts.",
+    "CustomPackDesc": "Select 3 or more products and enjoy great discounts.",
     "CreatePack": "Create my pack"
   },
   "AccessoryDetail": {
@@ -2142,7 +2142,7 @@
     "SpeedTitle": "Fast processing:",
     "SpeedDesc": "We ship to all major cities in Morocco in 24-48h. Other regions take up to 72h.",
     "GuaranteeTitle": "Guarantee:",
-    "GuaranteeDesc": "If the item is defective or doesn't match, Riwaya will replace or refund it.",
+    "GuaranteeDesc": "If the item is defective or doesn't match, PetsUnivers will replace or refund it.",
     "YouMightAlsoLike": "You might also like...",
     "StockLeft": "{stock} left",
     "OutOfStock": "Out of stock",
@@ -2158,7 +2158,7 @@
       "BookmarkDim": "12 x 3 cm",
       "Standard": "Standard",
       "USBCapacity": "64 Go",
-      "RiwayaWarranty": "Riwaya quality guarantee"
+      "PetsUniversWarranty": "PetsUnivers quality guarantee"
     }
   },
   "ReturnReminders": {
@@ -2204,7 +2204,7 @@
     "InStock": "In stock",
     "OutOfStock": "Out of stock",
     "Savings": "Save",
-    "PackOf": "Bundle of {count} books"
+    "PackOf": "Bundle of {count} products"
   },
   "AdminPacks": {
     "PackLanguage": "Pack Language",
@@ -2251,23 +2251,23 @@
     "PasteJsonLabel": "Paste AI-generated JSON",
     "PasteJsonPlaceholder": "Paste the JSON object returned by the AI here...",
     "PasteFromClipboard": "Paste from clipboard",
-    "ApplyBtn": "Apply to book (100% SEO)",
+    "ApplyBtn": "Apply to product (100% SEO)",
     "Applying": "Applying...",
     "SuccessTitle": "SEO boosted successfully!",
-    "SuccessDesc": "All fields have been optimized for 100% SEO score. Remember to save the book.",
+    "SuccessDesc": "All fields have been optimized for 100% SEO score. Remember to save the product.",
     "InvalidJson": "The provided text is not valid JSON."
   },
   "SeoAlert": {
     "Title": "SEO Optimization Alert",
-    "Description": "{count} out of {total} books ({percent}%) have an SEO score ≤ 80 (critical threshold > {threshold}%).",
+    "Description": "{count} out of {total} products ({percent}%) have an SEO score ≤ 80 (critical threshold > {threshold}%).",
     "Badge": "Action required",
     "Action": "Optimize listings",
     "Dismiss": "Dismiss alert"
   },
   "BulkImport": {
     "Title": "Bulk Import & Stock Update",
-    "Subtitle": "Import new books or update your inventory in bulk",
-    "NewBooks": "New Books",
+    "Subtitle": "Import new products or update your inventory in bulk",
+    "NewBooks": "New Products",
     "UpdateStock": "Update Stock",
     "Instructions": "Instructions",
     "DownloadExcel": "Download Excel Template (.xlsx)",
@@ -2276,8 +2276,8 @@
     "LiveImport": "Live Import",
     "LiveStock": "Live Stock Update",
     "ProcessingFile": "Processing file...",
-    "ProgressCount": "{current} of {total} book(s) processed",
-    "CurrentBook": "Book: {title}",
+    "ProgressCount": "{current} of {total} product(s) processed",
+    "CurrentBook": "Product: {title}",
     "SuccessBadge": "✓ {count} succeeded",
     "FailBadge": "✗ {count} failed",
     "RejectionReportTitle": "Rejected rows summary report",

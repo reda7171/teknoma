@@ -98,7 +98,7 @@ export async function GET() {
 
         // Formater les livres
         for (const book of books) {
-            const localizedTitle = getLocalizedTitle(book, 'fr') || book.title || 'Livre Riwaya'
+            const localizedTitle = getLocalizedTitle(book, 'fr') || book.title || 'Livre PetsUnivers'
             const localizedDesc = cleanDescription(getLocalizedDescription(book, 'fr') || book.description)
             const bookUrl = `${baseUrl}/fr${generateBookUrl(book, 'fr')}`
             const normalizedImg = normalizeImage(book.image)
@@ -113,7 +113,7 @@ export async function GET() {
                 link: bookUrl,
                 guid: `${baseUrl}/books/${book.id}`,
                 pubDate: book.createdAt || new Date(),
-                author: book.author || 'Riwaya',
+                author: book.author || 'PetsUnivers',
                 category: book.category || 'Livres',
                 description: `${localizedDesc}${book.price ? ` — Prix: ${book.price} MAD` : ''}`,
                 imageUrl,
@@ -137,7 +137,7 @@ export async function GET() {
                 link: postUrl,
                 guid: `${baseUrl}/blog/${post.slug}`,
                 pubDate: post.publishedAt || post.createdAt || new Date(),
-                author: post.author?.fullName || 'Équipe Riwaya',
+                author: post.author?.fullName || 'Équipe PetsUnivers',
                 category: post.category || 'Blog Littéraire',
                 description: desc,
                 imageUrl,
@@ -171,20 +171,20 @@ export async function GET() {
             .join('\n')
 
         const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" 
-     xmlns:atom="http://www.w3.org/2005/Atom" 
-     xmlns:dc="http://purl.org/dc/elements/1.1/" 
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
      xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
-    <title>Riwaya | Nouveaux Livres et Articles</title>
+    <title>PetsUnivers | Nouveaux Livres et Articles</title>
     <link>${baseUrl}</link>
-    <description>Flux officiel de la librairie Riwaya au Maroc. Nouveaux livres, romans, packs et articles du blog littéraire.</description>
+    <description>Flux officiel de la librairie PetsUnivers au Maroc. Nouveaux livres, romans, packs et articles du blog littéraire.</description>
     <language>fr</language>
     <lastBuildDate>${latestBuildDate}</lastBuildDate>
     <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml"/>
     <image>
       <url>${baseUrl}/logo.png</url>
-      <title>Riwaya</title>
+      <title>PetsUnivers</title>
       <link>${baseUrl}</link>
     </image>
 ${xmlItems}

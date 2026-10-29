@@ -21,7 +21,7 @@ export async function generateMetadata({
     const product = await prisma.extraProduct.findUnique({
         where: { id },
     })
-    
+
     const t = await getTranslations('KidsProductDetail')
 
     if (!product) {
@@ -31,10 +31,10 @@ export async function generateMetadata({
     }
 
     return {
-        title: `${product.name} | Riwaya`,
+        title: `${product.name} | PetsUnivers`,
         description: product.description || t('MetaDesc', { name: product.name }),
         openGraph: {
-            title: `${product.name} | Riwaya`,
+            title: `${product.name} | PetsUnivers`,
             description: product.description || t('MetaDesc', { name: product.name }),
             images: [product.image || '/og-image.jpg'],
         }
@@ -174,7 +174,7 @@ export default async function ProductDetailPage({
                             <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-3">
                                 {product.name}
                             </h1>
-                            
+
                             {/* Note / Avis Simulés Premium */}
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center text-amber-400">

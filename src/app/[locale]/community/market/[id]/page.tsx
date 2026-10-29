@@ -17,22 +17,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const book = await getExchangeBookDetails(id)
     const baseUrl = getBaseUrl()
     const pageUrl = `${baseUrl}/${locale}/community/market/${id}`
-    
+
     if (!book) {
         return {
-            title: 'Livre introuvable | Riwaya Community',
+            title: 'Livre introuvable | PetsUnivers Community',
         }
     }
 
     const coverImg = book.image ? (book.image.startsWith('http') ? book.image.split(',')[0] : `${baseUrl}${book.image.split(',')[0]}`) : `${baseUrl}/og-image.jpg`
 
     return {
-        title: `${book.title} par ${book.author} — Échange de livres | Riwaya Community`,
-        description: book.seoDescription || book.description || `Échangez ${book.title} de ${book.author} sur Riwaya Community au Maroc. Troc de livres direct entre lecteurs.`,
-        keywords: book.seoKeywords || `${book.title}, ${book.author}, échange livre, troc livre maroc, Riwaya`,
+        title: `${book.title} par ${book.author} — Échange de livres | PetsUnivers Community`,
+        description: book.seoDescription || book.description || `Échangez ${book.title} de ${book.author} sur PetsUnivers Community au Maroc. Troc de livres direct entre lecteurs.`,
+        keywords: book.seoKeywords || `${book.title}, ${book.author}, échange livre, troc livre maroc, PetsUnivers`,
         openGraph: {
             title: `${book.title} | Échange de livres Maroc`,
-            description: book.seoDescription || book.description || `Découvrez et échangez ${book.title} sur la communauté Riwaya.`,
+            description: book.seoDescription || book.description || `Découvrez et échangez ${book.title} sur la communauté PetsUnivers.`,
             url: pageUrl,
             images: [{ url: coverImg }],
         },
@@ -68,7 +68,7 @@ export default async function CommunityBookDetailPage({
 
     const user = await getCommunityUser()
     const canEdit = user?.role === 'ADMIN' || user?.id === book.ownerId
-    
+
     const parsedImages = parseImages(book.image)
 
     const bookSchema = {
@@ -84,7 +84,7 @@ export default async function CommunityBookDetailPage({
         sku: book.id,
         brand: {
             '@type': 'Brand',
-            name: 'Riwaya Community'
+            name: 'PetsUnivers Community'
         },
         offers: {
             '@type': 'Offer',
@@ -95,7 +95,7 @@ export default async function CommunityBookDetailPage({
             description: 'Livre disponible pour troc et échange entre lecteurs au Maroc',
             seller: {
                 '@type': 'Organization',
-                name: 'Riwaya'
+                name: 'PetsUnivers'
             },
             hasMerchantReturnPolicy: {
                 '@type': 'MerchantReturnPolicy',

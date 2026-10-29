@@ -43,27 +43,27 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
         const number = formatWhatsAppNumber(order.phone)
         const name = order.fullName.split(' ')[0]
         let text = ''
-        
+
         if (template === 'confirm') {
-            text = `Salam ${name}, m3ak Riwaya 👋. Twaselna b l'commande dyalk #${order.id.slice(0, 8)}. Wach n'confirmew m3ak l'adresse bach nsiftoha lik ?`
+            text = `Salam ${name}, m3ak PetsUnivers 👋. Twaselna b l'commande dyalk #${order.id.slice(0, 8)}. Wach n'confirmew m3ak l'adresse bach nsiftoha lik ?`
         } else if (template === 'review') {
-            text = `Salam ${name}, m3ak Riwaya 👋. Kif jatak l'commande dyalk ? Ntmna tkon 3jbatk! ila 3jbatk l'khedma dyalna, mkrehnach tkhli lina wahed l'avis sghir. Shokran bzaf!`
+            text = `Salam ${name}, m3ak PetsUnivers 👋. Kif jatak l'commande dyalk ? Ntmna tkon 3jbatk! ila 3jbatk l'khedma dyalna, mkrehnach tkhli lina wahed l'avis sghir. Shokran bzaf!`
         } else if (template === 'repurchase') {
-            text = `Salam ${name}, twahachnak f Riwaya! Jbnalkom koutoub jdad o promotions mzyanin. Dkhol l site dyalna riwaya.store tktachef jdid, marhba bik f ay waqt!`
+            text = `Salam ${name}, twahachnak f PetsUnivers! Jbnalkom koutoub jdad o promotions mzyanin. Dkhol l site dyalna petsunivers.ma tktachef jdid, marhba bik f ay waqt!`
         } else if (template === 'delay') {
-            text = `Salam ${name}, m3ak Riwaya 👋. Kants2asfo bzaf 3la t2akhir lli w9a3 f l'commande dyalk. 9rib insha'Allah tkoun 3ndk. Shokran 3la tfahom dyalk!`
+            text = `Salam ${name}, m3ak PetsUnivers 👋. Kants2asfo bzaf 3la t2akhir lli w9a3 f l'commande dyalk. 9rib insha'Allah tkoun 3ndk. Shokran 3la tfahom dyalk!`
         } else if (template === 'no_answer') {
-            text = `Salam ${name}, m3ak Riwaya 👋. 3ytna lik 9bila bach n'confirmew l'commande dyalk sa3a majawbtinach. Mli tkoun msali(a) jawbna hna bach nsiftoha lik f a9rab wa9t.`
+            text = `Salam ${name}, m3ak PetsUnivers 👋. 3ytna lik 9bila bach n'confirmew l'commande dyalk sa3a majawbtinach. Mli tkoun msali(a) jawbna hna bach nsiftoha lik f a9rab wa9t.`
         } else if (template === 'shipped') {
-            text = `Salam ${name}, m3ak Riwaya 👋. L'commande dyalk khrjat lyouma! L'livreur ghadi itassel bik 9rib bach iwselha lik. B saha w raha!`
+            text = `Salam ${name}, m3ak PetsUnivers 👋. L'commande dyalk khrjat lyouma! L'livreur ghadi itassel bik 9rib bach iwselha lik. B saha w raha!`
         } else if (template === 'encourage_read') {
-            text = `Salam ${name} 👋, l'9raya hia l'ghida2 dyal l'39al 🧠. Riwaya katmna lik 9raya momti3a! Dima m3ak bach nwfro lik ahsan l'kotob.`
+            text = `Salam ${name} 👋, l'9raya hia l'ghida2 dyal l'39al 🧠. PetsUnivers katmna lik 9raya momti3a! Dima m3ak bach nwfro lik ahsan l'kotob.`
         } else if (template === 'encourage_gift') {
-            text = `Salam ${name} 👋! L'ktab howa ahsan cadeau t9dr thdi l chi wahed 3ziz 🎁. Dkhol l riwaya.store o khtar ahsan l'kotob.`
+            text = `Salam ${name} 👋! L'ktab howa ahsan cadeau t9dr thdi l chi wahed 3ziz 🎁. Dkhol l petsunivers.ma o khtar ahsan l'kotob.`
         } else if (template === 'encourage_promo') {
-            text = `Salam ${name} 🎉! Riwaya jabt likoum promo zwina! Dkhol l site dyalna bach tstafd mn l'3orod jdida 9bl matsali.`
+            text = `Salam ${name} 🎉! PetsUnivers jabt likoum promo zwina! Dkhol l site dyalna bach tstafd mn l'3orod jdida 9bl matsali.`
         }
-        
+
         return `https://wa.me/${number}?text=${encodeURIComponent(text)}`
     }
 
@@ -74,7 +74,7 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
         await incrementFollowUp(order.id)
         // Update local state to reflect UI change instantly
         setOrders(prev => prev.map(o => o.id === order.id ? {
-            ...o, 
+            ...o,
             followUpCount: (o.followUpCount || 0) + 1,
             lastFollowUp: new Date()
         } : o))
@@ -96,7 +96,7 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
             .filter(Boolean)
             .map(o => formatWhatsAppNumber(o!.phone))
             .join(', ')
-        
+
         navigator.clipboard.writeText(numbers)
         showNotification(`${selectedOrders.size} numéros copiés !`, 'success')
     }
@@ -134,8 +134,8 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
         }
     }
 
-    const filteredOrders = orders.filter(o => 
-        o.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const filteredOrders = orders.filter(o =>
+        o.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.phone.includes(searchTerm) ||
         o.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -287,7 +287,7 @@ export default function CallCenterClient({ initialOrders }: { initialOrders: Ord
                                                 </button>
                                                 <button onClick={() => openWhatsApp(order, 'encourage_promo')} className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex flex-col gap-1">
                                                     <span className="text-xs font-bold text-gray-900">9. Offre Spéciale</span>
-                                                    <span className="text-[10px] text-gray-500 line-clamp-1">Riwaya jabt likoum promo zwina 🎉...</span>
+                                                    <span className="text-[10px] text-gray-500 line-clamp-1">PetsUnivers jabt likoum promo zwina 🎉...</span>
                                                 </button>
                                             </div>
                                         </div>

@@ -26,7 +26,7 @@ export default function ReaderCardModal({ visible, onClose, customer, t }: Reade
 
   // Utilize external API to generate QR Code
   // the 'data' parameter is the customer's unique identifier (ID or Email)
-  const qrData = customer.id || customer.email || 'riwaya-user';
+  const qrData = customer.id || customer.email || 'petsunivers-user';
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&color=000000&bgcolor=ffffff&qzone=1`;
 
   return (

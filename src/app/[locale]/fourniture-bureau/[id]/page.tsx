@@ -25,16 +25,16 @@ export async function generateMetadata({
 
     if (!product) {
         return {
-            title: 'Produit introuvable | Riwaya',
+            title: 'Produit introuvable | PetsUnivers',
         }
     }
 
     return {
-        title: `${product.name} | Riwaya`,
-        description: product.description || `Découvrez ${product.name} sur Riwaya. Livraison rapide au Maroc.`,
+        title: `${product.name} | PetsUnivers`,
+        description: product.description || `Découvrez ${product.name} sur PetsUnivers. Livraison rapide au Maroc.`,
         openGraph: {
-            title: `${product.name} | Riwaya`,
-            description: product.description || `Découvrez ${product.name} sur Riwaya. Livraison rapide au Maroc.`,
+            title: `${product.name} | PetsUnivers`,
+            description: product.description || `Découvrez ${product.name} sur PetsUnivers. Livraison rapide au Maroc.`,
             images: [product.image || '/og-image.jpg'],
         }
     }
@@ -74,7 +74,7 @@ export default async function ProductDetailPage({
             return tExtraProduct('Categories.ACCESSORY')
         }
     }
-    
+
     const categoryLabel = getCategoryLabel(product.category)
 
     // Spécifications techniques dynamiques ou basées sur la catégorie par défaut
@@ -82,7 +82,7 @@ export default async function ProductDetailPage({
         { label: tAccessory('Specs.Material'), value: product.materials || (product.category === 'BOOKMARK' ? tAccessory('Specs.BookmarkMaterial') : tAccessory('Specs.MaterialPremium')) },
         { label: tAccessory('Specs.Dimensions'), value: product.dimensions || (product.category === 'BOOKMARK' ? tAccessory('Specs.BookmarkDim') : tAccessory('Specs.Standard')) },
         { label: tAccessory('Specs.WeightCapacity'), value: product.weight || (product.category === 'USB' ? tAccessory('Specs.USBCapacity') : tAccessory('Specs.Standard')) },
-        { label: tAccessory('Specs.Warranty'), value: product.warranty || tAccessory('Specs.RiwayaWarranty') },
+        { label: tAccessory('Specs.Warranty'), value: product.warranty || tAccessory('Specs.PetsUniversWarranty') },
     ]
 
     return (
@@ -105,7 +105,7 @@ export default async function ProductDetailPage({
                     {/* Colonne Image / Galerie */}
                     <div className="lg:col-span-7">
                         <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col gap-8">
-                            <FournitureMediaClient 
+                            <FournitureMediaClient
                                 productName={product.name}
                                 mainImage={product.image}
                                 images={(product.images as string[]) || []}
@@ -150,7 +150,7 @@ export default async function ProductDetailPage({
                             <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-3">
                                 {product.name}
                             </h1>
-                            
+
                             {/* Note / Avis Simulés Premium */}
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center text-amber-400">

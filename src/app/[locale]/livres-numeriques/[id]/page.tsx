@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const imageUrl = getOgImageUrl(product.image, baseUrl, `${baseUrl}/images/og-blog.png`)
 
   return {
-    title: `${product.title} | Riwaya`,
+    title: `${product.title} | PetsUnivers`,
     description: product.description,
     openGraph: {
-      title: `${product.title} | Riwaya`,
+      title: `${product.title} | PetsUnivers`,
       description: product.description || '',
       images: [imageUrl],
       url: `${baseUrl}/${locale}/livres-numeriques/${id}`
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function DigitalProductPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
   const { locale, id } = await params
   const t = await getTranslations('DigitalBooks')
-  
+
   const product = await prisma.digitalProduct.findUnique({
     where: { id, active: true }
   })
@@ -78,7 +78,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
     "@type": "Book",
     "name": product.title,
     "image": productImageUrl,
-    "description": product.description || `Livre numérique ${product.title} sur Riwaya.`,
+    "description": product.description || `Livre numérique ${product.title} sur PetsUnivers.`,
     "url": productUrl,
     "bookFormat": "https://schema.org/EBook",
     "isAccessibleForFree": false,
@@ -88,7 +88,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Riwaya"
+      "name": "PetsUnivers"
     }
   }
 
@@ -126,10 +126,10 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <HeaderWithUser />
-      
+
       <main className="min-h-screen bg-white pt-32 pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 font-medium">
             <Link href="/" className="hover:text-amber-600 transition-colors">Accueil</Link>
@@ -140,7 +140,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
           </nav>
 
           <div className="flex flex-col lg:flex-row gap-16">
-            
+
             {/* Image (gauche) */}
             <div className="lg:w-1/3">
               <div className="sticky top-32">
@@ -166,7 +166,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
 
             {/* Contenu (droite) */}
             <div className="lg:w-2/3 space-y-10">
-              
+
               {/* Header produit */}
               <div className="space-y-4">
                 {product.category && (
@@ -174,11 +174,11 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
                     {product.category}
                   </div>
                 )}
-                
+
                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight">
                   {product.title}
                 </h1>
-                
+
                 <p className="text-xl text-gray-500 italic font-medium">
                   par <span className="text-gray-900 not-italic font-bold">{product.author}</span>
                 </p>
@@ -219,7 +219,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
 
                 <div className="space-y-3">
                   {hasPurchased ? (
-                    <Link 
+                    <Link
                       href={`/${locale}/livres-numeriques/reader/${product.id}`}
                       className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-amber-400 hover:bg-amber-500 text-black font-black uppercase tracking-widest rounded-xl transition-all text-center"
                     >
@@ -272,7 +272,7 @@ export default async function DigitalProductPage({ params }: { params: Promise<{
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </>
   )

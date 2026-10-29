@@ -13,14 +13,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('Title'),
     description: t('Description'),
-    keywords: ['livraison 1h rabat', 'livres rabat', 'librairie rabat', 'livraison rapide', 'livraison salé', 'livraison témara', 'Riwaya Sonic']
+    keywords: ['livraison 1h rabat', 'livres rabat', 'librairie rabat', 'livraison rapide', 'livraison salé', 'livraison témara', 'PetsUnivers Sonic']
   }
 }
 
 export default async function Livraison1hRabatPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Livraison1hRabatPage' });
-  
+
   // Fetch initial books for lazy loading
   const initialFilters = { inStock: true, page: 1, limit: 12, active: true };
   const sonicBooks = await getBooks(initialFilters);
@@ -28,24 +28,24 @@ export default async function Livraison1hRabatPage({ params }: { params: Promise
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-outfit" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <HeaderWithUser locale={locale} />
-      
+
       <main className="flex-grow pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Hero Section */}
           <div className="bg-white rounded-[2rem] p-8 md:p-16 shadow-sm border border-gray-100 mb-16 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-pixio-yellow/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
-            
+
             <div className="relative z-10 max-w-3xl">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-yellow-200">
                 <Zap className="w-4 h-4 fill-current" />
                 {t('Badge')}
               </div>
-              
+
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-black leading-tight tracking-tight mb-8">
                 {t('H1')}
               </h1>
-              
+
               <div className="prose prose-lg text-gray-600 max-w-none">
                 <p dangerouslySetInnerHTML={{ __html: t.raw('P1') }} />
                 <p dangerouslySetInnerHTML={{ __html: t.raw('P2') }} />
@@ -94,15 +94,15 @@ export default async function Livraison1hRabatPage({ params }: { params: Promise
           </div>
 
           <div className="-mx-4 sm:mx-0">
-            <InfiniteBookList 
+            <InfiniteBookList
               initialBooks={sonicBooks}
               initialFilters={initialFilters}
             />
           </div>
-          
+
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

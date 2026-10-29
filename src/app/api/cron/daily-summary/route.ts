@@ -68,10 +68,10 @@ export async function GET(req: NextRequest) {
             totalDeliveryFees += fee ?? 30
         }
         const caNet = totalRevenue - totalDeliveryFees
-        
+
         // Trouver le livre le plus vendu
         const bookStats: Record<string, { title: string, qty: number }> = {}
-        
+
         for (const order of orders) {
             for (const item of order.items) {
                 if (item.bookId) {
@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
         }
 
         // 5. Envoyer le message
-        const text = `📊 <b>Résumé Journalier - Riwaya</b>\n\n` +
+        const text = `📊 <b>Résumé Journalier - PetsUnivers</b>\n\n` +
             `📅 <b>Date:</b> ${startOfDay.toLocaleDateString('fr-FR')}\n` +
             `📦 <b>Commandes:</b> ${orders.length}\n` +
             `💰 <b>CA Brut:</b> ${totalRevenue.toFixed(2)} درهم\n` +

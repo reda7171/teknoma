@@ -27,16 +27,16 @@ export async function POST(req: NextRequest) {
         }
 
         const imageUrl = customImageUrl || item?.image;
-        const title = item?.title || 'Riwaya';
+        const title = item?.title || 'PetsUnivers';
         const description = customCaption || item?.description || '';
-        const itemUrl = link || (item ? `https://riwaya.store/fr/books/${item.id}` : 'https://riwaya.store');
+        const itemUrl = link || (item ? `https://petsunivers.ma/fr/books/${item.id}` : 'https://petsunivers.ma');
 
         if (!imageUrl) {
             return NextResponse.json({ error: 'Image requise pour Pinterest' }, { status: 400 });
         }
 
         const result = await publishPin(
-            imageUrl.startsWith('http') ? imageUrl : `https://riwaya.store${imageUrl}`,
+            imageUrl.startsWith('http') ? imageUrl : `https://petsunivers.ma${imageUrl}`,
             title,
             description,
             itemUrl,

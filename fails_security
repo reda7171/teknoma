@@ -42,8 +42,8 @@ Un inventaire plus large des 27 scripts uniques utilisés par l'accueil, le cata
 | API découverte dans les scripts publics | Contrôles sans écriture | Résultat |
 |---|---|---|
 | /api/admin/notifications/stream?since= | GET sans cookie, cookie invalide, Bearer invalide, Origin externe ; fenêtres 24 h, 30 j et 90 j | *Fuite confirmée* : noms, villes, montants, statuts, identifiants et dates de commande. Voir les volumes anonymisés ci-dessus. |
-| /api/auth/google/login | GET normal et paramètre redirect externe | 307 vers Google, callback riwaya fixé ; paramètre externe ignoré. Aucun état state observé dans la requête d'autorisation. |
-| /api/auth/facebook/login | GET normal et paramètre callbackUrl externe | 307 vers Facebook, callback riwaya fixé ; paramètre externe ignoré. Aucun état state observé dans la requête d'autorisation. |
+| /api/auth/google/login | GET normal et paramètre redirect externe | 307 vers Google, callback petsunivers fixé ; paramètre externe ignoré. Aucun état state observé dans la requête d'autorisation. |
+| /api/auth/facebook/login | GET normal et paramètre callbackUrl externe | 307 vers Facebook, callback petsunivers fixé ; paramètre externe ignoré. Aucun état state observé dans la requête d'autorisation. |
 | /api/books/reserve | GET, OPTIONS, POST JSON vide | GET 405 ; OPTIONS 204 sans ACAO ; POST 400 « Données manquantes ». Pas de réservation créée. |
 | /api/chat | GET et POST JSON vide | GET 405 ; POST 400. Aucun message envoyé. |
 | /api/newsletter/subscribe | GET et POST JSON vide | GET 405 ; POST 400 « Email invalide ». Aucun email inscrit. |
@@ -66,7 +66,7 @@ Cette couverture ne permet pas d'affirmer que les autres paramètres ou traiteme
 4. Examiner les autres routes et actions serveur administratives : la redirection de l'interface ne protège pas automatiquement les appels de données.
 5. Après correction, tester la route avec une session anonyme, une session normale et une session admin autorisée. Les deux premières ne doivent retourner aucune commande. Vérifier également qu'une session admin révoquée perd l'accès.
 
-Les corrections ne sont pas appliquées : le dépôt local est celui de HexStrike, pas le code de Riwaya. Il faut accéder au gestionnaire serveur du site pour corriger puis retester.
+Les corrections ne sont pas appliquées : le dépôt local est celui de HexStrike, pas le code de PetsUnivers. Il faut accéder au gestionnaire serveur du site pour corriger puis retester.
 
 ## Méthode et limites
 

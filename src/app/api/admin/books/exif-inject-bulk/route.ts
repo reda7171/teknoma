@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     try {
         await verifyAdmin()
         const { edits } = await req.json()
-        
+
         if (!edits || typeof edits !== 'object') {
             return NextResponse.json({ success: false, error: 'Données invalides' }, { status: 400 })
         }
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
         for (const book of books) {
             if (!book.image || !book.image.startsWith('/uploads/')) continue
-            
+
             const filePath = path.join(process.cwd(), 'public', book.image)
             if (!fs.existsSync(filePath)) continue
 
@@ -44,13 +44,13 @@ export async function POST(req: Request) {
                     Keywords: kwArray,
                     Rating: 5,
                     RatingPercent: 99,
-                    XPAuthor: `${book.author} | Riwaya`,
-                    Artist: `${book.author} | Riwaya`,
-                    Creator: `${book.author} | Riwaya`,
-                    XPComment: `Acheter ${book.title} de ${book.author} sur la librairie Riwaya Maroc`,
-                    Description: `Acheter ${book.title} de ${book.author} sur la librairie Riwaya Maroc`,
-                    Copyright: 'Riwaya',
-                    Software: 'Riwaya',
+                    XPAuthor: `${book.author} | PetsUnivers`,
+                    Artist: `${book.author} | PetsUnivers`,
+                    Creator: `${book.author} | PetsUnivers`,
+                    XPComment: `Acheter ${book.title} de ${book.author} sur la librairie PetsUnivers Maroc`,
+                    Description: `Acheter ${book.title} de ${book.author} sur la librairie PetsUnivers Maroc`,
+                    Copyright: 'PetsUnivers',
+                    Software: 'PetsUnivers',
                 })
 
                 // Exiftool creates an _original backup file. Delete it.
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
                 if (fs.existsSync(backupPath)) {
                     fs.unlinkSync(backupPath)
                 }
-                
+
                 successCount++
             } catch (err) {
                 console.error(`Erreur EXIF pour ${book.title}:`, err)

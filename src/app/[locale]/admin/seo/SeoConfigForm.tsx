@@ -28,23 +28,23 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
     const d = initialData
     const [form, setForm] = useState({
         // Identité
-        seo_default_title: d['seo_default_title'] || 'Riwaya - Votre librairie en ligne au Maroc | Romans et Livres',
-        seo_default_description: d['seo_default_description'] || 'Découvrez Riwaya, la meilleure librairie en ligne au Maroc. Achetez vos livres, romans, et ouvrages de développement personnel avec livraison rapide partout au Maroc et paiement à la livraison (COD).',
-        seo_default_keywords: d['seo_default_keywords'] || 'librairie en ligne maroc, acheter livre maroc, romans maroc, livres de poche, développement personnel, riwaya, livres pas cher',
-        seo_canonical_url: d['seo_canonical_url'] || 'https://riwaya.store',
-        seo_site_name: d['seo_site_name'] || 'Riwaya',
-        seo_author: d['seo_author'] || 'Riwaya Team',
+        seo_default_title: d['seo_default_title'] || 'PetsUnivers - Votre librairie en ligne au Maroc | Romans et Livres',
+        seo_default_description: d['seo_default_description'] || 'Découvrez PetsUnivers, la meilleure librairie en ligne au Maroc. Achetez vos livres, romans, et ouvrages de développement personnel avec livraison rapide partout au Maroc et paiement à la livraison (COD).',
+        seo_default_keywords: d['seo_default_keywords'] || 'librairie en ligne maroc, acheter livre maroc, romans maroc, livres de poche, développement personnel, petsunivers, livres pas cher',
+        seo_canonical_url: d['seo_canonical_url'] || 'https://petsunivers.ma',
+        seo_site_name: d['seo_site_name'] || 'PetsUnivers',
+        seo_author: d['seo_author'] || 'PetsUnivers Team',
         seo_language: d['seo_language'] || 'fr-MA',
         // Open Graph
-        seo_og_image: d['seo_og_image'] || 'https://riwaya.store/og-image.jpg',
+        seo_og_image: d['seo_og_image'] || 'https://petsunivers.ma/og-image.jpg',
         seo_og_image_width: d['seo_og_image_width'] || '1200',
         seo_og_image_height: d['seo_og_image_height'] || '630',
-        seo_og_image_alt: d['seo_og_image_alt'] || 'Riwaya - Librairie en ligne au Maroc',
+        seo_og_image_alt: d['seo_og_image_alt'] || 'PetsUnivers - Librairie en ligne au Maroc',
         seo_og_type: d['seo_og_type'] || 'website',
         seo_og_locale: d['seo_og_locale'] || 'fr_MA',
-        seo_twitter_handle: d['seo_twitter_handle'] || '@riwaya_ma',
+        seo_twitter_handle: d['seo_twitter_handle'] || '@petsunivers_ma',
         seo_twitter_card: d['seo_twitter_card'] || 'summary_large_image',
-        seo_twitter_image: d['seo_twitter_image'] || 'https://riwaya.store/twitter-image.jpg',
+        seo_twitter_image: d['seo_twitter_image'] || 'https://petsunivers.ma/twitter-image.jpg',
         // Vérifications
         seo_google_verification: d['seo_google_verification'] || '',
         seo_bing_verification: d['seo_bing_verification'] || '',
@@ -52,15 +52,15 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_pinterest_verification: d['seo_pinterest_verification'] || '',
         // Technique
         seo_favicon_url: d['seo_favicon_url'] || '/favicon.ico',
-        seo_robots_txt: d['seo_robots_txt'] || 'User-agent: *\nAllow: /\nSitemap: https://riwaya.store/sitemap.xml',
+        seo_robots_txt: d['seo_robots_txt'] || 'User-agent: *\nAllow: /\nSitemap: https://petsunivers.ma/sitemap.xml',
         seo_robots_meta: d['seo_robots_meta'] || 'index, follow',
         seo_viewport: d['seo_viewport'] || 'width=device-width, initial-scale=1',
         seo_theme_color: d['seo_theme_color'] || '#000000',
         // Réseaux sociaux
-        seo_facebook_page: d['seo_facebook_page'] || 'https://facebook.com/riwaya.store',
-        seo_instagram_handle: d['seo_instagram_handle'] || '@riwaya.store',
-        seo_youtube_channel: d['seo_youtube_channel'] || 'https://youtube.com/@riwaya_store',
-        seo_tiktok_handle: d['seo_tiktok_handle'] || '@riwaya.store',
+        seo_facebook_page: d['seo_facebook_page'] || 'https://facebook.com/petsunivers.ma',
+        seo_instagram_handle: d['seo_instagram_handle'] || '@petsunivers.ma',
+        seo_youtube_channel: d['seo_youtube_channel'] || 'https://youtube.com/@petsunivers_store',
+        seo_tiktok_handle: d['seo_tiktok_handle'] || '@petsunivers.ma',
         // Analytics
         seo_google_analytics_id: d['seo_google_analytics_id'] || '',
         seo_gtm_id: d['seo_gtm_id'] || '',
@@ -71,7 +71,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_address_city: d['seo_address_city'] || 'Casablanca',
         seo_address_country: d['seo_address_country'] || 'MA',
         seo_contact_phone: d['seo_contact_phone'] || '+212 6 00 00 00 00',
-        seo_contact_email: d['seo_contact_email'] || 'contact@riwaya.store',
+        seo_contact_email: d['seo_contact_email'] || 'contact@petsunivers.ma',
     })
 
     const [loading, setLoading] = useState(false)
@@ -155,18 +155,18 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         if (fieldToGen === 'title') {
             setGenerating = lang === 'fr' ? setIsGeneratingTitleFR : setIsGeneratingTitleAR;
             prompt = lang === 'fr'
-                ? "Propose un Meta Title SEO très accrocheur (max 60 caractères) pour la page d'accueil d'une librairie en ligne au Maroc nommée Riwaya. Ne donne que le titre sans guillemets."
-                : "اقترح عنوان Meta Title جذاب جدا (بحد أقصى 60 حرفًا) للصفحة الرئيسية لمكتبة إلكترونية في المغرب تسمى Riwaya. أعطني العنوان فقط بدون علامات تنصيص.";
+                ? "Propose un Meta Title SEO très accrocheur (max 60 caractères) pour la page d'accueil d'une librairie en ligne au Maroc nommée PetsUnivers. Ne donne que le titre sans guillemets."
+                : "اقترح عنوان Meta Title جذاب جدا (بحد أقصى 60 حرفًا) للصفحة الرئيسية لمكتبة إلكترونية في المغرب تسمى PetsUnivers. أعطني العنوان فقط بدون علامات تنصيص.";
         } else if (fieldToGen === 'description') {
             setGenerating = lang === 'fr' ? setIsGeneratingDescFR : setIsGeneratingDescAR;
             prompt = lang === 'fr'
-                ? "Rédige une Meta Description SEO persuasive (max 160 caractères) pour la page d'accueil d'une librairie en ligne au Maroc nommée Riwaya. Ne donne que la description sans guillemets."
-                : "اكتب وصف Meta Description مقنع (بحد أقصى 160 حرفًا) للصفحة الرئيسية لمكتبة إلكترونية في المغرب تسمى Riwaya. أعطني الوصف فقط بدون علامات تنصيص.";
+                ? "Rédige une Meta Description SEO persuasive (max 160 caractères) pour la page d'accueil d'une librairie en ligne au Maroc nommée PetsUnivers. Ne donne que la description sans guillemets."
+                : "اكتب وصف Meta Description مقنع (بحد أقصى 160 حرفًا) للصفحة الرئيسية لمكتبة إلكترونية في المغرب تسمى PetsUnivers. أعطني الوصف فقط بدون علامات تنصيص.";
         } else if (fieldToGen === 'keywords') {
             setGenerating = lang === 'fr' ? setIsGeneratingKeywordsFR : setIsGeneratingKeywordsAR;
             prompt = lang === 'fr'
-                ? "Génère 10 à 15 mots-clés SEO pertinents (séparés par des virgules) pour une librairie en ligne au Maroc nommée Riwaya. Ne donne que les mots-clés."
-                : "قم بتوليد 10 إلى 15 كلمة مفتاحية SEO ذات صلة (مفصولة بفواصل) لمكتبة إلكترونية في المغرب تسمى Riwaya. أعطني الكلمات المفتاحية فقط.";
+                ? "Génère 10 à 15 mots-clés SEO pertinents (séparés par des virgules) pour une librairie en ligne au Maroc nommée PetsUnivers. Ne donne que les mots-clés."
+                : "قم بتوليد 10 إلى 15 كلمة مفتاحية SEO ذات صلة (مفصولة بفواصل) لمكتبة إلكترونية في المغرب تسمى PetsUnivers. أعطني الكلمات المفتاحية فقط.";
         }
 
         if (!setGenerating) return;
@@ -264,7 +264,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
             )}
 
             <div className="flex flex-col xl:flex-row gap-6 items-start">
-                
+
                 {/* Colonne de gauche */}
                 <div className="w-full xl:w-1/2 space-y-6">
                     {/* Aperçu SERP */}
@@ -273,7 +273,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                             <Eye className="w-3 h-3" /> Aperçu Google (SERP)
                         </p>
                         <div className="max-w-lg">
-                            <p className="text-[11px] text-gray-400 mb-1">{form.seo_canonical_url || 'https://riwaya.store'}</p>
+                            <p className="text-[11px] text-gray-400 mb-1">{form.seo_canonical_url || 'https://petsunivers.ma'}</p>
                             <p className="text-lg font-medium text-blue-700 leading-tight line-clamp-1">{form.seo_default_title || 'Titre de votre site'}</p>
                             <p className="text-sm text-gray-600 mt-1 leading-snug line-clamp-2">{form.seo_default_description || 'Description...'}</p>
                         </div>
@@ -307,7 +307,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                             <span className={`text-xs font-bold ml-2 ${titleLen > 60 ? 'text-red-500' : titleLen > 50 ? 'text-orange-500' : 'text-green-600'}`}>{titleLen}/60</span>
                                         </div>
                                     </div>
-                                    {input('seo_default_title', 'Riwaya - Librairie en ligne au Maroc')}
+                                    {input('seo_default_title', 'PetsUnivers - Librairie en ligne au Maroc')}
                                 </div>
                                 <div className="sm:col-span-2">
                                     <div className="flex justify-between items-center mb-1.5">
@@ -337,7 +337,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                         value={form.seo_default_description}
                                         onChange={e => update('seo_default_description', e.target.value)}
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none bg-white"
-                                        placeholder="Découvrez Riwaya, la librairie en ligne n°1 au Maroc..."
+                                        placeholder="Découvrez PetsUnivers, la librairie en ligne n°1 au Maroc..."
                                     />
                                 </div>
                                 <div className="sm:col-span-2">
@@ -365,9 +365,9 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                     {input('seo_default_keywords', 'livres, maroc, librairie, achat')}
                                     <p className="text-xs text-gray-400 mt-1">Séparés par des virgules</p>
                                 </div>
-                                {field('URL Canonique', 'seo_canonical_url', 'https://riwaya.store', 'url')}
-                                {field('Nom du site', 'seo_site_name', 'Riwaya')}
-                                {field('Auteur', 'seo_author', 'Riwaya Team')}
+                                {field('URL Canonique', 'seo_canonical_url', 'https://petsunivers.ma', 'url')}
+                                {field('Nom du site', 'seo_site_name', 'PetsUnivers')}
+                                {field('Auteur', 'seo_author', 'PetsUnivers Team')}
                                 {field('Langue principale', 'seo_language', 'fr-MA', 'text', 'Ex: fr-MA, ar-MA, en-US')}
                             </div>
                         )}
@@ -496,7 +496,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                                 <button
                                                     type="button"
                                                     onClick={() => setIndexNowUrlsInput(
-                                                        'https://riwaya.store/fr\nhttps://riwaya.store/ar\nhttps://riwaya.store/en\nhttps://riwaya.store/fr/books\nhttps://riwaya.store/ar/books\nhttps://riwaya.store/en/books\nhttps://riwaya.store/fr/packs\nhttps://riwaya.store/ar/packs\nhttps://riwaya.store/en/packs\nhttps://riwaya.store/fr/blog\nhttps://riwaya.store/ar/blog\nhttps://riwaya.store/en/blog'
+                                                        'https://petsunivers.ma/fr\nhttps://petsunivers.ma/ar\nhttps://petsunivers.ma/en\nhttps://petsunivers.ma/fr/books\nhttps://petsunivers.ma/ar/books\nhttps://petsunivers.ma/en/books\nhttps://petsunivers.ma/fr/packs\nhttps://petsunivers.ma/ar/packs\nhttps://petsunivers.ma/en/packs\nhttps://petsunivers.ma/fr/blog\nhttps://petsunivers.ma/ar/blog\nhttps://petsunivers.ma/en/blog'
                                                     )}
                                                     className="text-[10px] font-bold text-blue-600 hover:underline"
                                                 >
@@ -507,7 +507,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                                 rows={4}
                                                 value={indexNowUrlsInput}
                                                 onChange={e => setIndexNowUrlsInput(e.target.value)}
-                                                placeholder="https://riwaya.store/fr/books/...\nhttps://riwaya.store/fr/packs/..."
+                                                placeholder="https://petsunivers.ma/fr/books/...\nhttps://petsunivers.ma/fr/packs/..."
                                                 className="w-full px-3 py-2 text-xs font-mono border border-gray-300 rounded-lg outline-none bg-white focus:ring-1 focus:ring-black"
                                             />
                                             <button
@@ -562,7 +562,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                                 value={form.seo_og_image}
                                                 onChange={e => update('seo_og_image', e.target.value)}
                                                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
-                                                placeholder="https://riwaya.store/og-image.jpg"
+                                                placeholder="https://petsunivers.ma/og-image.jpg"
                                             />
                                             <div className="relative mt-2">
                                                 <input
@@ -585,13 +585,13 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                         )}
                                     </div>
                                 </div>
-                                {field('Alt Image OG', 'seo_og_image_alt', 'Riwaya - Librairie en ligne au Maroc')}
-                                {field('Image Twitter', 'seo_twitter_image', 'https://riwaya.store/twitter-image.jpg', 'url')}
+                                {field('Alt Image OG', 'seo_og_image_alt', 'PetsUnivers - Librairie en ligne au Maroc')}
+                                {field('Image Twitter', 'seo_twitter_image', 'https://petsunivers.ma/twitter-image.jpg', 'url')}
                                 {field('OG Type', 'seo_og_type', 'website', 'text', 'website, book, article...')}
                                 {field('OG Locale', 'seo_og_locale', 'fr_MA')}
                                 {field('Largeur OG (px)', 'seo_og_image_width', '1200')}
                                 {field('Hauteur OG (px)', 'seo_og_image_height', '630')}
-                                {field('Handle Twitter', 'seo_twitter_handle', '@riwaya_ma')}
+                                {field('Handle Twitter', 'seo_twitter_handle', '@petsunivers_ma')}
                                 <div>
                                     <label className="block text-xs font-black text-gray-600 uppercase tracking-widest mb-1.5">Twitter Card</label>
                                     <select aria-label="Champ de sélection"
@@ -627,9 +627,9 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                         {openSection === 'social' && (
                             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {field('Page Facebook (URL)', 'seo_facebook_page', 'https://facebook.com/...', 'url')}
-                                {field('Instagram (@handle)', 'seo_instagram_handle', '@riwaya.ma')}
+                                {field('Instagram (@handle)', 'seo_instagram_handle', '@petsunivers.ma')}
                                 {field('YouTube (URL)', 'seo_youtube_channel', 'https://youtube.com/...', 'url')}
-                                {field('TikTok (@handle)', 'seo_tiktok_handle', '@riwaya.ma')}
+                                {field('TikTok (@handle)', 'seo_tiktok_handle', '@petsunivers.ma')}
                             </div>
                         )}
                     </div>
@@ -668,7 +668,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                 {field('Ville', 'seo_address_city', 'Casablanca')}
                                 {field('Pays', 'seo_address_country', 'MA')}
                                 {field('Téléphone', 'seo_contact_phone', '+212...', 'tel')}
-                                {field('Email', 'seo_contact_email', 'contact@riwaya.store', 'email')}
+                                {field('Email', 'seo_contact_email', 'contact@petsunivers.ma', 'email')}
                             </div>
                         )}
                     </div>

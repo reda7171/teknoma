@@ -66,7 +66,7 @@ export default function PredictiveSearch() {
 
     // Charger l'historique et les catégories au montage
     useEffect(() => {
-        const savedHistory = localStorage.getItem('riwaya_search_history')
+        const savedHistory = localStorage.getItem('petsunivers_search_history')
         if (savedHistory) {
             setHistory(JSON.parse(savedHistory))
         }
@@ -141,7 +141,7 @@ export default function PredictiveSearch() {
 
     // Limite : 2 recherches par couverture max par session
     const COVER_SEARCH_LIMIT = 2
-    const COVER_SEARCH_KEY = 'riwaya_cover_search_count'
+    const COVER_SEARCH_KEY = 'petsunivers_cover_search_count'
 
     const getCoverSearchCount = (): number => {
         try {
@@ -208,13 +208,13 @@ export default function PredictiveSearch() {
         ].slice(0, 5) // Garder les 5 dernières recherches
 
         setHistory(newHistory)
-        localStorage.setItem('riwaya_search_history', JSON.stringify(newHistory))
+        localStorage.setItem('petsunivers_search_history', JSON.stringify(newHistory))
     }
 
     const clearHistory = (e: React.MouseEvent) => {
         e.stopPropagation()
         setHistory([])
-        localStorage.removeItem('riwaya_search_history')
+        localStorage.removeItem('petsunivers_search_history')
     }
 
     useEffect(() => {
@@ -268,7 +268,7 @@ export default function PredictiveSearch() {
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (!isOpen || results.length === 0) return;
-        
+
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             setSelectedIndex(prev => Math.min(prev + 1, results.length - 1));
@@ -369,8 +369,8 @@ export default function PredictiveSearch() {
                             title={t('CoverSearch')}
                             aria-label={t('CoverSearch')}
                             className={`p-1.5 sm:p-2 rounded-full transition-all ${
-                                isAnalyzingCover 
-                                    ? 'bg-amber-500 text-white shadow-xs' 
+                                isAnalyzingCover
+                                    ? 'bg-amber-500 text-white shadow-xs'
                                     : 'text-gray-500 hover:text-black hover:bg-white'
                             }`}
                         >
@@ -389,8 +389,8 @@ export default function PredictiveSearch() {
                                 title={t('VoiceSearch')}
                                 aria-label={t('VoiceSearch')}
                                 className={`p-1.5 sm:p-2 rounded-full transition-all ${
-                                    isListening 
-                                        ? 'bg-red-500 text-white animate-pulse shadow-xs' 
+                                    isListening
+                                        ? 'bg-red-500 text-white animate-pulse shadow-xs'
                                         : 'text-gray-500 hover:text-black hover:bg-white'
                                 }`}
                             >
@@ -541,8 +541,8 @@ export default function PredictiveSearch() {
                                                     setIsOpen(false)
                                                 }}
                                                 className={`flex items-center gap-4 p-4 transition-all group/item shadow-sm rounded-[1.5rem] border ${
-                                                    selectedIndex === idx 
-                                                    ? 'bg-pixio-beige/30 border-black' 
+                                                    selectedIndex === idx
+                                                    ? 'bg-pixio-beige/30 border-black'
                                                     : 'bg-white border-gray-100 hover:bg-pixio-beige/30 hover:border-black'
                                                 }`}
                                             >

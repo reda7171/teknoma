@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { 
-    MessageCircle, X, Send, Bot, User, Loader2, 
-    ThumbsUp, ThumbsDown, Sparkles, Volume2, VolumeX, 
-    ChevronRight, CornerDownRight, Zap 
+import {
+    MessageCircle, X, Send, Bot, User, Loader2,
+    ThumbsUp, ThumbsDown, Sparkles, Volume2, VolumeX,
+    ChevronRight, CornerDownRight, Zap
 } from 'lucide-react'
 import BookCarousel from './chatbot/BookCarousel'
 import OrderCard from './chatbot/OrderCard'
@@ -22,11 +22,11 @@ interface Message {
 export default function ChatBot() {
     const pathname = usePathname()
     const locale = pathname?.split('/')[1] || 'fr'
-    
+
     // Translatable labels
     const labels: Record<string, any> = {
         ar: {
-            welcome: "مرحباً! ✨ أنا المساعد الذكي لـ **رواية**. اسألني عن الكتب، الطلبات أو التوصيل.",
+            welcome: "مرحباً! ✨ أنا المساعد الذكي لـ **PetsUnivers**. اسألني عن الكتب، الطلبات أو التوصيل.",
             quick: ['التوصيل ؟', 'الكتب الجديدة', 'مفتاح USB', 'تتبع الطلب', 'اقترح عناوين؟', 'التصنيفات ؟'],
             placeholder: "اسأل سؤالك هنا...",
             online: "متصل",
@@ -37,7 +37,7 @@ export default function ChatBot() {
             suggestions: "اقتراحات لك"
         },
         fr: {
-            welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **Riwaya**. Posez-moi vos questions sur nos livres, commandes ou livraison.",
+            welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **PetsUnivers**. Posez-moi vos questions sur nos livres, commandes ou livraison.",
             quick: ['Livraison ?', 'Nouveautés', 'Clé USB', 'Suivi Commande', 'Propose moi des titres?', 'Catégories ?'],
             placeholder: "Posez votre question...",
             online: "En ligne",
@@ -78,7 +78,7 @@ export default function ChatBot() {
                     time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
                 }
                 setMessages([welcomeMsg])
-                
+
                 // Auto-open logic
                 const hasOpened = sessionStorage.getItem('bot_auto_opened')
                 if (!hasOpened && !pathname?.includes('/admin')) {
@@ -178,7 +178,7 @@ export default function ChatBot() {
     return (
         <>
             {/* Launcher Button */}
-            <button 
+            <button
                 onClick={() => setOpen(true)}
                 className={`fixed bottom-20 md:bottom-6 ltr:left-6 rtl:right-6 w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl z-[110] group border border-white/20 active:scale-90 ${open ? 'scale-0' : 'scale-100'}`}
                 style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #3e3e5e 100%)' }}
@@ -191,11 +191,11 @@ export default function ChatBot() {
 
             {/* Chat Window */}
             {open && (
-                <div 
+                <div
                     className="fixed bottom-20 md:bottom-6 ltr:left-6 rtl:right-6 w-[380px] max-w-[90vw] h-[600px] max-h-[80vh] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col z-[115] border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500"
                 >
                     {/* Premium Header */}
-                    <div 
+                    <div
                         className="p-6 pb-8 flex items-center justify-between gap-4 relative"
                         style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #3e3e5e 100%)' }}
                     >
@@ -206,7 +206,7 @@ export default function ChatBot() {
                             <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-pulse" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-white font-black text-sm tracking-wide">Assistant Riwaya</p>
+                            <p className="text-white font-black text-sm tracking-wide">Assistant PetsUnivers</p>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
                                 <span className="text-[10px] text-green-300 font-bold uppercase tracking-widest">{t.online}</span>

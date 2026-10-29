@@ -39,7 +39,7 @@ export async function POST(
         if (book.image.startsWith('http://') || book.image.startsWith('https://')) {
             const res = await fetch(book.image, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) RiwayaBot/1.0',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) PetsUniversBot/1.0',
                     'Accept': 'image/avif,image/webp,image/*,*/*'
                 }
             })

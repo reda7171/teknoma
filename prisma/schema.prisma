@@ -431,8 +431,9 @@ model Order {
   utmCampaign      String?              @db.VarChar(255)
   fbclid           String?              @db.VarChar(500)
   ttclid           String?              @db.VarChar(500)
-  salesChannel     SalesChannel         @default(RIWAYA_STORE)
+  salesChannel     SalesChannel         @default(PETSUNIVERS_STORE)
   items            OrderItem[]
+  paypalPayments   PaypalPayment[]
   statusHistory    OrderStatusHistory[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
   expense          Expense?             @relation(fields: [expenseId], references: [id])
@@ -452,6 +453,23 @@ model Order {
   @@index([financeArchiveId])
   @@index([expenseId])
   @@map("orders")
+}
+
+model PaypalPayment {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  orderId       String
+  mode          String   @db.VarChar(10)
+  paypalOrderId String?  @unique @db.VarChar(32)
+  captureId     String?  @unique @db.VarChar(32)
+  amountMad     Int
+  amountUsd     Int
+  status        String   @default("CREATED") @db.VarChar(20)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  order         Order    @relation(fields: [orderId], references: [id])
+
+  @@unique([orderId, mode])
+  @@map("paypal_payments")
 }
 
 model Customer {
@@ -985,7 +1003,7 @@ model AbandonedCart {
   cartData     String       @db.Text
   total        Float
   status       String       @default("PENDING")
-  salesChannel SalesChannel @default(RIWAYA_STORE)
+  salesChannel SalesChannel @default(PETSUNIVERS_STORE)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -1289,8 +1307,8 @@ enum OrderStatus {
 }
 
 enum SalesChannel {
-  RIWAYA_STORE
-  RIWAYA_MA
+  PETSUNIVERS_STORE
+  PETSUNIVERS_MA
   ADMIN_POS
   MOBILE_APP
   ADMIN_IMPORT
@@ -1533,7 +1551,7 @@ model PromoLead {
   id        String   @id @default(uuid())
   phone     String?  @db.VarChar(50)
   email     String?  @db.VarChar(255)
-  promoCode String?  @default("RIWAYA10") @db.VarChar(50)
+  promoCode String?  @default("PETSUNIVERS10") @db.VarChar(50)
   source    String?  @default("cart_popup") @db.VarChar(100)
   contacted Boolean  @default(false)
   notes     String?  @db.VarChar(500)

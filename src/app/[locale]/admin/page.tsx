@@ -50,8 +50,8 @@ async function getStats(role: string | null, userId: string | null) {
         prisma.book.aggregate({ where: { active: true, ...sellerBookWhere }, _sum: { stock: true } }),
         prisma.book.count({ where: { active: true, image: '', ...sellerBookWhere } }),
         prisma.order.count({ where: { isPaid: true, ...sellerOrderWhere } }),
-        role === 'SELLER' 
-            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }) 
+        role === 'SELLER'
+            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } })
             : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }),
         prisma.order.groupBy({
             by: ['salesChannel'],
@@ -421,10 +421,10 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Économie IA ($)', value: `$${geminiStats.estimatedCostSavedUsd.toFixed(3)}`, iconName: 'Coins', color: 'emerald', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
         { name: 'Commandes', value: stats.ordersCount, iconName: 'ShoppingCart', color: 'green', roles: ['ADMIN', 'SELLER'] },
-        { name: 'Commandes (Store)', value: stats.salesChannels.RIWAYA_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },
-        { name: 'CA (Store)', value: `${(stats.salesChannels.RIWAYA_STORE?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'blue', roles: ['ADMIN'] },
-        { name: 'Commandes (riwaya.ma)', value: stats.salesChannels.RIWAYA_MA?.orders || 0, iconName: 'ShoppingCart', color: 'teal', roles: ['ADMIN'] },
-        { name: 'CA (riwaya.ma)', value: `${(stats.salesChannels.RIWAYA_MA?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'teal', roles: ['ADMIN'] },
+        { name: 'Commandes (Store)', value: stats.salesChannels.PETSUNIVERS_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },
+        { name: 'CA (Store)', value: `${(stats.salesChannels.PETSUNIVERS_STORE?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'blue', roles: ['ADMIN'] },
+        { name: 'Commandes (petsunivers.ma)', value: stats.salesChannels.PETSUNIVERS_MA?.orders || 0, iconName: 'ShoppingCart', color: 'teal', roles: ['ADMIN'] },
+        { name: 'CA (petsunivers.ma)', value: `${(stats.salesChannels.PETSUNIVERS_MA?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'teal', roles: ['ADMIN'] },
         { name: 'Commandes Payées', value: stats.paidOrdersCount, iconName: 'DollarSign', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
         { name: 'LTV (Client)', value: `${stats.ltv.toFixed(0)} ${currency}`, iconName: 'Users', color: 'blue', roles: ['ADMIN'] },
         { name: 'En Attente', value: stats.pendingOrders, iconName: 'Clock', color: 'yellow', roles: ['ADMIN', 'SELLER'] },
@@ -496,14 +496,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         <DashboardPrivacyProvider>
             <div className="space-y-12">
 
-                {/* Header section style Riwaya */}
+                {/* Header section style PetsUnivers */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                     <div>
                         <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
                             Tableau<span className="text-blue-600">.</span>
                         </h1>
                         <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                            Centre de commande global Riwaya
+                            Centre de commande global PetsUnivers
                         </p>
                     </div>
 

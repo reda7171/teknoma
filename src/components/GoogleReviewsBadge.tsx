@@ -10,11 +10,11 @@ export default function GoogleReviewsBadge() {
 
   const title = isAr ? 'آراء العملاء' : isEn ? 'Reviews' : 'Avis clients'
   const action = isAr ? 'عرض على Google' : isEn ? 'View on Google' : 'Voir sur Google'
-  const aria = isAr ? 'عرض تقييمات عملاء رواية على Google' : isEn ? 'View Riwaya customer reviews on Google' : 'Consulter les avis clients Riwaya sur Google'
+  const aria = isAr ? 'عرض تقييمات عملاء PetsUnivers على Google' : isEn ? 'View PetsUnivers customer reviews on Google' : 'Consulter les avis clients PetsUnivers sur Google'
 
   return (
     <a
-      href="https://www.google.com/maps/place/Riwaya/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt"
+      href="https://www.google.com/maps/place/PetsUnivers/@34.0151156,-6.8506771,17z/data=!3m1!4b1!4m6!3m5!1s0xda76d9be04b2cdb:0xb283e75db60f9d37!8m2!3d34.0151156!4d-6.8506771!16s%2Fg%2F11ywgnhfxt"
       target="_blank"
       rel="noopener noreferrer"
       aria-label={aria}

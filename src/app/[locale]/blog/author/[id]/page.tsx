@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     if (!user) return {}
 
     return {
-        title: `${user.fullName || user.email} | Blog Riwaya`,
-        description: user.bio || `Découvrez les articles écrits par ${user.fullName || user.email} sur le blog Riwaya.`
+        title: `${user.fullName || user.email} | Blog PetsUnivers`,
+        description: user.bio || `Découvrez les articles écrits par ${user.fullName || user.email} sur le blog PetsUnivers.`
     }
 }
 
@@ -25,7 +25,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
     const t = await getTranslations('BlogList') // Utiliser BlogList ou similaire
     const tBlog = await getTranslations('Blog')
     const currentUser = await getCommunityUser()
-    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'contact@riwaya.store'
+    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'contact@petsunivers.ma'
 
     const user = await prisma.user.findUnique({
         where: { id },
@@ -59,14 +59,14 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                         "mainEntity": {
                             "@type": "Person",
                             "name": user.fullName || user.email?.split('@')[0],
-                            "url": `https://riwaya.store/${locale}/blog/author/${user.id}`,
-                            ...(user.image ? { "image": user.image.startsWith('http') ? user.image : `https://riwaya.store${user.image.startsWith('/') ? '' : '/'}${user.image}` } : {}),
+                            "url": `https://petsunivers.ma/${locale}/blog/author/${user.id}`,
+                            ...(user.image ? { "image": user.image.startsWith('http') ? user.image : `https://petsunivers.ma${user.image.startsWith('/') ? '' : '/'}${user.image}` } : {}),
                             ...(user.bio ? { "description": user.bio } : {}),
                             ...(user.editorialRole ? { "jobTitle": user.editorialRole } : { "jobTitle": "Rédacteur & Chroniqueur Littéraire" }),
                             "worksFor": {
                                 "@type": "Organization",
-                                "name": "Riwaya",
-                                "url": "https://riwaya.store"
+                                "name": "PetsUnivers",
+                                "url": "https://petsunivers.ma"
                             }
                         }
                     }).replace(/</g, '\\u003c')
@@ -255,7 +255,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
-                                                    <span className="text-gray-200 font-black text-2xl">Riwaya</span>
+                                                    <span className="text-gray-200 font-black text-2xl">PetsUnivers</span>
                                                 </div>
                                             )}
                                             {post.category && (

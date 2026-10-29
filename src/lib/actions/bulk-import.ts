@@ -257,7 +257,7 @@ export async function importBooksFromExcel(
                     }
                 }
                 if (!authorStr) {
-                    authorStr = language === 'ar' ? 'دار النشر رواية' : 'Riwaya Édition'
+                    authorStr = language === 'ar' ? 'دار النشر PetsUnivers' : 'PetsUnivers Édition'
                 }
 
                 // Normalisation image
@@ -284,8 +284,8 @@ export async function importBooksFromExcel(
 
                 // Description
                 const descVal = extractCellValue(getField(row, ['description', 'Description', 'resume', 'desc']))
-                const descriptionStr = descVal || (language === 'ar' 
-                    ? `وصف كتاب ${titleStr} متوفر للطلب عبر الدفع عند الاستلام على منصة رواية.`
+                const descriptionStr = descVal || (language === 'ar'
+                    ? `وصف كتاب ${titleStr} متوفر للطلب عبر الدفع عند الاستلام على منصة PetsUnivers.`
                     : `Livre: ${titleStr}${authorStr ? ' par ' + authorStr : ''}. Disponible en livraison rapide avec paiement à la livraison.`)
 
                 // Stock : 100 par défaut si non spécifié
@@ -422,7 +422,7 @@ export async function generateExcelTemplate() {
         await verifyAdmin()
 
         const workbook = new ExcelJS.Workbook()
-        workbook.creator = 'Riwaya'
+        workbook.creator = 'PetsUnivers'
         const worksheet = workbook.addWorksheet('Livres')
 
         worksheet.columns = [
@@ -499,7 +499,7 @@ export async function generateExcelTemplate() {
         return {
             success: true,
             base64: Buffer.from(buffer).toString('base64'),
-            filename: 'template_livres_riwaya.xlsx',
+            filename: 'template_livres_petsunivers.xlsx',
         }
     } catch {
         return null
@@ -526,7 +526,7 @@ export async function updateStockFromTsv(
 
         const text = await file.text()
         const lines = text.split(/\r?\n/)
-        
+
         if (lines.length <= 1) {
             return { success: false, message: 'Le fichier est vide ou invalide' }
         }
@@ -572,7 +572,7 @@ export async function updateStockFromTsv(
 
             // Recherche exacte du livre
             const book = await prisma.book.findFirst({
-                where: { 
+                where: {
                     title: title.trim()
                 }
             })

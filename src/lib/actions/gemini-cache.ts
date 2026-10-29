@@ -86,7 +86,7 @@ export async function recordCacheHit(fingerprint: string) {
 
 export async function getCoverCacheStats(): Promise<CoverCacheStats> {
     await loadPersistedCoverCache()
-    
+
     let totalHits = 0
     const entries: CoverCacheEntry[] = []
 
@@ -220,7 +220,7 @@ export async function preindexCatalogCovers(options?: { bypassAuth?: boolean }):
 
         const itemsToIndex: Array<{ title: string; author?: string; image: string }> = [
             ...books.filter(b => b.image).map(b => ({ title: b.title, author: b.author, image: b.image })),
-            ...packs.filter(p => p.image).map(p => ({ title: p.name, author: 'Pack Riwaya', image: p.image! }))
+            ...packs.filter(p => p.image).map(p => ({ title: p.name, author: 'Pack PetsUnivers', image: p.image! }))
         ]
 
         let indexedCount = 0

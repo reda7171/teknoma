@@ -40,7 +40,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
     const [positions, setPositions] = useState({ text: { x: 0, y: 0 }, book: { x: 0, y: 0 } })
     const [dragging, setDragging] = useState<string | null>(null)
     const [offset, setOffset] = useState({ x: 0, y: 0 })
-    
+
     // New parameters
     const [bgOpacity, setBgOpacity] = useState(60)
     const [bookSize, setBookSize] = useState(100) // % size
@@ -159,12 +159,12 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                 pixelRatio: 2,
                 backgroundColor: 'transparent',
             })
-            
+
             const newWindow = window.open()
             if (newWindow) {
                 newWindow.document.write(`
                     <html lang="fr">
-                        <head><title>Aperçu n8n - Riwaya</title></head>
+                        <head><title>Aperçu n8n - PetsUnivers</title></head>
                         <body style="margin:0;display:flex;align-items:center;justify-content:center;background:#000;min-height:100vh;">
                             <img src="${dataUrl}" style="max-width:95%;max-height:95vh;border-radius:12px;box-shadow:0 0 50px rgba(255,255,255,0.1);" />
                         </body>
@@ -214,13 +214,13 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                     {/* Left side: Creative Builder */}
                     <div className="flex-1 bg-gray-100 p-6 flex flex-col items-center justify-center overflow-auto border-r border-gray-100 relative">
                         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 flex gap-4 w-full justify-center">
-                            <button 
+                            <button
                                 onClick={() => setUseCustomCreative(false)}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm ${!useCustomCreative ? 'bg-black text-white' : 'bg-white text-gray-500 border border-gray-200'}`}
                             >
                                 Couverture Simple
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setUseCustomCreative(true)}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm ${useCustomCreative ? 'bg-indigo-600 text-white' : 'bg-white text-gray-500 border border-gray-200'}`}
                             >
@@ -229,7 +229,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                         </div>
 
                         {useCustomCreative ? (
-                            <div 
+                            <div
                                 ref={posterRef}
                                 className={`relative ${format === 'story' ? 'w-[320px] h-[568px]' : 'w-[400px] h-[500px]'} shadow-2xl overflow-hidden rounded-xl bg-gradient-to-br transition-all duration-500 mt-12 ${
                                     bgImage ? 'text-white' :
@@ -242,14 +242,14 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                             >
                                 {bgImage && <div className="absolute inset-0 bg-black" style={{ opacity: bgOpacity / 100 }}></div>}
                                 <div className="absolute inset-0 bg-white/5 blur-3xl pointer-events-none"></div>
-                                
-                                <div 
+
+                                <div
                                     className="absolute z-10 cursor-move p-4 text-center w-full"
                                     style={{ transform: `translate(${positions.text.x}px, ${positions.text.y}px)`, opacity: textOpacity / 100 }}
                                     onMouseDown={(e) => handleMouseDown(e, 'text')}
                                 >
                                     <Quote className="w-8 h-8 text-white/20 mb-2 mx-auto" />
-                                    <p 
+                                    <p
                                         contentEditable
                                         suppressContentEditableWarning
                                         onBlur={(e) => setEditableTexts(prev => ({ ...prev, description: e.currentTarget.textContent || '' }))}
@@ -258,7 +258,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                     >
                                         {editableTexts.description}
                                     </p>
-                                    <p 
+                                    <p
                                         contentEditable
                                         suppressContentEditableWarning
                                         onBlur={(e) => setEditableTexts(prev => ({ ...prev, title: e.currentTarget.textContent || '' }))}
@@ -268,20 +268,20 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                     </p>
                                 </div>
 
-                                <div 
+                                <div
                                     className="absolute bottom-10 left-1/2 -translate-x-1/2 cursor-move z-10 flex flex-col items-center"
                                     style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px)` }}
                                     onMouseDown={(e) => handleMouseDown(e, 'book')}
                                 >
-                                    <img 
+                                    <img
                                         src={(() => {
                                             const img = normalizeImage(book.image);
                                             if (img.startsWith('http') && !img.includes(typeof window !== 'undefined' ? window.location.host : '')) {
                                                 return `/api/proxy/image?url=${encodeURIComponent(img)}`;
                                             }
                                             return img;
-                                        })() || '/book-placeholder.png'} 
-                                        className="h-auto rounded shadow-2xl pointer-events-none" 
+                                        })() || '/book-placeholder.png'}
+                                        className="h-auto rounded shadow-2xl pointer-events-none"
                                         style={{ width: `${(96 * bookSize) / 100}px` }}
                                         alt=""
                                         crossOrigin="anonymous"
@@ -290,16 +290,16 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                             </div>
                         ) : (
                             <div className="w-[300px] h-[450px] shadow-2xl rounded-xl overflow-hidden mt-12">
-                                <img 
+                                <img
                                     src={(() => {
                                         const img = normalizeImage(book.image);
                                         if (img.startsWith('http') && !img.includes(typeof window !== 'undefined' ? window.location.host : '')) {
                                             return `/api/proxy/image?url=${encodeURIComponent(img)}`;
                                         }
                                         return img;
-                                    })() || '/book-placeholder.png'} 
-                                    className="w-full h-full object-cover" 
-                                    alt="" 
+                                    })() || '/book-placeholder.png'}
+                                    className="w-full h-full object-cover"
+                                    alt=""
                                     crossOrigin="anonymous"
                                 />
                             </div>
@@ -366,13 +366,13 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                         <Sliders className="w-4 h-4" />
                                         Personnalisation visuelle
                                     </h4>
-                                    
+
                                     {!bgImage && (
                                         <div>
                                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Thème de couleur</label>
                                             <div className="flex gap-2">
                                                 {(['dark', 'emerald', 'gold', 'purple'] as const).map(t => (
-                                                    <button 
+                                                    <button
                                                         key={t}
                                                         onClick={() => setTheme(t)}
                                                         className={`w-8 h-8 rounded-full border-2 transition ${theme === t ? 'border-white ring-2 ring-indigo-500' : 'border-transparent'} ${
@@ -386,8 +386,8 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
 
                                     <div>
                                         <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Image de fond (URL)</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={bgImage}
                                             onChange={e => setBgImage(e.target.value)}
                                             placeholder="https://exemple.com/image.jpg"
@@ -401,9 +401,9 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                                 <span>Filtre sombre (Opacité)</span>
                                                 <span>{bgOpacity}%</span>
                                             </label>
-                                            <input 
-                                                type="range" 
-                                                min="0" max="100" 
+                                            <input
+                                                type="range"
+                                                min="0" max="100"
                                                 value={bgOpacity}
                                                 onChange={e => setBgOpacity(Number(e.target.value))}
                                                 className="w-full"
@@ -416,9 +416,9 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                             <span>Taille de couverture</span>
                                             <span>{bookSize}%</span>
                                         </label>
-                                        <input 
-                                            type="range" 
-                                            min="30" max="250" 
+                                        <input
+                                            type="range"
+                                            min="30" max="250"
                                             value={bookSize}
                                             onChange={e => setBookSize(Number(e.target.value))}
                                             className="w-full"
@@ -430,9 +430,9 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
                                             <span>Opacité du texte</span>
                                             <span>{textOpacity}%</span>
                                         </label>
-                                        <input 
-                                            type="range" 
-                                            min="0" max="100" 
+                                        <input
+                                            type="range"
+                                            min="0" max="100"
                                             value={textOpacity}
                                             onChange={e => setTextOpacity(Number(e.target.value))}
                                             className="w-full"

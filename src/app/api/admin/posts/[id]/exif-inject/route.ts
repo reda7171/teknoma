@@ -32,12 +32,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             Keywords: kwArray,
             Rating: 5,
             RatingPercent: 99,
-            XPAuthor: `Riwaya Blog`,
-            Artist: `Riwaya Blog`,
-            Creator: `Riwaya Blog`,
-            Description: `${post.title} | Blog Riwaya Maroc`,
-            Copyright: 'Riwaya',
-            Software: 'Riwaya',
+            XPAuthor: `PetsUnivers Blog`,
+            Artist: `PetsUnivers Blog`,
+            Creator: `PetsUnivers Blog`,
+            Description: `${post.title} | Blog PetsUnivers Maroc`,
+            Copyright: 'PetsUnivers',
+            Software: 'PetsUnivers',
         }
 
         // Image locale
@@ -53,14 +53,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         }
 
         // Image distante — télécharger → temp → EXIF → supprimer temp
-        const imageUrl = post.coverImage.startsWith('http') ? post.coverImage : `https://riwaya.store${post.coverImage}`
+        const imageUrl = post.coverImage.startsWith('http') ? post.coverImage : `https://petsunivers.ma${post.coverImage}`
         const response = await fetch(imageUrl)
         if (!response.ok) {
             return NextResponse.json({ success: false, error: `Image distante inaccessible (${response.status})` }, { status: 400 })
         }
 
         const ext = imageUrl.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
-        tempFilePath = path.join(os.tmpdir(), `riwaya-exif-post-${id}.${ext}`)
+        tempFilePath = path.join(os.tmpdir(), `petsunivers-exif-post-${id}.${ext}`)
         fs.writeFileSync(tempFilePath, Buffer.from(await response.arrayBuffer()))
 
         await exiftool.write(tempFilePath, exifData)

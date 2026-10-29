@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ token: null, customer: null, isLoggedIn: false }),
     }),
     {
-      name: 'riwaya-auth',
+      name: 'petsunivers-auth',
       storage: createJSONStorage(() => safeStorage),
     }
   )

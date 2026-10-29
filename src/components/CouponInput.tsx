@@ -20,7 +20,7 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
 
     useEffect(() => {
         try {
-            const pending = localStorage.getItem('riwaya_pending_coupon')
+            const pending = localStorage.getItem('petsunivers_pending_coupon')
             if (pending && cartTotal > 0 && !appliedCoupon) {
                 validateCoupon(pending, cartTotal).then((res) => {
                     if (res.success) {

@@ -110,7 +110,7 @@ export default function BookDetailsScreen() {
     if (!product) return;
     await Share.share({
       title: product.title,
-      message: `Découvrez "${product.title}"${product.author ? ` par ${product.author}` : ''} sur Riwaya — ${product.price.toFixed(2)} MAD\nhttps://riwaya.ma/books/${product.id}`,
+      message: `Découvrez "${product.title}"${product.author ? ` par ${product.author}` : ''} sur PetsUnivers — ${product.price.toFixed(2)} MAD\nhttps://petsunivers.ma/books/${product.id}`,
     });
   };
 
@@ -167,8 +167,8 @@ export default function BookDetailsScreen() {
       'Êtes-vous sûr de vouloir supprimer cet avis ?',
       [
         { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Supprimer', 
+        {
+          text: 'Supprimer',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -229,14 +229,14 @@ export default function BookDetailsScreen() {
         </View>
       </SafeAreaView>
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
-            tintColor="#0274DF" 
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0274DF"
           />
         }
       >
@@ -272,7 +272,7 @@ export default function BookDetailsScreen() {
           </View>
 
           <Text style={[styles.title, { color: colors.text }]}>{product.title}</Text>
-          
+
           {product.author && (
             <TouchableOpacity onPress={() => router.push(`/author/${encodeURIComponent(product.author!)}`)}>
               <Text style={[styles.author, { color: colors.textSecondary }]}>
@@ -375,9 +375,9 @@ export default function BookDetailsScreen() {
       {/* Floating Bottom Bar */}
       <View style={[styles.floatingBottomBar, { backgroundColor: colors.background }]}>
         {product.type === 'BOOK' && (
-          <TouchableOpacity 
-            style={[styles.readingListBtn, { backgroundColor: colors.backgroundElement }]} 
-            onPress={handleAddToReadingList} 
+          <TouchableOpacity
+            style={[styles.readingListBtn, { backgroundColor: colors.backgroundElement }]}
+            onPress={handleAddToReadingList}
             disabled={addingToList || isInReadingList}
           >
             {addingToList ? (
@@ -405,8 +405,8 @@ export default function BookDetailsScreen() {
       {/* Review Modal */}
       <Modal visible={showReviewModal} animationType="slide" transparent={true}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <KeyboardAvoidingView 
-            style={styles.modalOverlay} 
+          <KeyboardAvoidingView
+            style={styles.modalOverlay}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
             <TouchableWithoutFeedback>
@@ -422,7 +422,7 @@ export default function BookDetailsScreen() {
                     <Ionicons name="close" size={24} color={colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
-                
+
                 <View style={styles.ratingSelector}>
                   <Text style={{ color: colors.textSecondary, marginBottom: 12, fontSize: 16 }}>Notez ce livre</Text>
                   <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -444,8 +444,8 @@ export default function BookDetailsScreen() {
                   onChangeText={setReviewComment}
                 />
 
-                <TouchableOpacity 
-                  style={[styles.applyBtn, submittingReview && { opacity: 0.7 }]} 
+                <TouchableOpacity
+                  style={[styles.applyBtn, submittingReview && { opacity: 0.7 }]}
                   onPress={handleSubmitReview}
                   disabled={submittingReview}
                 >

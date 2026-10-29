@@ -20,7 +20,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
     const [search, setSearch] = useState('')
     const [saving, setSaving] = useState<string | null>(null)
     const [saved, setSaved] = useState<Set<string>>(new Set())
-    
+
     // New state for EXIF
     const [injectingExif, setInjectingExif] = useState<string | null>(null)
     const [exifSuccess, setExifSuccess] = useState<Set<string>>(new Set())
@@ -38,9 +38,9 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
 
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(assets.map(a => [a.id, {
-            alt: a.altText || `${a.name} | Riwaya Promotion`,
-            title: a.imageTitle || `Offre spéciale ${a.name} sur Riwaya`,
-            keywords: `${a.name}, marketing, promotion, offre, riwaya, livre`
+            alt: a.altText || `${a.name} | PetsUnivers Promotion`,
+            title: a.imageTitle || `Offre spéciale ${a.name} sur PetsUnivers`,
+            keywords: `${a.name}, marketing, promotion, offre, petsunivers, livre`
         }]))
     )
     const [message, setMessage] = useState('')
@@ -84,12 +84,12 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ edits: chunk })
                 })
-                
+
                 const contentType = res.headers.get('content-type')
                 if (!contentType || !contentType.includes('application/json')) {
                     throw new Error(`Erreur serveur (${res.status}): Réponse non JSON.`)
                 }
-                
+
                 if (!res.ok) throw new Error('Erreur API')
                 setProgress({ current: Math.min(i + chunkSize, entries.length), total: entries.length, label: 'Sauvegarde des métadonnées...' })
             }
@@ -285,13 +285,13 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
 
     async function downloadAll() {
         if (!confirm(`Voulez-vous vraiment télécharger ${filtered.length} images ? Votre navigateur pourrait vous demander l'autorisation de télécharger plusieurs fichiers.`)) return;
-        
+
         setIsDownloading(true);
         setMessage('');
         setProgress({ current: 0, total: filtered.length, label: 'Téléchargement en cours...' });
-        
+
         let errorCount = 0;
-        
+
         for (let i = 0; i < filtered.length; i++) {
             const asset = filtered[i];
             if (!asset.url) continue;
@@ -302,14 +302,14 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                
+
                 let filename = asset.url.split('/').pop() || `${asset.id}.jpg`;
                 if (filename.includes('?')) filename = filename.split('?')[0];
                 a.download = filename;
-                
+
                 document.body.appendChild(a);
                 a.click();
-                
+
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             } catch (e) {
@@ -317,11 +317,11 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                 console.error(`Erreur téléchargement ${asset.url}`, e);
             }
             setProgress({ current: i + 1, total: filtered.length, label: 'Téléchargement en cours...' });
-            
+
             // Attendre 250ms pour ne pas bloquer le navigateur
             await new Promise(r => setTimeout(r, 250));
         }
-        
+
         setTimeout(() => setProgress(null), 2000);
         if (errorCount > 0) {
             setMessage(`Téléchargement terminé : ${filtered.length - errorCount} succès, ${errorCount} erreurs.`);
@@ -333,14 +333,14 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
 
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
-        
-        const frKeywords = "marketing, offre spéciale, promotion livres, riwaya promo, remise livre, livraison gratuite maroc";
+
+        const frKeywords = "marketing, offre spéciale, promotion livres, petsunivers promo, remise livre, livraison gratuite maroc";
 
         assets.forEach(a => {
             updated[a.id] = {
-                alt: `${a.name} - ${a.type} | Promotion Riwaya Maroc`,
-                title: `Offre spéciale ${a.name} sur Riwaya`,
-                keywords: `${a.name}, marketing, promotion, offre, riwaya, livre, ${frKeywords}`
+                alt: `${a.name} - ${a.type} | Promotion PetsUnivers Maroc`,
+                title: `Offre spéciale ${a.name} sur PetsUnivers`,
+                keywords: `${a.name}, marketing, promotion, offre, petsunivers, livre, ${frKeywords}`
             }
         })
         setEdits(updated)
@@ -374,7 +374,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                         <span className="text-xs font-bold text-gray-900">{Math.round((progress.current / progress.total) * 100)}%</span>
                     </div>
                     <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
+                        <div
                             className="h-full bg-black transition-all duration-300"
                             style={{ width: `${(progress.current / progress.total) * 100}%` }}
                         ></div>
@@ -461,7 +461,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                             {/* Image */}
                             <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                 <img
-                                    src={asset.url?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${asset.url}` : asset.url || '/placeholder.jpg'}
+                                    src={asset.url?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.petsunivers.ma${asset.url}` : asset.url || '/placeholder.jpg'}
                                     alt={edits[asset.id]?.alt || asset.name}
                                     title={edits[asset.id]?.title || asset.name}
                                     className="w-full h-full object-cover"
@@ -485,7 +485,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                                         value={edits[asset.id]?.alt || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], alt: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
-                                        placeholder={`${asset.name} | Promotion Riwaya`}
+                                        placeholder={`${asset.name} | Promotion PetsUnivers`}
                                     />
                                 </div>
 
@@ -510,7 +510,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                                         value={edits[asset.id]?.keywords || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], keywords: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
-                                        placeholder={`Marketing, Promo, Riwaya, ...`}
+                                        placeholder={`Marketing, Promo, PetsUnivers, ...`}
                                     />
                                 </div>
                             </div>
@@ -533,7 +533,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                                 )}
                                 {saved.has(asset.id) ? 'Sauvé' : 'Sauver SEO'}
                             </button>
-                            
+
                             <button
                                 type="button"
                                 onClick={() => injectExif(asset.id)}

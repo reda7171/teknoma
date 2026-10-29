@@ -163,7 +163,7 @@ async function getCustomers(): Promise<CustomerItem[]> {
         readersMap.set(key, {
             id: u.id,
             userId: u.id,
-            fullName: u.fullName || u.email?.split('@')[0] || 'Lecteur Riwaya',
+            fullName: u.fullName || u.email?.split('@')[0] || 'Lecteur PetsUnivers',
             phone: u.phone || '',
             email: u.email || '',
             city: u.city || '',
@@ -322,7 +322,7 @@ export default async function AdminCustomersPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style PetsUnivers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2">
@@ -332,7 +332,7 @@ export default async function AdminCustomersPage() {
                         Base de données centralisée (**)
                     </p>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                     <div className="bg-black text-white px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10">
                         <Users className="w-4 h-4 text-gray-400" />

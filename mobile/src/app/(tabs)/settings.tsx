@@ -62,7 +62,7 @@ export default function SettingsScreen() {
   );
 
   const handleContactSupport = () => {
-    const url = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=Bonjour, j'ai besoin d'aide concernant Riwaya.`;
+    const url = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=Bonjour, j'ai besoin d'aide concernant PetsUnivers.`;
     Linking.openURL(url).catch(() => {
       Alert.alert('Erreur', 'WhatsApp n\'est pas installé sur cet appareil.');
     });
@@ -100,7 +100,7 @@ export default function SettingsScreen() {
 
   const handlePickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (permissionResult.granted === false) {
       Alert.alert('Permission requise', 'Vous devez autoriser l\'accès à vos photos.');
       return;
@@ -166,8 +166,8 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView 
-        contentContainerStyle={styles.container} 
+      <ScrollView
+        contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0274DF" />
@@ -190,12 +190,12 @@ export default function SettingsScreen() {
                   ) : (
                     <Text style={styles.avatarText}>{customer?.fullName?.charAt(0).toUpperCase() || 'U'}</Text>
                   )}
-                  <View style={{ 
-                    position: 'absolute', 
-                    bottom: 0, 
-                    right: 0, 
-                    backgroundColor: colors.primary, 
-                    borderRadius: 14, 
+                  <View style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    backgroundColor: colors.primary,
+                    borderRadius: 14,
                     padding: 5,
                     borderWidth: 2,
                     borderColor: colors.backgroundElement
@@ -223,10 +223,10 @@ export default function SettingsScreen() {
                   </View>
                 </View>
               </View>
-              
+
               {/* Carte de Gamification */}
               {customer?.gamification && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.gamificationCard, { backgroundColor: isDark ? '#1E293B' : '#F8FAFC', borderColor: isDark ? '#334155' : '#E2E8F0' }]}
                   activeOpacity={0.7}
                   onPress={() => setGamificationModalVisible(true)}
@@ -245,7 +245,7 @@ export default function SettingsScreen() {
                   </View>
                 </TouchableOpacity>
               )}
-              
+
               {/* Carte de Lecteur */}
               <TouchableOpacity
                 style={[styles.gamificationCard, { backgroundColor: colors.primary, marginTop: 12, borderColor: 'transparent' }]}
@@ -315,7 +315,7 @@ export default function SettingsScreen() {
               icon="moon-outline" iconColor="#3B82F6" iconBg="#EFF6FF"
               label={t('dark_mode')}
               toggleValue={isDark}
-              onToggle={() => Alert.alert('Info', 'Riwaya suit le thème système de votre appareil.')}
+              onToggle={() => Alert.alert('Info', 'PetsUnivers suit le thème système de votre appareil.')}
             />
             <SettingRow
               icon="language-outline" iconColor="#10B981" iconBg="#D1FAE5"
@@ -379,7 +379,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={styles.version}>Riwaya Mobile v1.0.0 • Made with ❤️</Text>
+        <Text style={styles.version}>PetsUnivers Mobile v1.0.0 • Made with ❤️</Text>
       </ScrollView>
 
       {/* Modal des niveaux de gamification */}

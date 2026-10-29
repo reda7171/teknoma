@@ -2,9 +2,9 @@
 set -e
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-echo "=== [$DATE] Début du contrôle nocturne VPS Riwaya ==="
+echo "=== [$DATE] Début du contrôle nocturne VPS PetsUnivers ==="
 
-ENV_FILE="/var/www/riwayama/.env"
+ENV_FILE="/var/www/petsunivers/.env"
 if [ -f "$ENV_FILE" ]; then
     export $(grep -E '^(TELEGRAM_BOT_TOKEN|TELEGRAM_CHAT_ID)=' "$ENV_FILE" | xargs)
 fi
@@ -16,8 +16,8 @@ echo "Utilisation RAM : ${MEM_PERCENT}% (${USED_MEM}Mo / ${TOTAL_MEM}Mo)"
 
 # Nettoyer uniquement le cache de build local. Le cache du conteneur actif ne
 # doit pas être supprimé pendant que Next.js traite des requêtes.
-if [ -d "/var/www/riwayama/.next/cache" ]; then
-    rm -rf /var/www/riwayama/.next/cache
+if [ -d "/var/www/petsunivers/.next/cache" ]; then
+    rm -rf /var/www/petsunivers/.next/cache
     echo "Cache de build local supprimé."
 fi
 
@@ -38,17 +38,17 @@ if [ "$TOTAL_SWAP" -lt 1024 ]; then
 fi
 
 # Ne jamais redémarrer l'application de façon planifiée. Le précédent
-# `docker restart riwaya_app` créait une coupure 502 visible chaque nuit.
+# `docker restart petsunivers_app` créait une coupure 502 visible chaque nuit.
 APP_RUNNING=false
-if command -v docker &> /dev/null && docker ps -q --filter "name=^riwaya_app$" | grep -q .; then
+if command -v docker &> /dev/null && docker ps -q --filter "name=^petsunivers_app$" | grep -q .; then
     APP_RUNNING=true
-    echo "Conteneur riwaya_app actif : aucun redémarrage nécessaire."
+    echo "Conteneur petsunivers_app actif : aucun redémarrage nécessaire."
 else
-    echo "AVERTISSEMENT : le conteneur riwaya_app n'est pas actif."
+    echo "AVERTISSEMENT : le conteneur petsunivers_app n'est pas actif."
 fi
 
 if { [ "$MEM_PERCENT" -ge 85 ] || [ "$APP_RUNNING" != true ]; } && [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-    MSG="🚨 <b>Alerte VPS Riwaya</b>%0AUtilisation RAM : <b>${MEM_PERCENT}%</b>%0AConteneur actif : <b>${APP_RUNNING}</b>%0AAucun redémarrage automatique effectué."
+    MSG="🚨 <b>Alerte VPS PetsUnivers</b>%0AUtilisation RAM : <b>${MEM_PERCENT}%</b>%0AConteneur actif : <b>${APP_RUNNING}</b>%0AAucun redémarrage automatique effectué."
     curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
         -d "chat_id=${TELEGRAM_CHAT_ID}" \
         -d "text=${MSG}" \

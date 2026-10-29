@@ -1,11 +1,11 @@
 import { getCoupons } from '@/lib/actions/coupons'
 import { CouponsClient } from '@/components/admin/CouponsClient'
 
-export const metadata = { title: 'Codes Promo | Admin Riwaya' }
+export const metadata = { title: 'Codes Promo | Admin PetsUnivers' }
 
 export default async function CouponsPage() {
   const result = await getCoupons()
-  
+
   if (!result.success) {
     return (
       <div className="flex items-center justify-center h-[50vh] text-red-500 font-bold">

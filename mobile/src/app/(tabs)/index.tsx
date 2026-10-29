@@ -57,7 +57,7 @@ export default function HomeScreen() {
   const [searchInput, setSearchInput] = useState(''); // Pour l'input avant soumission
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'PACK' | 'BOOK'>('ALL');
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const [showFilters, setShowFilters] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortFilter, setSortFilter] = useState('newest');
@@ -150,7 +150,7 @@ export default function HomeScreen() {
       >
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.premiumTitle}>Riwaya</Text>
+            <Text style={styles.premiumTitle}>PetsUnivers</Text>
             <Text style={styles.premiumSubtitle}>{t('home_subtitle')}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -377,11 +377,11 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
     marginBottom: Spacing.six,
   },
-  headerContent:  { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: Spacing.four 
+  headerContent:  {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.four
   },
   profileContainer: {
     marginLeft: Spacing.two,
@@ -408,12 +408,12 @@ const styles = StyleSheet.create({
   },
   premiumTitle:   { fontSize: 34, fontWeight: '900', color: '#FFF', marginBottom: 4, letterSpacing: -0.5 },
   premiumSubtitle:{ fontSize: 16, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
-  searchBar:      { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    borderRadius: 16, 
-    paddingHorizontal: Spacing.three, 
-    paddingVertical: 14, 
+  searchBar:      {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 14,
     position: 'absolute',
     bottom: -24,
     left: Spacing.four,

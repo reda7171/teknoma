@@ -1,4 +1,4 @@
-# 🎉 Projet Riwaya - Récapitulatif Complet
+# 🎉 Projet PetsUnivers - Récapitulatif Complet
 
 ## ✅ Fonctionnalités Implémentées
 
@@ -10,7 +10,7 @@
 - ✅ Redirection automatique
 
 **Identifiants par défaut** :
-- Email: `contact@riwaya.store`
+- Email: `contact@petsunivers.ma`
 - Password: `admin123`
 
 ### 🎨 **Back-Office Admin** (`/admin`)
@@ -52,7 +52,7 @@
 ## 📁 Structure du Projet
 
 ```
-riwaya/
+petsunivers/
 ├── prisma/
 │   ├── schema.prisma          # Modèles de données
 │   ├── seed.ts                # Seed TypeScript
@@ -164,7 +164,7 @@ npm run dev
 
 ### Admin
 ```
-Email: contact@riwaya.store
+Email: contact@petsunivers.ma
 Password: admin123
 ```
 

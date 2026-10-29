@@ -151,7 +151,7 @@ export function WhatsAppApiExplorer({ sessions = [] }: WhatsAppApiExplorerProps)
     }
 
     const copyCurl = () => {
-        const headersStr = "-H 'Content-Type: application/json' -H 'X-Api-Key: riwaya_waha_api_key_2026'"
+        const headersStr = "-H 'Content-Type: application/json' -H 'X-Api-Key: petsunivers_waha_api_key_2026'"
         const bodyStr = method !== 'GET' && jsonBody.trim() ? ` -d '${jsonBody.replace(/'/g, "'\\''")}'` : ''
         const curlCmd = `curl -X ${method} "http://167.86.108.246:3001${path}" ${headersStr}${bodyStr}`
         void navigator.clipboard.writeText(curlCmd)

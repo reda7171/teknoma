@@ -1,9 +1,10 @@
 {
-  "name": "riwaya",
+  "name": "petsunivers",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
+    "telegram:local": "node scripts/telegram-local.cjs",
     "build": "next build",
     "start": "node server.js",
     "lint": "eslint",

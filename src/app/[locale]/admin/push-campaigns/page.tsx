@@ -144,7 +144,7 @@ export default function PushCampaignsPage() {
                                 type="url"
                                 value={form.url}
                                 onChange={e => setForm(p => ({ ...p, url: e.target.value }))}
-                                placeholder="https://riwaya.store/fr/livres..."
+                                placeholder="https://petsunivers.ma/fr/livres..."
                                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                             />
                         </div>
@@ -158,7 +158,7 @@ export default function PushCampaignsPage() {
                                 <div>
                                     <p className="text-white text-sm font-black">{form.title || 'Titre...'}</p>
                                     <p className="text-slate-300 text-xs mt-0.5">{form.body || 'Message...'}</p>
-                                    <p className="text-slate-500 text-[10px] mt-1">riwaya.store</p>
+                                    <p className="text-slate-500 text-[10px] mt-1">petsunivers.ma</p>
                                 </div>
                             </div>
                         )}
@@ -239,7 +239,7 @@ export default function PushCampaignsPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => handleDelete(c.id)}
                                         className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors shrink-0"
                                         title="Supprimer"

@@ -4,10 +4,10 @@
 :root {
   --background: #FFFFFF;
   --foreground: #111111;
-  --pixio-beige: #FCF5EB;
-  --pixio-cream: #FDFBF7;
+  --pixio-beige: #F0E3CE;
+  --pixio-cream: #F7F0DF;
   --pixio-pink: #FDE2E4;
-  --pixio-yellow: #FEF9E7;
+  --pixio-yellow: #DBC38D;
 }
 
 .font-cairo-var {

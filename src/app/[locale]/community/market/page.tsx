@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'تبادل الكتب المستعملة بالمغرب | سوق وروايات القراء - مجتمع رواية'
+        ? 'تبادل الكتب المستعملة بالمغرب | سوق وروايات القراء - مجتمع PetsUnivers'
         : isEn
-            ? 'Used Books Exchange Morocco | Readers Swap & Trade - Riwaya'
-            : 'Échange de Livre Occasion au Maroc | Troc & Bourse aux Livres - Riwaya'
+            ? 'Used Books Exchange Morocco | Readers Swap & Trade - PetsUnivers'
+            : 'Échange de Livre Occasion au Maroc | Troc & Bourse aux Livres - PetsUnivers'
 
     const description = isAr
         ? 'منصة مجانية لتبادل وتدوير الكتب والروايات المستعملة بين القراء بالمغرب (الدار البيضاء، الرباط، مراكش...). بدّل كتبك القديمة بكتب جديدة بسهولة وبدون تكاليف.'
@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const keywords = isAr
         ? ['تبادل الكتب المستعملة بالمغرب', 'تبادل كتب مستعملة', 'سوق تبادل الكتب', 'تبادل الروايات بالمغرب', 'كتب مستعملة الدار البيضاء', 'قراء المغرب', 'troc livres maroc']
         : isEn
-            ? ['used books exchange morocco', 'used book swap morocco', 'trade pre-loved books morocco', 'book exchange casablanca', 'riwaya book market']
-            : ['échange de livre occasion', 'échange de livres maroc', 'troc livre occasion maroc', 'bourse aux livres occasion', 'livres occasion casablanca', 'troc romans maroc', 'livres seconde main maroc', 'riwaya community']
+            ? ['used books exchange morocco', 'used book swap morocco', 'trade pre-loved books morocco', 'book exchange casablanca', 'petsunivers book market']
+            : ['échange de livre occasion', 'échange de livres maroc', 'troc livre occasion maroc', 'bourse aux livres occasion', 'livres occasion casablanca', 'troc romans maroc', 'livres seconde main maroc', 'petsunivers community']
 
     return {
         title,
@@ -105,8 +105,8 @@ export default async function MarketPage({
     // FAQ schema matching on-page content for rich snippets
     const faqQuestions = isAr ? [
         {
-            q: 'كيف يمكنني تبادل كتاب مستعمل على منصة رواية؟',
-            a: 'سجل حسابك على رواية، أضف الكتب المستعملة من مكتبتك، وتصفح قائمة الكتب المتاحة لطلب التبادل مع قارئ آخر.'
+            q: 'كيف يمكنني تبادل كتاب مستعمل على منصة PetsUnivers؟',
+            a: 'سجل حسابك على PetsUnivers، أضف الكتب المستعملة من مكتبتك، وتصفح قائمة الكتب المتاحة لطلب التبادل مع قارئ آخر.'
         },
         {
             q: 'هل تبادل الكتب مجاني؟',
@@ -122,8 +122,8 @@ export default async function MarketPage({
         }
     ] : isEn ? [
         {
-            q: 'How do I exchange a used book on Riwaya?',
-            a: 'Create an account on Riwaya, list the used books from your bookshelf, and browse the market to request a direct swap or trade with credits.'
+            q: 'How do I exchange a used book on PetsUnivers?',
+            a: 'Create an account on PetsUnivers, list the used books from your bookshelf, and browse the market to request a direct swap or trade with credits.'
         },
         {
             q: 'Is the book exchange free?',
@@ -135,16 +135,16 @@ export default async function MarketPage({
         },
         {
             q: 'What if the owner has no book I want?',
-            a: 'Use Riwaya\'s credit system: give away your book to earn credits, then redeem them whenever you find a book you like from another reader.'
+            a: 'Use PetsUnivers\'s credit system: give away your book to earn credits, then redeem them whenever you find a book you like from another reader.'
         }
     ] : [
         {
-            q: 'Comment échanger un livre d\'occasion sur Riwaya ?',
-            a: 'Inscrivez-vous sur Riwaya, ajoutez les livres d\'occasion de votre bibliothèque que vous souhaitez prêter ou échanger, puis parcourez le catalogue pour proposer un échange direct ou via crédits.'
+            q: 'Comment échanger un livre d\'occasion sur PetsUnivers ?',
+            a: 'Inscrivez-vous sur PetsUnivers, ajoutez les livres d\'occasion de votre bibliothèque que vous souhaitez prêter ou échanger, puis parcourez le catalogue pour proposer un échange direct ou via crédits.'
         },
         {
             q: 'L\'échange de livres d\'occasion est-il gratuit ?',
-            a: 'Oui, le troc de livres entre membres de la communauté Riwaya est 100% gratuit. Les échanges se font principalement en main propre dans un lieu public sécurisé de votre ville.'
+            a: 'Oui, le troc de livres entre membres de la communauté PetsUnivers est 100% gratuit. Les échanges se font principalement en main propre dans un lieu public sécurisé de votre ville.'
         },
         {
             q: 'Quels types de livres peut-on troquer ?',
@@ -152,7 +152,7 @@ export default async function MarketPage({
         },
         {
             q: 'Comment faire si aucun livre ne m\'intéresse chez le propriétaire ?',
-            a: 'Grâce au système de crédits Riwaya : cédez votre livre pour gagner des crédits et utilisez-les plus tard pour acquérir le livre de n\'importe quel autre membre.'
+            a: 'Grâce au système de crédits PetsUnivers : cédez votre livre pour gagner des crédits et utilisez-les plus tard pour acquérir le livre de n\'importe quel autre membre.'
         }
     ]
 
@@ -169,7 +169,7 @@ export default async function MarketPage({
                 isPartOf: {
                     '@type': 'WebSite',
                     '@id': `${baseUrl}/#website`,
-                    name: 'Riwaya',
+                    name: 'PetsUnivers',
                     url: baseUrl
                 }
             },
@@ -185,7 +185,7 @@ export default async function MarketPage({
                     {
                         '@type': 'ListItem',
                         position: 2,
-                        name: isAr ? 'مجتمع رواية' : isEn ? 'Community' : 'Communauté',
+                        name: isAr ? 'مجتمع PetsUnivers' : isEn ? 'Community' : 'Communauté',
                         item: `${baseUrl}/${locale}/community`
                     },
                     {
@@ -261,4 +261,3 @@ export default async function MarketPage({
         </div>
     )
 }
-

@@ -6,7 +6,7 @@ import { getSetting } from '@/lib/actions/site-settings'
 export async function POST(req: Request) {
     try {
         const stripeSecretKey = await getSetting('payment_stripe_secret_key')
-        
+
         if (!stripeSecretKey) {
             return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 })
         }
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
 
         // Prepare line items
         const lineItems = order.items.map(item => {

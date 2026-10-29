@@ -1,0 +1,8 @@
+﻿import {Link} from '@/i18n/routing'
+import {getLocale} from 'next-intl/server'
+import {PawPrint, ArrowUpRight} from 'lucide-react'
+import {getPetCopy} from '@/lib/pets'
+export default async function PetFooter() {
+ const c = getPetCopy(await getLocale())
+ return <footer className="bg-[#17351d] px-5 pb-24 pt-14 text-[#f7f0df] md:pb-8"><div className="mx-auto max-w-7xl"><div className="grid gap-10 pb-12 md:grid-cols-3"><div><Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold" dir="ltr"><PawPrint/>PetsUnivers.</Link><p className="mt-4 max-w-xs text-sm leading-7 text-[#f7f0df]/70">{c.footer}</p></div><div className="grid content-start gap-3 text-sm"><strong className="mb-2">{c.catalog}</strong><Link href="/products?category=Chats">{c.cats}</Link><Link href="/products?category=Chiens">{c.dogs}</Link><Link href="/products?category=Alimentation">{c.food}</Link><Link href="/products?category=Accessoires">{c.accessories}</Link></div><div className="grid content-start gap-3 text-sm"><strong className="mb-2">{c.help}</strong><Link href="/services">{c.services}</Link><Link href="/contact" className="flex items-center gap-2">{c.contact}<ArrowUpRight className="h-4 w-4"/></Link><a href="mailto:contact@ecom.ma">contact@ecom.ma</a><Link href="/privacy">{c.rights === 'Tous droits réservés.' ? 'Confidentialité' : 'Privacy'}</Link><Link href="/terms">{c.rights === 'Tous droits réservés.' ? 'Conditions de vente' : 'Terms'}</Link></div></div><div className="border-t border-white/15 pt-6 text-xs text-[#f7f0df]/60">© {new Date().getFullYear()} PetsUnivers. {c.rights}</div></div></footer>
+}

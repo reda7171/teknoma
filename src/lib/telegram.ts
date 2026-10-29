@@ -114,7 +114,7 @@ export function formatOrderItemsList(items?: any[]): { itemsList: string; hasMis
             }
             const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📖'
             const price = i.price !== undefined ? ` (${i.price} MAD)` : ''
-            
+
             const isItemMissing = Boolean(
                 i.isMissing ||
                 (i.book && i.book.stock !== undefined && i.book.stock <= 0) ||
@@ -230,7 +230,7 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     }
 
     const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
-    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
+    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur PetsUnivers a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
     whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
                                .replace(/\{\{shortId\}\}/g, shortId)
                                .replace(/\{\{city\}\}/g, order.city)
@@ -248,7 +248,7 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
-    const promises = chatIds.map(id => 
+    const promises = chatIds.map(id =>
         fetch(`${TELEGRAM_API}${botToken}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -271,12 +271,12 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
 export async function sendTelegramPhoto(photoUrl: string, caption: string, chatId?: string, botToken?: string, keyboard?: any) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
-    
-    const promises = chatIds.map(cid => 
+
+    const promises = chatIds.map(cid =>
         fetch(`${TELEGRAM_API}${token}/sendPhoto`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -307,7 +307,7 @@ export async function sendTelegramDocument(
 ) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
@@ -358,11 +358,11 @@ export async function sendTelegramDocument(
 export async function sendTelegramMediaGroup(media: { type: 'photo', media: string, caption?: string }[], chatId?: string, botToken?: string) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id || media.length === 0) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
-    
+
     let isLocalFile = false
     for (const m of media) {
         if (!m.media.startsWith('http')) {
@@ -396,7 +396,7 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
                     }
                 }
             }
-            
+
             if (mediaArray.length === 0) return null
             formData.append('media', JSON.stringify(mediaArray))
 
@@ -409,7 +409,7 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
         const results = await Promise.all(promises)
         return results[0]
     } else {
-        const promises = chatIds.map(cid => 
+        const promises = chatIds.map(cid =>
             fetch(`${TELEGRAM_API}${token}/sendMediaGroup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -497,7 +497,7 @@ export async function sendUserRegistrationNotification(user: {
     const ip = await getClientIp()
     const location = await getLocationFromIp(ip)
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_register' } })
-    
+
     const headersList = await headers()
     const session = headersList.get('user-agent') || 'Inconnu'
 
@@ -515,7 +515,7 @@ export async function sendUserRegistrationNotification(user: {
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
-    const promises = chatIds.map(id => 
+    const promises = chatIds.map(id =>
         fetch(`${TELEGRAM_API}${botToken}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -546,7 +546,7 @@ export async function sendTelegramMessage(text: string, forceChatId?: string, fo
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
-    const promises = chatIds.map(id => 
+    const promises = chatIds.map(id =>
         fetch(`${TELEGRAM_API}${token}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -627,11 +627,11 @@ export async function sendLowStockNotification(book: { id: string, title: string
 export async function sendTelegramDocumentBuffer(documentBuffer: Buffer, filename: string, caption: string, chatId?: string, botToken?: string) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
-    
+
     const promises = chatIds.map(cid => {
         const formData = new FormData()
         formData.append('chat_id', cid)
@@ -668,4 +668,3 @@ export async function sendTelegramAlert(text: string) {
     )
     return Promise.all(promises)
 }
-

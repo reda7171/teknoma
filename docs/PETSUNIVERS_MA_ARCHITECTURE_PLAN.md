@@ -1,12 +1,12 @@
-# Plan d’architecture — riwaya.ma avec backend Riwaya partagé
+# Plan d’architecture — petsunivers.ma avec backend PetsUnivers partagé
 
-Statut : **palier A en cours sur la branche `feat/riwaya-ma-multistore` — schéma multiboutique appliqué, code applicatif pas encore déployé**  
+Statut : **palier A en cours sur la branche `feat/petsunivers-ma-multistore` — schéma multiboutique appliqué, code applicatif pas encore déployé**  
 Dernière mise à jour : **11 octobre 2026**  
-Projet actuel : **riwaya.store / Next.js 16 / Prisma / MySQL / Redis / Docker**
+Projet actuel : **petsunivers.ma / Next.js 16 / Prisma / MySQL / Redis / Docker**
 
 ## 1. Objectif
 
-Créer un frontend distinct pour `riwaya.ma` tout en conservant :
+Créer un frontend distinct pour `petsunivers.ma` tout en conservant :
 
 - un seul backoffice ;
 - une seule base de données ;
@@ -16,7 +16,7 @@ Créer un frontend distinct pour `riwaya.ma` tout en conservant :
 
 Le projet actuel doit continuer à fonctionner pendant toute la transition. Le nouveau domaine ne doit pas être un clone autonome du dépôt ni posséder une copie de la base de données.
 
-Le positionnement retenu pour le nouveau frontend est **premium, éditorial et chaleureux**. La charte détaillée est conservée dans `docs/RIWAYA_MA_PREMIUM_BRAND.md`.
+Le positionnement retenu pour le nouveau frontend est **premium, éditorial et chaleureux**. La charte détaillée est conservée dans `docs/PETSUNIVERS_MA_PREMIUM_BRAND.md`.
 
 ## 2. Décision d’architecture
 
@@ -24,10 +24,10 @@ Le positionnement retenu pour le nouveau frontend est **premium, éditorial et c
 
 ```text
                          ┌──────────────────────────────┐
-riwaya.store ───────────▶│ Frontend Riwaya Store       │
+petsunivers.ma ───────────▶│ Frontend PetsUnivers Store       │
                          └──────────────┬───────────────┘
                                         │ API privée
-riwaya.ma ──────────────▶│ Frontend Riwaya MA          │
+petsunivers.ma ──────────────▶│ Frontend PetsUnivers MA          │
                          └──────────────┬───────────────┘
                                         │
                          ┌──────────────▼───────────────┐
@@ -42,11 +42,11 @@ riwaya.ma ──────────────▶│ Frontend Riwaya MA   
 
 ### Règles fondamentales
 
-1. `riwaya.store` reste le système de production de référence pendant la migration.
+1. `petsunivers.ma` reste le système de production de référence pendant la migration.
 2. Les deux boutiques utilisent les mêmes identifiants de produits, stocks, entrepôts et clients.
-3. Toute écriture sensible passe par le backend partagé. Le frontend `riwaya.ma` ne se connecte jamais directement à MySQL ou Prisma.
+3. Toute écriture sensible passe par le backend partagé. Le frontend `petsunivers.ma` ne se connecte jamais directement à MySQL ou Prisma.
 4. Chaque panier, commande, paiement et événement analytique porte un canal d’origine.
-5. Le déploiement de `riwaya.ma` est indépendant : une erreur sur ce frontend ne doit pas arrêter `riwaya.store` ou le backoffice.
+5. Le déploiement de `petsunivers.ma` est indépendant : une erreur sur ce frontend ne doit pas arrêter `petsunivers.ma` ou le backoffice.
 6. Les secrets restent dans les variables d’environnement du VPS ou un gestionnaire de secrets, jamais dans Git.
 
 ## 3. Approche progressive retenue
@@ -61,8 +61,8 @@ Modifications de données envisagées :
 
 ```prisma
 enum SalesChannel {
-  RIWAYA_STORE
-  RIWAYA_MA
+  PETSUNIVERS_STORE
+  PETSUNIVERS_MA
   ADMIN_POS
   JUMIA
   TELEGRAM
@@ -90,8 +90,8 @@ Champs à introduire progressivement :
 
 Migration sûre :
 
-- champs initialement optionnels ou avec `RIWAYA_STORE` par défaut ;
-- backfill des anciennes commandes vers `RIWAYA_STORE` ;
+- champs initialement optionnels ou avec `PETSUNIVERS_STORE` par défaut ;
+- backfill des anciennes commandes vers `PETSUNIVERS_STORE` ;
 - index sur `salesChannel`, `createdAt` et `status` ;
 - aucun changement du calcul de stock ;
 - migration Prisma testée sur une copie de la base avant production.
@@ -121,18 +121,18 @@ Contraintes :
 - clés d’idempotence pour éviter les commandes doubles ;
 - jamais de prix, remise ou stock acceptés tels quels depuis le navigateur ;
 - réponses publiques sans données personnelles ni champs internes Prisma ;
-- versionnement de l’API avant le lancement de `riwaya.ma`.
+- versionnement de l’API avant le lancement de `petsunivers.ma`.
 
-Les Server Actions existantes restent utilisées par `riwaya.store` pendant cette phase. Elles sont remplacées ou adaptées progressivement, fonction par fonction.
+Les Server Actions existantes restent utilisées par `petsunivers.ma` pendant cette phase. Elles sont remplacées ou adaptées progressivement, fonction par fonction.
 
-### Palier C — construire le frontend riwaya.ma
+### Palier C — construire le frontend petsunivers.ma
 
 Créer une application séparée dans le même dépôt, après stabilisation de l’API :
 
 ```text
 apps/
-  storefront-store/     # évolution future du frontend riwaya.store
-  storefront-ma/        # nouveau design riwaya.ma
+  storefront-store/     # évolution future du frontend petsunivers.ma
+  storefront-ma/        # nouveau design petsunivers.ma
   backoffice/            # évolution future, pas au premier chantier
 packages/
   contracts/             # schémas Zod et types de l’API
@@ -142,7 +142,7 @@ packages/
 
 Au premier lancement, seuls `apps/storefront-ma` et `packages/contracts` doivent être extraits. Le déplacement complet de l’application actuelle attendra que la nouvelle vitrine soit stable.
 
-Le frontend `riwaya.ma` pourra avoir :
+Le frontend `petsunivers.ma` pourra avoir :
 
 - une identité visuelle, un header et une page d’accueil propres ;
 - ses propres collections éditoriales ;
@@ -162,16 +162,16 @@ Il partagera obligatoirement :
 
 ### Palier D — séparer proprement le backoffice
 
-Ce palier est optionnel et intervient seulement après le lancement réussi de `riwaya.ma`.
+Ce palier est optionnel et intervient seulement après le lancement réussi de `petsunivers.ma`.
 
-- déplacer l’interface admin vers une application dédiée ou `admin.riwaya.store` ;
+- déplacer l’interface admin vers une application dédiée ou `admin.petsunivers.ma` ;
 - conserver les mêmes services métier et la même base ;
 - ajouter des filtres par canal aux commandes, KPI, paniers abandonnés et rapports Telegram ;
 - autoriser une vue globale et une vue par boutique.
 
 ## 4. Stock, commandes et concurrence
 
-Le stock doit rester global par entrepôt. Il ne faut pas créer un stock `riwaya.ma` indépendant sauf décision commerciale future.
+Le stock doit rester global par entrepôt. Il ne faut pas créer un stock `petsunivers.ma` indépendant sauf décision commerciale future.
 
 Le checkout partagé doit :
 
@@ -191,10 +191,10 @@ Les deux domaines ne doivent pas publier automatiquement les mêmes pages avec l
 
 Avant l’ouverture à l’indexation :
 
-- définir le positionnement éditorial propre de `riwaya.ma` ;
+- définir le positionnement éditorial propre de `petsunivers.ma` ;
 - rédiger des pages d’accueil, catégories, collections et guides distincts ;
 - utiliser une URL canonique vers la page réellement prioritaire lorsqu’une fiche est identique ;
-- ne pas canoniser toutes les pages de `riwaya.ma` vers `riwaya.store` si le nouveau domaine doit se positionner seul ;
+- ne pas canoniser toutes les pages de `petsunivers.ma` vers `petsunivers.ma` si le nouveau domaine doit se positionner seul ;
 - générer des sitemaps séparés ;
 - créer une propriété Search Console et un Merchant Center/destination clairement configurés ;
 - garder `noindex` sur l’environnement de préproduction ;
@@ -212,8 +212,8 @@ Le VPS peut héberger les services suivants :
 
 ```text
 Nginx / reverse proxy
-  riwaya.store      -> storefront actuel / port interne 3000
-  riwaya.ma         -> nouveau frontend / port interne 3001
+  petsunivers.ma      -> storefront actuel / port interne 3000
+  petsunivers.ma         -> nouveau frontend / port interne 3001
   admin...          -> backoffice partagé, ultérieurement
 
 Docker network privé
@@ -236,13 +236,13 @@ Règles d’exploitation :
 - clé `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` stable entre instances d’une même application ;
 - journalisation avec `storefront`, `requestId` et version de déploiement.
 
-Le fichier Docker Compose actuel ne sera pas modifié avant que le frontend `riwaya.ma` puisse démarrer et réussir ses healthchecks de façon autonome.
+Le fichier Docker Compose actuel ne sera pas modifié avant que le frontend `petsunivers.ma` puisse démarrer et réussir ses healthchecks de façon autonome.
 
 ## 7. Domaine et DNS
 
 Quand le frontend est prêt :
 
-1. ajouter `riwaya.ma` et `www.riwaya.ma` dans le fournisseur DNS ;
+1. ajouter `petsunivers.ma` et `www.petsunivers.ma` dans le fournisseur DNS ;
 2. créer les enregistrements `A` vers l’adresse publique du VPS ;
 3. préparer Nginx avant de basculer le trafic ;
 4. générer le certificat TLS ;
@@ -271,14 +271,14 @@ Noms de secrets recommandés, sans valeurs dans le dépôt :
 - `VPS_PORT` ;
 - `VPS_USER` ;
 - `VPS_SSH_PRIVATE_KEY` ;
-- `RIWAYA_MA_API_TOKEN` ;
+- `PETSUNIVERS_MA_API_TOKEN` ;
 - `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`.
 
 ## 9. Phases de réalisation et critères de validation
 
 ### Phase 0 — préparation et sauvegarde
 
-- [x] Valider le positionnement commercial et SEO premium de `riwaya.ma`.
+- [x] Valider le positionnement commercial et SEO premium de `petsunivers.ma`.
 - [ ] Remplacer le mot de passe VPS exposé et configurer une clé SSH.
 - [ ] Documenter les services, domaines, sauvegardes et procédure de rollback actuels.
 - [ ] Créer une sauvegarde MySQL restaurable et tester sa restauration hors production.
@@ -289,7 +289,7 @@ Noms de secrets recommandés, sans valeurs dans le dépôt :
 ### Phase 1 — canal de vente dans le backend
 
 - [x] Ajouter l’énumération/canal et préparer une migration compatible avec l’existant.
-- [x] Prévoir le backfill des anciennes données vers `RIWAYA_STORE` grâce à la valeur par défaut.
+- [x] Prévoir le backfill des anciennes données vers `PETSUNIVERS_STORE` grâce à la valeur par défaut.
 - [x] Capturer automatiquement le canal à la création d’une commande.
 - [x] Afficher et filtrer le canal dans le backoffice.
 - [x] Inclure le canal dans Telegram, exports et KPI.
@@ -299,24 +299,24 @@ Avancement du 11 octobre 2026 : le schéma, les créations web/POS/mobile/import
 
 Validation isolée du 11 octobre 2026 :
 
-- schéma complet appliqué avec succès à une base MySQL locale jetable `riwaya_multistore_test` ;
-- valeur par défaut `RIWAYA_STORE` vérifiée sur `Order` et `AbandonedCart` ;
-- écriture explicite `RIWAYA_MA` vérifiée sur les deux modèles ;
+- schéma complet appliqué avec succès à une base MySQL locale jetable `petsunivers_multistore_test` ;
+- valeur par défaut `PETSUNIVERS_STORE` vérifiée sur `Order` et `AbandonedCart` ;
+- écriture explicite `PETSUNIVERS_MA` vérifiée sur les deux modèles ;
 - index composites `salesChannel/createdAt` vérifiés ;
 - données de test nettoyées, base jetable supprimée et conteneur MySQL de test arrêté ;
-- test reproductible disponible dans `scripts/test-sales-channel-schema.cjs`, avec blocage automatique si le nom de base n’est pas exactement `riwaya_multistore_test`.
+- test reproductible disponible dans `scripts/test-sales-channel-schema.cjs`, avec blocage automatique si le nom de base n’est pas exactement `petsunivers_multistore_test`.
 
 Préparation VPS du 11 octobre 2026 :
 
 - audit en lecture seule effectué avant migration ;
 - MySQL et le conteneur applicatif étaient actifs ;
-- les sauvegardes automatiques précédentes étaient vides, car le script ciblait l’ancien conteneur `riwaya_mysql` au lieu de `riwaya_db` ;
+- les sauvegardes automatiques précédentes étaient vides, car le script ciblait l’ancien conteneur `petsunivers_mysql` au lieu de `petsunivers_db` ;
 - `scripts/backup-db.sh` corrigé pour utiliser les variables internes du conteneur, une écriture atomique, `--single-transaction`, `--no-tablespaces` et une validation gzip ;
 - nouvelle sauvegarde de production créée et vérifiée : environ 5,59 Mo ;
 - restauration réelle réussie dans une base temporaire : 70 tables et 322 commandes ;
 - base de restauration supprimée automatiquement après le contrôle ;
 - migration multiboutique appliquée à la production après restauration validée ;
-- 322 commandes historiques classées automatiquement `RIWAYA_STORE` ;
+- 322 commandes historiques classées automatiquement `PETSUNIVERS_STORE` ;
 - colonnes et index vérifiés sur `orders` et `abandoned_carts` ;
 - application historique restée disponible et contrôlée en HTTP 200 après la migration.
 
@@ -332,7 +332,7 @@ Préparation VPS du 11 octobre 2026 :
 
 **Terminé lorsque :** un client de test peut parcourir le catalogue et créer une commande sans accès direct à la base.
 
-### Phase 3 — frontend riwaya.ma
+### Phase 3 — frontend petsunivers.ma
 
 - [ ] Créer l’application isolée et son design system.
 - [ ] Implémenter accueil, recherche, catégories, fiches, panier et checkout.
@@ -352,7 +352,7 @@ Préparation VPS du 11 octobre 2026 :
 - [ ] Ouvrir progressivement le trafic puis l’indexation.
 - [ ] Surveiller erreurs, disponibilité, vitesse, commandes et stock pendant 72 heures.
 
-**Terminé lorsque :** le domaine est stable, les commandes sont attribuées correctement et aucun impact n’est observé sur `riwaya.store`.
+**Terminé lorsque :** le domaine est stable, les commandes sont attribuées correctement et aucun impact n’est observé sur `petsunivers.ma`.
 
 ## 10. Tests obligatoires avant lancement
 
@@ -390,7 +390,7 @@ Préparation VPS du 11 octobre 2026 :
 3. modèle `SalesChannel` compatible ;
 4. filtres backoffice et attribution des commandes ;
 5. contrats et API storefront ;
-6. squelette du frontend `riwaya.ma` ;
+6. squelette du frontend `petsunivers.ma` ;
 7. design et contenu ;
 8. préproduction ;
 9. DNS/TLS ;

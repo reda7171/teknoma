@@ -44,7 +44,7 @@ const ENGLISH_FEMALE_NAMES = ["Emily", "Olivia", "Sophia", "Jessica", "Ava", "Is
 function getRandomNames(language: string, count: number): string[] {
   let malePool: string[] = [];
   let femalePool: string[] = [];
-  
+
   if (language === 'ar') {
     malePool = ARABIC_MALE_NAMES;
     femalePool = ARABIC_FEMALE_NAMES;
@@ -58,14 +58,14 @@ function getRandomNames(language: string, count: number): string[] {
 
   const selectedNames: string[] = [];
   const allNames = [...malePool, ...femalePool];
-  
+
   for (let i = 0; i < count; i++) {
     // Shuffle and pick
     const randIndex = Math.floor(Math.random() * allNames.length);
     selectedNames.push(allNames[randIndex]);
     allNames.splice(randIndex, 1); // Avoid picking the same name for the same article
   }
-  
+
   return selectedNames;
 }
 
@@ -136,12 +136,12 @@ async function main() {
     console.log(`⏳ Génération de ${numComments} commentaire(s) en ${languageStr} pour : "${post.title.substring(0, 30)}..."`);
 
     const names = getRandomNames(post.language, numComments);
-    
+
     // Tronquer le contenu pour ne pas exploser les tokens
     const truncatedContent = post.content ? post.content.substring(0, 3000) : "";
 
     const prompt = `
-Tu es un lecteur authentique du blog littéraire "Riwaya".
+Tu es un lecteur authentique du blog littéraire "PetsUnivers".
 Je vais te fournir le titre et un extrait d'un article de blog.
 L'article est écrit en ${languageStr}.
 
@@ -152,12 +152,12 @@ Chaque commentaire doit sembler écrit par une personne différente et doit util
 RÈGLES STRICTES :
 1. Langue : Les commentaires doivent IMPÉRATIVEMENT être écrits en ${languageStr}. Si c'est "Darija marocaine", utilise le dialecte marocain authentique (soit en alphabet arabe soit en alphabet latin, comme les marocains écrivent sur internet).
 2. Pertinence : Le commentaire DOIT faire référence à une idée, un personnage, l'auteur, ou un argument précis mentionné dans le texte de l'article. Pas de commentaires génériques.
-3. Diversité des profils : 
+3. Diversité des profils :
    - Certains sont très courts (1 phrase).
    - D'autres sont moyens (2-3 phrases).
    - D'autres un peu plus longs (3-5 phrases).
    - Alterne entre : question, accord, léger désaccord, expérience personnelle avec le livre, citation d'un passage.
-4. À BANNIR ABSOLUMENT : 
+4. À BANNIR ABSOLUMENT :
    - Les avis commerciaux, faux témoignages d'achats ("J'ai acheté ce livre ici", "livraison rapide").
    - Les phrases clichées seules ("Très bon article !", "Merci pour ce contenu", "Je recommande").
 5. Assigne chaque commentaire à l'un des noms fournis. Ne retourne que du JSON avec la structure attendue.
@@ -173,7 +173,7 @@ ${truncatedContent}
     try {
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
-      
+
       let generatedComments = [];
       try {
         generatedComments = JSON.parse(responseText);
@@ -220,7 +220,7 @@ ${truncatedContent}
       }
 
       console.log(`✅ ${generatedComments.length} commentaire(s) inséré(s).`);
-      
+
       // Pause de 15 secondes pour respecter le quota gratuit Gemini (15 RPM)
       await sleep(15000);
 

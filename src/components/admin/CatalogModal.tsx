@@ -22,7 +22,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
     const [warehouses, setWarehouses] = useState<any[]>([])
     const [config, setConfig] = useState({
         booksPerPage: 12,
-        title: 'Catalogue Riwaya',
+        title: 'Catalogue PetsUnivers',
         subtitle: 'Découvrez notre collection',
         primaryColor: '#2563eb',
         backgroundColor: '#ffffff',
@@ -50,7 +50,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
 
     useEffect(() => {
         if (!triggerEvent) return
-        
+
         const handleTrigger = () => {
             setIsVisitor(true)
             setConfig(prev => ({ ...prev, booksPerPage: 12 }))
@@ -227,7 +227,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                     <div className="bg-slate-900 p-6 flex items-center justify-between text-white border-b border-slate-800 shadow-xl">
                         <div className="flex items-center gap-3">
                             <FileText className="w-6 h-6 text-blue-400" />
-                            <h2 className="text-xl font-black uppercase tracking-tight">Catalogue Riwaya</h2>
+                            <h2 className="text-xl font-black uppercase tracking-tight">Catalogue PetsUnivers</h2>
                         </div>
                         <button aria-label="Fermer" onClick={handleClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold"><X className="w-6 h-6" /></button>
                     </div>
@@ -237,7 +237,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                             <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
                                 <Type className="w-4 h-4 text-blue-600" /> Texte
                             </h3>
-                            <input 
+                            <input
                                 type="text"
                                 value={config.title}
                                 onChange={(e) => setConfig({...config, title: e.target.value})}
@@ -291,7 +291,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2 text-sm">
                                     <Warehouse className="w-4 h-4 text-blue-600" /> Catalogue de quel entrepôt
                                 </h3>
-                                <select aria-label="Catalogue de quel entrepôt" 
+                                <select aria-label="Catalogue de quel entrepôt"
                                     value={config.selectedWarehouse}
                                     onChange={(e) => setConfig({...config, selectedWarehouse: e.target.value})}
                                     className="w-full px-4 py-2.5 border rounded-xl text-sm bg-white font-medium"
@@ -309,7 +309,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2 text-sm">
                                     <Filter className="w-4 h-4 text-blue-600" /> Catégorie
                                 </h3>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     value={config.selectedCategory}
                                     onChange={(e) => setConfig({...config, selectedCategory: e.target.value})}
                                     className="w-full px-4 py-2.5 border rounded-xl text-sm bg-white font-medium"
@@ -323,7 +323,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2 text-sm">
                                     <ArrowUpDown className="w-4 h-4 text-blue-600" /> Trier par
                                 </h3>
-                                <select aria-label="Ordre de tri" 
+                                <select aria-label="Ordre de tri"
                                     value={config.sortBy}
                                     onChange={(e) => setConfig({...config, sortBy: e.target.value})}
                                     className="w-full px-4 py-2.5 border rounded-xl text-sm bg-white font-medium"
@@ -341,7 +341,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2 text-sm">
                                     <Layers className="w-4 h-4 text-blue-600" /> Regrouper par
                                 </h3>
-                                <select aria-label="Regroupement" 
+                                <select aria-label="Regroupement"
                                     value={config.grouping}
                                     onChange={(e) => setConfig({...config, grouping: e.target.value})}
                                     className="w-full px-4 py-2.5 border rounded-xl text-sm bg-white font-medium"
@@ -356,7 +356,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 <h3 className="font-semibold text-gray-900 border-b pb-2 flex items-center gap-2 text-sm">
                                     <LayoutList className="w-4 h-4 text-blue-600" /> Livres par page
                                 </h3>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     value={config.booksPerPage}
                                     onChange={(e) => setConfig({...config, booksPerPage: Number(e.target.value)})}
                                     className="w-full px-4 py-2.5 border rounded-xl text-sm bg-white font-medium"
@@ -373,7 +373,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                                 </h3>
                                 <div className="pt-2">
                                     <label className="flex items-center gap-2.5 cursor-pointer">
-                                        <input 
+                                        <input
                                             type="checkbox"
                                             checked={config.showPrice}
                                             onChange={(e) => setConfig({...config, showPrice: e.target.checked})}
@@ -463,7 +463,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                             {config.selectedCategory !== 'all' ? `Collection : ${config.selectedCategory}` : config.subtitle}
                         </p>
                         <div className="w-20 h-1 bg-blue-600 mb-10"></div>
-                        <p className="text-sm font-bold text-gray-300 tracking-[0.5em] uppercase tracking-widest">Riwaya Catalogue</p>
+                        <p className="text-sm font-bold text-gray-300 tracking-[0.5em] uppercase tracking-widest">PetsUnivers Catalogue</p>
                     </div>
                 </div>
 
@@ -482,8 +482,8 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                         </div>
                         <div className="catalog-grid" style={{ '--catalog-rows': numRows } as CSSProperties}>
                             {books.map((book, idx) => (
-                                <div 
-                                    key={idx} 
+                                <div
+                                    key={idx}
                                     className="catalog-card border border-gray-100 rounded-2xl shadow-sm"
                                     style={{ backgroundColor: 'white' }}
                                 >

@@ -41,12 +41,12 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
     const [useDescription, setUseDescription] = useState<'short' | 'long'>('short')
     const [scheduleAt, setScheduleAt] = useState('')
     const [showPublishOptions, setShowPublishOptions] = useState(false)
-    
+
     // Typography States
     const [fontSize, setFontSize] = useState(28)
     const [fontColor, setFontColor] = useState('#ffffff')
     const [fontFamily, setFontFamily] = useState('system-ui')
-    
+
     const [editableTexts, setEditableTexts] = useState({
         title: book?.title || 'Titre',
         description: book?.description || 'Description...',
@@ -106,7 +106,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
     const toBase64 = async (url: string): Promise<string> => {
         try {
             if (url.startsWith('data:')) return url;
-            
+
             // Si c'est une URL externe, on passe par notre proxy pour éviter CORS
             let targetUrl = url;
             if (url.startsWith('http') && !url.includes(window.location.host)) {
@@ -188,13 +188,13 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                 skipFonts: false,
             })
             restoreImages(originals)
-            
+
             const newWindow = window.open()
             if (newWindow) {
                 newWindow.document.write(`
                     <html lang="fr">
                         <head>
-                            <title>Aperçu Description - Riwaya</title>
+                            <title>Aperçu Description - PetsUnivers</title>
                             <style>
                                 body { margin: 0; display: flex; align-items: center; justify-content: center; background: #1a1a2e; min-height: 100vh; font-family: sans-serif; }
                                 img { max-width: 90%; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
@@ -256,7 +256,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                 body: formData
             })
             const uploadData = await uploadRes.json()
-            
+
             if (!uploadData.success) {
                 throw new Error(uploadData.error || "Échec de l'upload de la description")
             }
@@ -317,18 +317,18 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black backdrop-blur-md">
             <div className="bg-white w-full h-full flex flex-col md:flex-row overflow-hidden shadow-2xl">
-                
+
                 {/* Left side: Preview Area */}
                 <div className="flex-1 bg-gray-100 p-8 flex items-center justify-center overflow-auto min-h-[400px]">
-                    <div 
+                    <div
                         ref={posterRef}
                         className={`relative ${format === 'story' ? 'w-[360px] min-h-[640px]' : 'w-[450px] min-h-[562px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden flex flex-col items-center justify-center p-12 transition-all duration-300`}
                     >
                         {/* Custom Background Image Layer */}
                         {bgImage && (
-                            <div 
+                            <div
                                 className={`absolute inset-0 z-0 cursor-move ${dragging === 'bg' ? '' : 'transition-transform'}`}
-                                style={{ 
+                                style={{
                                     backgroundImage: `url(${bgImage})`,
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
@@ -347,22 +347,22 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                         )}
 
                         {showCover && (
-                            <div 
+                            <div
                                 className="absolute cursor-move z-10 hover:ring-2 hover:ring-white/50 rounded-lg transition-shadow"
                                 style={{ transform: `translate(${positions.book.x}px, ${positions.book.y}px) scale(${imageScale}) rotate(${imageRotation}deg)` }}
                                 onMouseDown={(e) => handleMouseDown(e, 'book')}
                             >
-                                <img 
+                                <img
                                     src={(() => {
                                         const img = normalizeImage(book.image);
                                         if (img.startsWith('http') && !img.includes(typeof window !== 'undefined' ? window.location.host : '')) {
                                             return `/api/proxy/image?url=${encodeURIComponent(img)}`;
                                         }
                                         return img;
-                                    })() || '/book-placeholder.png'} 
-                                    alt={book.title} 
+                                    })() || '/book-placeholder.png'}
+                                    alt={book.title}
                                     className="w-32 object-cover rounded-md"
-                                    style={{ 
+                                    style={{
                                         boxShadow: showShadow ? '0 25px 50px -12px rgba(0,0,0,0.7)' : 'none',
                                         opacity: imageOpacity
                                     }}
@@ -371,20 +371,20 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                             </div>
                         )}
 
-                        <div 
+                        <div
                             className="absolute cursor-move z-20 flex flex-col items-center justify-center text-center w-full px-12"
                             style={{ transform: `translate(${positions.text.x}px, ${positions.text.y}px)` }}
                             onMouseDown={(e) => handleMouseDown(e, 'text')}
                         >
                             <Quote className="w-12 h-12 text-white/20 mb-6 drop-shadow-md" />
-                            <p 
+                            <p
                                 contentEditable
                                 suppressContentEditableWarning
                                 onBlur={(e) => handleTextChange('description', e.currentTarget.textContent || '')}
                                 dir="rtl"
                                 className={`font-black leading-relaxed drop-shadow-xl outline-none mb-6 w-full`}
-                                style={{ 
-                                    fontSize: `${fontSize}px`, 
+                                style={{
+                                    fontSize: `${fontSize}px`,
                                     color: fontColor,
                                     fontFamily: fontFamily,
                                     textRendering: 'optimizeLegibility',
@@ -395,12 +395,12 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                             >
                                 {editableTexts.description}
                             </p>
-                            <h3 
+                            <h3
                                 contentEditable
                                 suppressContentEditableWarning
                                 onBlur={(e) => handleTextChange('title', e.currentTarget.textContent || '')}
                                 className={`text-lg font-bold ${currentTheme.accent} opacity-80 uppercase outline-none whitespace-nowrap`}
-                                style={{ 
+                                style={{
                                     textRendering: 'optimizeLegibility',
                                     WebkitFontSmoothing: 'antialiased'
                                 }}
@@ -413,13 +413,13 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
 
                 {/* Right side: Controls */}
                 <div className="w-full md:w-[380px] bg-white border-l border-gray-200 p-8 flex flex-col relative shrink-0">
-                    <button aria-label="Fermer" 
+                    <button aria-label="Fermer"
                         onClick={onClose}
                         className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
                     >
                         <X className="w-6 h-6" />
                     </button>
-                    
+
                     <h3 className="text-lg font-bold text-gray-900 mb-6 mt-2 flex items-center">
                         <Quote className="w-5 h-5 mr-2 text-indigo-600" />
                         Générateur Description
@@ -431,28 +431,28 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                 Thème Sombre
                             </label>
                             <div className="grid grid-cols-2 gap-2">
-                                <button 
+                                <button
                                     onClick={() => setTheme('dark')}
                                     className={`flex items-center justify-center px-4 py-3 rounded-xl border ${theme === 'dark' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-900 to-black mr-2"></div>
                                     <span className="font-medium text-sm">Noir</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('emerald')}
                                     className={`flex items-center justify-center px-4 py-3 rounded-xl border ${theme === 'emerald' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-4 h-4 rounded-full bg-gradient-to-br from-emerald-900 to-emerald-950 mr-2"></div>
                                     <span className="font-medium text-sm">Émeraude</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('gold')}
                                     className={`flex items-center justify-center px-4 py-3 rounded-xl border ${theme === 'gold' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
                                     <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-900 to-amber-950 mr-2"></div>
                                     <span className="font-medium text-sm">Or</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setTheme('purple')}
                                     className={`flex items-center justify-center px-4 py-3 rounded-xl border ${theme === 'purple' ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:bg-gray-50'}`}
                                 >
@@ -469,10 +469,10 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                             </label>
                             <div className="space-y-3">
                                 <label className="flex items-center justify-center gap-3 w-full px-4 py-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="hidden" 
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
                                         onChange={(e) => {
                                             const file = e.target.files?.[0]
                                             if (file) {
@@ -494,15 +494,15 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                                 <span>Opacité du fond</span>
                                                 <span>{Math.round(bgOpacity * 100)}%</span>
                                             </label>
-                                            <input 
-                                                type="range" 
-                                                min="0" max="1" step="0.05" 
+                                            <input
+                                                type="range"
+                                                min="0" max="1" step="0.05"
                                                 value={bgOpacity}
                                                 onChange={(e) => setBgOpacity(parseFloat(e.target.value))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                             />
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={() => setBgImage(null)}
                                             className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition"
                                         >
@@ -515,15 +515,15 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
 
                         <div className="space-y-4 pt-4 border-t border-gray-100">
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Typographie (Description)</h4>
-                            
+
                             <div>
                                 <label className="flex justify-between text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                                     <span>Taille de la police</span>
                                     <span>{fontSize}px</span>
                                 </label>
-                                <input 
-                                    type="range" 
-                                    min="12" max="72" step="1" 
+                                <input
+                                    type="range"
+                                    min="12" max="72" step="1"
                                     value={fontSize}
                                     onChange={(e) => setFontSize(parseInt(e.target.value))}
                                     className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
@@ -535,8 +535,8 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                     Couleur du texte
                                 </label>
                                 <div className="flex items-center gap-3">
-                                    <input 
-                                        type="color" 
+                                    <input
+                                        type="color"
                                         value={fontColor}
                                         onChange={(e) => setFontColor(e.target.value)}
                                         className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none p-0"
@@ -549,7 +549,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                                     Police (Font Family)
                                 </label>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     value={fontFamily}
                                     onChange={(e) => setFontFamily(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
@@ -568,8 +568,8 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                         <div className="space-y-4 pt-4 border-t border-gray-100">
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Image & Couverture</h4>
                             <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={showCover}
                                     onChange={(e) => setShowCover(e.target.checked)}
                                     className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -584,9 +584,9 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                             <span>Taille de l'image</span>
                                             <span>{Math.round(imageScale * 100)}%</span>
                                         </label>
-                                        <input 
-                                            type="range" 
-                                            min="0.5" max="3" step="0.1" 
+                                        <input
+                                            type="range"
+                                            min="0.5" max="3" step="0.1"
                                             value={imageScale}
                                             onChange={(e) => setImageScale(parseFloat(e.target.value))}
                                             className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
@@ -597,9 +597,9 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                             <span>Inclinaison</span>
                                             <span>{imageRotation}°</span>
                                         </label>
-                                        <input 
-                                            type="range" 
-                                            min="-180" max="180" step="1" 
+                                        <input
+                                            type="range"
+                                            min="-180" max="180" step="1"
                                             value={imageRotation}
                                             onChange={(e) => setImageRotation(parseFloat(e.target.value))}
                                             className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
@@ -610,17 +610,17 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                             <span>Opacité de l'image</span>
                                             <span>{Math.round(imageOpacity * 100)}%</span>
                                         </label>
-                                        <input 
-                                            type="range" 
-                                            min="0" max="1" step="0.05" 
+                                        <input
+                                            type="range"
+                                            min="0" max="1" step="0.05"
                                             value={imageOpacity}
                                             onChange={(e) => setImageOpacity(parseFloat(e.target.value))}
                                             className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                         />
                                     </div>
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={showShadow}
                                             onChange={(e) => setShowShadow(e.target.checked)}
                                             className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
@@ -635,7 +635,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                         <div className="pt-6 mt-4 border-t border-gray-100 flex flex-col gap-3">
                             <div className="flex items-center justify-between mb-2">
                                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Publication n8n</h4>
-                                <button 
+                                <button
                                     onClick={() => setShowPublishOptions(!showPublishOptions)}
                                     className="text-indigo-600 text-xs font-bold hover:underline"
                                 >
@@ -690,7 +690,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                     {/* Scheduling */}
                                     <div>
                                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Programmer</label>
-                                        <input 
+                                        <input
                                             type="datetime-local"
                                             value={scheduleAt}
                                             onChange={(e) => setScheduleAt(e.target.value)}
@@ -746,7 +746,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                             formData.append('file', file)
                                             const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
                                             const uploadData = await uploadRes.json()
-                                            
+
                                             if (uploadData.success) {
                                                 const assetRes = await fetch('/api/admin/marketing/assets', {
                                                     method: 'POST',
@@ -781,7 +781,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                                     {isGenerating ? 'Génération...' : 'Sauvegarder dans Marketing'}
                                 </button>
                             </div>
-                            
+
                             <button
                                 onClick={handleQuickPublish}
                                 disabled={isGenerating || isPublishing}

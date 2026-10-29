@@ -60,18 +60,18 @@ interface ActiveFilters {
     limit?: string | number;
 }
 
-export default function BooksTable({ 
-    books, 
-    pageNumber, 
-    totalProviderPages, 
-    activeFilters, 
+export default function BooksTable({
+    books,
+    pageNumber,
+    totalProviderPages,
+    activeFilters,
     limit = 20,
     warehouses = []
-}: { 
-    books: Book[], 
-    pageNumber: number, 
-    totalProviderPages: number, 
-    activeFilters: ActiveFilters, 
+}: {
+    books: Book[],
+    pageNumber: number,
+    totalProviderPages: number,
+    activeFilters: ActiveFilters,
     limit?: number,
     warehouses?: { id: string; name: string }[]
 }) {
@@ -115,7 +115,7 @@ export default function BooksTable({
     const getEditUrl = (book: Book) => {
         if (book.productType === 'PACK') return `/admin/packs/${book.id}/edit`
         if (book.productType === 'EXTRA') return `/admin/accessories/${book.id}`
-        
+
         const params = new URLSearchParams()
         if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
         if (activeFilters.status) params.set('status', activeFilters.status)
@@ -128,7 +128,7 @@ export default function BooksTable({
         if (activeFilters.jumia) params.set('jumia', activeFilters.jumia)
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
         if (activeFilters.linked) params.set('linked', activeFilters.linked)
-        
+
         const effectiveLimit = activeFilters.limit || limit
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
             params.set('limit', effectiveLimit.toString())
@@ -229,7 +229,7 @@ export default function BooksTable({
 
     const handleBulkDelete = async () => {
         if (selectedIds.length === 0) return
-        if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.length} livre(s) ?`)) return
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.length} produit(s) ?`)) return
 
         setBulkLoading(true)
         const result = await bulkDeleteBooks(selectedIds)
@@ -246,22 +246,22 @@ export default function BooksTable({
         if (selectedIds.length === 0 || !bulkPrice) return
         const price = Number(bulkPrice)
         if (isNaN(price)) return alert('Prix invalide')
-        
-        if (!confirm(`Êtes-vous sûr de vouloir changer le prix de ${selectedIds.length} livre(s) à ${price} درهم ?`)) return
+
+        if (!confirm(`Êtes-vous sûr de vouloir changer le prix de ${selectedIds.length} produit(s) à ${price} درهم ?`)) return
 
         setIsUpdatingPrice(true)
         const result = await bulkUpdateBookPrices(selectedIds, price)
         setIsUpdatingPrice(false)
 
         if (result.success) {
-            setOrderedBooks(prev => prev.map(book => 
-                selectedIds.includes(book.id) 
-                    ? { ...book, price } 
+            setOrderedBooks(prev => prev.map(book =>
+                selectedIds.includes(book.id)
+                    ? { ...book, price }
                     : book
             ))
             setBulkPrice('')
             setSelectedIds([])
-            setToast({ msg: `✅ Prix mis à jour pour ${selectedIds.length} livres`, ok: true })
+            setToast({ msg: `✅ Prix mis à jour pour ${selectedIds.length} produits`, ok: true })
             router.refresh()
             setTimeout(() => setToast(null), 4000)
         } else {
@@ -273,11 +273,11 @@ export default function BooksTable({
         if (selectedIds.length === 0 || !bulkStock) return
         const stock = parseInt(bulkStock, 10)
         if (isNaN(stock) || stock < 0) return alert('Stock invalide (doit être un entier >= 0)')
-        
+
         const targetWarehouse = warehouses.find(w => w.id === selectedWarehouseId)
         const targetLabel = selectedWarehouseId === 'TOTAL' ? 'Stock Total' : (targetWarehouse?.name || 'Entrepôt sélectionné')
 
-        if (!confirm(`Êtes-vous sûr de vouloir changer le stock (${targetLabel}) de ${selectedIds.length} livre(s) à ${stock} ?`)) return
+        if (!confirm(`Êtes-vous sûr de vouloir changer le stock (${targetLabel}) de ${selectedIds.length} produit(s) à ${stock} ?`)) return
 
         setIsUpdatingStock(true)
         const result = await bulkUpdateBookStock(selectedIds, stock, selectedWarehouseId)
@@ -291,7 +291,7 @@ export default function BooksTable({
                     return { ...book, stock }
                 }
 
-                let updatedWarehouseStocks = (book.warehouseStocks || []).map(ws => 
+                let updatedWarehouseStocks = (book.warehouseStocks || []).map(ws =>
                     ws.warehouseId === selectedWarehouseId
                         ? { ...ws, quantity: stock }
                         : ws
@@ -313,7 +313,7 @@ export default function BooksTable({
             }))
             setBulkStock('')
             setSelectedIds([])
-            setToast({ msg: `✅ Stock (${targetLabel}) mis à jour pour ${selectedIds.length} livres`, ok: true })
+            setToast({ msg: `✅ Stock (${targetLabel}) mis à jour pour ${selectedIds.length} produits`, ok: true })
             router.refresh()
             setTimeout(() => setToast(null), 4000)
         } else {
@@ -330,9 +330,9 @@ export default function BooksTable({
             .map(book => book.id)
 
         if (selectedBookIds.length === 0) {
-            return alert('La sélection ne contient aucun livre.')
+            return alert('La sélection ne contient aucun produit.')
         }
-        if (!confirm(`Changer la langue de ${selectedBookIds.length} livre(s) en ${languageLabels[bulkLanguage]} ?`)) return
+        if (!confirm(`Changer la langue de ${selectedBookIds.length} produit(s) en ${languageLabels[bulkLanguage]} ?`)) return
 
         setIsUpdatingLanguage(true)
         const result = await bulkUpdateBookLanguages(selectedBookIds, bulkLanguage)
@@ -343,7 +343,7 @@ export default function BooksTable({
                 selectedBookIds.includes(book.id) ? { ...book, language: bulkLanguage } : book
             ))
             setSelectedIds([])
-            setToast({ msg: `✅ Langue mise à jour pour ${result.count ?? selectedBookIds.length} livre(s)`, ok: true })
+            setToast({ msg: `✅ Langue mise à jour pour ${result.count ?? selectedBookIds.length} produit(s)`, ok: true })
             router.refresh()
             setTimeout(() => setToast(null), 4000)
         } else {
@@ -365,7 +365,7 @@ export default function BooksTable({
             const res = await bulkGenerateSkus(selectedIds)
             if (res.success && res.updatedMap) {
                 const map = res.updatedMap
-                setOrderedBooks(prev => prev.map(book => 
+                setOrderedBooks(prev => prev.map(book =>
                     map[book.id] ? { ...book, sellerSku: map[book.id] } : book
                 ))
                 setSelectedIds([])
@@ -382,8 +382,8 @@ export default function BooksTable({
 
     const handleGenerateSingleSku = async (e: React.MouseEvent, bookId: string, currentSku?: string | null) => {
         e.stopPropagation()
-        const confirmMsg = currentSku 
-            ? `Changer le SKU actuel (${currentSku}) par un nouveau code SKU unique ?` 
+        const confirmMsg = currentSku
+            ? `Changer le SKU actuel (${currentSku}) par un nouveau code SKU unique ?`
             : 'Générer un code SKU unique pour ce produit ?'
         if (!confirm(confirmMsg)) return
 
@@ -407,14 +407,14 @@ export default function BooksTable({
     }
 
     const handleGenerateAllMissingSkus = async () => {
-        if (!confirm('Voulez-vous générer automatiquement un SKU unique pour TOUS les livres sans SKU du catalogue ?')) return
+        if (!confirm('Voulez-vous générer automatiquement un SKU unique pour TOUS les produits sans SKU du catalogue ?')) return
 
         setIsGeneratingSku(true)
         try {
             const res = await bulkGenerateSkus()
             if (res.success && res.updatedMap) {
                 const map = res.updatedMap
-                setOrderedBooks(prev => prev.map(book => 
+                setOrderedBooks(prev => prev.map(book =>
                     map[book.id] ? { ...book, sellerSku: map[book.id] } : book
                 ))
                 setToast({ msg: `✅ ${res.count || Object.keys(map).length} SKU générés avec succès pour l'ensemble du catalogue !`, ok: true })
@@ -428,7 +428,7 @@ export default function BooksTable({
         }
     }
 
-    // Export Excel de tous les livres
+    // Export Excel de tous les produits
     const handleExportExcel = async () => {
         try {
             const params = new URLSearchParams()
@@ -456,7 +456,7 @@ export default function BooksTable({
         }
     }
 
-    // Export Excel Jumia pour les livres sélectionnés
+    // Export Excel Jumia pour les produits sélectionnés
     const handleExportJumia = async () => {
         if (selectedIds.length === 0) return
         try {
@@ -482,7 +482,7 @@ export default function BooksTable({
     // Publier vers Jumia
     const handlePublishJumia = async () => {
         if (selectedIds.length === 0) return
-        if (!confirm(`Publier ${selectedIds.length} livre(s) sur Jumia ?`)) return
+        if (!confirm(`Publier ${selectedIds.length} produit(s) sur Jumia ?`)) return
 
         setBulkLoading(true)
         try {
@@ -490,9 +490,9 @@ export default function BooksTable({
             const result = await publishBooksToJumia(selectedIds)
             if (result.success) {
                 setToast({ msg: `✅ ${result.message}`, ok: true })
-                setOrderedBooks(prev => prev.map(book => 
-                    selectedIds.includes(book.id) 
-                        ? { ...book, isSyncedWithJumia: true } 
+                setOrderedBooks(prev => prev.map(book =>
+                    selectedIds.includes(book.id)
+                        ? { ...book, isSyncedWithJumia: true }
                         : book
                 ))
                 setSelectedIds([])
@@ -517,9 +517,9 @@ export default function BooksTable({
             const result = await syncBooksQuantityToJumia(selectedIds)
             if (result.success) {
                 setToast({ msg: `✅ ${result.message}`, ok: true })
-                setOrderedBooks(prev => prev.map(book => 
-                    selectedIds.includes(book.id) 
-                        ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock } 
+                setOrderedBooks(prev => prev.map(book =>
+                    selectedIds.includes(book.id)
+                        ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock }
                         : book
                 ))
                 setSelectedIds([])
@@ -546,9 +546,9 @@ export default function BooksTable({
                 const result = await syncBooksQuantityToJumia([id])
                 if (result.success) {
                     successCount++
-                    setOrderedBooks(prev => prev.map(book => 
-                        book.id === id 
-                            ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock } 
+                    setOrderedBooks(prev => prev.map(book =>
+                        book.id === id
+                            ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock }
                             : book
                     ))
                 }
@@ -575,17 +575,17 @@ export default function BooksTable({
             const result = await verifyJumiaSku(bookId, sellerSku);
             if (result.success) {
                 const isLinked = !!result.isLinked;
-                setToast({ 
-                    msg: isLinked ? `✅ ${result.message}` : `ℹ️ ${result.message}`, 
-                    ok: isLinked 
+                setToast({
+                    msg: isLinked ? `✅ ${result.message}` : `ℹ️ ${result.message}`,
+                    ok: isLinked
                 });
-                setOrderedBooks(prev => prev.map(book => 
-                    book.id === bookId 
-                        ? { 
-                            ...book, 
-                            isSyncedWithJumia: isLinked, 
-                            jumiaStock: isLinked ? (result.stock !== undefined ? result.stock : book.jumiaStock) : null 
-                          } 
+                setOrderedBooks(prev => prev.map(book =>
+                    book.id === bookId
+                        ? {
+                            ...book,
+                            isSyncedWithJumia: isLinked,
+                            jumiaStock: isLinked ? (result.stock !== undefined ? result.stock : book.jumiaStock) : null
+                          }
                         : book
                 ));
             } else {
@@ -599,7 +599,7 @@ export default function BooksTable({
         }
     }
 
-    // Vérifier les livres sélectionnés sur Jumia par Seller SKU
+    // Vérifier les produits sélectionnés sur Jumia par Seller SKU
     const handleBulkVerifyJumiaSku = async () => {
         if (selectedIds.length === 0) return;
         setBulkLoading(true);
@@ -673,9 +673,9 @@ export default function BooksTable({
                 setToast({ msg: `✅ ${result.message}`, ok: true });
                 const item = result.results?.[0];
                 if (item) {
-                    setOrderedBooks(prev => prev.map(book => 
-                        book.id === bookId 
-                            ? { ...book, sellerSku: item.cleanSku, isSyncedWithJumia: item.isLinked } 
+                    setOrderedBooks(prev => prev.map(book =>
+                        book.id === bookId
+                            ? { ...book, sellerSku: item.cleanSku, isSyncedWithJumia: item.isLinked }
                             : book
                     ));
                 }
@@ -698,9 +698,9 @@ export default function BooksTable({
             const result = await syncBooksQuantityToJumia([bookId]);
             if (result.success) {
                 setToast({ msg: `✅ Stock synchronisé avec succès`, ok: true });
-                setOrderedBooks(prev => prev.map(book => 
-                    book.id === bookId 
-                        ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock } 
+                setOrderedBooks(prev => prev.map(book =>
+                    book.id === bookId
+                        ? { ...book, isSyncedWithJumia: true, jumiaStock: book.stock }
                         : book
                 ));
             } else {
@@ -721,18 +721,18 @@ export default function BooksTable({
         if (selectedBooksData.length === 0) return
 
         const booksListText = selectedBooksData.map((b, i) => {
-            return `LIVRE #${i + 1}:
+            return `PRODUIT #${i + 1}:
 - ID: ${b.id}
 - Titre actuel (Arabe ou principal): ${b.title || 'N/A'}
 - Titre actuel (Français): ${b.titleFr || 'N/A'}
 - Titre actuel (Anglais): ${b.titleEn || 'N/A'}
-- Auteur: ${b.author || 'N/A'}
+- Marque: ${b.author || 'N/A'}
 - Catégorie actuelle: ${b.category || 'N/A'}${b.subCategory ? ` / ${b.subCategory}` : ''}
 - Langue: ${b.language || 'fr'}
 - SKU Vendeur: ${b.sellerSku || 'N/A'}`
         }).join('\n\n')
 
-        const prompt = `Act as an expert e-commerce copywriter & bookseller for Riwaya bookstore & Jumia marketplace.
+        const prompt = `Act as an expert e-commerce copywriter & bookseller for PetsUnivers bookstore & Jumia marketplace.
 I have ${selectedBooksData.length} book(s) to optimize.
 
 === BOOKS LIST TO PROCESS ===
@@ -741,17 +741,17 @@ ${booksListText}
 CRITICAL INSTRUCTIONS:
 1. TITLES TRANSLITERATION:
    For title_fr and title_en, DO NOT translate Arabic titles literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-   Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
+   Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat petsuniverst basatin arabistan" (NOT "Série de romans...").
 2. STRICT ZERO PRICE / NO DISCOUNT POLICY:
    NEVER mention or include any price, currency, discount or promo in descriptions, titles, keywords, highlights or package content (ABSOLUTELY NO 'prix', 'price', 'سعر', 'ثمن', 'DH', 'MAD', 'درهم', 'gratuit', 'free', 'off', 'promo', '%', 'remise', 'solde'). Jumia strictly rejects listings containing price mentions in the description!
 3. MULTILINGUAL CONTENT & SEMANTIC SEO STRUCTURE:
-   - For "longDescription_ar", "longDescription_fr", and "longDescription_en", use semantic <h2> headings to capture high-intent long-tail and voice search queries in Morocco (e.g. <h2>Pourquoi lire ce livre ?</h2>, <h2>Résumé et thèmes principaux</h2>, <h2>À qui s'adresse ce livre ?</h2> / <h2>لماذا يجب قراءة هذا الكتاب؟</h2>, <h2>ملخص وأهم المحاور</h2>).
+   - For "longDescription_ar", "longDescription_fr", and "longDescription_en", use semantic <h2> headings to capture high-intent long-tail and voice search queries in Morocco (e.g. <h2>Pourquoi lire ce produit ?</h2>, <h2>Résumé et thèmes principaux</h2>, <h2>À qui s'adresse ce produit ?</h2> / <h2>لماذا يجب قراءة هذا الكتاب؟</h2>, <h2>ملخص وأهم المحاور</h2>).
    - "description_ar", "description_fr", "description_en": 2 to 3 engaging hook paragraphs highlighting the reading experience and book value.
    - "category": Recommended main category (e.g. Romans & Littérature, Développement Personnel, Histoire, etc.).
    - "subCategory": Recommended subcategory.
    - "seoKeywords": High-volume search keywords separated by commas (author name, title transliteration, genre, book in Morocco).
    - "jumiaHighlights": Clean HTML bullet points (<ul><li>...</li></ul>) with 3-4 key selling points WITHOUT any price.
-   - "jumiaPackageContent": e.g. "1 x Livre : [Titre du livre]"
+   - "jumiaPackageContent": e.g. "1 x Produit : [Titre du produit]"
 
 STRICT JSON OUTPUT REQUIREMENT:
 You MUST return ONLY a valid JSON array of objects (one object per book), preserving the EXACT "id" for each book:
@@ -765,19 +765,19 @@ You MUST return ONLY a valid JSON array of objects (one object per book), preser
     "description_fr": "Description courte et engageante en français",
     "description_en": "Engaging short description in English",
     "longDescription_ar": "<h2>لماذا يجب قراءة هذا الكتاب؟</h2><p>...</p><h2>ملخص وأهم المحاور</h2><p>...</p>",
-    "longDescription_fr": "<h2>Pourquoi lire ce livre ?</h2><p>...</p><h2>Résumé et thèmes principaux</h2><p>...</p>",
+    "longDescription_fr": "<h2>Pourquoi lire ce produit ?</h2><p>...</p><h2>Résumé et thèmes principaux</h2><p>...</p>",
     "longDescription_en": "<h2>Why read this book?</h2><p>...</p><h2>Key themes & summary</h2><p>...</p>",
     "category": "Catégorie principale",
     "subCategory": "Sous-catégorie",
     "seoKeywords": "mot-clé 1, mot-clé 2, mot-clé 3",
-    "jumiaHighlights": "<ul><li>Auteur: ...</li><li>Genre: ...</li></ul>",
-    "jumiaPackageContent": "1 x Livre : [Titre]"
+    "jumiaHighlights": "<ul><li>Marque: ...</li><li>Genre: ...</li></ul>",
+    "jumiaPackageContent": "1 x Produit : [Titre]"
   }
 ]
 Do not add explanatory text outside the JSON array or code block.`
 
         navigator.clipboard.writeText(prompt)
-        setToast({ msg: `Prompt ChatGPT copié pour ${selectedBooksData.length} livre(s) !`, ok: true })
+        setToast({ msg: `Prompt ChatGPT copié pour ${selectedBooksData.length} produit(s) !`, ok: true })
         setTimeout(() => setToast(null), 4000)
     }
 
@@ -826,14 +826,14 @@ Do not add explanatory text outside the JSON array or code block.`
                 } else if (selectedIds.length === 1) {
                     itemsArray = [{ ...parsedData, id: selectedIds[0] }]
                 } else {
-                    setToast({ msg: 'Format invalide : tableau JSON requis pour plusieurs livres.', ok: false })
+                    setToast({ msg: 'Format invalide : tableau JSON requis pour plusieurs produits.', ok: false })
                     setTimeout(() => setToast(null), 4000)
                     return
                 }
             }
 
             if (itemsArray.length === 0) {
-                setToast({ msg: 'Aucun livre trouvé dans le JSON.', ok: false })
+                setToast({ msg: 'Aucun produit trouvé dans le JSON.', ok: false })
                 setTimeout(() => setToast(null), 4000)
                 return
             }
@@ -865,7 +865,7 @@ Do not add explanatory text outside the JSON array or code block.`
                         longDescription: update.longDescription_ar || update.longDescription || book.longDescription,
                     }
                 }))
-                setToast({ msg: `✅ ${result.count || itemsArray.length} livre(s) mis à jour avec succès depuis ChatGPT !`, ok: true })
+                setToast({ msg: `✅ ${result.count || itemsArray.length} produit(s) mis à jour avec succès depuis ChatGPT !`, ok: true })
                 router.refresh()
                 setTimeout(() => setToast(null), 5000)
             } else {
@@ -938,7 +938,7 @@ Do not add explanatory text outside the JSON array or code block.`
                 newSort = `${column}-asc`;
             }
         }
-        
+
         const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
         const params = new URLSearchParams()
         if (activeFilters.search?.trim()) params.set('search', activeFilters.search.trim())
@@ -952,7 +952,7 @@ Do not add explanatory text outside the JSON array or code block.`
         if (activeFilters.seoScore) params.set('seoScore', activeFilters.seoScore)
         if (activeFilters.linked) params.set('linked', activeFilters.linked)
         params.set('sort', newSort)
-        
+
         const effectiveLimit = activeFilters.limit || limit || currentUrlParams.get('limit')
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
             params.set('limit', effectiveLimit.toString())
@@ -1023,7 +1023,7 @@ Do not add explanatory text outside the JSON array or code block.`
             <div className="p-4 bg-white border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                        Total: <span className="text-gray-900 font-black">{books.length}</span> livres affichés
+                        Total: <span className="text-gray-900 font-black">{books.length}</span> produits affichés
                     </p>
                     <div className="flex bg-gray-100 p-1 rounded-xl">
                         <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-900'}`} title="Vue Liste"><List className="w-4 h-4"/></button>
@@ -1043,7 +1043,7 @@ Do not add explanatory text outside the JSON array or code block.`
                 <button
                     onClick={handleExportExcel}
                     className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-700 transition shadow-sm"
-                    title="Exporter tous les livres en Excel"
+                    title="Exporter tous les produits en Excel"
                 >
                     <FileDown className="w-4 h-4" />
                     Export Excel
@@ -1052,7 +1052,7 @@ Do not add explanatory text outside the JSON array or code block.`
 
             {books.length === 0 ? (
                 <div className="text-center py-12">
-                    <p className="text-gray-500">Aucun livre trouvé {activeFilters.search && `pour "${activeFilters.search}"`}</p>
+                    <p className="text-gray-500">Aucun produit trouvé {activeFilters.search && `pour "${activeFilters.search}"`}</p>
                 </div>
             ) : (
                 <>
@@ -1064,10 +1064,10 @@ Do not add explanatory text outside the JSON array or code block.`
                                 </div>
                                 <div>
                                     <p className="text-xs font-black text-amber-900">
-                                        Livres sans SKU Jumia détectés
+                                        Produits sans SKU Jumia détectés
                                     </p>
                                     <p className="text-[11px] text-amber-700">
-                                        Attribuez un code SKU unique à ces livres pour activer la synchronisation Jumia et Google Shopping.
+                                        Attribuez un code SKU unique à ces produits pour activer la synchronisation Jumia et Google Shopping.
                                     </p>
                                 </div>
                             </div>
@@ -1115,13 +1115,13 @@ Do not add explanatory text outside the JSON array or code block.`
 
                     {selectedIds.length > 0 && (
                         <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200 mx-4 mt-4 flex-wrap">
-                            <span className="text-sm font-black text-gray-900">{selectedIds.length} livre(s) sélectionnés</span>
-                            
+                            <span className="text-sm font-black text-gray-900">{selectedIds.length} produit(s) sélectionnés</span>
+
                             <div className="h-6 w-px bg-gray-300 mx-2 hidden sm:block"></div>
 
                             <div className="flex items-center gap-2">
-                                <input 
-                                    type="number" 
+                                <input
+                                    type="number"
                                     placeholder="Nouveau prix..."
                                     value={bulkPrice}
                                     onChange={(e) => setBulkPrice(e.target.value)}
@@ -1152,8 +1152,8 @@ Do not add explanatory text outside the JSON array or code block.`
                                     ))}
                                     <option value="TOTAL">Stock Total (Direct)</option>
                                 </select>
-                                <input 
-                                    type="number" 
+                                <input
+                                    type="number"
                                     min="0"
                                     placeholder="Nouveau stock..."
                                     value={bulkStock}
@@ -1176,7 +1176,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                     value={bulkLanguage}
                                     onChange={(event) => setBulkLanguage(event.target.value as 'fr' | 'ar' | 'en')}
                                     className="px-3 py-2 text-xs font-bold border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 bg-white cursor-pointer shadow-sm"
-                                    aria-label="Nouvelle langue des livres sélectionnés"
+                                    aria-label="Nouvelle langue des produits sélectionnés"
                                 >
                                     <option value="fr">Français</option>
                                     <option value="ar">Arabe</option>
@@ -1234,7 +1234,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                 onClick={handleBulkVerifyJumiaSku}
                                 disabled={bulkLoading}
                                 className="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition disabled:opacity-50"
-                                title="Vérifier sur Jumia Vendor par Seller SKU pour chaque livre sélectionné"
+                                title="Vérifier sur Jumia Vendor par Seller SKU pour chaque produit sélectionné"
                             >
                                 <RefreshCw className={`w-4 h-4 ${bulkLoading ? 'animate-spin' : ''}`} />
                                 Vérifier Link Jumia ({selectedIds.length})
@@ -1261,7 +1261,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                 type="button"
                                 onClick={handleCopyChatGptPrompt}
                                 className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition shadow-sm"
-                                title="Générer et copier le prompt ChatGPT pour les livres sélectionnés"
+                                title="Générer et copier le prompt ChatGPT pour les produits sélectionnés"
                             >
                                 <Bot className="w-4 h-4" />
                                 Prompt ChatGPT
@@ -1271,7 +1271,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                 onClick={handlePasteChatGptResponse}
                                 disabled={bulkLoading}
                                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-700 transition shadow-sm disabled:opacity-50"
-                                title="Coller la réponse ChatGPT pour mettre à jour les livres sélectionnés"
+                                title="Coller la réponse ChatGPT pour mettre à jour les produits sélectionnés"
                             >
                                 <ClipboardPaste className="w-4 h-4" />
                                 Coller réponse
@@ -1310,12 +1310,12 @@ Do not add explanatory text outside the JSON array or code block.`
                                             />
                                         </th>
                                         <th className="px-4 py-3 w-8"></th>
-                                        <th 
+                                        <th
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                                             onClick={() => handleSort('title')}
                                             title="Trier par ordre alphabétique (A-Z / Z-A)"
                                         >
-                                            <div className="flex items-center">Livre {getSortIcon('title')}</div>
+                                            <div className="flex items-center">Produit {getSortIcon('title')}</div>
                                         </th>
                                         <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Catégorie
@@ -1323,13 +1323,13 @@ Do not add explanatory text outside the JSON array or code block.`
                                         <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Langue
                                         </th>
-                                        <th 
+                                        <th
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                             onClick={() => handleSort('price')}
                                         >
                                             <div className="flex items-center">Prix {getSortIcon('price')}</div>
                                         </th>
-                                        <th 
+                                        <th
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                             onClick={() => handleSort('stock')}
                                         >
@@ -1341,7 +1341,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Qté Synch
                                         </th>
-                                        <th 
+                                        <th
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                             onClick={() => handleSort('orders')}
                                         >
@@ -1366,8 +1366,8 @@ Do not add explanatory text outside the JSON array or code block.`
                                 </thead>
                                 <Droppable droppableId="books-list">
                                     {(provided) => (
-                                        <tbody 
-                                            {...provided.droppableProps} 
+                                        <tbody
+                                            {...provided.droppableProps}
                                             ref={provided.innerRef}
                                             className="bg-white divide-y divide-gray-200"
                                         >
@@ -1376,7 +1376,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                                 return (
                                                 <Draggable key={book.id} draggableId={book.id} index={index}>
                                                     {(provided, snapshot) => (
-                                                        <tr 
+                                                        <tr
                                                             ref={provided.innerRef}
                                                             {...provided.draggableProps}
                                                             className={`transition-colors ${snapshot.isDragging ? 'bg-blue-50 shadow-lg' : 'hover:bg-gray-50'}`}
@@ -1394,7 +1394,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <div className="flex items-center">
-                                                                    <div 
+                                                                    <div
                                                                         className="h-12 w-10 flex-shrink-0 cursor-pointer relative rounded overflow-hidden group/thumb transition-transform hover:scale-105 hover:ring-2 hover:ring-indigo-500/60 shadow-xs"
                                                                         onMouseEnter={(e) => {
                                                                             const rect = e.currentTarget.getBoundingClientRect()
@@ -1419,13 +1419,13 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                     </div>
                                                                     <div className="ml-4">
                                                                         <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
-                                                                            <Link 
+                                                                            <Link
                                                                                 href={getEditUrl(book)}
                                                                                 locale={book.language || 'ar'}
                                                                                 className="hover:text-blue-600 hover:underline transition-colors"
                                                                                 title={displayTitle}
                                                                             >
-                                                                                {displayTitle.length > 12 
+                                                                                {displayTitle.length > 12
                                                                                     ? displayTitle.substring(0, 12) + '...'
                                                                                     : displayTitle}
                                                                             </Link>
@@ -1436,12 +1436,12 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                                 {book.isOriginal ? 'Original' : 'Copie'}
                                                                             </span>
                                                                             {book.seoScore !== undefined && book.productType === 'BOOK' && (
-                                                                                <span 
+                                                                                <span
                                                                                     className={`px-1.5 py-0.5 text-[8px] font-black tracking-tight rounded-md border ${
-                                                                                        book.seoScore >= 80 
-                                                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                                                                        : book.seoScore >= 50 
-                                                                                        ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                                                                                        book.seoScore >= 80
+                                                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                                                        : book.seoScore >= 50
+                                                                                        ? 'bg-amber-50 text-amber-700 border-amber-200'
                                                                                         : 'bg-red-50 text-red-700 border-red-200'
                                                                                     }`}
                                                                                     title={`Score SEO : ${book.seoScore}%`}
@@ -1544,7 +1544,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                                                 ) : (
                                                                     <span className="text-red-600">Non</span>
                                                                 )}
-                                                                <button 
+                                                                <button
                                                                     onClick={(e) => handleSyncQuantity(e, book.id)}
                                                                     disabled={loading === book.id + '-sync'}
                                                                     className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-blue-600 shadow-sm disabled:opacity-50 transition-colors"
@@ -1878,7 +1878,7 @@ Do not add explanatory text outside the JSON array or code block.`
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <div 
+                                    <div
                                         className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100 cursor-pointer group/thumb hover:ring-2 hover:ring-indigo-500/60 transition-all"
                                         onMouseEnter={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect()
@@ -1893,19 +1893,19 @@ Do not add explanatory text outside the JSON array or code block.`
                                         <img src={normalizeImage(book.image)} alt={displayTitle} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }} />
                                     </div>
                                     <div className="flex-1 flex flex-col">
-                                        <Link 
+                                        <Link
                                             href={getEditUrl(book)}
                                         >
                                             <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight hover:text-blue-600 hover:underline transition-colors">{displayTitle}</h3>
                                         </Link>
                                         {book.seoScore !== undefined && book.productType === 'BOOK' && (
                                             <div className="mt-1">
-                                                <span 
+                                                <span
                                                     className={`inline-block text-[8px] font-black px-1.5 py-0.5 rounded border ${
-                                                        book.seoScore >= 80 
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                                        : book.seoScore >= 50 
-                                                        ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                                                        book.seoScore >= 80
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        : book.seoScore >= 50
+                                                        ? 'bg-amber-50 text-amber-700 border-amber-200'
                                                         : 'bg-red-50 text-red-700 border-red-200'
                                                     }`}
                                                     title={`Score SEO : ${book.seoScore}%`}
@@ -1957,7 +1957,7 @@ Do not add explanatory text outside the JSON array or code block.`
                             >
                                 Précédent
                             </button>
-                            
+
                             <div className="hidden sm:flex items-center gap-1">
                                 {renderPaginationNumbers()}
                             </div>

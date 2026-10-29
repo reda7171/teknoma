@@ -8,13 +8,13 @@ export async function POST(req: Request) {
         const clientId = await getSetting('payment_cmi_client_id')
         const storeKey = await getSetting('payment_cmi_store_key')
         const mode = await getSetting('payment_cmi_mode') || 'test'
-        
+
         if (!clientId || !storeKey) {
             return NextResponse.json({ error: 'CMI is not configured' }, { status: 500 })
         }
 
-        const gatewayUrl = mode === 'live' 
-            ? 'https://payment.cmi.co.ma/ficap/sps/pay' 
+        const gatewayUrl = mode === 'live'
+            ? 'https://payment.cmi.co.ma/ficap/sps/pay'
             : 'https://testpayment.cmi.co.ma/ficap/sps/pay'
 
         const body = await req.json()
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
 
         // CMI Required Parameters
         const params: Record<string, string> = {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             storetype: '3d_pay_hosting',
             hashAlgorithm: 'ver3',
             lang: 'fr',
-            email: order.email || 'client@riwaya.store',
+            email: order.email || 'client@petsunivers.ma',
             BillToName: order.fullName,
             BillToCompany: '',
             BillToStreet1: order.address,

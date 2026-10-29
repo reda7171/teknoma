@@ -5,10 +5,10 @@ import { updateSetting } from '@/lib/actions/site-settings'
 import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function POSConfigForm({ 
-    initialStoreName, 
-    initialStoreAddress, 
-    initialStorePhone, 
+export default function POSConfigForm({
+    initialStoreName,
+    initialStoreAddress,
+    initialStorePhone,
     initialReceiptMessage,
     initialTaxRate,
     initialCurrency,
@@ -24,10 +24,10 @@ export default function POSConfigForm({
     initialAllowOutOfStock,
     initialRequireCustomer,
     initialEnableSessions
-}: { 
-    initialStoreName: string, 
-    initialStoreAddress: string, 
-    initialStorePhone: string, 
+}: {
+    initialStoreName: string,
+    initialStoreAddress: string,
+    initialStorePhone: string,
     initialReceiptMessage: string,
     initialTaxRate: string,
     initialCurrency: string,
@@ -122,7 +122,7 @@ export default function POSConfigForm({
                         value={storeName}
                         onChange={(e) => setStoreName(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="Ex: Riwaya Store"
+                        placeholder="Ex: PetsUnivers Store"
                     />
                 </div>
 
@@ -370,7 +370,7 @@ export default function POSConfigForm({
                             </div>
                         </label>
                     </div>
-                    
+
                     <div className="flex-1">
                         <label htmlFor="printerType" className="block text-sm font-bold text-gray-900 mb-2">
                             Type d'imprimante

@@ -5,7 +5,7 @@ const databaseUrl = process.env.DATABASE_URL
 if (!databaseUrl) throw new Error('DATABASE_URL est requis')
 
 const databaseName = new URL(databaseUrl).pathname.replace(/^\//, '')
-if (databaseName !== 'riwaya_multistore_test') {
+if (databaseName !== 'petsunivers_multistore_test') {
     throw new Error(`Test refusé sur la base "${databaseName}"`)
 }
 
@@ -28,12 +28,12 @@ async function main() {
     await prisma.order.create({
         data: {
             id: orderIds[1],
-            fullName: 'Test Riwaya MA',
+            fullName: 'Test PetsUnivers MA',
             phone: '0600000002',
             address: 'Adresse de test',
             city: 'Casablanca',
             total: 150,
-            salesChannel: SalesChannel.RIWAYA_MA
+            salesChannel: SalesChannel.PETSUNIVERS_MA
         }
     })
 
@@ -45,7 +45,7 @@ async function main() {
             id: cartIds[1],
             cartData: '[]',
             total: 20,
-            salesChannel: SalesChannel.RIWAYA_MA
+            salesChannel: SalesChannel.PETSUNIVERS_MA
         }
     })
 
@@ -59,17 +59,17 @@ async function main() {
     const orderChannels = new Set(orders.map(row => row.salesChannel))
     const cartChannels = new Set(carts.map(row => row.salesChannel))
 
-    if (!orderChannels.has(SalesChannel.RIWAYA_STORE) || !orderChannels.has(SalesChannel.RIWAYA_MA)) {
+    if (!orderChannels.has(SalesChannel.PETSUNIVERS_STORE) || !orderChannels.has(SalesChannel.PETSUNIVERS_MA)) {
         throw new Error('Canaux Order invalides')
     }
-    if (!cartChannels.has(SalesChannel.RIWAYA_STORE) || !cartChannels.has(SalesChannel.RIWAYA_MA)) {
+    if (!cartChannels.has(SalesChannel.PETSUNIVERS_STORE) || !cartChannels.has(SalesChannel.PETSUNIVERS_MA)) {
         throw new Error('Canaux AbandonedCart invalides')
     }
     if (orderIndexes.length < 2 || cartIndexes.length < 2) {
         throw new Error('Index composites salesChannel/createdAt absents')
     }
 
-    console.log('OK: valeurs par défaut, RIWAYA_MA et index composites validés.')
+    console.log('OK: valeurs par défaut, PETSUNIVERS_MA et index composites validés.')
 }
 
 main()

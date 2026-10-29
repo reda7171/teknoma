@@ -24,16 +24,16 @@ export async function generateMetadata({
 
     if (!product) {
         return {
-            title: 'Produit introuvable | Riwaya',
+            title: 'Produit introuvable | PetsUnivers',
         }
     }
 
     return {
-        title: `${product.name} | Riwaya`,
-        description: product.description || `Découvrez ${product.name} sur Riwaya. Livraison rapide au Maroc.`,
+        title: `${product.name} | PetsUnivers`,
+        description: product.description || `Découvrez ${product.name} sur PetsUnivers. Livraison rapide au Maroc.`,
         openGraph: {
-            title: `${product.name} | Riwaya`,
-            description: product.description || `Découvrez ${product.name} sur Riwaya. Livraison rapide au Maroc.`,
+            title: `${product.name} | PetsUnivers`,
+            description: product.description || `Découvrez ${product.name} sur PetsUnivers. Livraison rapide au Maroc.`,
             images: [product.image || '/og-image.jpg'],
         }
     }
@@ -74,7 +74,7 @@ export default async function ProductDetailPage({
         { label: t('Specs.TypeDuration'), value: product.materials || (product.category === 'BOARD_GAME' ? t('Specs.BoardGameDuration') : t('Specs.Standard')) },
         { label: t('Specs.AgePlayers'), value: product.dimensions || (product.category === 'BOARD_GAME' ? t('Specs.BoardGameAge') : t('Specs.Standard')) },
         { label: t('Specs.Content'), value: product.weight || (product.category === 'BOARD_GAME' ? t('Specs.BoardGameContent') : t('Specs.Standard')) },
-        { label: t('Specs.Warranty'), value: product.warranty || t('Specs.RiwayaWarranty') },
+        { label: t('Specs.Warranty'), value: product.warranty || t('Specs.PetsUniversWarranty') },
     ]
 
     return (

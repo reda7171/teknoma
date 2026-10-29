@@ -22,7 +22,7 @@ export default async function TrackingConfigPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style PetsUnivers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2 italic">
@@ -45,9 +45,9 @@ export default async function TrackingConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Tokens d'accès globaux & pixels de conversion</p>
                         </div>
                     </div>
-                    
+
                     <div className="space-y-8">
-                        <TrackingConfigForm 
+                        <TrackingConfigForm
                             initialFbPixelId={fbPixelId}
                             initialGeminiApiKey={geminiApiKey}
                             initialTiktokAccessToken={tiktokAccessToken}

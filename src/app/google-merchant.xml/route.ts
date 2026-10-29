@@ -64,7 +64,7 @@ export async function GET() {
             },
             include: { inventories: { include: { warehouse: true } } }
         })
-        
+
         const packs = await prisma.pack.findMany({
             where: { active: true, name: { not: '' } },
             include: {
@@ -75,7 +75,7 @@ export async function GET() {
                 }
             }
         })
-        
+
         const now = new Date()
         const allCoupons = await prisma.coupon.findMany({
             where: { isActive: true }
@@ -83,14 +83,14 @@ export async function GET() {
         const coupons = allCoupons.filter(c => !c.expiresAt || c.expiresAt >= now)
 
         // Utiliser directement l'URL de production pour éviter les problèmes de compilation locale
-        const baseUrl = 'https://www.riwaya.store'
+        const baseUrl = 'https://www.petsunivers.ma'
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
         xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n`
         xml += `  <channel>\n`
-        xml += `    <title>Riwaya</title>\n`
+        xml += `    <title>PetsUnivers</title>\n`
         xml += `    <link>${baseUrl}</link>\n`
-        xml += `    <description>Riwaya Bookstore - The best books available.</description>\n`
+        xml += `    <description>PetsUnivers Bookstore - The best books available.</description>\n`
 
         for (const book of books) {
             const merchantTitle = normalizeMerchantTitle(book.title, book.language)
@@ -102,7 +102,7 @@ export async function GET() {
             const imageUrl = encodeURI(`${baseUrl}/api/merchant-image/${book.id}?v=1500`)
             const availability = getGoogleAvailability(book)
             const condition = book.isOriginal ? 'new' : 'used'
-            
+
             xml += `    <item>\n`
             xml += `      <g:id>${escapeXml(book.id)}</g:id>\n`
             xml += `      <g:title>${escapeXml(merchantTitle)}</g:title>\n`
@@ -112,8 +112,8 @@ export async function GET() {
             xml += `      <g:condition>${condition}</g:condition>\n`
             xml += `      <g:availability>${availability}</g:availability>\n`
             xml += `      <g:price>${Number(book.price).toFixed(2)} MAD</g:price>\n`
-            xml += `      <g:brand>${escapeXml(book.author || 'Riwaya')}</g:brand>\n`
-            
+            xml += `      <g:brand>${escapeXml(book.author || 'PetsUnivers')}</g:brand>\n`
+
             const cleanIsbn = book.isbn ? book.isbn.replace(/\D/g, '') : '';
             if (cleanIsbn && [8, 10, 12, 13, 14].includes(cleanIsbn.length)) {
                 xml += `      <g:gtin>${cleanIsbn}</g:gtin>\n`
@@ -142,7 +142,7 @@ export async function GET() {
 
             xml += `    </item>\n`
         }
-        
+
         // Ajouter les packs au catalogue Google Merchant
         for (const pack of packs) {
             if (!pack.name.trim()) continue
@@ -163,7 +163,7 @@ export async function GET() {
             const regularPrice = hasDiscount ? totalOriginalPrice : displayPrice
             const salePrice = hasDiscount ? displayPrice : null
             const shippingFee = displayPrice >= 300 ? 0 : 35
-            
+
             xml += `    <item>\n`
             xml += `      <g:id>PACK-${escapeXml(pack.id)}</g:id>\n`
             xml += `      <g:title>${escapeXml(title)}</g:title>\n`
@@ -183,7 +183,7 @@ export async function GET() {
             if (salePrice !== null) {
                 xml += `      <g:sale_price>${salePrice.toFixed(2)} MAD</g:sale_price>\n`
             }
-            xml += `      <g:brand>Riwaya</g:brand>\n`
+            xml += `      <g:brand>PetsUnivers</g:brand>\n`
             xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             xml += `      <g:is_bundle>yes</g:is_bundle>\n`
             xml += `      <g:google_product_category>784</g:google_product_category>\n`

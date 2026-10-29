@@ -74,9 +74,9 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const [whatsapp, setWhatsapp] = useState('+212 600 00 00 00')
     const [badge, setBadge] = useState('Nouveau')
     const [caption, setCaption] = useState('')
-    const [hashtags, setHashtags] = useState('#riwaya #lecture #livre #maroc')
-    const [musicLabel, setMusicLabel] = useState('Son original - Riwaya')
-    const [socialHandle, setSocialHandle] = useState('@riwaya.book')
+    const [hashtags, setHashtags] = useState('#petsunivers #lecture #livre #maroc')
+    const [musicLabel, setMusicLabel] = useState('Son original - PetsUnivers')
+    const [socialHandle, setSocialHandle] = useState('@petsunivers.book')
 
     // Images
     const [images, setImages] = useState<string[]>([])
@@ -375,7 +375,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                 }
                 setActiveImageIndex(originalIndex)
             }
-            
+
             const { exportToMp4 } = await import('@/lib/videoExport')
             const blob = await exportToMp4({
                 element: previewRef.current,
@@ -406,27 +406,27 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
             const res = await fetch('/api/n8n/publish', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    platform, 
-                    customCaption: `${caption}\n\n${hashtags}`, 
+                body: JSON.stringify({
+                    platform,
+                    customCaption: `${caption}\n\n${hashtags}`,
                     customImageUrl: uploadData.url,
                     bookId: book?.id,
                     is_short: true
                 })
             })
-            
+
             if (!res.ok) {
                 const data = await res.json()
                 throw new Error(data.error || 'Erreur lors de la publication')
             }
-            
+
             alert('Envoyé avec succès !')
             onClose()
-        } catch (e: any) { 
+        } catch (e: any) {
             console.error('Publish error:', e)
-            alert(e.message || 'Erreur lors de la publication') 
+            alert(e.message || 'Erreur lors de la publication')
         }
-        finally { 
+        finally {
             setLoading(false)
             setMp4Progress(null)
         }
@@ -865,7 +865,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                             {/* LOGO */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             {showLogo && el('logo', 'top-6 right-6',
-                                <img src="/logo-riwaya.png?v=riwaya2" alt="Logo" crossOrigin="anonymous" className="h-6 object-contain brightness-0 invert opacity-90" />
+                                <img src="/logo-petsunivers.png?v=petsunivers2" alt="Logo" crossOrigin="anonymous" className="h-6 object-contain brightness-0 invert opacity-90" />
                             )}
 
                             {/* BOOK COVER */}
@@ -911,7 +911,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                             {/* SOCIALS */}
                             {showSocials && el('socials', 'left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5',
                                 <>
-                                    <span 
+                                    <span
                                         contentEditable={editing === 'socials'}
                                         suppressContentEditableWarning
                                         onBlur={(e) => { setSocialHandle(e.currentTarget.textContent || ''); setEditing(null) }}

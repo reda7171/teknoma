@@ -1,13 +1,13 @@
-# Positionnement premium — riwaya.ma
+# Positionnement premium — petsunivers.ma
 
 Statut : **direction produit validée**  
 Date : **11 octobre 2026**  
-Marque : **Riwaya**  
-Domaine : **riwaya.ma**
+Marque : **PetsUnivers**  
+Domaine : **petsunivers.ma**
 
 ## 1. Positionnement
 
-`riwaya.ma` sera une librairie en ligne premium et éditoriale destinée aux lecteurs marocains qui recherchent une sélection fiable, une belle expérience et un service soigné.
+`petsunivers.ma` sera une librairie en ligne premium et éditoriale destinée aux lecteurs marocains qui recherchent une sélection fiable, une belle expérience et un service soigné.
 
 Le premium ne signifie pas « vendre les mêmes livres plus cher ». Il repose sur :
 
@@ -37,9 +37,9 @@ Le premium ne signifie pas « vendre les mêmes livres plus cher ». Il repose s
 - lecteurs arabophones, francophones et anglophones ;
 - entreprises recherchant des cadeaux ou sélections professionnelles.
 
-## 2. Différence avec riwaya.store
+## 2. Différence avec petsunivers.ma
 
-| riwaya.store | riwaya.ma |
+| petsunivers.ma | petsunivers.ma |
 |---|---|
 | Catalogue large et commercial | Sélection premium et éditorialisée |
 | Promotions et disponibilité immédiate | Découverte, conseil et confiance |
@@ -110,7 +110,7 @@ Le ton doit être cultivé, clair et accueillant. Il ne doit être ni élitiste 
 - titres entièrement en majuscules ;
 - réductions affichées sur chaque bloc ;
 - promesses vagues comme « meilleur livre » sans justification ;
-- textes identiques à ceux de `riwaya.store`.
+- textes identiques à ceux de `petsunivers.ma`.
 
 ## 5. Navigation premium
 
@@ -133,13 +133,13 @@ Les catégories techniques du backend restent disponibles, mais la vitrine les r
 
 1. Hero éditorial avec une sélection forte et un seul appel à l’action.
 2. Trois engagements : sélection, emballage, livraison.
-3. « Choisis par Riwaya » : 6 à 8 livres maximum.
+3. « Choisis par PetsUnivers » : 6 à 8 livres maximum.
 4. Univers de lecture : littérature, réflexion, carrière, spiritualité.
 5. Cadeaux et coffrets premium.
 6. Une recommandation éditoriale détaillée.
 7. Nouveautés.
 8. Avis clients sobres et vérifiés.
-9. Journal Riwaya.
+9. Journal PetsUnivers.
 10. Newsletter avec bénéfice éditorial, sans remise automatique obligatoire.
 
 ## 7. Fiche livre premium
@@ -175,8 +175,8 @@ Principes :
 - total final toujours visible ;
 - disponibilité revérifiée côté serveur ;
 - commande idempotente ;
-- canal enregistré comme `RIWAYA_MA` ;
-- liens de confirmation et de suivi utilisant `riwaya.ma` ;
+- canal enregistré comme `PETSUNIVERS_MA` ;
+- liens de confirmation et de suivi utilisant `petsunivers.ma` ;
 - possibilité future d’emballage cadeau et message personnalisé.
 
 ## 9. Fonctionnalités premium par priorité
@@ -204,7 +204,7 @@ Principes :
 
 ## 10. SEO
 
-`riwaya.ma` doit viser des intentions premium et éditoriales différentes de `riwaya.store` :
+`petsunivers.ma` doit viser des intentions premium et éditoriales différentes de `petsunivers.ma` :
 
 - sélections de livres au Maroc ;
 - idées cadeaux culturelles ;
@@ -218,7 +218,7 @@ Chaque page éditoriale doit être originale. Lorsqu’une fiche reprend exactem
 ## 11. Indicateurs de réussite
 
 - taux d’ajout au panier ;
-- conversion par canal `RIWAYA_MA` ;
+- conversion par canal `PETSUNIVERS_MA` ;
 - panier moyen ;
 - part des coffrets et cadeaux ;
 - taux de retour ;

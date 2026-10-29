@@ -610,7 +610,7 @@ export async function sharePostToN8n(postId: string) {
 
         const { getSetting } = await import('@/lib/actions/site-settings')
         const n8nWebhook = await getSetting('n8n_facebook_webhook')
-        const siteUrl = await getSetting('site_url') || 'https://riwaya.store'
+        const siteUrl = await getSetting('site_url') || 'https://petsunivers.ma'
 
         if (!n8nWebhook) {
             return { success: false, error: 'Le webhook n8n n\'est pas configuré dans les paramètres du site (clé: n8n_facebook_webhook)' }
@@ -646,5 +646,3 @@ export async function sharePostToN8n(postId: string) {
         return { success: false, error: 'Une erreur est survenue' }
     }
 }
-
-

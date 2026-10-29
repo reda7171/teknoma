@@ -6,8 +6,8 @@ import { Metadata } from 'next'
 export async function generateMetadata({ params }: { params: Promise<{ orderId: string, locale: string }> }): Promise<Metadata> {
     const { orderId } = await params
     return {
-        title: `Suivi de Commande #${orderId.substring(0, 8)} | Riwaya`,
-        description: "Suivez l'état de votre commande sur Riwaya.",
+        title: `Suivi de Commande #${orderId.substring(0, 8)} | PetsUnivers`,
+        description: "Suivez l'état de votre commande sur PetsUnivers.",
         robots: {
             index: false, // Ne pas indexer les pages de suivi
             follow: false
@@ -50,10 +50,10 @@ export default async function OrderTrackingPage(props: {
     }
 
     return (
-        <OrderTrackingClient 
-            order={order as any} 
+        <OrderTrackingClient
+            order={order as any}
             shippingCompany={shippingCompany}
-            locale={locale} 
+            locale={locale}
         />
     )
 }

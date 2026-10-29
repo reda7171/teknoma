@@ -82,7 +82,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     }
 
     // 2. Si non trouvé localement, tenter de récupérer depuis le serveur de production
-    const remoteUrl = `https://riwaya.store/uploads/${pathArray.join('/')}`
+    const remoteUrl = `https://petsunivers.ma/uploads/${pathArray.join('/')}`
     try {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 3000)

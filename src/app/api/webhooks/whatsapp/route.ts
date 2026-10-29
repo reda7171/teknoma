@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
                             const rawTemplate = templateSetting?.value || DEFAULT_WHATSAPP_TEMPLATES.whatsapp_template_welcome
                             const customerName = payload.pushName || 'Cher lecteur'
-                            const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                            const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
                             const replyText = rawTemplate
                                 .replace(/{customerName}/g, customerName)
                                 .replace(/{siteUrl}/g, siteUrl)
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
     return NextResponse.json({
         status: 'online',
-        service: 'Riwaya WAHA Webhook Listener',
+        service: 'PetsUnivers WAHA Webhook Listener',
         supportedEvents: ['message.ack', 'message', 'session.status']
     })
 }

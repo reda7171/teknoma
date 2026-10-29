@@ -8,7 +8,7 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     const decoded = decodeURIComponent(tag)
     const t = await getTranslations({ locale, namespace: 'QuotesPage' })
     return {
-        title: `${decoded} ${t('TagQuotes')} | Riwaya`,
+        title: `${decoded} ${t('TagQuotes')} | PetsUnivers`,
         description: `${t('HeroDesc')} — #${decoded}`,
     }
 }

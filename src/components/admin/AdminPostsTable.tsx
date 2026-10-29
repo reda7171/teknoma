@@ -30,7 +30,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
     const handleUpdateAuthor = async (id: string) => {
         setIsUpdatingAuthor(true)
         try {
-            const res = await updatePost(id, { 
+            const res = await updatePost(id, {
                 authorId: selectedUserId || null,
                 authorName: ''
             })
@@ -195,7 +195,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                             {post.coverImage ? (
                                                 <div className="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-100 shadow-sm">
                                                 <Image
-                                                        src={post.coverImage?.startsWith('http') ? post.coverImage : `https://riwaya.store${post.coverImage}`}
+                                                        src={post.coverImage?.startsWith('http') ? post.coverImage : `https://petsunivers.ma${post.coverImage}`}
                                                         alt={post.title}
                                                         fill
                                                         className="object-cover"
@@ -244,7 +244,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div 
+                                            <div
                                                 className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 -ml-1.5 rounded-lg transition-colors group/author"
                                                 onClick={() => {
                                                     setEditingAuthorId(post.id)
@@ -346,8 +346,8 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                                 }
                                             }}
                                             className={`outline-none text-[10px] font-black uppercase tracking-widest rounded-full px-4 py-1.5 border appearance-none cursor-pointer text-center ${
-                                                post.published 
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                                post.published
+                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                                                 : 'bg-gray-100 text-gray-500 border-gray-200'
                                             }`}
                                         >
@@ -372,8 +372,8 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                                                 }
                                             }}
                                             className={`outline-none text-[10px] font-black uppercase tracking-widest rounded-full px-4 py-1.5 border appearance-none cursor-pointer text-center ${
-                                                post.isCompleted 
-                                                ? 'bg-blue-50 text-blue-600 border-blue-100' 
+                                                post.isCompleted
+                                                ? 'bg-blue-50 text-blue-600 border-blue-100'
                                                 : 'bg-gray-100 text-gray-500 border-gray-200'
                                             }`}
                                         >

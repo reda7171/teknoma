@@ -55,9 +55,9 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
 
     // Traductions du message WhatsApp
     const messages: Record<string, string> = {
-        fr: 'Bonjour Riwaya, je suis intéressé par ces livres :\n{books}\nCombien le prix total avec livraison ?',
-        en: 'Hello Riwaya, I am interested in these books:\n{books}\nHow much is the total price with delivery?',
-        ar: 'مرحباً رواية، أنا مهتم بهذه الكتب:\n{books}\nكم السعر الإجمالي مع التوصيل؟',
+        fr: 'Bonjour PetsUnivers, je suis intéressé par ces livres :\n{books}\nCombien le prix total avec livraison ?',
+        en: 'Hello PetsUnivers, I am interested in these books:\n{books}\nHow much is the total price with delivery?',
+        ar: 'مرحباً PetsUnivers، أنا مهتم بهذه الكتب:\n{books}\nكم السعر الإجمالي مع التوصيل؟',
     }
 
     let finalMessage = ''
@@ -67,9 +67,9 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
         finalMessage = baseMsg.replace('{books}', booksList)
     } else {
         const emptyMessages: Record<string, string> = {
-            fr: 'Bonjour Riwaya, je souhaite découvrir votre bibliothèque et en savoir plus sur vos livres.',
-            en: 'Hello Riwaya, I would like to browse your library and know more about your books.',
-            ar: 'مرحباً رواية، أود تصفح مكتبتكم ومعرفة المزيد عن كتبكم.',
+            fr: 'Bonjour PetsUnivers, je souhaite découvrir votre bibliothèque et en savoir plus sur vos livres.',
+            en: 'Hello PetsUnivers, I would like to browse your library and know more about your books.',
+            ar: 'مرحباً PetsUnivers، أود تصفح مكتبتكم ومعرفة المزيد عن كتبكم.',
         }
         finalMessage = emptyMessages[locale] || emptyMessages.fr
     }

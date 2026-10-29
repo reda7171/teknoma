@@ -48,7 +48,7 @@ function fallbackBooks(locale: Locale): CatalogBook[] {
 }
 
 export async function getCatalog(locale: Locale, filters: Record<string, string | undefined>): Promise<CatalogPage> {
-  const apiBaseUrl = process.env.RIWAYA_BACKEND_URL
+  const apiBaseUrl = process.env.PETSUNIVERS_BACKEND_URL
   if (!apiBaseUrl) {
     const books = fallbackBooks(locale)
     return { version: 1, locale, books, categories: [], pagination: { page: 1, limit: books.length, total: books.length, pages: 1 } }
@@ -75,7 +75,7 @@ export async function getCatalog(locale: Locale, filters: Record<string, string 
 }
 
 export async function getBook(locale: Locale, id: string): Promise<BookDetail | null> {
-  const apiBaseUrl = process.env.RIWAYA_BACKEND_URL
+  const apiBaseUrl = process.env.PETSUNIVERS_BACKEND_URL
   if (!apiBaseUrl) return null
   try {
     const response = await fetch(`${apiBaseUrl.replace(/\/$/, '')}/api/storefront/v1/books/${encodeURIComponent(id)}?locale=${locale}`, {
@@ -92,7 +92,7 @@ export async function getBook(locale: Locale, id: string): Promise<BookDetail | 
 }
 
 export async function getHomeCatalog(locale: Locale): Promise<CatalogBook[]> {
-  const apiBaseUrl = process.env.RIWAYA_BACKEND_URL
+  const apiBaseUrl = process.env.PETSUNIVERS_BACKEND_URL
   if (!apiBaseUrl) return fallbackBooks(locale)
 
   try {

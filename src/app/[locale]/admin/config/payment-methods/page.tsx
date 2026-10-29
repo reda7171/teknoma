@@ -2,12 +2,12 @@ import { getSetting } from '@/lib/actions/site-settings'
 import PaymentMethodsForm from './PaymentMethodsForm'
 
 export const metadata = {
-  title: 'Modes de Paiement | Admin Riwaya',
+  title: 'Modes de Paiement | Admin PetsUnivers',
 }
 
 export default async function PaymentMethodsPage() {
   const codEnabled = await getSetting('payment_cod_enabled') === 'true'
-  
+
   const paypalEnabled = await getSetting('payment_paypal_enabled') === 'true'
   const paypalClientId = await getSetting('payment_paypal_client_id') || ''
   const paypalClientSecret = await getSetting('payment_paypal_client_secret') || ''

@@ -180,7 +180,7 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
 
         try {
             const res = await fetch('/api/admin/database/backup')
-            
+
             if (!res.ok) {
                 const error = await res.json()
                 throw new Error(error.error || 'Erreur lors de la génération du backup')
@@ -188,7 +188,7 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
 
             // Récupérer le nom du fichier depuis les headers
             const disposition = res.headers.get('Content-Disposition')
-            let filename = 'backup_riwaya.sql'
+            let filename = 'backup_petsunivers.sql'
             if (disposition && disposition.indexOf('filename=') !== -1) {
                 filename = disposition.split('filename=')[1].replace(/"/g, '')
             }

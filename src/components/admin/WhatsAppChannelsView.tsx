@@ -14,7 +14,7 @@ export function WhatsAppChannelsView({ sessions, onShowFeedback }: Props) {
     const [session, setSession] = useState(workingSessions[0]?.name || sessions[0]?.name || 'default')
     const [channels, setChannels] = useState<WahaChannel[]>([])
     const [channelId, setChannelId] = useState('')
-    const [message, setMessage] = useState('Découvrez les nouveautés Riwaya 📚\nhttps://riwaya.store/')
+    const [message, setMessage] = useState('Découvrez les nouveautés PetsUnivers 📚\nhttps://petsunivers.ma/')
     const [isLoading, setIsLoading] = useState(false)
     const [isSending, setIsSending] = useState(false)
 

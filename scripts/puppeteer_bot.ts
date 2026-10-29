@@ -9,10 +9,10 @@ const prisma = new PrismaClient();
     console.log("🚀 Lancement du bot Facebook Marketplace...");
 
     // 1. Récupération des livres sélectionnés (batch ou unique)
-    const rawIds = process.env.BOOK_IDS 
+    const rawIds = process.env.BOOK_IDS
         ? process.env.BOOK_IDS.split(',').map(s => s.trim()).filter(Boolean)
         : (process.env.BOOK_ID ? [process.env.BOOK_ID.trim()] : []);
-    
+
     if (rawIds.length === 0) {
         console.log("❌ Aucun ID de livre fourni.");
         await prisma.$disconnect();
@@ -28,7 +28,7 @@ const prisma = new PrismaClient();
         await prisma.$disconnect();
         return;
     }
-    
+
     console.log(`📚 ${books.length} livre(s) sélectionné(s) pour publication par lot.`);
 
     const useWatermark = process.env.USE_WATERMARK === 'true';
@@ -68,13 +68,13 @@ const prisma = new PrismaClient();
                                 if (['input', 'textarea', 'label', 'div', 'span'].includes(tagName)) {
                                     await el.click();
                                     await new Promise(r => setTimeout(r, 400));
-                                    
+
                                     const isFocused = await page.evaluate(() => {
                                         const active = document.activeElement;
                                         return active && (
-                                            active.tagName === 'INPUT' || 
-                                            active.tagName === 'TEXTAREA' || 
-                                            active.getAttribute('contenteditable') === 'true' || 
+                                            active.tagName === 'INPUT' ||
+                                            active.tagName === 'TEXTAREA' ||
+                                            active.getAttribute('contenteditable') === 'true' ||
                                             active.getAttribute('role') === 'textbox'
                                         );
                                     });
@@ -113,7 +113,7 @@ const prisma = new PrismaClient();
                                 }
                                 return null;
                             }, label);
-                            
+
                             if (inputHandle && await inputHandle.evaluate(i => i !== null)) {
                                 await (inputHandle as any).click();
                                 await new Promise(r => setTimeout(r, 400));
@@ -129,7 +129,7 @@ const prisma = new PrismaClient();
                         } catch {}
                     }
                 }
-                
+
                 if (!found) console.log(`⚠️ Champ "${ariaLabels.join(' / ')}" introuvable.`);
             };
 
@@ -153,7 +153,7 @@ const prisma = new PrismaClient();
                         if (handle && await handle.evaluate(i => i !== null)) {
                             await page.evaluate((el: any) => el.click(), handle);
                             await new Promise(r => setTimeout(r, 1500));
-                            
+
                             let clicked = false;
                             for (const text of optionsText) {
                                 const success = await page.evaluate((searchText) => {
@@ -171,14 +171,14 @@ const prisma = new PrismaClient();
                                     }
                                     return false;
                                 }, text);
-                                
+
                                 if (success) {
                                     clicked = true;
                                     console.log(`✅ Option sélectionnée : ${text}`);
                                     break;
                                 }
                             }
-                            
+
                             if (!clicked) {
                                 await page.keyboard.press('Escape');
                                 await new Promise(r => setTimeout(r, 400));
@@ -246,7 +246,7 @@ const prisma = new PrismaClient();
                     finalImagePath = path.join(process.cwd(), 'public', book.image.replace(/^\/+/, ''));
                     // Télécharger si manquant
                     if (!fs.existsSync(finalImagePath)) {
-                        const prodUrl = `https://riwaya.store${book.image.startsWith('/') ? book.image : '/' + book.image}`;
+                        const prodUrl = `https://petsunivers.ma${book.image.startsWith('/') ? book.image : '/' + book.image}`;
                         try {
                             const res = await fetch(prodUrl);
                             if (res.ok) {

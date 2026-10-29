@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isAr = locale === 'ar'
     const isEn = locale === 'en'
 
-    const title = isAr 
-        ? 'كن بائعاً أو موزعاً للكتب | متجر رواية المغرب'
-        : isEn 
-            ? 'Become a Book Seller & Partner | Riwaya Morocco'
-            : 'Devenir Vendeur & Revendeur de Livres | Riwaya Maroc'
+    const title = isAr
+        ? 'كن بائعاً أو موزعاً للكتب | متجر PetsUnivers المغرب'
+        : isEn
+            ? 'Become a Book Seller & Partner | PetsUnivers Morocco'
+            : 'Devenir Vendeur & Revendeur de Livres | PetsUnivers Maroc'
 
     const description = isAr
         ? 'انضم إلى أكبر منصة ومكتبة لبيع الكتب في المغرب. اعرض كتبك كموزع أو بائع مستقل واستفد من آلاف القراء في جميع المدن المغربية.'
@@ -30,9 +30,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
             : 'Rejoignez la première librairie en ligne du Maroc. Vendez et distribuez vos livres simplement : touchez des milliers de lecteurs partout au Maroc.'
 
     const keywords = isAr
-        ? ['موزع كتب', 'بيع كتب بالمغرب', 'كن بائعاً', 'مكتبة الكترونية', 'شريك رواية', 'تجارة الكتب المغرب', 'devenir revendeur maroc']
+        ? ['موزع كتب', 'بيع كتب بالمغرب', 'كن بائعاً', 'مكتبة الكترونية', 'شريك PetsUnivers', 'تجارة الكتب المغرب', 'devenir revendeur maroc']
         : isEn
-            ? ['become a book reseller', 'sell books morocco', 'book reseller morocco', 'book distributor', 'riwaya partner']
+            ? ['become a book reseller', 'sell books morocco', 'book reseller morocco', 'book distributor', 'petsunivers partner']
             : ['devenir revendeur', 'devenir vendeur', 'revendeur livres maroc', 'vendre des livres maroc', 'librairie en ligne maroc', 'partenaire librairie']
 
     return {
@@ -123,7 +123,7 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                 </div>
             </section>
 
-            {/* Pourquoi choisir Riwaya */}
+            {/* Pourquoi choisir PetsUnivers */}
             <section className="py-8 sm:py-16 md:py-24 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-6 sm:mb-10 md:mb-16">
@@ -189,7 +189,7 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                             <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight mb-8">
                                 {t('4Etapes')}
                             </h2>
-                            
+
                             <div className="space-y-8">
                                 {/* Step 1 */}
                                 <div className="flex gap-4">
@@ -234,7 +234,7 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                                     <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
                                         <div className="flex items-center gap-2">
                                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            <span className="text-xs font-black uppercase tracking-wider text-gray-700">Riwaya Seller</span>
+                                            <span className="text-xs font-black uppercase tracking-wider text-gray-700">PetsUnivers Seller</span>
                                         </div>
                                         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
                                             <BookOpen className="w-4 h-4" />

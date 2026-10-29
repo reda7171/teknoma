@@ -34,7 +34,6 @@ export const queryClient = new QueryClient({
 // Persiste dans le stockage mémoire ci-dessus
 export const asyncStoragePersister = createAsyncStoragePersister({
   storage: inMemoryStorageAdapter,
-  key: 'RIWAYA_CACHE',
+  key: 'PETSUNIVERS_CACHE',
   throttleTime: 1000,
 });
-

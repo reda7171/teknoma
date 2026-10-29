@@ -13,10 +13,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params;
     const t = await getTranslations('UsbPage');
     return {
-        title: `${t('Title')} | Riwaya`,
+        title: `${t('Title')} | PetsUnivers`,
         description: t('Description'),
         openGraph: {
-            title: `${t('Title')} | Riwaya`,
+            title: `${t('Title')} | PetsUnivers`,
             description: t('Description'),
             images: ['/og-image.jpg'],
         }
@@ -174,7 +174,7 @@ export default async function UsbEducPage({ params }: { params: Promise<{ locale
                                 <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full" style={{ backgroundColor: '#FF6B6B', opacity: 0.4 }} />
                             </span>
                         </h1>
-                        <p 
+                        <p
                             className="text-xl text-gray-600 mb-8 max-w-lg leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: t.raw('HeroDesc') }}
                         />
@@ -199,7 +199,7 @@ export default async function UsbEducPage({ params }: { params: Promise<{ locale
                         <div className="relative w-80 h-80 md:w-[420px] md:h-[420px]">
                             <div className="absolute inset-0 rounded-full border-4 border-dashed border-orange-200 spin-slow" />
                             <div className="absolute inset-4 rounded-full bg-gradient-to-br from-orange-100 to-teal-100 blur-xl opacity-80" />
-                            <Image src="/usb_device_mockup.png" alt="Clé USB éducative Riwaya" fill className="object-contain relative z-10 drop-shadow-2xl float-2" priority />
+                            <Image src="/usb_device_mockup.png" alt="Clé USB éducative PetsUnivers" fill className="object-contain relative z-10 drop-shadow-2xl float-2" priority />
                             <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg float-1 z-20">{t('Badge500h')}</div>
                             <div className="absolute -bottom-2 -left-2 bg-teal-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg float-3 z-20">{t('Badge3Lang')}</div>
                         </div>
@@ -229,7 +229,7 @@ export default async function UsbEducPage({ params }: { params: Promise<{ locale
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                         <Image
                             src="/usb_promo_banner.png"
-                            alt="Famille regardant des vidéos éducatives sur la clé USB Riwaya"
+                            alt="Famille regardant des vidéos éducatives sur la clé USB PetsUnivers"
                             width={1400} height={600}
                             className="w-full object-cover"
                             style={{ maxHeight: '500px' }}

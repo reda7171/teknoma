@@ -1,10 +1,10 @@
 {
-  "name": "Riwaya - Publish Book to FB/Instagram",
+  "name": "PetsUnivers - Publish Book to FB/Instagram",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "riwaya-publish",
+        "path": "petsunivers-publish",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -16,7 +16,7 @@
         240,
         300
       ],
-      "webhookId": "riwaya-publish"
+      "webhookId": "petsunivers-publish"
     },
     {
       "parameters": {
@@ -643,7 +643,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ author: 'urn:li:organization:' + $json.linkedin_organization_id, lifecycleState: 'PUBLISHED', specificContent: { 'com.linkedin.ugc.ShareContent': { shareCommentary: { text: $json.caption }, shareMediaCategory: $json.image ? 'IMAGE' : 'NONE', media: $json.image ? [{ status: 'READY', description: { text: $json.title || '' }, media: $json.image, title: { text: $json.title || 'Riwaya' } }] : [] } }, visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' } }) }}",
+        "jsonBody": "={{ JSON.stringify({ author: 'urn:li:organization:' + $json.linkedin_organization_id, lifecycleState: 'PUBLISHED', specificContent: { 'com.linkedin.ugc.ShareContent': { shareCommentary: { text: $json.caption }, shareMediaCategory: $json.image ? 'IMAGE' : 'NONE', media: $json.image ? [{ status: 'READY', description: { text: $json.title || '' }, media: $json.image, title: { text: $json.title || 'PetsUnivers' } }] : [] } }, visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' } }) }}",
         "options": {}
       },
       "id": "post-linkedin",
@@ -966,7 +966,7 @@
   },
   "staticData": null,
   "tags": [
-    "riwaya",
+    "petsunivers",
     "social-media"
   ],
   "triggerCount": 0,

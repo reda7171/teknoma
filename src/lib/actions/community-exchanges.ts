@@ -54,7 +54,7 @@ export async function createExchangeRequest(formData: FormData): Promise<Exchang
         // 3. Vérifier l'éligibilité (Au moins une commande effectuée)
         const isEligible = await checkExchangeEligibility(user)
         if (!isEligible) {
-            return { success: false, error: "Vous devez avoir effectué au moins une commande sur Riwaya pour accéder au système d'échange." }
+            return { success: false, error: "Vous devez avoir effectué au moins une commande sur PetsUnivers pour accéder au système d'échange." }
         }
 
         // 2. Vérifier le livre offert (si échange direct)
@@ -87,7 +87,7 @@ export async function createExchangeRequest(formData: FormData): Promise<Exchang
             }
         })
 
-        // 4. Mettre à jour le statut des livres ? 
+        // 4. Mettre à jour le statut des livres ?
         // Non, on garde AVAILABLE tant que l'échange n'est pas ACCEPTED.
         // Mais on pourrait mettre "PENDING" pour éviter double demande instantanée.
         // Pour l'instant on autorise plusieurs demandes sur un même livre (premier arrivé premier servi à l'acceptation).

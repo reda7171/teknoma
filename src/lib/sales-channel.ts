@@ -1,6 +1,6 @@
 import { SalesChannel } from '@prisma/client'
 
-const RIWAYA_MA_HOSTS = new Set(['riwaya.ma', 'www.riwaya.ma'])
+const PETSUNIVERS_MA_HOSTS = new Set(['petsunivers.ma', 'www.petsunivers.ma'])
 
 function normalizeHost(value: string | null | undefined): string {
     if (!value) return ''
@@ -25,20 +25,20 @@ export function resolveStorefrontChannel(requestHeaders: Pick<Headers, 'get'>): 
         requestHeaders.get('origin')
     )
 
-    return RIWAYA_MA_HOSTS.has(host)
-        ? SalesChannel.RIWAYA_MA
-        : SalesChannel.RIWAYA_STORE
+    return PETSUNIVERS_MA_HOSTS.has(host)
+        ? SalesChannel.PETSUNIVERS_MA
+        : SalesChannel.PETSUNIVERS_STORE
 }
 
 const SALES_CHANNEL_LABELS: Record<SalesChannel, string> = {
-    [SalesChannel.RIWAYA_STORE]: 'Riwaya Store',
-    [SalesChannel.RIWAYA_MA]: 'Riwaya.ma',
+    [SalesChannel.PETSUNIVERS_STORE]: 'PetsUnivers Store',
+    [SalesChannel.PETSUNIVERS_MA]: 'petsunivers.ma',
     [SalesChannel.ADMIN_POS]: 'Caisse / POS',
     [SalesChannel.MOBILE_APP]: 'Application mobile',
     [SalesChannel.ADMIN_IMPORT]: 'Import administratif'
 }
 
 export function getSalesChannelLabel(channel: SalesChannel | string | null | undefined): string {
-    if (!channel) return SALES_CHANNEL_LABELS[SalesChannel.RIWAYA_STORE]
+    if (!channel) return SALES_CHANNEL_LABELS[SalesChannel.PETSUNIVERS_STORE]
     return SALES_CHANNEL_LABELS[channel as SalesChannel] || channel
 }

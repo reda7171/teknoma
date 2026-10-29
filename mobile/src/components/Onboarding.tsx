@@ -13,7 +13,7 @@ const SLIDES = [
   {
     id: '1',
     image: require('@/assets/images/onboarding1.png'),
-    title: 'Bienvenue sur Riwaya',
+    title: 'Bienvenue sur PetsUnivers',
     subtitle: 'La meilleure librairie en ligne au Maroc. Des livres pour tous les goûts, livrés chez vous.',
     bg: '#0274DF',
     accent: '#FFFFFF',

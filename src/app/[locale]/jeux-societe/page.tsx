@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'ألعاب جماعية ولوحية بالمغرب | متجر رواية'
+        ? 'ألعاب جماعية ولوحية بالمغرب | متجر PetsUnivers'
         : isEn
-            ? 'Board Games in Morocco | Riwaya Store'
-            : 'Jeux de Société au Maroc | Riwaya Store'
+            ? 'Board Games in Morocco | PetsUnivers Store'
+            : 'Jeux de Société au Maroc | PetsUnivers Store'
 
     const description = isAr
         ? 'اكتشف أفضل الألعاب الجماعية واللوحية بالمغرب: ألعاب التفكير، الاستراتيجية، وألعاب الذكاء للعائلة والأصدقاء. توصيل سريع لجميع المدن والدفع عند الاستلام.'
@@ -64,7 +64,7 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
     const baseUrl = getBaseUrl()
     const pageUrl = `${baseUrl}/${locale}/jeux-societe`
     const t = await getTranslations('BoardGamesPage')
-    
+
     /* Récupérer les produits catégorie BOARD_GAME depuis extra_products */
     const products = await prisma.extraProduct.findMany({
         where: { active: true, category: 'BOARD_GAME' },
@@ -96,7 +96,7 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
                         sku: p.id,
                         brand: {
                             '@type': 'Brand',
-                            name: 'Riwaya'
+                            name: 'PetsUnivers'
                         },
                         offers: {
                             '@type': 'Offer',
@@ -106,7 +106,7 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
                             itemCondition: 'https://schema.org/NewCondition',
                             seller: {
                                 '@type': 'Organization',
-                                name: 'Riwaya'
+                                name: 'PetsUnivers'
                             },
                             hasMerchantReturnPolicy: {
                                 '@type': 'MerchantReturnPolicy',
@@ -166,7 +166,7 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
             <section className="relative bg-white border-b border-slate-100 py-8 sm:py-14 md:py-20 overflow-hidden">
                 <div className="absolute -top-20 ltr:-right-20 rtl:-left-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl opacity-70 pointer-events-none" />
                 <div className="absolute -bottom-16 ltr:-left-16 rtl:-right-16 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl opacity-70 pointer-events-none" />
-                
+
                 {/* Micro-pattern background for premium feel */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
 
@@ -184,11 +184,11 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
                         </p>
                         <div className="flex justify-center md:justify-start gap-4 sm:gap-6 text-sm font-bold text-slate-600">
                             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-                                <Package className="w-4 h-4 text-amber-500" /> 
+                                <Package className="w-4 h-4 text-amber-500" />
                                 <span>{products.length} {t('ProductsCount')}</span>
                             </div>
                             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" /> 
+                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                 <span>{t('FastShipping')}</span>
                             </div>
                         </div>
@@ -221,7 +221,7 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
                                     <Gamepad2 className="w-24 h-24 sm:w-32 sm:h-32 text-amber-500 drop-shadow-md" strokeWidth={1.5} />
                                 )}
                             </div>
-                            
+
                             {/* Floating decorative elements */}
                             <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 bg-amber-400 text-white rounded-full flex items-center justify-center shadow-lg">
                                 <Star className="w-5 h-5 fill-current text-white" />

@@ -25,7 +25,7 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
     const handleSaveEdit = async () => {
         if (!editingRequest) return
         setLoadingMap(prev => ({ ...prev, [editingRequest.id]: true }))
-        
+
         const res = await updateSellerRequest(editingRequest.id, editFormData)
         if (res.success) {
             setRequests(prev => prev.map(r => r.id === editingRequest.id ? { ...r, ...editFormData } : r))
@@ -37,15 +37,15 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
     }
 
     const handleWhatsApp = (req: any) => {
-        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://riwaya.com'
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://petsunivers.ma'
         const resetLink = `${baseUrl}/fr/reset-password?email=${encodeURIComponent(req.email)}`
-        const message = `Bonjour ${req.managerName},\n\nVotre compte vendeur sur Riwaya a été créé avec succès. 🎉\n\n📧 Votre email de connexion : ${req.email}\n🔗 Définissez votre mot de passe ici : ${resetLink}\n\nBienvenue sur Riwaya !`
-        
+        const message = `Bonjour ${req.managerName},\n\nVotre compte vendeur sur PetsUnivers a été créé avec succès. 🎉\n\n📧 Votre email de connexion : ${req.email}\n🔗 Définissez votre mot de passe ici : ${resetLink}\n\nBienvenue sur PetsUnivers !`
+
         let phone = req.phone.replace(/[^0-9]/g, '')
         if (phone.startsWith('0')) {
             phone = '212' + phone.substring(1)
         }
-        
+
         const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
         window.open(whatsappUrl, '_blank')
     }
@@ -290,8 +290,8 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                         <div className="space-y-4">
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Boutique</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={editFormData.storeName}
                                     onChange={e => setEditFormData({...editFormData, storeName: e.target.value})}
                                     className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
@@ -299,8 +299,8 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                             </div>
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Gérant</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={editFormData.managerName}
                                     onChange={e => setEditFormData({...editFormData, managerName: e.target.value})}
                                     className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
@@ -308,8 +308,8 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                             </div>
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email</label>
-                                <input 
-                                    type="email" 
+                                <input
+                                    type="email"
                                     value={editFormData.email}
                                     onChange={e => setEditFormData({...editFormData, email: e.target.value})}
                                     className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
@@ -317,8 +317,8 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                             </div>
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Téléphone</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={editFormData.phone}
                                     onChange={e => setEditFormData({...editFormData, phone: e.target.value})}
                                     className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
@@ -327,8 +327,8 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ville</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={editFormData.city}
                                         onChange={e => setEditFormData({...editFormData, city: e.target.value})}
                                         className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
@@ -336,8 +336,8 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Stock</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={editFormData.stockSize}
                                         onChange={e => setEditFormData({...editFormData, stockSize: e.target.value})}
                                         className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
@@ -346,13 +346,13 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
                             </div>
                         </div>
                         <div className="flex justify-end gap-3 mt-8">
-                            <button 
+                            <button
                                 onClick={() => setEditingRequest(null)}
                                 className="px-6 py-3 bg-gray-100 text-gray-500 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all"
                             >
                                 Annuler
                             </button>
-                            <button 
+                            <button
                                 onClick={handleSaveEdit}
                                 disabled={loadingMap[editingRequest.id]}
                                 className="px-6 py-3 bg-black text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50"

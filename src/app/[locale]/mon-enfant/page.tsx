@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'كتب وقصص الأطفال وأنشطة التلوين بالمغرب | متجر رواية'
+        ? 'كتب وقصص الأطفال وأنشطة التلوين بالمغرب | متجر PetsUnivers'
         : isEn
-            ? 'Kids Books, Stories & Coloring in Morocco | Riwaya Store'
-            : 'Livres pour Enfants, Histoires & Coloriages au Maroc | Riwaya'
+            ? 'Kids Books, Stories & Coloring in Morocco | PetsUnivers Store'
+            : 'Livres pour Enfants, Histoires & Coloriages au Maroc | PetsUnivers'
 
     const description = isAr
         ? 'اكتشف أفضل كتب وقصص الأطفال المصورة بالمغرب: تنمية الذكاء، قصص قبل النوم، دفاتر تلوين وأنشطة تعليمية ممتعة. توصيل سريع والدفع عند الاستلام.'
@@ -99,7 +99,7 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                         sku: p.id,
                         brand: {
                             '@type': 'Brand',
-                            name: 'Riwaya'
+                            name: 'PetsUnivers'
                         },
                         offers: {
                             '@type': 'Offer',
@@ -109,7 +109,7 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                             itemCondition: 'https://schema.org/NewCondition',
                             seller: {
                                 '@type': 'Organization',
-                                name: 'Riwaya'
+                                name: 'PetsUnivers'
                             },
                             hasMerchantReturnPolicy: {
                                 '@type': 'MerchantReturnPolicy',
@@ -183,14 +183,14 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
             <section className="relative pt-24 pb-32 overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-50 mix-blend-multiply translate-x-1/3 -translate-y-1/3"></div>
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200 rounded-full blur-3xl opacity-50 mix-blend-multiply -translate-x-1/3 translate-y-1/3"></div>
-                
+
                 <div className="max-w-7xl mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center gap-12">
                     <div className="flex-1 text-center md:text-left">
                         <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-yellow-100 text-yellow-700 font-bold mb-6 animate-bounce">
                             <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
                             <span>{t('HeroBadge')}</span>
                         </div>
-                        <h1 
+                        <h1
                             className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight tracking-tight"
                             dangerouslySetInnerHTML={{ __html: t.raw('HeroTitle') }}
                         />
@@ -211,9 +211,9 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                     <div className="flex-1 relative">
                         <div className="relative w-full aspect-square max-w-lg mx-auto">
                             <div className="absolute inset-0 bg-gradient-to-tr from-yellow-200 to-pink-200 rounded-full blur-2xl opacity-60 animate-pulse"></div>
-                            <Image 
-                                src="/images/kids/hero.png" 
-                                alt="Enfants lisant un livre magique" 
+                            <Image
+                                src="/images/kids/hero.png"
+                                alt="Enfants lisant un livre magique"
                                 fill
                                 className="object-contain relative z-10 drop-shadow-2xl animate-float"
                             />
@@ -230,7 +230,7 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                             <div className="inline-block px-4 py-1.5 rounded-full bg-pink-100 text-pink-700 font-bold mb-4 text-sm tracking-wide uppercase">
                                 {t('SectionProducts.Badge')}
                             </div>
-                            <h2 
+                            <h2
                                 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight"
                                 dangerouslySetInnerHTML={{ __html: t.raw('SectionProducts.Title') }}
                             />
@@ -260,7 +260,7 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                             <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('SectionFeatures.StoryTitle')}</h3>
                             <p className="text-gray-600 font-medium leading-relaxed">{t('SectionFeatures.StoryDesc')}</p>
                         </div>
-                        
+
                         {/* Feature 2 */}
                         <div className="bg-blue-50 p-8 rounded-[2rem] border-2 border-transparent hover:border-blue-200 transition-colors text-center group">
                             <div className="w-20 h-20 bg-blue-100 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-transform">
@@ -287,9 +287,9 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                 <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-16">
                     <div className="flex-1 relative order-2 md:order-1">
                         <div className="relative w-full aspect-square max-w-md mx-auto">
-                            <Image 
-                                src="/images/kids/stories.png" 
-                                alt="Petites histoires" 
+                            <Image
+                                src="/images/kids/stories.png"
+                                alt="Petites histoires"
                                 fill
                                 className="object-contain relative z-10 drop-shadow-xl animate-float-delay"
                             />
@@ -299,14 +299,14 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                         <div className="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 font-bold mb-4 text-sm tracking-wide uppercase">
                             {t('SectionStories.Badge')}
                         </div>
-                        <h2 
+                        <h2
                             className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight"
                             dangerouslySetInnerHTML={{ __html: t.raw('SectionStories.Title') }}
                         />
                         <p className="text-lg text-gray-600 font-medium mb-8 leading-relaxed">
                             {t('SectionStories.Desc')}
                         </p>
-                        <Link 
+                        <Link
                             href="/books?category=Enfants"
                             className="inline-flex items-center gap-2 px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg"
                         >
@@ -324,14 +324,14 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                         <div className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 font-bold mb-4 text-sm tracking-wide uppercase">
                             {t('SectionColoring.Badge')}
                         </div>
-                        <h2 
+                        <h2
                             className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight"
                             dangerouslySetInnerHTML={{ __html: t.raw('SectionColoring.Title') }}
                         />
                         <p className="text-lg text-gray-600 font-medium mb-8 leading-relaxed">
                             {t('SectionColoring.Desc')}
                         </p>
-                        <Link 
+                        <Link
                             href="/books?category=Coloriage"
                             className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg shadow-emerald-200"
                         >
@@ -340,9 +340,9 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                     </div>
                     <div className="flex-1 relative">
                         <div className="relative w-full aspect-square max-w-md mx-auto">
-                            <Image 
-                                src="/images/kids/coloring.png" 
-                                alt="Cahiers de coloriage" 
+                            <Image
+                                src="/images/kids/coloring.png"
+                                alt="Cahiers de coloriage"
                                 fill
                                 className="object-contain relative z-10 drop-shadow-xl animate-float"
                             />
@@ -357,9 +357,9 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                     <div className="flex-1 relative order-2 md:order-1">
                         <div className="relative w-full aspect-square max-w-md mx-auto">
                             <div className="absolute inset-0 bg-gradient-to-br from-indigo-200 to-transparent rounded-full blur-2xl opacity-40"></div>
-                            <Image 
-                                src="/images/kids/numbers.png" 
-                                alt="Apprentissage ludique des chiffres et lettres" 
+                            <Image
+                                src="/images/kids/numbers.png"
+                                alt="Apprentissage ludique des chiffres et lettres"
                                 fill
                                 className="object-contain relative z-10 drop-shadow-xl animate-float-delay"
                             />
@@ -369,7 +369,7 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                         <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-100 text-indigo-700 font-bold mb-4 text-sm tracking-wide uppercase">
                             {t('SectionLearning.Badge')}
                         </div>
-                        <h2 
+                        <h2
                             className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight"
                             dangerouslySetInnerHTML={{ __html: t.raw('SectionLearning.Title') }}
                         />
@@ -387,7 +387,7 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                         <div className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 font-bold mb-4 text-sm tracking-wide uppercase">
                             {t('SectionWisdom.Badge')}
                         </div>
-                        <h2 
+                        <h2
                             className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight"
                             dangerouslySetInnerHTML={{ __html: t.raw('SectionWisdom.Title') }}
                         />
@@ -398,9 +398,9 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                     <div className="flex-1 relative">
                         <div className="relative w-full aspect-square max-w-md mx-auto">
                             <div className="absolute inset-0 bg-amber-200 rounded-full blur-3xl opacity-30"></div>
-                            <Image 
-                                src="/images/kids/owl.png" 
-                                alt="Chouette lisant un livre" 
+                            <Image
+                                src="/images/kids/owl.png"
+                                alt="Chouette lisant un livre"
                                 fill
                                 className="object-contain relative z-10 drop-shadow-2xl animate-float"
                             />
@@ -414,9 +414,9 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                 <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-16">
                     <div className="flex-1 relative order-2 md:order-1">
                         <div className="relative w-full aspect-square max-w-md mx-auto">
-                            <Image 
-                                src="/images/kids/stack.png" 
-                                alt="Pile de livres féerique" 
+                            <Image
+                                src="/images/kids/stack.png"
+                                alt="Pile de livres féerique"
                                 fill
                                 className="object-contain relative z-10 drop-shadow-xl animate-float-delay"
                             />
@@ -426,14 +426,14 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                         <div className="inline-block px-4 py-1.5 rounded-full bg-purple-100 text-purple-700 font-bold mb-4 text-sm tracking-wide uppercase">
                             {t('SectionLibrary.Badge')}
                         </div>
-                        <h2 
+                        <h2
                             className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight"
                             dangerouslySetInnerHTML={{ __html: t.raw('SectionLibrary.Title') }}
                         />
                         <p className="text-lg text-gray-600 font-medium mb-8 leading-relaxed">
                             {t('SectionLibrary.Desc')}
                         </p>
-                        <Link 
+                        <Link
                             href="/packs"
                             className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl font-bold transition-transform hover:-translate-y-1 shadow-lg shadow-purple-200"
                         >
@@ -448,15 +448,15 @@ export default async function KidsPage({ params }: { params: Promise<{ locale: s
                 <div className="relative z-10 max-w-4xl mx-auto">
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-6">{t('CTA.Title')}</h2>
                     <p className="text-xl text-white/90 font-medium mb-10 max-w-2xl mx-auto">{t('CTA.Desc')}</p>
-                    <Link 
-                        href="/books" 
+                    <Link
+                        href="/books"
                         className="inline-flex items-center gap-2 px-10 py-5 bg-white text-gray-900 rounded-[2rem] font-bold text-xl hover:scale-105 transition-transform shadow-2xl"
                     >
                         {t('CTA.Btn')}
                     </Link>
                 </div>
             </section>
-            
+
             <Footer />
         </div>
     )

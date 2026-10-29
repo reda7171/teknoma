@@ -39,7 +39,7 @@ const Draggable = ({ children, defaultPos = { x: 0, y: 0 }, className = '' }: an
     }, [isDragging])
 
     return (
-        <div 
+        <div
             className={`cursor-move select-none ${className}`}
             style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, zIndex: isDragging ? 50 : 10 }}
             onMouseDown={handleMouseDown}
@@ -125,7 +125,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 backgroundColor: 'transparent',
                 cacheBust: false,
             })
-            
+
             restoreImages(originals)
 
             const link = document.createElement('a')
@@ -178,7 +178,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 body: formData
             })
             const uploadData = await uploadRes.json()
-            
+
             if (!uploadData.success) {
                 throw new Error(uploadData.error || "Échec de l'upload de la créative")
             }
@@ -188,12 +188,12 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: `Nouvel échange sur Riwaya`,
+                    title: `Nouvel échange sur PetsUnivers`,
                     format: 'square', // Default
                     platform: platform === 'all' ? 'both' : platform,
                     scheduleAt: scheduleAt || null,
-                    customImageUrl: uploadData.url, 
-                    customCaption: caption 
+                    customImageUrl: uploadData.url,
+                    customCaption: caption
                 })
             })
             const data = await res.json()
@@ -242,19 +242,19 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8">
             <div className="bg-white w-full max-w-6xl h-full max-h-[90vh] rounded-[2rem] flex flex-col md:flex-row overflow-hidden shadow-2xl">
-                
+
                 {/* Aperçu */}
                 <div className="flex-1 bg-gray-50 p-8 flex items-center justify-center overflow-auto">
-                    <div 
+                    <div
                         ref={posterRef}
                         className={`relative w-[400px] h-[500px] ${customBgImage ? 'bg-black' : currentTheme.bg} overflow-hidden font-sans flex flex-col items-center justify-between p-8`}
                         style={{ aspectRatio: '4/5' }}
                     >
                         {customBgImage && (
-                            <img 
-                                src={customBgImage} 
-                                alt="Custom Background" 
-                                className="absolute inset-0 w-full h-full object-cover z-0" 
+                            <img
+                                src={customBgImage}
+                                alt="Custom Background"
+                                className="absolute inset-0 w-full h-full object-cover z-0"
                                 style={{ opacity: bgOpacity / 100 }}
                             />
                         )}
@@ -277,7 +277,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                             </Draggable>
                             <Draggable>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/logo-riwaya.png?v=riwaya2" alt="Riwaya" crossOrigin="anonymous" style={{ height: logoSize }} className={`object-contain pointer-events-none ${theme !== 'light' ? 'filter brightness-0 invert' : ''}`} />
+                                <img src="/logo-petsunivers.png?v=petsunivers2" alt="PetsUnivers" crossOrigin="anonymous" style={{ height: logoSize }} className={`object-contain pointer-events-none ${theme !== 'light' ? 'filter brightness-0 invert' : ''}`} />
                             </Draggable>
                         </div>
 
@@ -288,8 +288,8 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                                 <div className="w-28 h-40 rounded-lg overflow-hidden shadow-2xl relative mb-4">
                                     {exchange.bookRequested?.image ? (
                                         // eslint-disable-next-line @next/next/no-img-element
-                                        <img 
-                                            src={normalizeImage(exchange.bookRequested.image)} 
+                                        <img
+                                            src={normalizeImage(exchange.bookRequested.image)}
                                             alt={exchange.bookRequested.title}
                                             crossOrigin="anonymous"
                                             className="w-full h-full object-cover pointer-events-none"
@@ -325,8 +325,8 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                                         <div className="w-28 h-40 rounded-lg overflow-hidden shadow-2xl relative mb-4">
                                             {exchange.bookOffered.image ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
-                                                <img 
-                                                    src={normalizeImage(exchange.bookOffered.image)} 
+                                                <img
+                                                    src={normalizeImage(exchange.bookOffered.image)}
                                                     alt={exchange.bookOffered.title}
                                                     crossOrigin="anonymous"
                                                     className="w-full h-full object-cover pointer-events-none"
@@ -369,7 +369,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                                 Un nouveau match !
                             </h2>
                             <p className={`text-xs font-medium mt-1 opacity-80 ${currentTheme.text} pointer-events-none`}>
-                                Rejoignez la communauté sur riwaya.store
+                                Rejoignez la communauté sur petsunivers.ma
                             </p>
                         </Draggable>
                     </div>
@@ -401,8 +401,8 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                             </div>
 
                             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mt-6 mb-3">Image de Fond Personnalisée</label>
-                            <input 
-                                type="file" 
+                            <input
+                                type="file"
                                 accept="image/*"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
@@ -418,15 +418,15 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">
                                         Opacité de l'image ({bgOpacity}%)
                                     </label>
-                                    <input 
-                                        type="range" 
-                                        min="0" 
-                                        max="100" 
-                                        value={bgOpacity} 
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={bgOpacity}
                                         onChange={(e) => setBgOpacity(Number(e.target.value))}
                                         className="w-full accent-blue-500"
                                     />
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setCustomBgImage(null)
                                             setBgOpacity(100)
@@ -441,11 +441,11 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
 
                         <div>
                             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-3">Taille du Logo</label>
-                            <input 
-                                type="range" 
-                                min="16" 
-                                max="100" 
-                                value={logoSize} 
+                            <input
+                                type="range"
+                                min="16"
+                                max="100"
+                                value={logoSize}
                                 onChange={(e) => setLogoSize(Number(e.target.value))}
                                 className="w-full accent-blue-500"
                             />
@@ -453,7 +453,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
 
                         <div className="space-y-4 pt-4 border-t border-gray-100">
                             <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Publication Automatique</h4>
-                            
+
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Légende</label>
                                 <textarea
@@ -466,7 +466,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
 
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Plateforme</label>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     value={platform}
                                     onChange={(e) => setPlatform(e.target.value as any)}
                                     className="w-full text-xs p-3 rounded-xl border border-gray-200 outline-none bg-gray-50/50"

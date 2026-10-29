@@ -8,10 +8,10 @@ import Image from 'next/image'
 import { publishAccessoriesToJumia, checkJumiaLinkBySkuExact } from '@/lib/actions/jumia'
 import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 
-export default function EditAccessoryPage({ 
-    params 
-}: { 
-    params: Promise<{ locale: string, id: string }> 
+export default function EditAccessoryPage({
+    params
+}: {
+    params: Promise<{ locale: string, id: string }>
 }) {
     const { locale, id } = use(params)
     const router = useRouter()
@@ -95,7 +95,7 @@ export default function EditAccessoryPage({
                 if (data.videos && Array.isArray(data.videos)) {
                     setVideos(data.videos)
                 }
-                
+
                 if (data.sellerSku) {
                     checkJumiaLinkBySkuExact(data.sellerSku, data.jumiaProductSid).then(linked => {
                         setIsLinked(linked)
@@ -103,7 +103,7 @@ export default function EditAccessoryPage({
                         setIsLinked(false)
                     })
                 }
-                
+
                 setIsLoading(false)
             })
             .catch(() => {
@@ -245,7 +245,7 @@ export default function EditAccessoryPage({
                             </div>
                         </div>
                     )}
-                    
+
                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nom du produit</label>
@@ -295,7 +295,7 @@ export default function EditAccessoryPage({
 
                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                         <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest border-b border-slate-50 pb-3">Caractéristiques techniques (Optionnel)</h3>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Matériaux / Matière</label>
@@ -379,8 +379,8 @@ export default function EditAccessoryPage({
                                 type="button"
                                 onClick={() => setFormData({ ...formData, active: !formData.active })}
                                 className={`w-full py-3 rounded-xl text-sm font-bold border transition-all ${
-                                    formData.active 
-                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                                    formData.active
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                                     : 'bg-slate-50 border-slate-200 text-slate-500'
                                 }`}
                             >
@@ -477,11 +477,11 @@ export default function EditAccessoryPage({
                                                 }
                                                 // Load images from production in dev mode
                                                 if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
-                                                    src = `https://riwaya.store${src}`;
+                                                    src = `https://petsunivers.ma${src}`;
                                                 }
                                                 return <Image src={src} alt={`preview ${i}`} fill className="object-cover" unoptimized={process.env.NODE_ENV === 'development'} />
                                             })()}
-                                            
+
                                             {/* Reorder Controls */}
                                             <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/90 px-1 py-0.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-sm">
                                                 <button

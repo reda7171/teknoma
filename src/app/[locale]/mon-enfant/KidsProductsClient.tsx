@@ -58,14 +58,14 @@ export default function KidsProductsClient({ products }: { products: Product[] }
                                     <Package className="w-12 h-12 text-pink-200" />
                                 </div>
                             );
-                            
+
                             src = src.startsWith('http') || src.startsWith('/') ? src : `/uploads/images/${src}`;
-                            
+
                             // Load images from production in dev mode
                             if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
-                                src = `https://riwaya.store${src}`;
+                                src = `https://petsunivers.ma${src}`;
                             }
-                            
+
                             return (
                                 <Image
                                     src={src}

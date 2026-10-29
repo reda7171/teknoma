@@ -22,7 +22,7 @@ const withPWA = withPWAInit({
         urlPattern: /\.(png|jpg|jpeg|svg|gif|webp|ico|avif)$/i,
         handler: 'CacheFirst',
         options: {
-          cacheName: 'riwaya-images',
+          cacheName: 'petsunivers-images',
           expiration: {
             maxEntries: 200,
             maxAgeSeconds: 60 * 60 * 24 * 30, // 30 jours
@@ -39,7 +39,7 @@ const withPWA = withPWAInit({
           !url.pathname.split('/').includes('admin'),
         handler: 'NetworkOnly',
         options: {
-          cacheName: 'riwaya-pages-network-only',
+          cacheName: 'petsunivers-pages-network-only',
         },
       },
     ],
@@ -80,7 +80,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'riwaya.store',
+        hostname: 'petsunivers.ma',
       },
       {
         protocol: 'http',

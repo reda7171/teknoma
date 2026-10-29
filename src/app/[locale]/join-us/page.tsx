@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
-        title: locale === 'ar' ? 'إلتحق بفريق العمل | رواية' : locale === 'en' ? 'Join the Team | Riwaya' : "Rejoignez l'équipe | Riwaya",
+        title: locale === 'ar' ? 'إلتحق بفريق العمل | PetsUnivers' : locale === 'en' ? 'Join the Team | PetsUnivers' : "Rejoignez l'équipe | PetsUnivers",
         description: locale === 'ar' ? 'إلتحق بفريق العمل. ابعث لنا تدوينتك التجريبية الآن.' : locale === 'en' ? 'Join the team. Send us your sample post now.' : "Rejoignez l'équipe. Envoyez-nous votre article d'essai maintenant.",
     }
 }
@@ -18,7 +18,7 @@ export default async function JoinUsPage() {
     return (
         <div className="min-h-screen bg-pixio-cream overflow-hidden">
             <Header />
-            
+
             {/* Hero Section */}
             <section className="relative py-8 sm:py-16 md:py-32 lg:py-48 px-4 border-b border-gray-100" dir={t('heroTag') === 'فرصة عمل' ? 'rtl' : 'ltr'}>
                 <div className="max-w-7xl mx-auto text-center relative z-10">
@@ -79,8 +79,8 @@ export default async function JoinUsPage() {
                         <p className="text-base sm:text-xl md:text-2xl text-gray-500 font-bold leading-relaxed mb-6 sm:mb-12">
                             {t('applyDescription')}
                         </p>
-                        
-                        <a 
+
+                        <a
                             href="https://wa.me/"
                             target="_blank"
                             rel="noopener noreferrer"

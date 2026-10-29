@@ -31,11 +31,11 @@ export async function generateMetadata({
     let description = ''
     let siteTitle = ''
 
-    const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
+    const baseKeywords = ["PetsUnivers", "petsunivers", "book", "الكاتب", "authors", "كتب"]
 
     if (locale === 'ar') {
-        siteTitle = `${authorName} - كتب ومؤلفات | مكتبة رواية`
-        description = `اكتشف جميع كتب ومؤلفات ${authorName} المتوفرة في مكتبة رواية. توصيل سريع لجميع مدن المغرب.`
+        siteTitle = `${authorName} - كتب ومؤلفات | مكتبة PetsUnivers`
+        description = `اكتشف جميع كتب ومؤلفات ${authorName} المتوفرة في مكتبة PetsUnivers. توصيل سريع لجميع مدن المغرب.`
         keywords = [
             authorName,
             `كتب ${authorName}`,
@@ -43,13 +43,13 @@ export async function generateMetadata({
             'مكتبة في الرباط',
             'مكتبة f rabat',
             'مكتبة في الدار البيضاء',
-            'مكتبة رواية',
+            'مكتبة PetsUnivers',
             'كتب للبيع بالمغرب',
             ...baseKeywords
         ]
     } else if (locale === 'en') {
-        siteTitle = `${authorName} - Books and Biography | Riwaya`
-        description = `Discover all books by ${authorName} available on Riwaya. Fast delivery in Morocco.`
+        siteTitle = `${authorName} - Books and Biography | PetsUnivers`
+        description = `Discover all books by ${authorName} available on PetsUnivers. Fast delivery in Morocco.`
         keywords = [
             authorName,
             `books by ${authorName}`,
@@ -59,8 +59,8 @@ export async function generateMetadata({
             ...baseKeywords
         ]
     } else {
-        siteTitle = `${authorName} - Livres et Biographie | Riwaya`
-        description = `Découvrez tous les livres de ${authorName} disponibles sur Riwaya. Achetez en ligne au Maroc avec livraison rapide.`
+        siteTitle = `${authorName} - Livres et Biographie | PetsUnivers`
+        description = `Découvrez tous les livres de ${authorName} disponibles sur PetsUnivers. Achetez en ligne au Maroc avec livraison rapide.`
         keywords = [
             authorName,
             `livres de ${authorName}`,
@@ -121,8 +121,8 @@ export default async function AuthorPage({
     const profile = authorProfile
     const displayImage = profile?.image || (books.length > 0 ? books[0].image : null);
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
-    const shareTitle = `${authorName} - ${locale === 'ar' ? 'كتب ومؤلفات | مكتبة رواية' : locale === 'en' ? 'Books and Biography | Riwaya' : 'Livres et Biographie | Riwaya'}`
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+    const shareTitle = `${authorName} - ${locale === 'ar' ? 'كتب ومؤلفات | مكتبة PetsUnivers' : locale === 'en' ? 'Books and Biography | PetsUnivers' : 'Livres et Biographie | PetsUnivers'}`
     const jsonLd = [
         {
             "@context": "https://schema.org",
@@ -257,7 +257,7 @@ export default async function AuthorPage({
                                 {/* Biography */}
                                 {profile?.bio && (
                                     <div className="prose prose-lg md:prose-xl prose-slate max-w-3xl mb-12">
-                                        <p 
+                                        <p
                                             className="leading-relaxed text-slate-600 font-medium text-justify"
                                             dir="auto"
                                         >
@@ -299,8 +299,8 @@ export default async function AuthorPage({
                     {books.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                             {books.map((book) => (
-                                <BookCard 
-                                    key={book.id} 
+                                <BookCard
+                                    key={book.id}
                                     id={book.id}
                                     title={book.title}
                                     titleFr={book.titleFr}
@@ -333,10 +333,10 @@ export default async function AuthorPage({
                             </div>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {quotes.map((quote: any) => (
-                                    <QuoteCard 
-                                        key={quote.id} 
-                                        quote={quote} 
-                                        locale={locale} 
+                                    <QuoteCard
+                                        key={quote.id}
+                                        quote={quote}
+                                        locale={locale}
                                     />
                                 ))}
                             </div>
