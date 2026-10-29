@@ -10,7 +10,7 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
     const { locale } = use(params)
     const router = useRouter()
     const searchParams = useSearchParams()
-    const defaultCategory = searchParams.get('category')?.toUpperCase() || 'BOOKMARK'
+    const defaultCategory = searchParams.get('category')?.toUpperCase() || 'ACCESSORY'
 
     const [isSaving, setIsSaving] = useState(false)
     const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload')
@@ -142,7 +142,7 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
-                                placeholder="Ex: Marque-page Cuir"
+                                placeholder="Ex: Gamelle pour chat"
                             />
                         </div>
 
@@ -342,12 +342,6 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                 onChange={e => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
                             >
-                                <option value="BOOKMARK">Marque-page</option>
-                                <option value="LIBRARY">Bibliothèque</option>
-                                <option value="USB">Clé USB</option>
-                                <option value="FURNITURE">Fourniture bureau</option>
-                                <option value="BOARD_GAME">Jeux de société</option>
-                                <option value="KIDS">Produit enfant</option>
                                 <option value="ACCESSORY">Accessoire</option>
                             </select>
                         </div>

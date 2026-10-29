@@ -195,21 +195,6 @@ export default function AccessoriesTable({
                                         >
                                             <Edit className="w-4 h-4" />
                                         </Link>
-                                        <Link
-                                            href={`/${locale}/${
-                                                item.category === 'BOARD_GAME' ? 'jeux-societe' :
-                                                item.category === 'USB' ? 'cle-usb' :
-                                                item.category === 'KIDS' ? 'mon-enfant' :
-                                                item.category === 'FURNITURE' ? 'fourniture-bureau' :
-                                                'fourniture-bureau'
-                                            }/${item.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                            title="Voir la page produit"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                        </Link>
                                         <button
                                             onClick={() => handleDelete(item.id)}
                                             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"

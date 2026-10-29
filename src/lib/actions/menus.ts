@@ -1,5 +1,6 @@
 'use server'
 
+import { isRetiredStorefrontUrl } from '@/lib/pets-catalog'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { revalidatePath } from 'next/cache'
@@ -30,12 +31,12 @@ export async function getActiveMenuBySlug(slug: string) {
             const items: any[] = await prisma.$queryRaw`SELECT * FROM menu_items WHERE menuId = ${menu.id} AND isActive = 1 ORDER BY \`order\` ASC`
 
             // Structure hiérarchique simple (1 niveau pour le header)
-            const rootItems = items.filter(item => !item.parentId)
+            const rootItems = items.filter(item => !item.parentId && !isRetiredStorefrontUrl(item.url))
 
             // Attacher les enfants
             const rootItemsWithChildren = rootItems.map(root => ({
                 ...root,
-                children: items.filter(child => child.parentId === root.id)
+                children: items.filter(child => child.parentId === root.id && !isRetiredStorefrontUrl(child.url))
             }))
 
             return {

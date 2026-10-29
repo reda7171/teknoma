@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
+import { RETIRED_ACCESSORY_CATEGORIES, isRetiredAccessoryCategory } from '@/lib/pets-catalog'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
 
@@ -7,9 +8,10 @@ export async function GET(request: NextRequest) {
         await verifyAdmin()
         const { searchParams } = new URL(request.url)
         const category = searchParams.get('category')
+        if (isRetiredAccessoryCategory(category)) return NextResponse.json({ error: 'Catégorie supprimée de PetsUnivers' }, { status: 404 })
 
         const accessories = await prisma.extraProduct.findMany({
-            where: category ? { category: category.toUpperCase() } : undefined,
+            where: { category: category ? category.toUpperCase() : { notIn: RETIRED_ACCESSORY_CATEGORIES } },
             orderBy: { createdAt: 'desc' }
         })
 
@@ -24,6 +26,7 @@ export async function POST(request: NextRequest) {
         await verifyAdmin()
         const data = await request.json()
 
+        if (isRetiredAccessoryCategory(data.category)) return NextResponse.json({ error: 'Catégorie supprimée de PetsUnivers' }, { status: 400 })
         const accessory = await prisma.extraProduct.create({
             data: {
                 name: data.name,
@@ -54,10 +57,6 @@ export async function POST(request: NextRequest) {
         try {
             const { revalidatePath } = require('next/cache')
             revalidatePath('/[locale]/admin/accessories', 'page')
-            revalidatePath('/[locale]/admin/accessories/library', 'page')
-            revalidatePath('/[locale]/admin/accessories/usb', 'page')
-            revalidatePath('/[locale]/admin/accessories/bookmarks', 'page')
-            revalidatePath('/[locale]/admin/accessories/kids', 'page')
         } catch (e) {
             console.error(e)
         }

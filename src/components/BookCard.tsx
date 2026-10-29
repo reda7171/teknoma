@@ -9,7 +9,6 @@ import { useUIStore } from '@/store/ui'
 import { notifyAddToCart } from '@/lib/actions/cart-notify'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
 import WishlistButton from '@/components/WishlistButton'
-import AddToReadingListButton from '@/components/AddToReadingListButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import ReserveBookButton from '@/components/ReserveBookButton'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
@@ -83,13 +82,6 @@ export default function BookCard({
                     <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
                         <WishlistButton
                             item={{ id, title: displayTitle, price, image, type: 'BOOK', slug: bookUrl, author }}
-                            className="bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm"
-                        />
-                        <AddToReadingListButton
-                            bookId={id}
-                            title={displayTitle}
-                            author={author}
-                            cover={image}
                             className="bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm"
                         />
                     </div>

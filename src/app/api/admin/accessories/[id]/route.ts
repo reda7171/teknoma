@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
+import { RETIRED_ACCESSORY_CATEGORIES, isRetiredAccessoryCategory } from '@/lib/pets-catalog'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
 
@@ -28,6 +29,7 @@ export async function PATCH(
         const { id } = await params
         const data = await request.json()
 
+        if (isRetiredAccessoryCategory(data.category)) return NextResponse.json({ error: 'Catégorie supprimée de PetsUnivers' }, { status: 400 })
         const accessory = await prisma.extraProduct.update({
             where: { id },
             data: {
@@ -59,10 +61,6 @@ export async function PATCH(
         try {
             const { revalidatePath } = require('next/cache')
             revalidatePath('/[locale]/admin/accessories', 'page')
-            revalidatePath('/[locale]/admin/accessories/library', 'page')
-            revalidatePath('/[locale]/admin/accessories/usb', 'page')
-            revalidatePath('/[locale]/admin/accessories/bookmarks', 'page')
-            revalidatePath('/[locale]/admin/accessories/kids', 'page')
         } catch (e) {
             console.error(e)
         }

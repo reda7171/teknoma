@@ -415,7 +415,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const currency = locale === 'ar' ? 'درهم' : 'MAD'
 
     const statCards = [
-        { name: 'Livres Actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Produits actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
         { name: 'Score SEO ≤ 80', value: stats.seoScoreLte80Count, iconName: 'Sparkles', color: 'amber', roles: ['ADMIN', 'SELLER'], href: `/${locale}/admin/books?seoScore=lte80` },
         { name: 'Solde Tokens Économisés', value: `${geminiStats.estimatedTokensSaved.toLocaleString()} tkn`, iconName: 'Cpu', color: 'amber', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Économie IA ($)', value: `$${geminiStats.estimatedCostSavedUsd.toFixed(3)}`, iconName: 'Coins', color: 'emerald', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
@@ -436,14 +436,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Taux Conversion', value: `${stats.tauxConversion.toFixed(1)}%`, iconName: 'BarChart2', color: 'teal', roles: ['ADMIN', 'SELLER'] },
         { name: 'Taux Annulation', value: `${stats.tauxAnnulation.toFixed(1)}%`, iconName: 'XOctagon', color: 'gray', roles: ['ADMIN', 'SELLER'] },
         { name: "Cmd Aujourd'hui", value: stats.ordersToday, iconName: 'CalendarDays', color: 'teal', roles: ['ADMIN', 'SELLER'] },
-        { name: "Livres Vendus (Auj)", value: stats.booksSoldToday, iconName: 'BookOpen', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
+        { name: "Produits vendus (Auj)", value: stats.booksSoldToday, iconName: 'BookOpen', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
         { name: 'En Livraison', value: stats.shippedOrders, iconName: 'Truck', color: 'cyan', roles: ['ADMIN', 'SELLER'] },
         { name: 'Confirmées', value: stats.confirmedOrders, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN', 'SELLER'] },
         { name: 'CA du mois', value: `${stats.revenueMois.toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'orange', roles: ['ADMIN', 'SELLER'] },
         { name: 'Retours', value: stats.returnedCount, iconName: 'RefreshCw', color: 'rose', roles: ['ADMIN', 'SELLER'] },
         { name: 'Stock Total', value: stats.stockTotal, iconName: 'Archive', color: 'amber', roles: ['ADMIN', 'SELLER'] },
         { name: 'Sans Image', value: stats.booksNoImage, iconName: 'ImageOff', color: 'red', roles: ['ADMIN', 'SELLER'] },
-        { name: 'Livres SKU (Jumia)', value: jumiaStats.booksWithSku, iconName: 'Link2', color: 'orange', roles: ['ADMIN'] },
+        { name: 'Produits SKU (Jumia)', value: jumiaStats.booksWithSku, iconName: 'Link2', color: 'orange', roles: ['ADMIN'] },
         { name: 'Synchro Jumia', value: jumiaStats.syncedBooks, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN'] },
         { name: 'Commandes (Jumia)', value: jumiaRemoteStats?.total || 0, iconName: 'ShoppingCart', color: 'orange', roles: ['ADMIN'] },
         { name: 'En Attente (Jumia)', value: jumiaRemoteStats?.pending || 0, iconName: 'Clock', color: 'yellow', roles: ['ADMIN'] },
@@ -589,7 +589,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             <div>
                                 <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
                                     <BookOpen className="w-4 h-4 text-blue-600" />
-                                    Livres Vedettes
+                                    Produits vedettes
                                 </h3>
                                 <div className="space-y-4">
                                     {topPerformers.books.map((book: any, index: number) => (
@@ -761,11 +761,11 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 </div>
                 <div className="p-6 md:p-10">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                        {/* Livres avec SKU */}
+                        {/* Produits avec SKU */}
                         <div className="flex flex-col items-center justify-center p-6 bg-orange-50/50 rounded-2xl border border-orange-100 group hover:shadow-md transition-all">
                             <Link2 className="w-6 h-6 text-orange-500 mb-2" />
                             <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.booksWithSku}</span>
-                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Livres avec SKU</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Produits avec SKU</span>
                         </div>
                         {/* Synced */}
                         <div className="flex flex-col items-center justify-center p-6 bg-green-50/50 rounded-2xl border border-green-100 group hover:shadow-md transition-all">

@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation'
+import { RETIRED_ACCESSORY_CATEGORIES, isRetiredAccessoryCategory } from '@/lib/pets-catalog'
 import { prisma } from '@/lib/prisma'
 import AccessoriesTable from './AccessoriesTable'
 import Link from 'next/link'
@@ -13,18 +15,13 @@ export default async function AccessoriesPage({
     const { locale } = await params
     const { category } = await searchParams
 
+    if (isRetiredAccessoryCategory(category)) notFound()
     const accessories = await prisma.extraProduct.findMany({
-        where: category ? { category: category.toUpperCase() } : undefined,
+        where: { category: category ? category.toUpperCase() : { notIn: RETIRED_ACCESSORY_CATEGORIES } },
         orderBy: { createdAt: 'desc' }
     })
 
-    const title = category 
-        ? category.toUpperCase() === 'BOOKMARK' ? 'Marque-pages' 
-        : category.toUpperCase() === 'LIBRARY' ? 'Bibliothèques'
-        : category.toUpperCase() === 'USB' ? 'Clés USB'
-        : category.toUpperCase() === 'KIDS' ? 'Produits enfants'
-        : 'Accessoires'
-        : 'Tous les Accessoires'
+    const title = 'Accessoires animaliers'
 
     return (
         <div className="space-y-8">

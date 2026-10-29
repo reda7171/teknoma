@@ -206,7 +206,6 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         { href: '/', label: t('Home') },
         { href: '/books', label: t('Books') },
         { href: '/authors', label: t('Authors') },
-        { href: '/quotes', label: t('Quotes') },
         ...(features.packs === true ? [{ href: '/packs', label: t('Packs') }] : []),
         ...(features.deposerListe === true ? [{ href: '/deposer-liste', label: t('DeposerListe') }] : []),
         { href: '/blog', label: t('Journal'), isJournal: true },

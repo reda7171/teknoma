@@ -112,11 +112,11 @@ export default function AdminLayout({
         exchange: false,
         usb: false,
         kids: false,
-        readingList: featureSettings['feature_reading_list'] !== 'false',
-        digital: featureSettings['feature_digital_books'] !== 'false',
+        readingList: false,
+        digital: false,
         packs: featureSettings['feature_packs'] !== 'false',
         pos: featureSettings['feature_pos'] !== 'false',
-        deposer_liste: featureSettings['feature_deposer_liste'] !== 'false',
+        deposer_liste: false,
     }), [featureSettings])
 
     const allNavigation = useMemo(() => [
@@ -135,7 +135,6 @@ export default function AdminLayout({
             icon: BookOpen,
             children: [
                 { name: 'Produits animaliers', href: `/${lang}/admin/books`, icon: BookOpen },
-                { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
                 { name: 'Catalogue Jumia', href: `/${lang}/admin/jumia-products`, icon: ShoppingBag },
                 { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
                 { name: 'Entrepôts', href: `/${lang}/admin/warehouses`, icon: Package },
@@ -156,7 +155,6 @@ export default function AdminLayout({
                 { name: 'Centre d\'Appels', href: `/${lang}/admin/call-center`, icon: Headset },
                 { name: 'Relances (Follow-up)', href: `/${lang}/admin/follow-up`, icon: MessageCircle },
                 { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
-                { name: 'Listes Scolaires', href: `/${lang}/admin/school-lists`, icon: FileText, featureKey: 'feature_deposer_liste' },
                 { name: 'Achats Fournisseurs', href: `/${lang}/admin/supplier-order`, icon: ShoppingBag },
             ]
         },
@@ -172,16 +170,14 @@ export default function AdminLayout({
             ]
         },
         {
-            name: 'Communauté & Avis',
+            name: 'Avis & Actualités',
             href: `/${lang}/admin/reviews`,
             icon: MessageSquare,
             children: [
                 { name: 'Avis Clients', href: `/${lang}/admin/reviews`, icon: MessageSquare },
                 { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
-                { name: 'Demandes de Livres', href: `/${lang}/admin/requested-books`, icon: Search },
                 { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
                 { name: 'Blog & Actualités', href: `/${lang}/admin/posts`, icon: FileText },
-                { name: 'Citations (Quotes)', href: `/${lang}/admin/quotes`, icon: Quote },
             ]
         },
         {
@@ -504,7 +500,7 @@ export default function AdminLayout({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold text-slate-900 truncate">Administrateur</p>
-                                <p className="text-[10px] text-slate-500 font-medium truncate">contact@ecom.ma</p>
+                                <p className="text-[10px] text-slate-500 font-medium truncate">contact@petsunivers.ma</p>
                             </div>
                         </div>
 
