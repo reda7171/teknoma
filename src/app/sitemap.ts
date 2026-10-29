@@ -1,9 +1,10 @@
 ﻿import type {MetadataRoute} from 'next'
 import {prisma} from '@/lib/prisma'
 import {PET_CATEGORIES} from '@/lib/pets'
-export const revalidate=3600
+// Docker builds have no database connection. Query the catalogue at request time.
+export const dynamic='force-dynamic'
 export default async function sitemap():Promise<MetadataRoute.Sitemap>{
- const base=(process.env.NEXT_PUBLIC_APP_URL||'http://localhost:3000').replace(/\/$/,'')
+ const base=(process.env.NEXT_PUBLIC_APP_URL||'https://petsunivers.ma').replace(/\/$/,'')
  const locales=['fr','en','ar']
  const products=await prisma.book.findMany({where:{active:true,status:'APPROVED'},select:{id:true,updatedAt:true}})
  const pages=['','/products','/services','/contact','/privacy','/terms']
