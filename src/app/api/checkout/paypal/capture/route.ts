@@ -1,48 +1,36 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { confirmPaypalPayment, paypalClient, paypalOrigin } from '@/lib/paypal'
+import { validatePaypalOrder, type PaypalOrder } from '@/lib/paypal-validation'
 
 export async function GET(req: Request) {
+    const origin = paypalOrigin(req)
+    const failure = () => NextResponse.redirect(new URL('/fr/checkout?error=paypal_capture_failed', origin))
     try {
-        const { searchParams } = new URL(req.url)
-        const token = searchParams.get('token')
-        const orderId = searchParams.get('orderId')
-
-        if (!token || !orderId) {
-            return NextResponse.redirect(new URL('/checkout?error=invalid_paypal_return', req.url))
-        }
-
-        const clientId = await getSetting('payment_paypal_client_id')
-        const clientSecret = await getSetting('payment_paypal_client_secret')
-        const mode = await getSetting('payment_paypal_mode') || 'sandbox'
-        const baseUrl = mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
-
-        const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-
-        // Capture payment
-        const captureRes = await fetch(`${baseUrl}/v2/checkout/orders/${token}/capture`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${auth}`,
-                'Content-Type': 'application/json',
-            },
-        })
-
-        const captureData = await captureRes.json()
-
-        if (captureData.status === 'COMPLETED') {
-            await prisma.order.update({
-                where: { id: orderId },
-                data: { status: 'CONFIRMED' }
+        const params = new URL(req.url).searchParams
+        const token = params.get('token')
+        const orderId = params.get('orderId')
+        if (!token || !/^[A-Z0-9]{1,32}$/.test(token) || !orderId) return failure()
+        const payment = await prisma.paypalPayment.findUnique({ where: { paypalOrderId: token }, include: { order: true } })
+        if (!payment || payment.orderId !== orderId) return failure()
+        const order = payment.order
+        if (order.paymentMethod !== 'PAYPAL' || Math.round(order.total * 100) !== payment.amountMad ||
+            ['CANCELLED', 'RETURNED'].includes(order.status) || payment.status === 'REFUNDED') return failure()
+        const client = await paypalClient()
+        if (payment.mode !== client.config.mode) return failure()
+        let remote = await client.request<PaypalOrder>(`/v2/checkout/orders/${token}`)
+        // Check association and frozen amount BEFORE attempting a capture.
+        validatePaypalOrder(remote, payment)
+        if (remote.status !== 'COMPLETED') {
+            if (order.isPaid || remote.status !== 'APPROVED') return failure()
+            remote = await client.request<PaypalOrder>(`/v2/checkout/orders/${token}/capture`, {
+                body: {}, requestId: `capture-${payment.id}`,
             })
-            return NextResponse.redirect(new URL(`/checkout/success/${orderId}`, req.url))
-        } else {
-            console.error('PayPal capture error:', captureData)
-            return NextResponse.redirect(new URL('/checkout?error=paypal_capture_failed', req.url))
         }
-
-    } catch (error: any) {
-        console.error('PayPal Callback error:', error)
-        return NextResponse.redirect(new URL('/checkout?error=internal_error', req.url))
+        await confirmPaypalPayment(remote, client.config.mode)
+        return NextResponse.redirect(new URL(`/fr/checkout/success/${encodeURIComponent(orderId)}`, origin))
+    } catch (error) {
+        console.error('PayPal capture:', error instanceof Error ? error.message : 'Unknown error')
+        return failure()
     }
 }

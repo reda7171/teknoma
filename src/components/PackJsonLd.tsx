@@ -93,6 +93,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://riwaya.store' }: P
       "description": description,
       "url": packUrl,
       "sku": pack.id,
+      "mpn": pack.id,
       ...(pack.image ? { "image": pack.image } : {}),
       "brand": {
         "@type": "Brand",

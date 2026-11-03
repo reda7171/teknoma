@@ -27,7 +27,6 @@ const HomeLeaderboard = dynamic(() => import('@/components/home/HomeLeaderboard'
 import { Suspense } from 'react'
 import { ArrowRight, BookOpen, Package, Truck, Shield, Sparkles, Quote, TrendingUp, Users, RefreshCw, FileText, Zap, Download, Headphones, Star } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { getSchemaAvailability } from '@/lib/product-availability'
 import { Metadata } from 'next'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { getPrimaryImage } from '@/lib/utils/image'
@@ -294,7 +293,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           closes: '22:00',
         },
         paymentAccepted: 'Cash on Delivery',
-        currenciesAccepted: 'درهم',
+        currenciesAccepted: 'MAD',
       },
       {
         '@type': 'WebSite',
@@ -342,77 +341,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         '@id': 'https://riwaya.store/#products',
         name: 'Livres disponibles',
         numberOfItems: totalBooks,
-        itemListElement: popularBooks.slice(0, 5).map((book, index) => ({
-          '@type': 'ListItem',
-          position: index + 1,
-          item: {
-            '@type': 'Book',
-            '@id': `https://riwaya.store/books/${book.id}`,
+        itemListElement: popularBooks.slice(0, 5).map((book, index) => {
+          const img = book.image ? (book.image.startsWith('http') ? book.image : `https://riwaya.store${book.image}`) : undefined
+          return {
+            '@type': 'ListItem',
+            position: index + 1,
             name: book.title,
-            sku: book.id,
-            brand: {
-              '@type': 'Brand',
-              name: 'Riwaya',
-            },
-            ...(book.isbn ? { isbn: book.isbn } : {}),
-            author: {
-              '@type': 'Person',
-              name: book.author,
-            },
-            image: book.image,
-            offers: {
-              '@type': 'Offer',
-              price: book.price,
-              priceCurrency: 'MAD',
-              validFrom: book.createdAt
-                ? new Date(book.createdAt).toISOString().split('T')[0]
-                : '2025-01-01',
-              availability: getSchemaAvailability(book),
-              itemCondition: 'https://schema.org/NewCondition',
-              seller: {
-                '@id': 'https://riwaya.store/#organization',
-              },
-              hasMerchantReturnPolicy: {
-                '@type': 'MerchantReturnPolicy',
-                applicableCountry: 'MA',
-                returnPolicyCountry: 'MA',
-                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                merchantReturnDays: 3,
-                returnMethod: 'https://schema.org/ReturnByMail',
-                returnFees: 'https://schema.org/FreeReturn',
-                refundType: 'https://schema.org/FullRefund',
-                merchantReturnLink: `https://riwaya.store/${locale}/returns`
-              },
-              shippingDetails: {
-                '@type': 'OfferShippingDetails',
-                shippingRate: {
-                  '@type': 'MonetaryAmount',
-                  value: 35,
-                  currency: 'MAD'
-                },
-                shippingDestination: {
-                  '@type': 'DefinedRegion',
-                  addressCountry: 'MA'
-                },
-                deliveryTime: {
-                  '@type': 'ShippingDeliveryTime',
-                  handlingTime: {
-                    '@type': 'QuantitativeValue',
-                    minValue: 0,
-                    maxValue: 1,
-                    unitCode: 'DAY'
-                  },
-                  transitTime: {
-                    '@type': 'QuantitativeValue',
-                    minValue: 1,
-                    maxValue: 3,
-                    unitCode: 'DAY'
-                  }
-                }
-              }
-            },
-          },
-        })),
+            url: `https://riwaya.store/${locale}/books/${book.id}`,
+            ...(img ? { image: img } : {})
+          }
+        }),
       },
     ],
   };
@@ -526,29 +464,47 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const defaultOrder = [
     'home_section_hero',
+    'home_section_best_sellers',
+    'home_section_new_arrivals',
+    'home_section_used_books',
     'home_section_sonic_delivery',
     'home_section_custom_html',
     'home_section_features',
     'home_section_leaderboard',
-    'home_section_best_sellers',
     'home_section_quote',
     'home_section_packs',
     'home_section_authors',
     'home_section_trust',
-    'home_section_new_arrivals',
-    'home_section_used_books',
     'home_section_audio_testimonials',
     'home_section_instagram',
     'home_section_exchange',
     'home_section_digital',
     'home_section_blog'
   ]
-  const sectionsOrder = homeSettings['home_sections_order']
-    ? homeSettings['home_sections_order'].split(',').filter(k => defaultOrder.includes(k) || k.startsWith('home_section_custom_html_'))
+  const rawOrder = homeSettings['home_sections_order'] || settingsByKey['home_sections_order']
+  const sectionsOrder = rawOrder
+    ? rawOrder.split(',').filter(k => defaultOrder.includes(k) || k.startsWith('home_section_custom_html_'))
     : defaultOrder
 
   // Ensure missing sections are added at the end
-  const finalOrder = [...sectionsOrder, ...defaultOrder.filter(k => !sectionsOrder.includes(k))]
+  let finalOrder = [...sectionsOrder, ...defaultOrder.filter(k => !sectionsOrder.includes(k))]
+
+  // S'assurer que les sections demandées sont positionnées avant la Livraison Sonic
+  const sectionsBeforeSonic = [
+    'home_section_best_sellers',
+    'home_section_new_arrivals',
+    'home_section_used_books'
+  ]
+
+  sectionsBeforeSonic.forEach(secKey => {
+    const secIdx = finalOrder.indexOf(secKey)
+    const sonicIdx = finalOrder.indexOf('home_section_sonic_delivery')
+    if (secIdx !== -1 && sonicIdx !== -1 && secIdx > sonicIdx) {
+      finalOrder.splice(secIdx, 1)
+      const currentSonicIdx = finalOrder.indexOf('home_section_sonic_delivery')
+      finalOrder.splice(currentSonicIdx, 0, secKey)
+    }
+  })
 
   const renderSection = (key: string) => {
     if (!showSection(key)) return null

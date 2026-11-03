@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut, Camera, AlertTriangle } from 'lucide-react';
+import { Search, ShoppingBag, Trash2, Plus, Minus, User, MapPin, Phone, Maximize, Minimize, ArrowLeft, Check, X, Wifi, WifiOff, RefreshCw, ListOrdered, FileText, Delete, ZoomIn, ZoomOut, Camera, AlertTriangle, Sparkles, MessageSquare, ClipboardPaste } from 'lucide-react';
 import Link from 'next/link';
 import POSProductCard from './POSProductCard';
 import BarcodeScanner from './BarcodeScanner';
-import { createPOSOrder, getCustomerByPhone } from '@/lib/actions/pos';
+import { createPOSOrder, getCustomerByPhone, parseWhatsAppOrder } from '@/lib/actions/pos';
 import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
 import { printReceipt, printZReport } from '@/lib/utils/printReceipt';
@@ -170,6 +170,11 @@ export default function POSClient({
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   const [selectedShippingCompany, setSelectedShippingCompany] = useState<string>(shippingCompanies[0]?.id || '');
   
+  // WhatsApp Auto-fill States
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [whatsAppText, setWhatsAppText] = useState('');
+  const [isParsingWhatsApp, setIsParsingWhatsApp] = useState(false);
+
   const [allCities, setAllCities] = useState<string[]>([]);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
   const [showCities, setShowCities] = useState(false);
@@ -460,6 +465,64 @@ export default function POSClient({
 
   const toggleMissing = (cartItemId: string) => {
     setCart(prev => prev.map(item => item.cartItemId === cartItemId ? { ...item, isMissing: !item.isMissing } : item));
+  };
+
+  const handleParseWhatsApp = async () => {
+    if (!whatsAppText.trim()) {
+      showNotification('Veuillez d\'abord coller la conversation WhatsApp', 'error');
+      return;
+    }
+    setIsParsingWhatsApp(true);
+    try {
+      const res = await parseWhatsAppOrder(whatsAppText);
+      if (res.success && res.data) {
+        const { fullName, phone, city, address, shippingFees: fees, bookTitle } = res.data;
+
+        setCustomer(prev => ({
+          fullName: fullName || prev.fullName,
+          phone: phone || prev.phone,
+          city: city || prev.city,
+          address: address || prev.address
+        }));
+
+        if (fees !== null && fees !== undefined && !isNaN(Number(fees))) {
+          setShippingFees(Number(fees));
+        }
+
+        if (city) {
+          const normalized = normalizeString(city);
+          const matchedCity = allCities.find(c => normalizeString(c) === normalized);
+          if (matchedCity) {
+            setCustomer(prev => ({ ...prev, city: matchedCity }));
+          }
+        }
+
+        if (bookTitle) {
+          setSearchTerm(bookTitle);
+          const normalizedBookTitle = normalizeString(bookTitle);
+          const foundBook = localBooks.find(b => 
+            normalizeString(b.title || '').includes(normalizedBookTitle) ||
+            normalizedBookTitle.includes(normalizeString(b.title || ''))
+          );
+          if (foundBook) {
+            addToCart(foundBook, 'BOOK');
+            showNotification(`Livre détecté et ajouté : ${foundBook.title}`, 'success');
+          } else {
+            showNotification(`Livre recherché : ${bookTitle}`, 'info');
+          }
+        }
+
+        showNotification('Informations WhatsApp appliquées avec succès', 'success');
+        setShowWhatsAppModal(false);
+        setWhatsAppText('');
+      } else {
+        showNotification(res.error || 'Erreur lors de l\'analyse', 'error');
+      }
+    } catch (err: any) {
+      showNotification('Erreur lors du traitement', 'error');
+    } finally {
+      setIsParsingWhatsApp(false);
+    }
   };
 
   const itemsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -957,9 +1020,92 @@ export default function POSClient({
         </div>
 
         <div className="shrink-0 p-8 border-t border-gray-50 bg-gray-50/50 space-y-6">
-          <div className="flex items-center gap-3 text-[10px] font-black text-black uppercase tracking-[0.2em]">
-            <User className="w-3.5 h-3.5" /> Fiche Client
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-[10px] font-black text-black uppercase tracking-[0.2em]">
+              <User className="w-3.5 h-3.5" /> Fiche Client
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowWhatsAppModal(!showWhatsAppModal)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-sm"
+              title="Saisie automatique WhatsApp"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              Saisie WhatsApp
+            </button>
           </div>
+
+          {showWhatsAppModal && (
+            <div className="p-4 bg-emerald-50/40 border border-emerald-200/70 rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-[10px] font-black text-emerald-800 uppercase tracking-wider">
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                  Conversation WhatsApp
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const clipText = await navigator.clipboard.readText();
+                        if (clipText) setWhatsAppText(clipText);
+                      } catch {
+                        showNotification('Accès au presse-papiers non disponible', 'error');
+                      }
+                    }}
+                    className="px-2.5 py-1 bg-white hover:bg-emerald-100/50 text-emerald-700 border border-emerald-200 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all"
+                  >
+                    <ClipboardPaste className="w-3 h-3" /> Coller
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowWhatsAppModal(false)}
+                    className="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+              <textarea
+                rows={4}
+                value={whatsAppText}
+                onChange={e => setWhatsAppText(e.target.value)}
+                placeholder="Collez ici les messages WhatsApp (ex: nom, numéro, adresse, ville, livre demandé)..."
+                className="w-full p-3 text-[11px] font-sans bg-white border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+              />
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWhatsAppText('');
+                    setShowWhatsAppModal(false);
+                  }}
+                  className="px-3 py-2 text-[9px] font-black uppercase tracking-wider text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  disabled={isParsingWhatsApp || !whatsAppText.trim()}
+                  onClick={handleParseWhatsApp}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-emerald-600/20 active:scale-95"
+                >
+                  {isParsingWhatsApp ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Analyse en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      Extraire et Remplir
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             <input
               type="text"

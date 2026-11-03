@@ -14,7 +14,6 @@ import KidsProductsClient from '../mon-enfant/KidsProductsClient'
 import { Filter, SlidersHorizontal, Quote, Banknote, Globe, User } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { getTranslations } from 'next-intl/server'
-import { getSchemaAvailability } from '@/lib/product-availability'
 import { Metadata } from 'next'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { headers } from 'next/headers'
@@ -188,73 +187,16 @@ export default async function BooksPage({
             mainEntity: {
                 '@type': 'ItemList',
                 numberOfItems: books.length,
-                itemListElement: books.slice(0, 20).map((b: any, index: number) => ({
-                    '@type': 'ListItem',
-                    position: index + 1,
-                    name: b.title,
-                    url: `${baseUrl}/${locale}/books/${b.id}`,
-                    item: {
-                        '@type': 'Product',
+                itemListElement: books.slice(0, 20).map((b: any, index: number) => {
+                    const img = b.image ? (b.image.startsWith('http') ? b.image : `${baseUrl}${b.image}`) : undefined
+                    return {
+                        '@type': 'ListItem',
+                        position: index + 1,
                         name: b.title,
-                        description: b.description ? b.description.slice(0, 160) : b.title,
-                        image: b.image ? (b.image.startsWith('http') ? b.image : `${baseUrl}${b.image}`) : undefined,
-                        sku: b.id,
-                        brand: {
-                            '@type': 'Brand',
-                            name: 'Riwaya'
-                        },
-                        ...(b.isbn ? { isbn: b.isbn } : {}),
-                        offers: {
-                            '@type': 'Offer',
-                            priceCurrency: 'MAD',
-                            price: b.price,
-                            availability: getSchemaAvailability(b),
-                            itemCondition: 'https://schema.org/UsedCondition',
-                            seller: {
-                                '@type': 'Organization',
-                                name: 'Riwaya'
-                            },
-                            hasMerchantReturnPolicy: {
-                                '@type': 'MerchantReturnPolicy',
-                                applicableCountry: 'MA',
-                                returnPolicyCountry: 'MA',
-                                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                                merchantReturnDays: 3,
-                                returnMethod: 'https://schema.org/ReturnByMail',
-                                returnFees: 'https://schema.org/FreeReturn',
-                                refundType: 'https://schema.org/FullRefund',
-                                merchantReturnLink: `${baseUrl}/${locale}/returns`
-                            },
-                            shippingDetails: {
-                                '@type': 'OfferShippingDetails',
-                                shippingRate: {
-                                    '@type': 'MonetaryAmount',
-                                    value: 35,
-                                    currency: 'MAD'
-                                },
-                                shippingDestination: {
-                                    '@type': 'DefinedRegion',
-                                    addressCountry: 'MA'
-                                },
-                                deliveryTime: {
-                                    '@type': 'ShippingDeliveryTime',
-                                    handlingTime: {
-                                        '@type': 'QuantitativeValue',
-                                        minValue: 0,
-                                        maxValue: 1,
-                                        unitCode: 'DAY'
-                                    },
-                                    transitTime: {
-                                        '@type': 'QuantitativeValue',
-                                        minValue: 1,
-                                        maxValue: 3,
-                                        unitCode: 'DAY'
-                                    }
-                                }
-                            }
-                        }
+                        url: `${baseUrl}/${locale}/books/${b.id}`,
+                        ...(img ? { image: img } : {})
                     }
-                }))
+                })
             }
         }
     }

@@ -91,6 +91,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/:path*/opengraph-image',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, noarchive',
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           {

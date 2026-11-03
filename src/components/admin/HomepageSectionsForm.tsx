@@ -44,13 +44,15 @@ interface HomepageSectionsFormProps {
 
 const HOME_SECTIONS = [
     { key: 'home_section_hero', label: 'Section Hero', icon: Sparkles, defaultBg: 'bg-pixio-cream' },
-    { key: 'home_section_features', label: 'Avantages (Features)', icon: Truck, defaultBg: 'bg-white' },
     { key: 'home_section_best_sellers', label: 'Meilleures Ventes', icon: TrendingUp, defaultBg: 'bg-white' },
+    { key: 'home_section_new_arrivals', label: 'Nouveautés (Derniers Arrivages)', icon: Zap, defaultBg: 'bg-white' },
+    { key: 'home_section_used_books', label: "Livres d'occasion", icon: RefreshCw, defaultBg: 'bg-pixio-cream' },
+    { key: 'home_section_sonic_delivery', label: 'Livraison Sonic', icon: Zap, defaultBg: 'bg-white' },
+    { key: 'home_section_features', label: 'Avantages (Features)', icon: Truck, defaultBg: 'bg-white' },
     { key: 'home_section_quote', label: 'Citation du Jour', icon: Quote, defaultBg: 'bg-pixio-yellow' },
     { key: 'home_section_packs', label: 'Collections / Packs', icon: Package, defaultBg: 'bg-pixio-cream' },
     { key: 'home_section_authors', label: 'Auteurs Vedettes', icon: Users, defaultBg: 'bg-white' },
     { key: 'home_section_trust', label: 'Section Confiance', icon: Shield, defaultBg: 'bg-white' },
-    { key: 'home_section_new_arrivals', label: 'Nouveautés', icon: Zap, defaultBg: 'bg-white' },
     { key: 'home_section_exchange', label: 'Échange de Livres', icon: RefreshCw, defaultBg: 'bg-gradient-to-br from-green-50 to-teal-50' },
     { key: 'home_section_digital', label: 'Livres Numériques', icon: FileText, defaultBg: 'bg-black' },
     { key: 'home_section_blog', label: 'Journal / Blog', icon: FileText, defaultBg: 'bg-white' },

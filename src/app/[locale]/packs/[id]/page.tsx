@@ -175,6 +175,7 @@ export default async function PackDetailPage({
             '@type': 'Product',
             name: displayName,
             sku: pack.id,
+            mpn: pack.id,
             description: displayDescription || `Pack de ${pack.books.length} livres sélectionné par Riwaya.`,
             image: packImageUrl,
             brand: {
