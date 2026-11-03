@@ -658,6 +658,8 @@ export default function CheckoutClient({
                                     />
                                     <div className="ml-3 flex flex-col">
                                         <span className="font-bold text-pixio-dark">PayPal</span>
+                                        <span className="text-xs text-pixio-gray">Paiement en USD après conversion du total MAD. Le montant sera affiché sur PayPal avant validation.</span>
+                                        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" className="text-xs text-pixio-gray underline">Taux de change : ExchangeRate-API</a>
                                         <span className="text-sm text-pixio-gray">Payez de manière sécurisée via votre compte PayPal</span>
                                     </div>
                                     <svg className="w-8 h-8 ml-auto opacity-50" viewBox="0 0 124 32" fill="none" xmlns="http://www.w3.org/2000/svg">

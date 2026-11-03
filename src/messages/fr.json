@@ -2236,5 +2236,16 @@
     "cleanSkuBulk": "Nettoyer SKU Jumia ({count})",
     "cleanSkuRow": "Nettoyer SKU Jumia (Marketplace)",
     "cleanSkuTooltip": "Nettoyer les espaces parasites et resynchroniser vers Jumia"
+  },
+  "POSWhatsApp": {
+    "button": "Saisie WhatsApp",
+    "title": "Conversation WhatsApp",
+    "paste": "Coller",
+    "placeholder": "Collez ici les messages WhatsApp (ex: nom, numéro, adresse, ville, livre demandé)...",
+    "cancel": "Annuler",
+    "extract": "Extraire et Remplir",
+    "analyzing": "Analyse en cours...",
+    "success": "Informations client WhatsApp appliquées",
+    "bookDetected": "Livre détecté et ajouté : {title}"
   }
 }

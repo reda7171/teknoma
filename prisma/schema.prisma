@@ -22,6 +22,19 @@ model ShippingCompany {
   @@map("shipping_companies")
 }
 
+model CityDelivery {
+  id        String   @id @default(uuid())
+  city      String   @unique @db.VarChar(150)
+  price     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([city])
+  @@index([active])
+  @@map("city_delivery")
+}
+
 model CategoryConfig {
   id             String    @id @default(uuid())
   name           String    @unique
@@ -420,6 +433,7 @@ model Order {
   ttclid           String?              @db.VarChar(500)
   salesChannel     SalesChannel         @default(RIWAYA_STORE)
   items            OrderItem[]
+  paypalPayments   PaypalPayment[]
   statusHistory    OrderStatusHistory[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
   expense          Expense?             @relation(fields: [expenseId], references: [id])
@@ -439,6 +453,23 @@ model Order {
   @@index([financeArchiveId])
   @@index([expenseId])
   @@map("orders")
+}
+
+model PaypalPayment {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  orderId       String
+  mode          String   @db.VarChar(10)
+  paypalOrderId String?  @unique @db.VarChar(32)
+  captureId     String?  @unique @db.VarChar(32)
+  amountMad     Int
+  amountUsd     Int
+  status        String   @default("CREATED") @db.VarChar(20)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  order         Order    @relation(fields: [orderId], references: [id])
+
+  @@unique([orderId, mode])
+  @@map("paypal_payments")
 }
 
 model Customer {

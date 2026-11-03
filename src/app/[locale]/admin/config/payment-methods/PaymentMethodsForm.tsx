@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2, Eye, EyeOff, Upload, Loader2 } from 'lucide-react'
-import { updateSetting } from '@/lib/actions/site-settings'
+import { updateSetting, updateMultipleSettings } from '@/lib/actions/site-settings'
 import { useUIStore } from '@/store/ui'
 
 interface PaymentSettings {
@@ -43,9 +43,33 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
     const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
     const [uploadingQrIndex, setUploadingQrIndex] = useState<number | null>(null)
     const [showPaypalSecret, setShowPaypalSecret] = useState(false)
+    const [testingPaypal, setTestingPaypal] = useState(false)
+    const [paypalTest, setPaypalTest] = useState<{ message: string; webhookReady: boolean; canRegisterWebhook: boolean } | null>(null)
     const [showStripeSecret, setShowStripeSecret] = useState(false)
     const [showCmiKey, setShowCmiKey] = useState(false)
     const showNotification = useUIStore(state => state.showNotification)
+
+    const testPaypal = async (action: 'test' | 'register' = 'test') => {
+        setTestingPaypal(true)
+        setPaypalTest(null)
+        try {
+            const saved = await updateMultipleSettings([
+                { key: 'payment_paypal_enabled', value: String(settings.paypalEnabled), category: 'config' },
+                { key: 'payment_paypal_mode', value: settings.paypalMode, category: 'config' },
+                { key: 'payment_paypal_client_id', value: settings.paypalClientId.trim(), category: 'config' },
+                { key: 'payment_paypal_client_secret', value: settings.paypalClientSecret.trim(), category: 'config' },
+            ])
+            if (!saved.success) throw new Error(saved.error || 'Enregistrement impossible')
+            const response = await fetch('/api/admin/paypal/test', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }),
+            })
+            const result = await response.json()
+            if (!response.ok) throw new Error(result.error || 'Test PayPal impossible')
+            setPaypalTest(result)
+        } catch (error) {
+            showNotification(error instanceof Error ? error.message : 'Test PayPal impossible', 'error')
+        } finally { setTestingPaypal(false) }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -246,6 +270,20 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     </div>
                 )}
                 
+                {settings.paypalEnabled && (
+                    <div className="space-y-3">
+                        <button type="button" disabled={testingPaypal || isLoading} onClick={() => testPaypal()}
+                            className="px-4 py-3 rounded-xl bg-blue-600 text-white font-bold disabled:opacity-50">
+                            {testingPaypal ? 'Vérification en cours…' : 'Enregistrer et tester PayPal'}
+                        </button>
+                        {paypalTest && <div role="status" className="p-4 rounded-xl bg-blue-50 text-sm text-blue-900 space-y-3">
+                            <p>{paypalTest.message}</p>
+                            {!paypalTest.webhookReady && paypalTest.canRegisterWebhook && <button type="button" disabled={testingPaypal}
+                                onClick={() => testPaypal('register')} className="underline font-bold">Connecter le webhook PayPal</button>}
+                        </div>}
+                        <p className="text-xs text-slate-500">Le test enregistre les paramètres PayPal. Aucun paiement n’est encaissé.</p>
+                    </div>
+                )}
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-800">
                     <strong>Documentation PayPal :</strong> Vous pouvez créer une application et obtenir votre Client ID et Secret Key depuis le <a href="https://developer.paypal.com/dashboard" target="_blank" rel="noreferrer" className="underline font-bold">Portail Développeur PayPal</a>. Assurez-vous d'activer les paiements en direct si vous choisissez le mode Production.
                 </div>

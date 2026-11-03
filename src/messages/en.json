@@ -2326,5 +2326,16 @@
     "cleanSkuBulk": "Clean Jumia SKU ({count})",
     "cleanSkuRow": "Clean Jumia SKU (Marketplace)",
     "cleanSkuTooltip": "Clean parasite spaces and resynchronize with Jumia"
+  },
+  "POSWhatsApp": {
+    "button": "WhatsApp Autofill",
+    "title": "WhatsApp Conversation",
+    "paste": "Paste",
+    "placeholder": "Paste WhatsApp conversation here (e.g. name, phone, address, city, requested book)...",
+    "cancel": "Cancel",
+    "extract": "Extract & Fill",
+    "analyzing": "Analyzing...",
+    "success": "Customer information applied successfully",
+    "bookDetected": "Book detected and added: {title}"
   }
 }

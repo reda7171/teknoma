@@ -1088,7 +1088,7 @@ export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
 }
 
 /**
- * Générer automatiquement des SKU uniques pour les livres sans SKU
+ * Générer automatiquement ou modifier des SKU uniques pour les livres, packs et accessoires
  */
 export async function bulkGenerateSkus(ids?: string[]): Promise<{
     success: boolean
@@ -1101,51 +1101,116 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
         const role = await getAdminRole()
         const userId = await getAdminUser()
 
-        const where: any = {
-            OR: [
+        const isBulkAllMissing = !ids || ids.length === 0
+
+        const bookWhere: any = {}
+        if (isBulkAllMissing) {
+            bookWhere.OR = [
                 { sellerSku: null },
                 { sellerSku: '' }
             ]
-        }
-        if (ids && ids.length > 0) {
-            where.id = { in: ids }
+        } else {
+            bookWhere.id = { in: ids }
         }
         if (role === 'SELLER' && userId) {
-            where.sellerId = userId
+            bookWhere.sellerId = userId
         }
 
-        const booksWithoutSku = await prisma.book.findMany({
-            where,
-            select: { id: true, title: true }
-        })
+        const packWhere: any = isBulkAllMissing
+            ? { OR: [{ sellerSku: null }, { sellerSku: '' }] }
+            : { id: { in: ids } }
 
-        if (booksWithoutSku.length === 0) {
+        const extraWhere: any = isBulkAllMissing
+            ? { OR: [{ sellerSku: null }, { sellerSku: '' }] }
+            : { id: { in: ids } }
+
+        const [booksToProcess, packsToProcess, extrasToProcess, existingBookSkus, existingPackSkus, existingExtraSkus] = await Promise.all([
+            prisma.book.findMany({
+                where: bookWhere,
+                select: { id: true, title: true, sellerSku: true }
+            }),
+            isBulkAllMissing 
+                ? Promise.resolve([]) 
+                : prisma.pack.findMany({ where: packWhere, select: { id: true, name: true, sellerSku: true } }),
+            isBulkAllMissing 
+                ? Promise.resolve([]) 
+                : prisma.extraProduct.findMany({ where: extraWhere, select: { id: true, name: true, sellerSku: true } }),
+            prisma.book.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
+            prisma.pack.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
+            prisma.extraProduct.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
+        ])
+
+        const totalItems = booksToProcess.length + packsToProcess.length + extrasToProcess.length
+        if (totalItems === 0) {
             return { success: true, count: 0, updatedMap: {} }
+        }
+
+        const usedSkus = new Set(
+            [
+                ...existingBookSkus.map(b => b.sellerSku?.toUpperCase()),
+                ...existingPackSkus.map(p => p.sellerSku?.toUpperCase()),
+                ...existingExtraSkus.map(e => e.sellerSku?.toUpperCase()),
+            ].filter((s): s is string => Boolean(s))
+        )
+
+        function generateUniqueSku(id: string, currentSku?: string | null): string {
+            const cleanCurrent = (currentSku || '').trim().toUpperCase()
+            const idHex = id.replace(/-/g, '').toUpperCase()
+
+            // 1er essai: 8 premiers caractères de l'ID
+            let candidate = idHex.substring(0, 8)
+
+            // Si c'est identique au SKU actuel OU déjà utilisé par un autre produit:
+            if (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                candidate = idHex.substring(8, 16)
+            }
+            if (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                candidate = idHex.substring(16, 24)
+            }
+            if (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                candidate = idHex.substring(24, 32)
+            }
+
+            // Si toujours en collision ou identique : suffixe aléatoire de 4 chars
+            while (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
+                candidate = (idHex.substring(0, 4) + rand).toUpperCase()
+            }
+
+            usedSkus.add(candidate)
+            return candidate
         }
 
         const updatedMap: Record<string, string> = {}
 
-        // SKUs deja utilises pour eviter les doublons
-        const allExistingSkus = await prisma.book.findMany({
-            where: { sellerSku: { not: null } },
-            select: { sellerSku: true }
-        })
-        const usedSkus = new Set(allExistingSkus.map(b => b.sellerSku?.toUpperCase()))
-
-        for (let i = 0; i < booksWithoutSku.length; i++) {
-            const b = booksWithoutSku[i]
-            // SKU = 8 premiers chars UUID sans tirets en majuscules (ex: D8EC428A)
-            let generatedSku = b.id.replace(/-/g, '').substring(0, 8).toUpperCase()
-            // Collision rare : prendre les 8 suivants
-            if (usedSkus.has(generatedSku)) {
-                generatedSku = b.id.replace(/-/g, '').substring(8, 16).toUpperCase()
-            }
+        // 1. Mettre à jour les livres
+        for (const b of booksToProcess) {
+            const newSku = generateUniqueSku(b.id, b.sellerSku)
             await prisma.book.update({
                 where: { id: b.id },
-                data: { sellerSku: generatedSku }
+                data: { sellerSku: newSku }
             })
-            updatedMap[b.id] = generatedSku
-            usedSkus.add(generatedSku)
+            updatedMap[b.id] = newSku
+        }
+
+        // 2. Mettre à jour les packs
+        for (const p of packsToProcess) {
+            const newSku = generateUniqueSku(p.id, p.sellerSku)
+            await prisma.pack.update({
+                where: { id: p.id },
+                data: { sellerSku: newSku }
+            })
+            updatedMap[p.id] = newSku
+        }
+
+        // 3. Mettre à jour les accessoires
+        for (const e of extrasToProcess) {
+            const newSku = generateUniqueSku(e.id, e.sellerSku)
+            await prisma.extraProduct.update({
+                where: { id: e.id },
+                data: { sellerSku: newSku }
+            })
+            updatedMap[e.id] = newSku
         }
 
         revalidatePath('/admin/books')
@@ -1154,10 +1219,10 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
         await createAuditLog({
             action: 'BULK_GENERATE_SKU',
             entity: 'BOOK',
-            details: `Génération automatique de SKU pour ${booksWithoutSku.length} livre(s)`,
+            details: `Génération / modification automatique de SKU pour ${totalItems} produit(s)`,
         })
 
-        return { success: true, count: booksWithoutSku.length, updatedMap }
+        return { success: true, count: totalItems, updatedMap }
     } catch (error: any) {
         console.error('Erreur lors de la génération automatique des SKU:', error)
         return { success: false, error: error.message || 'Impossible de générer les SKU' }

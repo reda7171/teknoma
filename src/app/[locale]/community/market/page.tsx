@@ -200,28 +200,16 @@ export default async function MarketPage({
                 '@type': 'ItemList',
                 name: pageTitle,
                 numberOfItems: Math.min(books.length, 12),
-                itemListElement: books.slice(0, 12).map((book: any, index: number) => ({
-                    '@type': 'ListItem',
-                    position: index + 1,
-                    item: {
-                        '@type': 'Book',
+                itemListElement: books.slice(0, 12).map((book: any, index: number) => {
+                    const img = book.image ? (getPrimaryImage(book.image).startsWith('http') ? getPrimaryImage(book.image) : `${baseUrl}${getPrimaryImage(book.image)}`) : undefined
+                    return {
+                        '@type': 'ListItem',
+                        position: index + 1,
                         name: book.title,
-                        author: {
-                            '@type': 'Person',
-                            name: book.author
-                        },
                         url: `${baseUrl}/${locale}/community/market/${book.id}`,
-                        image: book.image ? (getPrimaryImage(book.image).startsWith('http') ? getPrimaryImage(book.image) : `${baseUrl}${getPrimaryImage(book.image)}`) : undefined,
-                        itemCondition: 'https://schema.org/UsedCondition',
-                        offers: {
-                            '@type': 'Offer',
-                            price: '0',
-                            priceCurrency: 'MAD',
-                            availability: 'https://schema.org/InStock',
-                            description: 'Échange ou troc de livre d\'occasion'
-                        }
+                        ...(img ? { image: img } : {})
                     }
-                }))
+                })
             },
             {
                 '@type': 'FAQPage',

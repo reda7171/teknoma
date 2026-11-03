@@ -7,7 +7,6 @@ import BookCard from '@/components/BookCard'
 import { CheckCircle2, Truck, Shield, Star, BookOpen, ChevronRight, ChevronDown, Languages } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { getBaseUrl, normalizeImage } from '@/lib/utils'
-import { getSchemaAvailability } from '@/lib/product-availability'
 
 import { getSeoCategoryPage } from '@/lib/actions/seo-categories'
 import { getTranslations } from 'next-intl/server'
@@ -280,89 +279,6 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     ],
   }
 
-  const itemListSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: data.title,
-    description: data.description,
-    url: pageUrl,
-    numberOfItems: popularBooks.length,
-    itemListElement: structuredBooks.map((book: any, index: number) => {
-      const bookUrl = `${baseUrl}/${locale}/books/${book.id}`
-      const rawImage = normalizeImage(book.image)
-      const imageUrl = rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage}`
-
-      return {
-        '@type': 'ListItem',
-        position: index + 1,
-        url: bookUrl,
-        name: book.title,
-        item: {
-          '@type': 'Product',
-          name: book.title,
-          image: imageUrl,
-          description: book.description ? book.description.substring(0, 160) : book.title,
-          url: bookUrl,
-          sku: book.id,
-          brand: {
-            '@type': 'Brand',
-            name: 'Riwaya'
-          },
-          ...(book.isbn ? { isbn: book.isbn } : {}),
-          offers: {
-            '@type': 'Offer',
-            priceCurrency: 'MAD',
-            price: book.price,
-            availability: getSchemaAvailability(book),
-            itemCondition: 'https://schema.org/NewCondition',
-            seller: {
-              '@type': 'Organization',
-              name: 'Riwaya'
-            },
-            hasMerchantReturnPolicy: {
-              '@type': 'MerchantReturnPolicy',
-              applicableCountry: 'MA',
-              returnPolicyCountry: 'MA',
-              returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-              merchantReturnDays: 3,
-              returnMethod: 'https://schema.org/ReturnByMail',
-              returnFees: 'https://schema.org/FreeReturn',
-              refundType: 'https://schema.org/FullRefund',
-              merchantReturnLink: `${baseUrl}/${locale}/returns`
-            },
-            shippingDetails: {
-              '@type': 'OfferShippingDetails',
-              shippingRate: {
-                '@type': 'MonetaryAmount',
-                value: 35,
-                currency: 'MAD'
-              },
-              shippingDestination: {
-                '@type': 'DefinedRegion',
-                addressCountry: 'MA'
-              },
-              deliveryTime: {
-                '@type': 'ShippingDeliveryTime',
-                handlingTime: {
-                  '@type': 'QuantitativeValue',
-                  minValue: 0,
-                  maxValue: 1,
-                  unitCode: 'DAY'
-                },
-                transitTime: {
-                  '@type': 'QuantitativeValue',
-                  minValue: 1,
-                  maxValue: 3,
-                  unitCode: 'DAY'
-                }
-              }
-            }
-          }
-        }
-      }
-    }),
-  }
-
   const collectionSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -371,13 +287,21 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     url: pageUrl,
     mainEntity: {
       '@type': 'ItemList',
+      name: data.title,
       numberOfItems: popularBooks.length,
-      itemListElement: structuredBooks.map((book: any, index: number) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: book.title,
-        url: `${baseUrl}/${locale}/books/${book.id}`,
-      })),
+      itemListElement: structuredBooks.map((book: any, index: number) => {
+        const bookUrl = `${baseUrl}/${locale}/books/${book.id}`
+        const rawImage = normalizeImage(book.image)
+        const imageUrl = rawImage ? (rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage}`) : undefined
+
+        return {
+          '@type': 'ListItem',
+          position: index + 1,
+          name: book.title,
+          url: bookUrl,
+          ...(imageUrl ? { image: imageUrl } : {})
+        }
+      }),
     },
   }
 
@@ -390,10 +314,6 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
       <script
         type="application/ld+json"

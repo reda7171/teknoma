@@ -106,7 +106,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "name": book.author
         },
         "sku": (book as any).sellerSku || book.id,
-        ...((book as any).sellerSku ? { "mpn": (book as any).sellerSku } : {}),
+        "mpn": (book as any).sellerSku || book.id,
         ...(showIsbn ? { "isbn": validIsbn } : {}),
         ...(showIsbn && validIsbn?.length === 13 ? { "gtin13": validIsbn } : {}),
         ...(showIsbn && validIsbn?.length === 10 ? { "gtin10": validIsbn } : {}),

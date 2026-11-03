@@ -53,6 +53,11 @@ const cairo = Cairo({
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  if (!routing.locales.includes(locale as any)) {
+    return {
+      robots: { index: false, follow: false },
+    };
+  }
   const siteUrl = await getSetting('site_url') || 'https://riwaya.store';
 
   // Dynamic SEO configurations from database
@@ -571,7 +576,7 @@ export default async function LocaleLayout({
                 'كتب', 'مكتبة إلكترونية', 'تطوير الذات', 'روايات', 'المغرب'
               ],
               paymentAccepted: 'Cash',
-              currenciesAccepted: 'درهم',
+              currenciesAccepted: 'MAD',
               openingHours: 'Mo-Su 08:00-22:00',
               sameAs: [
                 facebook || 'https://facebook.com/riwaya.book',

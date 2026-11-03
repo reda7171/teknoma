@@ -75,8 +75,9 @@ export async function generateMetadata({
     params: Promise<{ id: string; locale: string }>
 }): Promise<Metadata> {
     const { id, locale } = await params
-    const bookId = id.slice(0, 36);
-    const initialBook = await getBookById(bookId)
+    const uuidMatch = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
+    const bookId = uuidMatch ? uuidMatch[0] : id.slice(0, 36)
+    const initialBook = await getBookById(bookId).catch(() => null).catch(() => null)
 
     if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && bookId !== '08f41f86-a23c-48f6-b486-109383b0f6e0') {
         return {
@@ -243,14 +244,15 @@ export default async function BookDetailPage({
     params: Promise<{ id: string; locale: string }>
 }) {
     const { id, locale } = await params
-    const bookId = id.slice(0, 36);
+    const uuidMatch = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
+    const bookId = uuidMatch ? uuidMatch[0] : id.slice(0, 36)
     
     const tBook = await getTranslations('BookDetail');
     const tCommon = await getTranslations('Common');
     const tNav = await getTranslations('Navigation');
     const tBlog = await getTranslations('Blog');
 
-    const initialBook = await getBookById(bookId)
+    const initialBook = await getBookById(bookId).catch(() => null)
     const user = await getCommunityUser().catch(() => null)
     const isAdmin = user?.role === 'ADMIN' || user?.email === 'contact@riwaya.store'
 

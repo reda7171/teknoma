@@ -156,3 +156,182 @@ export async function createPOSOrder(data: {
     return { success: false, error: errorMessage };
   }
 }
+
+export interface ParsedWhatsAppOrder {
+  fullName: string;
+  phone: string;
+  city: string;
+  address: string;
+  shippingFees: number | null;
+  total: number | null;
+  bookTitle: string | null;
+}
+
+function parseWhatsAppLocally(rawText: string): ParsedWhatsAppOrder {
+  const clean = rawText
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/[\u00A0\u2000-\u200B\u202F\uFEFF]/g, ' ');
+
+  // 1. Extraction téléphone marocain
+  let phone = '';
+  const phoneMatch = clean.match(/(?:\+212|00212|0)[\s\-\.]*([5-7])(?:[\s\-\.]*\d){8}/);
+  if (phoneMatch) {
+    const digits = phoneMatch[0].replace(/\D/g, '');
+    if (digits.startsWith('212')) phone = '0' + digits.slice(3);
+    else if (digits.startsWith('0')) phone = digits;
+  }
+
+  // 2. Frais de livraison & Total
+  let shippingFees: number | null = null;
+  const feesMatch = clean.match(/(?:tawsil|livraison|frais|chhal\s*tawsil)[^\d\n]*(\d+)\s*(?:dh|dirhams?|درهم)?/i);
+  if (feesMatch) {
+    shippingFees = parseInt(feesMatch[1], 10);
+  }
+
+  let total: number | null = null;
+  const totalMatch = clean.match(/(?:total|kheliha|khaliha)[^\d\n]*(\d+)\s*(?:dh|dirhams?|درهم)?/i) ||
+                     clean.match(/(\d+)\s*(?:dh|dirhams?|درهم)?\s*(?:total|kheliha|khaliha)/i);
+  if (totalMatch) {
+    total = parseInt(totalMatch[1], 10);
+  }
+
+  // 3. Titre du livre
+  let bookTitle: string | null = null;
+  const quoteMatch = clean.match(/["'«“]([^"'»”]{3,100})["'»”]/);
+  if (quoteMatch) {
+    bookTitle = quoteMatch[1].trim();
+  }
+
+  // 4. Détection de ville
+  const moroccanCitiesMap: Record<string, string> = {
+    'oued zem': 'Oued Zem', 'wad zem': 'Oued Zem', 'وادي زم': 'Oued Zem',
+    'casablanca': 'Casablanca', 'casa': 'Casablanca', 'الدار البيضاء': 'Casablanca',
+    'rabat': 'Rabat', 'الرباط': 'Rabat',
+    'marrakech': 'Marrakech', 'kech': 'Marrakech', 'مراكش': 'Marrakech',
+    'tanger': 'Tanger', 'tangier': 'Tanger', 'طنجة': 'Tanger',
+    'fes': 'Fès', 'fez': 'Fès', 'فاس': 'Fès',
+    'meknes': 'Meknès', 'مكناس': 'Meknès',
+    'agadir': 'Agadir', 'أكادير': 'Agadir',
+    'oujda': 'Oujda', 'وجدة': 'Oujda',
+    'kenitra': 'Kénitra', 'القنيطرة': 'Kénitra',
+    'tetouan': 'Tétouan', 'تطوان': 'Tétouan',
+    'safi': 'Safi', 'آسفي': 'Safi',
+    'temara': 'Témara', 'تمارة': 'Témara',
+    'salé': 'Salé', 'sale': 'Salé', 'سلا': 'Salé',
+    'mohammedia': 'Mohammédia', 'المحمدية': 'Mohammédia',
+    'el jadida': 'El Jadida', 'الجديدة': 'El Jadida',
+    'beni mellal': 'Béni Mellal', 'بني ملال': 'Béni Mellal',
+    'nador': 'Nador', 'الناظور': 'Nador',
+    'khouribga': 'Khouribga', 'خريبكة': 'Khouribga',
+    'berrechid': 'Berrechid', 'برشيد': 'Berrechid',
+    'khemisset': 'Khémisset', 'الخميسات': 'Khémisset',
+    'berkane': 'Berkane', 'بركان': 'Berkane',
+    'taroudant': 'Taroudant', 'تارودانت': 'Taroudant'
+  };
+
+  let detectedCity = '';
+  const lower = clean.toLowerCase();
+  for (const [key, val] of Object.entries(moroccanCitiesMap)) {
+    if (lower.includes(key)) {
+      detectedCity = val;
+      break;
+    }
+  }
+
+  // 5. Nettoyage des lignes (horodatages et métadonnées)
+  const rawLines = clean
+    .split('\n')
+    .map(l => l.replace(/^(?:\[.*?\]\s*[^:]+:\s*|.*?-\s*[^:]+:\s*)/, '').trim())
+    .filter(Boolean);
+
+  const candidateLines = rawLines.filter(line => {
+    const l = line.toLowerCase();
+    if (phone && line.replace(/\D/g, '').includes(phone.slice(2))) return false;
+    if (line.match(/(?:\+212|00212|0)[5-7]\d{7,8}/)) return false;
+    if (l.includes('salam') || l.includes('chhal') || l.includes('tawsil') || l.includes('total') || l.includes('dh')) return false;
+    return true;
+  });
+
+  let fullName = '';
+  let address = '';
+
+  for (const line of candidateLines) {
+    const isAddressKeyword = /(?:rue|hay|bd|boulevard|derb|lot|lotissement|residence|immeuble|app|n°|زنقة|شارع|حي|تجزئة|تزئة|إقامة|اقامة|عمارة|درب)/i.test(line);
+    const words = line.trim().split(/\s+/);
+    if (!fullName && !isAddressKeyword && words.length >= 1 && words.length <= 4 && !/\d{2,}/.test(line)) {
+      fullName = line.trim();
+    } else if (!address) {
+      address = line.trim();
+    } else {
+      address += ' ' + line.trim();
+    }
+  }
+
+  return {
+    fullName,
+    phone,
+    city: detectedCity,
+    address,
+    shippingFees,
+    total,
+    bookTitle
+  };
+}
+
+export async function parseWhatsAppOrder(rawText: string): Promise<{ success: boolean; data?: ParsedWhatsAppOrder; error?: string }> {
+  if (!rawText || !rawText.trim()) {
+    return { success: false, error: 'Texte vide' };
+  }
+
+  // 1. Analyse locale instantanée (< 5ms)
+  const localResult = parseWhatsAppLocally(rawText);
+  if (localResult.fullName && localResult.phone && (localResult.city || localResult.address)) {
+    return { success: true, data: localResult };
+  }
+
+  // 2. IA Ultra-rapide Gemini Flash Lite avec timeout strict de 2.5 secondes
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const { getSetting } = await import('@/lib/actions/site-settings');
+
+    const apiKey = (await getSetting("gemini_api_key")) || process.env.GEMINI_API_KEY || "";
+    if (apiKey) {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+
+      const prompt = `Extrais les infos de commande WhatsApp en JSON strict uniquement:
+{"fullName": string, "phone": string, "city": string, "address": string, "shippingFees": number|null, "total": number|null, "bookTitle": string|null}
+Texte:
+${rawText}`;
+
+      const aiPromise = (async () => {
+        const result = await model.generateContent(prompt);
+        const text = result.response.text().trim().replace(/```json|```/gi, '').trim();
+        return JSON.parse(text);
+      })();
+
+      const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2500));
+      const parsedJson: any = await Promise.race([aiPromise, timeoutPromise]);
+
+      if (parsedJson && (parsedJson.fullName || parsedJson.phone || parsedJson.city || parsedJson.address)) {
+        return {
+          success: true,
+          data: {
+            fullName: String(parsedJson.fullName || localResult.fullName || '').trim(),
+            phone: String(parsedJson.phone || localResult.phone || '').replace(/\D/g, '').trim(),
+            city: String(parsedJson.city || localResult.city || '').trim(),
+            address: String(parsedJson.address || localResult.address || '').trim(),
+            shippingFees: typeof parsedJson.shippingFees === 'number' ? parsedJson.shippingFees : localResult.shippingFees,
+            total: typeof parsedJson.total === 'number' ? parsedJson.total : localResult.total,
+            bookTitle: parsedJson.bookTitle ? String(parsedJson.bookTitle).trim() : localResult.bookTitle,
+          }
+        };
+      }
+    }
+  } catch (aiError) {
+    console.warn('Gemini Flash Lite fallback activated:', aiError);
+  }
+
+  // Si l'IA dépasse 2.5s ou échoue, renvoyer immédiatement le résultat local
+  return { success: true, data: localResult };
+}

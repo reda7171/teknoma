@@ -82,6 +82,7 @@ export default async function CommunityBookDetailPage({
         description: book.description || book.title,
         image: book.image ? (book.image.startsWith('http') ? book.image.split(',')[0] : `${baseUrl}${book.image.split(',')[0]}`) : undefined,
         sku: book.id,
+        mpn: book.id,
         brand: {
             '@type': 'Brand',
             name: 'Riwaya Community'

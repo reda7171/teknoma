@@ -79,6 +79,9 @@ export function getBaseUrl(): string {
     if (url.includes('0.0.0.0') || url.includes('127.0.0.1') || url.includes('localhost') || url.includes('167.86.108.246')) {
         url = 'https://riwaya.store';
     }
+    if (url.startsWith('http://')) {
+        url = url.replace('http://', 'https://');
+    }
     return url;
 }
 
